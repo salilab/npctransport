@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/imp/!svn/ver/14646/branches/salilab/npctransport/benchmark
+END
+SConscript
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/imp/!svn/ver/14646/branches/salilab/npctransport/benchmark/SConscript
+END
+benchmark_sites_pair_score.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/imp/!svn/ver/14646/branches/salilab/npctransport/benchmark/benchmark_sites_pair_score.cpp
+END
+benchmark_interaction_scores.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/imp/!svn/ver/14670/branches/salilab/npctransport/benchmark/benchmark_interaction_scores.cpp
+END

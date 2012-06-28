@@ -1,0 +1,145 @@
+/**
+ * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ */
+
+#include <IMP.h>
+#include <IMP/core.h>
+#include <IMP/algebra.h>
+#include <IMP/npctransport.h>
+#include <IMP/benchmark.h>
+#include <IMP/container.h>
+#include <IMP/example/optimizing.h>
+
+using namespace IMP;
+using namespace IMP::npctransport;
+using namespace IMP::algebra;
+using namespace IMP::benchmark;
+using namespace IMP::core;
+using namespace IMP::container;
+const double radius=2;
+#if IMP_BUILD < IMP_FAST
+int number_of_particles=5;
+int step_size=8;
+#else
+int number_of_particles=40;
+int step_size=5;
+#endif
+
+
+/**
+sites 1 1 0.2,                8.85e-04,           -1.3e+04
+sites 1 1 0.4,                1.23e-03,           -2.0e+04
+sites 1 1 0.8,                9.03e-04,           -5.4e+04
+sites 6 1 0.2,                2.35e-03,           -3.3e+04
+sites 6 1 0.4,                2.40e-03,           -6.1e+04
+sites 6 1 0.8,                2.35e-03,           -1.3e+05
+sites 6 6 0.2,                1.98e-02,           -2.3e+04
+sites 6 6 0.4,                2.98e-02,           -3.1e+04
+sites 6 6 0.8,                1.14e-02,           -1.6e+05
+sites 11 1 0.2,               3.84e-03,           -3.6e+04
+sites 11 1 0.4,               3.83e-03,           -7.3e+04
+sites 11 1 0.8,               4.87e-03,           -1.2e+05
+sites 11 6 0.2,               5.31e-02,           -1.6e+04
+sites 11 6 0.4,               2.66e-02,           -6.2e+04
+sites 11 6 0.8,               1.93e-02,           -1.7e+05
+sites 11 11 0.2,              3.45e-02,           -4.4e+04
+sites 11 11 0.4,              3.51e-02,           -8.7e+04
+sites 11 11 0.8,              9.52e-02,           -6.6e+04
+sites 16 1 0.2,               1.02e-02,           -2.0e+04
+sites 16 1 0.4,               5.24e-03,           -7.7e+04
+sites 16 1 0.8,               5.62e-03,           -1.4e+05
+sites 16 6 0.2,               2.81e-02,           -4.3e+04
+sites 16 6 0.4,               2.93e-02,           -8.3e+04
+sites 16 6 0.8,               7.67e-02,           -6.3e+04
+sites 16 11 0.2,              9.07e-02,           -2.4e+04
+sites 16 11 0.4,              5.04e-02,           -8.7e+04
+sites 16 11 0.8,              5.02e-02,           -1.8e+05
+sites 16 16 0.2,              7.47e-02,           -4.4e+04
+sites 16 16 0.4,              1.42e-01,           -4.6e+04
+sites 16 16 0.8,              1.96e-01,           -6.7e+04
+ */
+ParticlesTemp create_particles(Model *m,
+                               const BoundingBox3D &bb,
+                               int n) {
+  ParticlesTemp ret;
+  for ( int i=0; i< n; ++i) {
+    IMP_NEW(Particle, p, (m));
+    XYZR d= XYZR::setup_particle(p);
+    d.set_radius(radius);
+    d.set_coordinates(get_random_vector_in(bb));
+    ret.push_back(p);
+    d.set_coordinates_are_optimized(true);
+    Transformation3D tr(get_random_rotation_3d(),
+                        get_zero_vector_d<3>());
+    ReferenceFrame3D rf(tr);
+    RigidBody::setup_particle(p,rf);
+  }
+  return ret;
+}
+
+template <unsigned int NA, unsigned int NB, bool WHICH>
+void test_one(double range) {
+  BoundingBox3D bb= get_cube_d<3>(50);
+  IMP_NEW(Model, m, ());
+  ParticlesTemp psa= create_particles(m, bb, number_of_particles);
+  ParticlesTemp psb= create_particles(m, bb, number_of_particles);
+  Sphere3D s(get_zero_vector_d<3>(), radius);
+  Vector3Ds sas= get_uniform_surface_cover(s, NA);
+  Vector3Ds sbs= get_uniform_surface_cover(s, NB);
+  example::optimize_balls(psa+psb);
+  typedef TemplateSitesPairScore<NA, NB, WHICH> TSPS;
+  IMP_NEW(TSPS, tsps, (range, 1, 0,0, 1, sas, sbs));
+  IMP_NEW(SitesPairScore, sps, (range, 1, 0, 0, 1, sas, sbs));
+  IMP_NEW(ListSingletonContainer, lsca, (psa));
+  IMP_NEW(ListSingletonContainer, lscb, (psb));
+  IMP_NEW(AllBipartitePairContainer, abpc,(lsca, lscb));
+  {
+    Pointer<Restraint> r= create_restraint(sps.get(), abpc.get());
+    r->set_model(m);
+    double scores=0;
+    double time=0;
+    IMP_TIME({
+        scores+=r->evaluate(true);
+    }, time);
+    std::ostringstream oss;
+    oss << "sites " << NA << " " << NB << " " << range;
+    report(oss.str(), time, scores);
+  }
+  {
+    Pointer<Restraint> r= create_restraint(tsps.get(), abpc.get());
+    r->set_model(m);
+    double scores=0;
+    double time=0;
+    IMP_TIME({
+        scores+=r->evaluate(true);
+    }, time);
+    std::ostringstream oss;
+    oss << "template sites " << NA << " " << NB << " " << WHICH << " " << range;
+    report(oss.str(), time, scores);
+  }
+}
+
+template <unsigned int NA, unsigned int NB, bool WHICH>
+void test_ranges() {
+  for (double range=.1*radius; range < .5*radius; range*=2) {
+    test_one<NA, NB, WHICH>(range);
+  }
+}
+
+int main(int, char**) {
+  test_ranges<1,1, false>();
+  test_ranges<1,1, true>();
+  test_ranges<4,1, false>();
+  test_ranges<4,1, true>();
+  test_ranges<4,4, false>();
+  test_ranges<4,4, true>();
+  test_ranges<16,1, false>();
+  test_ranges<16,1, true>();
+  test_ranges<16,4, false>();
+  test_ranges<16,4, true>();
+  test_ranges<16,8, false>();
+  test_ranges<16,8, true>();
+  test_ranges<16,16, false>();
+  test_ranges<16,16, true>();
+  return IMP::benchmark::get_return_value();
+}

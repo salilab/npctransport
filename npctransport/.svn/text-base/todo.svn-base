@@ -1,0 +1,6 @@
+create submit script that
+   copies things over
+   checks the work units
+   creates and chmods the required directories
+make csv read the indexes
+add show histogram method to statistics

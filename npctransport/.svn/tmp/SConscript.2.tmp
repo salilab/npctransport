@@ -1,0 +1,51 @@
+Import('env')
+import scons_tools.dependency.boost
+from glob import glob
+
+scons_tools.dependency.boost.add_boost_library(env, "ProgramOptions",
+                                               "program_options",
+                                               'boost/program_options.hpp',
+                                               extra_boost_libs=["system"])
+
+scons_tools.dependency.boost.add_boost_library( env, "FileSystem", "filesystem",
+                                                'boost/filesystem/path.hpp',
+                                                body="boost::filesystem::path p;",
+                                                extra_boost_libs=["system"])
+
+scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
+                                            "google/protobuf/text_format.h")
+
+# See IMP.gsl for an example of how to add external dependencies to a module
+req_depend = ['Boost.ProgramOptions',
+              'Boost.FileSystem',
+              'ProtoBuf']
+oenv=env.IMPModuleBuild(module="npctransport",
+                        version='SVN',
+                        required_modules=['kernel', 'algebra', 'container',
+                                          'display', 'core', 'atom',
+                                          'statistics', 'rmf', 'base', 'RMF'],
+                        lib_only_required_modules=['benchmark', 'example'],
+                        lib_only_optional_modules=['cgal'],
+                        python=True, cpppath=[Dir("#/build/src")],
+                        required_dependencies= req_depend )
+
+if oenv:
+    """cat %(tmpdir)s/npctransport.pb.cc | sed "s#data/npctransport.pb.h#IMP/npctransport/internal/proto.hpp#g"> %(targetcc)s"""
+    def build_protoc(target, source, env):
+        cmd="""mkdir -p %(tmpdir)s;
+cp %(source)s %(tmpdir)s
+cd %(tmpdir)s; protoc npctransport.proto --cpp_out=%(tmpdir)s --python_out=%(tmpdir)s
+mv %(tmpdir)s/npctransport.pb.cc %(targetcc)s
+mv %(tmpdir)s/npctransport.pb.h %(targeth)s
+mv %(tmpdir)s/npctransport_pb2.py %(targetpy)s
+"""%{"tmpdir":Dir("#/build/tmp").abspath,
+     "targetcc":target[0].path,
+     "targeth":target[1].path,
+     "targetpy":target[2].path,
+     "source":source[0].path}
+        env.Execute(cmd)
+    oenv['BUILDERS']['Protoc']=Builder(action=build_protoc)
+    oenv.Protoc(source=[File("#/build/data/npctransport/npctransport.proto")],
+               target=[File("#/build/src/npctransport.pb.cpp"),
+                       File("#/build/src/npctransport.pb.h"),
+                       File("#/build/src/_proto.py")])

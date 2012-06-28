@@ -1,0 +1,25 @@
+#!/bin/zsh
+# arguments executable, args, num work units
+#alias ecsub=echo
+#alias f=echo
+echo "name" $1
+echo "arguments" $2
+echo "work units" $3
+echo "iteration" $4
+name=$1
+work_units=$3
+iteration=$4
+arguments=$2
+versname="$name"_"$iteration"
+echo "versioned name" $versname
+dir=$CHOME/$versname
+
+blaze-bin/third_party/npc/$name  --number_of_work_units=$work_units --number_of_trials=0 --number_of_frames=0 --work_unit=0 > /dev/null
+
+f mkdir $dir
+f mkdir $dir/output
+f chmod 777 $dir
+f chmod 777 $dir/output
+f cp blaze-bin/third_party/npc/$name $dir/$versname
+f chmod 777 $dir/$versname
+ecsub --work_unit_min=0 --work_unit_max=$work_units --binarydir=$dir --binary="%(binarydir)s/$versname" --arguments="--number_of_work_units=$work_units --work_unit=%(tasknum)d $arguments" --outputdir=$dir/output --jobname $versname --outputs="stdout.0=%(outputdir)s/%(tasknum)d.out,stderr.0=%(outputdir)s/%(tasknum)d.err,final.pym=%(outputdir)s/%(tasknum)d.final.pym"

@@ -1,0 +1,120 @@
+/**
+ *  \file simulation_data.h
+ *  \brief description
+ *
+ *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ */
+
+#ifndef IMPNPCTRANSPORT_SIMULATION_DATA_H
+#define IMPNPCTRANSPORT_SIMULATION_DATA_H
+
+#include "npctransport_config.h"
+#include "io.h"
+#include <IMP/Model.h>
+#include <IMP/atom/BrownianDynamics.h>
+#include <IMP/atom/Hierarchy.h>
+#include <IMP/container/ClosePairContainer.h>
+#include <IMP/container/ListSingletonContainer.h>
+#include <IMP/core/pair_predicates.h>
+#include <IMP/core/Typed.h>
+#include <IMP/display/geometry.h>
+#include <IMP/container/PairContainerSet.h>
+#include <IMP/container/PredicatePairsRestraint.h>
+#include <IMP/Pointer.h>
+#include <boost/timer.hpp>
+IMPNPCTRANSPORT_BEGIN_NAMESPACE
+
+
+class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
+  double slack_;
+  double time_step_;
+  double interaction_spring_constant_;
+  double backbone_spring_constant_;
+  double radius_;
+  double side_;
+  int dump_interval_;
+  int number_of_frames_;
+  int number_of_trials_;
+  double range_;
+  Pointer<Model> m_;
+  Pointer<atom::BrownianDynamics> bd_;
+  Pointer<container::ListSingletonContainer> diffusers_;
+  Pointer<container::ClosePairContainer> cpc_;
+  Pointer<core::OrderedTypePairPredicate> otpp_;
+  Pointer<container::PredicatePairsRestraint> predr_;
+  Pointer<RestraintSet> static_;
+  Pointer<WriteOptimizerState> writer_;
+  Pointer<Particle> root_;
+  Pointer<display::Geometry> static_geom_;
+  Pointer<container::PairContainerSet> bonds_;
+  compatibility::map<core::ParticleType, algebra::Vector3Ds> sites_;
+  compatibility::map<core::ParticleType, ParticlesTemp> particles_;
+  mutable bool first_stats_;
+  std::string statistics_file_name_;
+
+  boost::tuple<double,double,double,double>
+      get_interactions_and_interacting(const ParticlesTemp &kaps,
+<<<<<<< .mine
+                                       const base::Vector<ParticlesTemps> &fgs) const;
+=======
+                                       const base::Vector<ParticlesTemps> &fgs)
+    const;
+>>>>>>> .r13157
+ public:
+  SimulationData(std::string config_file, std::string statistics_file,
+                 bool quick);
+  Model *get_m();
+#ifndef SWIG
+  Model *get_m() const  {return m_;}
+#endif
+  double get_range() const {return range_;}
+  atom::BrownianDynamics *get_bd();
+  container::ListSingletonContainer *get_diffusers();
+  container::ClosePairContainer* get_cpc();
+  container::PredicatePairsRestraint* get_predr();
+  // get the number of interactions between two particles
+  int get_number_of_interactions(Particle *a, Particle *b) const;
+  void set_sites(core::ParticleType t0,
+                 unsigned int n, double r);
+  algebra::Vector3Ds get_sites(core::ParticleType t0) const {
+    if (sites_.find(t0) != sites_.end()) {
+      return sites_.find(t0)->second;
+    } else {
+      return algebra::Vector3Ds();
+    }
+  }
+  PairContainer* get_bonds() const {return bonds_;}
+  void add_interaction(core::ParticleType t0,
+                       core::ParticleType t1);
+  algebra::BoundingBox3D get_box() const {
+    return algebra::get_cube_d<3>(.5*side_);
+  }
+  double get_backbone_k() const {return backbone_spring_constant_;}
+  double get_interaction_k() const {return interaction_spring_constant_;}
+  OptimizerState *get_writer();
+  void reset_rmf();
+  RestraintSet *get_static_restraints();
+  void write_geometry(std::string out);
+  ParticlesTemp get_particles(core::ParticleType type) const {
+    return particles_.find(type)->second;
+  }
+  void update_statistics(const boost::timer &timer) const;
+  unsigned int get_number_of_frames() const {return number_of_frames_;}
+  unsigned int get_number_of_trials() const {return number_of_trials_;}
+  atom::Hierarchy get_root() const {return atom::Hierarchy(root_);}
+  display::Geometry* get_static_geometry();
+  IMP_OBJECT_INLINE(SimulationData,IMP_UNUSED(out),);
+};
+
+IMPNPCTRANSPORTEXPORT
+void initialize_positions(SimulationData *sd,
+                          const ParticlePairsTemp &extra_links
+                          = ParticlePairsTemp());
+
+IMPNPCTRANSPORTEXPORT
+extern core::ParticleTypes type_of_fg;
+IMPNPCTRANSPORTEXPORT
+extern core::ParticleTypes type_of_float;
+IMPNPCTRANSPORT_END_NAMESPACE
+
+#endif  /* IMPNPCTRANSPORT_SIMULATION_DATA_H */
