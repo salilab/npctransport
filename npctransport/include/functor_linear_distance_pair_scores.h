@@ -21,15 +21,16 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-
+#ifndef SWIG
 typedef score_functor::SphereDistance<score_functor::LinearLowerBound>
 LinearSoftSphereScore;
+#endif
 IMP_FUNCTOR_DISTANCE_PAIR_SCORE(FunctorLinearSoftSpherePairScore,
                                 LinearSoftSphereScore,
                                 (double k,
                                  std::string name="LinearSSPairScore%1%"), (k));
 
-
+#ifndef SWIG
 /**
    A soft linear attractive / repulsive score between two spheres.
    The score is 0 if the spheres are beyond the attractive range.
@@ -83,7 +84,7 @@ public:
     return squared_distance > algebra::get_squared(attr_range_);
   }
 };
-
+#endif
 
 typedef score_functor::SphereDistance<LinearInteraction>
 LinearInteractionScore;

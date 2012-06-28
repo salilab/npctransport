@@ -10,7 +10,6 @@
 
 
 #ifdef IMP_NPC_MAIN
-
 #include "npctransport_config.h"
 #include <IMP/algebra.h>
 #include <IMP/core.h>
@@ -22,6 +21,7 @@
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/npctransport.h>
 #include <IMP/benchmark/Profiler.h>
+#include "internal/main.h"
 #include <numeric>
 #include <cmath>
 #include <iostream>
@@ -76,25 +76,8 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
 #endif
 
 #define IMP_NPC_LOOP(links)                                     \
-  for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {  \
-    IMP::base::CreateLogContext clc("iteration");               \
-    boost::timer timer;                                         \
-    IMP::set_log_level(IMP::SILENT);                            \
-    if (!FLAGS_quick) sd->reset_rmf();                          \
-    std::cout<< "Initializing..." << std::endl;                 \
-    initialize_positions(sd, links);                            \
-    sd->get_bd()->set_log_level(SILENT);                        \
-    std::cout << "Running..." << std::endl;                     \
-    sd->get_bd()->set_log_level(IMP::PROGRESS);                 \
-    IMP::benchmark::Profiler p;                                 \
-    if(i == 0)                                                  \
-      p.set("profiling.pprof");                                 \
-    sd->get_bd()->optimize(sd->get_number_of_frames());         \
-    p.reset();                                                  \
-    sd->update_statistics(timer);                               \
-    std::cout << "Writing..." << std::endl;                     \
-    sd->write_geometry(FLAGS_final_configuration);              \
-  }
+  IMP::npctransport::internal::do_main_loop(sd, links, FLAGS_quick,     \
+                                            FLAGS_final_configuration)
 
 using namespace IMP;
 using namespace IMP::npctransport;
@@ -105,6 +88,6 @@ using namespace IMP::display;
 using namespace IMP::algebra;
 using namespace RMF;
 
-
 #endif // IMP_NPC_MAIN
+
 #endif /* IMPNPCTRANSPORT_MAIN_H */
