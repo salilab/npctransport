@@ -1,4 +1,1 @@
-npc
-===
-
-Code for modeling NPC transport
+npctransport is an IMP module.
