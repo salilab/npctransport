@@ -9,6 +9,7 @@
 #define IMPNPCTRANSPORT_PARTICLE_TYPES_H
 
 #include "npctransport_config.h"
+#include <IMP/atom/Hierarchy.h>
 #include <IMP/core/Typed.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE

@@ -9,7 +9,7 @@
 #define IMPNPCTRANSPORT_RMF_LINKS_H
 
 #include "npctransport_config.h"
-#include "simulation_data.h"
+#include "SimulationData.h"
 #include <IMP/rmf/atom_links.h>
 #include <IMP/rmf/link_macros.h>
 #include <IMP/WeakPointer.h>

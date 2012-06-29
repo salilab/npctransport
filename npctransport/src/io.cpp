@@ -8,7 +8,7 @@
 
 #include <IMP/npctransport/io.h>
 #include <IMP/npctransport/SitesPairScore.h>
-#include <IMP/npctransport/simulation_data.h>
+#include <IMP/npctransport/SimulationData.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/display/restraint_geometry.h>
 #include <RMF/decorators.h>

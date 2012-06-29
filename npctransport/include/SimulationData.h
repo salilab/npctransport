@@ -60,7 +60,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
     };
   Parameter<double> interaction_k_;
   Parameter<double> interaction_range_;
-  Parameter<double> backbone_spring_k_;
+  Parameter<double> backbone_k_;
   Parameter<double> box_side_;
   Parameter<double> tunnel_radius_;
   Parameter<double> slab_thickness_;
@@ -143,13 +143,15 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      Adds the FG Nup chains to the model hierarchy,
      based on the settings in data
    */
-  void create_fgs(const  ::npctransport::Assignment_FGAssignment&data);
+  void create_fgs(const  ::npctransport::Assignment_FGAssignment&data,
+                  core::ParticleType type);
 
   /**
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
      based on the settings in data
    */
-  void create_floaters(const ::npctransport::Assignment_FloaterAssignment&data);
+  void create_floaters(const ::npctransport::Assignment_FloaterAssignment&data,
+                       core::ParticleType type, display::Color color);
 
   /**
      Creates bounding volume restraints such as box restraint and slab
@@ -230,7 +232,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
     return algebra::get_cube_d<3>(.5*box_side_);
   }
   algebra::Cylinder3D get_cylinder() const;
-  double get_backbone_k() const {return backbone_spring_k_;}
+  double get_backbone_k() const {return backbone_k_;}
   double get_interaction_k() const {return interaction_k_;}
 
   /**

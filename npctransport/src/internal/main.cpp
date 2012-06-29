@@ -10,6 +10,7 @@
 #include <IMP/base_types.h>
 #include <boost/timer.hpp>
 #include <IMP/benchmark/Profiler.h>
+#include <IMP/npctransport/initialize_positions.h>
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,

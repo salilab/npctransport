@@ -9,7 +9,7 @@
 #define IMPNPCTRANSPORT_CREATING_PARTICLES_H
 
 #include "npctransport_config.h"
-#include "simulation_data.h"
+#include "SimulationData.h"
 #include <IMP/display/Color.h>
 #include <IMP/core/Typed.h>
 #include <IMP/container/PairContainerSet.h>

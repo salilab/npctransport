@@ -34,6 +34,39 @@ def set_default_configuration(config):
     config.excluded_volume_k.lower=1
     config.slab.on_or_off=0
 
+def add_fg_type(config, number_of_beads, number, radius,
+                interactions=1, rest_length_factor=1, d_factor=1,
+                interaction_k_factor=1, interaction_range_factor=1):
+    fg= config.fgs.add()
+    fg.number_of_beads=number_of_beads
+    fg.number=number
+    fg.radius=radius
+    fg.interactions=interactions
+    fg.rest_length_factor=rest_length_factor
+    fg.d_factor=d_factor
+    fg.interaction_k_factor=interaction_k_factor
+    fg.interaction_range_factor=interaction_range_factor
+    return fg
+
+def add_float_type(config, number, radius,
+                   interactions=1,  d_factor=1,
+                interaction_k_factor=1, interaction_range_factor=1):
+    fg= config.floats.add()
+    fg.number=number
+    fg.radius=radius
+    fg.interactions=interactions
+    fg.d_factor=d_factor
+    fg.interaction_k_factor=interaction_k_factor
+    fg.interaction_range_factor=interaction_range_factor
+    return fg
+
+def add_interaction(config, name0, name1, is_on):
+    i= config.interactions.add()
+    i.type0= name0
+    i.type1=name1
+    i.is_on.lower=is_on
+    return i
+
 
 def set_single_configuration(config):
     """Change the passed configuration to be a single run configuration"""
@@ -42,3 +75,17 @@ def set_single_configuration(config):
 def set_quick_configuration(config):
     """Change the passed configuration to be quick"""
     config.number_of_frames.lower=100000
+
+def write(config):
+    f=open(sys.argv[1], "wb")
+    f.write(config.SerializeToString())
+
+    if len(sys.argv)>2:
+        set_single_configuration(config)
+        f=open(sys.argv[2], "wb")
+        f.write(config.SerializeToString())
+    if len(sys.argv)>3:
+        set_quick_configuration(config)
+        #config.dump_interval=1
+        f=open(sys.argv[3], "wb")
+        f.write(config.SerializeToString())

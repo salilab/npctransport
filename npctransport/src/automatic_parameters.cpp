@@ -7,7 +7,7 @@
  */
 
 #include <IMP/npctransport/automatic_parameters.h>
-#include <IMP/atom/estimates.h
+#include <IMP/atom/estimates.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #ifdef IMP_NPC_GOOGLE
@@ -30,11 +30,11 @@ double get_close_pairs_range(const ::npctransport::Assignment& config) {
   double max_range= config.interaction_range().value();
   UPDATE_MAX(range, config.nonspecific_range);
   double max_range_factor= 1;
-  for (unsigned int i=0; i< config.fgs_size(); ++i) {
-    UPDATE_MIN(range_factor, config.fgs(i).interaction_range_factor);
+  for ( int i=0; i< config.fgs_size(); ++i) {
+    UPDATE_MAX(range_factor, config.fgs(i).interaction_range_factor);
   }
-  for (unsigned int i=0; i< config.floaters_size(); ++i) {
-    UPDATE_MIN(range_factor, config.floaters(i).interaction_range_factor);
+  for ( int i=0; i< config.floaters_size(); ++i) {
+    UPDATE_MAX(range_factor, config.floaters(i).interaction_range_factor);
   }
 
   return get_close_pairs_range(max_range, max_range_factor);
@@ -50,7 +50,7 @@ get_time_step(double time_step_factor, double max_d_factor,
   double ts_max= 1e12, ts_min=0;
   do {
     double mid= .5*(ts_max+ts_min);
-    double length= atom::get_diffusion_length(D, k, mid);
+    double length= atom::get_diffusion_length(D, max_k, mid);
     if (length > scale) {
       ts_max=mid;
     } else {
@@ -61,7 +61,7 @@ get_time_step(double time_step_factor, double max_d_factor,
 }
 
 double get_time_step(const ::npctransport::Assignment& config) {
-  double time_step_factor= config.time_step_factor();
+  double time_step_factor= config.time_step_factor().value();
   double max_d_factor=1;
   double min_radius=std::numeric_limits<double>::max();
   double min_range= config.interaction_range().value();
@@ -73,17 +73,17 @@ double get_time_step(const ::npctransport::Assignment& config) {
   UPDATE_MAX(k, config.nonspecific_k);
   UPDATE_MAX(k, config.excluded_volume_k);
   double max_k_factor=1;
-  for (unsigned int i=0; i< config.fgs_size(); ++i) {
+  for ( int i=0; i< config.fgs_size(); ++i) {
     UPDATE_MAX(d_factor, config.fgs(i).d_factor);
     UPDATE_MIN(radius, config.fgs(i).radius);
     UPDATE_MIN(range_factor, config.fgs(i).interaction_range_factor);
-    UPDATE_MIN(k_factor, config.fgs(i).interaction_k_factor);
+    UPDATE_MAX(k_factor, config.fgs(i).interaction_k_factor);
   }
-  for (unsigned int i=0; i< config.floaters_size(); ++i) {
+  for ( int i=0; i< config.floaters_size(); ++i) {
     UPDATE_MAX(d_factor, config.floaters(i).d_factor);
     UPDATE_MIN(radius, config.floaters(i).radius);
     UPDATE_MIN(range_factor, config.floaters(i).interaction_range_factor);
-    UPDATE_MIN(k_factor, config.floaters(i).interaction_k_factor);
+    UPDATE_MAX(k_factor, config.floaters(i).interaction_k_factor);
   }
 
   return get_time_step(time_step_factor, max_d_factor,

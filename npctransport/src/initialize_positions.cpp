@@ -7,7 +7,14 @@
  */
 
 #include <IMP/npctransport/initialize_positions.h>
-
+#include <IMP/example/randomizing.h>
+#include <IMP/example/optimizing.h>
+#include <IMP/npctransport/particle_types.h>
+#include <IMP/core/DistancePairScore.h>
+#include <IMP/core/XYZR.h>
+#include <IMP/base/Pointer.h>
+#include <IMP/base/object_macros.h>
+#include <IMP/core/RestraintsScoringFunction.h>
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 void initialize_positions(SimulationData *sd,

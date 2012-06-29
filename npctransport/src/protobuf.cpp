@@ -7,6 +7,7 @@
  */
 
 #include <IMP/npctransport/protobuf.h>
+#include <IMP/npctransport/automatic_parameters.h>
 #ifdef IMP_NPC_GOOGLE
 #include "third_party/npc/module/data/npctransport.pb.h"
 #else

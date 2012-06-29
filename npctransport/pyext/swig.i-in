@@ -35,4 +35,5 @@ IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, Bipar
 %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
 from _proto import *
+from _configuration import *
 %}

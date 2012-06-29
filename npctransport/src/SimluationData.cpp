@@ -6,10 +6,11 @@
  *
  */
 
-#include <IMP/npctransport/simulation_data.h>
+#include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
 #include <IMP/npctransport/SlabGeometry.h>
 #include <IMP/npctransport/SlabSingletonScore.h>
+#include <IMP/npctransport/particle_types.h>
 #ifdef IMP_NPC_GOOGLE
 #include "third_party/npc/module/data/npctransport.pb.h"
 #else
@@ -61,7 +62,7 @@ SimulationData::SimulationData(std::string assignment_file,
   data.ParseFromIstream(&file);
   GET_ASSIGNMENT(interaction_k);
   GET_ASSIGNMENT(interaction_range);
-  GET_ASSIGNMENT(backbone_spring_k);
+  GET_ASSIGNMENT(backbone_k);
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
   GET_ASSIGNMENT(slab_thickness);
@@ -69,13 +70,13 @@ SimulationData::SimulationData(std::string assignment_file,
   GET_VALUE(number_of_trials);
   GET_VALUE(number_of_frames);
   GET_VALUE(dump_interval);
-  GET_ASSIGNMENT(onspecific_k);
+  GET_ASSIGNMENT(nonspecific_k);
   GET_ASSIGNMENT(nonspecific_range);
   GET_ASSIGNMENT(angular_d_factor);
   GET_VALUE(statistics_interval);
   GET_ASSIGNMENT(excluded_volume_k);
-  GET_ASSIGNMENT(range);
-  GET_ASSIGNMENT(time_step);
+  GET_VALUE(range);
+  GET_VALUE(time_step);
   if(quick){
     number_of_frames_ = 2;
     number_of_trials_ = 1;
@@ -89,24 +90,25 @@ SimulationData::SimulationData(std::string assignment_file,
   root_->set_name("root");
   bonds_= new container::PairContainerSet(get_m());
   for (int i=0; i< data.fgs_size(); ++i) {
-    create_fgs(data.fgs(i));
+    create_fgs(data.fgs(i), type_of_fg[i]);
   }
   for (int i=0; i< data.floaters_size(); ++i) {
-    create_floaters(data.floaters(i));
+    create_floaters(data.floaters(i), type_of_float[i],
+                    display::get_display_color(i));
   }
   for (int i=0; i< data.interactions_size(); ++i) {
     const ::npctransport::Assignment_InteractionAssignment&
       interaction_i = data.interactions(i);
-    if (interaction_i.on_or_off().value()) {
+    if (interaction_i.is_on().value()) {
       add_interaction( interaction_i );
     }
   }
   ParticlesTemp leaves= get_as<ParticlesTemp>(atom::get_leaves(get_root()));
   get_diffusers()->set_particles(leaves);
-  if (data.box_is_on()) {
+  if (data.box_is_on().value()) {
     create_bounding_box_restraint();
   }
-  if (data.slab_is_on()) {
+  if (data.slab_is_on().value()) {
     create_slab_restraint();
  }
 }
@@ -116,40 +118,34 @@ SimulationData::SimulationData(std::string assignment_file,
    based on the settings in data
 */
 void SimulationData::
-create_floaters(const  ::npctransport::Assignment_FloaterAssignment&data) {
+create_floaters(const  ::npctransport::Assignment_FloaterAssignment&data,
+                core::ParticleType type, display::Color color) {
   if (data.number().value() > 0) {
     float_stats_.push_back(BodyStatisticsOptimizerStates());
-    IMP_LOG(TERSE, "create_floaters i=" << i <<std::endl);
     atom::Hierarchy cur_root
       = atom::Hierarchy::setup_particle(new Particle(get_m()));
-    core::ParticleType type=type_of_float[i];
     IMP_LOG(TERSE, "   type " << type.get_string() <<std::endl);
     cur_root->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(cur_root);
     ParticlesTemp cur;
     for (int j=0; j< data.number().value(); ++j) {
-      double dc=1.0;
-      if (data.has_d_factor()) {
-        dc= data.d_factor().value();
-        // evil patch
-        if (dc==0) dc=1;
-      }
+      double dc=data.d_factor().value();
       cur.push_back(create_particle(this, data.radius().value(),
                                     angular_d_factor_, dc,
-                                    display::get_display_color(i),
+                                    color,
                                     type, type.get_string()));
       IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back()));
-      os->set_period(stats_interval_);
+      os->set_period(statistics_interval_);
       float_stats_.back().push_back(os);
       cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
-      if (data.interactions() >0) {
+      if (data.interactions().value() >0) {
         int nsites= data.interactions().value();
         set_sites(type, nsites, data.radius().value());
       }
     }
     particles_[type]=cur;
-    interaction_range_factors_[type]= data.interaction_range_factor();
-    interaction_k_factors_[type]= data.interaction_k_factor();
+    interaction_range_factors_[type]= data.interaction_range_factor().value();
+    interaction_k_factors_[type]= data.interaction_k_factor().value();
   }
 }
 
@@ -158,37 +154,35 @@ create_floaters(const  ::npctransport::Assignment_FloaterAssignment&data) {
    based on the settings in data
 */
 void SimulationData::
-create_fgs(const ::npctransport::Assignment_FGAssignment&data) {
+create_fgs(const ::npctransport::Assignment_FGAssignment&data,
+           core::ParticleType type) {
   if (data.number().value() > 0) {
     fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
     chain_stats_.push_back(ChainStatisticsOptimizerStates());
-    core::ParticleType type=type_of_fg[i];
     ParticlesTemp cur;
     atom::Hierarchy hi= atom::Hierarchy::setup_particle(new Particle(get_m()));
     hi->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(hi);
-    for (int j=0; j< data.number(); ++j) {
+    for (int j=0; j< data.number().value(); ++j) {
       double dc=data.d_factor().value();
-      }
       double rlf=data.rest_length_factor().value();
-      }
       atom::Hierarchy hc(create_chain(this,
                                       data.number_of_beads().value(),
                                       data.radius().value(),
                                       angular_d_factor_, dc, rlf,
-                                      backbone_spring_k_,
+                                      backbone_k_,
                                       display::Color(.3,.3,.3), type, "fg",
                                       bonds_));
       cur.push_back(hc);
       ParticlesTemp chain=hc.get_children();
       chain_stats_.back()
         .push_back(new ChainStatisticsOptimizerState(chain));
-      chain_stats_.back().back()->set_period(stats_interval_);
+      chain_stats_.back().back()->set_period(statistics_interval_);
       fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
       for (unsigned int k=0; k < chain.size(); ++k) {
         fgs_stats_.back().back()
           .push_back(new BodyStatisticsOptimizerState(chain[k]));
-        fgs_stats_.back().back().back()->set_period(stats_interval_);
+        fgs_stats_.back().back().back()->set_period(statistics_interval_);
       }
       hi.add_child(atom::Hierarchy(cur.back()));
       if (data.interactions().value() > 0) {
@@ -197,8 +191,8 @@ create_fgs(const ::npctransport::Assignment_FGAssignment&data) {
       }
     }
     particles_[type]=cur;
-    interaction_range_factors_[type]= data.interaction_range_factor();
-    interaction_k_factors_[type]= data.interaction_k_factor();
+    interaction_range_factors_[type]= data.interaction_range_factor().value();
+    interaction_k_factors_[type]= data.interaction_k_factor().value();
   }
 }
 
@@ -264,7 +258,7 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
     if(get_has_slab()){
       IMP::rmf::add_restraints(fh, RestraintsTemp(1, slab_restraint_));
       IMP_NEW(SlabWireGeometry, slab_geometry,
-              ( slab_height_ , slab_radius_ , slab_width_ ) );
+              ( slab_thickness_ , tunnel_radius_ , box_side_ ) );
         IMP::rmf::add_static_geometries
           (fh, slab_geometry->get_components() );
         //      IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()) );
@@ -365,7 +359,7 @@ container::PredicatePairsRestraint* SimulationData::get_predr() {
     otpp_=otpp;
     IMP_NEW(container::PredicatePairsRestraint, ppr, (otpp, get_cpc()));
     predr_=ppr;
-    IMP_NEW(LinearSoftSpherePairScore, ssps, (default_repulsive_k_));
+    IMP_NEW(LinearSoftSpherePairScore, ssps, (excluded_volume_k_));
     ppr->set_unknown_score(ssps.get() );
   }
   return predr_;
@@ -456,7 +450,7 @@ SimulationData::add_interaction
              bpsos ,
              ( get_m(), interaction_type,
                set0, set1,  range_ /* distance thresh */ ) );
-    bpsos->set_period(stats_interval_);
+    bpsos->set_period(statistics_interval_);
     interactions_stats_.push_back (bpsos);
   }
 }
@@ -728,6 +722,12 @@ display::Geometry* SimulationData::get_static_geometry() {
   return static_geom_;
 }
 
+
+algebra::Cylinder3D SimulationData::get_cylinder() const {
+  algebra::Vector3D pt(0,0, slab_thickness_/2.0);
+  algebra::Segment3D seg(pt, -pt);
+  return algebra::Cylinder3D(seg, tunnel_radius_);
+}
 
 
 IMPNPCTRANSPORT_END_NAMESPACE

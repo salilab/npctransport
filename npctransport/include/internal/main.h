@@ -9,7 +9,7 @@
 #define IMPNPCTRANSPORT_INTERNAL_MAIN_H
 
 #include "../npctransport_config.h"
-#include "../simulation_data.h"
+#include "../SimulationData.h"
 #include <string>
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
