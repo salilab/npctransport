@@ -1,16 +1,15 @@
-def create_range(field, lb, ub=None, steps=None, base=None):
+def create_range(field, lb, ub=None, steps=5, base=2):
     """Create a range in the passed field"""
     field.lower=lb
     if ub:
         field.upper=ub
         field.steps=steps
-        if base:
+        try:
             field.base=base
-        else:
-            try:
-                field.base=2
-            except:
-                pass
+        except:
+            # int range
+            pass
+
 
 def set_default_configuration(config):
     """Set the defaults for the configuration"""
@@ -69,23 +68,33 @@ def add_interaction(config, name0, name1, is_on=1):
 
 def set_single_configuration(config):
     """Change the passed configuration to be a single run configuration"""
-    config.number_of_trials.lower=1
+    config.number_of_trials=1
 
 def set_quick_configuration(config):
     """Change the passed configuration to be quick"""
-    config.number_of_frames.lower=100000
+    config.number_of_frames=100000
 
 def write(config):
     import sys
-    f=open(sys.argv[1], "wb")
+    import optparse
+    parser = optparse.OptionParser(usage="usage: %prog [options] output.pb")
+    parser.add_option("-s", "--single", dest="single",
+                      help="Where to put a protobuf to do a single run")
+    parser.add_option("-q", "--quick", dest="quick",
+                      help="Where to put the protobuf for a single quick run")
+    (options, args) = parser.parse_args()
+    if len(args) != 1:
+        parser.print_help()
+        exit(1)
+    f=open(args[0], "wb")
     f.write(config.SerializeToString())
 
-    if len(sys.argv)>2:
+    if options.single:
         set_single_configuration(config)
-        f=open(sys.argv[2], "wb")
+        f=open(options.single, "wb")
         f.write(config.SerializeToString())
-    if len(sys.argv)>3:
+    if options.quick:
         set_quick_configuration(config)
         #config.dump_interval=1
-        f=open(sys.argv[3], "wb")
+        f=open(options.quick, "wb")
         f.write(config.SerializeToString())
