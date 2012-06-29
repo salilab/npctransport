@@ -20,13 +20,13 @@ message Configuration {
     required FloatRange radius=3;
     required IntRange interactions=4;
     required FloatRange rest_length_factor=5;
-    required FloatRange D_factor=6;
+    required FloatRange d_factor=6;
   };
   message FloatConfiguration {
     required IntRange number=1;
     required FloatRange radius=2;
     required IntRange interactions=3;
-    required FloatRange D_factor=4;
+    required FloatRange d_factor=4;
   };
   message Interaction {
     required string type0=1;

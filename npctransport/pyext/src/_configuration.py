@@ -16,48 +16,47 @@ def set_default_configuration(config):
     """Set the defaults for the configuration"""
     config.interaction_k.lower=1
     config.interaction_range.lower=5
-    config.backbone_k=1
-    config.time_step_factor=1
+    config.backbone_k.lower=1
+    config.time_step_factor.lower=1
     config.box_on_or_off.lower=1
-    config.box_size=100
+    config.box_side.lower=100
     config.slab_on_or_off.lower=0
-    config.slab_thickness=30
-    config.tunnel_radius=30
+    config.slab_thickness.lower=30
+    config.tunnel_radius.lower=30
     config.slack.lower=5
-    config.number_of_trials.lower=40
-    config.number_of_frames.lower=1000000
+    config.number_of_trials=40
+    config.number_of_frames=1000000
     config.dump_interval=10000
     config.nonspecific_range.lower=2
     config.nonspecific_k.lower=.3
     config.angular_D_factor.lower=5
     config.statistics_interval=1000
     config.excluded_volume_k.lower=1
-    config.slab.on_or_off=0
 
 def add_fg_type(config, number_of_beads, number, radius,
                 interactions=1, rest_length_factor=1, d_factor=1,
                 interaction_k_factor=1, interaction_range_factor=1):
     fg= config.fgs.add()
-    fg.number_of_beads=number_of_beads
-    fg.number=number
-    fg.radius=radius
-    fg.interactions=interactions
-    fg.rest_length_factor=rest_length_factor
-    fg.d_factor=d_factor
-    fg.interaction_k_factor=interaction_k_factor
-    fg.interaction_range_factor=interaction_range_factor
+    fg.number_of_beads.lower=number_of_beads
+    fg.number.lower=number
+    fg.radius.lower=radius
+    fg.interactions.lower=interactions
+    fg.rest_length_factor.lower=rest_length_factor
+    fg.d_factor.lower=d_factor
+    fg.interaction_k_factor.lower=interaction_k_factor
+    fg.interaction_range_factor.lower=interaction_range_factor
     return fg
 
 def add_float_type(config, number, radius,
                    interactions=1,  d_factor=1,
                 interaction_k_factor=1, interaction_range_factor=1):
     fg= config.floats.add()
-    fg.number=number
-    fg.radius=radius
-    fg.interactions=interactions
-    fg.d_factor=d_factor
-    fg.interaction_k_factor=interaction_k_factor
-    fg.interaction_range_factor=interaction_range_factor
+    fg.number.lower=number
+    fg.radius.lower=radius
+    fg.interactions.lowet=interactions
+    fg.d_factor.lower=d_factor
+    fg.interaction_k_factor.lower=interaction_k_factor
+    fg.interaction_range_factor.lower=interaction_range_factor
     return fg
 
 def add_interaction(config, name0, name1, is_on):

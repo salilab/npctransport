@@ -2,4 +2,6 @@ Import('env')
 
 # The swig.i-in is processed to generate the input file to swig. All files in
 # src are installed as python code.
-env.IMPModulePython(swigfiles=env.IMPModuleGetSwigFiles(), pythonfiles=env.IMPModuleGetPython())
+pf=env.IMPModuleGetPython()
+print [f.path for f in pf]
+env.IMPModulePython(swigfiles=env.IMPModuleGetSwigFiles(), pythonfiles=pf)
