@@ -17,9 +17,9 @@ def set_default_configuration(config):
     config.interaction_range.lower=5
     config.backbone_k.lower=1
     config.time_step_factor.lower=1
-    config.box_on_or_off.lower=1
+    config.box_is_on.lower=1
     config.box_side.lower=100
-    config.slab_on_or_off.lower=0
+    config.slab_is_on.lower=0
     config.slab_thickness.lower=30
     config.tunnel_radius.lower=30
     config.slack.lower=5

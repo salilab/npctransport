@@ -144,6 +144,7 @@ Ranges get_ranges(std::string name,
     for (int i=0; i < d->field_count(); ++i) {
       const FieldDescriptor* fd( d->field(i));
       const FieldDescriptor* out_fd( out_d->FindFieldByName(fd->name()));
+      IMP_INTERNAL_CHECK(out_fd, "No field named " << fd->name());
       if (fd->type()== FieldDescriptor::TYPE_MESSAGE) {
         if (fd->is_repeated()) {
           int sz= r->FieldSize(*message, fd);
@@ -273,6 +274,24 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
     IMP_THROW("Could not open file " << ofname, IOException);
   }
   output.SerializeToOstream(&out);
+  return ret;
+}
+
+
+int
+get_number_of_work_units(std::string assignment_file) {
+ ::npctransport::Configuration input;
+  std::fstream in(assignment_file.c_str(), std::ios::in | std::ios::binary);
+  if (!in) {
+    IMP_THROW("Could not open file " << assignment_file, IOException);
+  }
+  input.ParseFromIstream(&in);
+  Assignment output;
+  base::SetLogState sls(base::VERBOSE);
+  Ranges ranges=get_ranges("all", &input, &output);
+  Floats values;
+  Ints indexes;
+  int ret=assign_internal(ranges, 0, values, indexes, false);
   return ret;
 }
 IMPNPCTRANSPORT_END_NAMESPACE

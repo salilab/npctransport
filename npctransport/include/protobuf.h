@@ -23,6 +23,9 @@ IMPNPCTRANSPORTEXPORT int
 assign_ranges(std::string fname, std::string output, unsigned int work_unit,
               bool show_steps);
 
+IMPNPCTRANSPORTEXPORT int
+get_number_of_work_units(std::string configuration_file);
+
 IMPNPCTRANSPORT_END_NAMESPACE
 
 #endif  /* IMPNPCTRANSPORT_PROTOBUF_H */

@@ -43,10 +43,10 @@ message Configuration {
   required FloatRange backbone_k=5;
   required FloatRange time_step_factor=6;
   required FloatRange box_side=7;
-  required IntRange box_on_or_off=8;
+  required IntRange box_is_on=8;
   required FloatRange slab_thickness=9;
   required FloatRange tunnel_radius=10;
-  required IntRange slab_on_or_off=11;
+  required IntRange slab_is_on=11;
   required FloatRange slack=12;
   required int32 number_of_trials=13;
   required int32 number_of_frames=14;
