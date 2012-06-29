@@ -22,7 +22,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, Bipar
 %include "IMP/npctransport/linear_distance_pair_scores.h"
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"
 %include "IMP/npctransport/SitesPairScore.h"
-%include "IMP/npctransport/simulation_data.h"
+%include "IMP/npctransport/SimulationData.h"
 %include "IMP/npctransport/io.h"
 %include "IMP/npctransport/creating_particles.h"
 //%include "IMP/npctransport/csv.h"

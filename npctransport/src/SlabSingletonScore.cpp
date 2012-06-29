@@ -20,14 +20,14 @@ std::pair<double, algebra::Vector3D>
 SlabSingletonScore::get_displacement_vector(const algebra::Vector3D &v) const
 {
   double R2= square(v[0]) + square(v[1]); // r^2 for [x,y] projection
-  double H= v[2] - midZ_;  // height on z-axis from cyl origin
+  double H= v[2] - midZ_;  // thickness on z-axis from cyl origin
   //std::cout << h << " " << r2 << " for " << v << std::endl;
   if (R2 > square(radius_) || (v[2] <= top_ && v[2] >= bottom_))
     { // = either inside cylinder, or [x,y] outside cyl_radius
       double aH= std::abs(H); // absolute distance from cyl origin
       double R= std::sqrt(R2);
       double dR = R - radius_; // displacement on [x,y] direction
-      if (dR + aH < .5 * height_) {
+      if (dR + aH < .5 * thickness_) {
         //std::cout << "ring or tunnel" << std::endl;
         if (R2 < .00001) { // at origin
           return std::make_pair(radius_, algebra::Vector3D(0,0,1));
@@ -66,9 +66,9 @@ SlabSingletonScore::get_displacement_vector(const algebra::Vector3D &v) const
     }
 }
 
-SlabSingletonScore::SlabSingletonScore(double height, double radius, double k):
-  height_(height), radius_(radius), k_(k),
-   top_( height / 2.0 ), bottom_( -height / 2.0 ), midZ_( 0.0 )
+SlabSingletonScore::SlabSingletonScore(double thickness, double radius, double k):
+  thickness_(thickness), radius_(radius), k_(k),
+   top_( thickness / 2.0 ), bottom_( -thickness / 2.0 ), midZ_( 0.0 )
 {
 }
 
@@ -80,8 +80,8 @@ double SlabSingletonScore::evaluate(Particle *p,
   core::XYZR d(p);
   if (!d.get_coordinates_are_optimized()) return false;
   // early abort if above or below slab
-  if ( (d.get_z()-d.get_radius() > height_) ||
-       (d.get_z()+d.get_radius() < -height_)) {
+  if ( (d.get_z()-d.get_radius() > thickness_) ||
+       (d.get_z()+d.get_radius() < -thickness_)) {
     return 0;
   }
   // early abort if [x,y] within cylinder radius

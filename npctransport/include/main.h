@@ -47,12 +47,14 @@
   if (FLAGS_show_number_of_work_units) {                                \
     std::cout << "work units " << num << std::endl;                     \
   }                                                                     \
+  set_log_level(LogLevel(FLAGS_log_level));                             \
   IMP_NEW(SimulationData, sd,(FLAGS_assignments, FLAGS_statistics,      \
                               FLAGS_quick))
 
 
 
 IMP_NPC_PARAMETER_INT(work_unit, -1, "The work unit");
+IMP_NPC_PARAMETER_INT(log_level, 0, "The log level to use");
 IMP_NPC_PARAMETER_STRING(configuration, "configuration.pb",
                          "Configuration file");
 IMP_NPC_PARAMETER_STRING(assignments, "assignments.pb", "Assignments file");

@@ -17,11 +17,11 @@ def create_range(field, lb, ub=None, steps=None, base=None):
 config= Configuration()
 config.dump_interval=1000
 config.statistics_interval=100
-create_range(config.interaction_spring_constant, .2, 20, 5)
-create_range(config.backbone_spring_constant, .2, 20, 5)
+create_range(config.interaction_k, .2, 20, 5)
+create_range(config.backbone_k, .2, 20, 5)
 config.time_step_factor.lower=1
 create_range(config.nonspecific_range, 0, 5, 3, base=1)
-create_range(config.nonspecific_spring_constant, .2, 20, 3, 5)
+create_range(config.nonspecific_k, .2, 20, 3, 5)
 create_range(config.angular_D_factor, 10, 50, 3)
 #create_range(config.rest_length_factor, .5, 1, 10)
 config.box_size.lower=150

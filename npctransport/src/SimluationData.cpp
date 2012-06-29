@@ -43,26 +43,10 @@
 
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-
-#define GET_VALUE(item, field, def)\
-  (item.has_##field() ? item.field().value() : (def))
-#define GET_COMPOUND_VALUE(item, field, subfield, deflt)\
-  (item.has_##field() ? GET_VALUE(item.field(), subfield, deflt) : (deflt))
-#define GET(item, field, def)\
-  (item.has_##field() ? item.field() : (def))
-
-core::ParticleType type_of_fga[]={core::ParticleType("fg0"),
-                                 core::ParticleType("fg1"),
-                                 core::ParticleType("fg2")};
-core::ParticleType type_of_floata[]={core::ParticleType("kap"),
-                                    core::ParticleType("crap0"),
-                                    core::ParticleType("crap1")};
-core::ParticleTypes type_of_fg(type_of_fga,
-                              type_of_fga+sizeof(type_of_fga)/
-                              sizeof(core::ParticleType));
-core::ParticleTypes type_of_float(type_of_floata,
-                              type_of_floata+sizeof(type_of_floata)/
-                              sizeof(core::ParticleType));
+#define GET_ASSIGNMENT(name)                    \
+name##_= data.name().value()
+#define GET_VALUE(name)                         \
+  name##_= data.name()
 
 SimulationData::SimulationData(std::string assignment_file,
                                std::string statistics_file,
@@ -75,38 +59,27 @@ SimulationData::SimulationData(std::string assignment_file,
   ::npctransport::Assignment data;
   std::ifstream file(assignment_file.c_str(), std::ios::binary);
   data.ParseFromIstream(&file);
-  slack_=GET_VALUE(data, slack, 10);
-  interaction_k_
-      =GET_VALUE(data,interaction_k, 1);
-  backbone_spring_k_
-      =GET_VALUE(data, backbone_spring_k, 1);
-  default_repulsive_k_
-      =GET_VALUE(data, default_repulsive_k, 1);
-  slab_on_
-    =GET_COMPOUND_VALUE(data, slab, on_or_off, false);
-  slab_radius_
-    =GET_COMPOUND_VALUE(data, slab, radius, 200);
-  slab_height_
-    =GET_COMPOUND_VALUE(data, slab, height, 500);
-  slab_width_
-    =GET_COMPOUND_VALUE(data, slab, width, slab_radius_ * 2);
-  box_on_
-    =GET_COMPOUND_VALUE(data, box, on_or_off, false);
-  box_side_
-    =GET_COMPOUND_VALUE(data, box, size, slab_width_);
-  stats_interval_= GET(data, statistics_interval, 100);
-  dump_interval_=GET(data, dump_interval, -1);
-  nonspecific_range_=GET_VALUE(data, nonspecific_range, 0);
-  nonspecific_k_=GET_VALUE(data, nonspecific_k, 0);
-  if(!quick){
-    number_of_frames_= GET_VALUE(data, number_of_frames, 1);
-    number_of_trials_= GET_VALUE(data, number_of_trials, 1);
-  } else {
+  GET_ASSIGNMENT(interaction_k);
+  GET_ASSIGNMENT(interaction_range);
+  GET_ASSIGNMENT(backbone_spring_k);
+  GET_ASSIGNMENT(box_side);
+  GET_ASSIGNMENT(tunnel_radius);
+  GET_ASSIGNMENT(slab_thickness);
+  GET_ASSIGNMENT(slack);
+  GET_VALUE(number_of_trials);
+  GET_VALUE(number_of_frames);
+  GET_VALUE(dump_interval);
+  GET_ASSIGNMENT(onspecific_k);
+  GET_ASSIGNMENT(nonspecific_range);
+  GET_ASSIGNMENT(angular_d_factor);
+  GET_VALUE(statistics_interval);
+  GET_ASSIGNMENT(excluded_volume_k);
+  GET_ASSIGNMENT(range);
+  GET_ASSIGNMENT(time_step);
+  if(quick){
     number_of_frames_ = 2;
     number_of_trials_ = 1;
   }
-  time_step_= GET(data, time_step, 1); // in femtosec (maximal only!)
-  range_= GET_VALUE(data, range, 1);
   first_stats_=true;
 
   // create particles hierarchy
@@ -115,9 +88,12 @@ SimulationData::SimulationData(std::string assignment_file,
   atom::Hierarchy hr=atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
   bonds_= new container::PairContainerSet(get_m());
-  create_fgs(data);
-  create_floaters(data);
-
+  for (int i=0; i< data.fgs_size(); ++i) {
+    create_fgs(data.fgs(i));
+  }
+  for (int i=0; i< data.floaters_size(); ++i) {
+    create_floaters(data.floaters(i));
+  }
   for (int i=0; i< data.interactions_size(); ++i) {
     const ::npctransport::Assignment_InteractionAssignment&
       interaction_i = data.interactions(i);
@@ -127,100 +103,102 @@ SimulationData::SimulationData(std::string assignment_file,
   }
   ParticlesTemp leaves= get_as<ParticlesTemp>(atom::get_leaves(get_root()));
   get_diffusers()->set_particles(leaves);
-  create_bounding_volume_restraints();
+  if (data.box_is_on()) {
+    create_bounding_box_restraint();
+  }
+  if (data.slab_is_on()) {
+    create_slab_restraint();
+ }
 }
 
 /**
    Adds the 'floaters' (free diffusing particles) to the model hierarchy,
    based on the settings in data
 */
-void SimulationData::create_floaters(const  ::npctransport::Assignment&data) {
-  for (int i=0; i< data.floaters_size(); ++i) {
-    if (data.floaters(i).number().value() > 0) {
-      float_stats_.push_back(BodyStatisticsOptimizerStates());
-      IMP_LOG(TERSE, "create_floaters i=" << i <<std::endl);
-      atom::Hierarchy cur_root
-          = atom::Hierarchy::setup_particle(new Particle(get_m()));
-      core::ParticleType type=type_of_float[i];
-      IMP_LOG(TERSE, "   type " << type.get_string() <<std::endl);
-      cur_root->set_name(type.get_string());
-      atom::Hierarchy(get_root()).add_child(cur_root);
-      double adc= GET_VALUE(data, angular_d_factor, 1);
-      ParticlesTemp cur;
-      for (int j=0; j< data.floaters(i).number().value(); ++j) {
-        double dc=1.0;
-        if (data.floaters(i).has_d_factor()) {
-          dc= data.floaters(i).d_factor().value();
-          // evil patch
-          if (dc==0) dc=1;
-        }
-        cur.push_back(create_particle(this, data.floaters(i).radius().value(),
-                                      adc, dc,
-                                      display::get_display_color(i),
-                                      type, type.get_string()));
-        IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back()));
-        os->set_period(stats_interval_);
-        float_stats_.back().push_back(os);
-        cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
-        if (data.floaters(i).has_interactions()) {
-          int nsites= data.floaters(i).interactions().value();
-          set_sites(type, nsites, data.floaters(i).radius().value());
-        }
+void SimulationData::
+create_floaters(const  ::npctransport::Assignment_FloaterAssignment&data) {
+  if (data.number().value() > 0) {
+    float_stats_.push_back(BodyStatisticsOptimizerStates());
+    IMP_LOG(TERSE, "create_floaters i=" << i <<std::endl);
+    atom::Hierarchy cur_root
+      = atom::Hierarchy::setup_particle(new Particle(get_m()));
+    core::ParticleType type=type_of_float[i];
+    IMP_LOG(TERSE, "   type " << type.get_string() <<std::endl);
+    cur_root->set_name(type.get_string());
+    atom::Hierarchy(get_root()).add_child(cur_root);
+    ParticlesTemp cur;
+    for (int j=0; j< data.number().value(); ++j) {
+      double dc=1.0;
+      if (data.has_d_factor()) {
+        dc= data.d_factor().value();
+        // evil patch
+        if (dc==0) dc=1;
       }
-      particles_[type]=cur;
+      cur.push_back(create_particle(this, data.radius().value(),
+                                    angular_d_factor_, dc,
+                                    display::get_display_color(i),
+                                    type, type.get_string()));
+      IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back()));
+      os->set_period(stats_interval_);
+      float_stats_.back().push_back(os);
+      cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
+      if (data.interactions() >0) {
+        int nsites= data.interactions().value();
+        set_sites(type, nsites, data.radius().value());
+      }
     }
+    particles_[type]=cur;
+    interaction_range_factors_[type]= data.interaction_range_factor();
+    interaction_k_factors_[type]= data.interaction_k_factor();
   }
-  IMP_LOG(TERSE, " Done creating floaters "  <<std::endl);
 }
 
 /**
    Adds the FG Nup chains to the model hierarchy,
    based on the settings in data
 */
-void SimulationData::create_fgs(const  ::npctransport::Assignment&data) {
-  for (int i=0; i< data.fgs_size(); ++i) {
+void SimulationData::
+create_fgs(const ::npctransport::Assignment_FGAssignment&data) {
+  if (data.number().value() > 0) {
     fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
     chain_stats_.push_back(ChainStatisticsOptimizerStates());
     core::ParticleType type=type_of_fg[i];
     ParticlesTemp cur;
     atom::Hierarchy hi= atom::Hierarchy::setup_particle(new Particle(get_m()));
     hi->set_name(type.get_string());
-    double adc= GET_VALUE(data, angular_d_factor, 1);
     atom::Hierarchy(get_root()).add_child(hi);
-    for (int j=0; j< GET_VALUE(data.fgs(i), number, 0); ++j) {
-      double dc=1.0;
-      if (data.fgs(i).has_d_factor()) {
-        dc= data.fgs(i).d_factor().value();
+    for (int j=0; j< data.number(); ++j) {
+      double dc=data.d_factor().value();
       }
-      double rlf=1.0;
-      if (data.fgs(i).has_rest_length_factor()) {
-        dc= data.fgs(i).rest_length_factor().value();
+      double rlf=data.rest_length_factor().value();
       }
       atom::Hierarchy hc(create_chain(this,
-                                      data.fgs(i).number_of_beads().value(),
-                                      data.fgs(i).radius().value(),
-                                      adc, dc, rlf,
+                                      data.number_of_beads().value(),
+                                      data.radius().value(),
+                                      angular_d_factor_, dc, rlf,
                                       backbone_spring_k_,
                                       display::Color(.3,.3,.3), type, "fg",
                                       bonds_));
       cur.push_back(hc);
       ParticlesTemp chain=hc.get_children();
       chain_stats_.back()
-          .push_back(new ChainStatisticsOptimizerState(chain));
+        .push_back(new ChainStatisticsOptimizerState(chain));
       chain_stats_.back().back()->set_period(stats_interval_);
       fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
       for (unsigned int k=0; k < chain.size(); ++k) {
         fgs_stats_.back().back()
-            .push_back(new BodyStatisticsOptimizerState(chain[k]));
+          .push_back(new BodyStatisticsOptimizerState(chain[k]));
         fgs_stats_.back().back().back()->set_period(stats_interval_);
       }
       hi.add_child(atom::Hierarchy(cur.back()));
-      if (data.fgs(i).has_interactions()) {
-        int nsites= data.fgs(i).interactions().value();
-        set_sites(type, nsites, data.fgs(i).radius().value());
+      if (data.interactions().value() > 0) {
+        int nsites= data.interactions().value();
+        set_sites(type, nsites, data.radius().value());
       }
     }
     particles_[type]=cur;
+    interaction_range_factors_[type]= data.interaction_range_factor();
+    interaction_k_factors_[type]= data.interaction_k_factor();
   }
 }
 
@@ -229,29 +207,28 @@ void SimulationData::create_fgs(const  ::npctransport::Assignment&data) {
    Creates bounding volume restraints such as box restraint and slab restraints,
    based on the box_size_, slab_height_, slab_radius_, etc. class variables
 */
-void SimulationData::create_bounding_volume_restraints()
+void SimulationData::create_bounding_box_restraint()
 {
-  if(box_on_){
-    // Add bounding box restraint
-    // TODO: what does backbone_spring_k_ has to do
-    //       with bounding box constraint?
-    IMP_NEW(core::HarmonicUpperBound, hub, (0, backbone_spring_k_));
-    IMP_NEW(core::GenericBoundingBox3DSingletonScore<core::HarmonicUpperBound>,
-            bbss,
-            (hub.get(), get_box()));
-    box_restraint_=container::create_restraint(bbss.get(),
-                                               get_diffusers(),
-                                               "bounding box");
-  }
-  if(slab_on_){
+  // Add bounding box restraint
+  // TODO: what does backbone_spring_k_ has to do
+  //       with bounding box constraint?
+  IMP_NEW(core::HarmonicUpperBound, hub, (0, excluded_volume_k_));
+  IMP_NEW(core::GenericBoundingBox3DSingletonScore<core::HarmonicUpperBound>,
+          bbss,
+          (hub.get(), get_box()));
+  box_restraint_=container::create_restraint(bbss.get(),
+                                             get_diffusers(),
+                                             "bounding box");
+}
+
+void SimulationData::create_slab_restraint() {
     // Add cylinder restraint
-    IMP_NEW(SlabSingletonScore,
-            slab_score,
-            (slab_height_ /* h */, slab_radius_ /*r*/, 100.0 /* k */) );
-    slab_restraint_=container::create_restraint(slab_score.get(),
-                                                get_diffusers(),
-                                                "bounding slab");
-  }
+  IMP_NEW(SlabSingletonScore,
+          slab_score,
+          (slab_thickness_ /* h */, tunnel_radius_ /*r*/, excluded_volume_k_) );
+  slab_restraint_=container::create_restraint(slab_score.get(),
+                                              get_diffusers(),
+                                              "bounding slab");
 }
 
 Model *SimulationData::get_m() {
@@ -279,12 +256,12 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
     add_hierarchy(fh, atom::Hierarchy(get_root()));
     IMP::rmf::add_restraints(fh, RestraintsTemp(1, get_predr()));
     IMP::rmf::add_restraints(fh, chain_restraints_);
-    if(box_on_){
+    if(get_has_bounding_box()){
       IMP::rmf::add_restraints(fh, RestraintsTemp(1, box_restraint_));
       IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
       IMP::rmf::add_geometries(fh, display::Geometries(1, bbg));
     }
-    if(slab_on_){
+    if(get_has_slab()){
       IMP::rmf::add_restraints(fh, RestraintsTemp(1, slab_restraint_));
       IMP_NEW(SlabWireGeometry, slab_geometry,
               ( slab_height_ , slab_radius_ , slab_width_ ) );
@@ -308,12 +285,12 @@ void SimulationData::dump_geometry() {
     g->set_sites(it->first, it->second);
   }
   w->add_geometry(g);
-  if(box_on_){
+  if(get_has_bounding_box()){
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
     bbg->set_was_used(true);
     w->add_geometry(bbg);
   }
-  if(slab_on_){
+  if(get_has_slab()){
     IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()) );
     w->add_geometry( cyl_geom);
     // IMP_NEW(SlabWireGeometry, slab_geometry,
@@ -339,8 +316,8 @@ atom::BrownianDynamics *SimulationData::get_bd() {
       bd_->add_optimizer_state(get_rmf_writer());
     }
     RestraintsTemp rs= chain_restraints_;
-    if(box_on_) rs.push_back(box_restraint_);
-    if(slab_on_) rs.push_back(slab_restraint_);
+    if(get_has_bounding_box()) rs.push_back(box_restraint_);
+    if(get_has_slab()) rs.push_back(slab_restraint_);
     rs.push_back(predr_);
     IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
     bd_->set_scoring_function(rsf);
@@ -419,14 +396,12 @@ SimulationData::add_interaction
   // extract interaction params
   core::ParticleType type0(idata.type0());
   core::ParticleType type1(idata.type1());
-  double nspec_attr_range =
-    GET_VALUE(idata, nonspecific_attr_range, nonspecific_range_);
-  double nspec_attr_k =
-    GET_VALUE(idata, nonspecific_attr_k, nonspecific_k_);
-  double spec_attr_range =
-    GET_VALUE(idata, site_attr_range, range_);
-  double spec_attr_k =
-    GET_VALUE(idata, site_attr_k, interaction_k_);
+  double interaction_k= interaction_k_
+    * interaction_k_factors_.find(type0)->second
+    * interaction_k_factors_.find(type1)->second;
+  double interaction_range= interaction_range_
+    * interaction_range_factors_.find(type0)->second
+    * interaction_range_factors_.find(type1)->second;
 
   // create interaction
   container::PredicatePairsRestraint *ppr= get_predr();
@@ -437,13 +412,11 @@ SimulationData::add_interaction
     ts.push_back(type0);
     ts.push_back(type1);
     int interaction_id= otpp_->get_value(ts);
-    set_sites_score(spec_attr_range, // site-specific
-                    spec_attr_k,
-                    nspec_attr_range, // non-specific = entire particle
-                    nspec_attr_k,
-                    default_repulsive_k_ / 10000.0, // non-specific repulsion
-                    // TODO: we aslready have a repulsive force between all
-                    //       diffusers, should we cancel this one?
+    set_sites_score(interaction_range, // site-specific
+                    interaction_k,
+                    nonspecific_range_, // non-specific = entire particle
+                    nonspecific_k_,
+                    excluded_volume_k_,
                     sites_[type0], sites_[type1],
                     interaction_id , ppr);
   }
@@ -452,11 +425,11 @@ SimulationData::add_interaction
     ts.push_back(type1);
     ts.push_back(type0);
     int interaction_id= otpp_->get_value(ts);
-    set_sites_score(spec_attr_range, // site-specific
-                    spec_attr_k,
-                    nspec_attr_range, // non-specific attraction
-                    nspec_attr_k,
-                    default_repulsive_k_, // non-specific repulsion
+    set_sites_score(interaction_range, // site-specific
+                    interaction_k,
+                    nonspecific_range_, // non-specific = entire particle
+                    nonspecific_k_,
+                    excluded_volume_k_,
                     sites_[type0], sites_[type1],
                     interaction_id , ppr);
   }
@@ -476,71 +449,18 @@ SimulationData::add_interaction
            << type0.get_string() << ", "
            << type1.get_string()
            << "  sizes: " << set0.size() << ", " << set1.size()
-           << " statistics range: " << spec_attr_range << std::endl );
+           << " statistics range: " << range_ << std::endl );
   if(set0.size() > 0 && set1.size() > 0) {
     InteractionType interaction_type = std::make_pair(type0,type1);
     IMP_NEW( BipartitePairsStatisticsOptimizerState,
              bpsos ,
              ( get_m(), interaction_type,
-               set0, set1,  spec_attr_range /* distance thresh */ ) );
+               set0, set1,  range_ /* distance thresh */ ) );
     bpsos->set_period(stats_interval_);
     interactions_stats_.push_back (bpsos);
   }
 }
 
-
-void initialize_positions(SimulationData *sd,
-                          const ParticlePairsTemp &extra_links) {
-  if(sd->is_slab_on()) {
-    example::randomize_particles(sd->get_diffusers()->get_particles(),
-                                 sd->get_cylinder());
-  }
-  else if (sd->is_box_on()) {
-    example::randomize_particles(sd->get_diffusers()->get_particles(),
-                                 sd->get_box());
-  }
-  sd->get_rmf_writer()->update();
-  RestraintsTemp rss=sd->get_chain_restraints();
-  if(sd->is_box_on())  rss.push_back(sd->get_box_restraint());
-  if(sd->is_slab_on()) rss.push_back(sd->get_slab_restraint());
-  // pin first link of fgs, if not already pinned
-  core::XYZs previously_unpinned;
-  atom::Hierarchies chains= get_fg_chains(sd->get_root());
-  for (unsigned int i=0; i< chains.size(); ++i) {
-    if (core::XYZ(chains[i].get_child(0)).get_coordinates_are_optimized()) {
-      previously_unpinned.push_back(core::XYZ(chains[i].get_child(0)));
-      core::XYZ(chains[i].get_child(0)).set_coordinates_are_optimized(false);
-    }
-  }
-  for (unsigned int i=0; i< extra_links.size(); ++i) {
-    double d= core::XYZR(extra_links[i][0]).get_radius()
-        +  core::XYZR(extra_links[i][1]).get_radius();
-    IMP_NEW(core::HarmonicDistancePairScore, link,
-            (d,sd->get_backbone_k(), "linker ps"));
-    Pointer<Restraint> r
-        = IMP::create_restraint(link.get(), extra_links[i]);
-    rss.push_back(r);
-  }
-  IMP_NEW(core::RestraintsScoringFunction, sf, (rss));
-
-  // Now optimize:
-  int dump_interval = sd->get_rmf_dump_interval();
-  sd->get_rmf_writer()->set_period(dump_interval * 100);// reduce output rate:
-  example::optimize_balls(sd->get_diffusers()->get_particles(),
-                          sf->get_restraints(),
-                          sd->get_cpc()->get_pair_filters(),
-                          OptimizerStates(1, sd->get_rmf_writer()),
-                          PROGRESS);
-  IMP_LOG(TERSE, "Initial energy is " << sd->get_m()->evaluate(false)
-          << std::endl);
-  sd->get_rmf_writer()->set_period(dump_interval);// restore output rate
-  sd->get_rmf_writer()->update();
-
-  // unpin previously unpinned fgs (= allow optimization)
-  for (unsigned int i=0; i< previously_unpinned.size(); ++i) {
-    previously_unpinned[i].set_coordinates_are_optimized(true);
-  }
-}
 
 void SimulationData::write_geometry(std::string out) {
   IMP_OBJECT_LOG;
@@ -559,12 +479,12 @@ void SimulationData::write_geometry(std::string out) {
             (chain_restraints_[i]));
     w->add_geometry(rsg);
   }
-  if(box_on_){
+  if(get_has_bounding_box()){
     IMP_NEW(display::RestraintGeometry, rsg,
             (box_restraint_));
     w->add_geometry(rsg);
   }
-  if(slab_on_){
+  if(get_has_slab()){
     IMP_NEW(display::RestraintGeometry, slab_rsg,
             (slab_restraint_));
     w->add_geometry(slab_rsg);
@@ -574,11 +494,11 @@ void SimulationData::write_geometry(std::string out) {
             (predr_));
     w->add_geometry(prsg);
   }
-  if(box_on_){
+  if(get_has_bounding_box()){
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
     w->add_geometry(bbg);
   }
-  if(slab_on_){
+  if(get_has_slab()){
     // IMP_NEW(SlabWireGeometry, slab_geometry,
     //         (1000 /* h */ , 100 /* r */, 300 /* w */) );
     // w->add_geometry(slab_geometry);
@@ -809,25 +729,5 @@ display::Geometry* SimulationData::get_static_geometry() {
 }
 
 
-atom::Hierarchies get_fg_chains(atom::Hierarchy root) {
-  atom::Hierarchies ret;
-  // I. return root itself if the type of its first direct child
-  // is contained in [type_of_fg]
-  if (root.get_number_of_children() >0) {
-    atom::Hierarchy c= root.get_child(0);
-    if (core::Typed::particle_is_instance(c)) {
-      core::ParticleType t=core::Typed(c).get_type();
-      if (std::find(type_of_fg.begin(),
-                    type_of_fg.end(), t) != type_of_fg.end()) {
-        return atom::Hierarchies(1, root);
-      }
-    }
-  }
-  // II. Otherwise, recurse on all of root's children
-  for (unsigned int i=0; i< root.get_number_of_children(); ++i) {
-    ret+= get_fg_chains(root.get_child(i));
-  }
-  return ret;
-}
 
 IMPNPCTRANSPORT_END_NAMESPACE

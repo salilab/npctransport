@@ -19,120 +19,103 @@ message Configuration {
     required IntRange number=2;
     required FloatRange radius=3;
     required IntRange interactions=4;
-    optional FloatRange rest_length_factor=5;
-    optional FloatRange D_factor=6;
+    required FloatRange rest_length_factor=5;
+    required FloatRange D_factor=6;
   };
   message FloatConfiguration {
     required IntRange number=1;
     required FloatRange radius=2;
     required IntRange interactions=3;
-    optional FloatRange D_factor=4;
+    required FloatRange D_factor=4;
   };
   message Interaction {
     required string type0=1;
     required string type1=2;
     required IntRange on_or_off=3;
-    optional FloatRange nonspecific_attr_range=4;
-    optional FloatRange nonspecific_attr_k=5;
-    optional FloatRange site_attr_range=6;
-    optional FloatRange site_attr_k=7;
   };
-  message Slab {
-    required IntRange on_or_off=1;
-    required FloatRange height=2;
-    required FloatRange radius=3;
-    optional FloatRange width=4;
-  }
-  message Box {
-    required IntRange on_or_off=1;
-    required FloatRange size=2;
-  };
-  optional FloatRange interaction_k=3;
-  optional FloatRange backbone_spring_k=4;
-  optional FloatRange time_step_factor=5;
-  optional Box box=6;
-  optional Slab slab=18;
-  optional FloatRange slack=7;
-  optional IntRange number_of_trials=8;
-  optional IntRange number_of_frames=11;
-  repeated FGConfiguration fgs=9;
-  repeated FloatConfiguration floaters=10;
-  repeated Interaction interactions=14;
-  optional int32 dump_interval=12;
-  optional FloatRange nonspecific_range=13;
-  optional FloatRange nonspecific_k=16;
-  optional FloatRange angular_D_factor=15;
-  optional int32 statistics_interval=17;
-  optional FloatRange default_repulsive_range=19;
-  optional FloatRange default_repulsive_k=20;
-  optional FloatRange range=21;
+
+  required FloatRange interaction_k=3;
+  required FloatRange interaction_range=4;
+  required FloatRange backbone_k=5;
+  required FloatRange time_step_factor=6;
+  required FloatRange box_side=7;
+  required IntRange box_on_or_off=8;
+  required FloatRange slab_thickness=9;
+  required FloatRange tunnel_radius=10;
+  required IntRange slab_on_or_off=11;
+  required FloatRange slack=12;
+  required IntRange number_of_trials=13;
+  required IntRange number_of_frames=14;
+  repeated FGConfiguration fgs=15;
+  repeated FloatConfiguration floaters=16;
+  repeated Interaction interactions=17;
+  required int32 dump_interval=18;
+  required FloatRange nonspecific_range=19;
+  required FloatRange nonspecific_k=20;
+  required FloatRange angular_D_factor=21;
+  required int32 statistics_interval=22;
+  required FloatRange excluded_volume_k=23;
 }
 
+// if you add any parameters you must update automatic_parameters.cpp
+// accordingly
 message Assignment {
   message IntAssignment {
     required int32 value=1;
-    optional int32 index=2;
+    required int32 index=2;
   };
   message FloatAssignment {
     required double value=1;
-    optional int32 index=2;
+    required int32 index=2;
   };
   message FGAssignment {
     required IntAssignment number_of_beads=1;
     required IntAssignment number=2;
     required FloatAssignment radius=3;
     required IntAssignment interactions=4;
-    optional FloatAssignment rest_length_factor=5;
-    optional FloatAssignment D_factor=6;
+    required FloatAssignment rest_length_factor=5;
+    required FloatAssignment d_factor=6;
+    required FloatAssignment interaction_k_factor=7;
+    required FloatAssignment interaction_range_factor=8;
   };
   message FloaterAssignment {
     required IntAssignment number=1;
     required FloatAssignment radius=2;
     required IntAssignment interactions=3;
-    optional FloatAssignment D_factor=4;
+    required FloatAssignment d_factor=4;
+    required FloatAssignment interaction_k_factor=5;
+    required FloatAssignment interaction_range_factor=7;
   };
   message InteractionAssignment {
     required string type0=1;
     required string type1=2;
-    required IntAssignment on_or_off=3;
-    optional FloatAssignment nonspecific_attr_range=4;
-    optional FloatAssignment nonspecific_attr_k=5;
-    optional FloatAssignment site_attr_range=6;
-    optional FloatAssignment site_attr_k=7;
+    required IntAssignment is_on=3;
   };
-  message Slab {
-    required IntAssignment on_or_off=1;
-    required FloatAssignment height=2;
-    required FloatAssignment radius=3;
-    optional FloatAssignment width=4;
-  };
-  message Box {
-    required IntAssignment on_or_off=1;
-    required FloatAssignment size=2;
-  };
-  optional int32 work_unit=1;
-  optional IntAssignment number_of_work_units=2;
-  optional FloatAssignment interaction_k=3;
-  optional FloatAssignment backbone_spring_k=4;
-  optional FloatAssignment time_step_factor=5;
-  optional Box box=6;
-  optional Slab slab=21;
-  optional FloatAssignment slack=7;
-  optional IntAssignment number_of_trials=8;
-  optional IntAssignment number_of_frames=12;
-  repeated FGAssignment fgs=9;
-  repeated FloaterAssignment floaters=10;
-  repeated IntAssignment grid_index=11;
-  optional int32 dump_interval=13;
-  optional FloatAssignment nonspecific_range=14;
-  optional FloatAssignment nonspecific_k=19;
-  repeated InteractionAssignment interactions=15;
-  optional double time_step=16;
-  optional FloatAssignment angular_D_factor=18;
-  optional int32 statistics_interval=20;
-  optional FloatAssignment default_repulsive_range=22;
-  optional FloatAssignment default_repulsive_k=23;
-  optional FloatAssignment range=24;
+  required int32 work_unit=1;
+  required FloatAssignment interaction_k=3;
+  required FloatAssignment interaction_range=4;
+  required FloatAssignment backbone_k=5;
+  required FloatAssignment time_step_factor=6;
+  // length of the side of a box
+  required FloatAssignment box_side=7;
+  required IntAssignment box_is_on=8;
+  required FloatAssignment slab_thickness=9;
+  required FloatAssignment tunnel_radius=10;
+  required IntAssignment slab_is_on=11;
+  required FloatAssignment slack=12;
+  required IntAssignment number_of_trials=13;
+  required IntAssignment number_of_frames=14;
+  repeated FGAssignment fgs=15;
+  repeated FloaterAssignment floaters=16;
+  repeated InteractionAssignment interactions=17;
+  required int32 dump_interval=18;
+  required FloatAssignment nonspecific_range=19;
+  required FloatAssignment nonspecific_k=20;
+  required FloatAssignment angular_D_factor=21;
+  required int32 statistics_interval=22;
+  required FloatAssignment excluded_volume_k=23;
+  required double time_step=25;
+  required double range=26;
 }
 
 message Statistics {

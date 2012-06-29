@@ -21,13 +21,13 @@
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/container/PairContainerSet.h>
 #include <IMP/rmf/SaveOptimizerState.h>
+#include "SlabSingletonScore.h"
+#include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/Pointer.h>
 
 #include <boost/timer.hpp>
 #include <string>
-#include <map>
-#include <utility>
 
 //#ifndef SWIG
 #ifdef IMP_NPC_GOOGLE
@@ -38,23 +38,6 @@
 //#endif
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-// TODO: move this to a different file?
-#ifndef SWIG
-// sort pair such that first >= second
-template <class Pair>
-inline Pair sort_pair(Pair unsorted)
-{
-  if(unsorted.first >= unsorted.second){
-    return unsorted;
-  } else {
-    Pair ret;
-    ret.first = unsorted.second;
-    ret.second = unsorted.first;
-    return ret;
-  }
-}
-
-#endif
 
 class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 #ifndef SWIG
@@ -75,42 +58,27 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
       }
         bool is_init() { return init_; }
     };
-
-  // a less operator where the order of first and second does not matter.
-  // Formally, for any A,B,C,D, then [A,B] < [C,D] iff [B,A] < [C,D]
-  // (it follows that [A,B] = [B,A])
-  template<class Pair>
-    class less_unordered_pair
-    {
-    public:
-      bool operator() (const Pair &p1, const Pair &p2) const{
-        Pair p1sorted = sort_pair(p1);
-        Pair p2sorted = sort_pair(p2);
-        return std::less<Pair>()(p1sorted, p2sorted);
-      }
-    };
-
-  typedef std::pair<core::ParticleType, core::ParticleType> ParticleTypePair;
-
-  Parameter<double> slack_;
-  Parameter<double> time_step_; // in femtosec (maximal only!)
   Parameter<double> interaction_k_;
+  Parameter<double> interaction_range_;
   Parameter<double> backbone_spring_k_;
-  Parameter<double> default_repulsive_k_;
-  Parameter<double> radius_;
-  Parameter<bool> box_on_;
   Parameter<double> box_side_;
-  Parameter<bool> slab_on_;
-  Parameter<double> slab_height_;
-  Parameter<double> slab_radius_;
-  Parameter<double> slab_width_;
-  Parameter<int> dump_interval_;
-  Parameter<int> number_of_frames_;
+  Parameter<double> tunnel_radius_;
+  Parameter<double> slab_thickness_;
+  Parameter<double> slack_;
   Parameter<int> number_of_trials_;
-  Parameter<double> range_;
-  Parameter<double> nonspecific_range_;
+  Parameter<int> number_of_frames_;
+  Parameter<int> dump_interval_;
   Parameter<double> nonspecific_k_;
-  Parameter<int> stats_interval_;
+  Parameter<double> nonspecific_range_;
+  Parameter<double> angular_d_factor_;
+  Parameter<int> statistics_interval_;
+  Parameter<double> excluded_volume_k_;
+  Parameter<double> range_;
+  Parameter<double> time_step_;
+
+  // Per type scaling factors for the interaction parameters
+  compatibility::map<core::ParticleType, double> interaction_range_factors_;
+  compatibility::map<core::ParticleType, double> interaction_k_factors_;
 #endif
   // the model on which the simulation is run
   Pointer<Model> m_;
@@ -175,20 +143,22 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      Adds the FG Nup chains to the model hierarchy,
      based on the settings in data
    */
-  void create_fgs(const  ::npctransport::Assignment&data);
+  void create_fgs(const  ::npctransport::Assignment_FGAssignment&data);
 
   /**
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
      based on the settings in data
    */
-  void create_floaters(const  ::npctransport::Assignment&data);
+  void create_floaters(const ::npctransport::Assignment_FloaterAssignment&data);
 
   /**
      Creates bounding volume restraints such as box restraint and slab
      restraints, based on the box_size_, slab_height_ and slab_radius_
      class variables, etc.
    */
-  void create_bounding_volume_restraints();
+  void create_bounding_box_restraint();
+
+  void create_slab_restraint();
 
  public:
   /**
@@ -233,8 +203,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
     return range_/2;
   }
   PairContainer* get_bonds() const {return bonds_;}
-  bool is_box_on() const { return box_on_; }
-  bool is_slab_on() const { return slab_on_; }
+  bool get_has_bounding_box() const { return box_restraint_; }
+  bool get_has_slab() const { return slab_restraint_; }
 
   // swig doesn't equate the two protobuf types
 #ifndef SWIG
@@ -259,12 +229,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   algebra::BoundingBox3D get_box() const {
     return algebra::get_cube_d<3>(.5*box_side_);
   }
-  algebra::Cylinder3D get_cylinder() const {
-    algebra::Vector3D bottom(0, 0, -slab_height_ / 2);
-    algebra::Vector3D top(0, 0, slab_height_ / 2);
-    algebra::Segment3D axis( bottom, top );
-    return algebra::Cylinder3D( axis, slab_radius_ );
-  }
+  algebra::Cylinder3D get_cylinder() const;
   double get_backbone_k() const {return backbone_spring_k_;}
   double get_interaction_k() const {return interaction_k_;}
 
@@ -317,30 +282,7 @@ boost::timer create_boost_timer()
   return boost::timer();
 }
 
-IMPNPCTRANSPORTEXPORT
-void initialize_positions(SimulationData *sd,
-                          const ParticlePairsTemp &extra_links
-                          = ParticlePairsTemp());
 
-IMPNPCTRANSPORTEXPORT
-extern core::ParticleTypes type_of_fg;
-IMPNPCTRANSPORTEXPORT
-extern core::ParticleTypes type_of_float;
-
-inline IMPNPCTRANSPORTEXPORT
-core::ParticleType get_type_of_fg(unsigned int index)
-{
-  return type_of_fg[index];
-}
-
-inline IMPNPCTRANSPORTEXPORT
-core::ParticleType get_type_of_float(unsigned int index)
-{
-  return type_of_float[index];
-}
-
-IMPNPCTRANSPORTEXPORT
-atom::Hierarchies get_fg_chains(atom::Hierarchy h);
 
 inline WeakObjectKey get_simulation_data_key() {
   static WeakObjectKey simdata("simulation data");

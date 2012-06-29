@@ -227,33 +227,6 @@ int assign_internal(const Ranges &r, int work_unit,
 }
 
 
-  // sets the time step to allow at most movement of ~10% of particle radii
-  // times f
-  double
-  get_time_step(double f, double k, const Floats &radii,
-                const Floats &ds) {
-  double D=-1;
-  double rmin=std::numeric_limits<double>::max();
-  for (unsigned int i=0; i< radii.size(); ++i) {
-    rmin=std::min(rmin, radii[i]);
-  }
-  for (unsigned int i=0; i< ds.size(); ++i) {
-    D= std::max(D, ds[i]);
-  }
-  double scale= .1*rmin;
-  // binary search between ts_max and ts_min
-  double ts_max= 1e12, ts_min=0;
-  do {
-    double mid= .5*(ts_max+ts_min);
-    double length= atom::get_diffusion_length(D, k, mid);
-    if (length > scale) {
-      ts_max=mid;
-    } else {
-      ts_min=mid;
-    }
-  } while ((ts_max-ts_min) > .1*ts_max);
-  return f*ts_min;
-}
 
 }
 
@@ -292,38 +265,8 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
     }
   }
   output.set_work_unit(work_unit);
-  Floats rs;
-  Floats dfs;
-  for (int i=0; i< output.fgs_size(); ++i) {
-    rs.push_back(output.fgs(i).radius().value());
-    if (output.fgs(i).has_d_factor()) {
-      dfs.push_back(output.fgs(i).d_factor().value());
-    } else {
-      dfs.push_back(1);
-    }
-  }
-  for (int i=0; i< output.floaters_size(); ++i) {
-    rs.push_back(output.floaters(i).radius().value());
-    if (output.floaters(i).has_d_factor()) {
-      dfs.push_back(output.floaters(i).d_factor().value());
-    } else {
-      dfs.push_back(1);
-    }
-  }
-  Floats ds;
-  for (unsigned int i=0; i< rs.size(); ++i) {
-    double d= dfs[i]*atom::get_einstein_diffusion_coefficient(rs[i]);
-    ds.push_back(d);
-  }
-  // TODO: if using interaction specific k, should this be adjusted?
-  double ts
-    = get_time_step( output.time_step_factor().value(),
-                               std::max(output.interaction_k().
-                                        value(),
-                                        output.backbone_spring_k()
-                                        .value()),
-                               rs, ds);
-  output.set_time_step(ts);
+  output.set_time_step(get_time_step(output));
+  output.set_range(get_close_pairs_range(output));
   std::fstream out(ofname.c_str(), std::ios::out | std::ios::binary);
   if (!out) {
     IMP_THROW("Could not open file " << ofname, IOException);

@@ -22,7 +22,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
  */
 class IMPNPCTRANSPORTEXPORT SlabSingletonScore: public SingletonScore
 {
-  double height_; // height of slab
+  double thickness_; // thichness of slab
 
   double radius_; // radius of slab cylinder
 
@@ -36,7 +36,7 @@ class IMPNPCTRANSPORTEXPORT SlabSingletonScore: public SingletonScore
 
  public:
   //! Get the individual particles from the passed SingletonContainer
-  SlabSingletonScore(double height, double radius, double k);
+  SlabSingletonScore(double thickness, double radius, double k);
 
   IMP_SINGLETON_SCORE(SlabSingletonScore);
   algebra::Vector3D
