@@ -50,16 +50,16 @@ def add_fg_type(config, number_of_beads, number, radius,
 def add_float_type(config, number, radius,
                    interactions=1,  d_factor=1,
                 interaction_k_factor=1, interaction_range_factor=1):
-    fg= config.floats.add()
+    fg= config.floaters.add()
     fg.number.lower=number
     fg.radius.lower=radius
-    fg.interactions.lowet=interactions
+    fg.interactions.lower=interactions
     fg.d_factor.lower=d_factor
     fg.interaction_k_factor.lower=interaction_k_factor
     fg.interaction_range_factor.lower=interaction_range_factor
     return fg
 
-def add_interaction(config, name0, name1, is_on):
+def add_interaction(config, name0, name1, is_on=1):
     i= config.interactions.add()
     i.type0= name0
     i.type1=name1
@@ -76,6 +76,7 @@ def set_quick_configuration(config):
     config.number_of_frames.lower=100000
 
 def write(config):
+    import sys
     f=open(sys.argv[1], "wb")
     f.write(config.SerializeToString())
 

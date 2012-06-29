@@ -19,8 +19,7 @@ fg= IMP.npctransport.add_fg_type(config,
                                  interactions=1)
 IMP.npctransport.create_range(fg.rest_length_factor, .5, .8, 3)
 
-kap= IMP.npctransport.add_floater(config,
-                                  number_of_beads=10,
+kap= IMP.npctransport.add_float_type(config,
                                   number=1,
                                   radius=10)
 IMP.npctransport.create_range(kap.number,0, 10,3)
