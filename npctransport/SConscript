@@ -31,7 +31,7 @@ oenv=env.IMPModuleBuild(module="npctransport",
                         cpppath=[Dir("#/build/src/npctransport")],
                         required_dependencies= req_depend )
 
-if oenv:
+if oenv and oenv["IMP_PASS"]=="BUILD":
     """cat %(tmpdir)s/npctransport.pb.cc | sed "s#data/npctransport.pb.h#IMP/npctransport/internal/proto.hpp#g"> %(targetcc)s"""
     def build_protoc(target, source, env):
         cmd="""mkdir -p %(tmpdir)s;
