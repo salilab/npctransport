@@ -16,6 +16,7 @@ class ConeTests(IMP.test.TestCase):
     def _randomize(self, rps, sites, bb):
         for i in range(len(rps)):
             ok=False
+            failures=0
             while not ok:
                 tr= IMP.algebra.get_random_vector_in(bb)
                 r= IMP.algebra.get_random_rotation_3d()
@@ -23,16 +24,20 @@ class ConeTests(IMP.test.TestCase):
                 rps[i].set_reference_frame(IMP.algebra.ReferenceFrame3D(trans))
                 ok=True
                 for orb, s in zip(rps[0:i], sites[0:i]):
+                    if failures>200:
+                        raise RuntimeError("too many failures with "+str(IMP.core.XYZR(rps[i])) + " and "+str(IMP.core.XYZR(orb)))
                     d= IMP.core.get_distance(IMP.core.XYZR(rps[i]),
                                              IMP.core.XYZR(orb))
                     if d <0 or d >radius:
                         ok=False
+                        failures+=1
                         break
                     sp=rps[i].get_reference_frame().get_global_coordinates(sites[i][0])
                     spo= orb.get_reference_frame().get_global_coordinates(s[0])
                     ds= IMP.algebra.get_distance(sp, spo)
                     print d, ds
                     if ds >5:
+                        failures+=1
                         ok=False
     def _show(self, rps, sites, w):
         for i,r in enumerate(rps):
