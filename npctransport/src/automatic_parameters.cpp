@@ -85,6 +85,17 @@ double get_time_step(const ::npctransport::Assignment& config) {
     UPDATE_MIN(range_factor, config.floaters(i).interaction_range_factor);
     UPDATE_MAX(k_factor, config.floaters(i).interaction_k_factor);
   }
+  for ( int i=0; i< config.interactions_size(); ++i) {
+    if (config.interactions(i).has_interaction_range()) {
+      UPDATE_MIN(range_factor, config.interactions(i)
+                 .interaction_range);
+    }
+    if (config.interactions(i).has_interaction_k()) {
+      UPDATE_MAX(k_factor, config.interactions(i).interaction_k);
+    }
+  }
+
+
 
   return get_time_step(time_step_factor, max_d_factor,
                        max_k*max_k_factor,

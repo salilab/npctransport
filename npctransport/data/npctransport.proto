@@ -36,6 +36,8 @@ message Configuration {
     required string type0=1;
     required string type1=2;
     required IntRange is_on=3;
+    optional FloatRange interaction_k=4;
+    optional FloatRange interaction_range=5;
   };
 
   required FloatRange interaction_k=3;
@@ -94,6 +96,8 @@ message Assignment {
     required string type0=1;
     required string type1=2;
     required IntAssignment is_on=3;
+    optional FloatAssignment interaction_k=4;
+    optional FloatAssignment interaction_range=5;
   };
   required int32 work_unit=1;
   required FloatAssignment interaction_k=3;

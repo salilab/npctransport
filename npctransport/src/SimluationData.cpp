@@ -390,10 +390,18 @@ SimulationData::add_interaction
   // extract interaction params
   core::ParticleType type0(idata.type0());
   core::ParticleType type1(idata.type1());
-  double interaction_k= interaction_k_
+  double base_k=interaction_k_;
+  if (idata.has_interaction_k()) {
+    base_k= idata.interaction_k().value();
+  }
+  double interaction_k= base_k
     * interaction_k_factors_.find(type0)->second
     * interaction_k_factors_.find(type1)->second;
-  double interaction_range= interaction_range_
+  double base_range=interaction_range_;
+  if (idata.has_interaction_range()) {
+    base_k= idata.interaction_range().value();
+  }
+  double interaction_range= base_range
     * interaction_range_factors_.find(type0)->second
     * interaction_range_factors_.find(type1)->second;
 
