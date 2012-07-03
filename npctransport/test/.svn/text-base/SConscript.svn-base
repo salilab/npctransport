@@ -1,9 +1,0 @@
-Import('env')
-
-# This finds all python files matching test_*.py and all cpp files
-# matching test_*.cpp
-env.IMPModuleTest(python_tests= env.IMPModuleGetPythonTests(),
-                  cpp_tests= env.IMPModuleGetCPPTests(),
-                  spelling_exceptions=["npc", "fg", "kap", "cpc", "predr", "rmf"],
-                  function_name_exceptions=["append_npc", "display_npc",
-                                            "relax_npc", "simulate_npc"])
