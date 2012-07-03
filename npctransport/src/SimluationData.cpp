@@ -690,18 +690,18 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
                 IMP::base::ValueException );
     }
     // save the rest of the interactions info
-    Int n0 = pInStats_i->get_n_particles_groupI();
-    Int n1 = pInStats_i->get_n_particles_groupII();
-    Float avg_contacts_num = pInStats_i->get_avg_ncontacts();
+    Int n0 = pInStats_i->get_number_of_particles_1();
+    Int n1 = pInStats_i->get_number_of_particles_2();
+    Float avg_contacts_num = pInStats_i->get_average_number_of_contacts();
 
     UPDATE(nf, *pOutStats_i, avg_contacts_per_particle0,
            avg_contacts_num / n0);
     UPDATE(nf, *pOutStats_i, avg_contacts_per_particle1,
            avg_contacts_num / n1);
     UPDATE(nf, *pOutStats_i, avg_pct_bound_particles0,
-           pInStats_i->get_avg_pct_bound_particles_I() );
+           pInStats_i->get_average_percentage_bound_particles_1() );
     UPDATE(nf, *pOutStats_i, avg_pct_bound_particles1,
-           pInStats_i->get_avg_pct_bound_particles_II() );
+           pInStats_i->get_average_percentage_bound_particles_2() );
   }
 
   UPDATE(nf, stats, energy_per_particle, get_m()->evaluate(false)/all.size());
