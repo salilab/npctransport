@@ -4,6 +4,7 @@ import IMP.npctransport
 import math
 
 radius=5
+rng=100
 
 class ConeTests(IMP.test.TestCase):
     def _create_particle(self, m):
@@ -25,7 +26,9 @@ class ConeTests(IMP.test.TestCase):
                 ok=True
                 for orb, s in zip(rps[0:i], sites[0:i]):
                     if failures>200:
-                        raise RuntimeError("too many failures with "+str(IMP.core.XYZR(rps[i])) + " and "+str(IMP.core.XYZR(orb)))
+                        #raise RuntimeError("too many failures with "+str(IMP.core.XYZR(rps[i])) + " and "+str(IMP.core.XYZR(orb)))
+                        # restart process
+                        return self._randomize(rps, sites, bb)
                     d= IMP.core.get_distance(IMP.core.XYZR(rps[i]),
                                              IMP.core.XYZR(orb))
                     if d <0 or d >radius:
@@ -69,7 +72,7 @@ class ConeTests(IMP.test.TestCase):
         rp0.get_particle().show()
         rp1.get_particle().show()
 
-        cg.optimize(1000000)
+        cg.optimize(1000)
         rp0.get_particle().show()
         rp1.get_particle().show()
         w.set_frame(1)
