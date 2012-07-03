@@ -44,7 +44,7 @@ class ConeTests(IMP.test.TestCase):
         m.set_log_level(IMP.SILENT)
         rp0= self._create_particle(m)
         rp1= self._create_particle(m)
-        bb= IMP.algebra.get_cube_3d(10)
+        bb= IMP.algebra.get_cube_3d(15)
         s0=[IMP.algebra.Vector3D(radius, 0,0)]
         s1=[IMP.algebra.Vector3D(0, radius,0)]
         ps= IMP.npctransport.SitesPairScore(1000, 10,
