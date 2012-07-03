@@ -115,25 +115,25 @@ public OptimizerState {
 
   // returns the average number of all pairs of particles that
   //touch each other per update
-  Float get_avg_ncontacts() const
+  Float get_average_number_of_contacts() const
   { return avg_ncontacts_; }
 
   // returns the average fraction of particles from group I
   // that are bound in each update round
-  Float get_avg_pct_bound_particles_I() const
+  Float get_average_percentage_bound_particles_1() const
   { return avg_pct_bound_particles_I_; }
 
   // returns the average fraction of particles from group II
   // that are bound in each update round
-  Float get_avg_pct_bound_particles_II() const
+  Float get_average_percentage_bound_particles_2() const
   { return avg_pct_bound_particles_II_; }
 
   // return the total number of particles in the first group
-  Int get_n_particles_groupI()
+  Int get_number_of_particles_1()
   { return n_particles_I_; }
 
   // return the total number of particles in the second group
-  Int get_n_particles_groupII()
+  Int get_number_of_particles_2()
   { return n_particles_II_; }
 
   IMP_PERIODIC_OPTIMIZER_STATE(BipartitePairsStatisticsOptimizerState);
