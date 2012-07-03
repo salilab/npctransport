@@ -2,6 +2,7 @@
 #include <RMF.h>
 %}
 IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, SimulationData, SimulationDatas);
 IMP_SWIG_OBJECT(IMP::npctransport, SitesGeometry, SitesGeometries);
 IMP_SWIG_OBJECT(IMP::npctransport, TypedSitesGeometry, TypedSitesGeometries);
