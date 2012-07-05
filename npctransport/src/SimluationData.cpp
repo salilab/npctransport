@@ -399,7 +399,7 @@ SimulationData::add_interaction
     * interaction_k_factors_.find(type1)->second;
   double base_range=interaction_range_;
   if (idata.has_interaction_range()) {
-    base_k= idata.interaction_range().value();
+    base_range= idata.interaction_range().value();
   }
   double interaction_range= base_range
     * interaction_range_factors_.find(type0)->second
