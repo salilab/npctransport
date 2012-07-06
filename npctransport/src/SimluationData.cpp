@@ -59,7 +59,10 @@ SimulationData::SimulationData(std::string assignment_file,
   statistics_file_name_= statistics_file;
   ::npctransport::Assignment data;
   std::ifstream file(assignment_file.c_str(), std::ios::binary);
-  data.ParseFromIstream(&file);
+  bool read=data.ParseFromIstream(&file);
+  if (!read) {
+    IMP_THROW("Unable to read from protobuf", base::IOException);
+  }
   GET_ASSIGNMENT(interaction_k);
   GET_ASSIGNMENT(interaction_range);
   GET_ASSIGNMENT(backbone_k);

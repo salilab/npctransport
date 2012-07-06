@@ -19,6 +19,7 @@
 #include <IMP/algebra/GridD.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/algebra/grid_storages.h>
+#include <IMP/base/CreateLogContext.h>
 #include <IMP/base/SetLogState.h>
 #include <boost/scoped_ptr.hpp>
 #include <fstream>
@@ -106,6 +107,8 @@ void set_value(const Reflection *r, Message *m,
 Ranges get_ranges(std::string name,
                   const Message *message,
                   Message *out_message) {
+  std::string contextname=(std::string("get_ranges: ")+name);
+  IMP::base::CreateLogContext gr(contextname.c_str());
   const Reflection* r(message->GetReflection());
   const Reflection* out_r(out_message->GetReflection());
   /*IMP_LOG(VERBOSE, "Inspecting " << name << " "
@@ -119,7 +122,7 @@ Ranges get_ranges(std::string name,
   const FieldDescriptor* ufd(d->FindFieldByName("upper"));
   if (lfd && ufd) {
     if (r->HasField(*message, ufd)) {
-      //IMP_LOG(VERBOSE, "Found range" <<  std::endl);
+      IMP_LOG(VERBOSE, "Found range " << name << std::endl);
       Range cur;
       const FieldDescriptor* sfd(d->FindFieldByName("steps"));
       const FieldDescriptor* bfd(d->FindFieldByName("base"));
@@ -136,7 +139,7 @@ Ranges get_ranges(std::string name,
       ret.push_back(cur);
       //IMP_LOG(VERBOSE, "Ret is " << IMP::Showable(ret) << std::endl);
     } else {
-      //IMP_LOG(VERBOSE, "Found value" <<  std::endl);
+      IMP_LOG(VERBOSE, "Found value " <<  name << std::endl);
       const FieldDescriptor* out_lfd(out_d->FindFieldByName("value"));
       set_value(out_r, out_message, out_lfd, get_value(r, message, lfd));
     }
@@ -163,6 +166,7 @@ Ranges get_ranges(std::string name,
         }
       } else {
         if (out_fd) {
+          IMP_LOG(VERBOSE, "Found constant " <<  fd->name() << std::endl);
           if (out_fd->type()== FieldDescriptor::TYPE_STRING) {
             out_r->SetString(out_message, out_fd,
                              r->GetString(*message, fd));
@@ -236,12 +240,17 @@ int assign_internal(const Ranges &r, int work_unit,
 int
 assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
               bool show_steps) {
+  IMP_FUNCTION_LOG;
   std::fstream in(fname.c_str(), std::ios::in | std::ios::binary);
   if (!in) {
     IMP_THROW("Could not open file " << fname, IOException);
   }
   ::npctransport::Configuration input;
-  input.ParseFromIstream(&in);
+  bool success=input.ParseFromIstream(&in);
+  if (!success) {
+    IMP_THROW("Unable to read from protobuf " << fname,
+              IOException);
+  }
   Assignment output;
   base::SetLogState sls(base::VERBOSE);
   Ranges ranges=get_ranges("all", &input, &output);
@@ -273,7 +282,11 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   if (!out) {
     IMP_THROW("Could not open file " << ofname, IOException);
   }
-  output.SerializeToOstream(&out);
+  bool written=output.SerializeToOstream(&out);
+  if (!written) {
+    IMP_THROW("Unable to write to " << ofname,
+              IOException);
+  }
   return ret;
 }
 
