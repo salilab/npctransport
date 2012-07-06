@@ -269,9 +269,11 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
     for (unsigned int i=0; i< ranges.size(); ++i) {
       const Reflection* r(ranges[i].m->GetReflection());
       const Descriptor* d(ranges[i].m->GetDescriptor());
+      IMP_LOG(VERBOSE, "Assigning range " << ranges[i].name << std::endl);
       const FieldDescriptor* vfd(d->FindFieldByName("value"));
       set_value(r, ranges[i].m, vfd, values[i]);
       const FieldDescriptor* ifd(d->FindFieldByName("index"));
+      IMP_INTERNAL_CHECK(ifd, "No index found?");
       r->SetInt32(ranges[i].m, ifd, indexes[i]);
     }
   }
