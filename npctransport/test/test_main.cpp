@@ -14,17 +14,21 @@ int main(int , char *[]) {
     std::string config
         = IMP::npctransport::get_data_path("quick.pb");
     std::string assignment
-        = IMP::base::create_temporary_file_name("assignment", "pb");
+        = IMP::base::create_temporary_file_name("assignment", ".pb");
     std::string statistics
-        = IMP::base::create_temporary_file_name("statistics", "pb");
+        = IMP::base::create_temporary_file_name("statistics", ".pb");
+    std::string output
+        = IMP::base::create_temporary_file_name("output", ".rmf");
     set_log_level(LogLevel(IMP::base::VERBOSE));
     int num=assign_ranges(config, assignment,
                           0, true);
     std::cout << "num ranges " << num << std::endl;
     IMP_NEW(SimulationData, sd,(assignment,statistics,
                                 true));
+    sd->set_rmf_file_name(output);
     sd->get_m()->set_log_level(SILENT);
     std::cout << "Files are " << assignment << " and " << statistics
+              << " and " << output
               << std::endl;
     IMP_NPC_LOOP(ParticlePairsTemp());
   } catch (IMP::Exception e) {

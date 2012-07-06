@@ -309,7 +309,7 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     bd_=new atom::BrownianDynamics(m_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_/4);
-    if (dump_interval_ > 0) {
+    if (dump_interval_ > 0 && !get_rmf_file_name().empty()) {
       bd_->add_optimizer_state(get_rmf_writer());
     }
     RestraintsTemp rs= chain_restraints_;

@@ -49,7 +49,10 @@
   }                                                                     \
   set_log_level(LogLevel(FLAGS_log_level));                             \
   IMP_NEW(SimulationData, sd,(FLAGS_assignments, FLAGS_statistics,      \
-                              FLAGS_quick))
+                              FLAGS_quick));                            \
+  if (!FLAGS_conformations.empty()) {                                   \
+    sd->set_rmf_file_name(FLAGS_conformations);                         \
+  }
 
 
 
@@ -61,6 +64,8 @@ IMP_NPC_PARAMETER_STRING(assignments, "assignments.pb", "Assignments file");
 IMP_NPC_PARAMETER_STRING(statistics, "statistics.pb", "Statistics file");
 IMP_NPC_PARAMETER_STRING(final_configuration, "final.pym",
                          "Where to write the final config");
+IMP_NPC_PARAMETER_STRING(configurations, "conformations.rmf",
+                         "Where to write the conformations.");
 IMP_NPC_PARAMETER_BOOL(profile, false,
                          "Whether to turn on profiling for the first run");
 IMP_NPC_PARAMETER_BOOL(quick, false, "Reduce all steps to the minimum");

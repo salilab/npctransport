@@ -269,7 +269,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      the previous RMF writer is invalidated by this action (closed and flushed)
      TODO: make sure it is indeed closed and flushed
   */
-  void set_new_rmf_writer_filename(const std::string& new_name)
+  void set_rmf_file_name(const std::string& new_name)
   {
     rmf_file_name_ = new_name;
     rmf_writer_ = IMP_NULLPTR; // invalidate the existing writer
