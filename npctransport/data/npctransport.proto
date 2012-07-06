@@ -68,11 +68,11 @@ message Configuration {
 message Assignment {
   message IntAssignment {
     required int32 value=1;
-    required int32 index=2;
+    optional int32 index=2;
   };
   message FloatAssignment {
     required double value=1;
-    required int32 index=2;
+    optional int32 index=2;
   };
   message FGAssignment {
     required IntAssignment number_of_beads=1;
