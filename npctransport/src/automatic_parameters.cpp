@@ -45,7 +45,10 @@ get_time_step(double time_step_factor, double max_d_factor,
               double max_k, double min_radius,
               double min_range) {
   double D=max_d_factor*atom::get_einstein_diffusion_coefficient(min_radius);
-  double scale= std::min(.1*min_radius, .3*min_range);
+  double scale=.1*min_radius;
+  if (min_range> 0) {
+    scale= std::min(scale, .3*min_range);
+  }
   // binary search between ts_max and ts_min
   double ts_max= 1e12, ts_min=0;
   do {
