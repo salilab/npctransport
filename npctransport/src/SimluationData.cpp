@@ -1,4 +1,4 @@
-/**
+spo/**
  *  \file simulation_data.cpp
  *  \brief description.
  *
@@ -99,10 +99,12 @@ SimulationData::SimulationData(std::string assignment_file,
     create_floaters(data.floaters(i), type_of_float[i],
                     display::get_display_color(i));
   }
+  IMP_LOG(TERSE, "   SimulationData before adding interactions" <<std::endl);
   for (int i=0; i< data.interactions_size(); ++i) {
     const ::npctransport::Assignment_InteractionAssignment&
       interaction_i = data.interactions(i);
     if (interaction_i.is_on().value()) {
+      IMP_LOG(TERSE, "   Adding interacton " << i <<std::endl);
       add_interaction( interaction_i );
     }
   }
@@ -127,7 +129,7 @@ create_floaters(const  ::npctransport::Assignment_FloaterAssignment&data,
     float_stats_.push_back(BodyStatisticsOptimizerStates());
     atom::Hierarchy cur_root
       = atom::Hierarchy::setup_particle(new Particle(get_m()));
-    IMP_LOG(TERSE, "   type " << type.get_string() <<std::endl);
+    std::cout << "   type " << type.get_string() << std::endl;
     cur_root->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(cur_root);
     ParticlesTemp cur;
@@ -143,6 +145,7 @@ create_floaters(const  ::npctransport::Assignment_FloaterAssignment&data,
       cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
       if (data.interactions().value() >0) {
         int nsites= data.interactions().value();
+        std::cout << nsites << " sites added " << std::endl;
         set_sites(type, nsites, data.radius().value());
       }
     }
@@ -398,7 +401,7 @@ SimulationData::add_interaction
     base_k= idata.interaction_k().value();
   }
   double interaction_k= base_k
-    * interaction_k_factors_.find(type0)->second
+    * interaction_k_factors_.find(type0)->second // TODO: validate type exists
     * interaction_k_factors_.find(type1)->second;
   double base_range=interaction_range_;
   if (idata.has_interaction_range()) {
@@ -407,6 +410,15 @@ SimulationData::add_interaction
   double interaction_range= base_range
     * interaction_range_factors_.find(type0)->second
     * interaction_range_factors_.find(type1)->second;
+
+  std::cout << "creating interaction "
+            << idata.type0() << "," << idata.type1()
+            << " effective_k = " << interaction_k
+            << ", effective_range = " << interaction_range
+            << ", nonspecific k = " << nonspecific_k_
+            << ", nonspecific range = " << nonspecific_range_
+            << ", excluded volume k = " << excluded_volume_k_
+            << std::endl;
 
   // create interaction
   container::PredicatePairsRestraint *ppr= get_predr();

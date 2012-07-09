@@ -96,9 +96,11 @@ inline double SitesPairScore
   double particles_delta = std::sqrt( lips_cache.particles_delta_squared );
   double sum_radii = lips_cache.sum_particles_radii;
   double surface_delta = particles_delta - sum_radii; // between balls surface
+  IMP_LOG(PROGRESS, "Surface_delta " << surface_delta << " ; range "
+          << range_ << std::endl ) ; // TODO: VERBOSE
   if(surface_delta > range_){
-    IMP_LOG(PROGRESS, "Surface_delta " << surface_delta << " ; range "
-            << range_ << std::endl ) ;
+    IMP_LOG(PROGRESS, "Sites contribution is 0.0 and soft sphere is "
+            << soft << std::endl); // TODO: VERBOSE
     return soft; // (probably 0.0 in this case, but leave as-is for consistency)
   }
 
@@ -133,8 +135,8 @@ inline double SitesPairScore
                                         nnsites_[nn[j]], da);
     }
   }
-  IMP_LOG(VERBOSE, "Sites contribution is " << sum << " and soft sphere is "
-          << soft << std::endl);
+  IMP_LOG(PROGRESS, "Sites contribution is " << sum << " and soft sphere is "
+          << soft << std::endl); // TODO: VERBOSE
   return sum+ soft; // specific + non-specific
 }
 

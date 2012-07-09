@@ -19,8 +19,6 @@ IMP_SWIG_OBJECT(IMP::npctransport, ChainStatisticsOptimizerState, ChainStatistic
 IMP_SWIG_OBJECT(IMP::npctransport, BodyStatisticsOptimizerState, BodyStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, BipartitePairsStatisticsOptimizerStates);
 
-%include "IMP/npctransport/automatic_parameters.h"
-%include "IMP/npctransport/initialize_positions.h"
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"
@@ -35,6 +33,8 @@ IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, Bipar
 %include "IMP/npctransport/SlabGeometry.h"
 %include "IMP/npctransport/statistics_optimizer_states.h"
 %include "IMP/npctransport/particle_types.h"
+%include "IMP/npctransport/automatic_parameters.h"
+%include "IMP/npctransport/initialize_positions.h"
 
 %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
