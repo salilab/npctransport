@@ -43,15 +43,19 @@ double get_close_pairs_range(const ::npctransport::Assignment& config) {
 double
 get_time_step(double time_step_factor, double max_d_factor,
               double max_k, double min_radius,
-              double min_range) {
+              double min_range,
+              double max_trans_relative_to_radius,
+              double max_trans_relative_to_range) {
   double D=max_d_factor*atom::get_einstein_diffusion_coefficient(min_radius);
-  double scale= std::min(.1*min_radius, .3*min_range);
-  // binary search between ts_max and ts_min
+  double max_trans= std::min(max_trans_relative_to_radius * min_radius,
+                             max_trans_relative_to_range * min_range);
+  // binary search between minimal and maximal time steps
+  // till they converge near maximal translation
   double ts_max= 1e12, ts_min=0;
   do {
     double mid= .5*(ts_max+ts_min);
     double length= atom::get_diffusion_length(D, max_k, mid);
-    if (length > scale) {
+    if (length > max_trans) {
       ts_max=mid;
     } else {
       ts_min=mid;
