@@ -25,7 +25,9 @@ kap= IMP.npctransport.add_float_type(config,
 IMP.npctransport.create_range(kap.number,0, 10,3)
 IMP.npctransport.create_range(kap.interactions, 1, 10, 3)
 
-interaction= IMP.npctransport.add_interaction(config, "fg0", "fg0")
+interaction= IMP.npctransport.add_interaction(config, "fg0", "fg0",
+                                              interaction_k = 1.0,
+                                              interaction_range = 1.0)
 IMP.npctransport.create_range(interaction.is_on,0,1,2)
 
 interaction= IMP.npctransport.add_interaction(config, "fg0", "kap")

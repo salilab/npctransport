@@ -58,10 +58,13 @@ def add_float_type(config, number, radius,
     fg.interaction_range_factor.lower=interaction_range_factor
     return fg
 
-def add_interaction(config, name0, name1, is_on=1):
+def add_interaction(config, name0, name1,
+                    interaction_k, interaction_range, is_on=1):
     i= config.interactions.add()
     i.type0= name0
     i.type1=name1
+    i.interaction_k.lower=interaction_k
+    i.interaction_range.lower=interaction_range
     i.is_on.lower=is_on
     return i
 

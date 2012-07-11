@@ -27,32 +27,15 @@ int main(int argc, char *argv[]) {
   atom::Hierarchy root= sd->get_root();
   atom::Hierarchies chains =get_fg_chains(root);
   // create a set of random sites (for now)
-  Vector2Ds sites;
+  Vector3Ds sites=get_grid_surface_cover(cyl, sqrt(chains.size())+1,
+                                         sqrt(chains.size())+1);
   std::cout << IMP::base::Showable(sites) << std::endl;
-  double r= XYZR(chains[0].get_child(0)).get_radius();
-  std::cout << "Base is " << base << std::endl;
-  do {
-    // add a site that is not too close to an existing sites (at least 2*r)
-    // - a site for every cain
-    Vector2D cur=(get_random_vector_on(cyl));
-    bool bad=false;
-    for (unsigned int i=0; i< sites.size(); ++i) {
-      if (get_distance(sites[i], cur) < 2*r) {
-        bad=true;
-        break;
-      }
-    }
-    if (!bad) {
-      sites.push_back(cur);
-    }
-  } while (sites.size() < chains.size());
   // anchor each fg chain to the (x,y) site (only by x,y coords,
   // all anchored to the same z plane)
   for (unsigned int i=0; i< chains.size(); ++i) {
     atom::Hierarchy r(chains[i]);
     core::XYZ d(r.get_child(0));
-    d.set_coordinates(Vector3D(sites[i][0], sites[i][1],
-                               sd->get_box().get_corner(0)[2]));
+    d.set_coordinates(sites[i]);
     d.set_coordinates_are_optimized(false);
   }
   IMP_NPC_LOOP(ParticlePairsTemp());

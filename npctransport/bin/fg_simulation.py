@@ -207,7 +207,7 @@ print "here2"
 
 timer = IMP.npctransport.create_boost_timer()
 print "here3"
-IMP.set_log_level(IMP.WARNING)
+IMP.set_log_level(IMP.PROGRESS)
 sd = IMP.npctransport.SimulationData(
     flags.assignments,
     flags.statistics,
@@ -227,7 +227,7 @@ for i in range(ntrials):
     print "Initializing..."
     IMP.npctransport.initialize_positions(sd)
     print "Running..."
-    sd.get_bd().set_log_level(IMP.WARNING)
+    sd.get_bd().set_log_level(IMP.PROGRESS)
     p = IMP.benchmark.Profiler()
     if(flags.profile):
         p.start("profile.pprof")
