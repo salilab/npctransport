@@ -15,10 +15,11 @@
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
                   bool quick, std::string final_config) {
+  using namespace IMP;
   for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
     IMP::base::CreateLogContext clc("iteration");
     boost::timer timer;
-    IMP::set_log_level(IMP::SILENT);
+    IMP::set_log_level(SILENT);
     if (!quick) sd->reset_rmf();
     std::cout<< "Initializing..." << std::endl;
     initialize_positions(sd, links);

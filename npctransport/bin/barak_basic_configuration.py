@@ -14,7 +14,7 @@ def get_basic_config():
     #config.time_step_factor.lower=0.3
     config.time_step_factor.lower=3
     #create_range(config.rest_length_factor, .5, 1, 10)
-    config.excluded_volume_k.lower=.02
+    config.excluded_volume_k.lower=.2
     config.nonspecific_range.lower=2
     config.nonspecific_k.lower=0.01
     create_range(config.slack, 10, 11, 2)
@@ -28,6 +28,6 @@ def get_basic_config():
     config.box_is_on.lower=1
     config.box_side.lower=350
     config.slab_is_on.lower=0
-    config.slab_thickness.lower=225
+    config.slab_thickness.lower=175
     config.tunnel_radius.lower=100
     return config

@@ -5,6 +5,8 @@
 # * Copyright 2007-2012 IMP Inventors. All rights reserved.
 # */
 
+#define IMP_NPC_MAIN
+#include <IMP/npctransport/main.h>
 #include <IMP/npctransport/npctransport_config.h>
 #include <IMP/algebra.h>
 #include <IMP/core.h>
@@ -17,6 +19,7 @@
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/npctransport.h>
 #include <IMP/benchmark/Profiler.h>
+#include <IMP/ParticleTuple.h>
 #include <numeric>
 #include <cmath>
 #include <iostream>
@@ -27,42 +30,8 @@
 #include <IMP/example/counting.h>
 #include <IMP/example/optimizing.h>
 
-#define IMP_NPC_MAIN
-#ifdef IMP_NPC_GOOGLE
-#include <IMP/npctransport/internal/google_main.h>
-#else
-#include <IMP/npctransport/internal/boost_main.h>
-#endif
 
 
-IMP_NPC_PARAMETER_INT(work_unit, -1, "The work unit");
-IMP_NPC_PARAMETER_STRING(configuration, "configuration.pb",
-                         "input configuration file in protobuf format"
-                         " [default: %default]");
-IMP_NPC_PARAMETER_STRING(assignments, "assignments.pb",
-                         "output assignments file in protobuf format,"
-                         " recording the assignment being executed"
-                         " [default: %default]");
-IMP_NPC_PARAMETER_STRING(statistics, "statistics.pb",
-                         "output statistics file in protobuf format"
-                         " [default: %default]");
-IMP_NPC_PARAMETER_STRING(final_configuration, "final.pym",
-                         "output final configuration file"
-                         " [default: %default]");
-IMP_NPC_PARAMETER_STRING(rmf_file, "output.rmf",
-                         "RMF file for recording the simulation progress"
-                         " [default: %default]");
-IMP_NPC_PARAMETER_BOOL(profile, false,
-                       "Whether to turn on profiling for the first run");
-IMP_NPC_PARAMETER_BOOL(quick, false,
-                       "Reduce all steps to the minimum");
-IMP_NPC_PARAMETER_BOOL(show_steps, false,
-                       "Show the steps for each modified variable");
-IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
-                       "Show the number of work units");
-IMP_NPC_PARAMETER_BOOL(cylinder_anchoring, false,
-                       "anchor FG nups to a cylinder specified in"
-                       "the config file");
 
 
 /**
@@ -83,7 +52,7 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd )
   Vector2D upper_corner_XY
     (sd.get_box().get_corner(1)[0],
      sd.get_box().get_corner(1)[1]) ;
-  BoundingBox2D surface
+  algebra::BoundingBox2D surface
     ( lower_corner_XY, upper_corner_XY ) ;
   // get fg
   atom::Hierarchy root= sd.get_root();
@@ -129,24 +98,24 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd )
   @param chains  the SimulationData object
 */
 void color_fgs( IMP::npctransport::SimulationData& sd ){
+  using namespace IMP;
   using namespace IMP::npctransport;
-  using namespace IMP::atom;
-  using namespace IMP::display;
+  using IMP::display::Colored;
 
-  Hierarchy root( sd.get_root() );
-  Hierarchies chains( get_fg_chains( root ) );
+  atom::Hierarchy root( sd.get_root() );
+  atom::Hierarchies chains( get_fg_chains( root ) );
   unsigned int n_chains = chains.size();
   for(unsigned int i = 0 ; i < n_chains; i++) {
-    Color color;
+    display::Color color;
     // choose color
     if(n_chains <= 11) {
-      color = get_display_color(i);
+      color = display::get_display_color(i);
     } else {
       double f = i / (float)(n_chains - 1); // spread in [0..1]
-      color = get_jet_color( f );
+      color = display::get_jet_color( f );
     }
     // apply color
-    Hierarchies children = chains[i].get_children();
+    atom::Hierarchies children = chains[i].get_children();
     for(unsigned int j = 0 ; j < children.size(); j++)
       {
         if( !Colored::particle_is_instance( children[i] ) ) {
@@ -221,52 +190,25 @@ void set_fgs_in_cylinder( IMP::npctransport::SimulationData& sd, int n_layers )
 }
 
 
+
 int main(int argc, char *argv[])
 {
+  using namespace IMP;
+
   // logging stuff:
-  IMP::base::CreateLogContext clc("iteration");
-  IMP::set_log_level(IMP::PROGRESS);
+  IMP::base::CreateLogContext main("main");
   RMF::set_show_hdf5_errors( true );
-  // preparation:
-  IMP_NPC_START_INT; // cmd-line options etc.
-  IMP_NPC_PRINTHELP; // if help flag specified
-  int num=IMP::npctransport::assign_ranges   // process config file
-    (FLAGS_configuration, FLAGS_assignments,
-     FLAGS_work_unit, FLAGS_show_steps);
-  if(FLAGS_show_number_of_work_units)
-    std::cout << "work units " << num;
-  IMP::base::Pointer<IMP::npctransport::SimulationData> sd =
-    new IMP::npctransport::SimulationData(FLAGS_assignments, FLAGS_statistics,
-                                          FLAGS_quick, FLAGS_rmf_file);
+  // preparation::
+  IMP_NPC_PARAMETER_BOOL(cylinder_anchoring, false,
+                       "anchor FG nups to a cylinder specified in"
+                       "the config file");
+  IMP_NPC_STARTUP(sd); //
   if(FLAGS_cylinder_anchoring)
     set_fgs_in_cylinder(*sd, 4);
   color_fgs( *sd );
-  boost::timer timer= IMP::npctransport::create_boost_timer();
   int ntrials = sd->get_number_of_trials();
-  // run:
-  for(int i = 0 ; i < ntrials ; i++){
-    std::cout <<  "Trial #" << i << std::endl;
-    IMP::set_log_level(IMP::SILENT);
-    if(! FLAGS_quick) // TODO: why is that?
-      sd->reset_rmf();
-    std::cout << "Initializing..." << std::endl;
-    IMP::npctransport::initialize_positions(sd);
-    std::cout << "Running..." << std::endl;
-    sd->get_bd()->set_log_level(IMP::PROGRESS);
-    IMP::benchmark::Profiler p;
-    if(FLAGS_profile){
-      p.set("profiling.pprof");
-      std::cout << "Profiling begins..." << std::endl;
-    }
-    sd->get_bd()->optimize( sd->get_number_of_frames() );
-    if(FLAGS_profile) {
-      p.reset();
-      std::cout << "Profiling end..." << std::endl;
-    }
-    sd->update_statistics( timer );
-    std::cout << "Writing..." << std::endl;
-    sd->write_geometry( FLAGS_final_configuration );
-  }
+  // run
+  IMP_NPC_LOOP(sd, IMP::ParticlePairsTemp());
 
   return 0;
  }
