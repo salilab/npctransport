@@ -57,7 +57,7 @@ SimulationData::SimulationData(std::string assignment_file,
   rmf_file_name_( rmf_file_name )
 {
   statistics_file_name_= statistics_file;
-  ::npctransport::Assignment data;
+  ::npctransport_proto::Assignment data;
   std::ifstream file(assignment_file.c_str(), std::ios::binary);
   bool read=data.ParseFromIstream(&file);
   if (!read) {
@@ -101,7 +101,7 @@ SimulationData::SimulationData(std::string assignment_file,
   }
   IMP_LOG(TERSE, "   SimulationData before adding interactions" <<std::endl);
   for (int i=0; i< data.interactions_size(); ++i) {
-    const ::npctransport::Assignment_InteractionAssignment&
+    const ::npctransport_proto::Assignment_InteractionAssignment&
       interaction_i = data.interactions(i);
     if (interaction_i.is_on().value()) {
       IMP_LOG(TERSE, "   Adding interacton " << i <<std::endl);
@@ -123,7 +123,7 @@ SimulationData::SimulationData(std::string assignment_file,
    based on the settings in data
 */
 void SimulationData::
-create_floaters(const  ::npctransport::Assignment_FloaterAssignment&data,
+create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
                 core::ParticleType type, display::Color color) {
   if (data.number().value() > 0) {
     float_stats_.push_back(BodyStatisticsOptimizerStates());
@@ -160,7 +160,7 @@ create_floaters(const  ::npctransport::Assignment_FloaterAssignment&data,
    based on the settings in data
 */
 void SimulationData::
-create_fgs(const ::npctransport::Assignment_FGAssignment&data,
+create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
            core::ParticleType type) {
   if (data.number().value() > 0) {
     fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
@@ -391,7 +391,7 @@ void SimulationData::set_sites(core::ParticleType t0,
 */
 void
 SimulationData::add_interaction
-(const ::npctransport::Assignment_InteractionAssignment& idata )
+(const ::npctransport_proto::Assignment_InteractionAssignment& idata )
 {
   // extract interaction params
   core::ParticleType type0(idata.type0());
@@ -575,7 +575,7 @@ SimulationData
 }
 
 void SimulationData::update_statistics(const boost::timer &timer) const {
-  ::npctransport::Statistics stats;
+  ::npctransport_proto::Statistics stats;
   if (first_stats_) { // first initialization
     for (unsigned int i=0; i<type_of_fg.size(); ++i) {
       if (particles_.find(type_of_fg[i]) != particles_.end()) {
@@ -590,7 +590,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       }
     }
     for(unsigned int i = 0; i < interactions_stats_.size(); i++){
-      ::npctransport::Statistics_InteractionStats*
+      ::npctransport_proto::Statistics_InteractionStats*
         pOutStats_i = stats.add_interactions();
       InteractionType itype = interactions_stats_[i]->get_interaction_type();
       pOutStats_i->set_type0( itype.first.get_string() );
@@ -697,7 +697,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   // update statistics gathered on interaction rates
   for(unsigned int i = 0; i < interactions_stats_.size(); i++){
     IMP_LOG( PROGRESS, "adding interaction statistics # " << i << std::endl );
-    ::npctransport::Statistics_InteractionStats*
+    ::npctransport_proto::Statistics_InteractionStats*
       pOutStats_i = stats.mutable_interactions(i);
     IMP::Pointer<BipartitePairsStatisticsOptimizerState>
       pInStats_i = interactions_stats_[i];

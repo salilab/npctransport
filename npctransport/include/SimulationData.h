@@ -143,14 +143,14 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      Adds the FG Nup chains to the model hierarchy,
      based on the settings in data
    */
-  void create_fgs(const  ::npctransport::Assignment_FGAssignment&data,
+  void create_fgs(const  ::npctransport_proto::Assignment_FGAssignment&data,
                   core::ParticleType type);
 
   /**
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
      based on the settings in data
    */
-  void create_floaters(const ::npctransport::Assignment_FloaterAssignment&data,
+  void create_floaters(const ::npctransport_proto::Assignment_FloaterAssignment&data,
                        core::ParticleType type, display::Color color);
 
   /**
@@ -225,7 +225,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
             interaction coefficients, etc.)
   */
   void add_interaction
-    ( const ::npctransport::Assignment_InteractionAssignment& idata );
+    ( const ::npctransport_proto::Assignment_InteractionAssignment& idata );
 #endif
 
   algebra::BoundingBox3D get_box() const {
