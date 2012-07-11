@@ -20,7 +20,7 @@
 #include <IMP/container.h>
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/npctransport.h>
-#include <IMP/benchmark/Profiler.h>
+//#include <IMP/benchmark/Profiler.h>
 #include "internal/main.h"
 #include "protobuf.h"
 #include <numeric>
@@ -57,8 +57,8 @@
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));                  \
   IMP_NEW(SimulationData, sim_data,(FLAGS_assignments, FLAGS_statistics,\
                               FLAGS_quick));                            \
-  if (!FLAGS_conformations.empty()) {                                   \
-    sd->set_rmf_file_name(FLAGS_conformations);                         \
+  if (!FLAGS_configurations.empty()) {                                  \
+    sd->set_rmf_file_name(FLAGS_configurations);                        \
   }
 
 
@@ -91,7 +91,7 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
                        "Show the number of work units");
 
 #ifdef IMP_BENCHMARK_USE_GOOGLE_PERFTOOLS_PROFILE
-#define IMP_NPC_SET_PROF(p, tf) if (FLAGS_profile && i==0) {             \
+#define IMP_NPC_SET_PROF(p, tf) if (FLAGS_profile && i==0) {          \
   p.set("profiling.pprof");                                           \
   }
 #else

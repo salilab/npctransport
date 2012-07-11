@@ -10,7 +10,7 @@
 
 #include "npctransport_config.h"
 #ifdef IMP_NPC_GOOGLE
-#include "third_party/npc/module/data/npctransport.pb.h"
+#include "third_party/npc/npctransport/data/npctransport.pb.h"
 #else
 #include "npctransport.pb.h"
 #endif

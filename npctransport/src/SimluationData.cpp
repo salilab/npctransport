@@ -12,7 +12,7 @@
 #include <IMP/npctransport/SlabSingletonScore.h>
 #include <IMP/npctransport/particle_types.h>
 #ifdef IMP_NPC_GOOGLE
-#include "third_party/npc/module/data/npctransport.pb.h"
+#include "third_party/npc/npctransport/data/npctransport.pb.h"
 #else
 #include "npctransport.pb.h"
 #endif
@@ -705,7 +705,8 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
     InteractionType itype = pInStats_i->get_interaction_type();
     std::string s_type0 = itype.first.get_string();
     std::string s_type1 = itype.second.get_string();
-    if( pOutStats_i->type0() != s_type0  || pOutStats_i->type1() != s_type1) {
+    if( std::string(pOutStats_i->type0()) != s_type0
+        || std::string(pOutStats_i->type1()) != s_type1) {
       IMP_THROW("Incompatible interaction types in pOutStats_i ["
                 << pOutStats_i->type0() << ", " << pOutStats_i->type1()
                 << "] and pInStats_i " << s_type0 << ", " << s_type1

@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
   Vector2Ds sites;
   std::cout << base::Showable(sites) << std::endl;
   double r= core::XYZR(chains[0].get_child(0)).get_radius();
+  std::cout << "Base is " << base << std::endl;
   do {
     // add a site that is not too close to an existing sites (at least 2*r)
     // - a site for every cain
