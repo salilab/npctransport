@@ -6,12 +6,16 @@
 
 #define IMP_NPC_MAIN
 #include <IMP/npctransport/main.h>
-
+#include <IMP/ParticleTuple.h>
 #include <RMF/utility.h>
 
 
 int main(int argc, char *argv[]) {
-  IMP_NPC_STARTUP;
+  using namespace IMP;
+  using namespace IMP::npctransport;
+  using namespace IMP::algebra;
+
+  IMP_NPC_STARTUP(sd);
   RMF:: set_show_hdf5_errors(true);
   //  sd->add_interaction(type_of_float[0], type_of_fg[0]);
   //  sd->add_interaction(type_of_float[1], type_of_fg[0]);
@@ -21,13 +25,12 @@ int main(int argc, char *argv[]) {
                               sd->get_box().get_corner(0)[1]),
                      Vector2D(sd->get_box().get_corner(1)[0],
                               sd->get_box().get_corner(1)[1]));
-  using namespace IMP::npctransport;
   atom::Hierarchy root= sd->get_root();
   atom::Hierarchies chains =get_fg_chains(root);
   // create a set of random sites (for now)
   Vector2Ds sites;
-  std::cout << IMP::base::Showable(sites) << std::endl;
-  double r= XYZR(chains[0].get_child(0)).get_radius();
+  std::cout << base::Showable(sites) << std::endl;
+  double r= core::XYZR(chains[0].get_child(0)).get_radius();
   std::cout << "Base is " << base << std::endl;
   do {
     // add a site that is not too close to an existing sites (at least 2*r)
@@ -53,6 +56,6 @@ int main(int argc, char *argv[]) {
                                sd->get_box().get_corner(0)[2]));
     d.set_coordinates_are_optimized(false);
   }
-  IMP_NPC_LOOP(ParticlePairsTemp());
+  IMP_NPC_LOOP(sd, IMP::ParticlePairsTemp());
   return 0;
 }

@@ -6,12 +6,15 @@
 
 #define IMP_NPC_MAIN
 #include <IMP/npctransport/main.h>
+#include <IMP/ParticleTuple.h>
 #include <RMF/utility.h>
 
 int main(int argc, char *argv[]) {
+  using namespace IMP;
+
   RMF::set_show_hdf5_errors(true);
-  IMP_NPC_STARTUP;
-  sd->get_m()->set_log_level(SILENT);
-  IMP_NPC_LOOP(ParticlePairsTemp());
+  IMP_NPC_STARTUP(sd);
+  sd->get_m()->set_log_level(base::SILENT);
+  IMP_NPC_LOOP(sd, IMP::ParticlePairsTemp());
   return 0;
 }
