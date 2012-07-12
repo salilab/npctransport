@@ -219,14 +219,14 @@ void BipartitePairsStatisticsOptimizerState
     update_average( avg_pct_bound_particles_II_,
                     pct_bound_particles_II,
                     old_update_number + 1);
-  std::cout <<
-           "BipartitePairsStatisticsOptimizerState: "
-           "Interaction type " << interaction_type_.first.get_string()
-           << ", " << interaction_type_.second.get_string()
-           <<" avg_pct_bound_I,II " << avg_pct_bound_particles_I_
-           << ", " << avg_pct_bound_particles_II_
-           << " avg_ncontacts " << avg_ncontacts_
-            << " update # " << old_update_number + 1 << std::endl;
+  // std::cout <<
+  //          "BipartitePairsStatisticsOptimizerState: "
+  //          "Interaction type " << interaction_type_.first.get_string()
+  //          << ", " << interaction_type_.second.get_string()
+  //          <<" avg_pct_bound_I,II " << avg_pct_bound_particles_I_
+  //          << ", " << avg_pct_bound_particles_II_
+  //          << " avg_ncontacts " << avg_ncontacts_
+  //           << " update # " << old_update_number + 1 << std::endl;
 }
 
 void BipartitePairsStatisticsOptimizerState
