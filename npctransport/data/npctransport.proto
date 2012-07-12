@@ -1,6 +1,6 @@
 syntax="proto2";
 
-package npctransport;
+package npctransport_proto;
 
 message Configuration {
   message IntRange {

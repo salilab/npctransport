@@ -49,15 +49,15 @@
   IMP_NPC_START_INT;                                                    \
   IMP_NPC_PRINTHELP;                                                    \
   int num=IMP::npctransport::assign_ranges                              \
-    (FLAGS_configuration, FLAGS_assignments,                            \
-     FLAGS_work_unit, FLAGS_show_steps);                                \
+      (FLAGS_conformations, FLAGS_assignments,                          \
+       FLAGS_work_unit, FLAGS_show_steps);                              \
   if (FLAGS_show_number_of_work_units) {                                \
     std::cout << "work units " << num << std::endl;                     \
   }                                                                     \
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));                  \
   IMP_NEW(SimulationData, sim_data,(FLAGS_assignments, FLAGS_statistics,\
                               FLAGS_quick));                            \
-  if (!FLAGS_configurations.empty()) {                                  \
+  if (!FLAGS_conformations.empty()) {                                   \
     sd->set_rmf_file_name(FLAGS_conformations);                         \
   }
 
@@ -99,7 +99,7 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
 #endif
 
 /** TODO: what is the meaning of links? */
-#define IMP_NPC_LOOP(sim_data, links)                                    \
+#define IMP_NPC_LOOP(sim_data, links)                                   \
   IMP::npctransport::internal::do_main_loop(sim_data, links, FLAGS_quick,     \
                                             FLAGS_final_configuration)
 

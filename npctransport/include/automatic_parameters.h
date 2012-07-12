@@ -21,7 +21,7 @@ double get_close_pairs_range(double max_range, double max_range_factor);
 /** returns an upper bound on the contact range between any two particles in the
     system */ // TODO: maybe different ranges for different pair types?
 IMPNPCTRANSPORTEXPORT
-double get_close_pairs_range(const ::npctransport::Assignment& config);
+double get_close_pairs_range(const ::npctransport_proto::Assignment& config);
 
 /** Computes the time step size that is required for a stable
     simulation.
@@ -64,7 +64,7 @@ double get_time_step(double max_d_factor,
     @return time step size in femtoseconds required for stable simulation
 */
 IMPNPCTRANSPORTEXPORT
-double get_time_step(const ::npctransport::Assignment& config,
+double get_time_step(const ::npctransport_proto::Assignment& config,
                      double max_trans_relative_to_radius= 0.1);
 
 IMPNPCTRANSPORT_END_NAMESPACE

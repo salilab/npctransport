@@ -31,7 +31,6 @@ using namespace proto2;
 #else
 using namespace ::google::protobuf;
 #endif
-using namespace ::npctransport;
 namespace {
 void show_ranges(std::string name, const Message *message) {
   const Reflection* r(message->GetReflection());
@@ -66,7 +65,7 @@ void show_ranges(std::string name, const Message *message) {
 }
 void show_ranges(std::string fname) {
   std::fstream in(fname.c_str(), std::ios::in | std::ios::binary);
-  ::npctransport::Configuration input;
+  ::npctransport_proto::Configuration input;
   input.ParseFromIstream(&in);
   show_ranges("root", &input);
 }
@@ -245,13 +244,13 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   if (!in) {
     IMP_THROW("Could not open file " << fname, IOException);
   }
-  ::npctransport::Configuration input;
+  ::npctransport_proto::Configuration input;
   bool success=input.ParseFromIstream(&in);
   if (!success) {
     IMP_THROW("Unable to read from protobuf " << fname,
               IOException);
   }
-  Assignment output;
+  npctransport_proto::Assignment output;
   base::SetLogState sls(base::VERBOSE);
   Ranges ranges=get_ranges("all", &input, &output);
   /*for (unsigned int i=0; i< ranges.size(); ++i) {
@@ -295,13 +294,13 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
 
 int
 get_number_of_work_units(std::string assignment_file) {
- ::npctransport::Configuration input;
+ ::npctransport_proto::Configuration input;
   std::fstream in(assignment_file.c_str(), std::ios::in | std::ios::binary);
   if (!in) {
     IMP_THROW("Could not open file " << assignment_file, IOException);
   }
   input.ParseFromIstream(&in);
-  Assignment output;
+  npctransport_proto::Assignment output;
   base::SetLogState sls(base::VERBOSE);
   Ranges ranges=get_ranges("all", &input, &output);
   Floats values;

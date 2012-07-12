@@ -26,7 +26,7 @@ double get_close_pairs_range(double max_range, double max_range_factor) {
   return max_range*max_range_factor;
 }
 
-double get_close_pairs_range(const ::npctransport::Assignment& config) {
+double get_close_pairs_range(const ::npctransport_proto::Assignment& config) {
   double max_range= config.interaction_range().value();
   UPDATE_MAX(range, config.nonspecific_range);
   double max_range_factor= 1;
@@ -66,7 +66,7 @@ get_time_step(double max_d_factor,
   return time_step_factor*ts_min;
 }
 
-double get_time_step(const ::npctransport::Assignment& config,
+double get_time_step(const ::npctransport_proto::Assignment& config,
                      double max_trans_relative_to_radius) {
   double time_step_factor= config.time_step_factor().value();
   double max_d_factor=1;
