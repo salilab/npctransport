@@ -14,6 +14,7 @@
 #else
 #include "npctransport.pb.h"
 #endif
+
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 IMPNPCTRANSPORTEXPORT
 double get_close_pairs_range(double max_range, double max_range_factor);
@@ -66,6 +67,29 @@ double get_time_step(double max_d_factor,
 IMPNPCTRANSPORTEXPORT
 double get_time_step(const ::npctransport_proto::Assignment& config,
                      double max_trans_relative_to_radius= 0.1);
+
+/**
+   computes the number of frames needed to acheive simulation time simulation_time
+   with time step time_step. Throws an exception if max_nframes is exceeded
+   @throw ValueException if computed number of frames exceeds max_nframes
+*/
+int get_number_of_frames(double simulation_time,
+                            double time_step,
+                            int max_nframes);
+
+/**
+   computes the number of frames needed to acheive simulation time required in the
+   confiugration time, with time step computed from config.
+
+   @param config the simulation parameters used to compute the time step size
+
+   @throw ValueException if maximum number of frames specified in config is exceeded
+*/
+IMPNPCTRANSPORTEXPORT
+int get_number_of_frames(const ::npctransport_proto::Assignment& config);
+
+
+
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

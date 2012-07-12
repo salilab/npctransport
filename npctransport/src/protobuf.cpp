@@ -70,6 +70,8 @@ void show_ranges(std::string fname) {
   show_ranges("root", &input);
 }
 
+// a range of double values [lb..ub] with <steps> discrete steps,
+// assicuated with message m
 namespace {
 struct Range {
   std::string name;
@@ -102,6 +104,28 @@ void set_value(const Reflection *r, Message *m,
   }
 }
 
+// return a vector of ranges for any message that descends from the input
+// protobuf message <message> and contains a range of values
+// (those are indicated by having 'lower' and 'upper' fields).
+// In addition, writes all constant messages to out_message, including
+// messages with 'degenerate' ranges (only a lower bound)
+//
+// @param name the name to be given to the range (range.name),
+//             only if it is a direct child of current message.
+// @param message the input message
+// @param out_message the message to which constand and 'degenerate' range
+//                    messages are written (in the same hierarchy as in message)
+//                    In addition, range.m (message field) of each range
+//                    that is returned is associated with the descendent of
+//                    out_message where it should be added to maintain the
+//                    correct hierarchy
+//        returned (range.m). In addition, constant and 'degenerate' range
+//        messages are written to out_message.
+//
+// @return A vector of ranges. The range.name field of each Range is set to the
+//         name of its direct parent message field (or the input parameter
+//         <name>, if the range belong directly to the message).
+//
 
 Ranges get_ranges(std::string name,
                   const Message *message,
@@ -119,7 +143,7 @@ Ranges get_ranges(std::string name,
   const Descriptor* out_d(out_message->GetDescriptor());
   const FieldDescriptor* lfd(d->FindFieldByName("lower"));
   const FieldDescriptor* ufd(d->FindFieldByName("upper"));
-  if (lfd && ufd) {
+  if (lfd && ufd) { // current message directly contains range
     if (r->HasField(*message, ufd)) {
       IMP_LOG(VERBOSE, "Found range " << name << std::endl);
       Range cur;
@@ -142,7 +166,7 @@ Ranges get_ranges(std::string name,
       const FieldDescriptor* out_lfd(out_d->FindFieldByName("value"));
       set_value(out_r, out_message, out_lfd, get_value(r, message, lfd));
     }
-  } else {
+  } else { // recursively look for descendent messages with ranges
     for (int i=0; i < d->field_count(); ++i) {
       const FieldDescriptor* fd( d->field(i));
       const FieldDescriptor* out_fd( out_d->FindFieldByName(fd->name()));
@@ -185,6 +209,23 @@ void copy(R r, Out out) {
   std::copy(r.begin(), r.end(), out);
 }
 
+  // Compute the [work_unit]'th combination of values from the set of ranges r
+  // using r[i].steps in each dimension, with points evenly distributed for each
+  // entry in r[i] on a log scale, using r[i].base log base.
+  //
+  // It is guaranteed that if r induces k possible combinations,
+  // then iterating over work_unit from 0 to (k-1) will enumerate every possible
+  // combination of these values.
+  // The enumeration is cyclic, that is, work_unit % k and work_unit will return
+  // the same result (over the same range)
+  //
+  // @param[in] r a vector with the set of value ranges
+  // @param[in] work_unit the index of the combination of ranges that will be
+  //                      stored to values and indexesd. This is a cyclic value.
+  // @param[out] values The emumerated combination of values within the ranges
+  //                    defined by r
+  // @param[out] indexes The emumerated combination of indexes for work_unit
+  // @param[in]  show_steps whether to display the grid
 int assign_internal(const Ranges &r, int work_unit,
                      Floats &values, Ints &indexes,
                      bool show_steps) {
@@ -235,7 +276,7 @@ int assign_internal(const Ranges &r, int work_unit,
 
 }
 
-
+// see documentation in .h file
 int
 assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
               bool show_steps) {
@@ -259,11 +300,13 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
               }*/
   int ret=0;
   if (ranges.empty()) {
-    IMP_WARN("No ranges for file " << fname);
+    IMP_WARN("No message with value ranges detected for file " << fname);
     //return 0;
   } else {
     Floats values;
     Ints indexes;
+    // assign the [work_unit]'th combination of ranges into the
+    // message indicated for each range entry (ranges[i].m)
     ret=assign_internal(ranges, work_unit, values, indexes, show_steps);
     for (unsigned int i=0; i< ranges.size(); ++i) {
       const Reflection* r(ranges[i].m->GetReflection());
@@ -276,8 +319,10 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
       r->SetInt32(ranges[i].m, ifd, indexes[i]);
     }
   }
+  // output work units and automatic parameters
   output.set_work_unit(work_unit);
   output.set_time_step(get_time_step(output));
+  output.set_number_of_frames(get_number_of_frames(output));
   output.set_range(get_close_pairs_range(output));
   std::fstream out(ofname.c_str(), std::ios::out | std::ios::binary);
   if (!out) {
