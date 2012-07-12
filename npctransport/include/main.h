@@ -58,7 +58,7 @@
   IMP_NEW(SimulationData, sim_data,(FLAGS_assignments, FLAGS_statistics,\
                               FLAGS_quick));                            \
   if (!FLAGS_configurations.empty()) {                                  \
-    sd->set_rmf_file_name(FLAGS_configurations);                        \
+    sd->set_rmf_file_name(FLAGS_conformations);                         \
   }
 
 
