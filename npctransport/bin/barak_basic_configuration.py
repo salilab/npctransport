@@ -17,7 +17,7 @@ def get_basic_config():
     config.excluded_volume_k.lower=.2
     config.nonspecific_range.lower=2
     config.nonspecific_k.lower=0.01
-    create_range(config.slack, 10, 11, 2)
+    config.slack.lower = 10
     config.number_of_trials=1
     config.number_of_frames=200000000
     #config.number_of_frames.lower=500

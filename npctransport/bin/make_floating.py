@@ -42,6 +42,14 @@ interactionFG_FG= IMP.npctransport.add_interaction(config,
 #                                                   interaction_k=0,
 #                                                   interaction_range=0)
 
+create_range(config.nonspecific_k, 0.01, 1, 5)
+create_range(config.nonspecific_range, 0.1, 10, 5)
+create_range(interactionFG_KAP.interaction_k, 0.1, 500, 50)
+create_range(interactionFG_KAP.interaction_range, 0.1, 10, 10)
+create_range(interactionFG_FG.interaction_k, 0.1, 500, 30)
+create_range(interactionFG_FG.interaction_range, 0.1, 10, 10)
+
+
 f=open(sys.argv[1], "wb")
 f.write(config.SerializeToString())
 

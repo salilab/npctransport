@@ -48,13 +48,13 @@
 #define IMP_NPC_STARTUP(sim_data)                                       \
   IMP_NPC_START_INT;                                                    \
   IMP_NPC_PRINTHELP;                                                    \
+  set_log_level(IMP::base::LogLevel(FLAGS_log_level));                  \
   int num=IMP::npctransport::assign_ranges                              \
-      (FLAGS_conformations, FLAGS_assignments,                          \
+      (FLAGS_configuration, FLAGS_assignments,                          \
        FLAGS_work_unit, FLAGS_show_steps);                              \
   if (FLAGS_show_number_of_work_units) {                                \
     std::cout << "work units " << num << std::endl;                     \
   }                                                                     \
-  set_log_level(IMP::base::LogLevel(FLAGS_log_level));                  \
   IMP_NEW(SimulationData, sim_data,(FLAGS_assignments, FLAGS_statistics,\
                               FLAGS_quick));                            \
   if (!FLAGS_conformations.empty()) {                                   \
