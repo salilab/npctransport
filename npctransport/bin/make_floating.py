@@ -5,7 +5,7 @@ import barak_basic_configuration
 
 config= barak_basic_configuration.get_basic_config()
 config.dump_interval=500000
-config.maximal_number_of_frames=50000000
+config.maximal_number_of_frames=200000000
 config.simulation_time_nanosec=500
 
 fg= IMP.npctransport.add_fg_type(config,
@@ -43,12 +43,12 @@ interactionFG_FG= IMP.npctransport.add_interaction(config,
 #                                                   interaction_k=0,
 #                                                   interaction_range=0)
 
-create_range(config.nonspecific_k, 0.01, 1, steps=5)
-create_range(config.nonspecific_range, 0.1, 5, steps=4)
-create_range(interactionFG_KAP.interaction_k, 0.1, 1000, steps=35,base=1.3)
-create_range(interactionFG_KAP.interaction_range, 0.1, 5, steps=5)
-create_range(interactionFG_FG.interaction_k, 0.1, 500, steps=20)
-create_range(interactionFG_FG.interaction_range, 0.1, 5, steps=5)
+create_range(config.nonspecific_k, 0.0001, 1, steps=10)
+create_range(config.nonspecific_range, 0.1, 5, steps=5)
+create_range(interactionFG_KAP.interaction_k, 0.001, 500, steps=30,base=1.3)
+create_range(interactionFG_KAP.interaction_range, 0.1, 6, steps=5)
+create_range(interactionFG_FG.interaction_k, 0.001, 500, steps=20)
+create_range(interactionFG_FG.interaction_range, 0.1, 6, steps=5)
 
 
 f=open(sys.argv[1], "wb")
