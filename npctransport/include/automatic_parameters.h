@@ -73,7 +73,7 @@ double get_time_step(const ::npctransport_proto::Assignment& config,
    with time step time_step. Throws an exception if max_nframes is exceeded
    @throw ValueException if computed number of frames exceeds max_nframes
 */
-int get_number_of_frames(double simulation_time,
+int get_number_of_frames(double simulation_time_ns,
                             double time_step,
                             int max_nframes);
 

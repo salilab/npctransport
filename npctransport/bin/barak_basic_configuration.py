@@ -19,7 +19,8 @@ def get_basic_config():
     config.nonspecific_k.lower=0.01
     config.slack.lower = 10
     config.number_of_trials=1
-    config.number_of_frames=200000000
+    config.dump_interval=500000
+    config.simulation_time_nanosec=100
     #config.number_of_frames.lower=500
     config.angular_D_factor.lower=200
     config.statistics_interval=1000

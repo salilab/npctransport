@@ -28,7 +28,8 @@ def set_default_configuration(config):
     config.tunnel_radius.lower=30
     config.slack.lower=5
     config.number_of_trials=40
-    config.number_of_frames=1000000
+    config.maximal_number_of_frames=1000000000
+    config.simulation_time_nanosec=10
     config.dump_interval=10000
     config.nonspecific_range.lower=2
     config.nonspecific_k.lower=.3

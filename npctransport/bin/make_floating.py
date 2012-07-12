@@ -5,7 +5,8 @@ import barak_basic_configuration
 
 config= barak_basic_configuration.get_basic_config()
 config.dump_interval=500000
-config.number_of_frames=50000000
+config.maximal_number_of_frames=50000000
+config.simulation_time_nanosec=500
 
 fg= IMP.npctransport.add_fg_type(config,
                                  number_of_beads=12,

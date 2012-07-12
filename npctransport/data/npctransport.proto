@@ -51,7 +51,8 @@ message Configuration {
   required IntRange slab_is_on=11;
   required FloatRange slack=12;
   required int32 number_of_trials=13;
-  required int32 number_of_frames=14;
+  required double maximal_number_of_frames=14;
+  required double simulation_time_nanosec=24;
   repeated FGConfiguration fgs=15;
   repeated FloatConfiguration floaters=16;
   repeated Interaction interactions=17;
@@ -112,7 +113,9 @@ message Assignment {
   required IntAssignment slab_is_on=11;
   required FloatAssignment slack=12;
   required int32 number_of_trials=13;
-  required int32 number_of_frames=14;
+  required double maximal_number_of_frames=14;
+  required int32 number_of_frames=24;
+  required double simulation_time_nanosec=27;
   repeated FGAssignment fgs=15;
   repeated FloaterAssignment floaters=16;
   repeated InteractionAssignment interactions=17;

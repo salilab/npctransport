@@ -101,14 +101,15 @@ double get_time_step(const ::npctransport_proto::Assignment& config,
                        time_step_factor);
 }
 
-int get_number_of_frames(double simulation_time,
+int get_number_of_frames(double simulation_time_ns,
                             double time_step,
                             int max_nframes)
 {
-  int nframes = std::ceil(simulation_time / time_step);
+
+  int nframes = std::ceil(simulation_time_ns * 1000000 / time_step);
   if(nframes > max_nframes){
     IMP_THROW("number of frames " << nframes
-              << ", which is required for simulation time" << simulation_time
+              << ", which is required for simulation time" << simulation_time_ns
               << " exceeds the specified maximal value " << max_nframes,
               IMP::base::ValueException);
   }
@@ -118,10 +119,10 @@ int get_number_of_frames(double simulation_time,
 IMPNPCTRANSPORTEXPORT
 int get_number_of_frames(const ::npctransport_proto::Assignment& config)
 {
-  int simulation_time = config.simulation_time_femtosec();
+  double simulation_time_ns = config.simulation_time_nanosec();
   double time_step = get_time_step(config);
-  int max_nframes = config.maximal_number_of_frames();
-  return get_number_of_frames(simulation_time, time_step, max_nframes);
+  double max_nframes = config.maximal_number_of_frames();
+  return get_number_of_frames(simulation_time_ns, time_step, max_nframes);
 }
 
 

@@ -5,7 +5,7 @@ import barak_basic_configuration
 
 config= barak_basic_configuration.get_basic_config()
 config.dump_interval=25000
-config.number_of_frames=50000000
+config.simulation_time_nanosec=500
 config.box_is_on.lower=1
 config.box_side.lower=350
 config.slab_is_on.lower=1

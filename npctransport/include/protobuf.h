@@ -38,6 +38,9 @@ show_ranges(std::string fname);
                     will enumerate over all possible combinations, and that
                     work_unit and (work_unit % k) will return the same output for
                     the same input.
+
+   @throw IMP::base::ValueException if any of the values in the configuration file
+              are in conflict (e.g., simulation time and maximal number of frames)
 */
 // Each range field also has .steps and .base field.
 IMPNPCTRANSPORTEXPORT int
