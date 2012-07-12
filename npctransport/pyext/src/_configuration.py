@@ -1,9 +1,13 @@
+nranges=1
+
 def create_range(field, lb, ub=None, steps=5, base=2):
     """Create a range in the passed field"""
     field.lower=lb
     if ub:
         field.upper=ub
         field.steps=steps
+        global nranges
+        nranges*=steps
         try:
             field.base=base
         except:
@@ -59,12 +63,14 @@ def add_float_type(config, number, radius,
     return fg
 
 def add_interaction(config, name0, name1,
-                    interaction_k, interaction_range, is_on=1):
+                    interaction_k=None, interaction_range=None, is_on=1):
     i= config.interactions.add()
     i.type0= name0
     i.type1=name1
-    i.interaction_k.lower=interaction_k
-    i.interaction_range.lower=interaction_range
+    if interaction_k:
+      i.interaction_k.lower=interaction_k
+    if interaction_range:
+      i.interaction_range.lower=interaction_range
     i.is_on.lower=is_on
     return i
 
@@ -101,3 +107,4 @@ def write(config):
         #config.dump_interval=1
         f=open(options.quick, "wb")
         f.write(config.SerializeToString())
+    print nranges, "work units"

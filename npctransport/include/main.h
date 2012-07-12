@@ -49,17 +49,29 @@
   IMP_NPC_START_INT;                                                    \
   IMP_NPC_PRINTHELP;                                                    \
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));                  \
-  int num=IMP::npctransport::assign_ranges                              \
-      (FLAGS_configuration, FLAGS_assignments,                          \
-       FLAGS_work_unit, FLAGS_show_steps);                              \
-  if (FLAGS_show_number_of_work_units) {                                \
-    std::cout << "work units " << num << std::endl;                     \
+  try {                                                                 \
+    int num=IMP::npctransport::assign_ranges                            \
+        (FLAGS_configuration, FLAGS_assignments,                        \
+         FLAGS_work_unit, FLAGS_show_steps);                            \
+    if (FLAGS_show_number_of_work_units) {                              \
+      std::cout << "work units " << num << std::endl;                   \
+    }                                                                   \
+    set_log_level(IMP::base::LogLevel(FLAGS_log_level));                \
+  } catch (const IMP::base::IOException &e) {                           \
+    std::cerr << "Error: " << e.what() << std::endl;                    \
+    return 1;                                                           \
   }                                                                     \
   IMP_NEW(SimulationData, sim_data,(FLAGS_assignments, FLAGS_statistics,\
                               FLAGS_quick));                            \
-  if (!FLAGS_conformations.empty()) {                                   \
-    sd->set_rmf_file_name(FLAGS_conformations);                         \
-  }
+  try {                                                                 \
+    if (!FLAGS_conformations.empty()) {                                 \
+      sd->set_rmf_file_name(FLAGS_conformations);                       \
+    }                                                                   \
+  } catch(const RMF::Exception &e) {                                    \
+    std::cerr << "Error: " << e.what() << std::endl;                    \
+    return 1;                                                           \
+  }                                                                     \
+
 
 
 
