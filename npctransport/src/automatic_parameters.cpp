@@ -116,7 +116,6 @@ int get_number_of_frames(double simulation_time_ns,
   return nframes;
 }
 
-IMPNPCTRANSPORTEXPORT
 int get_number_of_frames(const ::npctransport_proto::Assignment& config)
 {
   double simulation_time_ns = config.simulation_time_nanosec();
