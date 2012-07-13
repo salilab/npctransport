@@ -62,7 +62,7 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd )
   // create a set of random sites (for now)
   double r= core::XYZR(chains[0].get_child(0)).get_radius();
   Vector2Ds sites;
-  std::cout << base::Showable(sites) << std::endl;
+  std::cout << IMP::base::Showable(sites) << std::endl;
   while ( sites.size() < chains.size() )
     {
       Vector2D cur = get_random_vector_in(surface);
@@ -189,6 +189,9 @@ void set_fgs_in_cylinder( IMP::npctransport::SimulationData& sd, int n_layers )
     }
 }
 
+IMP_NPC_PARAMETER_BOOL(cylinder_anchoring, false,
+                       "anchor FG nups to a cylinder specified in"
+                       "the config file");
 
 
 int main(int argc, char *argv[])
@@ -199,9 +202,6 @@ int main(int argc, char *argv[])
   IMP::base::CreateLogContext main("main");
   RMF::set_show_hdf5_errors( true );
   // preparation::
-  IMP_NPC_PARAMETER_BOOL(cylinder_anchoring, false,
-                       "anchor FG nups to a cylinder specified in"
-                       "the config file");
   IMP_NPC_STARTUP(sd); //
   if(FLAGS_cylinder_anchoring)
     set_fgs_in_cylinder(*sd, 4);
