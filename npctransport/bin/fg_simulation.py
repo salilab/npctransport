@@ -138,6 +138,86 @@ def color_fgs( sd ):
             else:
                 IMP.display.Colored( child ).set_color( color )
 
+
+def get_fgs_of_type( fg_type, root ):
+    """
+    returns all fg chain hierarchies of type fg_type_name that descend from root
+
+    fg_type - ParticleType object with the required type of fgs
+    """
+    ret = IMP.atom.Hierarchies()
+    # I. return root itself if the type of its first direct child
+    # is fg_type_name
+    if (root.get_number_of_children() >0):
+        c= root.get_child(0) # atom.Hierarchy
+        if (IMP.core.Typed.particle_is_instance(c)):
+            t=IMP.core.Typed(c).get_type()
+            if (t == fg_type):
+                ret.append( root )
+    # II. Otherwise, recurse on all of root's children
+    for i in range( root.get_number_of_children()) :
+        ichild_fgs = get_fgs_of_type( fg_type, root.get_child(i) )
+        ret.extend( ichild_fgs )
+    return ret
+
+
+# TODO: implement
+def set_specific_fgs_in_cylinder( sd, fgs_list, n_layers,
+                                  relative_bottom, relative_top):
+    """
+    anchors the FG chains in the list fgs_list to the surface of
+    the simulation bounding cylinder (= tunnel inside slab).
+    The chains are distributed as evenly as possible in n_layers,
+    between relative_bottom and relative_top height (values from 0 to 1,
+    which correspond to slab bottom and slab top respectively)
+
+    sd - the SimulationData object
+    fgs_list - list of objects of type Hierarchy, each supposed to be an fg
+    n_layers - number of fg nup layers
+    relative bottom - bottom layer position relative to the cylinder z-axis
+                      (0 = cylinder bottom ; 1 = cylinder top)
+    relative top - top layer position relative to the cylinder z-axis
+                      (0 = cylinder bottom ; 1 = cylinder top)
+    """
+    cyl = sd.get_cylinder()
+    # compute the relative radius in which particles would be positioned
+    # TODO: we assume here that particle radius is smaller
+    #       than the cylinder radius - verify in runtime?
+    particle_radius = \
+        IMP.core.XYZR( fgs_list[0].get_child(0)).get_radius()
+    # compute fraction of particle from full cylinder radius
+    relative_r = \
+        ( cyl.get_radius() - particle_radius ) / cyl.get_radius()
+    # compute vertical poisition along central axis, and inter-layer distance
+    bottom_layer_height = None
+    relative_mid = (relative_bottom + relative_top) / 2
+    if(n_layers == 1):
+        bottom_layer_height = relative_mid
+    else:
+        bottom_layer_height = relative_bottom
+    delta_layers = 0.0
+    if(n_layers > 1):
+        delta_layers = (relative_top - relative_bottom ) / (n_layers - 1.0)
+        print "Delta layers: %f (relative value)" % delta_layers
+    # calculate angle increments between adjacent fg nups in each layers
+    chains_per_layer = int( math.ceil( len(fgs_list) / float(n_layers) ) )
+    angle_increments = 2 * math.pi / chains_per_layer
+    # pin chains to each layer
+    for layer in range( n_layers ):
+        relative_h = bottom_layer_height + layer * delta_layers
+        for k in range( chains_per_layer ):
+            chain_num = layer * chains_per_layer + k #
+            if( chain_num >=  len(fgs_list) ):
+                break; # may happen if len(chains) does not divide by n_layers
+            angle = k * angle_increments
+            new_anchor = cyl.get_inner_point_at( \
+                relative_h, relative_r, angle)
+            cur_chain = IMP.atom.Hierarchy( fgs_list[chain_num] )
+            d = IMP.core.XYZ( cur_chain.get_child(0) )
+            d.set_coordinates( new_anchor )
+            d.set_coordinates_are_optimized(False);
+            print "d = ", d
+
 def set_fgs_in_cylinder( sd, n_layers ):
     """
     anchors the FGs to the surface of the simulation bounding cylinder
@@ -148,55 +228,54 @@ def set_fgs_in_cylinder( sd, n_layers ):
     """
     cyl = sd.get_cylinder()
     root = sd.get_root() # atom.Hierarchy
-    chains = IMP.npctransport.get_fg_chains(root) # atom.Hierarchies
-    # compute the relative radius in which particles would be positioned
-    # TODO: we assume here that particle radius is smaller
-    #       than the cylinder radius - verify in runtime?
-    particle_radius = \
-        IMP.core.XYZR( chains[0].get_child(0)).get_radius()
-    # compute fraction of particle from full cylinder radius
-    relative_r = \
-        ( cyl.get_radius() - particle_radius ) / cyl.get_radius()
-    # compute vertical poisition along central axis, and inter-layer distance
-    bottom_layer_height = None
-    if(n_layers == 1):
-        bottom_layer_height = 0.5
-    else:
-        bottom_layer_height = 0.0
-    delta_layers = 0.0
-    if(n_layers > 1):
-        delta_layers = 1.0 / (n_layers - 1)
-    # calculate angle increments between adjacent fg nups in each layers
-    chains_per_layer = int( math.ceil( len(chains) / float(n_layers) ) )
-    angle_increments = 2 * math.pi / chains_per_layer
-    # pin chains to each layer
-    for layer in range( n_layers ):
-        relative_h = bottom_layer_height + layer * delta_layers
-        for k in range( chains_per_layer ):
-            chain_num = layer * chains_per_layer + k #
-            if( chain_num >=  len(chains) ):
-                break; # may happen if len(chains) does not divide by n_layers
-            angle = k * angle_increments
-            new_anchor = cyl.get_inner_point_at( \
-                relative_h, relative_r, angle)
-            cur_chain = IMP.atom.Hierarchy( chains[chain_num] )
-            d = IMP.core.XYZ( cur_chain.get_child(0) )
-            d.set_coordinates( new_anchor )
-            d.set_coordinates_are_optimized(False);
-            print "d = ", d
+    fg_chains = IMP.npctransport.get_fg_chains(root) # atom.Hierarchies
+    set_specific_fgs_in_cylinder(sd = sd,
+                        fgs_list = fg_chains,
+                        n_layers = n_layers,
+                        relative_bottom = 0.0, relative_top = 1.0)
+
+def set_fgs_three_types( sd ):
+    """
+    anchors the FGs to the surface of the simulation bounding cylinder
+    (= slab constraint), using fg0 for top filaments, fg1 for middle,
+    and fg2 for bottom
+
+    sd - the SimulationData object
+    """
+    cyl = sd.get_cylinder()
+    root = sd.get_root() # atom.Hierarchy
+    fgs_cyt = get_fgs_of_type(IMP.npctransport.get_type_of_fg(0), root)
+    fgs_middle = get_fgs_of_type(IMP.npctransport.get_type_of_fg(1), root)
+    fgs_nuclear = get_fgs_of_type(IMP.npctransport.get_type_of_fg(2), root)
+    print "DEBUG stats:"
+    print fgs_cyt
+    print fgs_cyt[0]
+    print type(fgs_cyt[0])
+
+    set_specific_fgs_in_cylinder(sd = sd,
+                        fgs_list = fgs_cyt,
+                        n_layers = 1,
+                        relative_bottom = 1.0, relative_top = 1.0)
+    set_specific_fgs_in_cylinder(sd = sd,
+                        fgs_list = fgs_middle,
+                        n_layers = 2,
+                        relative_bottom = 0.2, relative_top = 0.8)
+    set_specific_fgs_in_cylinder(sd = sd,
+                        fgs_list = fgs_nuclear,
+                        n_layers = 1,
+                        relative_bottom = 0.0, relative_top = 0.0)
+
 
 
 ################## MAIN ####################
 flags = get_cmdline_options()
 print flags
-# process info from protobuf
-IMP.npctransport.assign_ranges(flags.configuration, flags.assignments,
+# process info from protobuf, using [work_unit]'th combination of values
+n = IMP.npctransport.assign_ranges(flags.configuration, flags.assignments,
                                flags.work_unit, flags.show_steps)
-print "here"
 if(flags.show_number_of_work_units):
-    print "work units ", flags.work_units
+    print "total number of work units ", n
 RMF.set_show_hdf5_errors(True)
-print "here2"
 # #ifdef IMP_BENCHMARK_USE_GOOGLE_PERFTOOLS_PROFILE
 # #define IMP_NPC_SET_PROF(tf) if (FLAGS_profile && i==0) {               \
 #     IMP::benchmark::set_is_profiling(tf);                               \
@@ -206,17 +285,17 @@ print "here2"
 # #endif
 
 timer = IMP.npctransport.create_boost_timer()
-print "here3"
 IMP.set_log_level(IMP.PROGRESS)
 sd = IMP.npctransport.SimulationData(
     flags.assignments,
     flags.statistics,
     flags.quick,
     flags.rmf_file)
-print "here4"
 print "RMF file: ", sd.get_rmf_file_name()
+print get_fgs_of_type(IMP.npctransport.get_type_of_fg(0), sd.get_root())
 if(flags.cylinder_anchoring):
-    set_fgs_in_cylinder(sd, 4)
+#    set_fgs_in_cylinder(sd, 4)
+    set_fgs_three_types(sd)
 color_fgs( sd )
 ntrials = sd.get_number_of_trials()
 print "Number of trials: ", ntrials
