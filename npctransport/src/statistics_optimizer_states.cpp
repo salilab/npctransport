@@ -63,6 +63,9 @@ void BodyStatisticsOptimizerState
 ::do_update(unsigned int) {
   positions_.push_back(core::RigidBody(p_).get_reference_frame().
                           get_transformation_to());
+  while (positions_.size() > 1000) {
+    positions_.pop_front();
+  }
 }
 
 void BodyStatisticsOptimizerState
@@ -133,6 +136,9 @@ void ChainStatisticsOptimizerState
     vs.push_back(core::XYZ(ps_[i]).get_coordinates());
   }
   positions_.push_back(vs);
+  while (positions_.size() > 1000) {
+    positions_.pop_front();
+  }
 }
 
 void ChainStatisticsOptimizerState

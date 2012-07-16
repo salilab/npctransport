@@ -15,14 +15,16 @@
 #include <IMP/optimizer_state_macros.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
 #include <IMP/npctransport/typedefs.h>
+#include <deque>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 /** Track the rotational correlation time of a rigid body*/
+/** The correlation with at most the last 100 updates is tracked*/
 class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState:
 public OptimizerState {
   Particle *p_;
-  algebra::Transformation3Ds positions_;
+  std::deque<algebra::Transformation3D> positions_;
   Particle *get_particle() const {return p_;}
   void add_orientation(algebra::Rotation3D rot) {
     positions_.push_back(rot);
@@ -41,7 +43,7 @@ IMP_OBJECTS(BodyStatisticsOptimizerState,
 class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState:
 public OptimizerState {
   ParticlesTemp ps_;
-  base::Vector<algebra::Vector3Ds > positions_;
+  std::deque<algebra::Vector3Ds > positions_;
   double get_dt() const;
  public:
   ChainStatisticsOptimizerState(const ParticlesTemp &p);
