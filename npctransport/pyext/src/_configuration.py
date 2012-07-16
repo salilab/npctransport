@@ -82,7 +82,7 @@ def set_single_configuration(config):
 
 def set_quick_configuration(config):
     """Change the passed configuration to be quick"""
-    config.number_of_frames=100000
+    config.maximal_number_of_frames=100000
 
 def write(config):
     import sys
