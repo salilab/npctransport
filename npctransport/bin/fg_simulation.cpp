@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
   if(FLAGS_cylinder_anchoring)
     set_fgs_in_cylinder(*sd, 4);
   color_fgs( *sd );
-  int ntrials = sd->get_number_of_trials();
+  //int ntrials = sd->get_number_of_trials();
   // run
   IMP_NPC_LOOP(sd, IMP::ParticlePairsTemp());
 
