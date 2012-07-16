@@ -89,6 +89,7 @@ inline double evaluate_one_site_2(double k, double range,
   static const double MIN_DISTANCE = .00001;
   double distance2= delta.get_squared_magnitude();
   if (distance2 > algebra::get_squared(range)) return 0;
+  if (distance2 < MIN_DISTANCE) return 0;
   //double distance=std::sqrt(distance2);
   //double dp1= distance+1;
   //double dp12= algebra::get_squar4ed(dp1);
@@ -96,13 +97,7 @@ inline double evaluate_one_site_2(double k, double range,
   double distance=distance2*idistance;
   double kidistance=k*idistance;
   algebra::VectorD<3> deriv=kidistance*delta; // magnitude k
-  double score;
-  if (distance2 > 1.0) { // TODO: why arbitrary choice of 1.0?
-    score=-kidistance;
-    deriv*=algebra::get_squared(idistance); // magnitue = (k / distance^2)
-  } else {
-    score =-k*(2.0-distance);
-  }
+  double score=-k*(range-distance);
   if (da && distance2 > MIN_DISTANCE) {
     rb0.add_to_derivatives(itr0.get_rotated(deriv),
                            deriv, local0, tr0.get_rotation(), *da);
