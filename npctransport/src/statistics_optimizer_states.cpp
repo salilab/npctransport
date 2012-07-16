@@ -47,8 +47,8 @@ get_correlation_time()const {
       last=angle;
     }
   }
-  std::cout << n << " events from " << angles
-            << " with " << positions_.size() << " samples " << std::endl;
+  /*std::cout << n << " events from " << angles
+    << " with " << positions_.size() << " samples " << std::endl;*/
   if (n==0) {
     return std::numeric_limits<double>::infinity();
   }
