@@ -16,12 +16,24 @@ HierarchyLoadLink::HierarchyLoadLink(RMF::FileConstHandle fh, Model *m):
 HierarchySaveLink::HierarchySaveLink(RMF::FileHandle fh):
   rmf::HierarchySaveLink(fh), bf_(fh), cf_(fh) {}
 
+std::pair<double, algebra::Vector3Ds>
+HierarchySaveLink::get_sites(core::ParticleType t) const  {
+  if (sd_) {
+    return std::make_pair(sd_->get_site_radius(t),
+                          sd_->get_sites(t) );
+  } else if (sites_.find(t) != sites_.end()) {
+    return sites_.find(t)->second;
+  } else {
+    return std::make_pair(0.0, algebra::Vector3Ds());
+  }
+}
+
 void HierarchySaveLink::do_add_recursive(Particle *root,
                                          Particle *p, RMF::NodeHandle cur) {
   if (core::Typed::particle_is_instance(p)) {
     core::ParticleType type= core::Typed(p).get_type();
-    algebra::Vector3Ds sites= sd_->get_sites(type);
-    for (unsigned int i=0; i< sites.size(); ++i) {
+    unsigned int nsites= get_sites(type).second.size();
+    for (unsigned int i=0; i< nsites; ++i) {
       cur.add_child("site", RMF::GEOMETRY);
     }
   }
@@ -36,14 +48,15 @@ void HierarchySaveLink::do_save_node(Particle *p,
                                      unsigned int frame) {
   if (core::Typed::particle_is_instance(p)) {
     core::ParticleType type= core::Typed(p).get_type();
-    algebra::Vector3Ds sites= sd_->get_sites(type);
+    std::pair<double, algebra::Vector3Ds> sites
+        = get_sites(type);
     core::RigidBody rb(p);
     RMF::NodeHandles ch= n.get_children();
     algebra::ReferenceFrame3D rf= rb.get_reference_frame();
-    for (unsigned int i=0; i< sites.size(); ++i) {
+    for (unsigned int i=0; i< sites.second.size(); ++i) {
       RMF::Ball b= bf_.get(ch[i], frame);
-      b.set_radius(sd_->get_site_radius(type));
-      algebra::Vector3D local= rf.get_global_coordinates(sites[i]);
+      b.set_radius(sites.first);
+      algebra::Vector3D local= rf.get_global_coordinates(sites.second[i]);
       b.set_coordinates(RMF::Floats(local.coordinates_begin(),
                                     local.coordinates_end()));
       RMF::Floats color(3);
@@ -55,6 +68,7 @@ void HierarchySaveLink::do_save_node(Particle *p,
 }
 
 
+
 IMP_DEFINE_LINKERS(Hierarchy, hierarchy, hierarchies,
                    atom::Hierarchy,atom::Hierarchies,
                    atom::Hierarchy,atom::Hierarchies,
@@ -62,5 +76,14 @@ IMP_DEFINE_LINKERS(Hierarchy, hierarchy, hierarchies,
                    (RMF::FileConstHandle fh,
                     Model *m), (fh), (fh, m),
                    (fh, IMP::internal::get_model(hs)));
+
+void add_sites(RMF::FileHandle fh,
+               core::ParticleType t,
+               double range,
+               algebra::Vector3Ds sites) {
+  HierarchySaveLink *l=get_hierarchy_save_link(fh);
+  l->add_sites(t, range, sites);
+}
+
 
 IMPNPCTRANSPORT_END_NAMESPACE

@@ -31,9 +31,26 @@ class IMPNPCTRANSPORTEXPORT HierarchySaveLink:
   void do_save_node(Particle *p,
                     RMF::NodeHandle n,
                     unsigned int frame);
+  std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const ;
+  // for testing without sd
+  compatibility::map<core::ParticleType, std::pair<double,
+      algebra::Vector3Ds > > sites_;
  public:
   HierarchySaveLink(RMF::FileHandle fh);
+  // for testing
+  void add_sites(core::ParticleType t,
+                 double range,
+                 algebra::Vector3Ds sites) {
+    sites_[t]=std::make_pair(range, sites);
+  }
 };
+
+// for testing
+IMPNPCTRANSPORTEXPORT void add_sites(RMF::FileHandle fh,
+                                     core::ParticleType t,
+                                     double radius,
+                                     algebra::Vector3Ds sites);
+
 IMP_DECLARE_LINKERS(Hierarchy, hierarchy, hierarchies,
                     atom::Hierarchy,atom::Hierarchies,
                     atom::Hierarchy,atom::Hierarchies,
