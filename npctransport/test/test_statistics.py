@@ -20,7 +20,7 @@ class Tests(IMP.test.TestCase):
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_maximum_time_step(dt)
         os= IMP.npctransport.BodyStatisticsOptimizerState(p)
-        os.set_period(5)
+        os.set_period(10)
         bd.add_optimizer_state(os)
         bd.optimize(1000)
         Dout= os.get_diffusion_coefficient()
@@ -29,28 +29,32 @@ class Tests(IMP.test.TestCase):
         self.assertAlmostEqual(Dout, Din, delta=.4*Dout)
     def test_rot(self):
         """Check rigid body correlation time"""
+        if IMP.build!= "fast":
+          self.skipTest("Only run in fast mode")
         m= IMP.Model()
         p =IMP.Particle(m)
         d=IMP.core.XYZR.setup_particle(p)
         d.set_radius(10)
-        d.set_coordinates_are_optimized(True)
         rb= IMP.core.RigidBody.setup_particle(p, IMP.algebra.ReferenceFrame3D())
         dd= IMP.atom.RigidBodyDiffusion.setup_particle(p)
-        nD=10.0*dd.get_rotational_diffusion_coefficient()
-        dd.set_rotational_diffusion_coefficient(nD)
-        dt=10000
+        rb.set_coordinates_are_optimized(True)
+        nD=dd.get_rotational_diffusion_coefficient()
+        dd.set_rotational_diffusion_coefficient(10*nD)
+        print dd.get_rotational_diffusion_coefficient(), dd.get_diffusion_coefficient()
+        dt=100000
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_maximum_time_step(dt)
         os= IMP.npctransport.BodyStatisticsOptimizerState(p)
-        os.set_period(10)
+        num_steps=1000
+        os.set_period(num_steps/1000)
         bd.add_optimizer_state(os)
         IMP.set_log_level(IMP.SILENT)
-        bd.optimize(1000)
-        Dout= os.get_correlation_time()
+        bd.optimize(num_steps)
+        cor_out= os.get_correlation_time()
         Din= dd.get_rotational_diffusion_coefficient()
-        v=1.0/(2.0*Dout)
-        print Dout, Din, v
-        self.assertAlmostEqual(v, Din, delta=.5*v)
+        Dout=1.0/(2.0*cor_out)
+        print Dout, Din, cor_out
+        self.assertAlmostEqual(Dout, Din, delta=.5*Dout)
 
     def test_rot_nrb(self):
         """Check hidden rigid body correlation time"""

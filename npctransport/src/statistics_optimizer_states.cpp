@@ -31,19 +31,26 @@ double BodyStatisticsOptimizerState::
 get_correlation_time()const {
   double sum=0;
   int n=0;
+  Floats angles;
   for (unsigned int i=0; i< positions_.size(); ++i) {
     double last=0;
     for (unsigned int j=i+1; j < positions_.size(); ++j) {
       algebra::Rotation3D rel= positions_[j].get_rotation()
           /positions_[i].get_rotation();
       double angle=algebra::get_axis_and_angle(rel).second;
+      if (i==0) angles.push_back(angle);
       if (angle >1) {
-        sum+=get_period()*(j-i-1 + (angle-last))*get_dt();
+        sum+=get_period()*get_dt()*(j-i-1 + (angle-last));
         ++n;
         break;
       }
       last=angle;
     }
+  }
+  std::cout << n << " events from " << angles
+            << " with " << positions_.size() << " samples " << std::endl;
+  if (n==0) {
+    return std::numeric_limits<double>::infinity();
   }
   return sum/n;
 }
@@ -102,6 +109,8 @@ get_correlation_time()const {
       last=angle;
     }
   }
+  std::cout << n << " events" << std::endl;
+
   if (n==0) {
     return std::numeric_limits<double>::infinity();
   }
