@@ -89,7 +89,7 @@ inline double evaluate_one_site_2(double k, double range,
   static const double MIN_DISTANCE = .00001;
   double distance2= delta.get_squared_magnitude();
   if (distance2 > algebra::get_squared(range)) return 0;
-  if (distance2 < MIN_DISTANCE) return 0;
+  if (distance2 < MIN_DISTANCE) return -k*range;
   //double distance=std::sqrt(distance2);
   //double dp1= distance+1;
   //double dp12= algebra::get_squar4ed(dp1);
