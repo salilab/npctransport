@@ -126,7 +126,8 @@ inline double SitesPairScore
   double sum= 0;
   for (unsigned int i=0; i< sites_.size(); ++i) {
     // filter to evaluate only sites within range of attraction:
-    Ints nn= nn_->get_in_ball(relative.get_transformed(sites_[i]), range_);
+    algebra::Vector3D trp=relative.get_transformed(sites_[i]);
+    Ints nn= nn_->get_in_ball(trp, range_);
     for (unsigned int j=0; j < nn.size(); ++j) {
       //double d2=algebra::get_squared(range_);
       sum+= internal::evaluate_one_site_2(k_, range_,
