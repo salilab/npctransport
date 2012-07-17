@@ -10,7 +10,9 @@ IMP.npctransport.create_range(config.interaction_k, .2, 20, 5)
 IMP.npctransport.create_range(config.backbone_k, .2, 20, 5)
 IMP.npctransport.create_range(config.nonspecific_range, 0, 5, 3, base=1)
 IMP.npctransport.create_range(config.nonspecific_k, .2, 20, 3)
-config.simulation_time_nanosec=100
+config.simulation_time_nanosec=500
+config.box_side.lower=400
+config.dump_interval=1000
 #IMP.npctransport.create_range(config.angular_D_factor, 10, 50, 3)
 
 fg= IMP.npctransport.add_fg_type(config,
