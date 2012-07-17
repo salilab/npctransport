@@ -72,7 +72,10 @@ SimulationData::SimulationData(std::string assignment_file,
   GET_ASSIGNMENT(slack);
   GET_VALUE(number_of_trials);
   GET_VALUE(number_of_frames);
+  std::cout << "assignment.dump interval = "
+            << data.dump_interval() << std::endl;
   GET_VALUE(dump_interval);
+  std::cout << "dump interval = " << dump_interval_ << std::endl;
   GET_ASSIGNMENT(nonspecific_k);
   GET_ASSIGNMENT(nonspecific_range);
   GET_ASSIGNMENT(angular_d_factor);
@@ -461,18 +464,19 @@ SimulationData::add_interaction
       set1.push_back( diffusers_->get_particles()[i] );
     }
   }
+  double stats_contact_range = 1.5; // TODO: make a param
   IMP_LOG( PROGRESS,
            "Interaction "
            << type0.get_string() << ", "
            << type1.get_string()
            << "  sizes: " << set0.size() << ", " << set1.size()
-           << " statistics range: " << range_ << std::endl );
+           << " statistics range: " << stats_contact_range << std::endl );
   if(set0.size() > 0 && set1.size() > 0) {
     InteractionType interaction_type = std::make_pair(type0,type1);
     IMP_NEW( BipartitePairsStatisticsOptimizerState,
              bpsos ,
              ( get_m(), interaction_type,
-               set0, set1,  range_ /* distance thresh */ ) );
+               set0, set1, stats_contact_range ) );
     bpsos->set_period(statistics_interval_);
     interactions_stats_.push_back (bpsos);
   }

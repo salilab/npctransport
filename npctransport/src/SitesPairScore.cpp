@@ -98,10 +98,10 @@ inline double SitesPairScore
   double surface_delta = particles_delta - sum_radii; // between balls surface
   IMP_LOG(PROGRESS, "Surface_delta " << surface_delta << " ; range "
           << range_ << std::endl ) ; // TODO: VERBOSE
-  if(surface_delta > range_){
+  if(surface_delta > range_){ 
     IMP_LOG(PROGRESS, "Sites contribution is 0.0 and soft sphere is "
             << soft << std::endl); // TODO: VERBOSE
-    return soft; // (probably 0.0 in this case, but leave as-is for consistency)
+    return soft; // can still contribute if non-specific range is longer
   }
 
   // III. evaluate site-specific contributions :

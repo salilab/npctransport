@@ -101,27 +101,51 @@ double get_time_step(const ::npctransport_proto::Assignment& config,
                        time_step_factor);
 }
 
-int get_number_of_frames(double simulation_time_ns,
-                            double time_step,
-                            int max_nframes)
+int get_number_of_frames
+(const ::npctransport_proto::Assignment& config, double time_step)
 {
-
-  int nframes = std::ceil(simulation_time_ns * 1000000 / time_step);
-  if(nframes > max_nframes){
+  double simulation_time_ns = config.simulation_time_nanosec();
+  const double fs_in_ns = 1000000;
+  int nframes = std::ceil(simulation_time_ns * fs_in_ns / time_step);
+  if(nframes > config.maximal_number_of_frames()){
     IMP_THROW("number of frames " << nframes
               << ", which is required for simulation time" << simulation_time_ns
-              << " exceeds the specified maximal value " << max_nframes,
+              << " exceeds the specified maximal value "
+              << config.maximal_number_of_frames() ,
               IMP::base::ValueException);
   }
   return nframes;
 }
 
-int get_number_of_frames(const ::npctransport_proto::Assignment& config)
+int get_dump_interval_in_frames
+(const ::npctransport_proto::Assignment& config, double time_step)
 {
-  double simulation_time_ns = config.simulation_time_nanosec();
-  double time_step = get_time_step(config);
-  double max_nframes = config.maximal_number_of_frames();
-  return get_number_of_frames(simulation_time_ns, time_step, max_nframes);
+  std::cout << "here dump auto" << std::endl;
+  const double fs_in_ns = 1000000;
+  double ret =
+    config.is_dump_interval_in_ns()
+    ? config.dump_interval() *  fs_in_ns / time_step
+    : config.dump_interval();
+  std::cout << "dump interval = " << std::ceil(ret) << " frames, originally "
+            << config.dump_interval() << ", time step " << time_step
+            << std::endl;;
+  return std::ceil(ret);
+}
+
+int get_statistics_interval_in_frames
+(const ::npctransport_proto::Assignment& config, double time_step)
+{
+  std::cout << "here stats auto" << std::endl;
+  const double fs_in_ns = 1000000;
+  double ret =
+    config.is_statistics_interval_in_ns()
+    ? config.statistics_interval() * fs_in_ns / time_step
+    : config.statistics_interval();
+  std::cout << "stats interval = " << std::ceil(ret) << " frames, originally "
+            << config.statistics_interval() << ", time step " << time_step
+            << std::endl;;
+  return std::ceil(ret);
+
 }
 
 

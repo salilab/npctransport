@@ -31,10 +31,12 @@ def set_default_configuration(config):
     config.maximal_number_of_frames=1000000000
     config.simulation_time_nanosec=10
     config.dump_interval=10000
+    config.is_dump_interval_in_ns=False
     config.nonspecific_range.lower=2
     config.nonspecific_k.lower=.3
     config.angular_D_factor.lower=5
     config.statistics_interval=1000
+    config.is_statistics_interval_in_ns=False
     config.excluded_volume_k.lower=1
 
 def add_fg_type(config, number_of_beads, number, radius,
