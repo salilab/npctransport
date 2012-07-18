@@ -43,7 +43,8 @@ interactionFG_FG= IMP.npctransport.add_interaction(config,
                                                    interaction_k=30,
                                                    interaction_range=2)
 
-interactionFG_KAP.interaction_k.lower = 2000
+#interactionFG_KAP.interaction_k.lower = 2000
+create_range(interactionFG_KAP.interaction_k, 0.001, 500, steps=30,base=1.3)
 #create_range(interactionFG_KAP.interaction_range, 0.1, 6, steps=5)
 create_range(config.nonspecific_k, 0.0001, 1, steps=10)
 #create_range(config.nonspecific_range, 0.1, 5, steps=5)

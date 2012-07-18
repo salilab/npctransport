@@ -23,7 +23,7 @@ def get_basic_config():
     config.dump_interval=500000
     config.simulation_time_nanosec=100
     #config.number_of_frames.lower=500
-    config.angular_D_factor.lower=200
+    config.angular_D_factor.lower=0.3 #increased dynamic viscosity relative to water?
     config.statistics_interval=0.01
     config.is_statistics_interval_in_ns=1
     ###
