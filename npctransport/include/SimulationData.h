@@ -67,11 +67,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Parameter<double> slack_;
   Parameter<int> number_of_trials_;
   Parameter<int> number_of_frames_;
-  Parameter<int> dump_interval_;
+  Parameter<int> dump_interval_frames_;
   Parameter<double> nonspecific_k_;
   Parameter<double> nonspecific_range_;
   Parameter<double> angular_d_factor_;
-  Parameter<int> statistics_interval_;
+  Parameter<int> statistics_interval_frames_;
   Parameter<double> excluded_volume_k_;
   Parameter<double> range_;
   Parameter<double> time_step_;
@@ -261,7 +261,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Restraint* get_slab_restraint() const {return slab_restraint_;}
   display::Geometry* get_static_geometry();
 
-  int get_rmf_dump_interval() const { return dump_interval_; }
+  int get_rmf_dump_interval_frames() const { return dump_interval_frames_; }
   std::string get_rmf_file_name() const { return rmf_file_name_; }
 
   /**

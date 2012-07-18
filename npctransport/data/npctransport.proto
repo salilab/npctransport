@@ -55,15 +55,13 @@ message Configuration {
   repeated FGConfiguration fgs=15;
   repeated FloatConfiguration floaters=16;
   repeated Interaction interactions=17;
-  required double dump_interval=18;
+  required double dump_interval_ns=18; // 0 = every frame
   required FloatRange nonspecific_range=19;
   required FloatRange nonspecific_k=20;
   required FloatRange angular_D_factor=21;
-  required double statistics_interval=22;
+  required double statistics_interval_ns=22; // 0 = every frame
   required FloatRange excluded_volume_k=23;
-  required double simulation_time_nanosec=24;
-  required int32 is_statistics_interval_in_ns=25;
-  required int32 is_dump_interval_in_ns=26;
+  required double simulation_time_ns=24;
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -119,18 +117,18 @@ message Assignment {
   repeated FGAssignment fgs=15;
   repeated FloaterAssignment floaters=16;
   repeated InteractionAssignment interactions=17;
-  required double dump_interval=18;
+  required double dump_interval_ns=18; // 0 = every frame
   required FloatAssignment nonspecific_range=19;
   required FloatAssignment nonspecific_k=20;
   required FloatAssignment angular_D_factor=21;
-  required double statistics_interval=22;
+  required double statistics_interval_ns=22; // 0 = every frame
   required FloatAssignment excluded_volume_k=23;
-  required int32 number_of_frames=24;
-  required double time_step=25;
+  required int32 number_of_frames=24; // = simulation_time_ns * 1e+6 / time_step
+  required double time_step=25; // in femtoseconds (IMP default)
   required double range=26;
-  required double simulation_time_nanosec=27;
-  required int32 is_statistics_interval_in_ns=28;
-  required int32 is_dump_interval_in_ns=29;
+  required double simulation_time_ns=27;
+  required double statistics_interval_frames=28; // = statistics_interval_ns * 1e+6 / time_step
+  required double dump_interval_frames=29; // = dump_interval_ns * 1e+6 / time_step
 }
 
 message Statistics {

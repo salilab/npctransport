@@ -22,8 +22,8 @@ def add_interactions_for_fg(fg_name, k_kap):
 
 # ********* MAIN: *********
 config= barak_basic_configuration.get_basic_config()
-config.dump_interval=25000
-config.simulation_time_nanosec=500
+config.dump_interval_ns=0.1
+config.simulation_time_ns=500
 config.box_is_on.lower=1
 config.box_side.lower=350
 config.slab_is_on.lower=1
@@ -54,9 +54,9 @@ nonspecifics= IMP.npctransport.add_float_type(config,
                                               radius=20,
                                               interactions=0)
 
-add_interactions_for_fg("fg0",90)
-add_interactions_for_fg("fg1",10)
-add_interactions_for_fg("fg2",90)
+add_interactions_for_fg("fg0",9)
+add_interactions_for_fg("fg1",0.5)
+add_interactions_for_fg("fg2",0.5)
 
 
 f=open(sys.argv[1], "wb")
