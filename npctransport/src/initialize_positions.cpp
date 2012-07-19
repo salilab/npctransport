@@ -156,7 +156,7 @@ void initialize_positions(SimulationData *sd,
   IMP_NEW(core::RestraintsScoringFunction, sf, (rss));
 
   // Now optimize:
-  int dump_interval = sd->get_rmf_dump_interval();
+  int dump_interval = sd->get_rmf_dump_interval_frames();
   sd->get_rmf_writer()->set_period(dump_interval * 100);// reduce output rate:
   optimize_balls(sd->get_diffusers()->get_particles(),
                           sf->get_restraints(),

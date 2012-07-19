@@ -320,9 +320,16 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
     }
   }
   // output work units and automatic parameters
+  double time_step = get_time_step(output);
+  std::cout << "DEBUG protobug auto" << std::endl;
+  output.set_time_step( time_step );
   output.set_work_unit(work_unit);
-  output.set_time_step(get_time_step(output));
-  output.set_number_of_frames(get_number_of_frames(output));
+  output.set_number_of_frames
+    ( get_number_of_frames(output, time_step) );
+  output.set_dump_interval_frames
+    ( get_dump_interval_in_frames(output, time_step) );
+  output.set_statistics_interval_frames
+    ( get_statistics_interval_in_frames(output, time_step) );
   output.set_range(get_close_pairs_range(output));
   std::fstream out(ofname.c_str(), std::ios::out | std::ios::binary);
   if (!out) {

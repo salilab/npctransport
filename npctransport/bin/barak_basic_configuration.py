@@ -5,7 +5,6 @@ import sys
 def get_basic_config():
     config = Configuration()
     IMP.npctransport.set_default_configuration(config)
-    config.dump_interval=50000
     #config.dump_interval=1
     config.interaction_k.lower=10
     config.interaction_range.lower=1
@@ -19,11 +18,10 @@ def get_basic_config():
     config.nonspecific_k.lower=0.01
     config.slack.lower = 10
     config.number_of_trials=1
-    config.dump_interval=500000
-    config.simulation_time_nanosec=100
-    #config.number_of_frames.lower=500
-    config.angular_D_factor.lower=200
-    config.statistics_interval=1000
+    config.dump_interval_ns=0.1
+    config.simulation_time_ns=500
+    config.angular_D_factor.lower=0.3 #increased dynamic viscosity relative to water?
+    config.statistics_interval_ns=0.001
     ###
     #simulation bounding volumes:
     config.box_is_on.lower=1

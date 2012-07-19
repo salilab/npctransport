@@ -69,27 +69,39 @@ double get_time_step(const ::npctransport_proto::Assignment& config,
                      double max_trans_relative_to_radius= 0.1);
 
 /**
-   computes the number of frames needed to acheive simulation time simulation_time
-   with time step time_step. Throws an exception if max_nframes is exceeded
-   @throw ValueException if computed number of frames exceeds max_nframes
-*/
-IMPNPCTRANSPORTEXPORT
-int get_number_of_frames(double simulation_time_ns,
-                            double time_step,
-                            int max_nframes);
-
-/**
    computes the number of frames needed to acheive simulation time required in the
    confiugration time, with time step computed from config.
 
-   @param config the simulation parameters used to compute the time step size
+   @param config the simulation parameters
+   @param time_step the time step in femtoseconds
 
    @throw ValueException if maximum number of frames specified in config is exceeded
 */
 IMPNPCTRANSPORTEXPORT
-int get_number_of_frames(const ::npctransport_proto::Assignment& config);
+int get_number_of_frames
+(const ::npctransport_proto::Assignment& config, double time_step);
 
+/**
+   computes the number of frames for the specified dump_interval,
+   which is normalized by the time step if the interval is specified in ns
 
+   @param config the simulation parameters
+   @param time_step the time step in femtoseconds
+*/
+IMPNPCTRANSPORTEXPORT
+int get_dump_interval_in_frames
+(const ::npctransport_proto::Assignment& config, double time_step);
+
+/**
+   computes the number of frames for the specified statistics_interval,
+   normalized by the time step if the interval is specified in ns
+
+   @param config the simulation parameters
+   @param time_step the time step in femtoseconds
+*/
+IMPNPCTRANSPORTEXPORT
+int get_statistics_interval_in_frames
+(const ::npctransport_proto::Assignment& config, double time_step);
 
 
 IMPNPCTRANSPORT_END_NAMESPACE

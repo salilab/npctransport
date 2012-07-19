@@ -294,8 +294,8 @@ sd = IMP.npctransport.SimulationData(
 print "RMF file: ", sd.get_rmf_file_name()
 print get_fgs_of_type(IMP.npctransport.get_type_of_fg(0), sd.get_root())
 if(flags.cylinder_anchoring):
-#    set_fgs_in_cylinder(sd, 4)
-    set_fgs_three_types(sd)
+    set_fgs_in_cylinder(sd, 4)
+#    set_fgs_three_types(sd)
 color_fgs( sd )
 ntrials = sd.get_number_of_trials()
 print "Number of trials: ", ntrials

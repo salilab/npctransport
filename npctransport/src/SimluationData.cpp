@@ -72,11 +72,11 @@ SimulationData::SimulationData(std::string assignment_file,
   GET_ASSIGNMENT(slack);
   GET_VALUE(number_of_trials);
   GET_VALUE(number_of_frames);
-  GET_VALUE(dump_interval);
+  GET_VALUE(dump_interval_frames);
   GET_ASSIGNMENT(nonspecific_k);
   GET_ASSIGNMENT(nonspecific_range);
   GET_ASSIGNMENT(angular_d_factor);
-  GET_VALUE(statistics_interval);
+  GET_VALUE(statistics_interval_frames);
   GET_ASSIGNMENT(excluded_volume_k);
   GET_VALUE(range);
   GET_VALUE(time_step);
@@ -140,7 +140,7 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
                                     color,
                                     type, type.get_string()));
       IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back()));
-      os->set_period(statistics_interval_);
+      os->set_period(statistics_interval_frames_);
       float_stats_.back().push_back(os);
       cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
       if (data.interactions().value() >0) {
@@ -183,12 +183,12 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
       ParticlesTemp chain=hc.get_children();
       chain_stats_.back()
         .push_back(new ChainStatisticsOptimizerState(chain));
-      chain_stats_.back().back()->set_period(statistics_interval_);
+      chain_stats_.back().back()->set_period(statistics_interval_frames_);
       fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
       for (unsigned int k=0; k < chain.size(); ++k) {
         fgs_stats_.back().back()
           .push_back(new BodyStatisticsOptimizerState(chain[k]));
-        fgs_stats_.back().back().back()->set_period(statistics_interval_);
+        fgs_stats_.back().back().back()->set_period(statistics_interval_frames_);
       }
       hi.add_child(atom::Hierarchy(cur.back()));
       if (data.interactions().value() > 0) {
@@ -252,7 +252,7 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
     IMP_NEW(rmf::SaveOptimizerState, los,
             (fh));
     rmf_writer_=los;
-    los->set_period(dump_interval_);
+    los->set_period(dump_interval_frames_);
     add_hierarchy(fh, atom::Hierarchy(get_root()));
     IMP::rmf::add_restraints(fh, RestraintsTemp(1, get_predr()));
     IMP::rmf::add_restraints(fh, chain_restraints_);
@@ -312,7 +312,7 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     bd_=new atom::BrownianDynamics(m_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_/4);
-    if (dump_interval_ > 0 && !get_rmf_file_name().empty()) {
+    if (dump_interval_frames_ > 0 && !get_rmf_file_name().empty()) {
       bd_->add_optimizer_state(get_rmf_writer());
     }
     RestraintsTemp rs= chain_restraints_;
@@ -461,19 +461,20 @@ SimulationData::add_interaction
       set1.push_back( diffusers_->get_particles()[i] );
     }
   }
+  double stats_contact_range = 1.5; // TODO: make a param
   IMP_LOG( PROGRESS,
            "Interaction "
            << type0.get_string() << ", "
            << type1.get_string()
            << "  sizes: " << set0.size() << ", " << set1.size()
-           << " statistics range: " << range_ << std::endl );
+           << " statistics range: " << stats_contact_range << std::endl );
   if(set0.size() > 0 && set1.size() > 0) {
     InteractionType interaction_type = std::make_pair(type0,type1);
     IMP_NEW( BipartitePairsStatisticsOptimizerState,
              bpsos ,
              ( get_m(), interaction_type,
-               set0, set1,  range_ /* distance thresh */ ) );
-    bpsos->set_period(statistics_interval_);
+               set0, set1, stats_contact_range ) );
+    bpsos->set_period(statistics_interval_frames_);
     interactions_stats_.push_back (bpsos);
   }
 }

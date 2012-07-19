@@ -4,8 +4,8 @@ import sys
 import barak_basic_configuration
 
 config= barak_basic_configuration.get_basic_config()
-config.dump_interval=25000
-config.simulation_time_nanosec=500
+config.dump_interval_ns=0.2
+config.simulation_time_ns=5
 config.box_is_on.lower=1
 config.box_side.lower=350
 config.slab_is_on.lower=1
@@ -29,7 +29,7 @@ nonspecifics= IMP.npctransport.add_float_type(config,
 interactionFG_KAP= IMP.npctransport.add_interaction(config,
                                                     name0="fg0",
                                                     name1="kap",
-                                                    interaction_k=90,
+                                                    interaction_k=3,
                                                     interaction_range=3)
 interactionFG_CRAP= IMP.npctransport.add_interaction(config,
                                                      name0="fg0",
@@ -39,7 +39,7 @@ interactionFG_CRAP= IMP.npctransport.add_interaction(config,
 interactionFG_FG= IMP.npctransport.add_interaction(config,
                                                    name0="fg0",
                                                    name1="fg0",
-                                                   interaction_k=30,
+                                                   interaction_k=3,
                                                    interaction_range=1)
 interactionCRAP_KAP= IMP.npctransport.add_interaction(config,
                                                       name0="crap0",
