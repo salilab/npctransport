@@ -140,7 +140,10 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
                                     angular_d_factor_, dc,
                                     color,
                                     type, type.get_string()));
-      IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back()));
+      IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back(),
+                                                 statistics_fraction_
+                                                 * time_step_
+                                                 *number_of_frames_));
       os->set_period(statistics_interval_frames_);
       float_stats_.back().push_back(os);
       cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
@@ -182,12 +185,18 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
       cur.push_back(hc);
       ParticlesTemp chain=hc.get_children();
       chain_stats_.back()
-        .push_back(new ChainStatisticsOptimizerState(chain));
+        .push_back(new ChainStatisticsOptimizerState(chain,
+                                                     statistics_fraction_
+                                                     * time_step_
+                                                     *number_of_frames_));
       chain_stats_.back().back()->set_period(statistics_interval_frames_);
       fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
       for (unsigned int k=0; k < chain.size(); ++k) {
         fgs_stats_.back().back()
-          .push_back(new BodyStatisticsOptimizerState(chain[k]));
+          .push_back(new BodyStatisticsOptimizerState(chain[k],
+                                                      statistics_fraction_
+                                                      * time_step_
+                                                      *number_of_frames_));
         fgs_stats_.back().back().back()->set_period(statistics_interval_frames_);
       }
       hi.add_child(atom::Hierarchy(cur.back()));

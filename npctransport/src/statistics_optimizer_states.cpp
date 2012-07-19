@@ -72,6 +72,8 @@ double BodyStatisticsOptimizerState::get_diffusion_coefficient() const {
 
 void BodyStatisticsOptimizerState
 ::do_update(unsigned int) {
+  if (dynamic_cast<atom::Simulator*>(get_optimizer())
+      ->get_current_time() < start_time_) return;
   positions_.push_back(core::RigidBody(p_).get_reference_frame().
                           get_transformation_to());
   while (positions_.size() > 1000) {
@@ -148,6 +150,8 @@ Floats ChainStatisticsOptimizerState::get_diffusion_coefficients() const {
 
 void ChainStatisticsOptimizerState
 ::do_update(unsigned int) {
+  if (dynamic_cast<atom::Simulator*>(get_optimizer())
+      ->get_current_time() < start_time_) return;
   algebra::Vector3Ds vs;
   for (unsigned int i=0; i< ps_.size(); ++i) {
     vs.push_back(core::XYZ(ps_[i]).get_coordinates());
@@ -183,6 +187,7 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
  InteractionType interaction_type,
  const ParticlesTemp& particlesI,
  const ParticlesTemp& particlesII,
+ double start_time,
  double contact_range,
  double slack)
   :    core::PeriodicOptimizerState("BipartitePairsStatisticsOptimizerState%1%"),
