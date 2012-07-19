@@ -81,6 +81,7 @@ SimulationData::SimulationData(std::string assignment_file,
   GET_VALUE(range);
   GET_VALUE(time_step);
   GET_ASSIGNMENT(statistics_fraction);
+  GET_VALUE(maximum_number_of_minutes);
   if(quick){
     number_of_frames_ = 2;
     number_of_trials_ = 1;
@@ -764,6 +765,9 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   UPDATE(nf, stats, seconds_per_iteration, timer.elapsed());
 
   stats.set_number_of_frames(nf+1);
+  if (interrupted) {
+    stats.set_interrupted(1);
+  }
   std::ofstream outf(statistics_file_name_.c_str(), std::ios::binary);
   stats.SerializeToOstream(&outf);
 }

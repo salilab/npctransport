@@ -76,6 +76,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Parameter<double> range_;
   Parameter<double> time_step_;
   Parameter<double> statistics_fraction_;
+  Parameter<double> maximum_number_of_minutes_;
 
   // Per type scaling factors for the interaction parameters
   compatibility::map<core::ParticleType, double> interaction_range_factors_;
@@ -210,6 +211,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   bool get_has_slab() const { return slab_restraint_; }
 
   double get_statistics_fraction() const {return statistics_fraction_;}
+  //! Return the maximum number of minutes the simulation can run
+  /** Or 0 for no limit. */
+  double get_maximum_number_of_minutes() const {
+    return maximum_number_of_minutes_;
+  }
 
   // swig doesn't equate the two protobuf types
 #ifndef SWIG
@@ -256,7 +262,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   ParticlesTemp get_particles(core::ParticleType type) const {
     return particles_.find(type)->second;
   }
-  void update_statistics(const boost::timer &timer) const;
+  void update_statistics(const boost::timer &timer,
+                         bool interrupted) const;
   unsigned int get_number_of_frames() const {return number_of_frames_;}
   unsigned int get_number_of_trials() const {return number_of_trials_;}
   atom::Hierarchy get_root() const {return atom::Hierarchy(root_);}
