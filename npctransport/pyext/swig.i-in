@@ -13,8 +13,8 @@ IMP_SWIG_OBJECT(IMP::npctransport, LinearSoftSpherePairScore, LinearSoftSpherePa
 IMP_SWIG_OBJECT(IMP::npctransport, FunctorLinearSoftSpherePairScore, FunctorLinearSoftSpherePairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, LinearInteractionPairScore, LinearInteractionPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, FunctorLinearInteractionPairScore, FunctorLinearInteractionPairScores);
-#  IMP_SWIG_OBJECT(IMP::npctransport, HierarchySaveLink, HierarchySaveLinks);
-#  IMP_SWIG_OBJECT(IMP::npctransport, HierarchyLoadLink, HierarchyLoadLinks);
+IMP_SWIG_OBJECT(IMP::npctransport, HierarchySaveLink, HierarchySaveLinks);
+IMP_SWIG_OBJECT(IMP::npctransport, HierarchyLoadLink, HierarchyLoadLinks);
 IMP_SWIG_OBJECT(IMP::npctransport, ChainStatisticsOptimizerState, ChainStatisticsptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, BodyStatisticsOptimizerState, BodyStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, BipartitePairsStatisticsOptimizerStates);
