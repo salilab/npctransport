@@ -75,6 +75,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Parameter<double> excluded_volume_k_;
   Parameter<double> range_;
   Parameter<double> time_step_;
+  Parameter<double> statistics_fraction_;
 
   // Per type scaling factors for the interaction parameters
   compatibility::map<core::ParticleType, double> interaction_range_factors_;

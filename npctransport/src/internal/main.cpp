@@ -29,6 +29,7 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     /*IMP::benchmark::Profiler p;
     if(i == 0)
       p.set("profiling.pprof");*/
+    sd->get_bd()->set_current_time(0);
     sd->get_bd()->optimize(sd->get_number_of_frames());
     //p.reset();
     sd->update_statistics(timer);

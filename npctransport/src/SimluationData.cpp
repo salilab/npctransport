@@ -80,6 +80,7 @@ SimulationData::SimulationData(std::string assignment_file,
   GET_ASSIGNMENT(excluded_volume_k);
   GET_VALUE(range);
   GET_VALUE(time_step);
+  GET_ASSIGNMENT(statistics_fraction);
   if(quick){
     number_of_frames_ = 2;
     number_of_trials_ = 1;
@@ -139,7 +140,10 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
                                     angular_d_factor_, dc,
                                     color,
                                     type, type.get_string()));
-      IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back()));
+      IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back(),
+                                                 statistics_fraction_
+                                                 * time_step_
+                                                 *number_of_frames_));
       os->set_period(statistics_interval_frames_);
       float_stats_.back().push_back(os);
       cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
@@ -182,12 +186,18 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
       cur.push_back(hc);
       ParticlesTemp chain=hc.get_children();
       chain_stats_.back()
-        .push_back(new ChainStatisticsOptimizerState(chain));
+        .push_back(new ChainStatisticsOptimizerState(chain,
+                                                     statistics_fraction_
+                                                     * time_step_
+                                                     *number_of_frames_));
       chain_stats_.back().back()->set_period(statistics_interval_frames_);
       fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
       for (unsigned int k=0; k < chain.size(); ++k) {
         fgs_stats_.back().back()
-          .push_back(new BodyStatisticsOptimizerState(chain[k]));
+          .push_back(new BodyStatisticsOptimizerState(chain[k],
+                                                      statistics_fraction_
+                                                      * time_step_
+                                                      *number_of_frames_));
         fgs_stats_.back().back().back()->set_period(statistics_interval_frames_);
       }
       hi.add_child(atom::Hierarchy(cur.back()));
@@ -473,7 +483,9 @@ SimulationData::add_interaction
     IMP_NEW( BipartitePairsStatisticsOptimizerState,
              bpsos ,
              ( get_m(), interaction_type,
-               set0, set1, stats_contact_range ) );
+               set0, set1, statistics_fraction_
+               * time_step_*number_of_frames_,
+               stats_contact_range ) );
     bpsos->set_period(statistics_interval_frames_);
     interactions_stats_.push_back (bpsos);
   }
@@ -643,6 +655,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       UPDATE(cnf,
              *stats.mutable_floaters(i), correlation_time,
              float_stats_[i][j]->get_correlation_time());
+      float_stats_[i][j]->reset();
     }
   }
   for (unsigned int i=0; i<fgs_stats_.size(); ++i) {
@@ -656,6 +669,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
         UPDATE(cnf,
                *stats.mutable_fgs(i),particle_diffusion_coefficient,
                fgs_stats_[i][j][k]->get_diffusion_coefficient());
+        fgs_stats_[i][j][k]->reset();
       }
     }
   }
@@ -674,6 +688,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       UPDATE(cnf,
              *stats.mutable_fgs(i), local_diffusion_coefficient,
              df);
+      chain_stats_[i][j]->reset();
     }
   }
 
@@ -727,6 +742,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
            pInStats_i->get_average_percentage_bound_particles_1() );
     UPDATE(nf, *pOutStats_i, avg_pct_bound_particles1,
            pInStats_i->get_average_percentage_bound_particles_2() );
+    interactions_stats_[i]->reset();
   }
 
   UPDATE(nf, stats, energy_per_particle, get_m()->evaluate(false)/all.size());
