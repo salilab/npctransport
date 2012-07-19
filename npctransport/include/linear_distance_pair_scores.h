@@ -50,10 +50,10 @@ inline double do_evaluate_index(Model *m, const ParticleIndexPair& pp,
     algebra::Vector3D deriv= k*delta/delta_length; // deriv magnitude is k
     m->add_to_coordinate_derivatives(pp[0], deriv, *da);
     m->add_to_coordinate_derivatives(pp[1], -deriv, *da);
-    IMP_LOG(PROGRESS, "Distance: " << shifted_length
+    IMP_LOG(TERSE, "Distance: " << shifted_length
             << "\nscore: " << score << "\nderiv: " << deriv << std::endl);
   } else {
-    IMP_LOG(PROGRESS, "Distance: " << shifted_length
+    IMP_LOG(TERSE, "Distance: " << shifted_length
             << "\nscore: " << score << std::endl);
   }
   return score;

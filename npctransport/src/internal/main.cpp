@@ -46,7 +46,6 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     if (!quick) sd->reset_rmf();
     std::cout<< "Initializing..." << std::endl;
     initialize_positions(sd, links);
-    sd->get_bd()->set_log_level(SILENT);
     sd->get_bd()->set_log_level(IMP::PROGRESS);
     /*IMP::benchmark::Profiler p;
     if(i == 0)
