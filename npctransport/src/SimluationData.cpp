@@ -80,6 +80,7 @@ SimulationData::SimulationData(std::string assignment_file,
   GET_ASSIGNMENT(excluded_volume_k);
   GET_VALUE(range);
   GET_VALUE(time_step);
+  GET_ASSIGNMENT(statistics_fraction);
   if(quick){
     number_of_frames_ = 2;
     number_of_trials_ = 1;
@@ -473,7 +474,8 @@ SimulationData::add_interaction
     IMP_NEW( BipartitePairsStatisticsOptimizerState,
              bpsos ,
              ( get_m(), interaction_type,
-               set0, set1, stats_contact_range ) );
+               set0, set1,
+               stats_contact_range ) );
     bpsos->set_period(statistics_interval_frames_);
     interactions_stats_.push_back (bpsos);
   }
@@ -575,6 +577,30 @@ SimulationData
                            chain_partners);
 }
 
+
+void SimulationData::reset_statistics_optimizer_states() {
+  for (unsigned int i=0; i< fgs_stats_.size(); ++i) {
+    for (unsigned int j=0; j < fgs_stats_[i].size(); ++j) {
+      for (unsigned int k=0; k < fgs_stats_[i][j].size(); ++k) {
+        fgs_stats_[i][j][k]->reset();
+      }
+    }
+  }
+  for (unsigned int i=0; i< float_stats_.size(); ++i) {
+    for (unsigned int j=0; j < float_stats_[i].size(); ++j) {
+      float_stats_[i][j]->reset();
+    }
+  }
+  for (unsigned int i=0; i< chain_stats_.size(); ++i) {
+    for (unsigned int j=0; j < chain_stats_[i].size(); ++j) {
+      chain_stats_[i][j]->reset();
+    }
+  }
+  for (unsigned int i=0; i< interactions_stats_.size(); ++i) {
+    interactions_stats_[i]->reset();
+  }
+}
+
 void SimulationData::update_statistics(const boost::timer &timer) const {
   ::npctransport_proto::Statistics stats;
   if (first_stats_) { // first initialization
@@ -643,6 +669,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       UPDATE(cnf,
              *stats.mutable_floaters(i), correlation_time,
              float_stats_[i][j]->get_correlation_time());
+      float_stats_[i][j]->reset();
     }
   }
   for (unsigned int i=0; i<fgs_stats_.size(); ++i) {
@@ -656,6 +683,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
         UPDATE(cnf,
                *stats.mutable_fgs(i),particle_diffusion_coefficient,
                fgs_stats_[i][j][k]->get_diffusion_coefficient());
+        fgs_stats_[i][j][k]->reset();
       }
     }
   }
@@ -674,6 +702,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       UPDATE(cnf,
              *stats.mutable_fgs(i), local_diffusion_coefficient,
              df);
+      chain_stats_[i][j]->reset();
     }
   }
 
@@ -727,6 +756,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
            pInStats_i->get_average_percentage_bound_particles_1() );
     UPDATE(nf, *pOutStats_i, avg_pct_bound_particles1,
            pInStats_i->get_average_percentage_bound_particles_2() );
+    interactions_stats_[i]->reset();
   }
 
   UPDATE(nf, stats, energy_per_particle, get_m()->evaluate(false)/all.size());

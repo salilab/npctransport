@@ -36,6 +36,7 @@ def set_default_configuration(config):
     config.angular_D_factor.lower=5
     config.statistics_interval_ns=.001
     config.excluded_volume_k.lower=1
+    config.statistics_fraction.lower=.5;
 
 def add_fg_type(config, number_of_beads, number, radius,
                 interactions=1, rest_length_factor=1, d_factor=1,
