@@ -582,10 +582,10 @@ void SimulationData::reset_statistics_optimizer_states() {
   for (unsigned int i=0; i< fgs_stats_.size(); ++i) {
     for (unsigned int j=0; j < fgs_stats_[i].size(); ++j) {
       for (unsigned int k=0; k < fgs_stats_[i][j].size(); ++k) {
-      fgs_stats_[i][j][k]->reset();
+        fgs_stats_[i][j][k]->reset();
+      }
     }
   }
-
   for (unsigned int i=0; i< float_stats_.size(); ++i) {
     for (unsigned int j=0; j < float_stats_[i].size(); ++j) {
       float_stats_[i][j]->reset();
@@ -593,7 +593,7 @@ void SimulationData::reset_statistics_optimizer_states() {
   }
   for (unsigned int i=0; i< chain_stats_.size(); ++i) {
     for (unsigned int j=0; j < chain_stats_[i].size(); ++j) {
-      chain_stats[i][j]->reset();
+      chain_stats_[i][j]->reset();
     }
   }
   for (unsigned int i=0; i< interactions_stats_.size(); ++i) {
