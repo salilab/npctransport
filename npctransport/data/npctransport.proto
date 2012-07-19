@@ -63,7 +63,7 @@ message Configuration {
   required FloatRange excluded_volume_k=23;
   required double simulation_time_ns=24;
   required FloatRange statistics_fraction=25;
-  optional double maximum_number_of_minutes=25;
+  optional double maximum_number_of_minutes=26;
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -132,7 +132,7 @@ message Assignment {
   required double statistics_interval_frames=28; // = statistics_interval_ns * 1e+6 / time_step
   required double dump_interval_frames=29; // = dump_interval_ns * 1e+6 / time_step
   required FloatAssignment statistics_fraction=30;
-  optional double maximum_number_of_minutes=30;
+  optional double maximum_number_of_minutes=31;
 }
 
 message Statistics {

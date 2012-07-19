@@ -262,8 +262,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   ParticlesTemp get_particles(core::ParticleType type) const {
     return particles_.find(type)->second;
   }
-  void update_statistics(const boost::timer &timer,
-                         bool interrupted) const;
+  void set_interrupted(bool tf);
+  void update_statistics(const boost::timer &timer) const;
   unsigned int get_number_of_frames() const {return number_of_frames_;}
   unsigned int get_number_of_trials() const {return number_of_trials_;}
   atom::Hierarchy get_root() const {return atom::Hierarchy(root_);}

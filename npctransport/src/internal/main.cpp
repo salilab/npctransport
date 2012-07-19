@@ -19,15 +19,15 @@ namespace {
               boost::timer&total_time) {
     unsigned int total_frames=0;
     do {
-      unsigned int cur_frames= std::min(1000000,
-                                        number_of_frames-total_frames);
+      unsigned int cur_frames
+          = std::min<unsigned int>(1000000,
+                                   number_of_frames-total_frames);
       std::cout << "Running..." << std::endl;
       sd->get_bd()->optimize(cur_frames);
       if (sd->get_maximum_number_of_minutes() > 0
           && total_time.elapsed()/60 > sd->get_maximum_number_of_minutes()) {
-        sd->set_aborted(true);
+        sd->set_interrupted(true);
         std::cout << "Terminating..." << std::endl;
-        sd->write_geometry(final_config);
         return true;
       }
     } while (total_frames < sd->get_number_of_frames());
@@ -54,7 +54,7 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     sd->get_bd()->set_current_time(0);
     std::cout << "Equilibrating..." << std::endl;
     if (run_it(sd, sd->get_number_of_frames()
-               * sd->get_statistics_fraction(), total_timer)) {
+               * sd->get_statistics_fraction(), total_time)) {
       return;
     }
     sd->reset_statistics_optimizer_states();
@@ -63,9 +63,9 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     sd->get_bd()->optimize(sd->get_number_of_frames()
                            *(1.0- sd->get_statistics_fraction()));
     bool abort=run_it(sd, sd->get_number_of_frames()
-                      * (1.0- sd->get_statistics_fraction()), total_timer);
+                      * (1.0- sd->get_statistics_fraction()), total_time);
     //p.reset();
-    sd->update_statistics(timer, false);
+    sd->update_statistics(timer);
     std::cout << "Writing..." << std::endl;
     sd->write_geometry(final_config);
     if (abort) break;

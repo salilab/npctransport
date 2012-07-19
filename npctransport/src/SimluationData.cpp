@@ -765,9 +765,19 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   UPDATE(nf, stats, seconds_per_iteration, timer.elapsed());
 
   stats.set_number_of_frames(nf+1);
-  if (interrupted) {
-    stats.set_interrupted(1);
+
+  std::ofstream outf(statistics_file_name_.c_str(), std::ios::binary);
+  stats.SerializeToOstream(&outf);
+}
+void SimulationData::set_interrupted(bool tf) {
+  ::npctransport_proto::Statistics stats;
+  if (first_stats_) { // first initialization
+  } else { // not first initialization
+    std::ifstream inf(statistics_file_name_.c_str(), std::ios::binary);
+    stats.ParseFromIstream(&inf);
+    inf.close();
   }
+  stats.set_interrupted(tf?1:0);
   std::ofstream outf(statistics_file_name_.c_str(), std::ios::binary);
   stats.SerializeToOstream(&outf);
 }
