@@ -18,9 +18,9 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BodyStatisticsOptimizerState
-::BodyStatisticsOptimizerState(Particle*p, double start_time):
+::BodyStatisticsOptimizerState(Particle*p):
   core::PeriodicOptimizerState("BodyStatisticsOptimizerState%1%"),
-  p_(p), start_time_(start_time){
+  p_(p){
 }
 void BodyStatisticsOptimizerState::reset() {
   positions_.clear();
@@ -72,8 +72,6 @@ double BodyStatisticsOptimizerState::get_diffusion_coefficient() const {
 
 void BodyStatisticsOptimizerState
 ::do_update(unsigned int) {
-  if (dynamic_cast<atom::Simulator*>(get_optimizer())
-      ->get_current_time() < start_time_) return;
   positions_.push_back(core::RigidBody(p_).get_reference_frame().
                           get_transformation_to());
   while (positions_.size() > 1000) {
@@ -87,10 +85,9 @@ void BodyStatisticsOptimizerState
 
 
 ChainStatisticsOptimizerState
-::ChainStatisticsOptimizerState(const ParticlesTemp&p,
-                                double start_time):
+::ChainStatisticsOptimizerState(const ParticlesTemp&p):
   core::PeriodicOptimizerState("ChainStatisticsOptimizerState%1%"),
-  ps_(p), start_time_(start_time) {
+  ps_(p) {
 }
 void ChainStatisticsOptimizerState::reset() {
   positions_.clear();
@@ -151,8 +148,6 @@ Floats ChainStatisticsOptimizerState::get_diffusion_coefficients() const {
 
 void ChainStatisticsOptimizerState
 ::do_update(unsigned int) {
-  if (dynamic_cast<atom::Simulator*>(get_optimizer())
-      ->get_current_time() < start_time_) return;
   algebra::Vector3Ds vs;
   for (unsigned int i=0; i< ps_.size(); ++i) {
     vs.push_back(core::XYZ(ps_[i]).get_coordinates());
@@ -188,11 +183,10 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
  InteractionType interaction_type,
  const ParticlesTemp& particlesI,
  const ParticlesTemp& particlesII,
- double start_time,
  double contact_range,
  double slack)
   :    core::PeriodicOptimizerState("BipartitePairsStatisticsOptimizerState%1%"),
-       m_(m), start_time_(start_time), updates_(0),
+       m_(m), updates_(0),
        interaction_type_(interaction_type),
        n_particles_I_( particlesI.size() ),
        n_particles_II_( particlesII.size() ) {
@@ -222,8 +216,6 @@ namespace {
 
 void BipartitePairsStatisticsOptimizerState
 ::do_update(unsigned int) {
-  if (dynamic_cast<atom::Simulator*>(get_optimizer())
-      ->get_current_time() < start_time_) return;
   // count all the pairs that are currently in contact
   // and update average
   close_bipartite_pair_container_->before_evaluate();

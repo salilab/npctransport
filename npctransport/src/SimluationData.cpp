@@ -140,10 +140,7 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
                                     angular_d_factor_, dc,
                                     color,
                                     type, type.get_string()));
-      IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back(),
-                                                 statistics_fraction_
-                                                 * time_step_
-                                                 *number_of_frames_));
+      IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back()));
       os->set_period(statistics_interval_frames_);
       float_stats_.back().push_back(os);
       cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
@@ -186,18 +183,12 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
       cur.push_back(hc);
       ParticlesTemp chain=hc.get_children();
       chain_stats_.back()
-        .push_back(new ChainStatisticsOptimizerState(chain,
-                                                     statistics_fraction_
-                                                     * time_step_
-                                                     *number_of_frames_));
+        .push_back(new ChainStatisticsOptimizerState(chain));
       chain_stats_.back().back()->set_period(statistics_interval_frames_);
       fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
       for (unsigned int k=0; k < chain.size(); ++k) {
         fgs_stats_.back().back()
-          .push_back(new BodyStatisticsOptimizerState(chain[k],
-                                                      statistics_fraction_
-                                                      * time_step_
-                                                      *number_of_frames_));
+          .push_back(new BodyStatisticsOptimizerState(chain[k]));
         fgs_stats_.back().back().back()->set_period(statistics_interval_frames_);
       }
       hi.add_child(atom::Hierarchy(cur.back()));
@@ -483,8 +474,7 @@ SimulationData::add_interaction
     IMP_NEW( BipartitePairsStatisticsOptimizerState,
              bpsos ,
              ( get_m(), interaction_type,
-               set0, set1, statistics_fraction_
-               * time_step_*number_of_frames_,
+               set0, set1,
                stats_contact_range ) );
     bpsos->set_period(statistics_interval_frames_);
     interactions_stats_.push_back (bpsos);
@@ -585,6 +575,30 @@ SimulationData
   }
   return boost::make_tuple(interactions, interacting, bead_partners,
                            chain_partners);
+}
+
+
+void SimulationData::reset_statistics_optimizer_states() {
+  for (unsigned int i=0; i< fgs_stats_.size(); ++i) {
+    for (unsigned int j=0; j < fgs_stats_[i].size(); ++j) {
+      for (unsigned int k=0; k < fgs_stats_[i][j].size(); ++k) {
+      fgs_stats_[i][j][k]->reset();
+    }
+  }
+
+  for (unsigned int i=0; i< float_stats_.size(); ++i) {
+    for (unsigned int j=0; j < float_stats_[i].size(); ++j) {
+      float_stats_[i][j]->reset();
+    }
+  }
+  for (unsigned int i=0; i< chain_stats_.size(); ++i) {
+    for (unsigned int j=0; j < chain_stats_[i].size(); ++j) {
+      chain_stats[i][j]->reset();
+    }
+  }
+  for (unsigned int i=0; i< interactions_stats_.size(); ++i) {
+    interactions_stats_[i]->reset();
+  }
 }
 
 void SimulationData::update_statistics(const boost::timer &timer) const {

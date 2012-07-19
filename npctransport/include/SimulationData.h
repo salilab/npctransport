@@ -209,6 +209,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   bool get_has_bounding_box() const { return box_restraint_; }
   bool get_has_slab() const { return slab_restraint_; }
 
+  double get_statistics_fraction() const {return statistics_fraction_;}
+
   // swig doesn't equate the two protobuf types
 #ifndef SWIG
   /**
@@ -245,6 +247,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   rmf::SaveOptimizerState *get_rmf_writer();
 
   void reset_rmf();
+  void reset_statistics_optimizer_states();
   void add_chain_restraint(Restraint *r) {
     chain_restraints_.push_back(r);
   }

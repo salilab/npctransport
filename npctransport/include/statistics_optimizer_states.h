@@ -26,7 +26,6 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState:
   public core::PeriodicOptimizerState {
   Particle *p_;
-  double start_time_;
   std::deque<algebra::Transformation3D> positions_;
   Particle *get_particle() const {return p_;}
   void add_orientation(algebra::Rotation3D rot) {
@@ -34,7 +33,7 @@ class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState:
   }
   double get_dt() const;
  public:
-  BodyStatisticsOptimizerState(Particle *p, double start_time);
+  BodyStatisticsOptimizerState(Particle *p);
   double get_correlation_time()const;
   double get_diffusion_coefficient() const;
   void reset();
@@ -47,12 +46,10 @@ IMP_OBJECTS(BodyStatisticsOptimizerState,
 class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState:
   public core::PeriodicOptimizerState {
   ParticlesTemp ps_;
-  double start_time_;
   std::deque<algebra::Vector3Ds > positions_;
   double get_dt() const;
  public:
-  ChainStatisticsOptimizerState(const ParticlesTemp &p,
-                                double start_time);
+  ChainStatisticsOptimizerState(const ParticlesTemp &p);
   double get_correlation_time()const;
   Floats get_diffusion_coefficients() const;
   double get_diffusion_coefficient() const;
@@ -71,7 +68,6 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState:
   // the model on which the simulation is run and to which all particles are
   // assumed to belong
   Pointer<Model> m_;
-  double start_time_;
   int updates_;
   // the types of particles involved in the interaction (type of group I and II)
   // TODO: a bit ugly and ungeneral, we might have mixed types in principle
@@ -104,8 +100,6 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState:
                                  particlesI and II
      @param[in] particlesI    particles from one side of the interaction
      @param[in] particlesII    particles from other side of the interaction
-     @param[in] start_time   things are ignore before the simulation has
-                             progressed far enough
      @param[in] contact_range keep track of particle pairs within that range
      @param[in] slack         slack for updating close particles in appropriate
                               CloseBiparyiyrPairContainer, this affects only
@@ -117,7 +111,6 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState:
                                         //       a bit ugly and ungeneral
      const ParticlesTemp& particlesI,
      const ParticlesTemp& particlesII,
-     double start_time,
      double contact_range = 1.0,
      double slack = 1.0 );
 
