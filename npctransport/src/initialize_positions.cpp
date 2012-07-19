@@ -8,14 +8,124 @@
 
 #include <IMP/npctransport/initialize_positions.h>
 #include <IMP/example/randomizing.h>
-#include <IMP/example/optimizing.h>
 #include <IMP/npctransport/particle_types.h>
 #include <IMP/core/DistancePairScore.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/base/Pointer.h>
 #include <IMP/base/object_macros.h>
 #include <IMP/core/RestraintsScoringFunction.h>
+#include <IMP/core/ConjugateGradients.h>
+#include <IMP/core/MonteCarlo.h>
+#include <IMP/core/SerialMover.h>
+#include <IMP/core/BallMover.h>
+#include <IMP/container/ClosePairContainer.h>
+#include <IMP/core/rigid_bodies.h>
+#include <IMP/core/SphereDistancePairScore.h>
+#include <IMP/base/log_macros.h>
+#include <IMP/container/ListSingletonContainer.h>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <IMP/scoped.h>
+#include <IMP/PairPredicate.h>
+#include <IMP/container/generic.h>
+
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
+
+namespace {
+
+core::Mover* create_serial_mover(const ParticlesTemp &ps) {
+  core::Movers movers;
+  for (unsigned int i=0; i< ps.size(); ++i) {
+    double scale= core::XYZR(ps[i]).get_radius();
+    movers.push_back(new core::BallMover(ParticlesTemp(1, ps[i]),
+                                         scale*2));
+  }
+  IMP_NEW(core::SerialMover, sm, (get_as<core::MoversTemp>(movers)));
+  return sm.release();
+}
+
+
+/** Take a set of core::XYZR particles and relax them relative to a set of
+    restraints. Excluded volume is handle separately, so don't include it
+in the passed list of restraints. */
+void optimize_balls(const ParticlesTemp &ps,
+                    const RestraintsTemp &rs,
+                    const PairPredicates &excluded,
+                    const OptimizerStates &opt_states,
+                    base::LogLevel ll) {
+  // make sure that errors and log messages are marked as coming from this
+  // function
+  IMP_FUNCTION_LOG;
+  base::SetLogState sls(ll);
+  IMP_USAGE_CHECK(!ps.empty(), "No Particles passed.");
+  Model *m= ps[0]->get_model();
+  //double scale = core::XYZR(ps[0]).get_radius();
+
+  IMP_NEW(core::SoftSpherePairScore, ssps, (10));
+  IMP_NEW(core::ConjugateGradients, cg, (m));
+  cg->set_score_threshold(.1);
+  cg->set_optimizer_states(opt_states);
+  {
+    cg->set_score_threshold(ps.size()*.1);
+    // set up restraints for cg
+    IMP_NEW(container::ListSingletonContainer, lsc, (ps));
+    IMP_NEW(container::ClosePairContainer, cpc,
+            (lsc, 0, core::XYZR(ps[0]).get_radius()));
+    cpc->add_pair_filters(excluded);
+    Pointer<Restraint> r= container::create_restraint(ssps.get(),
+                                                      cpc.get());
+    r->set_model(ps[0]->get_model());
+    cg->set_restraints(rs+RestraintsTemp(1, r.get()));
+    cg->set_optimizer_states(opt_states);
+  }
+  IMP_NEW(core::MonteCarlo, mc, (m));
+  mc->set_score_threshold(.1);
+  mc->set_optimizer_states(opt_states);
+  IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));
+  {
+    // set up MC
+    mc->set_score_threshold(ps.size()*.1);
+    mc->add_mover(create_serial_mover(ps));
+    // we are special casing the nbl term for montecarlo, but using all for CG
+    mc->set_incremental_scoring_function(isf);
+    // use special incremental support for the non-bonded part
+    isf->add_close_pair_score(ssps, 0, ps, excluded);
+    // make pointer vector
+  }
+
+  IMP_LOG(PROGRESS, "Performing initial optimization" << std::endl);
+  {
+    boost::ptr_vector<ScopedSetFloatAttribute> attrs;
+    for (unsigned int j=0; j< attrs.size(); ++j) {
+      attrs.push_back( new ScopedSetFloatAttribute(ps[j],
+                                                   core::XYZR::get_radius_key(),
+                                                   0));
+    }
+    cg->optimize(1000);
+  }
+  // shrink each of the particles, relax the configuration, repeat
+  for (int i=0; i< 11; ++i) {
+    boost::ptr_vector<ScopedSetFloatAttribute> attrs;
+    double factor=.1*i;
+    IMP_LOG(PROGRESS, "Optimizing with radii at " << factor << " of full"
+            << std::endl);
+    for (unsigned int j=0; j< ps.size(); ++j) {
+      attrs.push_back( new ScopedSetFloatAttribute(ps[j],
+                                                   core::XYZR::get_radius_key(),
+                                                   core::XYZR(ps[j])
+                                                   .get_radius()*factor));
+    }
+    // changed all radii
+    isf->set_moved_particles(isf->get_movable_particles());
+    for (int j=0; j< 5; ++j) {
+      mc->set_kt(100.0/(3*j+1));
+      mc->optimize(ps.size()*(j+1)*500);
+      double e=cg->optimize(10);
+      IMP_LOG(PROGRESS, "Energy is " << e << std::endl);
+      if (e < .000001) break;
+    }
+  }
+}
+}
 
 void initialize_positions(SimulationData *sd,
                           const ParticlePairsTemp &extra_links) {
@@ -48,13 +158,13 @@ void initialize_positions(SimulationData *sd,
   // Now optimize:
   int dump_interval = sd->get_rmf_dump_interval();
   sd->get_rmf_writer()->set_period(dump_interval * 100);// reduce output rate:
-  example::optimize_balls(sd->get_diffusers()->get_particles(),
+  optimize_balls(sd->get_diffusers()->get_particles(),
                           sf->get_restraints(),
                           sd->get_cpc()->get_pair_filters(),
                           OptimizerStates(1, sd->get_rmf_writer()),
                           PROGRESS);
-  IMP_LOG(TERSE, "Initial energy is " << sd->get_m()->evaluate(false)
-          << std::endl);
+  std::cout << "Initial energy is " << sd->get_m()->evaluate(false)
+            << std::endl;
   sd->get_rmf_writer()->set_period(dump_interval);// restore output rate
   sd->get_rmf_writer()->update();
 
