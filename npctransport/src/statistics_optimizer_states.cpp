@@ -19,8 +19,12 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BodyStatisticsOptimizerState
 ::BodyStatisticsOptimizerState(Particle*p):
-  OptimizerState("BodyStatisticsOptimizerState%1%"),
+  core::PeriodicOptimizerState("BodyStatisticsOptimizerState%1%"),
   p_(p){
+}
+void BodyStatisticsOptimizerState::reset() {
+  positions_.clear();
+  core::PeriodicOptimizerState::reset();
 }
 double BodyStatisticsOptimizerState::get_dt() const {
   return dynamic_cast<atom::Simulator*>(get_optimizer())
@@ -82,8 +86,12 @@ void BodyStatisticsOptimizerState
 
 ChainStatisticsOptimizerState
 ::ChainStatisticsOptimizerState(const ParticlesTemp&p):
-  OptimizerState("ChainStatisticsOptimizerState%1%"),
-  ps_(p){
+  core::PeriodicOptimizerState("ChainStatisticsOptimizerState%1%"),
+  ps_(p) {
+}
+void ChainStatisticsOptimizerState::reset() {
+  positions_.clear();
+  core::PeriodicOptimizerState::reset();
 }
 double ChainStatisticsOptimizerState::get_dt() const {
   return dynamic_cast<atom::Simulator*>(get_optimizer())
@@ -177,13 +185,12 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
  const ParticlesTemp& particlesII,
  double contact_range,
  double slack)
-  :    m_(m),
+  :    core::PeriodicOptimizerState("BipartitePairsStatisticsOptimizerState%1%"),
+       m_(m), updates_(0),
        interaction_type_(interaction_type),
-       avg_ncontacts_(0),
-       avg_pct_bound_particles_I_(0.0),
-       avg_pct_bound_particles_II_(0.0),
        n_particles_I_( particlesI.size() ),
        n_particles_II_( particlesII.size() ) {
+  reset();
   close_bipartite_pair_container_ =
     new IMP::container::CloseBipartitePairContainer
     (particlesI, particlesII,  contact_range, slack);
@@ -193,6 +200,12 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
   // for(int i = 0; i < = particlesI.size(); i++){
 }
 
+void BipartitePairsStatisticsOptimizerState::reset() {
+  updates_=0;
+  avg_ncontacts_=0;
+  avg_pct_bound_particles_I_=0.0;
+  avg_pct_bound_particles_II_=0.0;
+}
 namespace {
   // update the average cur_avg of n-1 observation
   // with a new observation new_val
@@ -202,38 +215,42 @@ namespace {
 }
 
 void BipartitePairsStatisticsOptimizerState
-::do_update(unsigned int old_update_number) {
-
+::do_update(unsigned int) {
   // count all the pairs that are currently in contact
   // and update average
-  m_->update();
+  close_bipartite_pair_container_->before_evaluate();
   unsigned int ncontacts =
     close_bipartite_pair_container_->get_number_of_particle_pairs ();
   avg_ncontacts_ =
-    update_average( avg_ncontacts_, ncontacts, old_update_number + 1 );
+    update_average( avg_ncontacts_, ncontacts, updates_ + 1 );
 
   // update the rate of particles in contact with just anybody
   // from each group
-  IMP_NEW(IMP::container::ListSingletonContainer, bounds_I, (m_) );
-  IMP_NEW(IMP::container::ListSingletonContainer, bounds_II, (m_) );
+  ParticlesTemp bounds_I;
+  ParticlesTemp bounds_II;
   for(unsigned int i = 0 ; i < ncontacts ; i++) {
     ParticlePair cur_pair =
       close_bipartite_pair_container_->get_particle_pair (i);
-    bounds_I->add_particle( cur_pair[0] );
-    bounds_II->add_particle( cur_pair[1] );
+    bounds_I.push_back( cur_pair[0] );
+    bounds_II.push_back( cur_pair[1] );
   }
-  Float pct_bound_particles_I = bounds_I->get_number_of_particles()
+  std::sort(bounds_I.begin(), bounds_I.end());
+  std::sort(bounds_II.begin(), bounds_II.end());
+  bounds_I.erase(std::unique(bounds_I.begin(), bounds_I.end()), bounds_I.end());
+  bounds_II.erase(std::unique(bounds_II.begin(), bounds_II.end()),
+                 bounds_II.end());
+  Float pct_bound_particles_I = bounds_I.size()
     * 1.0 / n_particles_I_;
-  Float pct_bound_particles_II = bounds_II->get_number_of_particles()
+  Float pct_bound_particles_II = bounds_II.size()
     * 1.0 / n_particles_II_;
   avg_pct_bound_particles_I_ =
     update_average( avg_pct_bound_particles_I_,
                     pct_bound_particles_I,
-                    old_update_number + 1 );
+                    updates_ + 1 );
   avg_pct_bound_particles_II_ =
     update_average( avg_pct_bound_particles_II_,
                     pct_bound_particles_II,
-                    old_update_number + 1);
+                    updates_ + 1);
   // std::cout <<
   //          "BipartitePairsStatisticsOptimizerState: "
   //          "Interaction type " << interaction_type_.first.get_string()
@@ -242,13 +259,13 @@ void BipartitePairsStatisticsOptimizerState
   //          << ", " << avg_pct_bound_particles_II_
   //          << " avg_ncontacts " << avg_ncontacts_
   //           << " update # " << old_update_number + 1 << std::endl;
+  ++updates_;
 }
 
 void BipartitePairsStatisticsOptimizerState
 ::do_show(std::ostream& o) const {
   o << "Average ncontacts " << avg_ncontacts_
-    << "after " << call_number_ << "calls and "
-    << update_number_ << "updates" << std::endl;
+    << "after " << updates_ << "updates" << std::endl;
 }
 
 

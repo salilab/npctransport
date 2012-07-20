@@ -13,6 +13,8 @@
 #include <IMP/algebra/Transformation3D.h>
 #include <IMP/OptimizerState.h>
 #include <IMP/optimizer_state_macros.h>
+#include <IMP/core/PeriodicOptimizerState.h>
+#include <IMP/core/periodic_optimizer_state_macros.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
 #include <IMP/npctransport/typedefs.h>
 #include <deque>
@@ -22,7 +24,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 /** Track the rotational correlation time of a rigid body*/
 /** The correlation with at most the last 100 updates is tracked*/
 class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState:
-public OptimizerState {
+  public core::PeriodicOptimizerState {
   Particle *p_;
   std::deque<algebra::Transformation3D> positions_;
   Particle *get_particle() const {return p_;}
@@ -34,14 +36,15 @@ public OptimizerState {
   BodyStatisticsOptimizerState(Particle *p);
   double get_correlation_time()const;
   double get_diffusion_coefficient() const;
-  IMP_PERIODIC_OPTIMIZER_STATE(BodyStatisticsOptimizerState);
+  void reset();
+  IMP_CORE_PERIODIC_OPTIMIZER_STATE(BodyStatisticsOptimizerState);
 };
 IMP_OBJECTS(BodyStatisticsOptimizerState,
             BodyStatisticsOptimizerStates);
 
 /** Compute various statistics of a chain.*/
 class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState:
-public OptimizerState {
+  public core::PeriodicOptimizerState {
   ParticlesTemp ps_;
   std::deque<algebra::Vector3Ds > positions_;
   double get_dt() const;
@@ -50,7 +53,8 @@ public OptimizerState {
   double get_correlation_time()const;
   Floats get_diffusion_coefficients() const;
   double get_diffusion_coefficient() const;
-  IMP_PERIODIC_OPTIMIZER_STATE(ChainStatisticsOptimizerState);
+  void reset();
+  IMP_CORE_PERIODIC_OPTIMIZER_STATE(ChainStatisticsOptimizerState);
 };
 IMP_OBJECTS(ChainStatisticsOptimizerState,
             ChainStatisticsOptimizerStates);
@@ -60,11 +64,11 @@ IMP_OBJECTS(ChainStatisticsOptimizerState,
     range
 */
 class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState:
-public OptimizerState {
+  public core::PeriodicOptimizerState {
   // the model on which the simulation is run and to which all particles are
   // assumed to belong
-  Pointer<Model> m_;
-
+  base::Pointer<Model> m_;
+  int updates_;
   // the types of particles involved in the interaction (type of group I and II)
   // TODO: a bit ugly and ungeneral, we might have mixed types in principle
   InteractionType interaction_type_;
@@ -138,7 +142,9 @@ public OptimizerState {
   Int get_number_of_particles_2()
   { return n_particles_II_; }
 
-  IMP_PERIODIC_OPTIMIZER_STATE(BipartitePairsStatisticsOptimizerState);
+  void reset();
+
+  IMP_CORE_PERIODIC_OPTIMIZER_STATE(BipartitePairsStatisticsOptimizerState);
 };
 IMP_OBJECTS(BipartitePairsStatisticsOptimizerState,
             BipartitePairsStatisticsOptimizerStates);
