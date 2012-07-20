@@ -66,8 +66,7 @@ create_chain(SimulationData *sd, int n, double radius,
              double D_factor, double rest_length_factor,
              double spring_constant,
              display::Color c,
-             core::ParticleType t, std::string name,
-             container::PairContainerSet *bonds);
+             core::ParticleType t, std::string name);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

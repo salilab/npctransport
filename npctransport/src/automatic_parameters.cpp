@@ -134,7 +134,6 @@ int get_dump_interval_in_frames
 int get_statistics_interval_in_frames
 (const ::npctransport_proto::Assignment& config, double time_step)
 {
-  std::cout << "here stats auto" << std::endl;
   const double fs_in_ns = 1000000;
   double ret =
     config.statistics_interval_ns() * fs_in_ns / time_step;

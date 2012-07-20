@@ -81,6 +81,7 @@ SimulationData::SimulationData(std::string assignment_file,
   GET_VALUE(range);
   GET_VALUE(time_step);
   GET_ASSIGNMENT(statistics_fraction);
+  GET_VALUE(maximum_number_of_minutes);
   if(quick){
     number_of_frames_ = 2;
     number_of_trials_ = 1;
@@ -92,7 +93,6 @@ SimulationData::SimulationData(std::string assignment_file,
   root_->add_attribute(get_simulation_data_key(), this);
   atom::Hierarchy hr=atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
-  bonds_= new container::PairContainerSet(get_m());
   for (int i=0; i< data.fgs_size(); ++i) {
     create_fgs(data.fgs(i), type_of_fg[i]);
   }
@@ -178,8 +178,7 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
                                       data.radius().value(),
                                       angular_d_factor_, dc, rlf,
                                       backbone_k_,
-                                      display::Color(.3,.3,.3), type, "fg",
-                                      bonds_));
+                                      display::Color(.3,.3,.3), type, "fg"));
       cur.push_back(hc);
       ParticlesTemp chain=hc.get_children();
       chain_stats_.back()
@@ -602,6 +601,7 @@ void SimulationData::reset_statistics_optimizer_states() {
 }
 
 void SimulationData::update_statistics(const boost::timer &timer) const {
+  IMP_OBJECT_LOG;
   ::npctransport_proto::Statistics stats;
   if (first_stats_) { // first initialization
     for (unsigned int i=0; i<type_of_fg.size(); ++i) {
@@ -764,6 +764,19 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   UPDATE(nf, stats, seconds_per_iteration, timer.elapsed());
 
   stats.set_number_of_frames(nf+1);
+
+  std::ofstream outf(statistics_file_name_.c_str(), std::ios::binary);
+  stats.SerializeToOstream(&outf);
+}
+void SimulationData::set_interrupted(bool tf) {
+  ::npctransport_proto::Statistics stats;
+  if (first_stats_) { // first initialization
+  } else { // not first initialization
+    std::ifstream inf(statistics_file_name_.c_str(), std::ios::binary);
+    stats.ParseFromIstream(&inf);
+    inf.close();
+  }
+  stats.set_interrupted(tf?1:0);
   std::ofstream outf(statistics_file_name_.c_str(), std::ios::binary);
   stats.SerializeToOstream(&outf);
 }

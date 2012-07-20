@@ -67,7 +67,7 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState:
   public core::PeriodicOptimizerState {
   // the model on which the simulation is run and to which all particles are
   // assumed to belong
-  Pointer<Model> m_;
+  base::Pointer<Model> m_;
   int updates_;
   // the types of particles involved in the interaction (type of group I and II)
   // TODO: a bit ugly and ungeneral, we might have mixed types in principle

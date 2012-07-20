@@ -153,16 +153,15 @@ void initialize_positions(SimulationData *sd,
         = IMP::create_restraint(link.get(), extra_links[i]);
     rss.push_back(r);
   }
-  IMP_NEW(core::RestraintsScoringFunction, sf, (rss));
 
   // Now optimize:
   int dump_interval = sd->get_rmf_dump_interval_frames();
   sd->get_rmf_writer()->set_period(dump_interval * 100);// reduce output rate:
   optimize_balls(sd->get_diffusers()->get_particles(),
-                          sf->get_restraints(),
-                          sd->get_cpc()->get_pair_filters(),
-                          OptimizerStates(1, sd->get_rmf_writer()),
-                          PROGRESS);
+                 rss,
+                 sd->get_cpc()->get_pair_filters(),
+                 OptimizerStates(1, sd->get_rmf_writer()),
+                 PROGRESS);
   std::cout << "Initial energy is " << sd->get_m()->evaluate(false)
             << std::endl;
   sd->get_rmf_writer()->set_period(dump_interval);// restore output rate

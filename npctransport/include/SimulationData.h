@@ -76,6 +76,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Parameter<double> range_;
   Parameter<double> time_step_;
   Parameter<double> statistics_fraction_;
+  Parameter<double> maximum_number_of_minutes_;
 
   // Per type scaling factors for the interaction parameters
   compatibility::map<core::ParticleType, double> interaction_range_factors_;
@@ -105,7 +106,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Pointer<Particle> root_;
 
   Pointer<display::Geometry> static_geom_;
-  Pointer<container::PairContainerSet> bonds_;
   Pointer<Restraint> box_restraint_;
   Pointer<Restraint> slab_restraint_;
   Restraints chain_restraints_;
@@ -205,11 +205,15 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   double get_site_radius(core::ParticleType) const {
     return range_/2;
   }
-  PairContainer* get_bonds() const {return bonds_;}
   bool get_has_bounding_box() const { return box_restraint_; }
   bool get_has_slab() const { return slab_restraint_; }
 
   double get_statistics_fraction() const {return statistics_fraction_;}
+  //! Return the maximum number of minutes the simulation can run
+  /** Or 0 for no limit. */
+  double get_maximum_number_of_minutes() const {
+    return maximum_number_of_minutes_;
+  }
 
   // swig doesn't equate the two protobuf types
 #ifndef SWIG
@@ -256,6 +260,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   ParticlesTemp get_particles(core::ParticleType type) const {
     return particles_.find(type)->second;
   }
+  void set_interrupted(bool tf);
   void update_statistics(const boost::timer &timer) const;
   unsigned int get_number_of_frames() const {return number_of_frames_;}
   unsigned int get_number_of_trials() const {return number_of_trials_;}
