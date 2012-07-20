@@ -5,17 +5,18 @@ import barak_basic_configuration
 
 nonspecifics_on=None
 if len(sys.argv)>2:
-    nonspecifics_on = sys.argv[2]
+    nonspecifics_on = (sys.argv[2] != '0')
+    print "Nonspecifics: ", nonspecifics_on
 else:
-    print "Usage: %s <output-file> <is_nonspecifics_on> [output-file-quick]" % \
+    print "Usage: %s <output-file> <is_nonspecifics_on> [output-file-quick]" \
         % sys.argv[0]
 
 config= barak_basic_configuration.get_basic_config()
-config.simulation_time_ns=1000
-config.dump_interval_ns=1
-config.statistics_interval_ns=0.005
+config.simulation_time_ns=5000
+config.dump_interval_ns=500
+config.statistics_interval_ns=0.1
 config.maximal_number_of_frames=400000000
-config.time_step_factor.lower=2
+config.time_step_factor.lower=2.5
 
 fg= IMP.npctransport.add_fg_type(config,
                                  number_of_beads=12,
@@ -48,12 +49,12 @@ interactionFG_FG= IMP.npctransport.add_interaction(config,
                                                    interaction_k=30,
                                                    interaction_range=1)
 
-create_range(interactionFG_KAP.interaction_k, 0.0001, 10, steps=30)
-create_range(interactionFG_KAP.interaction_range, 0.1, 6, steps=5)
-create_range(config.nonspecific_k, 0.0001, 10, steps=10)
+create_range(interactionFG_KAP.interaction_k, 0.0001, 5, steps=20)
+create_range(interactionFG_KAP.interaction_range, 0.5, 5, steps=3)
+create_range(config.nonspecific_k, 0.0001, 100, steps=20)
 create_range(config.nonspecific_range, 0.1, 6, steps=5)
 create_range(interactionFG_FG.interaction_k, 0.0001, 30, steps=10)
-create_range(interactionFG_FG.interaction_range, 0.1, 6, steps=5)
+create_range(interactionFG_FG.interaction_range, 0.5, 5, steps=3)
 
 
 f=open(sys.argv[1], "wb")
