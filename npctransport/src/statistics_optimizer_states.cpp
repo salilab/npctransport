@@ -226,17 +226,22 @@ void BipartitePairsStatisticsOptimizerState
 
   // update the rate of particles in contact with just anybody
   // from each group
-  IMP_NEW(IMP::container::ListSingletonContainer, bounds_I, (m_) );
-  IMP_NEW(IMP::container::ListSingletonContainer, bounds_II, (m_) );
+  ParticlesTemp bounds_I;
+  ParticlesTemp bounds_II;
   for(unsigned int i = 0 ; i < ncontacts ; i++) {
     ParticlePair cur_pair =
       close_bipartite_pair_container_->get_particle_pair (i);
-    bounds_I->add_particle( cur_pair[0] );
-    bounds_II->add_particle( cur_pair[1] );
+    bounds_I.push_back( cur_pair[0] );
+    bounds_II.push_back( cur_pair[1] );
   }
-  Float pct_bound_particles_I = bounds_I->get_number_of_particles()
+  std::sort(bounds_I.begin(), bounds_I.end());
+  std::sort(bounds_II.begin(), bounds_II.end());
+  bounds_I.erase(std::unique(bounds_I.begin(), bounds_I.end()), bounds_I.end());
+  bounds_II.erase(std::unique(bounds_II.begin(), bounds_II.end()),
+                 bounds_II.end());
+  Float pct_bound_particles_I = bounds_I.size()
     * 1.0 / n_particles_I_;
-  Float pct_bound_particles_II = bounds_II->get_number_of_particles()
+  Float pct_bound_particles_II = bounds_II.size()
     * 1.0 / n_particles_II_;
   avg_pct_bound_particles_I_ =
     update_average( avg_pct_bound_particles_I_,
