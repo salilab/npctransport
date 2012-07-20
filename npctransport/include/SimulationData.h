@@ -106,7 +106,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Pointer<Particle> root_;
 
   Pointer<display::Geometry> static_geom_;
-  Pointer<container::PairContainerSet> bonds_;
   Pointer<Restraint> box_restraint_;
   Pointer<Restraint> slab_restraint_;
   Restraints chain_restraints_;
@@ -206,7 +205,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   double get_site_radius(core::ParticleType) const {
     return range_/2;
   }
-  PairContainer* get_bonds() const {return bonds_;}
   bool get_has_bounding_box() const { return box_restraint_; }
   bool get_has_slab() const { return slab_restraint_; }
 

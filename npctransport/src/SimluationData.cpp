@@ -93,7 +93,6 @@ SimulationData::SimulationData(std::string assignment_file,
   root_->add_attribute(get_simulation_data_key(), this);
   atom::Hierarchy hr=atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
-  bonds_= new container::PairContainerSet(get_m());
   for (int i=0; i< data.fgs_size(); ++i) {
     create_fgs(data.fgs(i), type_of_fg[i]);
   }
@@ -179,8 +178,7 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
                                       data.radius().value(),
                                       angular_d_factor_, dc, rlf,
                                       backbone_k_,
-                                      display::Color(.3,.3,.3), type, "fg",
-                                      bonds_));
+                                      display::Color(.3,.3,.3), type, "fg"));
       cur.push_back(hc);
       ParticlesTemp chain=hc.get_children();
       chain_stats_.back()
@@ -603,6 +601,7 @@ void SimulationData::reset_statistics_optimizer_states() {
 }
 
 void SimulationData::update_statistics(const boost::timer &timer) const {
+  IMP_OBJECT_LOG;
   ::npctransport_proto::Statistics stats;
   if (first_stats_) { // first initialization
     for (unsigned int i=0; i<type_of_fg.size(); ++i) {
