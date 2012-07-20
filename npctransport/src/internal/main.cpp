@@ -17,11 +17,10 @@ namespace {
   bool run_it(SimulationData *sd,
               unsigned int number_of_frames,
               boost::timer&total_time) {
-    unsigned int total_frames=0;
     do {
       unsigned int cur_frames
           = std::min<unsigned int>(1000000,
-                                   number_of_frames-total_frames);
+                                   number_of_frames);
       std::cout << "Running..." << std::endl;
       sd->get_bd()->optimize(cur_frames);
       if (sd->get_maximum_number_of_minutes() > 0
@@ -30,7 +29,8 @@ namespace {
         std::cout << "Terminating..." << std::endl;
         return true;
       }
-    } while (total_frames < sd->get_number_of_frames());
+      number_of_frames-=cur_frames;
+    } while (number_of_frames > 0);
     return false;
   }
 }
@@ -38,6 +38,7 @@ namespace {
 void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
                   bool quick, std::string final_config) {
   using namespace IMP;
+  sd->set_was_used(true);
   boost::timer total_time;
   for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
     IMP::base::CreateLogContext clc("iteration");
