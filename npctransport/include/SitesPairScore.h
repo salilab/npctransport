@@ -53,7 +53,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore :
   // (this switching may be made to improve running time efficiency)
   bool sites_first_;
 
-  Pointer<algebra::NearestNeighbor3D> nn_;
+  base::OwnerPointer<algebra::NearestNeighbor3D> nn_;
 public:
   /**
      A score between two spherical particles that contain a fixed set
