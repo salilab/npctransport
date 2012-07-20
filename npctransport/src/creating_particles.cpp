@@ -46,8 +46,7 @@ create_chain(SimulationData *sd, int n, double radius,
              double rest_length_factor,
              double spring_constant,
              display::Color c,
-             core::ParticleType t, std::string name,
-             container::PairContainerSet *bonds) {
+             core::ParticleType t, std::string name) {
   ParticlesTemp ret;
   for ( int i=0; i< n; ++i) {
     ret.push_back(create_particle(sd, radius, angular_D_factor,
@@ -58,12 +57,6 @@ create_chain(SimulationData *sd, int n, double radius,
                                                         rest_length_factor,
                                                         spring_constant,
                                                         name+"chain restraint");
-  // hack
-  if (bonds) {
-    PairContainer *pc // the a container for all consecutive particle pairs
-        =dynamic_cast<PairContainer*>(cr->get_input_containers()[0].get());
-    bonds->add_pair_container(pc);
-  }
   sd->add_chain_restraint(cr);
   atom::Hierarchy root
       = atom::Hierarchy::setup_particle(new Particle(sd->get_m()),
