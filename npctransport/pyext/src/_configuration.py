@@ -85,17 +85,18 @@ def set_quick_configuration(config):
     """Change the passed configuration to be quick"""
     config.maximal_number_of_frames=100000
 
+import sys
+import optparse
+make_parser = optparse.OptionParser(usage="usage: %prog [options] output.pb")
+make_parser.add_option("-s", "--single", dest="single",
+                  help="Where to put a protobuf to do a single run")
+make_parser.add_option("-q", "--quick", dest="quick",
+                  help="Where to put the protobuf for a single quick run")
+
 def write(config):
-    import sys
-    import optparse
-    parser = optparse.OptionParser(usage="usage: %prog [options] output.pb")
-    parser.add_option("-s", "--single", dest="single",
-                      help="Where to put a protobuf to do a single run")
-    parser.add_option("-q", "--quick", dest="quick",
-                      help="Where to put the protobuf for a single quick run")
-    (options, args) = parser.parse_args()
+    (options, args) = make_parser.parse_args()
     if len(args) != 1:
-        parser.print_help()
+        make_parser.print_help()
         exit(1)
     f=open(args[0], "wb")
     f.write(config.SerializeToString())
