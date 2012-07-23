@@ -17,6 +17,7 @@
 #include <IMP/container/ClosePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
 #include <IMP/core/pair_predicates.h>
+#include "linear_distance_pair_scores.h"
 #include <IMP/core/Typed.h>
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/container/PairContainerSet.h>
@@ -111,6 +112,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Restraints chain_restraints_;
   compatibility::map<core::ParticleType, algebra::Vector3Ds> sites_;
   compatibility::map<core::ParticleType, double> ranges_;
+  LinearWellPairScores backbone_scores_;
 
   // the list of particles for each particle type
   // e.g., particles_[ ParticleType("fg0") ]
@@ -185,6 +187,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   double get_range() const {return range_;}
   atom::BrownianDynamics *get_bd();
   container::ListSingletonContainer *get_diffusers();
+
+  LinearWellPairScores get_backbone_scores() const {
+    return backbone_scores_;
+  }
 
   // a close pair container for all diffusers except diffusers that
   // appear consecutively within the model (e.g., fg repeats)

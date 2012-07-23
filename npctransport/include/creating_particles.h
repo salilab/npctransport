@@ -63,8 +63,8 @@ IMPNPCTRANSPORTEXPORT Particle* create_particle(SimulationData *sd,
 IMPNPCTRANSPORTEXPORT Particle*
 create_chain(SimulationData *sd, int n, double radius,
              double angular_D_factor,
-             double D_factor, double rest_length_factor,
-             double spring_constant,
+             double D_factor,
+             LinearWellPairScore *ps,
              display::Color c,
              core::ParticleType t, std::string name);
 

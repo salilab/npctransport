@@ -12,10 +12,11 @@ IMP.npctransport.create_range(config.interaction_range, 1, 5, 3)
 IMP.npctransport.create_range(config.backbone_k, .2, 20, 5)
 IMP.npctransport.create_range(config.nonspecific_range, 0, 5, 3, base=1)
 IMP.npctransport.create_range(config.nonspecific_k, .2, 20, 3)
+
 config.box_side.lower=150
-config.simulation_time_nanosec=1000
+config.simulation_time_ns=1000
 config.number_of_trials=4
-config.dump_interval=10000
+config.dump_interval_ns=1
 
 #IMP.npctransport.create_range(config.angular_D_factor, 10, 50, 3)
 
@@ -41,6 +42,6 @@ IMP.npctransport.create_range(interaction.is_on,0,1,2)
 interaction= IMP.npctransport.add_interaction(config, "fg0", "kap")
 interaction= IMP.npctransport.add_interaction(config, "fg0", "crap0")
 
-config.statistics_interval=100000
+config.statistics_interval_ns=1
 
 IMP.npctransport.write(config)

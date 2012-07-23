@@ -51,4 +51,26 @@ LinearInteractionPairScore::get_input_containers(Particle*) const {
 
 
 
+
+LinearWellPairScore
+::LinearWellPairScore(double x0, double k,
+                      std::string name):
+    PairScore(name),
+    x0_(x0), k_(k) {
+}
+
+void LinearWellPairScore::do_show(std::ostream & o) const
+{
+}
+ParticlesTemp LinearWellPairScore
+::get_input_particles(Particle*p) const {
+  return ParticlesTemp(1, p);
+}
+ContainersTemp
+LinearWellPairScore::get_input_containers(Particle*) const {
+  return ContainersTemp();
+}
+
+
+
 IMPNPCTRANSPORT_END_NAMESPACE

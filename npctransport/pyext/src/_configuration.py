@@ -26,7 +26,7 @@ def set_default_configuration(config):
     config.slab_is_on.lower=0
     config.slab_thickness.lower=30
     config.tunnel_radius.lower=30
-    config.slack.lower=5
+    config.slack.lower=15
     config.number_of_trials=40
     config.maximal_number_of_frames=1000000000
     config.simulation_time_ns=10
@@ -35,7 +35,7 @@ def set_default_configuration(config):
     config.nonspecific_k.lower=.3
     config.angular_D_factor.lower=5
     config.statistics_interval_ns=.001
-    config.excluded_volume_k.lower=1
+    config.excluded_volume_k.lower=20
     config.statistics_fraction.lower=.5;
 
 def add_fg_type(config, number_of_beads, number, radius,
