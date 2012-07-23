@@ -40,11 +40,38 @@ Particle* create_particle(SimulationData *sd, double radius,
   return pc;
 }
 
+namespace {
+/** Restraint the passed particles to be connected in a chain. The distance
+    between consecutive particles is length_factor*the sum of the radii.
+
+    Note, this assumes that all such chains will be disjoint and so you can
+    use the container::ExclusiveConsecutivePairFilter if you want to filter
+    out all pairs of particles connected by such chain restraints.
+
+    The restraint is not added to the model.
+*/
+inline Restraint* create_chain_restraint(const ParticlesTemp &ps,
+                                         LinearWellPairScore *pps,
+                                         std::string name) {
+  IMP_USAGE_CHECK(!ps.empty(), "No Particles passed.");
+  double scale = core::XYZR(ps[0]).get_radius();
+
+  // Exclusive means that the particles will be in no other
+  // ConsecutivePairContainer
+  // this assumption accelerates certain computations
+  IMP_NEW(container::ExclusiveConsecutivePairContainer, cpc,
+          (ps, name+" consecutive pairs"));
+  Pointer<Restraint> r= container::create_restraint(pps, cpc.get(),
+                                                    "chain restraint %1%");
+  // make sure it is not freed
+  return r.release();
+}
+}
+
 Particle*
 create_chain(SimulationData *sd, int n, double radius,
              double angular_D_factor, double D_factor,
-             double rest_length_factor,
-             double spring_constant,
+             LinearWellPairScore *ps,
              display::Color c,
              core::ParticleType t, std::string name) {
   ParticlesTemp ret;
@@ -53,10 +80,9 @@ create_chain(SimulationData *sd, int n, double radius,
                                   D_factor, c, t, name));
   }
   sd->get_diffusers()->add_particles(ret); // TODO: this seems to be redundant
-  Pointer<Restraint> cr=example::create_chain_restraint(ret,
-                                                        rest_length_factor,
-                                                        spring_constant,
-                                                        name+"chain restraint");
+  Pointer<Restraint> cr=create_chain_restraint(ret,
+                                               ps,
+                                               name+"chain restraint");
   sd->add_chain_restraint(cr);
   atom::Hierarchy root
       = atom::Hierarchy::setup_particle(new Particle(sd->get_m()),

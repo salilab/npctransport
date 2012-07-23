@@ -19,14 +19,14 @@ def set_default_configuration(config):
     """Set the defaults for the configuration"""
     config.interaction_k.lower=1
     config.interaction_range.lower=5
-    config.backbone_k.lower=1
+    config.backbone_k.lower=5
     config.time_step_factor.lower=1
     config.box_is_on.lower=1
     config.box_side.lower=100
     config.slab_is_on.lower=0
     config.slab_thickness.lower=30
     config.tunnel_radius.lower=30
-    config.slack.lower=5
+    config.slack.lower=15
     config.number_of_trials=40
     config.maximal_number_of_frames=1000000000
     config.simulation_time_ns=10
@@ -35,7 +35,7 @@ def set_default_configuration(config):
     config.nonspecific_k.lower=.3
     config.angular_D_factor.lower=5
     config.statistics_interval_ns=.001
-    config.excluded_volume_k.lower=1
+    config.excluded_volume_k.lower=20
     config.statistics_fraction.lower=.5;
 
 def add_fg_type(config, number_of_beads, number, radius,
@@ -85,17 +85,18 @@ def set_quick_configuration(config):
     """Change the passed configuration to be quick"""
     config.maximal_number_of_frames=100000
 
+import sys
+import optparse
+make_parser = optparse.OptionParser(usage="usage: %prog [options] output.pb")
+make_parser.add_option("-s", "--single", dest="single",
+                  help="Where to put a protobuf to do a single run")
+make_parser.add_option("-q", "--quick", dest="quick",
+                  help="Where to put the protobuf for a single quick run")
+
 def write(config):
-    import sys
-    import optparse
-    parser = optparse.OptionParser(usage="usage: %prog [options] output.pb")
-    parser.add_option("-s", "--single", dest="single",
-                      help="Where to put a protobuf to do a single run")
-    parser.add_option("-q", "--quick", dest="quick",
-                      help="Where to put the protobuf for a single quick run")
-    (options, args) = parser.parse_args()
+    (options, args) = make_parser.parse_args()
     if len(args) != 1:
-        parser.print_help()
+        make_parser.print_help()
         exit(1)
     f=open(args[0], "wb")
     f.write(config.SerializeToString())

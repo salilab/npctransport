@@ -93,8 +93,12 @@ IMP_NPC_PARAMETER_STRING(final_configuration, "final.pym",
 IMP_NPC_PARAMETER_STRING(conformations, "conformations.rmf",
                          "RMF file for recording the conforomations along the "
                          " simulation [default: %default]");
+#ifdef IMP_NPC_GOOGLE
 IMP_NPC_PARAMETER_BOOL(profile, false,
                        "Whether to turn on profiling for the first run");
+#endif
+IMP_NPC_PARAMETER_BOOL(debug_initialization, false,
+                       "Print more info about initialization");
 IMP_NPC_PARAMETER_BOOL(quick, false,
                        "Reduce all steps to the minimum");
 IMP_NPC_PARAMETER_BOOL(show_steps, false,
@@ -113,7 +117,8 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
 /** TODO: what is the meaning of links? */
 #define IMP_NPC_LOOP(sim_data, links)                                   \
   IMP::npctransport::internal::do_main_loop(sim_data, links, FLAGS_quick,     \
-                                            FLAGS_final_configuration)
+                                            FLAGS_final_configuration,\
+                                            FLAGS_debug_initialization)
 
 using namespace IMP::npctransport;
 

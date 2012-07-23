@@ -184,6 +184,55 @@ inline double LinearInteractionPairScore
   }
 }
 
+
+
+
+
+
+/**
+   A soft linear attractive / repulsive score between two spheres
+   for the backbone of a chain.
+*/
+class IMPNPCTRANSPORTEXPORT LinearWellPairScore:
+    public PairScore
+{
+ private:
+  double x0_, k_;
+public:
+  LinearWellPairScore(double x0, double k,
+                             std::string name="LinearIDPairScore%1%");
+
+  void set_x0(double x0) {
+    x0_=x0;
+  }
+  double get_x0() const {
+    return x0_;
+  }
+  IMP_INDEX_PAIR_SCORE(LinearWellPairScore);
+};
+
+inline double LinearWellPairScore
+::evaluate_index(Model *m, const ParticleIndexPair& pp,
+                 DerivativeAccumulator *da) const {
+  IMP_OBJECT_LOG;
+
+  // Associate intermediate variables with cache_, for further reuse:
+  algebra::Vector3D delta =  m->get_sphere(pp[0]).get_center()
+    - m->get_sphere(pp[1]).get_center();
+  double delta_length_2 =
+    delta.get_squared_magnitude();
+  double delta_length= (1.0)/(1.0/std::sqrt(delta_length_2));
+  if (delta_length > x0_) { // attractive regime
+    return // decreases with slope k_attr_ as spheres get closer
+        do_evaluate_index(m, pp, da, delta, delta_length, x0_, k_);
+  } else { // repulsive regime, may be negative for small penetration
+    return
+      do_evaluate_index(m, pp, da, delta, delta_length, x0_, -k_);
+  }
+}
+
+IMP_OBJECTS(LinearWellPairScore, LinearWellPairScores);
+
 IMPNPCTRANSPORT_END_NAMESPACE
 
 #endif  /* IMPNPCTRANSPORT_LINEAR_DISTANCE_PAIR_SCORES_H */

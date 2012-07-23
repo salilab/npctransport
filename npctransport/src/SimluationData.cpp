@@ -170,14 +170,17 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
     atom::Hierarchy hi= atom::Hierarchy::setup_particle(new Particle(get_m()));
     hi->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(hi);
+    double rlf=data.rest_length_factor().value();
+    backbone_scores_
+      .push_back(new LinearWellPairScore(rlf*data.radius().value()*2.0,
+                                         backbone_k_));
     for (int j=0; j< data.number().value(); ++j) {
       double dc=data.d_factor().value();
-      double rlf=data.rest_length_factor().value();
       atom::Hierarchy hc(create_chain(this,
                                       data.number_of_beads().value(),
                                       data.radius().value(),
-                                      angular_d_factor_, dc, rlf,
-                                      backbone_k_,
+                                      angular_d_factor_, dc,
+                                      backbone_scores_.back(),
                                       display::Color(.3,.3,.3), type, "fg"));
       cur.push_back(hc);
       ParticlesTemp chain=hc.get_children();

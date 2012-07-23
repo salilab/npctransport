@@ -15,7 +15,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 IMPNPCTRANSPORTEXPORT
 void initialize_positions(SimulationData *sd,
                           const ParticlePairsTemp &extra_links
-                          = ParticlePairsTemp());
+                          = ParticlePairsTemp(),
+                          bool debug=false);
 
 
 IMPNPCTRANSPORT_END_NAMESPACE

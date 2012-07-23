@@ -27,6 +27,8 @@
 #include <IMP/scoped.h>
 #include <IMP/PairPredicate.h>
 #include <IMP/container/generic.h>
+#include <IMP/npctransport/SimulationData.h>
+#include <IMP/base/raii_macros.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -43,6 +45,22 @@ core::Mover* create_serial_mover(const ParticlesTemp &ps) {
   return sm.release();
 }
 
+class SetLength: public base::RAII {
+    base::WeakPointer<LinearWellPairScore> ps_;
+    double orig_;
+ public:
+    IMP_RAII(SetLength, (LinearWellPairScore *ps, double f),
+             {},
+             {
+               ps_=ps;
+               orig_= ps_->get_x0();
+               ps_->set_x0(orig_*f);
+             },
+             {
+               ps_->set_x0(orig_);
+             }, {});
+  };
+
 
 /** Take a set of core::XYZR particles and relax them relative to a set of
     restraints. Excluded volume is handle separately, so don't include it
@@ -50,8 +68,11 @@ in the passed list of restraints. */
 void optimize_balls(const ParticlesTemp &ps,
                     const RestraintsTemp &rs,
                     const PairPredicates &excluded,
-                    const OptimizerStates &opt_states,
-                    base::LogLevel ll) {
+                    rmf::SaveOptimizerState *save,
+                    Optimizer *local,
+                    LinearWellPairScores dps,
+                    base::LogLevel ll,
+                    bool debug) {
   // make sure that errors and log messages are marked as coming from this
   // function
   IMP_FUNCTION_LOG;
@@ -61,25 +82,11 @@ void optimize_balls(const ParticlesTemp &ps,
   //double scale = core::XYZR(ps[0]).get_radius();
 
   IMP_NEW(core::SoftSpherePairScore, ssps, (10));
-  IMP_NEW(core::ConjugateGradients, cg, (m));
-  cg->set_score_threshold(.1);
-  cg->set_optimizer_states(opt_states);
-  {
-    cg->set_score_threshold(ps.size()*.1);
-    // set up restraints for cg
-    IMP_NEW(container::ListSingletonContainer, lsc, (ps));
-    IMP_NEW(container::ClosePairContainer, cpc,
-            (lsc, 0, core::XYZR(ps[0]).get_radius()));
-    cpc->add_pair_filters(excluded);
-    Pointer<Restraint> r= container::create_restraint(ssps.get(),
-                                                      cpc.get());
-    r->set_model(ps[0]->get_model());
-    cg->set_restraints(rs+RestraintsTemp(1, r.get()));
-    cg->set_optimizer_states(opt_states);
-  }
   IMP_NEW(core::MonteCarlo, mc, (m));
   mc->set_score_threshold(.1);
-  mc->set_optimizer_states(opt_states);
+  if (debug) {
+    mc->add_optimizer_state(save);
+  }
   IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));
   {
     // set up MC
@@ -93,42 +100,45 @@ void optimize_balls(const ParticlesTemp &ps,
   }
 
   IMP_LOG(PROGRESS, "Performing initial optimization" << std::endl);
-  {
-    boost::ptr_vector<ScopedSetFloatAttribute> attrs;
-    for (unsigned int j=0; j< attrs.size(); ++j) {
-      attrs.push_back( new ScopedSetFloatAttribute(ps[j],
-                                                   core::XYZR::get_radius_key(),
-                                                   0));
-    }
-    cg->optimize(1000);
-  }
   // shrink each of the particles, relax the configuration, repeat
   for (int i=0; i< 11; ++i) {
     boost::ptr_vector<ScopedSetFloatAttribute> attrs;
+    boost::ptr_vector<SetLength> lengths;
     double factor=.1*i;
-    IMP_LOG(PROGRESS, "Optimizing with radii at " << factor << " of full"
-            << std::endl);
+    double length_factor=.3+.7*factor;
+    std::cout << "Optimizing with radii at " << factor << " of full"
+              << " and length factor " << length_factor << std::endl;
     for (unsigned int j=0; j< ps.size(); ++j) {
       attrs.push_back( new ScopedSetFloatAttribute(ps[j],
                                                    core::XYZR::get_radius_key(),
                                                    core::XYZR(ps[j])
                                                    .get_radius()*factor));
     }
+    for (unsigned int j=0; j< dps.size(); ++j) {
+      lengths.push_back(new SetLength(dps[j],
+                                      length_factor));
+    }
     // changed all radii
     isf->set_moved_particles(isf->get_movable_particles());
     for (int j=0; j< 5; ++j) {
       mc->set_kt(100.0/(3*j+1));
-      mc->optimize(ps.size()*(j+1)*500);
-      double e=cg->optimize(10);
-      IMP_LOG(PROGRESS, "Energy is " << e << std::endl);
+      double e= mc->optimize(ps.size()*(j+1)*500);
+      std::cout << "Energy is " << e << std::endl;
+      std::ostringstream oss;
+      oss << i << " " << j;
+      save->update_always();
+      save->set_frame_name(oss.str());
       if (e < .000001) break;
     }
+    double e=local->optimize(1000);
+    std::cout << "Energy after bd is " << e << std::endl;
   }
 }
 }
 
 void initialize_positions(SimulationData *sd,
-                          const ParticlePairsTemp &extra_links) {
+                          const ParticlePairsTemp &extra_links,
+                          bool debug) {
   example::randomize_particles(sd->get_diffusers()->get_particles(),
                                sd->get_box());
   sd->get_rmf_writer()->update();
@@ -156,16 +166,25 @@ void initialize_positions(SimulationData *sd,
 
   // Now optimize:
   int dump_interval = sd->get_rmf_dump_interval_frames();
-  sd->get_rmf_writer()->set_period(dump_interval * 100);// reduce output rate:
+  if (!debug) {
+    sd->get_rmf_writer()->set_period(dump_interval * 100);// reduce output rate:
+  } else {
+    sd->get_rmf_writer()->set_period(100);
+  }
   optimize_balls(sd->get_diffusers()->get_particles(),
                  rss,
                  sd->get_cpc()->get_pair_filters(),
-                 OptimizerStates(1, sd->get_rmf_writer()),
-                 PROGRESS);
-  std::cout << "Initial energy is " << sd->get_m()->evaluate(false)
+                 sd->get_rmf_writer(),
+                 sd->get_bd(),
+                 sd->get_backbone_scores(),
+                 PROGRESS, debug);
+  IMP_NEW(core::RestraintsScoringFunction, rsf,
+          (rss +RestraintsTemp(1, sd->get_predr()), "all restaints"));
+  std::cout << "Initial energy is " << rsf->evaluate(false)
             << std::endl;
   sd->get_rmf_writer()->set_period(dump_interval);// restore output rate
-  sd->get_rmf_writer()->update();
+  sd->get_rmf_writer()->update_always();
+  sd->get_rmf_writer()->set_frame_name("done initializing");
 
   // unpin previously unpinned fgs (= allow optimization)
   for (unsigned int i=0; i< previously_unpinned.size(); ++i) {
