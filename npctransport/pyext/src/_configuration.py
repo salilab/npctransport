@@ -19,7 +19,7 @@ def set_default_configuration(config):
     """Set the defaults for the configuration"""
     config.interaction_k.lower=1
     config.interaction_range.lower=5
-    config.backbone_k.lower=1
+    config.backbone_k.lower=5
     config.time_step_factor.lower=1
     config.box_is_on.lower=1
     config.box_side.lower=100
