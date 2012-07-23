@@ -71,7 +71,8 @@ void optimize_balls(const ParticlesTemp &ps,
                     rmf::SaveOptimizerState *save,
                     Optimizer *local,
                     LinearWellPairScores dps,
-                    base::LogLevel ll) {
+                    base::LogLevel ll,
+                    bool debug) {
   // make sure that errors and log messages are marked as coming from this
   // function
   IMP_FUNCTION_LOG;
@@ -83,7 +84,9 @@ void optimize_balls(const ParticlesTemp &ps,
   IMP_NEW(core::SoftSpherePairScore, ssps, (10));
   IMP_NEW(core::MonteCarlo, mc, (m));
   mc->set_score_threshold(.1);
-  //mc->add_optimizer_state(save);
+  if (debug) {
+    mc->add_optimizer_state(save);
+  }
   IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));
   {
     // set up MC
@@ -134,7 +137,8 @@ void optimize_balls(const ParticlesTemp &ps,
 }
 
 void initialize_positions(SimulationData *sd,
-                          const ParticlePairsTemp &extra_links) {
+                          const ParticlePairsTemp &extra_links,
+                          bool debug) {
   example::randomize_particles(sd->get_diffusers()->get_particles(),
                                sd->get_box());
   sd->get_rmf_writer()->update();
@@ -162,14 +166,18 @@ void initialize_positions(SimulationData *sd,
 
   // Now optimize:
   int dump_interval = sd->get_rmf_dump_interval_frames();
-  sd->get_rmf_writer()->set_period(dump_interval * 100);// reduce output rate:
+  if (!debug) {
+    sd->get_rmf_writer()->set_period(dump_interval * 100);// reduce output rate:
+  } else {
+    sd->get_rmf_writer()->set_period(100);
+  }
   optimize_balls(sd->get_diffusers()->get_particles(),
                  rss,
                  sd->get_cpc()->get_pair_filters(),
                  sd->get_rmf_writer(),
                  sd->get_bd(),
                  sd->get_backbone_scores(),
-                 PROGRESS);
+                 PROGRESS, debug);
   IMP_NEW(core::RestraintsScoringFunction, rsf,
           (rss +RestraintsTemp(1, sd->get_predr()), "all restaints"));
   std::cout << "Initial energy is " << rsf->evaluate(false)

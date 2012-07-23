@@ -36,7 +36,8 @@ namespace {
 }
 
 void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
-                  bool quick, std::string final_config) {
+                  bool quick, std::string final_config,
+                  bool debug_initialize) {
   using namespace IMP;
   sd->set_was_used(true);
   boost::timer total_time;
@@ -46,7 +47,8 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     IMP::set_log_level(SILENT);
     if (!quick) sd->reset_rmf();
     std::cout<< "Initializing..." << std::endl;
-    initialize_positions(sd, links);
+    initialize_positions(sd, links, debug_initialize);
+    if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
     /*IMP::benchmark::Profiler p;
     if(i == 0)
