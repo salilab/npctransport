@@ -4,12 +4,10 @@ import sys
 import barak_basic_configuration
 
 nonspecifics_on=None
-if len(sys.argv)>2:
-    nonspecifics_on = (sys.argv[2] != '0')
-    print "Nonspecifics: ", nonspecifics_on
-else:
-    print "Usage: %s <output-file> <is_nonspecifics_on> [output-file-quick]" \
-        % sys.argv[0]
+IMP.npctransport.make_parser.add_option("-n", "--nonspecifics", action="store_true",
+                                        dest="nonspecifics_on",
+                                        help="Whether to use non-specific interactions")
+(options, args) = IMP.npctransport.make_parser.parse_args()
 
 config= barak_basic_configuration.get_basic_config()
 config.simulation_time_ns=5000
@@ -27,7 +25,7 @@ kap= IMP.npctransport.add_float_type(config,
                                      number=10,
                                      radius=20,
                                      interactions=12)
-if(nonspecifics_on):
+if options.nonspecifics_on:
     nonspecifics= IMP.npctransport.add_float_type(config,
                                                   number=10,
                                                   radius=20,
@@ -49,29 +47,12 @@ interactionFG_FG= IMP.npctransport.add_interaction(config,
                                                    interaction_k=30,
                                                    interaction_range=1)
 
-create_range(interactionFG_KAP.interaction_k, 0.0001, 10, steps=30)
-create_range(interactionFG_KAP.interaction_range, 0.1, 6, steps=5)
-create_range(config.nonspecific_k, 0.0001, 10, steps=10)
-create_range(config.nonspecific_range, 0.1, 6, steps=5)
-create_range(interactionFG_FG.interaction_k, 0.0001, 30, steps=10)
-create_range(interactionFG_FG.interaction_range, 0.1, 6, steps=5)
-"""
 create_range(interactionFG_KAP.interaction_k, 0.0001, 5, steps=20)
 create_range(interactionFG_KAP.interaction_range, 0.5, 5, steps=3)
 create_range(config.nonspecific_k, 0.0001, 100, steps=20)
 create_range(config.nonspecific_range, 0.1, 6, steps=5)
 create_range(interactionFG_FG.interaction_k, 0.0001, 30, steps=10)
 create_range(interactionFG_FG.interaction_range, 0.5, 5, steps=3)
-"""
+config.backbone_k.lower=5
 
-
-f=open(sys.argv[1], "wb")
-f.write(config.SerializeToString())
-
-print config
-if len(sys.argv)>3:
-    config.number_of_trials.lower=2
-    config.number_of_frames.lower=2
-    config.dump_interval=1
-    f=open(sys.argv[2], "wb")
-    f.write(config.SerializeToString())
+IMP.npctransport.write(config)
