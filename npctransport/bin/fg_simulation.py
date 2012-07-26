@@ -17,8 +17,8 @@ import IMP
 from IMP import container
 import IMP.base
 import IMP.npctransport
-import IMP.benchmark
-import IMP.example
+#import IMP.benchmark
+#import IMP.example
 from optparse import OptionParser
 import math
 
@@ -265,6 +265,18 @@ def set_fgs_three_types( sd ):
                         n_layers = 1,
                         relative_bottom = 0.0, relative_top = 0.0)
 
+def optimize_in_chunks( sd, nchunks ):
+    """
+    Optimizes sd->bd() in nchunks iterations, writing statistics at
+    the end of each iteration
+    """
+    nframes_left = sd.get_number_of_frames();
+    nframes_chunk= math.ceil(nframes_left / nchunks)
+    while(nframes_left > 0):
+        nframes_chunk = min(nframes_chunk, nframes_left)
+        sd.get_bd().optimize( nframes_chunk )
+        sd.update_statistics( timer ) # TODO: timer?
+        nframes_left = nframes_left - nframes_chunk
 
 
 ################## MAIN ####################
@@ -311,11 +323,11 @@ for i in range(ntrials):
     if(flags.profile):
         p.start("profile.pprof")
         print "Profiling begins..."
-    sd.get_bd().optimize( sd.get_number_of_frames() )
+    nchunks= 250 # parametrize externally?
+    optimize_in_chunks(sd, nchunks)
     if(flags.profile):
         p.stop()
         print "Profiling ends"
-    sd.update_statistics( timer ) # TODO: timer?
     print "Writing..."
     sd.write_geometry( flags.final_configuration )
     # Profiling?

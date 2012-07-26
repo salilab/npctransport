@@ -558,6 +558,7 @@ void SimulationData::write_geometry(std::string out) {
 
 }
 
+// TODO: turn into a template inline in unamed space?
 #define UPDATE_AVG(frame, message, field, newvalue)  \
   (message).set_##field(static_cast<double>(frame)/(frame+1)*(message).field() \
                     + 1.0/(frame+1)*newvalue)
@@ -711,15 +712,16 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       float_stats_[i][j]->reset();
     }
   }
-  // update avg number of transports for each float type:
+  // update avg number of transports per particle for each float type:
   if( get_has_slab() ) {
     for (unsigned int i=0; i<float_transport_stats_.size(); ++i) {
       for (unsigned int j=0; j<float_transport_stats_[i].size(); ++j) {
-        int cnf=(nf)*float_transport_stats_[i].size()+j;
-        UPDATE_AVG(cnf,
-                   *stats.mutable_floaters(i), avg_n_transports,
-                   float_transport_stats_[i][j]->get_total_n_transports() );
-        float_transport_stats_[i][j]->reset();
+        *stats.mutable_floaters(i)->set_avg_n_transports(0);
+        int n_transports_ij =
+          float_transport_stats_[i][j]->get_total_n_transports() ;
+        UPDATE_AVG(j, *stats.mutable_floaters(i),
+                   avg_n_transports, n_transports_ij);
+        //        float_transport_stats_[i][j]->reset();
       }
     }
   }
