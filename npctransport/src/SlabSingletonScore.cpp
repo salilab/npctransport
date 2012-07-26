@@ -11,6 +11,14 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+SlabSingletonScore::SlabSingletonScore
+(double thickness, double radius, double k):
+  thickness_(thickness), radius_(radius), k_(k),
+   top_( thickness / 2.0 ), bottom_( -thickness / 2.0 ), midZ_( 0.0 )
+{
+}
+
+
 // computes the distance and displacement vector of v
 // from the surface of a z-axis aligned cylinder
 //
@@ -64,12 +72,6 @@ SlabSingletonScore::get_displacement_vector(const algebra::Vector3D &v) const
       algebra::Vector3D diff= v-rim;
       return std::make_pair(diff.get_magnitude(), diff.get_unit_vector());
     }
-}
-
-SlabSingletonScore::SlabSingletonScore(double thickness, double radius, double k):
-  thickness_(thickness), radius_(radius), k_(k),
-   top_( thickness / 2.0 ), bottom_( -thickness / 2.0 ), midZ_( 0.0 )
-{
 }
 
 

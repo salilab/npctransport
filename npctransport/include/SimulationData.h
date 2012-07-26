@@ -10,7 +10,10 @@
 
 #include "npctransport_config.h"
 #include "io.h"
-#include "statistics_optimizer_states.h"
+#include "BodyStatisticsOptimizerState.h"
+#include "ParticleTransportStatisticsOptimizerState.h"
+#include "ChainStatisticsOptimizerState.h"
+#include "BipartitePairsStatisticsOptimizerState.h"
 #include <IMP/Model.h>
 #include <IMP/atom/BrownianDynamics.h>
 #include <IMP/atom/Hierarchy.h>
@@ -125,11 +128,18 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   std::string rmf_file_name_;
 
   // statistics about all FG nups individual particles, for each FG type
-  base::Vector<base::Vector<BodyStatisticsOptimizerStates> > fgs_stats_;
+  base::Vector<base::Vector<BodyStatisticsOptimizerStates> >
+    fgs_stats_;
 
   // statistics about all Kaps and non-specific binders ("floats"),
   // for each floats type
-  base::Vector<BodyStatisticsOptimizerStates> float_stats_;
+  base::Vector<BodyStatisticsOptimizerStates>
+    float_stats_;
+
+  // transport statistics about all Kaps and non-specific binders ("floats"),
+  // for each floats type
+  base::Vector<ParticleTransportStatisticsOptimizerStates>
+    float_transport_stats_;
 
   // statistics about entire FG chains, for each FG type
   base::Vector<ChainStatisticsOptimizerStates> chain_stats_;
@@ -192,12 +202,22 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
     return backbone_scores_;
   }
 
-  // a close pair container for all diffusers except diffusers that
-  // appear consecutively within the model (e.g., fg repeats)
+  /**
+     a close pair container for all diffusers except diffusers that
+     appear consecutively within the model (e.g., fg repeats)
+  */
   container::ClosePairContainer* get_cpc();
 
+  /**
+     Returns the container for restraints over pairs of particles. Different scores
+     are used for particles of different (ordered) particle types.
+     When called for the first time, returns a new PredicatePairsRestraints
+     over all diffusing particles and sets a default linear repulsion restraint
+     between all close pairs returned by get_cpc()
+  */
   container::PredicatePairsRestraint* get_predr();
-  // get the number of interactions between two particles
+
+  /** get the number of interactions between two particles */
   int get_number_of_interactions(Particle *a, Particle *b) const;
   void set_sites(core::ParticleType t0,
                  unsigned int n, double r);

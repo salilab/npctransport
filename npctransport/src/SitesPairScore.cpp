@@ -214,6 +214,7 @@ void TypedSitesGeometry::do_show(std::ostream &) const {
    @param kr       coefficient for repulsion between penetrating particles
    @param sites0
    @param sites1
+   @param value
    @param ppr
 */
 void set_sites_score(double rangea, double ka,

@@ -127,12 +127,18 @@ void SimulationData::
 create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
                 core::ParticleType type, display::Color color) {
   if (data.number().value() > 0) {
-    float_stats_.push_back(BodyStatisticsOptimizerStates());
+    // prepare statistics for this type of floaters:
+    float_stats_.push_back
+      (BodyStatisticsOptimizerStates());
+    float_transport_stats_.push_back
+      (ParticleTransportStatisticsOptimizerStates());
+    // create a sub hierarchy with this type of floaters:
     atom::Hierarchy cur_root
       = atom::Hierarchy::setup_particle(new Particle(get_m()));
     std::cout << "   type " << type.get_string() << std::endl;
     cur_root->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(cur_root);
+    // populate hierarchy with particles:
     ParticlesTemp cur;
     for (int j=0; j< data.number().value(); ++j) {
       double dc=data.d_factor().value();
@@ -140,10 +146,19 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
                                     angular_d_factor_, dc,
                                     color,
                                     type, type.get_string()));
-      IMP_NEW(BodyStatisticsOptimizerState, os, (cur.back()));
-      os->set_period(statistics_interval_frames_);
-      float_stats_.back().push_back(os);
       cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
+      // add particle statistics:
+      IMP_NEW(BodyStatisticsOptimizerState, bsos, (cur.back()));
+      bsos->set_period(statistics_interval_frames_);
+      float_stats_.back().push_back(bsos);
+      IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
+              (cur.back(),
+               -0.5 * slab_thickness_, // tunnel bottom
+               0.5 * slab_thickness_) // tunnel top
+              );
+      ptsos->set_period(statistics_interval_frames_);
+      float_transport_stats_.back().push_back(ptsos);
+      // add interaction sites to particle:
       if (data.interactions().value() >0) {
         int nsites= data.interactions().value();
         std::cout << nsites << " sites added " << std::endl;
@@ -318,12 +333,14 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     if (dump_interval_frames_ > 0 && !get_rmf_file_name().empty()) {
       bd_->add_optimizer_state(get_rmf_writer());
     }
+    // set up the restraints for the BD simulation:
     RestraintsTemp rs= chain_restraints_;
     if(get_has_bounding_box()) rs.push_back(box_restraint_);
     if(get_has_slab()) rs.push_back(slab_restraint_);
     rs.push_back(predr_);
     IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
     bd_->set_scoring_function(rsf);
+    // add all kind of observers to the optimization:
     for (unsigned int i=0; i< fgs_stats_.size(); ++i) {
       for (unsigned int j=0; j< fgs_stats_[i].size(); ++j) {
         bd_->add_optimizer_states(fgs_stats_[i][j]);
@@ -360,10 +377,12 @@ container::ClosePairContainer* SimulationData::get_cpc() {
   }
   return cpc_;
 }
+
 container::PredicatePairsRestraint* SimulationData::get_predr() {
   if (!predr_) {
     // set linear repulsion upon penetration between all close pairs
-    // returned by get_cpc()
+    // returned by get_cpc(), with different scores for interactions
+    // between particles of different (ordered) types
     IMP_NEW(core::OrderedTypePairPredicate, otpp, ());
     otpp_=otpp;
     IMP_NEW(container::PredicatePairsRestraint, ppr, (otpp, get_cpc()));

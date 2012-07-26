@@ -16,9 +16,10 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 //! XXXX
 /** An origin centered slab with a tunnel in the vertical direction,
-    for z=[-height..height]
-    Returns 0 for all particles fully beyond [height] or below [-height],
-    or fully within slab radius from the origin in the [X,Y] plabe
+    for z = [-0.5*thickness_...0.5*thickness_]
+    Returns 0 for all particles fully beyond z range
+    or fully within slab radius from the origin in the [X,Y] plane
+    // TODO: verify documentation
  */
 class IMPNPCTRANSPORTEXPORT SlabSingletonScore: public SingletonScore
 {
@@ -46,6 +47,12 @@ class IMPNPCTRANSPORTEXPORT SlabSingletonScore: public SingletonScore
   double get_displacement_magnitude(const algebra::Vector3D &v) const {
     return get_displacement_vector(v).first;
   }
+
+  /** returns the lowest slab z coordinate */
+  double get_bottom_z() { return bottom_; }
+
+  /** returns the highest slab z coordinate */
+  double get_top_z() { return top_; }
 
  private:
   // computes the displacement of v from a z-axis aligned cylinder
