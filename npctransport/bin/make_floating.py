@@ -3,7 +3,6 @@ from IMP.npctransport import *
 import sys
 import barak_basic_configuration
 
-nonspecifics_on=None
 IMP.npctransport.make_parser.add_option("-n", "--nonspecifics", action="store_true",
                                         dest="nonspecifics_on",
                                         help="Whether to use non-specific interactions")
@@ -54,5 +53,6 @@ create_range(config.nonspecific_range, 0.1, 6, steps=5)
 create_range(interactionFG_FG.interaction_k, 0.0001, 30, steps=10)
 create_range(interactionFG_FG.interaction_range, 0.5, 5, steps=3)
 config.backbone_k.lower=5
+
 
 IMP.npctransport.write(config)

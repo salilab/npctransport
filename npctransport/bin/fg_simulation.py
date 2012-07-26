@@ -17,8 +17,8 @@ import IMP
 from IMP import container
 import IMP.base
 import IMP.npctransport
-import IMP.benchmark
-import IMP.example
+#import IMP.benchmark
+#import IMP.example
 from optparse import OptionParser
 import math
 
@@ -258,13 +258,25 @@ def set_fgs_three_types( sd ):
                         relative_bottom = 1.0, relative_top = 1.0)
     set_specific_fgs_in_cylinder(sd = sd,
                         fgs_list = fgs_middle,
-                        n_layers = 2,
+                        n_layers = 3,
                         relative_bottom = 0.2, relative_top = 0.8)
     set_specific_fgs_in_cylinder(sd = sd,
                         fgs_list = fgs_nuclear,
                         n_layers = 1,
                         relative_bottom = 0.0, relative_top = 0.0)
 
+def optimize_in_chunks( sd, nchunks ):
+    """
+    Optimizes sd->bd() in nchunks iterations, writing statistics at
+    the end of each iteration
+    """
+    nframes_left = sd.get_number_of_frames();
+    nframes_chunk= math.ceil(nframes_left / nchunks)
+    while(nframes_left > 0):
+        nframes_chunk = min(nframes_chunk, nframes_left)
+        sd.get_bd().optimize( nframes_chunk )
+        sd.update_statistics( timer ) # TODO: timer?
+        nframes_left = nframes_left - nframes_chunk
 
 
 ################## MAIN ####################
@@ -294,8 +306,8 @@ sd = IMP.npctransport.SimulationData(
 print "RMF file: ", sd.get_rmf_file_name()
 print get_fgs_of_type(IMP.npctransport.get_type_of_fg(0), sd.get_root())
 if(flags.cylinder_anchoring):
-    set_fgs_in_cylinder(sd, 4)
-#    set_fgs_three_types(sd)
+#    set_fgs_in_cylinder(sd, 4)
+    set_fgs_three_types(sd)
 color_fgs( sd )
 ntrials = sd.get_number_of_trials()
 print "Number of trials: ", ntrials
@@ -311,11 +323,11 @@ for i in range(ntrials):
     if(flags.profile):
         p.start("profile.pprof")
         print "Profiling begins..."
-    sd.get_bd().optimize( sd.get_number_of_frames() )
+    nchunks= 250 # parametrize externally?
+    optimize_in_chunks(sd, nchunks)
     if(flags.profile):
         p.stop()
         print "Profiling ends"
-    sd.update_statistics( timer ) # TODO: timer?
     print "Writing..."
     sd.write_geometry( flags.final_configuration )
     # Profiling?

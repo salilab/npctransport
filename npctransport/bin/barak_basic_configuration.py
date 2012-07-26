@@ -9,11 +9,11 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     # create_range(config.backbone_k, .2, 1, 10)
-    config.backbone_k.lower=.02
+    config.backbone_k.lower=.2
     #config.time_step_factor.lower=0.3
     config.time_step_factor.lower=3
     #create_range(config.rest_length_factor, .5, 1, 10)
-    config.excluded_volume_k.lower=.2
+    config.excluded_volume_k.lower=20
     config.nonspecific_range.lower=2
     config.nonspecific_k.lower=0.01
     config.slack.lower = 10
