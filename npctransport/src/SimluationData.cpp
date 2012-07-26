@@ -130,8 +130,10 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
     // prepare statistics for this type of floaters:
     float_stats_.push_back
       (BodyStatisticsOptimizerStates());
-    float_transport_stats_.push_back
-      (ParticleTransportStatisticsOptimizerStates());
+    if(get_has_slab()){ // only if has tunnel
+      float_transport_stats_.push_back
+        (ParticleTransportStatisticsOptimizerStates());
+    }
     // create a sub hierarchy with this type of floaters:
     atom::Hierarchy cur_root
       = atom::Hierarchy::setup_particle(new Particle(get_m()));
@@ -151,13 +153,15 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
       IMP_NEW(BodyStatisticsOptimizerState, bsos, (cur.back()));
       bsos->set_period(statistics_interval_frames_);
       float_stats_.back().push_back(bsos);
-      IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
-              (cur.back(),
-               -0.5 * slab_thickness_, // tunnel bottom
-               0.5 * slab_thickness_) // tunnel top
-              );
-      ptsos->set_period(statistics_interval_frames_);
-      float_transport_stats_.back().push_back(ptsos);
+      if(get_has_slab()) { // only if has tunnel
+        IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
+                (cur.back(),
+                 -0.5 * slab_thickness_, // tunnel bottom
+                 0.5 * slab_thickness_) // tunnel top
+                );
+        ptsos->set_period(statistics_interval_frames_);
+        float_transport_stats_.back().push_back(ptsos);
+      }
       // add interaction sites to particle:
       if (data.interactions().value() >0) {
         int nsites= data.interactions().value();
@@ -348,6 +352,11 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     }
     for (unsigned int i=0; i< float_stats_.size(); ++i) {
       bd_->add_optimizer_states(float_stats_[i]);
+    }
+    if(get_has_slab()){
+      for (unsigned int i=0; i< float_transport_stats_.size(); ++i) {
+        bd_->add_optimizer_states(float_transport_stats_[i]);
+      }
     }
     for (unsigned int i=0; i< chain_stats_.size(); ++i) {
       bd_->add_optimizer_states(chain_stats_[i]);
@@ -612,6 +621,13 @@ void SimulationData::reset_statistics_optimizer_states() {
       float_stats_[i][j]->reset();
     }
   }
+  if(get_has_slab()) {
+    for (unsigned int i=0; i< float_transport_stats_.size(); ++i) {
+      for (unsigned int j=0; j < float_transport_stats_[i].size(); ++j) {
+        float_transport_stats_[i][j]->reset();
+      }
+    }
+  }
   for (unsigned int i=0; i< chain_stats_.size(); ++i) {
     for (unsigned int j=0; j < chain_stats_[i].size(); ++j) {
       chain_stats_[i][j]->reset();
@@ -694,6 +710,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       float_stats_[i][j]->reset();
     }
   }
+  // TODO: add something for transport rates
   for (unsigned int i=0; i<fgs_stats_.size(); ++i) {
     for (unsigned int j=0; j<fgs_stats_[i].size(); ++j) {
       for (unsigned int k=0; k< fgs_stats_[i][j].size(); ++k) {
