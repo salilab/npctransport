@@ -41,7 +41,7 @@ ParticleTransportStatisticsOptimizerState
   if(cur_z_ > top_z_ && prev_z_ < top_z_
      && n_entries_bottom_ > 0 && !is_last_entry_from_top_) {
     n_transports_up_++;
-    sts::cout << "Particle " << *p_
+    std::cout << "Particle " << *p_
               << " n_transports_up = " << n_transports_up_
               << std::endl;
   }
