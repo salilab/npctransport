@@ -130,7 +130,7 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
     // prepare statistics for this type of floaters:
     float_stats_.push_back
       (BodyStatisticsOptimizerStates());
-    if(get_has_slab()){ // only if has tunnel
+    if( get_has_slab() ){ // only if has tunnel
       float_transport_stats_.push_back
         (ParticleTransportStatisticsOptimizerStates());
     }
@@ -153,7 +153,7 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
       IMP_NEW(BodyStatisticsOptimizerState, bsos, (cur.back()));
       bsos->set_period(statistics_interval_frames_);
       float_stats_.back().push_back(bsos);
-      if(get_has_slab()) { // only if has tunnel
+      if( get_has_slab() ) { // only if has tunnel
         IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
                 (cur.back(),
                  -0.5 * slab_thickness_, // tunnel bottom
@@ -283,7 +283,7 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
       IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
       IMP::rmf::add_geometries(fh, display::Geometries(1, bbg));
     }
-    if(get_has_slab()){
+    if( get_has_slab() ){
       IMP::rmf::add_restraints(fh, RestraintsTemp(1, slab_restraint_));
       IMP_NEW(SlabWireGeometry, slab_geometry,
               ( slab_thickness_ , tunnel_radius_ , box_side_ ) );
@@ -312,7 +312,7 @@ void SimulationData::dump_geometry() {
     bbg->set_was_used(true);
     w->add_geometry(bbg);
   }
-  if(get_has_slab()){
+  if( get_has_slab() ){
     IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()) );
     w->add_geometry( cyl_geom);
     // IMP_NEW(SlabWireGeometry, slab_geometry,
@@ -340,7 +340,7 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     // set up the restraints for the BD simulation:
     RestraintsTemp rs= chain_restraints_;
     if(get_has_bounding_box()) rs.push_back(box_restraint_);
-    if(get_has_slab()) rs.push_back(slab_restraint_);
+    if( get_has_slab() ) rs.push_back(slab_restraint_);
     rs.push_back(predr_);
     IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
     bd_->set_scoring_function(rsf);
@@ -353,7 +353,7 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     for (unsigned int i=0; i< float_stats_.size(); ++i) {
       bd_->add_optimizer_states(float_stats_[i]);
     }
-    if(get_has_slab()){
+    if( get_has_slab() ){
       for (unsigned int i=0; i< float_transport_stats_.size(); ++i) {
         bd_->add_optimizer_states(float_transport_stats_[i]);
       }
@@ -534,7 +534,7 @@ void SimulationData::write_geometry(std::string out) {
             (box_restraint_));
     w->add_geometry(rsg);
   }
-  if(get_has_slab()){
+  if( get_has_slab() ){
     IMP_NEW(display::RestraintGeometry, slab_rsg,
             (slab_restraint_));
     w->add_geometry(slab_rsg);
@@ -548,7 +548,7 @@ void SimulationData::write_geometry(std::string out) {
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
     w->add_geometry(bbg);
   }
-  if(get_has_slab()){
+  if( get_has_slab() ){
     // IMP_NEW(SlabWireGeometry, slab_geometry,
     //         (1000 /* h */ , 100 /* r */, 300 /* w */) );
     // w->add_geometry(slab_geometry);
@@ -558,7 +558,7 @@ void SimulationData::write_geometry(std::string out) {
 
 }
 
-#define UPDATE(frame, message, field, newvalue)  \
+#define UPDATE_AVG(frame, message, field, newvalue)  \
   (message).set_##field(static_cast<double>(frame)/(frame+1)*(message).field() \
                     + 1.0/(frame+1)*newvalue)
 
@@ -621,7 +621,7 @@ void SimulationData::reset_statistics_optimizer_states() {
       float_stats_[i][j]->reset();
     }
   }
-  if(get_has_slab()) {
+  if( get_has_slab() ) {
     for (unsigned int i=0; i< float_transport_stats_.size(); ++i) {
       for (unsigned int j=0; j < float_transport_stats_[i].size(); ++j) {
         float_transport_stats_[i][j]->reset();
@@ -689,37 +689,49 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
         double volume= -1.;
         double radius_of_gyration= -1.;
 #endif
-        UPDATE(nf, *stats.mutable_fgs(i), volume, volume);
+        UPDATE_AVG(nf, *stats.mutable_fgs(i), volume, volume);
         double length= core::get_distance(core::XYZ(chain[0]),
                                           core::XYZ(chain.back()));
-        UPDATE(nf, *stats.mutable_fgs(i), length, length);
-        UPDATE(nf, *stats.mutable_fgs(i), radius_of_gyration,
+        UPDATE_AVG(nf, *stats.mutable_fgs(i), length, length);
+        UPDATE_AVG(nf, *stats.mutable_fgs(i), radius_of_gyration,
                radius_of_gyration);
       }
     }
   }
+  // correlation times and diffusion coefficient
   for (unsigned int i=0; i<float_stats_.size(); ++i) {
     for (unsigned int j=0; j<float_stats_[i].size(); ++j) {
       int cnf=(nf)*float_stats_[i].size()+j;
-      UPDATE(cnf,
+      UPDATE_AVG(cnf,
              *stats.mutable_floaters(i), diffusion_coefficient,
              float_stats_[i][j]->get_diffusion_coefficient());
-      UPDATE(cnf,
+      UPDATE_AVG(cnf,
              *stats.mutable_floaters(i), correlation_time,
              float_stats_[i][j]->get_correlation_time());
       float_stats_[i][j]->reset();
     }
   }
-  // TODO: add something for transport rates
+  // update avg number of transports for each float type:
+  if( get_has_slab() ) {
+    for (unsigned int i=0; i<float_transport_stats_.size(); ++i) {
+      for (unsigned int j=0; j<float_transport_stats_[i].size(); ++j) {
+        int cnf=(nf)*float_transport_stats_[i].size()+j;
+        UPDATE_AVG(cnf,
+                   *stats.mutable_floaters(i), avg_n_transports,
+                   float_transport_stats_[i][j]->get_total_n_transports() );
+        float_transport_stats_[i][j]->reset();
+      }
+    }
+  }
   for (unsigned int i=0; i<fgs_stats_.size(); ++i) {
     for (unsigned int j=0; j<fgs_stats_[i].size(); ++j) {
       for (unsigned int k=0; k< fgs_stats_[i][j].size(); ++k) {
         unsigned int n=fgs_stats_[i].size()*fgs_stats_[i][j].size();
         unsigned int cnf=(nf)*n+j*fgs_stats_[i][j].size()+k;;
-        UPDATE(cnf,
+        UPDATE_AVG(cnf,
                *stats.mutable_fgs(i),particle_correlation_time,
                fgs_stats_[i][j][k]->get_correlation_time());
-        UPDATE(cnf,
+        UPDATE_AVG(cnf,
                *stats.mutable_fgs(i),particle_diffusion_coefficient,
                fgs_stats_[i][j][k]->get_diffusion_coefficient());
         fgs_stats_[i][j][k]->reset();
@@ -730,15 +742,15 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
     for (unsigned int j=0; j<chain_stats_[i].size(); ++j) {
       unsigned int n=chain_stats_[i].size();
       unsigned int cnf=(nf)*n+j;
-      UPDATE(cnf,
+      UPDATE_AVG(cnf,
              *stats.mutable_fgs(i), chain_correlation_time,
              chain_stats_[i][j]->get_correlation_time());
-      UPDATE(cnf,
+      UPDATE_AVG(cnf,
              *stats.mutable_fgs(i), chain_diffusion_coefficient,
              chain_stats_[i][j]->get_diffusion_coefficient());
       Floats dfs=chain_stats_[i][j]->get_diffusion_coefficient();
       double df= std::accumulate(dfs.begin(), dfs.end(), 0.0)/dfs.size();
-      UPDATE(cnf,
+      UPDATE_AVG(cnf,
              *stats.mutable_fgs(i), local_diffusion_coefficient,
              df);
       chain_stats_[i][j]->reset();
@@ -752,13 +764,13 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       double interactions, interacting, bead_partners, chain_partners;
       boost::tie(interactions, interacting, bead_partners, chain_partners)
           =get_interactions_and_interacting(floaters.back(), fgs);
-      UPDATE(nf, *stats.mutable_floaters(i), interactions,
+      UPDATE_AVG(nf, *stats.mutable_floaters(i), interactions,
              interactions/floaters.back().size());
-      UPDATE(nf, *stats.mutable_floaters(i), interacting,
+      UPDATE_AVG(nf, *stats.mutable_floaters(i), interacting,
              interacting/floaters.back().size());
-      UPDATE(nf, *stats.mutable_floaters(i), interaction_partner_chains,
+      UPDATE_AVG(nf, *stats.mutable_floaters(i), interaction_partner_chains,
              chain_partners/interacting);
-      UPDATE(nf, *stats.mutable_floaters(i), interaction_partner_beads,
+      UPDATE_AVG(nf, *stats.mutable_floaters(i), interaction_partner_beads,
              bead_partners/interacting);
     }
   }
@@ -787,23 +799,26 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
     Int n1 = pInStats_i->get_number_of_particles_2();
     Float avg_contacts_num = pInStats_i->get_average_number_of_contacts();
 
-    UPDATE(nf, *pOutStats_i, avg_contacts_per_particle0,
+    UPDATE_AVG(nf, *pOutStats_i, avg_contacts_per_particle0,
            avg_contacts_num / n0);
-    UPDATE(nf, *pOutStats_i, avg_contacts_per_particle1,
+    UPDATE_AVG(nf, *pOutStats_i, avg_contacts_per_particle1,
            avg_contacts_num / n1);
-    UPDATE(nf, *pOutStats_i, avg_pct_bound_particles0,
+    UPDATE_AVG(nf, *pOutStats_i, avg_pct_bound_particles0,
            pInStats_i->get_average_percentage_bound_particles_1() );
-    UPDATE(nf, *pOutStats_i, avg_pct_bound_particles1,
+    UPDATE_AVG(nf, *pOutStats_i, avg_pct_bound_particles1,
            pInStats_i->get_average_percentage_bound_particles_2() );
     interactions_stats_[i]->reset();
   }
 
-  UPDATE(nf, stats, energy_per_particle, get_m()->evaluate(false)/all.size());
+  UPDATE_AVG(nf, stats, energy_per_particle, // TODO: should this be reset?
+             get_m()->evaluate(false)/all.size());
 
-  UPDATE(nf, stats, seconds_per_iteration, timer.elapsed());
+  // TODO: should timer be reset?
+  UPDATE_AVG(nf, stats, seconds_per_iteration, timer.elapsed());
 
   stats.set_number_of_frames(nf+1);
 
+  // dump to file
   std::ofstream outf(statistics_file_name_.c_str(), std::ios::binary);
   stats.SerializeToOstream(&outf);
 }

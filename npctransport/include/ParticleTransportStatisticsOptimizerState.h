@@ -63,7 +63,7 @@ public core::PeriodicOptimizerState {
   /** Returns the number of times the particle crossed the channel
       from any one side to the other
   */
-  Float get_total_num_transports()
+  Float get_total_n_transports()
   { return n_transports_up_ + n_transports_down_; }
 
   /** resets the number of transports statistics to 0 */

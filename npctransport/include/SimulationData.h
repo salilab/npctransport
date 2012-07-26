@@ -264,8 +264,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   algebra::BoundingBox3D get_box() const {
     return algebra::get_cube_d<3>(.5*box_side_);
   }
+
   algebra::Cylinder3D get_cylinder() const;
+
   double get_backbone_k() const {return backbone_k_;}
+
   double get_interaction_k() const {return interaction_k_;}
 
   /**
@@ -277,26 +280,56 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   rmf::SaveOptimizerState *get_rmf_writer();
 
   void reset_rmf();
+
   void reset_statistics_optimizer_states();
+
   void add_chain_restraint(Restraint *r) {
     chain_restraints_.push_back(r);
   }
+
+  /**
+     Write the geometry to the file path 'out'
+  */
   void write_geometry(std::string out);
+
   void dump_geometry();
+
+  /**
+      Returns the list of particles in the simulation model
+      of type 'type'
+  */
   ParticlesTemp get_particles(core::ParticleType type) const {
     return particles_.find(type)->second;
   }
+
   void set_interrupted(bool tf);
+
+  /**
+      opens / creates statistics protobuf file, and update it
+      with appropriate statistics, using statistics file
+      originally specified in the constructor.
+
+      @param timer the timer that was used to measure the time
+                   that has elapsed for statistics
+   */
   void update_statistics(const boost::timer &timer) const;
+
   unsigned int get_number_of_frames() const {return number_of_frames_;}
+
   unsigned int get_number_of_trials() const {return number_of_trials_;}
+
   atom::Hierarchy get_root() const {return atom::Hierarchy(root_);}
+
   Restraints get_chain_restraints() const {return chain_restraints_;}
+
   Restraint* get_box_restraint() const {return box_restraint_;}
+
   Restraint* get_slab_restraint() const {return slab_restraint_;}
+
   display::Geometry* get_static_geometry();
 
   int get_rmf_dump_interval_frames() const { return dump_interval_frames_; }
+
   std::string get_rmf_file_name() const { return rmf_file_name_; }
 
   /**
