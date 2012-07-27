@@ -20,7 +20,10 @@ ParticleTransportStatisticsOptimizerState::ParticleTransportStatisticsOptimizerS
   bottom_z_(bottom_z), top_z_(top_z)
 {
   this->reset();
+  std::cout << "Initiating ParticleTransportStatsXXX with particle: ";
+  std::cout << p << std::endl;
   cur_z_ = core::RigidBody(p_).get_coordinates()[2];
+  std::cout << "Coordinates " << cur_z_ << std::endl;
 }
 
 void
