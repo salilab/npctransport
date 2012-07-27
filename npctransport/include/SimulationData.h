@@ -165,17 +165,23 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
      based on the settings in data
    */
-  void create_floaters(const ::npctransport_proto::Assignment_FloaterAssignment&data,
-                       core::ParticleType type, display::Color color);
+  void create_floaters
+    (const ::npctransport_proto::Assignment_FloaterAssignment&data,
+     core::ParticleType type, display::Color color);
 
   /**
-     Creates bounding volume restraints such as box restraint and slab
-     restraints, based on the box_size_, slab_height_ and slab_radius_
-     class variables, etc.
+     Creates bounding box restraint based on the box_size_
+     class variable, and apply it to all diffusers returned
+     by get_diffusers()
    */
-  void create_bounding_box_restraint();
+  void create_bounding_box_restraint_on_diffusers();
 
-  void create_slab_restraint();
+  /**
+     Creates slab bounding volume restraint, based on the slab_thickness_
+     and tunnel_radius_ class variables, and apply it to all diffusers
+     returned by get_diffusers()
+   */
+  void create_slab_restraint_on_diffusers();
 
  public:
   /**

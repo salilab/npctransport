@@ -90,13 +90,6 @@ SimulationData::SimulationData(std::string assignment_file,
   }
   first_stats_=true;
 
-  // bounding box / slab constraints
-  if (box_is_on_) {
-    create_bounding_box_restraint();
-  }
-  if (slab_is_on_) {
-    create_slab_restraint();
-  }
   // create particles hierarchy
   root_= new Particle(get_m());
   root_->add_attribute(get_simulation_data_key(), this);
@@ -122,6 +115,13 @@ SimulationData::SimulationData(std::string assignment_file,
   // get_diffusers()
   ParticlesTemp leaves= get_as<ParticlesTemp>(atom::get_leaves(get_root()));
   get_diffusers()->set_particles(leaves);
+  // bounding box / slab constraints on diffusers
+  if (box_is_on_) {
+    create_bounding_box_restraint_on_diffusers();
+  }
+  if (slab_is_on_) {
+    create_slab_restraint_on_diffusers();
+  }
 }
 
 /**
@@ -161,9 +161,6 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
       bsos->set_period( statistics_interval_frames_ );
       float_stats_.back().push_back( bsos );
       if( slab_is_on_ ) { // only if has tunnel
-        std::cout << "Adding transport statistics to particle "
-                  << cur_p << " of type " << type.get_string()
-                  << std::endl;
         IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
                 ( cur_p,
                   -0.5 * slab_thickness_, // tunnel bottom
@@ -239,7 +236,7 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
    Creates bounding volume restraints such as box restraint and slab restraints,
    based on the box_size_, slab_height_, slab_radius_, etc. class variables
 */
-void SimulationData::create_bounding_box_restraint()
+void SimulationData::create_bounding_box_restraint_on_diffusers()
 {
   // Add bounding box restraint
   // TODO: what does backbone_spring_k_ has to do
@@ -253,7 +250,7 @@ void SimulationData::create_bounding_box_restraint()
                                              "bounding box");
 }
 
-void SimulationData::create_slab_restraint() {
+void SimulationData::create_slab_restraint_on_diffusers() {
     // Add cylinder restraint
   IMP_NEW(SlabSingletonScore,
           slab_score,
