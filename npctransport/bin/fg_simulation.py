@@ -201,15 +201,16 @@ def set_specific_fgs_in_cylinder( sd, fgs_list, n_layers,
         print "Delta layers: %f (relative value)" % delta_layers
     # calculate angle increments between adjacent fg nups in each layers
     chains_per_layer = int( math.ceil( len(fgs_list) / float(n_layers) ) )
-    angle_increments = 2 * math.pi / chains_per_layer
+    angle_increments = 2.0 * math.pi / chains_per_layer
     # pin chains to each layer
     for layer in range( n_layers ):
         relative_h = bottom_layer_height + layer * delta_layers
+        angle_phase = layer * angle_increments / n_layers
         for k in range( chains_per_layer ):
             chain_num = layer * chains_per_layer + k #
             if( chain_num >=  len(fgs_list) ):
                 break; # may happen if len(chains) does not divide by n_layers
-            angle = k * angle_increments
+            angle = k * angle_increments + angle_phase
             new_anchor = cyl.get_inner_point_at( \
                 relative_h, relative_r, angle)
             cur_chain = IMP.atom.Hierarchy( fgs_list[chain_num] )

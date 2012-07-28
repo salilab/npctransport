@@ -757,7 +757,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       UPDATE_AVG(cnf,
              *stats.mutable_fgs(i), chain_diffusion_coefficient,
              chain_stats_[i][j]->get_diffusion_coefficient());
-      Floats dfs=chain_stats_[i][j]->get_diffusion_coefficient();
+      Floats dfs=chain_stats_[i][j]->get_diffusion_coefficients();
       double df= std::accumulate(dfs.begin(), dfs.end(), 0.0)/dfs.size();
       UPDATE_AVG(cnf,
              *stats.mutable_fgs(i), local_diffusion_coefficient,
