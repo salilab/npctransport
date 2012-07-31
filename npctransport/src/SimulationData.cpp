@@ -69,6 +69,8 @@ SimulationData::SimulationData(std::string assignment_file,
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
   GET_ASSIGNMENT(slab_thickness);
+  GET_ASSIGNMENT(slab_is_on);
+  GET_ASSIGNMENT(box_is_on);
   GET_ASSIGNMENT(slack);
   GET_VALUE(number_of_trials);
   GET_VALUE(number_of_frames);
@@ -109,14 +111,17 @@ SimulationData::SimulationData(std::string assignment_file,
       add_interaction( interaction_i );
     }
   }
+  // Add all leaves of th hierarchy as the set of diffusers returned by
+  // get_diffusers()
   ParticlesTemp leaves= get_as<ParticlesTemp>(atom::get_leaves(get_root()));
   get_diffusers()->set_particles(leaves);
-  if (data.box_is_on().value()) {
-    create_bounding_box_restraint();
+  // bounding box / slab constraints on diffusers
+  if (box_is_on_) {
+    create_bounding_box_restraint_on_diffusers();
   }
-  if (data.slab_is_on().value()) {
-    create_slab_restraint();
- }
+  if (slab_is_on_) {
+    create_slab_restraint_on_diffusers();
+  }
 }
 
 /**
@@ -130,7 +135,7 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
     // prepare statistics for this type of floaters:
     float_stats_.push_back
       (BodyStatisticsOptimizerStates());
-    if( get_has_slab() ){ // only if has tunnel
+    if( slab_is_on_ ){ // if has tunnel, create a list of particle stats
       float_transport_stats_.push_back
         (ParticleTransportStatisticsOptimizerStates());
     }
@@ -141,35 +146,37 @@ create_floaters(const  ::npctransport_proto::Assignment_FloaterAssignment&data,
     cur_root->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(cur_root);
     // populate hierarchy with particles:
-    ParticlesTemp cur;
+    ParticlesTemp cur_particles;
     for (int j=0; j< data.number().value(); ++j) {
       double dc=data.d_factor().value();
-      cur.push_back(create_particle(this, data.radius().value(),
-                                    angular_d_factor_, dc,
-                                    color,
-                                    type, type.get_string()));
-      cur_root.add_child(atom::Hierarchy::setup_particle(cur.back()));
+      Particle* cur_p =
+        create_particle(this, data.radius().value(),
+                        angular_d_factor_, dc,
+                        color,
+                        type, type.get_string());
+      cur_particles.push_back( cur_p );
+      cur_root.add_child( atom::Hierarchy::setup_particle( cur_p ) );
       // add particle statistics:
-      IMP_NEW(BodyStatisticsOptimizerState, bsos, (cur.back()));
-      bsos->set_period(statistics_interval_frames_);
-      float_stats_.back().push_back(bsos);
-      if( get_has_slab() ) { // only if has tunnel
+      IMP_NEW( BodyStatisticsOptimizerState, bsos, ( cur_p ) );
+      bsos->set_period( statistics_interval_frames_ );
+      float_stats_.back().push_back( bsos );
+      if( slab_is_on_ ) { // only if has tunnel
         IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
-                (cur.back(),
-                 -0.5 * slab_thickness_, // tunnel bottom
-                 0.5 * slab_thickness_) // tunnel top
+                ( cur_p,
+                  -0.5 * slab_thickness_, // tunnel bottom
+                  0.5 * slab_thickness_) // tunnel top
                 );
-        ptsos->set_period(statistics_interval_frames_);
-        float_transport_stats_.back().push_back(ptsos);
+        ptsos->set_period( statistics_interval_frames_ );
+        float_transport_stats_.back().push_back( ptsos );
       }
-      // add interaction sites to particle:
+      // add interaction sites to particles of this type:
       if (data.interactions().value() >0) {
         int nsites= data.interactions().value();
         std::cout << nsites << " sites added " << std::endl;
         set_sites(type, nsites, data.radius().value());
       }
     }
-    particles_[type]=cur;
+    particles_[type]=cur_particles;
     interaction_range_factors_[type]= data.interaction_range_factor().value();
     interaction_k_factors_[type]= data.interaction_k_factor().value();
   }
@@ -185,7 +192,7 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
   if (data.number().value() > 0) {
     fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
     chain_stats_.push_back(ChainStatisticsOptimizerStates());
-    ParticlesTemp cur;
+    ParticlesTemp cur_particles;
     atom::Hierarchy hi= atom::Hierarchy::setup_particle(new Particle(get_m()));
     hi->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(hi);
@@ -201,7 +208,7 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
                                       angular_d_factor_, dc,
                                       backbone_scores_.back(),
                                       display::Color(.3,.3,.3), type, "fg"));
-      cur.push_back(hc);
+      cur_particles.push_back(hc);
       ParticlesTemp chain=hc.get_children();
       chain_stats_.back()
         .push_back(new ChainStatisticsOptimizerState(chain));
@@ -212,13 +219,13 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
           .push_back(new BodyStatisticsOptimizerState(chain[k]));
         fgs_stats_.back().back().back()->set_period(statistics_interval_frames_);
       }
-      hi.add_child(atom::Hierarchy(cur.back()));
+      hi.add_child(atom::Hierarchy(cur_particles.back()));
       if (data.interactions().value() > 0) {
         int nsites= data.interactions().value();
         set_sites(type, nsites, data.radius().value());
       }
     }
-    particles_[type]=cur;
+    particles_[type]=cur_particles;
     interaction_range_factors_[type]= data.interaction_range_factor().value();
     interaction_k_factors_[type]= data.interaction_k_factor().value();
   }
@@ -229,7 +236,7 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
    Creates bounding volume restraints such as box restraint and slab restraints,
    based on the box_size_, slab_height_, slab_radius_, etc. class variables
 */
-void SimulationData::create_bounding_box_restraint()
+void SimulationData::create_bounding_box_restraint_on_diffusers()
 {
   // Add bounding box restraint
   // TODO: what does backbone_spring_k_ has to do
@@ -243,7 +250,7 @@ void SimulationData::create_bounding_box_restraint()
                                              "bounding box");
 }
 
-void SimulationData::create_slab_restraint() {
+void SimulationData::create_slab_restraint_on_diffusers() {
     // Add cylinder restraint
   IMP_NEW(SlabSingletonScore,
           slab_score,
@@ -353,7 +360,7 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     for (unsigned int i=0; i< float_stats_.size(); ++i) {
       bd_->add_optimizer_states(float_stats_[i]);
     }
-    if( get_has_slab() ){
+    if( slab_is_on_ ){
       for (unsigned int i=0; i< float_transport_stats_.size(); ++i) {
         bd_->add_optimizer_states(float_transport_stats_[i]);
       }
@@ -622,7 +629,7 @@ void SimulationData::reset_statistics_optimizer_states() {
       float_stats_[i][j]->reset();
     }
   }
-  if( get_has_slab() ) {
+  if( slab_is_on_ ) {
     for (unsigned int i=0; i< float_transport_stats_.size(); ++i) {
       for (unsigned int j=0; j < float_transport_stats_[i].size(); ++j) {
         float_transport_stats_[i][j]->reset();
@@ -676,9 +683,9 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   for (unsigned int i=0; i<type_of_fg.size(); ++i) {
     if (particles_.find(type_of_fg[i]) != particles_.end()) {
       fgs.push_back(ParticlesTemps());
-      ParticlesTemp cur= particles_.find(type_of_fg[i])->second;
-      for (unsigned int j=0; j< cur.size(); ++j) {
-        atom::Hierarchy h(cur[j]);
+      ParticlesTemp fgi_particles= particles_.find(type_of_fg[i])->second;
+      for (unsigned int j=0; j< fgi_particles.size(); ++j) {
+        atom::Hierarchy h(fgi_particles[j]);
         ParticlesTemp chain
             = get_as<ParticlesTemp>(atom::get_leaves(h));
         all+=chain;
@@ -713,10 +720,10 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
     }
   }
   // update avg number of transports per particle for each float type:
-  if( get_has_slab() ) {
+  if( slab_is_on_ ) {
     for (unsigned int i=0; i<float_transport_stats_.size(); ++i) {
       for (unsigned int j=0; j<float_transport_stats_[i].size(); ++j) {
-        *stats.mutable_floaters(i)->set_avg_n_transports(0);
+        (*stats.mutable_floaters(i)).set_avg_n_transports(0);
         int n_transports_ij =
           float_transport_stats_[i][j]->get_total_n_transports() ;
         UPDATE_AVG(j, *stats.mutable_floaters(i),

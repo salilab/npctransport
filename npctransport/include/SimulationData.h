@@ -68,6 +68,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Parameter<double> box_side_;
   Parameter<double> tunnel_radius_;
   Parameter<double> slab_thickness_;
+  Parameter<bool> box_is_on_;
+  Parameter<bool> slab_is_on_;
   Parameter<double> slack_;
   Parameter<int> number_of_trials_;
   Parameter<int> number_of_frames_;
@@ -163,17 +165,23 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
      based on the settings in data
    */
-  void create_floaters(const ::npctransport_proto::Assignment_FloaterAssignment&data,
-                       core::ParticleType type, display::Color color);
+  void create_floaters
+    (const ::npctransport_proto::Assignment_FloaterAssignment&data,
+     core::ParticleType type, display::Color color);
 
   /**
-     Creates bounding volume restraints such as box restraint and slab
-     restraints, based on the box_size_, slab_height_ and slab_radius_
-     class variables, etc.
+     Creates bounding box restraint based on the box_size_
+     class variable, and apply it to all diffusers returned
+     by get_diffusers()
    */
-  void create_bounding_box_restraint();
+  void create_bounding_box_restraint_on_diffusers();
 
-  void create_slab_restraint();
+  /**
+     Creates slab bounding volume restraint, based on the slab_thickness_
+     and tunnel_radius_ class variables, and apply it to all diffusers
+     returned by get_diffusers()
+   */
+  void create_slab_restraint_on_diffusers();
 
  public:
   /**
@@ -219,8 +227,19 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
   /** get the number of interactions between two particles */
   int get_number_of_interactions(Particle *a, Particle *b) const;
+
+  /**
+      Create n interaction sites spread around the surface of a ball of
+      radius r, and associate these sites with all particles of type t0
+  */
   void set_sites(core::ParticleType t0,
                  unsigned int n, double r);
+
+  /**
+      returns a list of 3D coordinates for the interaction sites associated
+      with particles of type t0. The site coordinates are relative to the
+      particles centers.
+  */
   algebra::Vector3Ds get_sites(core::ParticleType t0) const {
     if (sites_.find(t0) != sites_.end()) {
       return sites_.find(t0)->second;
@@ -228,13 +247,25 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
       return algebra::Vector3Ds();
     }
   }
+
+  /**
+      Returns the effective interaction range radius of a
+      site on a floater */
+  // TODO: this is not the true value - the true one might depend on the
+  //       specific range of each interaction type, so range_ is more
+  //       like an upper bound
   double get_site_radius(core::ParticleType) const {
     return range_/2;
   }
+
+  // returns true if a bounding box restraint has been defined */
   bool get_has_bounding_box() const { return box_restraint_; }
+
+  /** returns true if a slab restraint has been defined */
   bool get_has_slab() const { return slab_restraint_; }
 
   double get_statistics_fraction() const {return statistics_fraction_;}
+
   //! Return the maximum number of minutes the simulation can run
   /** Or 0 for no limit. */
   double get_maximum_number_of_minutes() const {

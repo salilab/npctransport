@@ -30,6 +30,7 @@ ParticleTransportStatisticsOptimizerState::reset()
   n_transports_down_ = 0;
   n_entries_bottom_ = 0;
   n_entries_top_ = 0;
+  is_reset_ = true;
 }
 
 void
@@ -37,6 +38,10 @@ ParticleTransportStatisticsOptimizerState
 ::do_update(unsigned int) {
   prev_z_ = cur_z_;
   cur_z_ = core::RigidBody(p_).get_coordinates()[2];
+  if(is_reset_){ // ignore previous z if reset
+    prev_z_ = cur_z_;
+    is_reset_ = false;
+  }
   // update transport events
   if(cur_z_ > top_z_ && prev_z_ < top_z_
      && n_entries_bottom_ > 0 && !is_last_entry_from_top_) {

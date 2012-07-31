@@ -28,11 +28,12 @@ public core::PeriodicOptimizerState {
   Float bottom_z_, top_z_; // channel boundaries on z-axis
   Float prev_z_; // particle z in previous round
   Float cur_z_; // particle z in this round
-  Int n_transports_up_; // from bottom to top of channel
-  Int n_transports_down_; // from top to bottom of channOBel
-  Int n_entries_bottom_; // times particle entered channel from bottom
-  Int n_entries_top_; // times particle entered channel from top
+  unsigned int n_transports_up_; // from bottom to top of channel
+  unsigned int n_transports_down_; // from top to bottom of channOBel
+  unsigned int n_entries_bottom_; // times particle entered channel from bottom
+  unsigned int n_entries_top_; // times particle entered channel from top
   bool is_last_entry_from_top_; // last time p entered channel was top or bottom
+  bool is_reset_;
 
   Particle *get_particle() const {return p_;}
  public:
@@ -48,22 +49,23 @@ public core::PeriodicOptimizerState {
                                             Float bottom_z,
                                             Float top_z);
 
-  /** Returns the number of times the particle crossed the channel
+  /**
+      Returns the number of times the particle crossed the channel
       from its bottom to its top
   */
-  Float get_n_transports_up()
+  unsigned int get_n_transports_up()
   { return n_transports_up_; }
 
   /** Returns the number of times the particle crossed the channel
       from its top to its bottom
   */
-  Float get_n_transports_down()
+  unsigned int get_n_transports_down()
   { return n_transports_down_; }
 
   /** Returns the number of times the particle crossed the channel
       from any one side to the other
   */
-  Float get_total_n_transports()
+  unsigned int get_total_n_transports()
   { return n_transports_up_ + n_transports_down_; }
 
   /** resets the number of transports statistics to 0 */
