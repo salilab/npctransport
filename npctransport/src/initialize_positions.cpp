@@ -124,10 +124,12 @@ void optimize_balls(const ParticlesTemp &ps,
       mc->set_kt(100.0/(3*j+1));
       double e= mc->optimize(ps.size()*(j+1)*500);
       std::cout << "Energy is " << e << std::endl;
-      std::ostringstream oss;
-      oss << i << " " << j;
-      save->update_always();
-      save->set_frame_name(oss.str());
+      if (debug) {
+        std::ostringstream oss;
+        oss << i << " " << j;
+        save->update_always();
+        save->set_frame_name(oss.str());
+      }
       if (e < .000001) break;
     }
     double e=local->optimize(1000);
