@@ -282,7 +282,7 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
             (fh));
     rmf_writer_=los;
     los->set_period(dump_interval_frames_);
-    add_hierarchy(fh, atom::Hierarchy(get_root()));
+    add_hierarchies(fh, atom::Hierarchy(get_root()).get_children());
     IMP::rmf::add_restraints(fh, RestraintsTemp(1, get_predr()));
     IMP::rmf::add_restraints(fh, chain_restraints_);
     if(get_has_bounding_box()){
