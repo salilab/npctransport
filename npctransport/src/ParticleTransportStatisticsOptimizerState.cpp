@@ -31,6 +31,7 @@ ParticleTransportStatisticsOptimizerState::reset()
   n_entries_bottom_ = 0;
   n_entries_top_ = 0;
   is_reset_ = true;
+  std::cout << "ParticleTransportStatistics - RESET" << std::endl;
 }
 
 void
@@ -43,25 +44,42 @@ ParticleTransportStatisticsOptimizerState
     is_reset_ = false;
   }
   // update transport events
-  if(cur_z_ > top_z_ && prev_z_ < top_z_
+  if(cur_z_ > top_z_ && prev_z_ <= top_z_
      && n_entries_bottom_ > 0 && !is_last_entry_from_top_) {
     n_transports_up_++;
-    std::cout << "Particle " << *p_
+    std::cout << "Particle EXIT UP " << std::endl
+              << *p_ << std::endl
               << " n_transports_up = " << n_transports_up_
+              << " prev_z = " << prev_z_
               << std::endl;
   }
-  if(cur_z_ < bottom_z_ && prev_z_ > bottom_z_
+  if(cur_z_ < bottom_z_ && prev_z_ >= bottom_z_
      && n_entries_top_ > 0 && is_last_entry_from_top_) {
     n_transports_down_++;
+    std::cout << "Particle EXIT DOWN" << std::endl
+              << *p_ << std::endl
+              << " n_transports_down = " << n_transports_down_
+              << " prev_z = " << prev_z_
+              << std::endl;
   }
   // update channel entry directionality
-  if(cur_z_ < top_z_ && prev_z_ > top_z_) {
+  if(cur_z_ < top_z_ && prev_z_ >= top_z_) {
     is_last_entry_from_top_ = true;
     n_entries_top_++;
+    std::cout << "Particle ENTRY TOP" << std::endl
+              << *p_ << std::endl
+              << " n_entries_top = " << n_entries_top_
+              << " prev_z = " << prev_z_
+              << std::endl;
   }
-  if(cur_z_ > bottom_z_ && prev_z_ < bottom_z_) {
+  if(cur_z_ > bottom_z_ && prev_z_ <= bottom_z_) {
     is_last_entry_from_top_ = false;
     n_entries_bottom_++;
+    std::cout << "Particle ENTRY BOTTOM " << std::endl
+              << *p_ << std::endl
+              << " n_entries_bottom = " << n_entries_bottom_
+              << " prev_z = " << prev_z_
+              << std::endl;
   }
 }
 
