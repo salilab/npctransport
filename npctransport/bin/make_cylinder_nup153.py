@@ -21,59 +21,66 @@ def add_interactions_for_fg(fg_name,
                                        name1="crap0",
                                        interaction_k=0,
                                        interaction_range=0)
-    interactionFG_FG= IMP.npctransport.add_interaction(config,
-                                       name0=fg_name,
-                                       name1=fg_name,
-                                       interaction_k=10,
-                                       interaction_range=2)
 
 # ********* MAIN: *********
 config= barak_basic_configuration.get_basic_config()
 config.dump_interval_ns=2.5
-config.simulation_time_ns=3000
+config.simulation_time_ns=6000
 config.box_is_on.lower=1
-config.box_side.lower=400
+config.box_side.lower=300
 config.slab_is_on.lower=1
 config.slab_thickness.lower=150
 config.tunnel_radius.lower=90
 
 fg_cyto= IMP.npctransport.add_fg_type(config,
-                                 number_of_beads=9,
+                                 number_of_beads=8,
                                  number=5,
                                  radius=8,
                                  interactions=1)
 fg_middle= IMP.npctransport.add_fg_type(config,
-                                 number_of_beads=9,
+                                 number_of_beads=8,
                                  number=15,
                                  radius=8,
                                  interactions=1)
 fg_nuclear= IMP.npctransport.add_fg_type(config,
-                                 number_of_beads=9,
+                                 number_of_beads=8,
                                  number=5,
                                  radius=8,
                                  interactions=1)
 kap= IMP.npctransport.add_float_type(config,
-                                     number=10,
+                                     number=5,
                                      radius=15,
                                      interactions=12)
 nonspecifics= IMP.npctransport.add_float_type(config,
-                                              number=20,
+                                              number=10,
                                               radius=15,
                                               interactions=0)
 
+# fg with kaps / craps
 add_interactions_for_fg("fg0",5)
 add_interactions_for_fg("fg1",
-                        k_kap_lower = 0.1,
-                        k_kap_upper = 5,
+                        k_kap_lower = 0.95,
+                        k_kap_upper = 10,
                         k_kap_steps = 10)
 add_interactions_for_fg("fg2",5)
+# non-specific attraction
 create_range(config.nonspecific_k, 0.1, 10, steps=5)
 create_range(config.nonspecific_range, 0.1, 2, steps=3)
+# internal FG-FG
+for i in range(3):
+    for j in range(i,3):
+        interactionFG_FG= IMP.npctransport.add_interaction(config,
+                                                           name0="fg%d" % i,
+                                                           name1="fg%d" % j,
+                                                           interaction_k=1,
+                                                           interaction_range=2)
 
+# dump to file
 f=open(sys.argv[1], "wb")
 f.write(config.SerializeToString())
-
 print config
+
+# dump quick file version
 if len(sys.argv)>2:
     config.number_of_trials.lower=2
     config.number_of_frames.lower=2

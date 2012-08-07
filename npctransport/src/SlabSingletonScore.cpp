@@ -82,8 +82,8 @@ double SlabSingletonScore::evaluate(Particle *p,
   core::XYZR d(p);
   if (!d.get_coordinates_are_optimized()) return false;
   // early abort if above or below slab
-  if ( (d.get_z()-d.get_radius() > thickness_) ||
-       (d.get_z()+d.get_radius() < -thickness_)) {
+  if ( (d.get_z()-d.get_radius() > top_) ||
+       (d.get_z()+d.get_radius() < bottom_)) {
     return 0;
   }
   // early abort if [x,y] within cylinder radius
