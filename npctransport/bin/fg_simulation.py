@@ -265,12 +265,13 @@ def set_fgs_three_types( sd ):
                         n_layers = 1,
                         relative_bottom = 0.0, relative_top = 0.0)
 
-def optimize_in_chunks( sd, nchunks ):
+def optimize_in_chunks( sd, nframes, nchunks ):
     """
     Optimizes sd->bd() in nchunks iterations, writing statistics at
     the end of each iteration
     """
-    nframes_left = sd.get_number_of_frames();
+    timer = IMP.npctransport.create_boost_timer()
+    nframes_left = nframes
     nframes_chunk= math.ceil(nframes_left / nchunks)
     while(nframes_left > 0):
         nframes_chunk = min(nframes_chunk, nframes_left)
@@ -296,7 +297,6 @@ RMF.set_show_hdf5_errors(True)
 # #define IMP_NPC_SET_PROF(tf)
 # #endif
 
-timer = IMP.npctransport.create_boost_timer()
 IMP.set_log_level(IMP.PROGRESS)
 sd = IMP.npctransport.SimulationData(
     flags.assignments,
@@ -317,14 +317,22 @@ for i in range(ntrials):
         sd.reset_rmf()
     print "Initializing..."
     IMP.npctransport.initialize_positions(sd)
+    nframes_running = math.ceil(sd.get_statistics_fraction()
+                                * sd.get_number_of_frames())
+    nframes_equilib = sd.get_number_of_frames() - nframes_running
+    print "Equilibrating..."
+    sd.reset_rmf() # TODO: should I keep it? it means no RMF for initialization
+    sd.get_bd().optimize(nframes_equilib)
     print "Running..."
+    sd.reset_statistics_optimizer_states(); # only take stats after equib
     sd.get_bd().set_log_level(IMP.PROGRESS)
     p = IMP.benchmark.Profiler()
     if(flags.profile):
         p.start("profile.pprof")
         print "Profiling begins..."
+    sd.get_bd().set_current_time(0)
     nchunks= 250 # parametrize externally?
-    optimize_in_chunks(sd, nchunks)
+    optimize_in_chunks(sd, nframes_running, nchunks)
     if(flags.profile):
         p.stop()
         print "Profiling ends"

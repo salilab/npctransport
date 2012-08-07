@@ -5,11 +5,12 @@ import sys
 def get_basic_config():
     config = Configuration()
     IMP.npctransport.set_default_configuration(config)
+    config.statistics_fraction.lower=0.9
     #config.dump_interval=1
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     # create_range(config.backbone_k, .2, 1, 10)
-    config.backbone_k.lower=.2
+    config.backbone_k.lower=1
     #config.time_step_factor.lower=0.3
     config.time_step_factor.lower=3
     #create_range(config.rest_length_factor, .5, 1, 10)
