@@ -731,16 +731,21 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       float_stats_[i][j]->reset();
     }
   }
-  // update avg number of transports per particle for each float type:
+  // update avg number of transports per particle for each type of floats:
   if( slab_is_on_ ) {
-    for (unsigned int i=0; i<float_transport_stats_.size(); ++i) {
-      for (unsigned int j=0; j<float_transport_stats_[i].size(); ++j) {
-        (*stats.mutable_floaters(i)).set_avg_n_transports(0);
-        int n_transports_ij =
-          float_transport_stats_[i][j]->get_total_n_transports() ;
-        UPDATE_AVG(j, *stats.mutable_floaters(i),
-                   avg_n_transports, n_transports_ij);
-        //        float_transport_stats_[i][j]->reset();
+    for (unsigned int typei=0; i<float_transport_stats_.size(); ++i) {
+      unsigned int n_particles = float_transport_stats_[typei].size();
+      unsigned int sum_n_transports_typei = 0;
+      for (unsigned int j = 0; j < n_particles ; ++j) {
+        sum_n_transports_typei +=
+          float_transport_stats_[typei][j]->get_total_n_transports();
+      }
+      double avg_n_transports_typei =
+        sum_n_transports_typei * 1.0 / n_particles;
+      (*stats.mutable_floaters(typei)).set_avg_n_transports
+        ( avg_n_transports_typei );
+      // Note: for transports, no reseting is needed between updates,
+      // as we want to average over particles, but sum over time
       }
     }
   }
