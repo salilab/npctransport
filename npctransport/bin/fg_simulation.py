@@ -321,10 +321,10 @@ for i in range(ntrials):
     nframes_running = math.ceil(sd.get_statistics_fraction()
                                 * sd.get_number_of_frames())
     nframes_equilib = sd.get_number_of_frames() - nframes_running
-    print "Equilibrating..."
+    print "Equilibrating for frames...", nframes_equilib
     sd.reset_rmf() # TODO: should I keep it? it means no RMF for initialization
     sd.get_bd().optimize(nframes_equilib)
-    print "Running..."
+    print "Running for frames...", nframes_running
     sd.reset_statistics_optimizer_states(); # only take stats after equib
     sd.get_bd().set_log_level(IMP.PROGRESS)
     p = IMP.benchmark.Profiler()
@@ -332,7 +332,7 @@ for i in range(ntrials):
         p.start("profile.pprof")
         print "Profiling begins..."
     sd.get_bd().set_current_time(0)
-    nchunks= 250 # parametrize externally?
+    nchunks= 2500 # parametrize externally?
     optimize_in_chunks(sd, nframes_running, nchunks)
     if(flags.profile):
         p.stop()
