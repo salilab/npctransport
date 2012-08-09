@@ -277,7 +277,7 @@ Model *SimulationData::get_m() {
 // @throw RMF::IOException if couldn't open RMF file, or unsupported file format
 void SimulationData::initialize_coordinates_from_rmf(std::string fname) {
   RMF::FileConstHandle f= RMF::open_rmf_file_read_only( fname );
-  IMP::rmf::link_hierarchies( f, get_root().get_children() );
+  link_hierarchies_with_sites( f, get_root().get_children() );
   IMP::rmf::load_frame( f, f.get_number_of_frames() - 1 );
 }
 
@@ -294,7 +294,7 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
             (fh));
     rmf_writer_=los;
     los->set_period(dump_interval_frames_);
-    add_hierarchies(fh, atom::Hierarchy(get_root()).get_children());
+    add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
     IMP::rmf::add_restraints(fh, RestraintsTemp(1, get_predr()));
     IMP::rmf::add_restraints(fh, chain_restraints_);
     if(get_has_bounding_box()){

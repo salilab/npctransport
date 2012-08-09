@@ -37,6 +37,9 @@ class ConeTests(IMP.test.TestCase):
         bd.set_maximum_time_step(100)
         bd.set_scoring_function([r])
         f= RMF.create_rmf_file(self.get_tmp_file_name("well.rmf"))
+        # TODO: note that if ds would have contained sites, we would
+        # need to switch to npctransport::add_hierarchies_with_sites(),
+        # perhaps worth switching anyway?
         IMP.rmf.add_hierarchies(f, ds)
         IMP.rmf.add_restraints(f, [r])
         w= IMP.rmf.SaveOptimizerState(f)

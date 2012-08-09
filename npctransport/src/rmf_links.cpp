@@ -10,14 +10,14 @@
 #include <IMP/core/rigid_bodies.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-HierarchyLoadLink::HierarchyLoadLink(RMF::FileConstHandle fh, Model *m):
+HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m):
   rmf::HierarchyLoadLink(fh, m){}
 
-HierarchySaveLink::HierarchySaveLink(RMF::FileHandle fh):
+HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh):
   rmf::HierarchySaveLink(fh), bf_(fh), cf_(fh) {}
 
 std::pair<double, algebra::Vector3Ds>
-HierarchySaveLink::get_sites(core::ParticleType t) const  {
+HierarchyWithSitesSaveLink::get_sites(core::ParticleType t) const  {
   if (sd_) {
     return std::make_pair(sd_->get_site_radius(t),
                           sd_->get_sites(t) );
@@ -28,7 +28,7 @@ HierarchySaveLink::get_sites(core::ParticleType t) const  {
   }
 }
 
-void HierarchySaveLink::do_add_recursive(Particle *root,
+void HierarchyWithSitesSaveLink::do_add_recursive(Particle *root,
                                          Particle *p, RMF::NodeHandle cur) {
   if (core::Typed::particle_is_instance(p)) {
     core::ParticleType type= core::Typed(p).get_type();
@@ -43,7 +43,7 @@ void HierarchySaveLink::do_add_recursive(Particle *root,
   }
   rmf::HierarchySaveLink::do_add_recursive(root, p, cur);
 }
-void HierarchySaveLink::do_save_node(Particle *p,
+void HierarchyWithSitesSaveLink::do_save_node(Particle *p,
                                      RMF::NodeHandle n,
                                      unsigned int frame) {
   if (core::Typed::particle_is_instance(p)) {
@@ -69,19 +69,20 @@ void HierarchySaveLink::do_save_node(Particle *p,
 
 
 
-IMP_DEFINE_LINKERS(Hierarchy, hierarchy, hierarchies,
+IMP_DEFINE_LINKERS(HierarchyWithSites,
+                   hierarchy_with_sites, hierarchies_with_sites,
                    atom::Hierarchy,atom::Hierarchies,
                    atom::Hierarchy,atom::Hierarchies,
                    (RMF::FileHandle fh),
-                   (RMF::FileConstHandle fh,
-                    Model *m), (fh), (fh, m),
+                   (RMF::FileConstHandle fh, Model *m),
+                   (fh), (fh, m),
                    (fh, IMP::internal::get_model(hs)));
 
 void add_sites(RMF::FileHandle fh,
                core::ParticleType t,
                double range,
                algebra::Vector3Ds sites) {
-  HierarchySaveLink *l=get_hierarchy_save_link(fh);
+  HierarchyWithSitesSaveLink *l=get_hierarchy_with_sites_save_link(fh);
   l->add_sites(t, range, sites);
 }
 
