@@ -36,9 +36,13 @@ namespace {
 }
 
 void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
-                  bool quick, std::string final_config,
+                  bool quick, std::string final_conformations,
                   bool debug_initialize) {
   using namespace IMP;
+  base::Pointer<rmf::SaveOptimizerState> final_sos;
+  if (!final_conformations.empty()) {
+    final_sos = sd->create_rmf_writer(final_conformations);
+  }
   sd->set_was_used(true);
   boost::timer total_time;
   for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
@@ -50,6 +54,9 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     initialize_positions(sd, links, debug_initialize);
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
+    if (final_sos) {
+      final_sos->update_always();
+    }
     /*IMP::benchmark::Profiler p;
     if(i == 0)
       p.set("profiling.pprof");*/
@@ -68,8 +75,9 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
                       * (1.0- sd->get_statistics_fraction()), total_time);
     //p.reset();
     sd->update_statistics(timer);
-    std::cout << "Writing..." << std::endl;
-    sd->write_geometry(final_config);
+    if (final_sos) {
+      final_sos->update_always();
+    }
     if (abort) break;
   }
 }

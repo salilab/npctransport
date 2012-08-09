@@ -333,6 +333,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   */
   rmf::SaveOptimizerState *get_rmf_writer();
 
+  /** Create an rmf write for the file with the passed name.*/
+  rmf::SaveOptimizerState *create_rmf_writer(std::string name);
+
   void reset_rmf();
 
   void reset_statistics_optimizer_states();
