@@ -23,7 +23,6 @@
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
-#include <IMP/rmf/atom_io.h>
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/container/ConsecutivePairContainer.h>
@@ -41,6 +40,9 @@
 #include <IMP/example/randomizing.h>
 #include <IMP/npctransport/rmf_links.h>
 #include <RMF/FileHandle.h>
+#include <RMF/FileConstHandle.h>
+#include <IMP/rmf/atom_io.h>
+#include <IMP/rmf/frames.h>
 
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -268,6 +270,16 @@ Model *SimulationData::get_m() {
   return m_;
 }
 
+// Note and beware: this method assumes that the hierarchy in the RMF file
+// was constructed in the same way as the hierarchy within this SimulationData
+// object. Use with great caution, otherwise unexpected results may come
+//
+// @throw RMF::IOException if couldn't open RMF file, or unsupported file format
+void SimulationData::initialize_coordinates_from_rmf(std::string fname) {
+  RMF::FileConstHandle f= RMF::open_rmf_file_read_only( fname );
+  IMP::rmf::link_hierarchies( f, get_root().get_children() );
+  IMP::rmf::load_frame( f, f.get_number_of_frames() - 1 );
+}
 
 // initialize a writer that outputs the particles hierarchy
 // using the name return by ::get_rmf_file_name()
