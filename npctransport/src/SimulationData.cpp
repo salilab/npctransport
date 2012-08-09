@@ -733,7 +733,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   }
   // update avg number of transports per particle for each type of floats:
   if( slab_is_on_ ) {
-    for (unsigned int typei=0; i<float_transport_stats_.size(); ++i) {
+    for (unsigned int typei=0; typei<float_transport_stats_.size(); ++typei) {
       unsigned int n_particles = float_transport_stats_[typei].size();
       unsigned int sum_n_transports_typei = 0;
       for (unsigned int j = 0; j < n_particles ; ++j) {
@@ -746,7 +746,6 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
         ( avg_n_transports_typei );
       // Note: for transports, no reseting is needed between updates,
       // as we want to average over particles, but sum over time
-      }
     }
   }
   for (unsigned int i=0; i<fgs_stats_.size(); ++i) {
@@ -755,11 +754,11 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
         unsigned int n=fgs_stats_[i].size()*fgs_stats_[i][j].size();
         unsigned int cnf=(nf)*n+j*fgs_stats_[i][j].size()+k;;
         UPDATE_AVG(cnf,
-               *stats.mutable_fgs(i),particle_correlation_time,
-               fgs_stats_[i][j][k]->get_correlation_time());
+                   *stats.mutable_fgs(i),particle_correlation_time,
+                   fgs_stats_[i][j][k]->get_correlation_time());
         UPDATE_AVG(cnf,
-               *stats.mutable_fgs(i),particle_diffusion_coefficient,
-               fgs_stats_[i][j][k]->get_diffusion_coefficient());
+                   *stats.mutable_fgs(i),particle_diffusion_coefficient,
+                   fgs_stats_[i][j][k]->get_diffusion_coefficient());
         fgs_stats_[i][j][k]->reset();
       }
     }
