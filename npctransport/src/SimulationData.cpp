@@ -23,7 +23,6 @@
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
-#include <IMP/rmf/atom_io.h>
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/container/ConsecutivePairContainer.h>
@@ -41,6 +40,9 @@
 #include <IMP/example/randomizing.h>
 #include <IMP/npctransport/rmf_links.h>
 #include <RMF/FileHandle.h>
+#include <RMF/FileConstHandle.h>
+#include <IMP/rmf/atom_io.h>
+#include <IMP/rmf/frames.h>
 
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -268,6 +270,16 @@ Model *SimulationData::get_m() {
   return m_;
 }
 
+// Note and beware: this method assumes that the hierarchy in the RMF file
+// was constructed in the same way as the hierarchy within this SimulationData
+// object. Use with great caution, otherwise unexpected results may come
+//
+// @throw RMF::IOException if couldn't open RMF file, or unsupported file format
+void SimulationData::initialize_coordinates_from_rmf(std::string fname) {
+  RMF::FileConstHandle f= RMF::open_rmf_file_read_only( fname );
+  link_hierarchies_with_sites( f, get_root().get_children() );
+  IMP::rmf::load_frame( f, f.get_number_of_frames() - 1 );
+}
 
 // initialize a writer that outputs the particles hierarchy
 // using the name return by ::get_rmf_file_name()
@@ -282,7 +294,7 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
             (fh));
     rmf_writer_=los;
     los->set_period(dump_interval_frames_);
-    add_hierarchies(fh, atom::Hierarchy(get_root()).get_children());
+    add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
     IMP::rmf::add_restraints(fh, RestraintsTemp(1, get_predr()));
     IMP::rmf::add_restraints(fh, chain_restraints_);
     if(get_has_bounding_box()){
@@ -719,17 +731,21 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       float_stats_[i][j]->reset();
     }
   }
-  // update avg number of transports per particle for each float type:
+  // update avg number of transports per particle for each type of floats:
   if( slab_is_on_ ) {
-    for (unsigned int i=0; i<float_transport_stats_.size(); ++i) {
-      for (unsigned int j=0; j<float_transport_stats_[i].size(); ++j) {
-        (*stats.mutable_floaters(i)).set_avg_n_transports(0);
-        int n_transports_ij =
-          float_transport_stats_[i][j]->get_total_n_transports() ;
-        UPDATE_AVG(j, *stats.mutable_floaters(i),
-                   avg_n_transports, n_transports_ij);
-        //        float_transport_stats_[i][j]->reset();
+    for (unsigned int typei=0; typei<float_transport_stats_.size(); ++typei) {
+      unsigned int n_particles = float_transport_stats_[typei].size();
+      unsigned int sum_n_transports_typei = 0;
+      for (unsigned int j = 0; j < n_particles ; ++j) {
+        sum_n_transports_typei +=
+          float_transport_stats_[typei][j]->get_total_n_transports();
       }
+      double avg_n_transports_typei =
+        sum_n_transports_typei * 1.0 / n_particles;
+      (*stats.mutable_floaters(typei)).set_avg_n_transports
+        ( avg_n_transports_typei );
+      // Note: for transports, no reseting is needed between updates,
+      // as we want to average over particles, but sum over time
     }
   }
   for (unsigned int i=0; i<fgs_stats_.size(); ++i) {
@@ -738,11 +754,11 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
         unsigned int n=fgs_stats_[i].size()*fgs_stats_[i][j].size();
         unsigned int cnf=(nf)*n+j*fgs_stats_[i][j].size()+k;;
         UPDATE_AVG(cnf,
-               *stats.mutable_fgs(i),particle_correlation_time,
-               fgs_stats_[i][j][k]->get_correlation_time());
+                   *stats.mutable_fgs(i),particle_correlation_time,
+                   fgs_stats_[i][j][k]->get_correlation_time());
         UPDATE_AVG(cnf,
-               *stats.mutable_fgs(i),particle_diffusion_coefficient,
-               fgs_stats_[i][j][k]->get_diffusion_coefficient());
+                   *stats.mutable_fgs(i),particle_diffusion_coefficient,
+                   fgs_stats_[i][j][k]->get_diffusion_coefficient());
         fgs_stats_[i][j][k]->reset();
       }
     }

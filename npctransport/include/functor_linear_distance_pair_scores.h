@@ -92,7 +92,8 @@ IMP_FUNCTOR_DISTANCE_PAIR_SCORE(FunctorLinearInteractionPairScore,
                                 LinearInteractionScore,
                                 (double krep, double attr_range, double kattr,
                                  std::string name="LinearSSPairScore%1%"),
-                                (LinearInteraction(krep, attr_range, kattr)));
+                                (LinearInteraction( ekrep, attr_range, kattr ) )
+                                );
 
 
 IMPNPCTRANSPORT_END_NAMESPACE

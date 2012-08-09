@@ -24,8 +24,8 @@ def add_interactions_for_fg(fg_name,
 
 # ********* MAIN: *********
 config= barak_basic_configuration.get_basic_config()
-config.dump_interval_ns=2.5
-config.simulation_time_ns=6000
+config.dump_interval_ns=25
+config.simulation_time_ns=10000
 config.box_is_on.lower=1
 config.box_side.lower=300
 config.slab_is_on.lower=1
@@ -57,12 +57,12 @@ nonspecifics= IMP.npctransport.add_float_type(config,
                                               interactions=0)
 
 # fg with kaps / craps
-add_interactions_for_fg("fg0",5)
+add_interactions_for_fg("fg0",10)
 add_interactions_for_fg("fg1",
                         k_kap_lower = 0.95,
                         k_kap_upper = 10,
                         k_kap_steps = 10)
-add_interactions_for_fg("fg2",5)
+add_interactions_for_fg("fg2",10)
 # non-specific attraction
 create_range(config.nonspecific_k, 0.1, 10, steps=5)
 create_range(config.nonspecific_range, 0.1, 2, steps=3)

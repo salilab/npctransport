@@ -40,6 +40,13 @@
 #include "npctransport.pb.h"
 #endif
 //#endif
+
+#ifdef SWIG
+namespace boost{
+  struct timer{};
+}
+#endif
+
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 
@@ -301,6 +308,22 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   double get_backbone_k() const {return backbone_k_;}
 
   double get_interaction_k() const {return interaction_k_;}
+
+  /**
+   Open the specified RMF file, links it to the hierarchies of this object, and copy
+   the XYZ coordinates from its last frame into the particles of this object.
+
+   @note this method assumes that the hierarchies that are stored in the RMF file
+   was constructed in the same way as the hierarchies within this SimulationData
+   object. The only major difference between the two is assumed to be the coordinates of
+   the various particles. Otherwise, results might be unexpected, and it is not guaranteed
+   that a mismatch would be detected at runtime.
+   \see IMP::rmf::link_hierarchies()
+   \see IMP::rmf::load_frame()
+
+   @exception RMF::IOException if couldn't open RMF file, or unsupported file format
+  */
+  void initialize_coordinates_from_rmf(std::string fname);
 
   /**
    Initialize a writer that outputs the particles hierarchy

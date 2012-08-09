@@ -16,13 +16,13 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-class IMPNPCTRANSPORTEXPORT HierarchyLoadLink:
+class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink:
   public rmf::HierarchyLoadLink {
  public:
-  HierarchyLoadLink(RMF::FileConstHandle fh, Model *m);
+  HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m);
 };
 
-class IMPNPCTRANSPORTEXPORT HierarchySaveLink:
+class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
   public rmf::HierarchySaveLink {
   WeakPointer<SimulationData> sd_;
   RMF::BallFactory bf_;
@@ -36,7 +36,7 @@ class IMPNPCTRANSPORTEXPORT HierarchySaveLink:
   compatibility::map<core::ParticleType, std::pair<double,
       algebra::Vector3Ds > > sites_;
  public:
-  HierarchySaveLink(RMF::FileHandle fh);
+  HierarchyWithSitesSaveLink(RMF::FileHandle fh);
   // for testing
   void add_sites(core::ParticleType t,
                  double range,
@@ -51,11 +51,27 @@ IMPNPCTRANSPORTEXPORT void add_sites(RMF::FileHandle fh,
                                      double radius,
                                      algebra::Vector3Ds sites);
 
-IMP_DECLARE_LINKERS(Hierarchy, hierarchy, hierarchies,
+// note that the corresponding define macro in the .cpp file implicitly
+// uses the HierarchyWithSitesLoadLink and HierarchyWithSitesSaveLink
+// classes
+/**
+   Functions for adding a hierarchy to an RMF file or linking an RMF
+   file to an existing hierarchy, including support for particles with sites.
+
+   These functions are practically identical to the add / link
+   methods in modules/rmf/include/hierarchy_io.h, such as
+   IMP::rmf::link_hierarchies(), except here NPC particle sites
+   support is included.
+ */
+IMP_DECLARE_LINKERS(HierarchyWithSites,
+                    hierarchy_with_sites, hierarchies_with_sites,
                     atom::Hierarchy,atom::Hierarchies,
                     atom::Hierarchy,atom::Hierarchies,
-                    (RMF::FileHandle fh),
-                    (RMF::FileConstHandle fh, Model *m));
+                    (RMF::FileConstHandle fh, Model *m),
+                    See IMP::rmf::link_hierarchies() for more details.
+                    The only difference is the addition of particle sites
+                    support.
+                    );
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
