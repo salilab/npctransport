@@ -36,7 +36,7 @@ namespace {
 }
 
 void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
-                  bool quick, std::string final_config,
+                  bool quick, std::string final_conformations,
                   bool debug_initialize, std::string init_rmf) {
   using namespace IMP;
   base::Pointer<rmf::SaveOptimizerState> final_sos;

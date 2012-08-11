@@ -122,7 +122,7 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
 /** TODO: what is the meaning of links? */
 #define IMP_NPC_LOOP(sim_data, links)                                   \
   IMP::npctransport::internal::do_main_loop(sim_data, links, FLAGS_quick,     \
-                                            FLAGS_final_configuration,\
+                                            FLAGS_final_conformations,\
                                             FLAGS_debug_initialization, \
                                             FLAGS_init_rmffile)
 
