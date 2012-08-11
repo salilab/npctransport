@@ -39,7 +39,7 @@ class Tests(IMP.test.TestCase):
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue.rmf"))
         for d in zip(types, sites):
           IMP.npctransport.add_sites(f, d[0], .5*radius, d[1])
-        w= IMP.npctransport.add_hierarchies(f, ds)
+        w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         sos= IMP.rmf.SaveOptimizerState(f)
         bd.add_optimizer_state(sos)
         bd.optimize(1000)
@@ -76,7 +76,7 @@ class Tests(IMP.test.TestCase):
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue2.rmf"))
         for d in zip(types, sites):
           IMP.npctransport.add_sites(f, d[0], .5*radius, d[1])
-        w= IMP.npctransport.add_hierarchies(f, ds)
+        w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
         sos= IMP.rmf.SaveOptimizerState(f)
         bd.add_optimizer_state(sos)
@@ -127,7 +127,7 @@ class Tests(IMP.test.TestCase):
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_scoring_function(rs)
         bd.set_maximum_time_step(dt)
-        w= IMP.npctransport.add_hierarchies(f, ds)
+        w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
         sos= IMP.rmf.SaveOptimizerState(f)
         bd.add_optimizer_state(sos)

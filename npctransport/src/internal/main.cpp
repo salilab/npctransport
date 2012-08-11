@@ -37,7 +37,7 @@ namespace {
 
 void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
                   bool quick, std::string final_config,
-                  bool debug_initialize) {
+                  bool debug_initialize, std::string init_rmf) {
   using namespace IMP;
   sd->set_was_used(true);
   boost::timer total_time;
@@ -47,7 +47,13 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     IMP::set_log_level(SILENT);
     if (!quick) sd->reset_rmf();
     std::cout<< "Initializing..." << std::endl;
-    initialize_positions(sd, links, debug_initialize);
+    if (init_rmf == "")
+      initialize_positions(sd, links, debug_initialize);
+    else{
+      sd->initialize_positions_from_rmf(init_rmf);
+      std::cout << "Initializing positions from RMF file "
+                << init_rmf << std::endl;
+    }
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
     /*IMP::benchmark::Profiler p;

@@ -93,6 +93,12 @@ IMP_NPC_PARAMETER_STRING(final_configuration, "final.pym",
 IMP_NPC_PARAMETER_STRING(conformations, "conformations.rmf",
                          "RMF file for recording the conforomations along the "
                          " simulation [default: %default]");
+IMP_NPC_PARAMETER_STRING(init_rmffile, "",
+                         "RMF file for initializing the simulation with its"
+                         " last frame (to continue a previous run). If not"
+                         " specified, initialization is through"
+                         " pre-optimization");
+
 #ifdef IMP_NPC_GOOGLE
 IMP_NPC_PARAMETER_BOOL(profile, false,
                        "Whether to turn on profiling for the first run");
@@ -118,7 +124,8 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
 #define IMP_NPC_LOOP(sim_data, links)                                   \
   IMP::npctransport::internal::do_main_loop(sim_data, links, FLAGS_quick,     \
                                             FLAGS_final_configuration,\
-                                            FLAGS_debug_initialization)
+                                            FLAGS_debug_initialization, \
+                                            FLAGS_init_rmffile)
 
 using namespace IMP::npctransport;
 
