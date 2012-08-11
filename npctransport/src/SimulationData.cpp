@@ -281,15 +281,10 @@ void SimulationData::initialize_positions_from_rmf(std::string fname) {
   IMP::rmf::load_frame( f, f.get_number_of_frames() - 1 );
 }
 
-// initialize a writer that outputs the particles hierarchy
-// using the name return by ::get_rmf_file_name()
-//
-// \exception RMF::IOException if couldn't open RMF file
-rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
+rmf::SaveOptimizerState *SimulationData::create_rmf_writer(std::string name) {
   if (!rmf_writer_) {
     IMP_LOG(TERSE, "Setting up dump" << std::endl);
-    RMF::FileHandle fh=RMF::create_rmf_file
-      (get_rmf_file_name());
+    RMF::FileHandle fh=RMF::create_rmf_file(name);
     IMP_NEW(rmf::SaveOptimizerState, los,
             (fh));
     rmf_writer_=los;
@@ -312,6 +307,17 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
         //      IMP::rmf::add_static_geometries
         //          (fh, display::Geometries(1, cyl_geom));
     }
+  }
+  return rmf_writer_;
+}
+
+// initialize a writer that outputs the particles hierarchy
+// using the name return by ::get_rmf_file_name()
+//
+// \exception RMF::IOException if couldn't open RMF file
+rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
+  if (!rmf_writer_) {
+    rmf_writer_= create_rmf_writer(get_rmf_file_name());
   }
   return rmf_writer_;
 }
@@ -773,8 +779,7 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       UPDATE_AVG(cnf,
              *stats.mutable_fgs(i), chain_diffusion_coefficient,
              chain_stats_[i][j]->get_diffusion_coefficient());
-      Floats dfs=chain_stats_[i][j]->get_diffusion_coefficients();
-      double df= std::accumulate(dfs.begin(), dfs.end(), 0.0)/dfs.size();
+      double df=chain_stats_[i][j]->get_diffusion_coefficient();
       UPDATE_AVG(cnf,
              *stats.mutable_fgs(i), local_diffusion_coefficient,
              df);

@@ -14,9 +14,9 @@ IMP.npctransport.create_range(config.nonspecific_range, 0, 5, 3, base=1)
 IMP.npctransport.create_range(config.nonspecific_k, .2, 20, 3)
 
 config.box_side.lower=150
-config.simulation_time_ns=1000
+config.simulation_time_ns=3000
 config.number_of_trials=4
-config.dump_interval_ns=1
+config.dump_interval_ns=10
 
 #IMP.npctransport.create_range(config.angular_D_factor, 10, 50, 3)
 

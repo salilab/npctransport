@@ -87,9 +87,6 @@ IMP_NPC_PARAMETER_STRING(assignments, "assignments.pb",
 IMP_NPC_PARAMETER_STRING(statistics, "statistics.pb",
                          "output statistics file in protobuf format"
                          " [default: %default]");
-IMP_NPC_PARAMETER_STRING(final_configuration, "final.pym",
-                         "output final configuration file"
-                         " [default: %default]");
 IMP_NPC_PARAMETER_STRING(conformations, "conformations.rmf",
                          "RMF file for recording the conforomations along the "
                          " simulation [default: %default]");
@@ -98,7 +95,9 @@ IMP_NPC_PARAMETER_STRING(init_rmffile, "",
                          " last frame (to continue a previous run). If not"
                          " specified, initialization is through"
                          " pre-optimization");
-
+IMP_NPC_PARAMETER_STRING(final_conformations, "final_conformations.rmf",
+                 "RMF file for recording the initial and final conformations "
+                         " [default: %default]");
 #ifdef IMP_NPC_GOOGLE
 IMP_NPC_PARAMETER_BOOL(profile, false,
                        "Whether to turn on profiling for the first run");
