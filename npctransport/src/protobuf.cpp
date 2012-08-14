@@ -226,51 +226,53 @@ void copy(R r, Out out) {
   //                    defined by r
   // @param[out] indexes The emumerated combination of indexes for work_unit
   // @param[in]  show_steps whether to display the grid
-int assign_internal(const Ranges &r, int work_unit,
-                     Floats &values, Ints &indexes,
-                     bool show_steps) {
-  typedef IMP::algebra::DenseGridStorageD<-1, int> Storage;
-  typedef IMP::algebra::LogEmbeddingD<-1> Embedding;
-  typedef IMP::algebra::GridD<-1, Storage, int, Embedding> Grid;
-  IMP::Ints steps(r.size());
-  IMP::algebra::VectorKD lb= IMP::algebra::get_zero_vector_kd(r.size());
-  IMP::algebra::VectorKD ub= IMP::algebra::get_zero_vector_kd(r.size());
-  IMP::algebra::VectorKD factors(IMP::Floats(lb.get_dimension(),2.0));
-  for (unsigned int i=0; i< r.size(); ++i) {
-    lb[i]=r[i].lb;
-    ub[i]=r[i].ub;
-    factors[i]=r[i].base;
-    steps[i]= r[i].steps;
-  }
-  Grid g(Storage(steps, 0),
-         Embedding(IMP::algebra::BoundingBoxKD(IMP::algebra::VectorKD(lb),
-                                               IMP::algebra::VectorKD(ub)),
-                   factors,
-                   steps, true));
-  if (show_steps) {
-    Grid::ExtendedIndex ei(Ints(g.get_dimension(), 0));
-    for (unsigned int i=0; i< g.get_dimension(); ++i) {
-      std::cout << r[i].name << ": ";
-      for (unsigned int j=0; j< g.get_number_of_voxels(i); ++j) {
-        ei[i]= j;
-        std::cout << g.get_center(ei)[i]<< " ";
-      }
-      std::cout << std::endl;
-      ei[i]=0;
+  int assign_internal(const Ranges &r, int work_unit,
+                      Floats &values, Ints &indexes,
+                      bool show_steps) {
+    typedef IMP::algebra::DenseGridStorageD<-1, int> Storage;
+    typedef IMP::algebra::LogEmbeddingD<-1> Embedding;
+    typedef IMP::algebra::GridD<-1, Storage, int, Embedding> Grid;
+    IMP::Ints steps(r.size());
+    // read bounding box for grid from r
+    IMP::algebra::VectorKD lb= IMP::algebra::get_zero_vector_kd(r.size());
+    IMP::algebra::VectorKD ub= IMP::algebra::get_zero_vector_kd(r.size());
+    IMP::algebra::VectorKD factors(IMP::Floats(lb.get_dimension(),2.0));
+    for (unsigned int i=0; i< r.size(); ++i) {
+      lb[i]=r[i].lb;
+      ub[i]=r[i].ub;
+      factors[i]=r[i].base;
+      steps[i]= r[i].steps;
     }
-  }
-  Grid::AllIndexIterator it= g.all_indexes_begin();
-  unsigned int nv= std::distance(g.all_indexes_begin(),
-                                 g.all_indexes_end());
-  std::advance(it, work_unit%nv);
-  IMP::algebra::VectorKD center= g.get_center(*it);
-  values= Floats(center.coordinates_begin(),
-                 center.coordinates_end());
-  indexes.resize(values.size());
-  // it-> returns a copy
+    Grid g(Storage(steps, 0) ,
+           Embedding(IMP::algebra::BoundingBoxKD(IMP::algebra::VectorKD(lb),
+                                                 IMP::algebra::VectorKD(ub)),
+                     factors,
+                     steps,
+                     true) );
+    if (show_steps) {
+      Grid::ExtendedIndex ei(Ints(g.get_dimension(), 0));
+      for (unsigned int i=0; i< g.get_dimension(); ++i) {
+        std::cout << r[i].name << ": ";
+        for (unsigned int j=0; j< g.get_number_of_voxels(i); ++j) {
+          ei[i]= j;
+          std::cout << g.get_center(ei)[i]<< " ";
+        }
+        std::cout << std::endl;
+        ei[i]=0;
+      }
+    }
+    Grid::AllIndexIterator it= g.all_indexes_begin();
+    unsigned int nv= std::distance(g.all_indexes_begin(),
+                                   g.all_indexes_end());
+    std::advance(it, work_unit%nv);
+    IMP::algebra::VectorKD center= g.get_center(*it);
+    values= Floats(center.coordinates_begin(),
+                   center.coordinates_end());
+    indexes.resize(values.size());
+    // it-> returns a copy
   copy(*it, indexes.begin());
   return g.get_number_of_voxels();
-}
+  }
 
 
 
