@@ -456,6 +456,11 @@ SimulationData::add_interaction
   if (idata.has_interaction_k()) {
     base_k= idata.interaction_k().value();
   }
+  // no particles so drop it
+  if (interaction_k_factors_.find(type0)== interaction_k_factors_.end()
+      || interaction_k_factors_.find(type1)== interaction_k_factors_.end()) {
+    return;
+  }
   double interaction_k= base_k
     * interaction_k_factors_.find(type0)->second // TODO: validate type exists
     * interaction_k_factors_.find(type1)->second;
