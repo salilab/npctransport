@@ -30,16 +30,16 @@ HierarchyWithSitesSaveLink::get_sites(core::ParticleType t) const  {
 
 void HierarchyWithSitesSaveLink::do_add_recursive(Particle *root,
                                          Particle *p, RMF::NodeHandle cur) {
+  if (!sd_ && p->has_attribute(get_simulation_data_key())) {
+    Object *o= p->get_value(get_simulation_data_key());
+    sd_= dynamic_cast<SimulationData*>(o);
+  }
   if (core::Typed::particle_is_instance(p)) {
     core::ParticleType type= core::Typed(p).get_type();
     unsigned int nsites= get_sites(type).second.size();
     for (unsigned int i=0; i< nsites; ++i) {
       cur.add_child("site", RMF::GEOMETRY);
     }
-  }
-  if (!sd_ && p->has_attribute(get_simulation_data_key())) {
-    Object *o= p->get_value(get_simulation_data_key());
-    sd_= dynamic_cast<SimulationData*>(o);
   }
   rmf::HierarchySaveLink::do_add_recursive(root, p, cur);
 }
@@ -54,6 +54,8 @@ void HierarchyWithSitesSaveLink::do_save_node(Particle *p,
     RMF::NodeHandles ch= n.get_children();
     algebra::ReferenceFrame3D rf= rb.get_reference_frame();
     for (unsigned int i=0; i< sites.second.size(); ++i) {
+      IMP_INTERNAL_CHECK(ch.size() > i,
+                         "Not enogh children for sites");
       RMF::Ball b= bf_.get(ch[i], frame);
       b.set_radius(sites.first);
       algebra::Vector3D local= rf.get_global_coordinates(sites.second[i]);
