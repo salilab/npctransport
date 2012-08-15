@@ -67,6 +67,10 @@ def get_cmdline_options(args = None):
                       action="store_true", default=False,
                       help="anchor FG nups to a cylinder specified in" +
                       "the config file")
+    parser.add_option("-i", "--initialization_rmf_file",
+                      help="initialize the simulation from the last frame of " +
+                      "the specified RMF file, assuming it was created by " +
+                      "this simualtion process")
     (options, args) = parser.parse_args()
     return options
 
@@ -317,7 +321,11 @@ for i in range(ntrials):
     if(not flags.quick): # TODO: why is that?
         sd.reset_rmf()
     print "Initializing..."
-    IMP.npctransport.initialize_positions(sd)
+    if(flags.initialization_rmf_file):
+        sd.initialize_positions_from_rmf(
+            flags.initialization_rmf_file )
+    else:
+        IMP.npctransport.initialize_positions( sd )
     nframes_running = math.ceil(sd.get_statistics_fraction()
                                 * sd.get_number_of_frames())
     nframes_equilib = sd.get_number_of_frames() - nframes_running

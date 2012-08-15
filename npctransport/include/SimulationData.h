@@ -211,6 +211,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 #endif
   double get_range() const {return range_;}
   atom::BrownianDynamics *get_bd();
+
+  /**
+     returns all diffusing particles that currently exist in
+     this simulation data object (or an empty list if none exists)
+   */
   container::ListSingletonContainer *get_diffusers();
 
   LinearWellPairScores get_backbone_scores() const {
@@ -323,7 +328,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
    @exception RMF::IOException if couldn't open RMF file, or unsupported file format
   */
-  void initialize_coordinates_from_rmf(std::string fname);
+  void initialize_positions_from_rmf(std::string fname);
 
   /**
    Initialize a writer that outputs the particles hierarchy

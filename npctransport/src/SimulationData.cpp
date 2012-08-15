@@ -275,7 +275,7 @@ Model *SimulationData::get_m() {
 // object. Use with great caution, otherwise unexpected results may come
 //
 // @throw RMF::IOException if couldn't open RMF file, or unsupported file format
-void SimulationData::initialize_coordinates_from_rmf(std::string fname) {
+void SimulationData::initialize_positions_from_rmf(std::string fname) {
   RMF::FileConstHandle f= RMF::open_rmf_file_read_only( fname );
   link_hierarchies_with_sites( f, get_root().get_children() );
   IMP::rmf::load_frame( f, f.get_number_of_frames() - 1 );
