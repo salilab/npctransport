@@ -46,12 +46,12 @@ interactionFG_FG= IMP.npctransport.add_interaction(config,
                                                    interaction_k=30,
                                                    interaction_range=1)
 
-create_range(interactionFG_KAP.interaction_k, 0.0001, 5, steps=20)
-create_range(interactionFG_KAP.interaction_range, 0.5, 5, steps=3)
-create_range(config.nonspecific_k, 0.0001, 100, steps=20)
-create_range(config.nonspecific_range, 0.1, 6, steps=5)
-create_range(interactionFG_FG.interaction_k, 0.0001, 30, steps=10)
-create_range(interactionFG_FG.interaction_range, 0.5, 5, steps=3)
+create_range(interactionFG_KAP.interaction_k, 0.01, 15, steps=10)
+create_range(interactionFG_KAP.interaction_range, 0.1, 5, steps=5)
+create_range(config.nonspecific_k, 0.01, 25, steps=10)
+create_range(config.nonspecific_range, 0.1, 5, steps=5)
+create_range(interactionFG_FG.interaction_k, 0.01, 30, steps=8)
+create_range(interactionFG_FG.interaction_range, 0.5, 5, steps=5)
 config.backbone_k.lower=5
 
 
