@@ -47,23 +47,47 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name)                    \
-name##_= data.name().value()
+  name##_= data.assignment().name().value()
 #define GET_VALUE(name)                         \
-  name##_= data.name()
+  name##_= data.assignment().name()
 
-SimulationData::SimulationData(std::string assignment_file,
-                               std::string statistics_file,
+SimulationData::SimulationData(std::string output_file,
                                bool quick,
                                std::string rmf_file_name):
   Object("SimulationData%1%"),
   rmf_file_name_( rmf_file_name )
 {
-  statistics_file_name_= statistics_file;
-  ::npctransport_proto::Assignment data;
-  std::ifstream file(assignment_file.c_str(), std::ios::binary);
-  bool read=data.ParseFromIstream(&file);
-  if (!read) {
-    IMP_THROW("Unable to read from protobuf", base::IOException);
+  initialize(output_file, output_file, quick);
+}
+SimulationData::SimulationData(std::string ass_file,
+                               std::string stat_file,
+                               bool quick,
+                               std::string rmf_file_name):
+  Object("SimulationData%1%"),
+  rmf_file_name_( rmf_file_name )
+{
+  initialize(ass_file, stat_file, quick);
+}
+
+void SimulationData::initialize(std::string ass_file,
+                               std::string stat_file,
+                               bool quick) {
+  output_file_name_= stat_file;
+  ::npctransport_proto::Output data;
+  if (ass_file==stat_file) {
+    std::ifstream file(output_file_name_.c_str(), std::ios::binary);
+    bool read=data.ParseFromIstream(&file);
+    if (!read) {
+      IMP_THROW("Unable to read from protobuf", base::IOException);
+    }
+  } else {
+    ::npctransport_proto::Assignment ass;
+    std::ifstream file(ass_file.c_str(), std::ios::binary);
+    bool read=ass.ParseFromIstream(&file);
+    if (!read) {
+      IMP_THROW("Unable to read from protobuf", base::IOException);
+    }
+    *data.mutable_assignment()=ass;
   }
   GET_ASSIGNMENT(interaction_k);
   GET_ASSIGNMENT(interaction_range);
@@ -90,24 +114,23 @@ SimulationData::SimulationData(std::string assignment_file,
     number_of_frames_ = 2;
     number_of_trials_ = 1;
   }
-  first_stats_=true;
 
   // create particles hierarchy
   root_= new Particle(get_m());
   root_->add_attribute(get_simulation_data_key(), this);
   atom::Hierarchy hr=atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
-  for (int i=0; i< data.fgs_size(); ++i) {
-    create_fgs(data.fgs(i), type_of_fg[i]);
+  for (int i=0; i< data.assignment().fgs_size(); ++i) {
+    create_fgs(data.assignment().fgs(i), type_of_fg[i]);
   }
-  for (int i=0; i< data.floaters_size(); ++i) {
-    create_floaters(data.floaters(i), type_of_float[i],
+  for (int i=0; i< data.assignment().floaters_size(); ++i) {
+    create_floaters(data.assignment().floaters(i), type_of_float[i],
                     display::get_display_color(i));
   }
   IMP_LOG(TERSE, "   SimulationData before adding interactions" <<std::endl);
-  for (int i=0; i< data.interactions_size(); ++i) {
+  for (int i=0; i< data.assignment().interactions_size(); ++i) {
     const ::npctransport_proto::Assignment_InteractionAssignment&
-      interaction_i = data.interactions(i);
+        interaction_i = data.assignment().interactions(i);
     if (interaction_i.is_on().value()) {
       IMP_LOG(TERSE, "   Adding interacton " << i <<std::endl);
       add_interaction( interaction_i );
@@ -668,11 +691,8 @@ void SimulationData::reset_statistics_optimizer_states() {
     interactions_stats_[i]->reset();
   }
 }
-
-void SimulationData::update_statistics(const boost::timer &timer) const {
-  IMP_OBJECT_LOG;
-  ::npctransport_proto::Statistics stats;
-  if (first_stats_) { // first initialization
+/*
+if (first_stats_) { // first initialization
     for (unsigned int i=0; i<type_of_fg.size(); ++i) {
       if (particles_.find(type_of_fg[i]) != particles_.end()) {
         stats.add_fgs();
@@ -693,11 +713,15 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       pOutStats_i->set_type1( itype.second.get_string() );
     }
     first_stats_=false;
-  } else { // not first initialization
-    std::ifstream inf(statistics_file_name_.c_str(), std::ios::binary);
-    stats.ParseFromIstream(&inf);
-    inf.close();
-  }
+*/
+void SimulationData::update_statistics(const boost::timer &timer) const {
+  IMP_OBJECT_LOG;
+  ::npctransport_proto::Output output;
+
+  std::ifstream inf(output_file_name_.c_str(), std::ios::binary);
+  output.ParseFromIstream(&inf);
+  inf.close();
+  ::npctransport_proto::Statistics &stats=*output.mutable_statistics();
 
   int nf= stats.number_of_frames();
   ParticlesTemp all;
@@ -854,19 +878,17 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   stats.set_number_of_frames(nf+1);
 
   // dump to file
-  std::ofstream outf(statistics_file_name_.c_str(), std::ios::binary);
-  stats.SerializeToOstream(&outf);
+  std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
+  output.SerializeToOstream(&outf);
 }
 void SimulationData::set_interrupted(bool tf) {
-  ::npctransport_proto::Statistics stats;
-  if (first_stats_) { // first initialization
-  } else { // not first initialization
-    std::ifstream inf(statistics_file_name_.c_str(), std::ios::binary);
-    stats.ParseFromIstream(&inf);
-    inf.close();
-  }
+  ::npctransport_proto::Output output;
+  std::ifstream inf(output_file_name_.c_str(), std::ios::binary);
+  output.ParseFromIstream(&inf);
+  inf.close();
+  ::npctransport_proto::Statistics &stats= *output.mutable_statistics();
   stats.set_interrupted(tf?1:0);
-  std::ofstream outf(statistics_file_name_.c_str(), std::ios::binary);
+  std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
   stats.SerializeToOstream(&outf);
 }
 

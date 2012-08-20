@@ -293,7 +293,8 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
     IMP_THROW("Unable to read from protobuf " << fname,
               IOException);
   }
-  npctransport_proto::Assignment output;
+  npctransport_proto::Output output_output;
+  npctransport_proto::Assignment& output=*output_output.mutable_assignment();
   base::SetLogState sls(base::VERBOSE);
   Ranges ranges=get_ranges("all", &input, &output);
   /*for (unsigned int i=0; i< ranges.size(); ++i) {
@@ -337,11 +338,38 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   if (!out) {
     IMP_THROW("Could not open file " << ofname, IOException);
   }
-  bool written=output.SerializeToOstream(&out);
+
+  {
+    for ( int i=0; i<output.fgs_size(); ++i) {
+      if (output.fgs(i).number().value() != 0) {
+        output_output.mutable_statistics()->add_fgs();
+        IMP_USAGE_CHECK(output_output.mutable_statistics()->fgs_size()
+                        ==static_cast<int>(i+1),
+                        "Wrong size: "
+                        << output_output.mutable_statistics()->fgs_size());
+      }
+    }
+    for ( int i=0; i<output.floaters_size(); ++i) {
+      if (output.floaters(i).number().value() != 0) {
+        output_output.mutable_statistics()->add_floaters();
+      }
+    }
+    for( int i = 0; i < output.interactions_size(); i++){
+      if (output.interactions(i).is_on().value()) {
+        ::npctransport_proto::Statistics_InteractionStats*
+            pOutStats_i = output_output.mutable_statistics()->add_interactions();
+        pOutStats_i->set_type0( output.interactions(i).type0() );
+        pOutStats_i->set_type1( output.interactions(i).type1() );
+      }
+    }
+  }
+
+  bool written=output_output.SerializeToOstream(&out);
   if (!written) {
     IMP_THROW("Unable to write to " << ofname,
               IOException);
   }
+
   return ret;
 }
 

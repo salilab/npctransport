@@ -11,15 +11,15 @@ class Tests(IMP.test.TestCase):
     def _make_and_run_simulation(self, output_file):
         RMF.set_show_hdf5_errors( True );
         config= IMP.npctransport.get_data_path( "quick.pb" );
-        assignment= IMP.base.create_temporary_file_name( "assignment", ".pb" );
-        statistics= IMP.base.create_temporary_file_name( "statistics", ".pb" );
+        assignment= self.get_tmp_file_name( "output.pb" );
         IMP.set_log_level( IMP.SILENT );
+        print "assigning"
         num=assign_ranges( config, assignment,
                           0, True );
         print "num ranges %d" % num
-        sd = SimulationData( assignment,statistics, False, output_file );
+        sd = SimulationData( assignment, False, output_file );
         sd.get_m().set_log_level( IMP.SILENT );
-        print "Files are " + assignment + " and " + statistics + \
+        print "Files are " + assignment + \
               " and " + output_file
         initialize_positions( sd )
         sd.get_bd().optimize( 10 )

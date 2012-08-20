@@ -41,9 +41,10 @@ class ConeTests(IMP.test.TestCase):
 
         assignment_name= self.get_tmp_file_name("assignment.pb")
         IMP.npctransport.assign_ranges(config_name, assignment_name, 0, True)
-        assign= IMP.npctransport.Assignment()
+        output= IMP.npctransport.Output()
         f=open(assignment_name, "rb")
-        assign.ParseFromString(f.read())
+        output.ParseFromString(f.read())
+        assign= output.assignment
         self.assertEqual(assign.interaction_k.value, .2)
         self.assertEqual(assign.interactions[0].is_on.value, 0)
         num= IMP.npctransport.get_number_of_work_units(config_name)
@@ -51,7 +52,8 @@ class ConeTests(IMP.test.TestCase):
         assignment_name= self.get_tmp_file_name("final.pb")
         IMP.npctransport.assign_ranges(config_name, assignment_name, num-1, True)
         f=open(assignment_name, "rb")
-        assign.ParseFromString(f.read())
+        output.ParseFromString(f.read())
+        assign= output.assignment
         self.assertEqual(assign.interaction_k.value, 20)
         self.assertEqual(assign.interactions[0].is_on.value, 1)
 if __name__ == '__main__':

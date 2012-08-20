@@ -130,9 +130,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   // e.g., particles_[ ParticleType("fg0") ]
   compatibility::map<core::ParticleType, ParticlesTemp> particles_;
 
-  mutable bool first_stats_;
   // the file to which simulation statistics are dumped:
-  std::string statistics_file_name_;
+  std::string output_file_name_;
   // the RMF format file to which simulation output is dumped:
   std::string rmf_file_name_;
 
@@ -190,20 +189,32 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
    */
   void create_slab_restraint_on_diffusers();
 
+  /** If the two filenames are the same, they are assumed to contain an
+      Output protobuf.*/
+  void initialize(std::string assignments_file,
+                  std::string stats_file,
+                  bool quick);
+
  public:
   /**
-     @param[out] assignment_file name of input assignment file for
-                                 initializing the simulation params
-     @param[out] statistics_file name of output statistics file
+     @param[out] output_file name of input assignment file for
+     initializing the simulation params and the output statistics file
      @param[out] quick if true, perform a very short simulation,
                        typically for calibration or for initial testing
      @param[out] rmf_file_name RMF file to which simulation trajectory
                                is recorded
    */
-  SimulationData(std::string assignment_file,
-                 std::string statistics_file,
+  SimulationData(std::string output_file,
                  bool quick,
                  std::string rmf_file_name = "output.prmf");
+#ifndef IMP_DOXYGEN
+  // for backwards compat
+  SimulationData(std::string assignments_file,
+                 std::string stats_file,
+                 bool quick,
+                 std::string rmf_file_name = "output.prmf");
+#endif
+
 
   Model *get_m();
 #ifndef SWIG

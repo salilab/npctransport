@@ -51,7 +51,7 @@
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));                  \
   try {                                                                 \
     int num=IMP::npctransport::assign_ranges                            \
-        (FLAGS_configuration, FLAGS_assignments,                        \
+        (FLAGS_configuration, FLAGS_output,                             \
          FLAGS_work_unit, FLAGS_show_steps);                            \
     if (FLAGS_show_number_of_work_units) {                              \
       std::cout << "work units " << num << std::endl;                   \
@@ -61,7 +61,7 @@
     std::cerr << "Error: " << e.what() << std::endl;                    \
     return 1;                                                           \
   }                                                                     \
-  IMP_NEW(SimulationData, sim_data,(FLAGS_assignments, FLAGS_statistics,\
+  IMP_NEW(SimulationData, sim_data,(FLAGS_output,                       \
                               FLAGS_quick));                            \
   try {                                                                 \
     if (!FLAGS_conformations.empty()) {                                 \
@@ -80,12 +80,9 @@ IMP_NPC_PARAMETER_INT(log_level, 0, "The log level to use");
 IMP_NPC_PARAMETER_STRING(configuration, "configuration.pb",
                          "input configuration file in protobuf format"
                          " [default: %default]");
-IMP_NPC_PARAMETER_STRING(assignments, "assignments.pb",
-                         "output assignments file in protobuf format,"
+IMP_NPC_PARAMETER_STRING(output, "output.pb",
+                         "output assignments and statistics file in protobuf format,"
                          " recording the assignment being executed"
-                         " [default: %default]");
-IMP_NPC_PARAMETER_STRING(statistics, "statistics.pb",
-                         "output statistics file in protobuf format"
                          " [default: %default]");
 IMP_NPC_PARAMETER_STRING(conformations, "conformations.rmf",
                          "RMF file for recording the conforomations along the "

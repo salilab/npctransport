@@ -171,3 +171,8 @@ message Statistics {
   optional double seconds_per_iteration=5 [default=0];
   optional int32 interrupted=7 [default=0];
 }
+
+message Output {
+  required Assignment assignment=1;
+  required Statistics statistics=2;
+}
