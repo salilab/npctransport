@@ -169,7 +169,7 @@ void show_statistics(CSV *csv,
                      const Strings& field_names,
                      base::TextOutput out) {
 #ifndef IMP_NO_ACCUMULATORS
-  OwnerPointer<CSV> ocsv(csv);
+  base::OwnerPointer<CSV> ocsv(csv);
   out.get_stream() << "name, min, max, mean, stddev" << std::endl;
   for (unsigned int i=0; i< field_names.size(); ++i) {
     show_statistics(csv, field_names[i], out);
@@ -203,7 +203,7 @@ void show_joint_statistics(CSV *csv,
                            std::string output_name,
                      base::TextOutput out) {
 #ifndef IMP_NO_ACCUMULATORS
-  OwnerPointer<CSV> ocsv(csv);
+  base::OwnerPointer<CSV> ocsv(csv);
   out.get_stream() << "name, covariance" << std::endl;
   for (unsigned int i=0; i< field_names.size(); ++i) {
     show_joint_statistics(csv, field_names[i], output_name, out);
@@ -215,7 +215,7 @@ void show_joint_statistics(CSV *csv,
 algebra::PrincipalComponentAnalysisKD
 get_principal_components(CSV *csv,
                          const Strings& field_names) {
-  OwnerPointer<CSV> ocsv(csv);
+  base::OwnerPointer<CSV> ocsv(csv);
   algebra::VectorKDs vects(csv->get_number_of_rows());
   for (unsigned int i=0; i< vects.size(); ++i) {
     algebra::VectorKD kd= algebra::get_zero_vector_kd(field_names.size());
@@ -237,8 +237,8 @@ void show_with_color(CSV *csv,
                      double min, double max,
                      Operation,
                      display::Writer *w) {
-  OwnerPointer<CSV> ocsv(csv);
-  OwnerPointer<display::Writer> ow(w);
+  base::OwnerPointer<CSV> ocsv(csv);
+  base::OwnerPointer<display::Writer> ow(w);
   base::Vector<const Floats*> locations_indexes;
   for (unsigned int i=0; i< base.size(); ++i) {
     //location_values.push_back(&csv->get_values(locations[i]));
