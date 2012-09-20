@@ -102,17 +102,19 @@ void optimize_balls(const ParticlesTemp &ps,
   IMP_LOG(PROGRESS, "Performing initial optimization" << std::endl);
   // shrink each of the particles, relax the configuration, repeat
   for (int i=0; i< 11; ++i) {
-    boost::ptr_vector<ScopedSetFloatAttribute> attrs;
+    boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > attrs
+        (new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()]);
     boost::ptr_vector<SetLength> lengths;
     double factor=.1*i;
     double length_factor=.3+.7*factor;
+#pragma omp critical
     std::cout << "Optimizing with radii at " << factor << " of full"
               << " and length factor " << length_factor << std::endl;
     for (unsigned int j=0; j< ps.size(); ++j) {
-      attrs.push_back( new ScopedSetFloatAttribute(ps[j],
-                                                   core::XYZR::get_radius_key(),
-                                                   core::XYZR(ps[j])
-                                                   .get_radius()*factor));
+      attrs[j].reset( new ScopedSetFloatAttribute(ps[j],
+                                                  core::XYZR::get_radius_key(),
+                                                  core::XYZR(ps[j])
+                                                  .get_radius()*factor));
     }
     for (unsigned int j=0; j< dps.size(); ++j) {
       lengths.push_back(new SetLength(dps[j],
@@ -123,7 +125,8 @@ void optimize_balls(const ParticlesTemp &ps,
     for (int j=0; j< 5; ++j) {
       mc->set_kt(100.0/(3*j+1));
       double e= mc->optimize(ps.size()*(j+1)*500);
-      std::cout << "Energy is " << e << std::endl;
+#pragma omp critical
+      std::cout << "Energy is " << e << " at " << i << ", " << j << std::endl;
       if (debug) {
         std::ostringstream oss;
         oss << i << " " << j;
@@ -133,6 +136,7 @@ void optimize_balls(const ParticlesTemp &ps,
       if (e < .000001) break;
     }
     double e=local->optimize(1000);
+#pragma omp critical
     std::cout << "Energy after bd is " << e << std::endl;
   }
 }
