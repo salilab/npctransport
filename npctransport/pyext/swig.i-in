@@ -27,7 +27,6 @@ IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, Bipar
 %include "IMP/npctransport/SimulationData.h"
 %include "IMP/npctransport/io.h"
 %include "IMP/npctransport/creating_particles.h"
-//%include "IMP/npctransport/csv.h"
 %include "IMP/npctransport/rmf_links.h"
 %include "IMP/npctransport/protobuf.h"
 %include "IMP/npctransport/SlabSingletonScore.h"
