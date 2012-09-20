@@ -51,7 +51,7 @@ public:
   }
   // depend on get_is_trivially_zero
   template <unsigned int D>
-  double get_score(Model *m, const ParticleIndexTuple<D>&pp,
+  double get_score(Model *m, const base::Array<D, ParticleIndex>&pp,
                    double distance) const {
     if (distance < 0) {
       return P::get_score(m, pp, distance)-k_attr_*attr_range_;
@@ -63,7 +63,7 @@ public:
   }
   template <unsigned int D>
   DerivativePair get_score_and_derivative(Model *m,
-                                          const ParticleIndexTuple<D>&p,
+                                          const  base::Array<D, ParticleIndex>&p,
                                           double distance) const {
     if (distance< 0) {
       DerivativePair dp= P::get_score_and_derivative(m, p, distance);
@@ -75,11 +75,12 @@ public:
     }
   }
   template <unsigned int D>
-  double get_maximum_range(Model *, const ParticleIndexTuple<D>& ) const {
+  double get_maximum_range(Model *,
+                           const base::Array<D, ParticleIndex>& ) const {
     return attr_range_;
   }
   template <unsigned int D>
-  bool get_is_trivially_zero(Model *, const ParticleIndexTuple<D>& ,
+  bool get_is_trivially_zero(Model *, const base::Array<D, ParticleIndex>& ,
                              double squared_distance) const {
     return squared_distance > algebra::get_squared(attr_range_);
   }
