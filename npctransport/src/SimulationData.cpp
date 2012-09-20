@@ -382,9 +382,11 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     bd_=new atom::BrownianDynamics(m_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_/4);
+#ifdef _OPENMP
     if (dump_interval_frames_ > 0 && !get_rmf_file_name().empty()) {
       bd_->add_optimizer_state(get_rmf_writer());
     }
+#endif
     // set up the restraints for the BD simulation:
     RestraintsTemp rs= chain_restraints_;
     if(get_has_bounding_box()) rs.push_back(box_restraint_);
@@ -612,7 +614,7 @@ void SimulationData::write_geometry(std::string out) {
 }
 
 // TODO: turn into a template inline in unamed space?
-#define UPDATE_AVG(frame, message, field, newvalue)  \
+#define UPDATE_AVG(frame, message, field, newvalue)                     \
   (message).set_##field(static_cast<double>(frame)/(frame+1)*(message).field() \
                     + 1.0/(frame+1)*newvalue)
 
@@ -737,6 +739,8 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
             = get_as<ParticlesTemp>(atom::get_leaves(h));
         all+=chain;
         fgs.back().push_back(chain);
+        IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i), "Not enough fgs",
+                         ValueException);
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
         double volume= atom::get_volume(h);
         double radius_of_gyration= atom::get_radius_of_gyration(chain);
@@ -757,6 +761,8 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   for (unsigned int i=0; i<float_stats_.size(); ++i) {
     for (unsigned int j=0; j<float_stats_[i].size(); ++j) {
       int cnf=(nf)*float_stats_[i].size()+j;
+      IMP_ALWAYS_CHECK(stats.floaters_size() >  static_cast<int>(i), "Not enough floaters",
+                         ValueException);
       UPDATE_AVG(cnf,
              *stats.mutable_floaters(i), diffusion_coefficient,
              float_stats_[i][j]->get_diffusion_coefficient());
@@ -788,6 +794,8 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       for (unsigned int k=0; k< fgs_stats_[i][j].size(); ++k) {
         unsigned int n=fgs_stats_[i].size()*fgs_stats_[i][j].size();
         unsigned int cnf=(nf)*n+j*fgs_stats_[i][j].size()+k;;
+        IMP_ALWAYS_CHECK(stats.fgs_size() >  static_cast<int>(i), "Not enough fgs",
+                         ValueException);
         UPDATE_AVG(cnf,
                    *stats.mutable_fgs(i),particle_correlation_time,
                    fgs_stats_[i][j][k]->get_correlation_time());
@@ -802,6 +810,8 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
     for (unsigned int j=0; j<chain_stats_[i].size(); ++j) {
       unsigned int n=chain_stats_[i].size();
       unsigned int cnf=(nf)*n+j;
+      IMP_ALWAYS_CHECK(stats.fgs_size() >  static_cast<int>(i), "Not enough fgs",
+                         ValueException);
       UPDATE_AVG(cnf,
              *stats.mutable_fgs(i), chain_correlation_time,
              chain_stats_[i][j]->get_correlation_time());
@@ -823,6 +833,8 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       double interactions, interacting, bead_partners, chain_partners;
       boost::tie(interactions, interacting, bead_partners, chain_partners)
           =get_interactions_and_interacting(floaters.back(), fgs);
+      IMP_ALWAYS_CHECK(stats.floaters_size() >  static_cast<int>(i), "Not enough fgs",
+                         ValueException);
       UPDATE_AVG(nf, *stats.mutable_floaters(i), interactions,
              interactions/floaters.back().size());
       UPDATE_AVG(nf, *stats.mutable_floaters(i), interacting,
@@ -837,6 +849,8 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   // update statistics gathered on interaction rates
   for(unsigned int i = 0; i < interactions_stats_.size(); i++){
     IMP_LOG( PROGRESS, "adding interaction statistics # " << i << std::endl );
+    IMP_ALWAYS_CHECK(stats.interactions_size() >  static_cast<int>(i), "Not enough fgs",
+                         ValueException);
     ::npctransport_proto::Statistics_InteractionStats*
       pOutStats_i = stats.mutable_interactions(i);
     IMP::Pointer<BipartitePairsStatisticsOptimizerState>
