@@ -19,6 +19,7 @@
 #include <IMP.h>
 #include <IMP/container.h>
 #include <IMP/base/CreateLogContext.h>
+#include "SimulationData.h"
 #include <IMP/npctransport.h>
 //#include <IMP/benchmark/Profiler.h>
 #include "internal/main.h"
@@ -46,31 +47,9 @@
    objects, based on these command line paramateres.
  */
 #define IMP_NPC_STARTUP(sim_data)                                       \
-  IMP_NPC_START_INT;                                                    \
-  IMP_NPC_PRINTHELP;                                                    \
-  set_log_level(IMP::base::LogLevel(FLAGS_log_level));                  \
-  try {                                                                 \
-    int num=IMP::npctransport::assign_ranges                            \
-        (FLAGS_configuration, FLAGS_output,                             \
-         FLAGS_work_unit, FLAGS_show_steps);                            \
-    if (FLAGS_show_number_of_work_units) {                              \
-      std::cout << "work units " << num << std::endl;                   \
-    }                                                                   \
-    set_log_level(IMP::base::LogLevel(FLAGS_log_level));                \
-  } catch (const IMP::base::IOException &e) {                           \
-    std::cerr << "Error: " << e.what() << std::endl;                    \
-    return 1;                                                           \
-  }                                                                     \
-  IMP_NEW(SimulationData, sim_data,(FLAGS_output,                       \
-                              FLAGS_quick));                            \
-  try {                                                                 \
-    if (!FLAGS_conformations.empty()) {                                 \
-      sd->set_rmf_file_name(FLAGS_conformations);                       \
-    }                                                                   \
-  } catch(const RMF::Exception &e) {                                    \
-    std::cerr << "Error: " << e.what() << std::endl;                    \
-    return 1;                                                           \
-  }                                                                     \
+  IMP::base::Pointer<IMP::npctransport::SimulationData> sim_data        \
+  = startup(argc, argv);                                                \
+  if (!sim_data) return 1
 
 
 
@@ -116,14 +95,46 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
 #define IMP_NPC_SET_PROF(p, tf)
 #endif
 
-/** TODO: what is the meaning of links? */
+/** links are extra pairs of things to tie together during the initialization
+    phase.*/
 #define IMP_NPC_LOOP(sim_data, links)                                   \
   IMP::npctransport::internal::do_main_loop(sim_data, links, FLAGS_quick,     \
                                             FLAGS_final_conformations,\
                                             FLAGS_debug_initialization, \
                                             FLAGS_init_rmffile)
 
-using namespace IMP::npctransport;
+
+inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
+  IMP_NPC_PARSE_OPTIONS(argc, argv);
+  IMP_NPC_PRINTHELP;
+  set_log_level(IMP::base::LogLevel(FLAGS_log_level));
+  try {
+    int num=IMP::npctransport::assign_ranges
+        (FLAGS_configuration, FLAGS_output,
+         FLAGS_work_unit, FLAGS_show_steps);
+    if (FLAGS_show_number_of_work_units) {
+#pragma omp critical
+      std::cout << "work units " << num << std::endl;
+    }
+    set_log_level(IMP::base::LogLevel(FLAGS_log_level));
+  } catch (const IMP::base::IOException &e) {
+#pragma omp critical
+   std::cerr << "Error: " << e.what() << std::endl;
+    return IMP_NULLPTR;
+  }
+  IMP_NEW(IMP::npctransport::SimulationData, sd,(FLAGS_output,
+                              FLAGS_quick));
+  try {
+    if (!FLAGS_conformations.empty()) {
+      sd->set_rmf_file_name(FLAGS_conformations);
+    }
+  } catch(const RMF::Exception &e) {
+#pragma omp critical
+    std::cerr << "Error: " << e.what() << std::endl;
+    return IMP_NULLPTR;
+  }
+  return sd.release();
+}
 
 #endif // IMP_NPC_MAIN
 

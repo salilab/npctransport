@@ -8,14 +8,11 @@
 #include <IMP/npctransport/main.h>
 #include <IMP/ParticleTuple.h>
 #include <RMF/utility.h>
-
-
-int main(int argc, char *argv[]) {
+int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
   using namespace IMP;
   using namespace IMP::npctransport;
   using namespace IMP::algebra;
 
-  IMP_NPC_STARTUP(sd);
   RMF:: set_show_hdf5_errors(true);
   //  sd->add_interaction(type_of_float[0], type_of_fg[0]);
   //  sd->add_interaction(type_of_float[1], type_of_fg[0]);
@@ -58,4 +55,13 @@ int main(int argc, char *argv[]) {
   }
   IMP_NPC_LOOP(sd, IMP::ParticlePairsTemp());
   return 0;
+}
+
+int main(int argc, char *argv[]) {
+  int ret;
+  IMP_NPC_STARTUP(sd);
+
+  ret=do_it(sd);
+
+  return ret;
 }

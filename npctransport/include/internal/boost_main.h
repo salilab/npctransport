@@ -37,7 +37,7 @@ typedef int IntArg;
   Adder name##add(#name, &FLAGS_##name,                                 \
                   description);
 
-#define IMP_NPC_START_INT                                               \
+#define IMP_NPC_PARSE_OPTIONS(argc, argv)                               \
   boost::program_options::variables_map vm;                             \
   boost::program_options::store(boost                                   \
                                 ::program_options::parse_command_line(argc, \
@@ -46,15 +46,16 @@ typedef int IntArg;
                                 vm);                                    \
   boost::program_options::notify(vm);                                   \
   if (vm.count("help")) {                                               \
-    std::cout << desc << "\n";                          \
-    return 1;                                           \
+    std::cout << desc << "\n";                                          \
+    return IMP_NULLPTR;                                                 \
   }
 
 #define IMP_NPC_PRINTHELP                       \
   if (FLAGS_help) {                             \
     std::cerr << desc;                          \
-    return 1;                                   \
+    return IMP_NULLPTR;                         \
   }
+
 #endif
 boost::program_options::options_description desc;
 struct Adder {

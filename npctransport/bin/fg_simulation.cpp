@@ -18,7 +18,6 @@
 #include <IMP/container.h>
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/npctransport.h>
-#include <IMP/benchmark/Profiler.h>
 #include <IMP/ParticleTuple.h>
 #include <numeric>
 #include <cmath>

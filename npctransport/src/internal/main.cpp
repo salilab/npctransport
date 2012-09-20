@@ -22,7 +22,13 @@ namespace {
           = std::min<unsigned int>(1000000,
                                    number_of_frames);
       std::cout << "Running..." << std::endl;
-      sd->get_bd()->optimize(cur_frames);
+#pragma omp parallel num_threads(3)
+{
+#pragma omp single
+{
+     sd->get_bd()->optimize(cur_frames);
+}
+}
       if (sd->get_maximum_number_of_minutes() > 0
           && total_time.elapsed()/60 > sd->get_maximum_number_of_minutes()) {
         sd->set_interrupted(true);
@@ -40,9 +46,11 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
                   bool debug_initialize, std::string init_rmf) {
   using namespace IMP;
   base::Pointer<rmf::SaveOptimizerState> final_sos;
+#ifndef _OPENMP
   if (!final_conformations.empty()) {
     final_sos = sd->create_rmf_writer(final_conformations);
   }
+#endif
   sd->set_was_used(true);
   boost::timer total_time;
   for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
@@ -50,9 +58,13 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     boost::timer timer;
     IMP::set_log_level(SILENT);
     if (!quick) sd->reset_rmf();
-    std::cout<< "Initializing..." << std::endl;
-    if (init_rmf == "")
-      initialize_positions(sd, links, debug_initialize);
+#pragma omp critical
+    {
+      std::cout<< "Initializing..." << std::endl;
+    }
+    if (init_rmf == "") {
+ 	  initialize_positions(sd, links, debug_initialize);
+    }
     else{
       sd->initialize_positions_from_rmf(init_rmf);
       std::cout << "Initializing positions from RMF file "
@@ -60,14 +72,19 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     }
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
+#ifndef _OPENMP
     if (final_sos) {
       final_sos->update_always();
     }
+#endif
     /*IMP::benchmark::Profiler p;
     if(i == 0)
       p.set("profiling.pprof");*/
     sd->get_bd()->set_current_time(0);
-    std::cout << "Equilibrating..." << std::endl;
+#pragma omp critical
+    {
+      std::cout << "Equilibrating..." << std::endl;
+    }
     if (run_it(sd, sd->get_number_of_frames()
                * sd->get_statistics_fraction(), total_time)) {
       return;
@@ -75,15 +92,15 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     sd->reset_statistics_optimizer_states();
     std::cout << "Running..." << std::endl;
     // now run the rest of the sim
-    sd->get_bd()->optimize(sd->get_number_of_frames()
-                           *(1.0- sd->get_statistics_fraction()));
     bool abort=run_it(sd, sd->get_number_of_frames()
                       * (1.0- sd->get_statistics_fraction()), total_time);
     //p.reset();
     sd->update_statistics(timer);
+#ifndef _OPENMP
     if (final_sos) {
       final_sos->update_always();
     }
+#endif
     if (abort) break;
   }
 }
