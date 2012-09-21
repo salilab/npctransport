@@ -189,16 +189,23 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
    */
   void create_slab_restraint_on_diffusers();
 
-  /** If the two filenames are the same, they are assumed to contain an
-      Output protobuf.*/
+  /** Initializes the simulation and keeps the assignment file and the stats
+      file in protobuf format.
+      If the two filenames assignments_file and stats_file are the same,
+      both are encapsulated in a single Output protobuf, otherwise they are
+      kept each in a separate file.
+
+      @param quick whether to perform a quick simulation with a small number
+                   of iterations
+  */
   void initialize(std::string assignments_file,
                   std::string stats_file,
                   bool quick);
 
  public:
   /**
-     @param[out] output_file name of input assignment file for
-     initializing the simulation params and the output statistics file
+     @param[out] output_file name of protobuf file that encapsulates the assignment
+     data for initializing the simulation params and the output statistics file
      @param[out] quick if true, perform a very short simulation,
                        typically for calibration or for initial testing
      @param[out] rmf_file_name RMF file to which simulation trajectory
@@ -208,7 +215,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
                  bool quick,
                  std::string rmf_file_name = "output.prmf");
 #ifndef IMP_DOXYGEN
-  // for backwards compat
+  // for backwards compatability - the assignment file and stats file are
+  // separate here, but if they are the same, they are merged in one file that
+  // encapsulates both
   SimulationData(std::string assignments_file,
                  std::string stats_file,
                  bool quick,

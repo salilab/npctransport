@@ -34,14 +34,12 @@ def get_cmdline_options(args = None):
                       type="string", default="configuration.pb",
                       help="input configuration file in protobuf format" +
                       " [default: %default]")
-    parser.add_option("-a", "--assignments", metavar="ASSIGN_FILE",
+    parser.add_option("-o", "--output", metavar="OUTPUT_FILE",
                       type="string", default="assignments.pb",
-                      help="output assignments file in protobuf format" +
-                      ", recording the assignment being executed" +
-                      " [default: %default]")
-    parser.add_option("-s", "--statistics", metavar="STATISTICS_FILE",
-                      type="string", default="statistics.pb",
-                      help="output statistics file in protobuf format" +
+                      help="output assignment and statistics file in " +
+                      " protobuf format" +
+                      ", recording the assignment being executed"
+                      " and the associated stats" +
                       " [default: %default]")
     parser.add_option("-f", "--final_configuration", metavar="FINAL_FILE",
                       type="string", default="final.pym",
@@ -289,8 +287,8 @@ def optimize_in_chunks( sd, nframes, nchunks ):
 flags = get_cmdline_options()
 print flags
 # process info from protobuf, using [work_unit]'th combination of values
-n = IMP.npctransport.assign_ranges(flags.configuration, flags.assignments,
-                               flags.work_unit, flags.show_steps)
+n = IMP.npctransport.assign_ranges(flags.configuration, flags.output,
+                                   flags.work_unit, flags.show_steps)
 if(flags.show_number_of_work_units):
     print "total number of work units ", n
 RMF.set_show_hdf5_errors(True)
@@ -304,8 +302,7 @@ RMF.set_show_hdf5_errors(True)
 
 IMP.set_log_level(IMP.PROGRESS)
 sd = IMP.npctransport.SimulationData(
-    flags.assignments,
-    flags.statistics,
+    flags.output,
     flags.quick,
     flags.rmf_file)
 print "RMF file: ", sd.get_rmf_file_name()
