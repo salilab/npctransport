@@ -34,7 +34,7 @@ class Tests(IMP.test.TestCase):
                 self.assert_(deriv[0] < 0)
 
     def test_interaction(self):
-        """Check linear soft sphere scores"""
+        """Check linear interaction scores"""
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
         ds= [self._create_particle(m) for i in range(0,2)]

@@ -44,7 +44,7 @@ class Tests(IMP.test.TestCase):
         bd.add_optimizer_state(sos)
         bd.optimize(1000)
     def test_one(self):
-        """Check interaction score repulsion"""
+        """Check interaction score repulsion for glue test"""
         k=500
         dt=IMP.npctransport.get_time_step(1, k, radius)
         self._test_one(radius, k, .2*radius, .5*k, k, dt)
@@ -133,7 +133,7 @@ class Tests(IMP.test.TestCase):
         bd.add_optimizer_state(sos)
         bd.optimize(3000)
     def test_three(self):
-        """Check two interactions"""
+        """Check three interactions"""
         k=500
         dt=IMP.npctransport.get_time_step(1, k, radius)
         self._test_three(radius, k, .2*radius, .5*k, k, dt)
