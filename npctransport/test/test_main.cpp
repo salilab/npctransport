@@ -19,10 +19,10 @@ int main(int , char *[]) {
         = IMP::base::create_temporary_file_name("output", ".rmf");
     set_log_level(IMP::base::LogLevel(IMP::base::SILENT));
     FLAGS_quick=true;
-    int num=assign_ranges(config, assignment,
+    int num=IMP::npctransport::assign_ranges(config, assignment,
                           0, true);
     std::cout << "num ranges " << num << std::endl;
-    IMP_NEW(SimulationData, sd,(assignment,
+    IMP_NEW(IMP::npctransport::SimulationData, sd,(assignment,
                                 true));
     sd->set_rmf_file_name(output);
     sd->get_m()->set_log_level(IMP::base::SILENT);
