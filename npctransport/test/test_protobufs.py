@@ -45,7 +45,7 @@ class ConeTests(IMP.test.TestCase):
         f=open(assignment_name, "rb")
         output.ParseFromString(f.read())
         assign= output.assignment
-        self.assertEqual(assign.interaction_k.value, .2)
+        self.assertAlmostEqual(assign.interaction_k.value, .2, delta=.0000001)
         self.assertEqual(assign.interactions[0].is_on.value, 0)
         num= IMP.npctransport.get_number_of_work_units(config_name)
         self.assertEqual(num, 5*5*3*3*3*3*3*2)

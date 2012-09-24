@@ -13,7 +13,7 @@ class Tests(IMP.test.TestCase):
         config= IMP.npctransport.get_data_path( "quick.pb" );
         assignment= self.get_tmp_file_name( "output.pb" );
         IMP.set_log_level( IMP.SILENT );
-        print "assigning"
+        print "assigning parameter ranges"
         num=assign_ranges( config, assignment,
                           0, True );
         print "num ranges %d" % num
@@ -70,6 +70,7 @@ class Tests(IMP.test.TestCase):
         # the first one:
         for i in range( len( coordsI ) ):
             for j in range(3):
+                print i, j
                 self.assertEqual(coordsI[i][j], coordsIII[i][j])
                 self.assertNotEqual(coordsI[i][j], coordsII[i][j])
 

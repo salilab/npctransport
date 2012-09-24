@@ -6,5 +6,6 @@ env.IMPModuleTest(python_tests= env.IMPModuleGetPythonTests(),
                   cpp_tests= env.IMPModuleGetCPPTests(),
                   spelling_exceptions=["npc", "fg", "kap", "cpc", "predr", "rmf"],
                   function_name_exceptions=["append_npc", "display_npc",
-                                            "relax_npc", "simulate_npc"],
+                                            "relax_npc", "simulate_npc",
+                                            "initialize_positions_from_rmf"],
                   value_object_exceptions=["timer"])

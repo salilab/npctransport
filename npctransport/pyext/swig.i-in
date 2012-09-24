@@ -19,6 +19,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, HierarchyWithSitesLoadLink, HierarchyWithSite
 IMP_SWIG_OBJECT(IMP::npctransport, ChainStatisticsOptimizerState, ChainStatisticsptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, BodyStatisticsOptimizerState, BodyStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, BipartitePairsStatisticsOptimizerStates);
+IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, ParticleTransportStatisticsOptimizerStates);
 
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
