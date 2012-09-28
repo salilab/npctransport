@@ -16,7 +16,7 @@ class ConeTests(IMP.test.TestCase):
                                        radius=10,
                                        interactions=2)
       config_name=self.get_tmp_file_name("rmf_sites.pb")
-      open(config_name, "w").write(config.SerializeToString())
+      open(config_name, "wb").write(config.SerializeToString())
       assignments_name= self.get_tmp_file_name("rmf_sites_assignments.pb")
       IMP.npctransport.assign_ranges(config_name, assignments_name,
                                      0, False)
