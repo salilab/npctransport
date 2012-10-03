@@ -44,6 +44,7 @@ Particle* create_particle(SimulationData *sd, double radius,
 namespace {
 /** Restraint the passed particles to be connected in a chain. The distance
     between consecutive particles is length_factor*the sum of the radii.
+    // TODO: this documentation seems obsolete?
 
     Note, this assumes that all such chains will be disjoint and so you can
     use the container::ExclusiveConsecutivePairFilter if you want to filter
@@ -55,7 +56,7 @@ inline Restraint* create_chain_restraint(const ParticlesTemp &ps,
                                          LinearWellPairScore *pps,
                                          std::string name) {
   IMP_USAGE_CHECK(!ps.empty(), "No Particles passed.");
-  double scale = core::XYZR(ps[0]).get_radius();
+  double scale = core::XYZR(ps[0]).get_radius(); // TODO: what's this scale?
 
   // Exclusive means that the particles will be in no other
   // ConsecutivePairContainer

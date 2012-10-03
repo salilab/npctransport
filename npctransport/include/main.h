@@ -95,10 +95,14 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
 #define IMP_NPC_SET_PROF(p, tf)
 #endif
 
-/** links are extra pairs of things to tie together during the initialization
-    phase.*/
-#define IMP_NPC_LOOP(sim_data, links)                                   \
-  IMP::npctransport::internal::do_main_loop(sim_data, links, FLAGS_quick,     \
+/** Run simulation using preconstructed SimulationData (sim_data) object.
+    init_restraints are used ad-hoc during initialization only,
+    and unless initialized from an RMF file
+*/
+#define IMP_NPC_LOOP(sim_data, init_restraints)                        \
+  IMP::npctransport::internal::do_main_loop(sim_data,                  \
+                                            init_restraints,           \
+                                            FLAGS_quick,               \
                                             FLAGS_final_conformations,\
                                             FLAGS_debug_initialization, \
                                             FLAGS_init_rmffile)
