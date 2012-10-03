@@ -56,7 +56,6 @@ inline Restraint* create_chain_restraint(const ParticlesTemp &ps,
                                          LinearWellPairScore *pps,
                                          std::string name) {
   IMP_USAGE_CHECK(!ps.empty(), "No Particles passed.");
-  double scale = core::XYZR(ps[0]).get_radius(); // TODO: what's this scale?
 
   // Exclusive means that the particles will be in no other
   // ConsecutivePairContainer
