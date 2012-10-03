@@ -29,6 +29,7 @@
 #include <IMP/container/generic.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/base/raii_macros.h>
+#include <IMP/log.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -143,7 +144,8 @@ void optimize_balls(const ParticlesTemp &ps,
 }
 
 void initialize_positions(SimulationData *sd,
-                          const ParticlePairsTemp &extra_links,
+                          //                          const ParticlePairsTemp &extra_links,
+                          const RestraintsTemp &extra_restraints,
                           bool debug) {
   example::randomize_particles(sd->get_diffusers()->get_particles(),
                                sd->get_box());
@@ -160,15 +162,16 @@ void initialize_positions(SimulationData *sd,
       core::XYZ(chains[i].get_child(0)).set_coordinates_are_optimized(false);
     }
   }
-  for (unsigned int i=0; i< extra_links.size(); ++i) {
-    double d= core::XYZR(extra_links[i][0]).get_radius()
-        +  core::XYZR(extra_links[i][1]).get_radius();
-    IMP_NEW(core::HarmonicDistancePairScore, link,
-            (d,sd->get_backbone_k(), "linker ps"));
-    Pointer<Restraint> r
-        = IMP::create_restraint(link.get(), extra_links[i]);
-    rss.push_back(r);
-  }
+  rss += extra_restraints;
+  // for (unsigned int i=0; i< extra_links.size(); ++i) {
+  //   double d= core::XYZR(extra_links[i][0]).get_radius()
+  //       +  core::XYZR(extra_links[i][1]).get_radius();
+  //   IMP_NEW(core::HarmonicDistancePairScore, link,
+  //           (d,sd->get_backbone_k(), "linker ps"));
+  //   Pointer<Restraint> r
+  //       = IMP::create_restraint(link.get(), extra_links[i]);
+  //   rss.push_back(r);
+  // }
 
   // Now optimize:
   int dump_interval = sd->get_rmf_dump_interval_frames();

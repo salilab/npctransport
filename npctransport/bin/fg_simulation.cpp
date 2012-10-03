@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
   color_fgs( *sd );
   //int ntrials = sd->get_number_of_trials();
   // run
-  IMP_NPC_LOOP(sd, IMP::ParticlePairsTemp());
+  IMP_NPC_LOOP(sd, RestraintsTemp() );
 
   return 0;
  }

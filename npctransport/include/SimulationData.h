@@ -408,6 +408,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
   Restraint* get_slab_restraint() const {return slab_restraint_;}
 
+  double get_slab_thickness() const { return slab_thickness_; }
+
   display::Geometry* get_static_geometry();
 
   int get_rmf_dump_interval_frames() const { return dump_interval_frames_; }

@@ -18,7 +18,9 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
    optimize a system in sd
 
    @param sd a constructed SimulationData object to be optimized
-   @param links
+   @param init_restraints additional restraints to be used ad-hoc
+                          during position initialization only
+                          (relevant only if init_rmf is "")
    @param quick whether to perform a quick optimization (TODO: this
                 right now as sd received 'quick' in its constructor -
                 isn't this redundant? shouldn't quick mode be saved
@@ -31,7 +33,7 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
                    likely that from a previous run using the same run params
  */
 IMPNPCTRANSPORTEXPORT void do_main_loop(SimulationData *sd,
-                                        const ParticlePairsTemp &links,
+                                        const RestraintsTemp &init_restraints,
                                         bool quick,
                                         std::string final_config,
                                         bool debug_init,

@@ -9,6 +9,7 @@
 #include <IMP/npctransport/internal/main.h>
 #include <IMP/base_types.h>
 #include <boost/timer.hpp>
+#include <IMP/log.h>
 //#include <IMP/benchmark/Profiler.h>
 #include <IMP/npctransport/initialize_positions.h>
 
@@ -41,7 +42,8 @@ namespace {
   }
 }
 
-void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
+void do_main_loop(SimulationData *sd,
+                  const RestraintsTemp &init_restraints,
                   bool quick, std::string final_conformations,
                   bool debug_initialize, std::string init_rmf) {
   using namespace IMP;
@@ -63,7 +65,7 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
       std::cout<< "Initializing..." << std::endl;
     }
     if (init_rmf == "") {
- 	  initialize_positions(sd, links, debug_initialize);
+ 	  initialize_positions(sd, init_restraints, debug_initialize);
     }
     else{
       sd->initialize_positions_from_rmf(init_rmf);

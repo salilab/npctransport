@@ -34,6 +34,6 @@ int main(int argc, char *argv[]) {
     d.set_coordinates(sites[i]);
     d.set_coordinates_are_optimized(false);
   }
-  IMP_NPC_LOOP(sd, IMP::ParticlePairsTemp());
+  IMP_NPC_LOOP(sd, IMP::RestraintsTemp());
   return 0;
 }
