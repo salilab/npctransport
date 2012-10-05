@@ -21,8 +21,9 @@ class Tests(IMP.test.TestCase):
         sd.get_m().set_log_level( IMP.SILENT );
         print "Files are " + assignment + \
               " and " + output_file
-        initialize_positions( sd )
         sd.get_bd().optimize( 10 )
+        # make sure final state is written
+        sd.get_rmf_writer().update_always()
         return sd
 
     def _get_diffuser_coords( self, sd, i ):
