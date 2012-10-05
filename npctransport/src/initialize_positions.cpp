@@ -24,6 +24,7 @@
 #include <IMP/base/log_macros.h>
 #include <IMP/container/ListSingletonContainer.h>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <IMP/scoped.h>
 #include <IMP/PairPredicate.h>
 #include <IMP/container/generic.h>
