@@ -2,6 +2,6 @@
 from IMP.npctransport import *
 import sys
 f=open(sys.argv[1], "rb")
-config= Statistics()
+config= Output()
 config.ParseFromString(f.read())
-print config
+print config.statistics
