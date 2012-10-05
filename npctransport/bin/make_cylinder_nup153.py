@@ -48,21 +48,21 @@ fg_nuclear= IMP.npctransport.add_fg_type(config,
                                  radius=8,
                                  interactions=1)
 kap= IMP.npctransport.add_float_type(config,
-                                     number=5,
+                                     number=10,
                                      radius=15,
                                      interactions=12)
 nonspecifics= IMP.npctransport.add_float_type(config,
-                                              number=10,
+                                              number=20,
                                               radius=15,
                                               interactions=0)
 
 # fg with kaps / craps
-add_interactions_for_fg("fg0",10)
+add_interactions_for_fg("fg0",5)
 add_interactions_for_fg("fg1",
-                        k_kap_lower = 0.95,
-                        k_kap_upper = 10,
+                        k_kap_lower = 2.5,
+                        k_kap_upper = 20,
                         k_kap_steps = 10)
-add_interactions_for_fg("fg2",10)
+add_interactions_for_fg("fg2",5)
 # non-specific attraction
 create_range(config.nonspecific_k, 0.1, 10, steps=5)
 create_range(config.nonspecific_range, 0.1, 2, steps=3)
