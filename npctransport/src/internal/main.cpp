@@ -48,11 +48,9 @@ void do_main_loop(SimulationData *sd,
                   bool debug_initialize, std::string init_rmf) {
   using namespace IMP;
   base::Pointer<rmf::SaveOptimizerState> final_sos;
-#ifndef _OPENMP
   if (!final_conformations.empty()) {
     final_sos = sd->create_rmf_writer(final_conformations);
   }
-#endif
   sd->set_was_used(true);
   boost::timer total_time;
   for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
@@ -60,7 +58,6 @@ void do_main_loop(SimulationData *sd,
     boost::timer timer;
     IMP::set_log_level(SILENT);
     if (!quick) sd->reset_rmf();
-#pragma omp critical
     {
       std::cout<< "Initializing..." << std::endl;
     }
@@ -74,16 +71,13 @@ void do_main_loop(SimulationData *sd,
     }
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
-#ifndef _OPENMP
     if (final_sos) {
       final_sos->update_always();
     }
-#endif
     /*IMP::benchmark::Profiler p;
     if(i == 0)
       p.set("profiling.pprof");*/
     sd->get_bd()->set_current_time(0);
-#pragma omp critical
     {
       std::cout << "Equilibrating..." << std::endl;
     }
@@ -98,11 +92,9 @@ void do_main_loop(SimulationData *sd,
                       * (1.0- sd->get_statistics_fraction()), total_time);
     //p.reset();
     sd->update_statistics(timer);
-#ifndef _OPENMP
     if (final_sos) {
       final_sos->update_always();
     }
-#endif
     if (abort) break;
   }
 }

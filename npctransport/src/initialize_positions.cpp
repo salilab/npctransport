@@ -109,7 +109,6 @@ void optimize_balls(const ParticlesTemp &ps,
     boost::ptr_vector<SetLength> lengths;
     double factor=.1*i;
     double length_factor=.3+.7*factor;
-#pragma omp critical
     std::cout << "Optimizing with radii at " << factor << " of full"
               << " and length factor " << length_factor << std::endl;
     for (unsigned int j=0; j< ps.size(); ++j) {
@@ -126,20 +125,32 @@ void optimize_balls(const ParticlesTemp &ps,
     isf->set_moved_particles(isf->get_movable_particles());
     for (int j=0; j< 5; ++j) {
       mc->set_kt(100.0/(3*j+1));
-      double e= mc->optimize(ps.size()*(j+1)*500);
-#pragma omp critical
-      std::cout << "Energy is " << e << " at " << i << ", " << j << std::endl;
-      if (debug) {
-        std::ostringstream oss;
-        oss << i << " " << j;
-        save->update_always();
-        save->set_frame_name(oss.str());
+      bool done=false;
+#pragma omp parallel num_threads(3)
+      {
+#pragma omp single
+        {
+          double e= mc->optimize(ps.size()*(j+1)*500);
+          std::cout << "Energy is " << e << " at " << i << ", " << j << std::endl;
+          if (debug) {
+            std::ostringstream oss;
+            oss << i << " " << j;
+            save->update_always();
+            save->set_frame_name(oss.str());
+          }
+          if (e < .000001) done=true;
+        }
       }
-      if (e < .000001) break;
+      if (done) break;
     }
-    double e=local->optimize(1000);
-#pragma omp critical
-    std::cout << "Energy after bd is " << e << std::endl;
+#pragma omp parallel num_threads(3)
+    {
+#pragma omp single
+      {
+        double e=local->optimize(1000);
+        std::cout << "Energy after bd is " << e << std::endl;
+      }
+    }
   }
 }
 }
