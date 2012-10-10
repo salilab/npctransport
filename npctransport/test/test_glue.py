@@ -154,7 +154,7 @@ class Tests(IMP.test.TestCase):
       rs= self._create_restraint_three(m, ds,  radius, k, .2*radius, .5*k, k)
       IMP.rmf.load_frame(f, 0)
       print rs[0].evaluate(True)
-      IMP.rmf.load_frame(f, 1000)
+      IMP.rmf.load_frame(f, f.get_number_of_frames()-1)
       print rs[0].evaluate(True)
 if __name__ == '__main__':
     IMP.test.main()
