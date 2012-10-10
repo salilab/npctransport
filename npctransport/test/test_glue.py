@@ -42,7 +42,9 @@ class Tests(IMP.test.TestCase):
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         sos= IMP.rmf.SaveOptimizerState(f)
         bd.add_optimizer_state(sos)
+        sos.set_period(1000)
         bd.optimize(1000)
+        sos.update_always()
     def test_one(self):
         """Check interaction score repulsion for glue test"""
         k=500
@@ -79,8 +81,10 @@ class Tests(IMP.test.TestCase):
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
         sos= IMP.rmf.SaveOptimizerState(f)
+        sos.set_period(1000)
         bd.add_optimizer_state(sos)
         bd.optimize(2000)
+        sos.update_always()
     def test_two(self):
         """Check two interactions"""
         k=500
@@ -132,7 +136,7 @@ class Tests(IMP.test.TestCase):
         sos= IMP.rmf.SaveOptimizerState(f)
         sos.set_period(1000)
         bd.add_optimizer_state(sos)
-        print "optimizing"
+        print "optimizin"
         IMP.set_log_level(IMP.SILENT)
         bd.optimize(3000)
         print "done"
