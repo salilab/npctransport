@@ -15,6 +15,8 @@ scons_tools.dependency.boost.add_boost_library( env, "FileSystem", "filesystem",
 
 scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
                                             "google/protobuf/text_format.h")
+scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
+                                            "avro/Reader.hh")
 
 # See IMP.gsl for an example of how to add external dependencies to a module
 req_depend = ['Boost.ProgramOptions',
@@ -32,10 +34,11 @@ oenv=env.IMPModuleBuild(module="npctransport",
                                           'score_functor',
                                           'kernel',
                                           'algebra',
-                                          'base'],
+                                          'base', "benchmark"],
                         lib_only_optional_modules=['cgal'],
                         cpppath=[Dir("#/build/src/npctransport")],
-                        required_dependencies= req_depend )
+                        required_dependencies= req_depend,
+                        optional_dependencies= ["AvroCpp"])
 
 if oenv and oenv["IMP_PASS"]=="BUILD":
     """cat %(tmpdir)s/npctransport.pb.cc | sed "s#data/npctransport.pb.h#IMP/npctransport/internal/proto.hpp#g"> %(targetcc)s"""
@@ -57,4 +60,16 @@ mv %(tmpdir)s/npctransport_pb2.py %(targetpy)s
                        target=[File("#/build/src/npctransport/npctransport.pb.cpp"),
                                File("#/build/src/npctransport/npctransport.pb.h"),
                                File("#/build/lib/IMP/npctransport/_proto.py")])
+    scons_tools.data.get(env).add_to_alias("npctransport", protoc)
+
+
+
+    def build_avroc(target, source, env):
+      cmd="avrogencpp --include-prefix - --namespace IMP/npctransport/internal -U -i %(source)s -o %(target)s"%{"source":source[0].abspath,
+                                                                                                   "target":target[0].abspath
+                                                                                                            }
+      env.Execute(cmd)
+    oenv['BUILDERS']['AvroCPP']=Builder(action=build_protoc)
+    protoc=oenv.Protoc(source=[File("#/build/data/npctransport/avrodata.json")],
+                       target=[File("#/build/include/IMP/npctransport/internal/avrodata.h")])
     scons_tools.data.get(env).add_to_alias("npctransport", protoc)
