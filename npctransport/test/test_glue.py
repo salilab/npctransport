@@ -130,8 +130,13 @@ class Tests(IMP.test.TestCase):
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
         sos= IMP.rmf.SaveOptimizerState(f)
+        sos.set_period(1000)
         bd.add_optimizer_state(sos)
+        print "optimizing"
+        IMP.set_log_level(IMP.SILENT)
         bd.optimize(3000)
+        print "done"
+        sos.update_always()
     def test_three(self):
         """Check three interactions"""
         k=500
