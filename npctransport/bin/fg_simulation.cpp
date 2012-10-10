@@ -16,13 +16,14 @@
 #include <IMP/rmf.h>
 #include <IMP.h>
 #include <RMF/utility.h>
-#include <IMP/container.h>
+#include <IMP/container/SingletonsRestraint.h>
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/npctransport.h>
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
 #include <IMP/Restraint.h>
 #include <IMP/SingletonScore.h>
+#include <IMP/core/Typed.h>
 #include <numeric>
 #include <cmath>
 #include <iostream>
@@ -194,31 +195,36 @@ void set_fgs_in_cylinder( IMP::npctransport::SimulationData& sd, int n_layers )
 
 /**    returns all kap / crap particles in SimulationData */
 IMP::ParticlesTemp get_kaps_and_craps( IMP::npctransport::SimulationData& sd ) {
+  using namespace IMP;
+
   ParticlesTemp ret;
-  int n = IMP::npctransport::get_n_types_of_float();
+  unsigned int n = IMP::npctransport::get_n_types_of_float();
   for(unsigned int i = 0; i < n ; i++) {
-    ParticleType float_type = IMP::npctransport::get_type_of_float(i);
+    IMP::core::ParticleType float_type =
+      IMP::npctransport::get_type_of_float(i);
     std::cout <<  float_type << std::endl;
-    ret.push_back( sd.get_particles( float_type ) );
+    ret += sd.get_particles( float_type ) ;
     std::cout << ret;
   }
   return ret;
 }
 
 
-IMP::Restraint get_exclude_from_channel_restraint( sd ) {
+IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint
+( IMP::npctransport::SimulationData& sd ) {
+  using namespace IMP;
+
   double top = (sd.get_slab_thickness() / 2) * 1.3; // *1.3 to get some slack
   double bottom = -top;
   double k = 40.0;
   IMP_NEW( IMP::npctransport::ExcludeZRangeSingletonScore,
            score,
            (bottom, top, k) );
-  ParticlesTemp particles = get_kaps_and_craps( sd );
-  IMP_NEW(IMP::Restraint,
-          restraint,
-          ( IMP.container.SingletonsRestraint
-            (score, particles, "ExcludeZRangeRestraint") ) );
-  return restraint;
+  IMP::ParticlesTemp particles = get_kaps_and_craps( sd );
+  IMP_NEW(container::SingletonsRestraint,
+          sr,
+          (score, particles, "ExcludeZRangeRestraint") );
+  return sr;
 }
 
 IMP_NPC_PARAMETER_BOOL(cylinder_anchoring, false,
@@ -238,12 +244,16 @@ int main(int argc, char *argv[])
   if(FLAGS_cylinder_anchoring)
     set_fgs_in_cylinder(*sd, 4);
   color_fgs( *sd );
-  RestraintsTemp init_restraints();
-  if(sd->get_has_slab()): // if has slab, exclude from channel initially
-    init_restraints.append( get_exclude_from_channel_restraint( sd ) );
-  IMP.npctransport.initialize_positions( sd, init_restraints )
+  Restraints initialization_restraints;
+  std::cout << initialization_restraints << std::endl;
+  if(sd->get_has_slab()) { // if has slab, exclude from channel initially
+    IMP::Pointer<IMP::Restraint> r= get_exclude_from_channel_restraint( *sd );
+    initialization_restraints.push_back( r );
+  }
+  //  IMP::npctransport::initialize_positions
+  // ( sd, initialization_restraints );
 
-  IMP_NPC_LOOP(sd, RestraintsTemp() );
+  IMP_NPC_LOOP(sd, initialization_restraints );
 
   return 0;
  }
