@@ -1,0 +1,1 @@
+/usr/bin/c++   -Wall -O3 -DNDEBUG    CMakeFiles/precompile.dir/test/precompile.cc.o  -o precompile -rdynamic libavrocpp_s.a -lboost_filesystem-mt -lboost_system-mt -lboost_program_options-mt 

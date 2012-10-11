@@ -16,7 +16,13 @@ scons_tools.dependency.boost.add_boost_library( env, "FileSystem", "filesystem",
 scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
                                             "google/protobuf/text_format.h")
 scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
-                                            "avro/Reader.hh")
+                                            "avro/Reader.hh",
+                                            build="""cd %(workdir)s
+    cmake -DCMAKE_INSTALL_PREFIX=%(builddir)s %(srcdir)s
+    make -j 12
+    make install""",
+
+        )
 
 # See IMP.gsl for an example of how to add external dependencies to a module
 req_depend = ['Boost.ProgramOptions',
@@ -34,7 +40,7 @@ oenv=env.IMPModuleBuild(module="npctransport",
                                           'score_functor',
                                           'kernel',
                                           'algebra',
-                                          'base', "benchmark"],
+                                          'base'],
                         lib_only_optional_modules=['cgal'],
                         cpppath=[Dir("#/build/src/npctransport")],
                         required_dependencies= req_depend,

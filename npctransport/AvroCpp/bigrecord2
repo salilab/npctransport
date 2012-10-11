@@ -1,0 +1,54 @@
+record RootRecord
+name mylong
+double
+name anotherint
+int
+name bytes
+bytes
+name nestedrecord
+record Nested
+name inval3
+int
+name inval2
+string
+name inval1
+double
+end record
+name mymap
+map
+string
+long
+end map
+name myarray
+array
+double
+end array
+name myenum
+enum ExampleEnum
+name three
+name two
+name one
+name zero
+end enum
+name myunion
+union
+null
+float
+map
+string
+float
+end map
+end union
+name anotherunion
+bytes
+name anothernested
+symbolic Nested
+name newbool
+boolean
+name myfixed
+union
+float
+fixed md5 16
+end fixed
+end union
+end record
