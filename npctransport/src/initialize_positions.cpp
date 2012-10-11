@@ -24,11 +24,13 @@
 #include <IMP/base/log_macros.h>
 #include <IMP/container/ListSingletonContainer.h>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <IMP/scoped.h>
 #include <IMP/PairPredicate.h>
 #include <IMP/container/generic.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/base/raii_macros.h>
+#include <IMP/log.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -107,7 +109,6 @@ void optimize_balls(const ParticlesTemp &ps,
     boost::ptr_vector<SetLength> lengths;
     double factor=.1*i;
     double length_factor=.3+.7*factor;
-#pragma omp critical
     std::cout << "Optimizing with radii at " << factor << " of full"
               << " and length factor " << length_factor << std::endl;
     for (unsigned int j=0; j< ps.size(); ++j) {
@@ -124,26 +125,39 @@ void optimize_balls(const ParticlesTemp &ps,
     isf->set_moved_particles(isf->get_movable_particles());
     for (int j=0; j< 5; ++j) {
       mc->set_kt(100.0/(3*j+1));
-      double e= mc->optimize(ps.size()*(j+1)*500);
-#pragma omp critical
-      std::cout << "Energy is " << e << " at " << i << ", " << j << std::endl;
-      if (debug) {
-        std::ostringstream oss;
-        oss << i << " " << j;
-        save->update_always();
-        save->set_frame_name(oss.str());
+      bool done=false;
+#pragma omp parallel num_threads(3)
+      {
+#pragma omp single
+        {
+          double e= mc->optimize(ps.size()*(j+1)*500);
+          std::cout << "Energy is " << e << " at " << i << ", " << j << std::endl;
+          if (debug) {
+            std::ostringstream oss;
+            oss << i << " " << j;
+            save->update_always();
+            save->set_frame_name(oss.str());
+          }
+          if (e < .000001) done=true;
+        }
       }
-      if (e < .000001) break;
+      if (done) break;
     }
-    double e=local->optimize(1000);
-#pragma omp critical
-    std::cout << "Energy after bd is " << e << std::endl;
+#pragma omp parallel num_threads(3)
+    {
+#pragma omp single
+      {
+        double e=local->optimize(1000);
+        std::cout << "Energy after bd is " << e << std::endl;
+      }
+    }
   }
 }
 }
 
 void initialize_positions(SimulationData *sd,
-                          const ParticlePairsTemp &extra_links,
+                          //                          const ParticlePairsTemp &extra_links,
+                          const RestraintsTemp &extra_restraints,
                           bool debug) {
   example::randomize_particles(sd->get_diffusers()->get_particles(),
                                sd->get_box());
@@ -160,15 +174,16 @@ void initialize_positions(SimulationData *sd,
       core::XYZ(chains[i].get_child(0)).set_coordinates_are_optimized(false);
     }
   }
-  for (unsigned int i=0; i< extra_links.size(); ++i) {
-    double d= core::XYZR(extra_links[i][0]).get_radius()
-        +  core::XYZR(extra_links[i][1]).get_radius();
-    IMP_NEW(core::HarmonicDistancePairScore, link,
-            (d,sd->get_backbone_k(), "linker ps"));
-    Pointer<Restraint> r
-        = IMP::create_restraint(link.get(), extra_links[i]);
-    rss.push_back(r);
-  }
+  rss += extra_restraints;
+  // for (unsigned int i=0; i< extra_links.size(); ++i) {
+  //   double d= core::XYZR(extra_links[i][0]).get_radius()
+  //       +  core::XYZR(extra_links[i][1]).get_radius();
+  //   IMP_NEW(core::HarmonicDistancePairScore, link,
+  //           (d,sd->get_backbone_k(), "linker ps"));
+  //   Pointer<Restraint> r
+  //       = IMP::create_restraint(link.get(), extra_links[i]);
+  //   rss.push_back(r);
+  // }
 
   // Now optimize:
   int dump_interval = sd->get_rmf_dump_interval_frames();

@@ -27,10 +27,23 @@ core::ParticleType get_type_of_fg(unsigned int index)
 }
 
 inline IMPNPCTRANSPORTEXPORT
+unsigned int get_n_types_of_fg()
+{
+  return type_of_fg.size();
+}
+
+inline IMPNPCTRANSPORTEXPORT
 core::ParticleType get_type_of_float(unsigned int index)
 {
   return type_of_float[index];
 }
+
+inline IMPNPCTRANSPORTEXPORT
+unsigned int get_n_types_of_float()
+{
+  return type_of_float.size();
+}
+
 
 IMPNPCTRANSPORTEXPORT
 atom::Hierarchies get_fg_chains(atom::Hierarchy h);

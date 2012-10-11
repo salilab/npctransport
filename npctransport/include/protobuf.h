@@ -10,11 +10,10 @@
 
 #include "npctransport_config.h"
 
-namespace npctransport {
-class OutputConfiguration;
-}
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
+
+class OutputConfiguration; // TODO: is this needed?
 
 IMPNPCTRANSPORTEXPORT void
 show_ranges(std::string fname);

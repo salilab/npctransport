@@ -42,7 +42,9 @@ class Tests(IMP.test.TestCase):
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         sos= IMP.rmf.SaveOptimizerState(f)
         bd.add_optimizer_state(sos)
+        sos.set_period(1000)
         bd.optimize(1000)
+        sos.update_always()
     def test_one(self):
         """Check interaction score repulsion for glue test"""
         k=500
@@ -79,8 +81,10 @@ class Tests(IMP.test.TestCase):
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
         sos= IMP.rmf.SaveOptimizerState(f)
+        sos.set_period(1000)
         bd.add_optimizer_state(sos)
         bd.optimize(2000)
+        sos.update_always()
     def test_two(self):
         """Check two interactions"""
         k=500
@@ -130,8 +134,13 @@ class Tests(IMP.test.TestCase):
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
         sos= IMP.rmf.SaveOptimizerState(f)
+        sos.set_period(1000)
         bd.add_optimizer_state(sos)
+        print "optimizin"
+        IMP.set_log_level(IMP.SILENT)
         bd.optimize(3000)
+        print "done"
+        sos.update_always()
     def test_three(self):
         """Check three interactions"""
         k=500
@@ -145,7 +154,7 @@ class Tests(IMP.test.TestCase):
       rs= self._create_restraint_three(m, ds,  radius, k, .2*radius, .5*k, k)
       IMP.rmf.load_frame(f, 0)
       print rs[0].evaluate(True)
-      IMP.rmf.load_frame(f, 1000)
+      IMP.rmf.load_frame(f, f.get_number_of_frames()-1)
       print rs[0].evaluate(True)
 if __name__ == '__main__':
     IMP.test.main()

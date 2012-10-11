@@ -59,7 +59,7 @@ LinearWellPairScore
     x0_(x0), k_(k) {
 }
 
-void LinearWellPairScore::do_show(std::ostream & o) const
+void LinearWellPairScore::do_show(std::ostream & ) const
 {
 }
 ParticlesTemp LinearWellPairScore

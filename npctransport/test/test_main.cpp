@@ -27,7 +27,7 @@ int main(int , char *[]) {
     std::cout << "Files are " << assignment
               << " and " << output
               << std::endl;
-    IMP_NPC_LOOP(sd, IMP::ParticlePairsTemp());
+    IMP_NPC_LOOP(sd, IMP::RestraintsTemp());
   } catch (IMP::Exception e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;

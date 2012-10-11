@@ -382,11 +382,11 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     bd_=new atom::BrownianDynamics(m_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_/4);
-#ifdef _OPENMP
+    //#ifdef _OPENMP
     if (dump_interval_frames_ > 0 && !get_rmf_file_name().empty()) {
       bd_->add_optimizer_state(get_rmf_writer());
     }
-#endif
+    //#endif
     // set up the restraints for the BD simulation:
     RestraintsTemp rs= chain_restraints_;
     if(get_has_bounding_box()) rs.push_back(box_restraint_);

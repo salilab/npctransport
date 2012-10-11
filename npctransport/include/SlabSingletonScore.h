@@ -14,6 +14,7 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+
 //! XXXX
 /** An origin centered slab with a tunnel in the vertical direction,
     for z = [-0.5*thickness_...0.5*thickness_]

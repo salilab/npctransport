@@ -25,15 +25,14 @@ IMPNPCTRANSPORTEXPORT
    frame in case that <debug> is true.
 
    @param sd the simulationd data object containing diffusing particles
-   @param extra_links specification of pairs of particles that will be linked
-                      for the sake of the initialization using an harmonic
-                      restraint
+   @param extra_restraints a list of additional ad-hoc restraints that will be
+                           used only throughout initialization
    @param debug if true, the initialization will dump much more output (e.g.
                 every frame to RMF file)
  */
 void initialize_positions(SimulationData *sd,
-                          const ParticlePairsTemp &extra_links
-                          = ParticlePairsTemp(),
+                          const RestraintsTemp &extra_restraints
+                          = RestraintsTemp(),
                           bool debug=false);
 
 

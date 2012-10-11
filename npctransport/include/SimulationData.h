@@ -378,10 +378,14 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
   /**
       Returns the list of particles in the simulation model
-      of type 'type'
+      of type 'type', or empty list if not found
   */
   ParticlesTemp get_particles(core::ParticleType type) const {
-    return particles_.find(type)->second;
+    compatibility::map<core::ParticleType, ParticlesTemp>::const_iterator iter;
+    iter = particles_.find(type);
+    if(iter != particles_.end())
+      return iter->second;
+    return ParticlesTemp();
   }
 
   void set_interrupted(bool tf);
@@ -407,6 +411,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Restraint* get_box_restraint() const {return box_restraint_;}
 
   Restraint* get_slab_restraint() const {return slab_restraint_;}
+
+  double get_slab_thickness() const { return slab_thickness_; }
 
   display::Geometry* get_static_geometry();
 

@@ -53,7 +53,7 @@ int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
                                sd->get_box().get_corner(0)[2]));
     d.set_coordinates_are_optimized(false);
   }
-  IMP_NPC_LOOP(sd, IMP::ParticlePairsTemp());
+  IMP_NPC_LOOP(sd, IMP::RestraintsTemp());
   return 0;
 }
 

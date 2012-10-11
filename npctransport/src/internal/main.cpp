@@ -9,6 +9,7 @@
 #include <IMP/npctransport/internal/main.h>
 #include <IMP/base_types.h>
 #include <boost/timer.hpp>
+#include <IMP/log.h>
 //#include <IMP/benchmark/Profiler.h>
 #include <IMP/npctransport/initialize_positions.h>
 
@@ -41,16 +42,15 @@ namespace {
   }
 }
 
-void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
+void do_main_loop(SimulationData *sd,
+                  const RestraintsTemp &init_restraints,
                   bool quick, std::string final_conformations,
                   bool debug_initialize, std::string init_rmf) {
   using namespace IMP;
   base::Pointer<rmf::SaveOptimizerState> final_sos;
-#ifndef _OPENMP
   if (!final_conformations.empty()) {
     final_sos = sd->create_rmf_writer(final_conformations);
   }
-#endif
   sd->set_was_used(true);
   boost::timer total_time;
   for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
@@ -58,12 +58,11 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     boost::timer timer;
     IMP::set_log_level(SILENT);
     if (!quick) sd->reset_rmf();
-#pragma omp critical
     {
       std::cout<< "Initializing..." << std::endl;
     }
     if (init_rmf == "") {
- 	  initialize_positions(sd, links, debug_initialize);
+ 	  initialize_positions(sd, init_restraints, debug_initialize);
     }
     else{
       sd->initialize_positions_from_rmf(init_rmf);
@@ -72,16 +71,13 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
     }
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
-#ifndef _OPENMP
     if (final_sos) {
       final_sos->update_always();
     }
-#endif
     /*IMP::benchmark::Profiler p;
     if(i == 0)
       p.set("profiling.pprof");*/
     sd->get_bd()->set_current_time(0);
-#pragma omp critical
     {
       std::cout << "Equilibrating..." << std::endl;
     }
@@ -96,11 +92,9 @@ void do_main_loop(SimulationData *sd, const ParticlePairsTemp &links,
                       * (1.0- sd->get_statistics_fraction()), total_time);
     //p.reset();
     sd->update_statistics(timer);
-#ifndef _OPENMP
     if (final_sos) {
       final_sos->update_always();
     }
-#endif
     if (abort) break;
   }
 }

@@ -13,8 +13,8 @@ import IMP.algebra
 import IMP.core
 import IMP.atom
 import IMP.display
+import IMP.container
 import IMP
-from IMP import container
 import IMP.base
 import IMP.npctransport
 #import IMP.benchmark
@@ -268,6 +268,37 @@ def set_fgs_three_types( sd ):
                         n_layers = 1,
                         relative_bottom = 0.0, relative_top = 0.0)
 
+def get_kaps_and_craps( sd ):
+    """
+    returns all kap / crap particles in SimulationData
+    """
+    ret = []
+    n = IMP.npctransport.get_n_types_of_float()
+    print "n types float: ", n
+    for i in range(n):
+        float_type = IMP.npctransport.get_type_of_float(i)
+        print float_type
+        ret += sd.get_particles( float_type )
+        print ret
+    return ret
+
+
+def get_exclude_from_channel_restraint( sd ):
+    top = (sd.get_slab_thickness() / 2) * 1.3; # *1.3 to get some slack
+    bottom = -top
+    k = 40.0
+    print "here 1"
+    score = IMP.npctransport.ExcludeZRangeSingletonScore(bottom, top, 1000)
+    print "here 2"
+    particles = get_kaps_and_craps( sd )
+    print "here 3"
+    restraint = IMP.container.SingletonsRestraint(score,
+                                                  particles,
+                                                  "ExcludeZRangeRestraint");
+    print "here 4"
+    return restraint
+
+
 def optimize_in_chunks( sd, nframes, nchunks ):
     """
     Optimizes sd->bd() in nchunks iterations, writing statistics at
@@ -322,7 +353,10 @@ for i in range(ntrials):
         sd.initialize_positions_from_rmf(
             flags.initialization_rmf_file )
     else:
-        IMP.npctransport.initialize_positions( sd )
+        init_restraints = []
+        if(sd.get_has_slab()): # if has slab, exclude from channel initially
+            init_restraints.append( get_exclude_from_channel_restraint( sd ) )
+        IMP.npctransport.initialize_positions( sd, init_restraints )
     nframes_running = math.ceil(sd.get_statistics_fraction()
                                 * sd.get_number_of_frames())
     nframes_equilib = sd.get_number_of_frames() - nframes_running
