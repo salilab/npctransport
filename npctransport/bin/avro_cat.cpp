@@ -3,8 +3,8 @@
  * \brief Concatenate a bunch of protobufs to an avro archive
  * Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
-#include <IMP/npctransport/internal/avrodata.h>
-#include <avro/Writer.hh>
+#include <IMP/npctransport/avro.h>
+#include <avro/DataFile.hh>
 
 int main(int argc, char *argv[]) {
   if (argc <3) {
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
   }
   std::string out = argv[argc-1];
 
-  Writer wr(out, IMP::npctransport::get_avro_data_file_schema());
+  avro::DataFileWriter wr(out, IMP::npctransport::get_avro_data_file_schema());
 
   for ( int i=0; i< argc-2; ++i) {
     IMP::npctransport::AvroDataFileData data;
