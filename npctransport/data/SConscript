@@ -19,6 +19,16 @@ if env["IMP_PASS"]=="BUILD":
       )
   scons_tools.install.install(env, "#/build/include/IMP/npctransport/internal/npctransport.pb.h",
                                  proto_files[1])
-  for p in proto_files:
-    print p.abspath
   env.Alias("all", proto_files)
+
+  def build_avro(target, source, env):
+        cmd="%(avrocpp)s -i %(json)s -o %(header)s -n IMP_npctransport"%{"avrocpp":source[0].abspath,
+     "json":source[1].abspath,
+     "header":target[0].abspath}
+        print "cmd=", cmd
+        env.Execute(cmd)
+  print "passed avro"
+  env['BUILDERS']['AvroCpp']=Builder(action=build_avro)
+  env.AvroCpp(source=[File("#/build/bin/avrogencpp"),
+                      scons_tools.paths.get_input_path(env, "AvroDataFileData.json")],
+              target=[File("#/build/include/IMP/npctransport/AvroDataFileData.h")])

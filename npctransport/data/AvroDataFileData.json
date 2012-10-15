@@ -1,6 +1,6 @@
 {
   "type":"record",
-  "name":"wrapper",
+  "name":"AvroDataFileData",
   "fields":[
     {
       "name":"key",

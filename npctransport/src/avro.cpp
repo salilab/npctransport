@@ -1,4 +1,5 @@
 #include <IMP/npctransport/npctransport_config.h>
+#include <IMP/npctransport/avro.h>
 #include <avro/ValidSchema.hh>
 #include <avro/Compiler.hh>
 #include <IMP/base/file.h>

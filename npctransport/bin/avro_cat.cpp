@@ -4,7 +4,10 @@
  * Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 #include <IMP/npctransport/avro.h>
+#include <IMP/npctransport/AvroDataFileData.h>
 #include <avro/DataFile.hh>
+#include <fstream>
+#include <iomanip>
 
 int main(int argc, char *argv[]) {
   if (argc <3) {
@@ -13,19 +16,21 @@ int main(int argc, char *argv[]) {
   }
   std::string out = argv[argc-1];
 
-  avro::DataFileWriter wr(out, IMP::npctransport::get_avro_data_file_schema());
+  avro::DataFileWriter<IMP_npctransport::AvroDataFileData>
+      wr(out.c_str(), IMP::npctransport::get_avro_data_file_schema());
 
   for ( int i=0; i< argc-2; ++i) {
-    IMP::npctransport::AvroDataFileData data;
-    data.key()="none";
-    ifstream file(argv[i], ios::in | ios::binary | ios::ate);
-    if(!file.is_open())
+    IMP_npctransport::AvroDataFileData data;
+    data.key="none";
+    std::ifstream file(argv[i], std::ios::in | std::ios::binary
+                       | std::ios::ate);
+    if(!file.is_open()) {
       throw std::runtime_error("couldn't open htdocs/image.png");
+    }
+    data.value.resize(file.tellg());
 
-    data.data.resize(file.tellg());
-
-    file.seekg(0, ios::beg);
-    if(!file.read(&data.data[ 0 ], data.data.size()))
+    file.seekg(0, std::ios::beg);
+    if(!file.read(reinterpret_cast<char*>(&data.value[ 0 ]), data.value.size()))
     wr.write(data);
   }
   return 0;
