@@ -346,9 +346,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
    \see IMP::rmf::link_hierarchies()
    \see IMP::rmf::load_frame()
 
+   The frame number is the frame in the file to use, if, eg, there are several
+   initial frames to use. If it is -1, the last frame is used.
+
    @exception RMF::IOException if couldn't open RMF file, or unsupported file format
   */
-  void initialize_positions_from_rmf(std::string fname);
+  void initialize_positions_from_rmf(std::string fname, int frame_number=-1);
 
   /**
    Initialize a writer that outputs the particles hierarchy

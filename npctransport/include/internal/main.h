@@ -34,7 +34,7 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
  */
 IMPNPCTRANSPORTEXPORT void do_main_loop(SimulationData *sd,
                                         const RestraintsTemp &init_restraints,
-                                        bool quick,
+                                        bool quick, bool initialize_only,
                                         std::string final_config,
                                         bool debug_init,
                                         std::string init_rmf="");
