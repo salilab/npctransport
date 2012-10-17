@@ -9,10 +9,16 @@ if env["IMP_PASS"]=="BUILD":
   # what ridiculousness scons makes us do
   proto=File(scons_tools.paths.get_input_path(env, "npctransport.proto")).abspath
   path=Dir(scons_tools.paths.get_input_path(env, ".")).abspath
-  print proto, path
+  #print proto, path
   # work around dumb script
-  os.makedirs(Dir("#/build/lib/IMP/npctransport/").abspath)
-  os.makedirs(Dir("#/build/src/npctransport").abspath)
+  try:
+    os.makedirs(Dir("#/build/lib/IMP/npctransport/").abspath)
+  except:
+    pass
+  try:
+    os.makedirs(Dir("#/build/src/npctransport").abspath)
+  except:
+    pass
   proto_files = env.Protoc(
       [],
       proto,
