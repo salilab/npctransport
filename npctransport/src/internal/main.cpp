@@ -15,21 +15,41 @@
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 namespace {
+  /**
+     Run simulation <sd> for <number_of_frames> frames, in chunks of
+     optimization that last <max_frames_per_chunks> frames each.
+     Statistics are updated after each chunk of optimization, using
+     <timer> to time the current simulation.
+
+     @param sd simulation data used for optimization
+     @param number_of_frames total number of simulation frames requires
+     @param timer a timer that was reset before this simulation trial was
+                  initialized, to be used for tracking statistics
+     @param total_time the total time that the simulation has spent.
+                       The simulation would terminate at the end of an
+                       optimization chunk in which this time has
+                       elapsed, that is sd->get_maximum_number_of_minutes()
+     @param max_frames_per_chunk maximal number of frames to be simulated
+                                 in a single optimization chunk
+  */
   bool run_it(SimulationData *sd,
               unsigned int number_of_frames,
-              boost::timer&total_time) {
+              boost::timer& timer,
+              boost::timer& total_time,
+              unsigned int max_frames_per_chunk = 100000) {
     do {
       unsigned int cur_frames
-          = std::min<unsigned int>(1000000,
-                                   number_of_frames);
+        = std::min<unsigned int>(max_frames_per_chunk,
+                                 number_of_frames);
       std::cout << "Running..." << std::endl;
 #pragma omp parallel num_threads(3)
-{
+      {
 #pragma omp single
-{
-     sd->get_bd()->optimize(cur_frames);
-}
-}
+        {
+          sd->get_bd()->optimize(cur_frames);
+          sd->update_statistics(timer);
+        }
+      }
       if (sd->get_maximum_number_of_minutes() > 0
           && total_time.elapsed()/60 > sd->get_maximum_number_of_minutes()) {
         sd->set_interrupted(true);
@@ -81,17 +101,19 @@ void do_main_loop(SimulationData *sd,
     {
       std::cout << "Equilibrating..." << std::endl;
     }
-    if (run_it(sd, sd->get_number_of_frames()
-               * sd->get_statistics_fraction(), total_time)) {
+    if (run_it(sd,
+               sd->get_number_of_frames() * sd->get_statistics_fraction(),
+               timer, total_time)) {
       return;
     }
     sd->reset_statistics_optimizer_states();
     std::cout << "Running..." << std::endl;
     // now run the rest of the sim
-    bool abort=run_it(sd, sd->get_number_of_frames()
-                      * (1.0- sd->get_statistics_fraction()), total_time);
+    bool abort=run_it(sd,
+                      sd->get_number_of_frames()
+                      * (1.0- sd->get_statistics_fraction())
+                      , timer, total_time);
     //p.reset();
-    sd->update_statistics(timer);
     if (final_sos) {
       final_sos->update_always();
     }
