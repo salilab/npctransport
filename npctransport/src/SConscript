@@ -2,4 +2,4 @@ Import('env')
 
 
 # Build and install the shared library:
-env.IMPModuleLib(env.IMPModuleGetSources()+[File("#/build/src/npctransport/npctransport.pb.cpp")])
+env.IMPModuleLib(env.IMPModuleGetSources()+[File("#/build/src/npctransport/npctransport.pb.cc")])

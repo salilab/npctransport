@@ -1,0 +1,14 @@
+{
+  "type":"record",
+  "name":"AvroDataFileData",
+  "fields":[
+    {
+      "name":"key",
+      "type":"string"
+    },
+    {
+      "name":"value",
+      "type":"bytes"
+    }
+  ]
+}

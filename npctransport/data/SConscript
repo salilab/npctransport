@@ -1,5 +1,34 @@
 Import('env')
-
+import scons_tools.install
+import scons_tools.paths
 # Install all files in this directory as data in (by default) /usr/share/imp/example
 # Use IMP::example::get_data_path(filename) to get the path for a data file
 env.IMPModuleData(env.IMPModuleGetData())
+if env["IMP_PASS"]=="BUILD":
+  # what ridiculousness scons makes us do
+  proto=File(scons_tools.paths.get_input_path(env, "npctransport.proto")).abspath
+  path=Dir(scons_tools.paths.get_input_path(env, ".")).abspath
+  print proto, path
+  proto_files = env.Protoc(
+      [],
+      proto,
+      PROTOCPROTOPATH=[path],
+      PROTOCPYTHONOUTDIR=Dir("#/build/lib/IMP/npctransport/").abspath,
+      PROTOCOUTDIR = Dir("#/build/src/npctransport/").abspath,
+      # PROTOCCPPOUTFLAGS = "dllexport_decl=PROTOCONFIG_EXPORT:", too
+      )
+  scons_tools.install.install(env, "#/build/include/IMP/npctransport/internal/npctransport.pb.h",
+                                 proto_files[1])
+  env.Alias("all", proto_files)
+
+  def build_avro(target, source, env):
+        cmd="%(avrocpp)s -i %(json)s -o %(header)s -n IMP_npctransport"%{"avrocpp":source[0].abspath,
+     "json":source[1].abspath,
+     "header":target[0].abspath}
+        print "cmd=", cmd
+        env.Execute(cmd)
+  print "passed avro"
+  env['BUILDERS']['AvroCpp']=Builder(action=build_avro)
+  env.AvroCpp(source=[File("#/build/bin/avrogencpp"),
+                      scons_tools.paths.get_input_path(env, "AvroDataFileData.json")],
+              target=[File("#/build/include/IMP/npctransport/AvroDataFileData.h")])

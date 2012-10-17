@@ -80,6 +80,8 @@ IMP_NPC_PARAMETER_BOOL(profile, false,
 #endif
 IMP_NPC_PARAMETER_BOOL(debug_initialization, false,
                        "Print more info about initialization");
+IMP_NPC_PARAMETER_BOOL(initialize_only, false,
+                       "Run the initialization and then stop");
 IMP_NPC_PARAMETER_BOOL(quick, false,
                        "Reduce all steps to the minimum");
 IMP_NPC_PARAMETER_BOOL(show_steps, false,
@@ -103,6 +105,7 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
   IMP::npctransport::internal::do_main_loop(sim_data,                  \
                                             init_restraints,           \
                                             FLAGS_quick,               \
+                                            FLAGS_initialize_only,     \
                                             FLAGS_final_conformations,\
                                             FLAGS_debug_initialization, \
                                             FLAGS_init_rmffile)

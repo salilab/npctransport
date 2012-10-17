@@ -64,7 +64,7 @@ namespace {
 
 void do_main_loop(SimulationData *sd,
                   const RestraintsTemp &init_restraints,
-                  bool quick, std::string final_conformations,
+                  bool quick, bool init_only, std::string final_conformations,
                   bool debug_initialize, std::string init_rmf) {
   using namespace IMP;
   base::Pointer<rmf::SaveOptimizerState> final_sos;
@@ -85,7 +85,7 @@ void do_main_loop(SimulationData *sd,
  	  initialize_positions(sd, init_restraints, debug_initialize);
     }
     else{
-      sd->initialize_positions_from_rmf(init_rmf);
+      sd->initialize_positions_from_rmf(init_rmf, i);
       std::cout << "Initializing positions from RMF file "
                 << init_rmf << std::endl;
     }
@@ -106,6 +106,8 @@ void do_main_loop(SimulationData *sd,
                timer, total_time)) {
       return;
     }
+    // go on to the next round
+    if (init_only) continue;
     sd->reset_statistics_optimizer_states();
     std::cout << "Running..." << std::endl;
     // now run the rest of the sim
