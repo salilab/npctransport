@@ -32,13 +32,12 @@ if env["IMP_PASS"]=="BUILD":
   env.Alias("all", proto_files)
 
   def build_avro(target, source, env):
-        cmd="%(avrocpp)s -i %(json)s -o %(header)s -n IMP_npctransport"%{"avrocpp":source[0].abspath,
-     "json":source[1].abspath,
+        cmd="avrogencpp -i %(json)s -o %(header)s -n IMP_npctransport"%{
+     "json":source[0].abspath,
      "header":target[0].abspath}
         print "cmd=", cmd
         env.Execute(cmd)
   print "passed avro"
   env['BUILDERS']['AvroCpp']=Builder(action=build_avro)
-  env.AvroCpp(source=[File("#/build/bin/avrogencpp"),
-                      scons_tools.paths.get_input_path(env, "AvroDataFileData.json")],
+  env.AvroCpp(source=[scons_tools.paths.get_input_path(env, "AvroDataFileData.json")],
               target=[File("#/build/include/IMP/npctransport/AvroDataFileData.h")])
