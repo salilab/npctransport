@@ -1,1 +1,0 @@
-/usr/bin/c++   -Wall -O3 -DNDEBUG    CMakeFiles/DataFileTests.dir/test/DataFileTests.cc.o  -o DataFileTests -rdynamic libavrocpp.so.1.7.2.0 -lboost_filesystem-mt -lboost_system-mt -lboost_program_options-mt -Wl,-rpath,/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2 

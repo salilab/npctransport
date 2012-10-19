@@ -1,26 +1,26 @@
 # CMake generated Testfile for 
-# Source directory: /usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2
-# Build directory: /usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2
+# Source directory: /Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp
+# Build directory: /Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp
 # 
 # This file includes the relevent testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.
-ADD_TEST(buffertest "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/buffertest")
-SET_TESTS_PROPERTIES(buffertest PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
-ADD_TEST(unittest "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/unittest")
-SET_TESTS_PROPERTIES(unittest PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
-ADD_TEST(SchemaTests "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/SchemaTests")
-SET_TESTS_PROPERTIES(SchemaTests PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
-ADD_TEST(CodecTests "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/CodecTests")
-SET_TESTS_PROPERTIES(CodecTests PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
-ADD_TEST(StreamTests "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/StreamTests")
-SET_TESTS_PROPERTIES(StreamTests PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
-ADD_TEST(SpecificTests "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/SpecificTests")
-SET_TESTS_PROPERTIES(SpecificTests PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
-ADD_TEST(DataFileTests "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/DataFileTests")
-SET_TESTS_PROPERTIES(DataFileTests PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
-ADD_TEST(JsonTests "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/JsonTests")
-SET_TESTS_PROPERTIES(JsonTests PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
-ADD_TEST(AvrogencppTests "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/AvrogencppTests")
-SET_TESTS_PROPERTIES(AvrogencppTests PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
-ADD_TEST(testgentest "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2/testgentest")
-SET_TESTS_PROPERTIES(testgentest PROPERTIES  WORKING_DIRECTORY "/usr/local/google/home/drussel/extern_src/avro-cpp-1.7.2")
+ADD_TEST(buffertest "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/buffertest")
+SET_TESTS_PROPERTIES(buffertest PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
+ADD_TEST(unittest "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/unittest")
+SET_TESTS_PROPERTIES(unittest PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
+ADD_TEST(SchemaTests "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/SchemaTests")
+SET_TESTS_PROPERTIES(SchemaTests PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
+ADD_TEST(CodecTests "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/CodecTests")
+SET_TESTS_PROPERTIES(CodecTests PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
+ADD_TEST(StreamTests "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/StreamTests")
+SET_TESTS_PROPERTIES(StreamTests PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
+ADD_TEST(SpecificTests "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/SpecificTests")
+SET_TESTS_PROPERTIES(SpecificTests PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
+ADD_TEST(DataFileTests "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/DataFileTests")
+SET_TESTS_PROPERTIES(DataFileTests PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
+ADD_TEST(JsonTests "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/JsonTests")
+SET_TESTS_PROPERTIES(JsonTests PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
+ADD_TEST(AvrogencppTests "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/AvrogencppTests")
+SET_TESTS_PROPERTIES(AvrogencppTests PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
+ADD_TEST(testgentest "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp/testgentest")
+SET_TESTS_PROPERTIES(testgentest PROPERTIES  WORKING_DIRECTORY "/Users/drussel/src/npc/npc/npctransport/dependency/AvroCpp")
