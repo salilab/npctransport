@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     std::ifstream file(argv[i], std::ios::in | std::ios::binary
                        | std::ios::ate);
     if(!file.is_open()) {
-      throw std::runtime_error("couldn't open htdocs/image.png");
+      throw std::runtime_error("couldn't open file");
     }
     data.value.resize(file.tellg());
 

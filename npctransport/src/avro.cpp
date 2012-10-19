@@ -7,7 +7,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 avro::ValidSchema get_avro_data_file_schema() {
-  std::string path= get_data_path("avrodatafile.json");
+  std::string path = get_data_path("avrodatafile.json");
   base::TextInput in(path);
   std::stringstream buf;
   buf << in.get_stream().rdbuf();
