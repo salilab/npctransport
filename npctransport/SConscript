@@ -25,10 +25,12 @@ scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
 
         )
 
-# See IMP.gsl for an example of how to add external dependencies to a module
+if env['visibility']:
+    print "visibility='no' required for npctransport."
+    scons_tools.data.get(env).add_module("npctransport", ok=False)
 
 oenv=env.IMPModuleBuild(module="npctransport",
-                        version='SVN',
+                        version='develop',
                         required_modules=['container',
                                           'display', 'core',
                                           'atom',
