@@ -28,7 +28,8 @@ if env["IMP_PASS"]=="BUILD":
       # PROTOCCPPOUTFLAGS = "dllexport_decl=PROTOCONFIG_EXPORT:", too
       )
   scons_tools.install.install(env, "#/build/include/IMP/npctransport/internal",
-                                 proto_files[1])
+                                 scons_tools.paths.get_build_source_file(env, "npctransport.pb.h",
+                                                                         modulename="npctransport"))
   env.Alias("all", proto_files)
 
   def build_avro(target, source, env):
