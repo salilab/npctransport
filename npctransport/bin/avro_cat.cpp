@@ -16,11 +16,11 @@ int main(int argc, char *argv[]) {
   }
   std::string out = argv[argc-1];
 
-  avro::DataFileWriter<IMP_npctransport::AvroDataFileData>
+  avro::DataFileWriter<IMP_npctransport::wrapper>
       wr(out.c_str(), IMP::npctransport::get_avro_data_file_schema());
 
   for ( int i=0; i< argc-2; ++i) {
-    IMP_npctransport::AvroDataFileData data;
+    IMP_npctransport::wrapper data;
     data.key="none";
     std::ifstream file(argv[i], std::ios::in | std::ios::binary
                        | std::ios::ate);
