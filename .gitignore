@@ -5,3 +5,4 @@
 *.old
 *.orig
 *.gcno
+*.gcda
