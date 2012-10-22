@@ -1,5 +1,7 @@
 *.os
+*.o
 *.pyc
 *~
 *.old
 *.orig
+*.gcno
