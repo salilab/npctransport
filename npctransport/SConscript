@@ -17,7 +17,7 @@ scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
                                             "google/protobuf/text_format.h")
 scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
                                             ["avro/Compiler.hh", "avro/ValidSchema.hh"],
-                                            body="""avro::compileJsonSchemaFromString("{}");""",
+                                            body="""avro::compileJsonSchemaFromString(std::string("{}"));""",
                                             build="""cd %(workdir)s
     cmake -DCMAKE_INSTALL_PREFIX=%(builddir)s %(srcdir)s
     make -j 12
