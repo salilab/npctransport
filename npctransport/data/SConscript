@@ -25,7 +25,8 @@ if env["IMP_PASS"]=="BUILD":
       PROTOCPROTOPATH=[path],
       PROTOCPYTHONOUTDIR=Dir("#/build/lib/IMP/npctransport/").abspath,
       PROTOCOUTDIR = Dir("#/build/src/npctransport/").abspath,
-      # PROTOCCPPOUTFLAGS = "dllexport_decl=PROTOCONFIG_EXPORT:", too
+      PROTOCINCLUDE = "IMP/npctransport/npctransport_config.h",
+      PROTOCCPPOUTFLAGS = "dllexport_decl=IMPNPCTRANSPORTEXPORT:"
       )
   scons_tools.install.install(env, "#/build/include/IMP/npctransport/internal",
                                  scons_tools.paths.get_build_source_file(env, "npctransport.pb.h",
