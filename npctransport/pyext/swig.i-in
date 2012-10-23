@@ -44,6 +44,6 @@ IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, Pa
 
 %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
-from npctransport_pb2.py import *
+from npctransport_pb2 import *
 from _configuration import *
 %}
