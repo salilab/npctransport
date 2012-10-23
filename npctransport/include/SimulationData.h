@@ -51,6 +51,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 
 class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
+ private:
 #ifndef SWIG
   template <class T>
     struct Parameter
@@ -154,6 +155,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
   // statistics of pairs of interactions for each interaction type
   BipartitePairsStatisticsOptimizerStates interactions_stats_;
+
+  // true if statistics were recently reset, so that update_statistics
+  // should restart averaging from 0 frames
+  mutable bool is_stats_reset_;
+ private:
 
   boost::tuple<double,double,double,double>
       get_interactions_and_interacting(const ParticlesTemp &kaps,
