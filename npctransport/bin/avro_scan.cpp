@@ -18,11 +18,11 @@ int main(int argc, char *argv[]) {
   }
   std::string out = argv[argc-1];
 
-  avro::DataFileReader<IMP_npctransport::AvroDataFileData>
+  avro::DataFileReader<IMP_npctransport::wrapper>
       rd(out.c_str(), IMP::npctransport::get_avro_data_file_schema());
 
 
-  IMP_npctransport::AvroDataFileData data;
+  IMP_npctransport::wrapper data;
   while (rd.read(data)) {
     std::cout << data.key << " ";
     npctransport_proto::Output pb;
