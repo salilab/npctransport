@@ -17,17 +17,13 @@ scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
                                             "google/protobuf/text_format.h")
 scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
                                             ["avro/Compiler.hh", "avro/ValidSchema.hh"],
-                                            body="""avro::compileJsonSchemaFromString("{}");""",
+                                            body="""avro::compileJsonSchemaFromString(std::string("{}"));""",
                                             build="""cd %(workdir)s
     cmake -DCMAKE_INSTALL_PREFIX=%(builddir)s %(srcdir)s
     make -j 12
     make install""",
 
         )
-
-if env['visibility']:
-    print "visibility='no' required for npctransport."
-    scons_tools.data.get(env).add_module("npctransport", ok=False)
 
 oenv=env.IMPModuleBuild(module="npctransport",
                         version='develop',

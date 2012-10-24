@@ -55,7 +55,8 @@ SimulationData::SimulationData(std::string output_file,
                                bool quick,
                                std::string rmf_file_name):
   Object("SimulationData%1%"),
-  rmf_file_name_( rmf_file_name )
+  rmf_file_name_( rmf_file_name ),
+  is_stats_reset_( false )
 {
   initialize(output_file, output_file, quick);
 }
@@ -669,6 +670,7 @@ SimulationData
 
 
 void SimulationData::reset_statistics_optimizer_states() {
+  is_stats_reset_ = true; // indicate to update_statistics()
   for (unsigned int i=0; i< fgs_stats_.size(); ++i) {
     for (unsigned int j=0; j < fgs_stats_[i].size(); ++j) {
       for (unsigned int k=0; k < fgs_stats_[i][j].size(); ++k) {
@@ -730,6 +732,10 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   ::npctransport_proto::Statistics &stats=*output.mutable_statistics();
 
   int nf= stats.number_of_frames();
+  if(is_stats_reset_){ // restart statistics from scratch
+    nf = 0;
+    is_stats_reset_ = false;
+  }
   ParticlesTemp all;
   ParticlesTemps floaters;
   base::Vector<ParticlesTemps> fgs;
