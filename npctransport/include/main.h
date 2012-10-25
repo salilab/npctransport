@@ -134,6 +134,9 @@ void seed_randn_generator(IntArg const_seed, IntArg seed_offset)
   if(seed == 0)
     seed = static_cast<IntArg> (std::time(IMP::nullptr));
   IMP::base::random_number_generator.seed( seed + seed_offset );
+  std::cout << "Running with random seed " << seed
+            << " offseted by " << seed_offset
+            << std::endl;
 }
 
 inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
