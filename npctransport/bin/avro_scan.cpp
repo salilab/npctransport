@@ -13,7 +13,7 @@
 
 int main(int argc, char *argv[]) {
   if (argc <3) {
-    std::cerr << "Usage: " << argv[0] << "avrofile" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " avrofile" << std::endl;
     return 1;
   }
   std::string out = argv[argc-1];
