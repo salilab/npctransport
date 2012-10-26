@@ -4,18 +4,19 @@ import RMF
 import IMP.rmf
 import IMP.container
 import math
+import IMP.base
 from IMP.npctransport import *
 
 class Tests(IMP.test.TestCase):
 
-    def _make_and_run_simulation(self, output_file):
+    def _make_and_run_simulation(self, output_file, seed):
         RMF.set_show_hdf5_errors( True );
         config= IMP.npctransport.get_data_path( "quick.pb" );
         assignment= self.get_tmp_file_name( "output.pb" );
         IMP.set_log_level( IMP.SILENT );
         print "assigning parameter ranges"
         num=assign_ranges( config, assignment,
-                          0, True );
+                          0, True, seed );
         print "num ranges %d" % num
         sd = SimulationData( assignment, False, output_file );
         sd.get_m().set_log_level( IMP.SILENT );
@@ -45,18 +46,21 @@ class Tests(IMP.test.TestCase):
     def test_init_from_rmf(self):
         """ Testing whether initialize_positions_from_rmf indeed
             restores the diffusers coordinates correctly """
+        # random generator initialization
+        seed = 1 # use time instead?
+        IMP.base.random_number_generator.seed( seed )
 
         # First simulation:
         output= IMP.base.create_temporary_file_name( "output", ".rmf" );
         print "Starting first simulation with RMF file " + output
-        sd = self._make_and_run_simulation( output )
+        sd = self._make_and_run_simulation( output, seed )
         print "*** After first simulation"
         coordsI = self._get_diffusers_coords( sd )
 
         # Second simulation:
         output2= IMP.base.create_temporary_file_name( "output2", ".rmf" );
         print "*** Starting second simulation with RMF file " + output2
-        sd2 = self._make_and_run_simulation( output2 )
+        sd2 = self._make_and_run_simulation( output2, seed )
         print "*** After second simulation"
         coordsII = self._get_diffusers_coords( sd2 )
 

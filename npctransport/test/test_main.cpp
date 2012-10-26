@@ -6,10 +6,13 @@
 
 #define IMP_NPC_MAIN
 #include <IMP/npctransport/main.h>
+#include <IMP/base/random.h>
 #include <RMF/utility.h>
 
 int main(int , char *[]) {
   try {
+    FLAGS_random_seed = 1.0; // use time instead of constant?
+    IMP::base::random_number_generator.seed( FLAGS_random_seed );
     RMF::set_show_hdf5_errors(true);
     std::string config
         = IMP::npctransport::get_data_path("quick.pb");
@@ -19,7 +22,8 @@ int main(int , char *[]) {
         = IMP::base::create_temporary_file_name("output", ".rmf");
     set_log_level(IMP::base::LogLevel(IMP::base::SILENT));
     FLAGS_quick=true;
-    int num=IMP::npctransport::assign_ranges(config, assignment, 0, true);
+    int num=IMP::npctransport::assign_ranges
+      (config, assignment, 0, true, FLAGS_random_seed);
     std::cout << "num ranges " << num << std::endl;
     IMP_NEW(IMP::npctransport::SimulationData, sd,(assignment, true));
     sd->set_rmf_file_name(output);

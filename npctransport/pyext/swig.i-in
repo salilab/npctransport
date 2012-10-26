@@ -22,6 +22,9 @@ IMP_SWIG_OBJECT(IMP::npctransport, BodyStatisticsOptimizerState, BodyStatisticsO
 IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, BipartitePairsStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, ParticleTransportStatisticsOptimizerStates);
 
+%apply unsigned int { std::uint32_t }
+%apply unsigned long long { std::uint64_t }
+
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"

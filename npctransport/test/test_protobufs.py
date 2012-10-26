@@ -1,6 +1,7 @@
 import IMP
 import IMP.test
 import IMP.npctransport
+import IMP.base
 import math
 
 radius=5
@@ -35,12 +36,12 @@ class ConeTests(IMP.test.TestCase):
         f.write(config.SerializeToString())
     def test_1(self):
         """Check creating a configuration and assigning values"""
-
+        seed = 1.0 # use time instead?
+        IMP.base.random_number_generator.seed(seed)
         config_name= self.get_tmp_file_name("configuration.pb")
         self._make_config(config_name)
-
         assignment_name= self.get_tmp_file_name("assignment.pb")
-        IMP.npctransport.assign_ranges(config_name, assignment_name, 0, True)
+        IMP.npctransport.assign_ranges(config_name, assignment_name, 0, True, seed)
         output= IMP.npctransport.Output()
         f=open(assignment_name, "rb")
         output.ParseFromString(f.read())
@@ -50,7 +51,7 @@ class ConeTests(IMP.test.TestCase):
         num= IMP.npctransport.get_number_of_work_units(config_name)
         self.assertEqual(num, 5*5*3*3*3*3*3*2)
         assignment_name= self.get_tmp_file_name("final.pb")
-        IMP.npctransport.assign_ranges(config_name, assignment_name, num-1, True)
+        IMP.npctransport.assign_ranges(config_name, assignment_name, num-1, True, seed)
         f=open(assignment_name, "rb")
         output.ParseFromString(f.read())
         assign= output.assignment

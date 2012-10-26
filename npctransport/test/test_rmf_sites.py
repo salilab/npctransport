@@ -3,10 +3,13 @@ import IMP.test
 import IMP.npctransport
 import RMF
 import math
+import IMP.base
 
 
 class ConeTests(IMP.test.TestCase):
     def test_rmf_sites(self):
+      seed = 1.0 # use time instead?
+      IMP.base.random_number_generator.seed( seed )
       # create sim data and write to file then check
       config= IMP.npctransport.Configuration()
       IMP.npctransport.set_default_configuration(config)
@@ -19,7 +22,7 @@ class ConeTests(IMP.test.TestCase):
       open(config_name, "wb").write(config.SerializeToString())
       assignments_name= self.get_tmp_file_name("rmf_sites_assignments.pb")
       IMP.npctransport.assign_ranges(config_name, assignments_name,
-                                     0, False)
+                                     0, False, seed)
       sd= IMP.npctransport.SimulationData(assignments_name, True)
       rmf_name=self.get_tmp_file_name("rmf_sites.rmf")
 
