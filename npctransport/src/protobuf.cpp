@@ -281,7 +281,7 @@ void copy(R r, Out out) {
 // see documentation in .h file
 int
 assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
-              bool show_steps) {
+              bool show_steps, boost::uint64_t random_seed) {
   IMP_FUNCTION_LOG;
   std::fstream in(fname.c_str(), std::ios::in | std::ios::binary);
   if (!in) {
@@ -334,6 +334,7 @@ assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   output.set_statistics_interval_frames
     ( get_statistics_interval_in_frames(output, time_step) );
   output.set_range(get_close_pairs_range(output));
+  output.set_random_seed( random_seed );
   std::fstream out(ofname.c_str(), std::ios::out | std::ios::binary);
   if (!out) {
     IMP_THROW("Could not open file " << ofname, IOException);

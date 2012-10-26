@@ -133,6 +133,7 @@ message Assignment {
   required double dump_interval_frames=29; // = dump_interval_ns * 1e+6 / time_step
   required FloatAssignment statistics_fraction=30;
   optional double maximum_number_of_minutes=31;
+  optional uint64 random_seed = 32; // random seed used to initialize this run
 }
 
 message Statistics {

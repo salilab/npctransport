@@ -95,14 +95,11 @@ IMP_NPC_PARAMETER_BOOL(show_steps, false,
                        "Show the steps for each modified variable");
 IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
                        "Show the number of work units");
-IMP_NPC_PARAMETER_INT(seed_offset, 0,
-                      "a number to add to the random seed of IMP random numbers"
-                      " generator" );
-IMP_NPC_PARAMETER_BOOL(const_seed, 0,
-                      "a number to be used as a constant seed"
-                       " (instead of system time)"
-                       " in the IMP random numbers generator."
-                       " If unspecified or zero, use system time" );
+IMP_NPC_PARAMETER_BOOL(random_seed, 0,
+                      "an integer to be used as a constant random seed"
+                       " in the IMP random numbers generator. If unspecified"
+                       " or zero, IMP uses system time as seed. If uncertain, "
+                       " use a 32 bit integer" );
 
 
 #ifdef IMP_BENCHMARK_USE_GOOGLE_PERFTOOLS_PROFILE
@@ -126,28 +123,30 @@ IMP_NPC_PARAMETER_BOOL(const_seed, 0,
                                             FLAGS_debug_initialization, \
                                             FLAGS_init_rmffile)
 
-//! seeds the random number generator of IMP with const_seed
-//! (or time if it is zero), offsetted by seed_offset
-void seed_randn_generator(IntArg const_seed, IntArg seed_offset)
+//! seeds the random number generator of IMP with seed
+//! (or time if it is zero)
+/**
+   returns the actual seed used to initialize the generator
+ */
+uint64_t seed_randn_generator(uint64_t seed)
 {
-  IntArg seed = const_seed;
-  if(seed == 0)
-    seed = static_cast<IntArg> (std::time(IMP::nullptr));
-  IMP::base::random_number_generator.seed( seed + seed_offset );
-  std::cout << "Running with random seed " << seed
-            << " offseted by " << seed_offset
-            << std::endl;
+  if(seed == 0) // TODO: use int32 or uint64? or remain generic?
+    seed =  static_cast<boost::uint64_t> (std::time(IMP::nullptr)) ;
+  std::cout << "Random seed is " << seed;
+  IMP::base::random_number_generator.seed( seed );
+  return seed;
 }
 
 inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
   IMP_NPC_PRINTHELP;
-  seed_randn_generator(FLAGS_const_seed, FLAGS_seed_offset);
+  boost::uint64_t actual_seed =
+    seed_randn_generator( FLAGS_random_seed );
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));
   try {
     int num=IMP::npctransport::assign_ranges
         (FLAGS_configuration, FLAGS_output,
-         FLAGS_work_unit, FLAGS_show_steps);
+         FLAGS_work_unit, FLAGS_show_steps, actual_seed);
     if (FLAGS_show_number_of_work_units) {
 #pragma omp critical
       std::cout << "work units " << num << std::endl;

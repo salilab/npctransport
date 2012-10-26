@@ -9,7 +9,7 @@
 #define IMPNPCTRANSPORT_PROTOBUF_H
 
 #include "npctransport_config.h"
-
+#include <boost/cstdint.hpp>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -37,6 +37,8 @@ show_ranges(std::string fname);
                     will enumerate over all possible combinations, and that
                     work_unit and (work_unit % k) will return the same output for
                     the same input.
+   @param random_seed the random seed used to initialize the IMP random number
+                      generator for this simulation
 
    @throw IMP::base::ValueException if any of the values in the configuration file
               are in conflict (e.g., simulation time and maximal number of frames)
@@ -44,7 +46,7 @@ show_ranges(std::string fname);
 // Each range field also has .steps and .base field.
 IMPNPCTRANSPORTEXPORT int
 assign_ranges(std::string fname, std::string output, unsigned int work_unit,
-              bool show_steps);
+              bool show_steps, boost::uint64_t random_seed);
 
 IMPNPCTRANSPORTEXPORT int
 get_number_of_work_units(std::string configuration_file);

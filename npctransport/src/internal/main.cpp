@@ -31,6 +31,8 @@ namespace {
                        elapsed, that is sd->get_maximum_number_of_minutes()
      @param max_frames_per_chunk maximal number of frames to be simulated
                                  in a single optimization chunk
+
+     @return true if succesful, false if terminated abnormally
   */
   bool run_it(SimulationData *sd,
               unsigned int number_of_frames,
@@ -41,11 +43,12 @@ namespace {
       unsigned int cur_frames
         = std::min<unsigned int>(max_frames_per_chunk,
                                  number_of_frames);
-      std::cout << "Running..." << std::endl;
 #pragma omp parallel num_threads(3)
       {
 #pragma omp single
         {
+          std::cout << "Optimizing for " << cur_frames
+                    << " frames in this iteration" << std::endl;
           sd->get_bd()->optimize(cur_frames);
           sd->update_statistics(timer);
         }
@@ -54,11 +57,11 @@ namespace {
           && total_time.elapsed()/60 > sd->get_maximum_number_of_minutes()) {
         sd->set_interrupted(true);
         std::cout << "Terminating..." << std::endl;
-        return true;
+        return false;
       }
       number_of_frames-=cur_frames;
     } while (number_of_frames > 0);
-    return false;
+    return true;
   }
 }
 
@@ -77,17 +80,18 @@ void do_main_loop(SimulationData *sd,
     IMP::base::CreateLogContext clc("iteration");
     boost::timer timer;
     IMP::set_log_level(SILENT);
-    if (!quick) sd->reset_rmf();
-    {
-      std::cout<< "Initializing..." << std::endl;
-    }
+    std::cout << "Simulation trial " << i << " out of "
+              << sd->get_number_of_trials() << std::endl;
+    if (!quick)
+      sd->reset_rmf();
+    std::cout<< "Initializing...";
     if (init_rmf == "") {
  	  initialize_positions(sd, init_restraints, debug_initialize);
+          std::cout << " from scratch" << std::endl;
     }
     else{
       sd->initialize_positions_from_rmf(init_rmf, i);
-      std::cout << "Initializing positions from RMF file "
-                << init_rmf << std::endl;
+      std::cout << " from existing RMF file " << init_rmf << std::endl;
     }
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
@@ -100,26 +104,30 @@ void do_main_loop(SimulationData *sd,
     sd->get_bd()->set_current_time(0);
     {
       std::cout << "Equilibrating..." << std::endl;
+      bool ok = run_it
+        (sd,
+         sd->get_number_of_frames() * sd->get_statistics_fraction(),
+         timer, total_time);
+      if(! ok)
+        return;
     }
-    if (run_it(sd,
-               sd->get_number_of_frames() * sd->get_statistics_fraction(),
-               timer, total_time)) {
-      return;
+    if (init_only)
+      continue; // skip optimization
+    {
+      sd->reset_statistics_optimizer_states();
+      std::cout << "Running..." << std::endl;
+      // now run the rest of the sim
+      bool ok = run_it(sd,
+                       sd->get_number_of_frames()
+                       * (1.0- sd->get_statistics_fraction())
+                       , timer, total_time);
+      //p.reset();
+      if (final_sos) {
+        final_sos->update_always();
+      }
+      if (! ok)
+        return;
     }
-    // go on to the next round
-    if (init_only) continue;
-    sd->reset_statistics_optimizer_states();
-    std::cout << "Running..." << std::endl;
-    // now run the rest of the sim
-    bool abort=run_it(sd,
-                      sd->get_number_of_frames()
-                      * (1.0- sd->get_statistics_fraction())
-                      , timer, total_time);
-    //p.reset();
-    if (final_sos) {
-      final_sos->update_always();
-    }
-    if (abort) break;
   }
 }
 IMPNPCTRANSPORT_END_INTERNAL_NAMESPACE
