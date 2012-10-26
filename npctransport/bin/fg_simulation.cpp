@@ -245,15 +245,13 @@ int main(int argc, char *argv[])
     set_fgs_in_cylinder(*sd, 4);
   color_fgs( *sd );
   Restraints initialization_restraints;
-  std::cout << initialization_restraints << std::endl;
   if(sd->get_has_slab()) { // if has slab, exclude from channel initially
     IMP::Pointer<IMP::Restraint> r= get_exclude_from_channel_restraint( *sd );
     initialization_restraints.push_back( r );
   }
-  //  IMP::npctransport::initialize_positions
-  // ( sd, initialization_restraints );
-
+  std::cout << initialization_restraints << std::endl;
   IMP_NPC_LOOP(sd, initialization_restraints );
+  std::cout << "Finished running of " << argv[0] << " app" << std::endl;
 
   return 0;
  }
