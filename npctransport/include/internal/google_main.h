@@ -12,6 +12,7 @@
 #include "base/commandlineflags.h"
 
 typedef int64 IntArg;
+typedef unsigned int64 UIntArg;
 
 #define IMP_NPC_PARAMETER(name, def, description)        \
   DEFINE_double(name, def, description);             \
@@ -21,7 +22,10 @@ typedef int64 IntArg;
   DEFINE_bool(name, def, description)
 
 #define IMP_NPC_PARAMETER_INT(name, def, description)        \
-  DEFINE_int64(name, def, description);                  \
+  DEFINE_int64(name, def, description);
+
+#define IMP_NPC_PARAMETER_UINT(name, def, description)  \
+  DEFINE_uint64(name, def, decription);
 
 #define IMP_NPC_PARAMETER_STRING(name, def, description) \
   DEFINE_string(name, def, description)

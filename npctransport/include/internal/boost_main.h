@@ -11,7 +11,7 @@
 #include <boost/program_options.hpp>
 
 typedef int IntArg;
-
+typedef unsigned int UIntArg;
 
 
 #define IMP_NPC_PARAMETER(name, def, description)                       \
@@ -29,6 +29,11 @@ typedef int IntArg;
 
 #define IMP_NPC_PARAMETER_INT(name, def, description)                   \
   int FLAGS_##name=def;                                                 \
+  Adder name##add(#name, &FLAGS_##name,                                 \
+                  description);                                         \
+
+#define IMP_NPC_PARAMETER_UINT(name, def, description)                   \
+  unsigned int FLAGS_##name=def;                                                 \
   Adder name##add(#name, &FLAGS_##name,                                 \
                   description);                                         \
 

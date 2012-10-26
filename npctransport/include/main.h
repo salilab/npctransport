@@ -95,12 +95,12 @@ IMP_NPC_PARAMETER_BOOL(show_steps, false,
                        "Show the steps for each modified variable");
 IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
                        "Show the number of work units");
-IMP_NPC_PARAMETER_INT(random_seed, 0,
-                      "an integer to be used as a constant random seed"
-                      " in the IMP random numbers generator. If unspecified"
-                      " or zero, IMP uses system time as seed. If uncertain,"
-                      " use a 32 bit unsigned integer, to avoid platform"
-                      " specific issues" );
+IMP_NPC_PARAMETER_UINT(random_seed, 0,
+                       "an unsigned integer to be used as a random seed"
+                       " in the IMP random numbers generator. If unspecified"
+                       " or zero, IMP will use system time as a seed."
+                       " (Note: if in doubt, use a 32 bit unsigned integer"
+                       " seed in the range 0 to 4,294,967,295)");
 
 
 #ifdef IMP_BENCHMARK_USE_GOOGLE_PERFTOOLS_PROFILE
