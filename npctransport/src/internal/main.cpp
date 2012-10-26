@@ -38,7 +38,7 @@ namespace {
               unsigned int number_of_frames,
               boost::timer& timer,
               boost::timer& total_time,
-              unsigned int max_frames_per_chunk = 100000) {
+              unsigned int max_frames_per_chunk = 10000) {
     do {
       unsigned int cur_frames
         = std::min<unsigned int>(max_frames_per_chunk,
@@ -103,24 +103,26 @@ void do_main_loop(SimulationData *sd,
       p.set("profiling.pprof");*/
     sd->get_bd()->set_current_time(0);
     {
-      std::cout << "Equilibrating..." << std::endl;
+      double equilibrate_fraction =  1.0 - sd->get_statistics_fraction() ;
+      unsigned int nframes_equilibrate = (unsigned int)
+        (sd->get_number_of_frames() * equilibrate_fraction );
+      std::cout << "Equilibrating for " << nframes_equilibrate
+                << " frames..." << std::endl;
       bool ok = run_it
-        (sd,
-         sd->get_number_of_frames() * sd->get_statistics_fraction(),
-         timer, total_time);
+        (sd, nframes_equilibrate, timer, total_time);
       if(! ok)
         return;
     }
-    if (init_only)
+    if (init_only) {
       continue; // skip optimization
+    }
     {
       sd->reset_statistics_optimizer_states();
-      std::cout << "Running..." << std::endl;
+      unsigned int nframes_run = (unsigned int)
+        ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
+      std::cout << "Running for " << nframes_run << " frames..." << std::endl;
       // now run the rest of the sim
-      bool ok = run_it(sd,
-                       sd->get_number_of_frames()
-                       * (1.0- sd->get_statistics_fraction())
-                       , timer, total_time);
+      bool ok = run_it(sd, nframes_run, timer, total_time);
       //p.reset();
       if (final_sos) {
         final_sos->update_always();

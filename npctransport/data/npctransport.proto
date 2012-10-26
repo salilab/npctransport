@@ -62,6 +62,7 @@ message Configuration {
   required double statistics_interval_ns=22; // 0 = every frame
   required FloatRange excluded_volume_k=23;
   required double simulation_time_ns=24;
+  // percent of time in actual running (as opposed to equlibration):
   required FloatRange statistics_fraction=25;
   optional double maximum_number_of_minutes=26;
 }
