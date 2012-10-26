@@ -95,12 +95,12 @@ IMP_NPC_PARAMETER_BOOL(show_steps, false,
                        "Show the steps for each modified variable");
 IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
                        "Show the number of work units");
-IMP_NPC_PARAMETER_BOOL(random_seed, 0,
+IMP_NPC_PARAMETER_INT(random_seed, 0,
                       "an integer to be used as a constant random seed"
-                       " in the IMP random numbers generator. If unspecified"
-                       " or zero, IMP uses system time as seed. If uncertain,"
-                       " use a 32 bit unsigned integer, to avoid platform"
-                       " specific issues" );
+                      " in the IMP random numbers generator. If unspecified"
+                      " or zero, IMP uses system time as seed. If uncertain,"
+                      " use a 32 bit unsigned integer, to avoid platform"
+                      " specific issues" );
 
 
 #ifdef IMP_BENCHMARK_USE_GOOGLE_PERFTOOLS_PROFILE
@@ -131,9 +131,8 @@ IMP_NPC_PARAMETER_BOOL(random_seed, 0,
  */
 uint64_t seed_randn_generator(uint64_t seed)
 {
-  if(seed == 0) // TODO: use int32 or uint64? or remain generic?
+  if(seed == 0)
     seed =  static_cast<boost::uint64_t> (std::time(IMP::nullptr)) ;
-  std::cout << "Random seed is " << seed;
   IMP::base::random_number_generator.seed( seed );
   return seed;
 }
@@ -143,6 +142,7 @@ inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PRINTHELP;
   boost::uint64_t actual_seed =
     seed_randn_generator( FLAGS_random_seed );
+  std::cout << "Random seed is " << actual_seed << std::endl;
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));
   try {
     int num=IMP::npctransport::assign_ranges
