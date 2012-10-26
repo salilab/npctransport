@@ -98,8 +98,9 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
 IMP_NPC_PARAMETER_BOOL(random_seed, 0,
                       "an integer to be used as a constant random seed"
                        " in the IMP random numbers generator. If unspecified"
-                       " or zero, IMP uses system time as seed. If uncertain, "
-                       " use a 32 bit integer" );
+                       " or zero, IMP uses system time as seed. If uncertain,"
+                       " use a 32 bit unsigned integer, to avoid platform"
+                       " specific issues" );
 
 
 #ifdef IMP_BENCHMARK_USE_GOOGLE_PERFTOOLS_PROFILE
