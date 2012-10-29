@@ -129,10 +129,11 @@ IMP_NPC_PARAMETER_UINT(random_seed, 0,
 /**
    returns the actual seed used to initialize the generator
  */
-uint64_t seed_randn_generator(uint64_t seed)
+boost::uint64_t seed_randn_generator(boost::uint64_t seed)
 {
-  if(seed == 0)
-    seed =  static_cast<boost::uint64_t> (std::time(IMP::nullptr)) ;
+  if(seed == 0){
+    seed =  static_cast<boost::uint64_t> (std::time(0)); //IMP::nullptr)) ;
+  }
   IMP::base::random_number_generator.seed( seed );
   return seed;
 }

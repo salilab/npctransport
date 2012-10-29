@@ -9,7 +9,7 @@
 #define IMPNPCTRANSPORT_PROTOBUF_H
 
 #include "npctransport_config.h"
-#include <cstdint>
+#include <boost/cstdint.hpp>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -47,7 +47,7 @@ show_ranges(std::string fname);
 IMPNPCTRANSPORTEXPORT int
 assign_ranges(std::string fname, std::string output, unsigned int work_unit,
               bool show_steps,
-              std::uint64_t random_seed // do not use boost::uint64_t cause of SWIG
+              boost::uint64_t random_seed // do not use boost::uint64_t cause of SWIG
               );
 
 IMPNPCTRANSPORTEXPORT int
