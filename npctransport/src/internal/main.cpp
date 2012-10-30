@@ -129,7 +129,8 @@ void do_main_loop(SimulationData *sd,
         ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;
       // now run the rest of the sim
-      bool ok = run_it(sd, nframes_run, timer, total_time);
+      bool ok = run_it(sd, nframes_run, timer, total_time,
+                       false /* verbose statistics */);
       //p.reset();
       if (final_sos) {
         final_sos->update_always();
