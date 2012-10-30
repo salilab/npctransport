@@ -156,6 +156,7 @@ message Statistics {
     optional double diffusion_coefficient=5 [default=0];
     optional double correlation_time=6 [default=0];
     optional double avg_n_transports=7 [default=0]; // avg number of times a particle of this type has crossed the channel
+    repeated double transport_time_points_ns=8; // records the time points of transports in simulation time (TODO: assuming single trial?)
   }
   message InteractionStats {
     required string type0=1;

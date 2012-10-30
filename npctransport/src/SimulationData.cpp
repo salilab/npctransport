@@ -44,6 +44,7 @@
 #include <IMP/rmf/atom_io.h>
 #include <IMP/rmf/frames.h>
 
+#include <set>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name)                    \
@@ -411,6 +412,10 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     if( slab_is_on_ ){
       for (unsigned int i=0; i< float_transport_stats_.size(); ++i) {
         bd_->add_optimizer_states(float_transport_stats_[i]);
+        // associate each with this bd_, so it can update transport times
+        for(unsigned int j=0 ; j < float_transport_stats_[i].size() ; j++) {
+          float_transport_stats_[i][j]->set_owner(bd_);
+        }
       }
     }
     for (unsigned int i=0; i< chain_stats_.size(); ++i) {
@@ -771,8 +776,9 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   for (unsigned int i=0; i<float_stats_.size(); ++i) {
     for (unsigned int j=0; j<float_stats_[i].size(); ++j) {
       int cnf=(nf)*float_stats_[i].size()+j;
-      IMP_ALWAYS_CHECK(stats.floaters_size() >  static_cast<int>(i), "Not enough floaters",
-                         ValueException);
+      IMP_ALWAYS_CHECK(stats.floaters_size() >  static_cast<int>(i),
+                       "Not enough floaters",
+                       ValueException);
       UPDATE_AVG(cnf,
              *stats.mutable_floaters(i), diffusion_coefficient,
              float_stats_[i][j]->get_diffusion_coefficient());
@@ -784,19 +790,36 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   }
   // update avg number of transports per particle for each type of floats:
   if( slab_is_on_ ) {
-    for (unsigned int typei=0; typei<float_transport_stats_.size(); ++typei) {
-      unsigned int n_particles = float_transport_stats_[typei].size();
-      unsigned int sum_n_transports_typei = 0;
-      for (unsigned int j = 0; j < n_particles ; ++j) {
-        sum_n_transports_typei +=
-          float_transport_stats_[typei][j]->get_total_n_transports();
-      }
-      double avg_n_transports_typei =
-        sum_n_transports_typei * 1.0 / n_particles;
-      (*stats.mutable_floaters(typei)).set_avg_n_transports
-        ( avg_n_transports_typei );
-      // Note: for transports, no reseting is needed between updates,
+      // Note: for transports avg, no reseting is needed between updates,
       // as we want to average over particles, but sum over time
+      // TODO: unless more than one trial?
+    for (unsigned int type_i=0; type_i<float_transport_stats_.size(); ++type_i) {
+      unsigned int n_particles = float_transport_stats_[type_i].size();
+      unsigned int sum_n_transports_type_i = 0;
+      for (unsigned int j = 0; j < n_particles ; ++j) {
+        sum_n_transports_type_i +=
+          float_transport_stats_[type_i][j]->get_total_n_transports();
+      }
+      double avg_n_transports_type_i =
+        sum_n_transports_type_i * 1.0 / n_particles;
+      (*stats.mutable_floaters(type_i)).set_avg_n_transports
+        ( avg_n_transports_type_i );
+      // collect individual transport times in an ordered set,
+      // and add them to the statistics fils:
+      std::set<double> times_all;
+      for(unsigned int j = 0; j < n_particles ; ++j) {
+        Floats const& times_j =
+          float_transport_stats_[type_i][j]->get_transport_time_points_in_ns();
+        for(unsigned int k = 0; k < times_j.size(); k++) {
+          times_all.insert( times_j[k] );
+        }
+      }
+      (*stats.mutable_floaters(type_i)).clear_transport_time_points_ns();
+      for(std::set<double>::const_iterator it = times_all.begin() ;
+          it != times_all.end() ; it++) {
+        (*stats.mutable_floaters(type_i))
+          .add_transport_time_points_ns( *it );
+      }
     }
   }
   for (unsigned int i=0; i<fgs_stats_.size(); ++i) {

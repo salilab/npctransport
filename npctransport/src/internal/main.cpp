@@ -29,6 +29,8 @@ namespace {
                        The simulation would terminate at the end of an
                        optimization chunk in which this time has
                        elapsed, that is sd->get_maximum_number_of_minutes()
+     @param silent_statistics if true, do not update statistics file
+                              (e.g., during equilibration)
      @param max_frames_per_chunk maximal number of frames to be simulated
                                  in a single optimization chunk
 
@@ -38,6 +40,7 @@ namespace {
               unsigned int number_of_frames,
               boost::timer& timer,
               boost::timer& total_time,
+              bool silent_statistics = false,
               unsigned int max_frames_per_chunk = 10000) {
     do {
       unsigned int cur_frames
@@ -50,7 +53,9 @@ namespace {
           std::cout << "Optimizing for " << cur_frames
                     << " frames in this iteration" << std::endl;
           sd->get_bd()->optimize(cur_frames);
-          sd->update_statistics(timer);
+          if(! silent_statistics) {
+            sd->update_statistics(timer);
+          }
         }
       }
       if (sd->get_maximum_number_of_minutes() > 0
@@ -109,7 +114,8 @@ void do_main_loop(SimulationData *sd,
       std::cout << "Equilibrating for " << nframes_equilibrate
                 << " frames..." << std::endl;
       bool ok = run_it
-        (sd, nframes_equilibrate, timer, total_time);
+        (sd, nframes_equilibrate, timer, total_time,
+         true /* silent stats */);
       if(! ok)
         return;
     }
