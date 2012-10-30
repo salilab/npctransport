@@ -406,8 +406,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
       @param timer the timer that was used to measure the time
                    that has elapsed for statistics
+      @param nf_new the number of frames by which the statistics file
+                    should be advanced. This is used to weight the
+                    contribution of average statistics over time.
    */
-  void update_statistics(const boost::timer &timer) const;
+  void update_statistics
+    (const boost::timer &timer, unsigned int nf_new = 1) const;
 
   unsigned int get_number_of_frames() const {return number_of_frames_;}
 

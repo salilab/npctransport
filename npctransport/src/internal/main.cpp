@@ -43,18 +43,18 @@ namespace {
               bool silent_statistics = false,
               unsigned int max_frames_per_chunk = 10000) {
     do {
-      unsigned int cur_frames
+      unsigned int cur_nframes
         = std::min<unsigned int>(max_frames_per_chunk,
                                  number_of_frames);
 #pragma omp parallel num_threads(3)
       {
 #pragma omp single
         {
-          std::cout << "Optimizing for " << cur_frames
+          std::cout << "Optimizing for " << cur_nframes
                     << " frames in this iteration" << std::endl;
-          sd->get_bd()->optimize(cur_frames);
+          sd->get_bd()->optimize(cur_nframes);
           if(! silent_statistics) {
-            sd->update_statistics(timer);
+            sd->update_statistics(timer, cur_nframes);
           }
         }
       }
@@ -64,7 +64,7 @@ namespace {
         std::cout << "Terminating..." << std::endl;
         return false;
       }
-      number_of_frames-=cur_frames;
+      number_of_frames-=cur_nframes;
     } while (number_of_frames > 0);
     return true;
   }
@@ -123,6 +123,7 @@ void do_main_loop(SimulationData *sd,
       continue; // skip optimization
     }
     {
+      timer.restart();
       sd->reset_statistics_optimizer_states();
       unsigned int nframes_run = (unsigned int)
         ( sd->get_number_of_frames() * sd->get_statistics_fraction() );

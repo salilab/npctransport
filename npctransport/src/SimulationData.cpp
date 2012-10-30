@@ -624,9 +624,16 @@ void SimulationData::write_geometry(std::string out) {
 }
 
 // TODO: turn into a template inline in unamed space?
-#define UPDATE_AVG(frame, message, field, newvalue)                     \
-  (message).set_##field(static_cast<double>(frame)/(frame+1)*(message).field() \
-                    + 1.0/(frame+1)*newvalue)
+/**
+   updates (message).field() with a weighted average of its current
+   value and new_value, giving weight n_old_frames, n_new_frames to each,
+   respectively.
+*/
+#define UPDATE_AVG(n_frames, n_new_frames, message, field, new_value)   \
+  (message).set_##field                                                 \
+  ( static_cast<double>                                                 \
+  (n_frames*(message).field() + n_new_frames * new_value) /             \
+    (n_frames + n_new_frames) );
 
 
 int SimulationData::get_number_of_interactions(Particle *a, Particle *b) const{
@@ -727,7 +734,11 @@ if (first_stats_) { // first initialization
     }
     first_stats_=false;
 */
-void SimulationData::update_statistics(const boost::timer &timer) const {
+// @param nf_new number of new frames accounted for in this statistics update
+void
+SimulationData::update_statistics
+(const boost::timer &timer, unsigned int nf_new) const
+{
   IMP_OBJECT_LOG;
   ::npctransport_proto::Output output;
 
@@ -738,9 +749,13 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
 
   int nf= stats.number_of_frames();
   if(is_stats_reset_){ // restart statistics from scratch
+    // TODO: what's if multiple trials?
     nf = 0;
     is_stats_reset_ = false;
   }
+  std::cout << "Updateing statistics file " << output_file_name_
+            << " that currently has " << nf << " frames, with "
+            << nf_new << " additional frames" << std::endl;
   ParticlesTemp all;
   ParticlesTemps floaters;
   base::Vector<ParticlesTemps> fgs;
@@ -763,11 +778,11 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
         double volume= -1.;
         double radius_of_gyration= -1.;
 #endif
-        UPDATE_AVG(nf, *stats.mutable_fgs(i), volume, volume);
+        UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), volume, volume);
         double length= core::get_distance(core::XYZ(chain[0]),
                                           core::XYZ(chain.back()));
-        UPDATE_AVG(nf, *stats.mutable_fgs(i), length, length);
-        UPDATE_AVG(nf, *stats.mutable_fgs(i), radius_of_gyration,
+        UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), length, length);
+        UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), radius_of_gyration,
                radius_of_gyration);
       }
     }
@@ -779,10 +794,10 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       IMP_ALWAYS_CHECK(stats.floaters_size() >  static_cast<int>(i),
                        "Not enough floaters",
                        ValueException);
-      UPDATE_AVG(cnf,
+      UPDATE_AVG(cnf, nf_new, // TODO: is nf_new correct? I think so
              *stats.mutable_floaters(i), diffusion_coefficient,
              float_stats_[i][j]->get_diffusion_coefficient());
-      UPDATE_AVG(cnf,
+      UPDATE_AVG(cnf, nf_new, // TODO: is nf_new correct? I think so
              *stats.mutable_floaters(i), correlation_time,
              float_stats_[i][j]->get_correlation_time());
       float_stats_[i][j]->reset();
@@ -829,10 +844,10 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
         unsigned int cnf=(nf)*n+j*fgs_stats_[i][j].size()+k;;
         IMP_ALWAYS_CHECK(stats.fgs_size() >  static_cast<int>(i), "Not enough fgs",
                          ValueException);
-        UPDATE_AVG(cnf,
+        UPDATE_AVG(cnf, nf_new,
                    *stats.mutable_fgs(i),particle_correlation_time,
                    fgs_stats_[i][j][k]->get_correlation_time());
-        UPDATE_AVG(cnf,
+        UPDATE_AVG(cnf, nf_new,
                    *stats.mutable_fgs(i),particle_diffusion_coefficient,
                    fgs_stats_[i][j][k]->get_diffusion_coefficient());
         fgs_stats_[i][j][k]->reset();
@@ -845,14 +860,14 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       unsigned int cnf=(nf)*n+j;
       IMP_ALWAYS_CHECK(stats.fgs_size() >  static_cast<int>(i), "Not enough fgs",
                          ValueException);
-      UPDATE_AVG(cnf,
+      UPDATE_AVG(cnf, nf_new,
              *stats.mutable_fgs(i), chain_correlation_time,
              chain_stats_[i][j]->get_correlation_time());
-      UPDATE_AVG(cnf,
+      UPDATE_AVG(cnf, nf_new,
              *stats.mutable_fgs(i), chain_diffusion_coefficient,
              chain_stats_[i][j]->get_diffusion_coefficient());
       double df=chain_stats_[i][j]->get_diffusion_coefficient();
-      UPDATE_AVG(cnf,
+      UPDATE_AVG(cnf, nf_new,
              *stats.mutable_fgs(i), local_diffusion_coefficient,
              df);
       chain_stats_[i][j]->reset();
@@ -866,15 +881,17 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
       double interactions, interacting, bead_partners, chain_partners;
       boost::tie(interactions, interacting, bead_partners, chain_partners)
           =get_interactions_and_interacting(floaters.back(), fgs);
-      IMP_ALWAYS_CHECK(stats.floaters_size() >  static_cast<int>(i), "Not enough fgs",
-                         ValueException);
-      UPDATE_AVG(nf, *stats.mutable_floaters(i), interactions,
+      IMP_ALWAYS_CHECK(stats.floaters_size() >  static_cast<int>(i),
+                       "Not enough fgs", ValueException);
+      UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i), interactions,
              interactions/floaters.back().size());
-      UPDATE_AVG(nf, *stats.mutable_floaters(i), interacting,
+      UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i), interacting,
              interacting/floaters.back().size());
-      UPDATE_AVG(nf, *stats.mutable_floaters(i), interaction_partner_chains,
+      UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i),
+                 interaction_partner_chains,
              chain_partners/interacting);
-      UPDATE_AVG(nf, *stats.mutable_floaters(i), interaction_partner_beads,
+      UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i),
+                 interaction_partner_beads,
              bead_partners/interacting);
     }
   }
@@ -882,8 +899,8 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
   // update statistics gathered on interaction rates
   for(unsigned int i = 0; i < interactions_stats_.size(); i++){
     IMP_LOG( PROGRESS, "adding interaction statistics # " << i << std::endl );
-    IMP_ALWAYS_CHECK(stats.interactions_size() >  static_cast<int>(i), "Not enough fgs",
-                         ValueException);
+    IMP_ALWAYS_CHECK(stats.interactions_size() > static_cast<int>(i),
+                         "Not enough fgs", ValueException);
     ::npctransport_proto::Statistics_InteractionStats*
       pOutStats_i = stats.mutable_interactions(i);
     IMP::Pointer<BipartitePairsStatisticsOptimizerState>
@@ -905,24 +922,25 @@ void SimulationData::update_statistics(const boost::timer &timer) const {
     Int n1 = pInStats_i->get_number_of_particles_2();
     Float avg_contacts_num = pInStats_i->get_average_number_of_contacts();
 
-    UPDATE_AVG(nf, *pOutStats_i, avg_contacts_per_particle0,
+    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_contacts_per_particle0,
            avg_contacts_num / n0);
-    UPDATE_AVG(nf, *pOutStats_i, avg_contacts_per_particle1,
+    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_contacts_per_particle1,
            avg_contacts_num / n1);
-    UPDATE_AVG(nf, *pOutStats_i, avg_pct_bound_particles0,
+    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_pct_bound_particles0,
            pInStats_i->get_average_percentage_bound_particles_1() );
-    UPDATE_AVG(nf, *pOutStats_i, avg_pct_bound_particles1,
+    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_pct_bound_particles1,
            pInStats_i->get_average_percentage_bound_particles_2() );
     interactions_stats_[i]->reset();
   }
 
-  UPDATE_AVG(nf, stats, energy_per_particle, // TODO: should this be reset?
+  UPDATE_AVG(nf, nf_new, stats, energy_per_particle, // TODO: reset?
              get_m()->evaluate(false)/all.size());
 
-  // TODO: should timer be reset?
-  UPDATE_AVG(nf, stats, seconds_per_iteration, timer.elapsed());
+  // Todo: define better what we want of timer
+  //UPDATE_AVG(nf, nf_new, stats, seconds_per_iteration, timer.elapsed());
+  stats.set_seconds_per_iteration( timer.elapsed() );
 
-  stats.set_number_of_frames(nf+1);
+  stats.set_number_of_frames( nf + nf_new );
 
   // dump to file
   std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
