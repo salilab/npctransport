@@ -9,6 +9,7 @@
 #include <IMP/npctransport/ParticleTransportStatisticsOptimizerState.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/compatibility/set.h>
+#include <IMP/compatibility/nullptr.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -53,7 +54,7 @@ ParticleTransportStatisticsOptimizerState
      && n_entries_bottom_ > 0 && !is_last_entry_from_top_) {
     n_transports_up_++;
     double time = 0.0;
-    if( owner_ != IMP::nullptr ) {
+    if( owner_ != nullptr ) {
       time = owner_->get_current_time() / 1000000.0;
     }
     transport_time_points_in_ns_.push_back( time );
@@ -66,7 +67,7 @@ ParticleTransportStatisticsOptimizerState
      && n_entries_top_ > 0 && is_last_entry_from_top_) {
     n_transports_down_++;
     double time = 0.0;
-    if( owner_ != IMP::nullptr ) {
+    if( owner_ != nullptr ) {
       time = owner_->get_current_time() / 1000000.0;
     }
     transport_time_points_in_ns_.push_back( time );

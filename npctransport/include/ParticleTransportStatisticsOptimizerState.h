@@ -16,6 +16,7 @@
 #include <IMP/core/periodic_optimizer_state_macros.h>
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/atom/Simulator.h>
+#include <IMP/compatibility/nullptr.h>
 #include <deque>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -48,13 +49,13 @@ public core::PeriodicOptimizerState {
      @param bottom_z the z coordinate of the channel bottom
      @param top_z the z coordinate of the channel top
      @param owner a simulator that is moving this particle and can provide it with
-                  time information, or IMP::nullptr
+                  time information, or nullptr
    */
   ParticleTransportStatisticsOptimizerState
     (Particle *p,
      Float bottom_z,
      Float top_z,
-     IMP::WeakPointer<IMP::atom::Simulator> owner = IMP::nullptr
+     IMP::WeakPointer<IMP::atom::Simulator> owner = nullptr
      );
 
   //! sets a simulator that moves this particle and can provide simulation time
