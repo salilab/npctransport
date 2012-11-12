@@ -1,5 +1,6 @@
+%import "RMF.i"
 %{
-#include <RMF.h>
+#include <RMF/FileConstHandle.h>
 %}
 IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);

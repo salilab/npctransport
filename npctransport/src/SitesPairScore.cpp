@@ -251,10 +251,11 @@ void set_sites_score(double rangea, double ka,
 
 
 Restraints SitesPairScore
-::create_current_decomposition(const ParticlePair& vt) const {
+::create_current_decomposition(Model *m,
+                               const ParticleIndexPair &pi) const {
   Restraints ret;
-  if (evaluate(vt, nullptr) < 0) {
-    return Restraints(1, IMP::create_restraint(this, vt));
+  if (evaluate_index(m, pi, nullptr) < 0) {
+    return Restraints(1, IMP::internal::create_tuple_restraint(this, m, pi));
   } else {
     return Restraints();
   }
