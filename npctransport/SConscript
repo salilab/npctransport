@@ -1,7 +1,5 @@
 Import('env')
 import scons_tools.dependency.boost
-import scons_tools.data
-from glob import glob
 
 scons_tools.dependency.boost.add_boost_library(env, "ProgramOptions",
                                                "program_options",
@@ -15,10 +13,16 @@ scons_tools.dependency.boost.add_boost_library( env, "FileSystem", "filesystem",
 
 scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
                                             "google/protobuf/text_format.h")
+
+scons_tools.dependency.add_external_cmake_library(env, "RMF",
+                                                  ["RMF"],
+                                                  "RMF/FileHandle.h",
+                                                  extra_libs=[scons_tools.dependency.boost.get_boost_lib_name(env, "system")])
+
 scons_tools.dependency.add_external_cmake_library(env, "AvroCpp", ["avrocpp"],
                                             ["avro/Compiler.hh", "avro/ValidSchema.hh"],
-                                            body="""avro::compileJsonSchemaFromString(std::string("{}"));"""
-        )
+                                            body="""avro::compileJsonSchemaFromString(std::string("{}"));""")
+
 
 oenv=env.IMPModuleBuild(module="npctransport",
                         version='develop',
@@ -34,6 +38,6 @@ oenv=env.IMPModuleBuild(module="npctransport",
                                           'base'],
                         lib_only_optional_modules=['cgal'],
                         cpppath=[Dir("#/build/src/npctransport")],
-                        required_dependencies= ['Boost.ProgramOptions',
+                        required_dependencies= ['RMF', 'Boost.ProgramOptions',
                                                 'Boost.FileSystem',
                                                 'ProtoBuf', 'AvroCpp'])
