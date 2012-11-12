@@ -15,14 +15,9 @@ scons_tools.dependency.boost.add_boost_library( env, "FileSystem", "filesystem",
 
 scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
                                             "google/protobuf/text_format.h")
-scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
+scons_tools.dependency.add_external_cmake_library(env, "AvroCpp", ["avrocpp"],
                                             ["avro/Compiler.hh", "avro/ValidSchema.hh"],
-                                            body="""avro::compileJsonSchemaFromString(std::string("{}"));""",
-                                            build="""cd %(workdir)s
-    cmake -DCMAKE_INSTALL_PREFIX=%(builddir)s %(srcdir)s
-    make -j 12
-    make install""",
-
+                                            body="""avro::compileJsonSchemaFromString(std::string("{}"));"""
         )
 
 oenv=env.IMPModuleBuild(module="npctransport",
