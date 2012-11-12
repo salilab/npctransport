@@ -35,7 +35,6 @@ Particle* create_particle(SimulationData *sd, double radius,
   diff.set_d(D_factor*diff.get_d());
   // rb.set_coordinates(IMP.algebra.get_random_vector_in(bb));
   rb.set_coordinates_are_optimized(true);
-  sd->get_diffusers()->add_particle(pc);
   pc->add_attribute(get_simulation_data_key(), sd);
   atom::Mass::setup_particle(pc, 1);
   return pc;
@@ -80,7 +79,6 @@ create_chain(SimulationData *sd, int n, double radius,
     ret.push_back(create_particle(sd, radius, angular_D_factor,
                                   D_factor, c, t, name));
   }
-  sd->get_diffusers()->add_particles(ret); // TODO: this seems to be redundant
   Pointer<Restraint> cr=create_chain_restraint(ret,
                                                ps,
                                                name+"chain restraint");

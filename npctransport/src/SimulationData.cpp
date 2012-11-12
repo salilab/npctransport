@@ -129,6 +129,17 @@ void SimulationData::initialize(std::string ass_file,
     create_floaters(data.assignment().floaters(i), type_of_float[i],
                     display::get_display_color(i));
   }
+  IMP_INTERNAL_CHECK(get_diffusers()->get_indexes().empty(),
+                     "Particles should not be in diffusers yet");
+
+  // Add all leaves of th hierarchy as the set of diffusers returned by
+  // get_diffusers()
+  ParticlesTemp leaves= get_as<ParticlesTemp>(atom::get_leaves(get_root()));
+  IMP_LOG(TERSE, "Leaves are " << leaves << std::endl);
+  get_diffusers()->set_particles(leaves);
+  IMP_USAGE_CHECK(leaves.size() == get_diffusers()->get_indexes().size(),
+                  "Set and get don't match");
+
   IMP_LOG(TERSE, "   SimulationData before adding interactions" <<std::endl);
   for (int i=0; i< data.assignment().interactions_size(); ++i) {
     const ::npctransport_proto::Assignment_InteractionAssignment&
@@ -138,10 +149,7 @@ void SimulationData::initialize(std::string ass_file,
       add_interaction( interaction_i );
     }
   }
-  // Add all leaves of th hierarchy as the set of diffusers returned by
-  // get_diffusers()
-  ParticlesTemp leaves= get_as<ParticlesTemp>(atom::get_leaves(get_root()));
-  get_diffusers()->set_particles(leaves);
+
   // bounding box / slab constraints on diffusers
   if (box_is_on_) {
     create_bounding_box_restraint_on_diffusers();
