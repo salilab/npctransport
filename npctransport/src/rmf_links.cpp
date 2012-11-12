@@ -44,8 +44,7 @@ void HierarchyWithSitesSaveLink::do_add_recursive(Particle *root,
   rmf::HierarchySaveLink::do_add_recursive(root, p, cur);
 }
 void HierarchyWithSitesSaveLink::do_save_node(Particle *p,
-                                     RMF::NodeHandle n,
-                                     unsigned int frame) {
+                                     RMF::NodeHandle n) {
   if (core::Typed::particle_is_instance(p)) {
     core::ParticleType type= core::Typed(p).get_type();
     std::pair<double, algebra::Vector3Ds> sites
@@ -56,17 +55,17 @@ void HierarchyWithSitesSaveLink::do_save_node(Particle *p,
     for (unsigned int i=0; i< sites.second.size(); ++i) {
       IMP_INTERNAL_CHECK(ch.size() > i,
                          "Not enogh children for sites");
-      RMF::Ball b= bf_.get(ch[i], frame);
+      RMF::Ball b= bf_.get(ch[i]);
       b.set_radius(sites.first);
       algebra::Vector3D local= rf.get_global_coordinates(sites.second[i]);
       b.set_coordinates(RMF::Floats(local.coordinates_begin(),
                                     local.coordinates_end()));
       RMF::Floats color(3);
       color[0]=1; color[1]=0; color[2]=0;
-      cf_.get(ch[i], frame).set_rgb_color(color);
+      cf_.get(ch[i]).set_rgb_color(color);
     }
   }
-  rmf::HierarchySaveLink::do_save_node(p,n,frame);
+  rmf::HierarchySaveLink::do_save_node(p,n);
 }
 
 
