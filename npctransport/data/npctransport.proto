@@ -170,8 +170,8 @@ message Statistics {
   repeated FloatStats floaters=2;
   repeated InteractionStats interactions=6;
   optional double energy_per_particle=3 [default=0];
-  optional int32 number_of_frames=4 [default=0];
-  optional double seconds_per_iteration=5 [default=0];
+  optional int32 number_of_frames=4 [default=0]; // number of frames for which statistics were gathered
+  optional double seconds_per_iteration=5 [default=0]; // overall time in seconds for this statistics iteration
   optional int32 interrupted=7 [default=0];
 }
 
