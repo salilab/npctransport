@@ -28,8 +28,6 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
   RMF::BallFactory bf_;
   RMF::ColoredFactory cf_;
   void do_add_recursive(Particle *root, Particle *p, RMF::NodeHandle cur);
-  void do_save_node(Particle *p,
-                    RMF::NodeHandle n);
   std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const ;
   // for testing without sd
   compatibility::map<core::ParticleType, std::pair<double,
