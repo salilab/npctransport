@@ -65,16 +65,12 @@ void SitesPairScore::do_show(std::ostream & o) const {
 }
 
 
-
-ParticlesTemp SitesPairScore
-::get_input_particles(Particle*p) const {
-  return ParticlesTemp(1, p);
+ModelObjectsTemp
+SitesPairScore::do_get_inputs(Model *m,
+                              const ParticleIndexes &pis) const {
+  return IMP::get_particles(m, pis);
 }
 
-ContainersTemp SitesPairScore
-::get_input_containers(Particle*) const {
-  return ContainersTemp();
-}
 
 // the sites of each particle are transformed to a common frame of reference
 // (using the reference frame of each particle), and the site-specific
