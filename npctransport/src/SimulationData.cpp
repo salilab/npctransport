@@ -59,16 +59,7 @@ SimulationData::SimulationData(std::string output_file,
   rmf_file_name_( rmf_file_name ),
   is_stats_reset_( false )
 {
-  initialize(output_file, output_file, quick);
-}
-SimulationData::SimulationData(std::string ass_file,
-                               std::string stat_file,
-                               bool quick,
-                               std::string rmf_file_name):
-  Object("SimulationData%1%"),
-  rmf_file_name_( rmf_file_name )
-{
-  initialize(ass_file, stat_file, quick);
+  initialize(output_file, quick);
 }
 
 namespace {
@@ -94,7 +85,7 @@ namespace {
                             algebra::Transformation3D tr(rotation, translation);
                             rb.set_reference_frame(algebra::ReferenceFrame3D(tr));
                           });
-    for (unsigned int i=0; i< conformation.sites_size(); ++i) {
+    for ( int i=0; i< conformation.sites_size(); ++i) {
       const ::npctransport_proto::Conformation::Sites &cur
         = conformation.sites(i);
       core::ParticleType pt(cur.name());
@@ -112,25 +103,15 @@ namespace {
 }
 
 
-void SimulationData::initialize(std::string ass_file,
-                               std::string stat_file,
+void SimulationData::initialize(std::string output_file,
                                bool quick) {
-  output_file_name_= stat_file;
+  output_file_name_= output_file;
   ::npctransport_proto::Output data;
-  if (ass_file==stat_file) {
-    std::ifstream file(output_file_name_.c_str(), std::ios::binary);
-    bool read=data.ParseFromIstream(&file);
-    if (!read) {
-      IMP_THROW("Unable to read from protobuf", base::IOException);
-    }
-  } else {
-    ::npctransport_proto::Assignment ass;
-    std::ifstream file(ass_file.c_str(), std::ios::binary);
-    bool read=ass.ParseFromIstream(&file);
-    if (!read) {
-      IMP_THROW("Unable to read from protobuf", base::IOException);
-    }
-    *data.mutable_assignment()=ass;
+  data.mutable_statistics();
+  std::ifstream file(output_file_name_.c_str(), std::ios::binary);
+  bool read=data.ParseFromIstream(&file);
+  if (!read) {
+    IMP_THROW("Unable to read from protobuf", base::IOException);
   }
   GET_ASSIGNMENT(interaction_k);
   GET_ASSIGNMENT(interaction_range);
@@ -200,7 +181,8 @@ void SimulationData::initialize(std::string ass_file,
   }
 
   // load from output file
-   if (ass_file==stat_file) {
+  if (data.conformation().sites_size()>0) {
+    std::cout << "Loading from output file " << std::endl;
      load_conformation(data.conformation(),
                        get_diffusers(),
                        sites_);
@@ -865,7 +847,9 @@ SimulationData::update_statistics
             = get_as<ParticlesTemp>(atom::get_leaves(h));
         all+=chain;
         fgs.back().push_back(chain);
-        IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i), "Not enough fgs",
+        IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i),
+                         "Not enough fgs: " << stats.fgs_size()
+                         << " vs " << static_cast<int>(i),
                          ValueException);
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
         double volume= atom::get_volume(h);
