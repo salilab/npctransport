@@ -9,9 +9,10 @@
 
 #ifdef IMP_NPC_MAIN
 #include <boost/program_options.hpp>
+#include <boost/cstdint.hpp>
 
-typedef int IntArg;
-typedef unsigned int UIntArg;
+typedef boost::int64_t Int64Arg;
+typedef boost::uint64_t UInt64Arg;
 
 
 #define IMP_NPC_PARAMETER(name, def, description)                       \
@@ -27,13 +28,13 @@ typedef unsigned int UIntArg;
   Adder name##add(#name, &FLAGS_##name,                   \
                                          description)
 
-#define IMP_NPC_PARAMETER_INT(name, def, description)                   \
-  int FLAGS_##name=def;                                                 \
+#define IMP_NPC_PARAMETER_INT64(name, def, description)                 \
+  Int64Arg FLAGS_##name=def;                                            \
   Adder name##add(#name, &FLAGS_##name,                                 \
                   description);                                         \
 
-#define IMP_NPC_PARAMETER_UINT(name, def, description)                   \
-  unsigned int FLAGS_##name=def;                                                 \
+#define IMP_NPC_PARAMETER_UINT64(name, def, description)                \
+  UInt64Arg FLAGS_##name=def;                                           \
   Adder name##add(#name, &FLAGS_##name,                                 \
                   description);                                         \
 

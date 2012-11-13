@@ -227,9 +227,11 @@ IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint
   return sr;
 }
 
-IMP_NPC_PARAMETER_BOOL(cylinder_anchoring, false,
-                       "anchor FG nups to a cylinder specified in"
-                       "the config file");
+IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
+                        "anchor FG nups to a cylindrical pore with a slab of"
+                        " dimensions that are specified in"
+                        " the config file, with specified number of FG layers"
+                        " (no cylinder anchoring if equals to 0)");
 
 
 int main(int argc, char *argv[])
@@ -241,8 +243,8 @@ int main(int argc, char *argv[])
   RMF::set_show_hdf5_errors( true );
   // preparation::
   IMP_NPC_STARTUP(sd); //
-  if(FLAGS_cylinder_anchoring)
-    set_fgs_in_cylinder(*sd, 4);
+  if(FLAGS_cylinder_nlayers > 0)
+    set_fgs_in_cylinder(*sd, FLAGS_cylinder_nlayers);
   color_fgs( *sd );
   Restraints initialization_restraints;
   if(sd->get_has_slab()) { // if has slab, exclude from channel initially

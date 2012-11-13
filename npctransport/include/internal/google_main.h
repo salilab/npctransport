@@ -11,7 +11,12 @@
 #include "base/init_google.h"
 #include "base/commandlineflags.h"
 
+<<<<<<< HEAD
+typedef int64 Int64Arg;
+typedef unsigned int64 UInt64Arg;
+=======
 typedef int64 IntArg;
+>>>>>>> 24f3e38f6e9424ca14de680b47d123973564fdc8
 
 #define IMP_NPC_PARAMETER(name, def, description)        \
   DEFINE_double(name, def, description);             \
@@ -20,8 +25,16 @@ typedef int64 IntArg;
 #define IMP_NPC_PARAMETER_BOOL(name, def, description)        \
   DEFINE_bool(name, def, description)
 
+<<<<<<< HEAD
+#define IMP_NPC_PARAMETER_INT64(name, def, description)        \
+  DEFINE_int64(name, def, description);
+
+#define IMP_NPC_PARAMETER_UINT64(name, def, description)        \
+  DEFINE_uint64(name, def, decription);
+=======
 #define IMP_NPC_PARAMETER_INT(name, def, description)        \
   DEFINE_int64(name, def, description);                  \
+>>>>>>> 24f3e38f6e9424ca14de680b47d123973564fdc8
 
 #define IMP_NPC_PARAMETER_STRING(name, def, description) \
   DEFINE_string(name, def, description)

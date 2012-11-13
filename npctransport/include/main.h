@@ -61,8 +61,8 @@
 
 
 
-IMP_NPC_PARAMETER_INT(work_unit, -1, "The work unit");
-IMP_NPC_PARAMETER_INT(log_level, 0, "The log level to use");
+IMP_NPC_PARAMETER_INT64(work_unit, -1, "The work unit");
+IMP_NPC_PARAMETER_INT64(log_level, 0, "The log level to use");
 IMP_NPC_PARAMETER_STRING(configuration, "configuration.pb",
                          "input configuration file in protobuf format"
                          " [default: %default]");
@@ -95,12 +95,12 @@ IMP_NPC_PARAMETER_BOOL(show_steps, false,
                        "Show the steps for each modified variable");
 IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
                        "Show the number of work units");
-IMP_NPC_PARAMETER_UINT(random_seed, 0,
-                       "an unsigned integer to be used as a random seed"
-                       " in the IMP random numbers generator. If unspecified"
-                       " or zero, IMP will use system time as a seed."
-                       " (Note: if in doubt, use a 32 bit unsigned integer"
-                       " seed in the range 0 to 4,294,967,295)");
+IMP_NPC_PARAMETER_UINT64(random_seed, 0,
+                         "an unsigned integer to be used as a random seed"
+                         " in the IMP random numbers generator. If unspecified"
+                         " or zero, IMP will use system time as a seed."
+                         " (Note: if in doubt, use a 32 bit unsigned integer"
+                         " seed in the range 0 to 4,294,967,295)");
 
 
 #ifdef IMP_BENCHMARK_USE_GOOGLE_PERFTOOLS_PROFILE
