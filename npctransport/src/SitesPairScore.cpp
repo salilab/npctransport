@@ -247,7 +247,7 @@ void set_sites_score(double rangea, double ka,
 
 
 Restraints SitesPairScore
-::create_current_decomposition(Model *m,
+::do_create_current_decomposition(Model *m,
                                const ParticleIndexPair &pi) const {
   Restraints ret;
   if (evaluate_index(m, pi, nullptr) < 0) {
