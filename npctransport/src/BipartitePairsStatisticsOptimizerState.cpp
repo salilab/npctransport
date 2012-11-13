@@ -8,6 +8,7 @@
 
 #include <IMP/npctransport/BipartitePairsStatisticsOptimizerState.h>
 #include <IMP/container/ClosePairContainer.h>
+#include <IMP/pair_macros.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -49,21 +50,30 @@ void BipartitePairsStatisticsOptimizerState
   // count all the pairs that are currently in contact
   // and update average
   close_bipartite_pair_container_->before_evaluate();
-  unsigned int ncontacts =
-    close_bipartite_pair_container_->get_number_of_particle_pairs ();
-  avg_ncontacts_ =
-    update_average( avg_ncontacts_, ncontacts, updates_ + 1 );
 
   // update the rate of particles in contact with just anybody
   // from each group
   ParticlesTemp bounds_I;
   ParticlesTemp bounds_II;
-  for(unsigned int i = 0 ; i < ncontacts ; i++) {
-    ParticlePair cur_pair =
-      close_bipartite_pair_container_->get_particle_pair (i);
-    bounds_I.push_back( cur_pair[0] );
-    bounds_II.push_back( cur_pair[1] );
-  }
+  unsigned int ncontacts = 0;
+  IMP_FOREACH_PAIR( close_bipartite_pair_container_ ,
+                    { bounds_I.push_back(_1[0] );
+                      bounds_II.push_back(_1[1] );
+                      ncontacts++;} );
+  avg_ncontacts_ =
+    update_average( avg_ncontacts_, ncontacts, updates_ + 1 );
+  /**
+      Deprecated code just for reference till sure new code is good
+      ==============================================================
+      // unsigned int ncontacts =
+      //   close_bipartite_pair_container_->get_number_of_particle_pairs ();
+      // for(unsigned int i = 0 ; i < ncontacts ; i++) {
+      //   ParticlePair cur_pair =
+      //     close_bipartite_pair_container_->get_particle_pair (i);
+      //   bounds_I.push_back( cur_pair[0] );
+      //   bounds_II.push_back( cur_pair[1] );
+      // }
+      */
   std::sort(bounds_I.begin(), bounds_I.end());
   std::sort(bounds_II.begin(), bounds_II.end());
   bounds_I.erase(std::unique(bounds_I.begin(), bounds_I.end()), bounds_I.end());
