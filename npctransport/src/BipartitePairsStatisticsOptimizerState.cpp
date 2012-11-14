@@ -53,13 +53,14 @@ void BipartitePairsStatisticsOptimizerState
 
   // update the rate of particles in contact with just anybody
   // from each group
-  ParticlesTemp bounds_I;
-  ParticlesTemp bounds_II;
+  ParticleIndexes bounds_I;
+  ParticleIndexes bounds_II;
   unsigned int ncontacts = 0;
-  IMP_FOREACH_PAIR( close_bipartite_pair_container_ ,
-                    { bounds_I.push_back(_1[0] );
-                      bounds_II.push_back(_1[1] );
-                      ncontacts++;} );
+  IMP_CONTAINER_FOREACH( IMP::container::CloseBipartitePairContainer,
+                         close_bipartite_pair_container_ ,
+                         { bounds_I.push_back( _1[0] );
+                           bounds_II.push_back( _1[1] );
+                           ncontacts++;} );
   avg_ncontacts_ =
     update_average( avg_ncontacts_, ncontacts, updates_ + 1 );
   /**

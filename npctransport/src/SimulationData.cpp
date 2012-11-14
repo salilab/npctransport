@@ -90,7 +90,7 @@ namespace {
         = conformation.sites(i);
       core::ParticleType pt(cur.name());
       sites[pt].clear();
-      for (unsigned int j=0; j< cur.coordinates_size(); ++j) {
+      for (int j=0; j< cur.coordinates_size(); ++j) {
         const ::npctransport_proto::Conformation::Coordinates
           &coords= cur.coordinates(j);
         sites[pt].push_back(algebra::Vector3D(coords.x(),
@@ -773,16 +773,18 @@ namespace {
                             pcur->set_j(tr.get_rotation().get_quaternion()[2]);
                             pcur->set_k(tr.get_rotation().get_quaternion()[3]);
                           });
-    for (auto it: sites) {
+    for (auto it = sites.begin(); it != sites.end() ;it++) {
       ::npctransport_proto::Conformation::Sites *cur
         = conformation->add_sites();
-      cur->set_name(it.first.get_string());
-      for (auto coord: it.second) {
+      cur->set_name(it->first.get_string());
+      auto coords = it->second;
+      for (auto coord = coords.begin();
+             coord != coords.end(); coord++) {
         ::npctransport_proto::Conformation::Coordinates
           *out_coords= cur->add_coordinates();
-        out_coords->set_x(coord[0]);
-        out_coords->set_y(coord[1]);
-        out_coords->set_z(coord[2]);
+        out_coords->set_x((*coord)[0]);
+        out_coords->set_y((*coord)[1]);
+        out_coords->set_z((*coord)[2]);
       }
     }
   }
