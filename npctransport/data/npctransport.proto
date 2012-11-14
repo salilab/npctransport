@@ -175,7 +175,31 @@ message Statistics {
   optional int32 interrupted=7 [default=0];
 }
 
+message Conformation {
+  message Coordinates {
+    required double x=1;
+    required double y=2;
+    required double z=3;
+  };
+  message Sites {
+     required string name=1;
+     repeated Coordinates coordinates=2;
+  };
+  repeated Sites sites=1;
+  message Particle {
+    required double x=1;
+    required double y=2;
+    required double z=3;
+    required double r=4;
+    required double i=5;
+    required double j=6;
+    required double k=7;
+  };
+  repeated Particle particle=2;
+};
+
 message Output {
   required Assignment assignment=1;
   required Statistics statistics=2;
+  optional Conformation conformation=3;
 }

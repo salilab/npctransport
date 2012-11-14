@@ -59,37 +59,59 @@ SimulationData::SimulationData(std::string output_file,
   rmf_file_name_( rmf_file_name ),
   is_stats_reset_( false )
 {
-  initialize(output_file, output_file, quick);
-}
-SimulationData::SimulationData(std::string ass_file,
-                               std::string stat_file,
-                               bool quick,
-                               std::string rmf_file_name):
-  Object("SimulationData%1%"),
-  rmf_file_name_( rmf_file_name )
-{
-  initialize(ass_file, stat_file, quick);
+  initialize(output_file, quick);
 }
 
-void SimulationData::initialize(std::string ass_file,
-                               std::string stat_file,
+namespace {
+
+ void load_conformation(const ::npctransport_proto::Conformation &conformation,
+                         SingletonContainer *diffusers,
+                         compatibility::map<core::ParticleType,
+                                            algebra::Vector3Ds> &sites) {
+    IMP_CONTAINER_FOREACH(SingletonContainer, diffusers,
+                          {
+                            const ::npctransport_proto::Conformation_Particle& pcur
+                              = conformation.particle(_2);
+                            core::RigidBody rb(diffusers->get_model(),
+                                               _1);
+                            algebra::Vector3D translation(pcur.x(),
+                                                          pcur.y(),
+                                                          pcur.z());
+                            algebra::Rotation3D rotation(algebra::Vector4D(pcur.r(),
+                                                                           pcur.i(),
+                                                                           pcur.j(),
+                                                                           pcur.k()));
+
+                            algebra::Transformation3D tr(rotation, translation);
+                            rb.set_reference_frame(algebra::ReferenceFrame3D(tr));
+                          });
+    for ( int i=0; i< conformation.sites_size(); ++i) {
+      const ::npctransport_proto::Conformation::Sites &cur
+        = conformation.sites(i);
+      core::ParticleType pt(cur.name());
+      sites[pt].clear();
+      for (unsigned int j=0; j< cur.coordinates_size(); ++j) {
+        const ::npctransport_proto::Conformation::Coordinates
+          &coords= cur.coordinates(j);
+        sites[pt].push_back(algebra::Vector3D(coords.x(),
+                                              coords.y(),
+                                              coords.z()));
+      }
+    }
+  }
+
+}
+
+
+void SimulationData::initialize(std::string output_file,
                                bool quick) {
-  output_file_name_= stat_file;
+  output_file_name_= output_file;
   ::npctransport_proto::Output data;
-  if (ass_file==stat_file) {
-    std::ifstream file(output_file_name_.c_str(), std::ios::binary);
-    bool read=data.ParseFromIstream(&file);
-    if (!read) {
-      IMP_THROW("Unable to read from protobuf", base::IOException);
-    }
-  } else {
-    ::npctransport_proto::Assignment ass;
-    std::ifstream file(ass_file.c_str(), std::ios::binary);
-    bool read=ass.ParseFromIstream(&file);
-    if (!read) {
-      IMP_THROW("Unable to read from protobuf", base::IOException);
-    }
-    *data.mutable_assignment()=ass;
+  data.mutable_statistics();
+  std::ifstream file(output_file_name_.c_str(), std::ios::binary);
+  bool read=data.ParseFromIstream(&file);
+  if (!read) {
+    IMP_THROW("Unable to read from protobuf", base::IOException);
   }
   GET_ASSIGNMENT(interaction_k);
   GET_ASSIGNMENT(interaction_range);
@@ -157,6 +179,14 @@ void SimulationData::initialize(std::string ass_file,
   if (slab_is_on_) {
     create_slab_restraint_on_diffusers();
   }
+
+  // load from output file
+  if (data.conformation().sites_size()>0) {
+    std::cout << "Loading from output file " << std::endl;
+     load_conformation(data.conformation(),
+                       get_diffusers(),
+                       sites_);
+   }
 }
 
 /**
@@ -719,6 +749,46 @@ void SimulationData::reset_statistics_optimizer_states() {
     interactions_stats_[i]->reset();
   }
 }
+
+namespace {
+  void save_conformation(SingletonContainer *diffusers,
+                         const compatibility::map<core::ParticleType,
+                                                  algebra::Vector3Ds> &sites,
+                         ::npctransport_proto::Conformation *conformation) {
+    conformation->clear_sites();
+    conformation->clear_particle();
+    IMP_CONTAINER_FOREACH(SingletonContainer, diffusers,
+                          {
+                            ::npctransport_proto::Conformation_Particle* pcur
+                              = conformation->add_particle();
+                            core::RigidBody rb(diffusers->get_model(),
+                                               _1);
+                            algebra::Transformation3D tr
+                              = rb.get_reference_frame().get_transformation_to();
+                            pcur->set_x(tr.get_translation()[0]);
+                            pcur->set_y(tr.get_translation()[1]);
+                            pcur->set_z(tr.get_translation()[2]);
+                            pcur->set_r(tr.get_rotation().get_quaternion()[0]);
+                            pcur->set_i(tr.get_rotation().get_quaternion()[1]);
+                            pcur->set_j(tr.get_rotation().get_quaternion()[2]);
+                            pcur->set_k(tr.get_rotation().get_quaternion()[3]);
+                          });
+    for (auto it: sites) {
+      ::npctransport_proto::Conformation::Sites *cur
+        = conformation->add_sites();
+      cur->set_name(it.first.get_string());
+      for (auto coord: it.second) {
+        ::npctransport_proto::Conformation::Coordinates
+          *out_coords= cur->add_coordinates();
+        out_coords->set_x(coord[0]);
+        out_coords->set_y(coord[1]);
+        out_coords->set_z(coord[2]);
+      }
+    }
+  }
+}
+
+
 /*
 if (first_stats_) { // first initialization
     for (unsigned int i=0; i<type_of_fg.size(); ++i) {
@@ -777,7 +847,9 @@ SimulationData::update_statistics
             = get_as<ParticlesTemp>(atom::get_leaves(h));
         all+=chain;
         fgs.back().push_back(chain);
-        IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i), "Not enough fgs",
+        IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i),
+                         "Not enough fgs: " << stats.fgs_size()
+                         << " vs " << static_cast<int>(i),
                          ValueException);
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
         double volume= atom::get_volume(h);
@@ -949,6 +1021,12 @@ SimulationData::update_statistics
   stats.set_seconds_per_iteration( timer.elapsed() );
 
   stats.set_number_of_frames( nf + nf_new );
+
+  ::npctransport_proto::Conformation *conformation
+      = output.mutable_conformation();
+  save_conformation(diffusers_,
+                    sites_, conformation);
+
 
   // dump to file
   std::ofstream outf(output_file_name_.c_str(), std::ios::binary);

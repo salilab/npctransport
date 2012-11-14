@@ -82,7 +82,7 @@ public:
 
   IMP_INDEX_PAIR_SCORE(SitesPairScore);
 
-  Restraints create_current_decomposition(Model *m,
+  Restraints do_create_current_decomposition(Model *m,
                                           const ParticleIndexPair& vt)
       const IMP_OVERRIDE;
 };
@@ -119,7 +119,7 @@ class TemplateBaseSitesPairScore: public LinearInteractionPairScore {
 
   }
   //! return the upper bound on the range over which it is non-zero
-  Restraints create_current_decomposition(Model *m,
+  Restraints do_create_current_decomposition(Model *m,
                                           const ParticleIndexPair& vt)
       const IMP_OVERRIDE {
     Restraints ret;

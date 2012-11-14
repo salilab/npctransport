@@ -205,7 +205,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
                    of iterations
   */
   void initialize(std::string assignments_file,
-                  std::string stats_file,
                   bool quick);
 
  public:
@@ -220,16 +219,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   SimulationData(std::string output_file,
                  bool quick,
                  std::string rmf_file_name = "output.prmf");
-#ifndef IMP_DOXYGEN
-  // for backwards compatability - the assignment file and stats file are
-  // separate here, but if they are the same, they are merged in one file that
-  // encapsulates both
-  SimulationData(std::string assignments_file,
-                 std::string stats_file,
-                 bool quick,
-                 std::string rmf_file_name = "output.prmf");
-#endif
-
 
   Model *get_m();
 #ifndef SWIG

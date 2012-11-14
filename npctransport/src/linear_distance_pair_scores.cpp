@@ -18,12 +18,10 @@ LinearSoftSpherePairScore
 void LinearSoftSpherePairScore::do_show(std::ostream &) const
 {
 }
-ParticlesTemp LinearSoftSpherePairScore::get_input_particles(Particle*p) const {
-  return ParticlesTemp(1, p);
-}
-ContainersTemp
-LinearSoftSpherePairScore::get_input_containers(Particle*) const {
-  return ContainersTemp();
+ModelObjectsTemp
+LinearSoftSpherePairScore::do_get_inputs(Model *m,
+                                      const ParticleIndexes &pis) const {
+  return IMP::get_particles(m, pis);
 }
 
 
@@ -40,14 +38,12 @@ void LinearInteractionPairScore::do_show(std::ostream & o) const
   o << "k_repulsive = " << k_rep_ << " ; k_attraction = " << k_attr_
     << " ; attraction range = " << attr_range_ << std::endl;
 }
-ParticlesTemp LinearInteractionPairScore
-::get_input_particles(Particle*p) const {
-  return ParticlesTemp(1, p);
+ModelObjectsTemp
+LinearInteractionPairScore::do_get_inputs(Model *m,
+                                      const ParticleIndexes &pis) const {
+  return IMP::get_particles(m, pis);
 }
-ContainersTemp
-LinearInteractionPairScore::get_input_containers(Particle*) const {
-  return ContainersTemp();
-}
+
 
 
 
@@ -62,13 +58,10 @@ LinearWellPairScore
 void LinearWellPairScore::do_show(std::ostream & ) const
 {
 }
-ParticlesTemp LinearWellPairScore
-::get_input_particles(Particle*p) const {
-  return ParticlesTemp(1, p);
-}
-ContainersTemp
-LinearWellPairScore::get_input_containers(Particle*) const {
-  return ContainersTemp();
+ModelObjectsTemp
+LinearWellPairScore::do_get_inputs(Model *m,
+                                      const ParticleIndexes &pis) const {
+  return IMP::get_particles(m, pis);
 }
 
 

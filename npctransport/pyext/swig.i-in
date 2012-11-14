@@ -48,6 +48,9 @@ IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, Pa
 
 %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
-from npctransport_pb2 import *
+try:
+  from npctransport_pb2 import *
+except:
+  print "no protobuf support in python"
 from _configuration import *
 %}
