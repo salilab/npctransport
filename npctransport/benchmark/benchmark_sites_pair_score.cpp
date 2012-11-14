@@ -2,13 +2,24 @@
  * Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#include <IMP.h>
-#include <IMP/core.h>
-#include <IMP/algebra.h>
-#include <IMP/npctransport.h>
-#include <IMP/benchmark.h>
-#include <IMP/container.h>
+
+#include <IMP/algebra/Transformation3D.h>
+#include <IMP/algebra/Sphere3D.h>
+#include <IMP/algebra/Vector3D.h>
+#include <IMP/algebra/vector_generators.h>
+#include <IMP/benchmark/benchmark_macros.h>
+#include <IMP/benchmark/utility.h>
+#include <IMP/container/AllBipartitePairContainer.h>
+#include <IMP/container/ListSingletonContainer.h>
+#include <IMP/core/XYZR.h>
+#include <IMP/core/rigid_bodies.h>
 #include <IMP/example/optimizing.h>
+#include <IMP/npctransport/SitesPairScore.h>
+#include <IMP/Model.h>
+#include <IMP/Particle.h>
+#include <IMP/Pointer.h>
+#include <IMP/Restraint.h>
+#include <string>
 
 using namespace IMP;
 using namespace IMP::npctransport;
@@ -24,6 +35,12 @@ int step_size=8;
 int number_of_particles=40;
 int step_size=5;
 #endif
+
+void debug_print_location(std::string context, bool reset = false){
+  static int ncall = 0;
+  if(reset) ncall = 0;
+  std::cout << "Here " << ncall++ << " in context " << context << std::endl;
+}
 
 
 /**
@@ -58,10 +75,10 @@ sites 16 16 0.2,              7.47e-02,           -4.4e+04
 sites 16 16 0.4,              1.42e-01,           -4.6e+04
 sites 16 16 0.8,              1.96e-01,           -6.7e+04
  */
-ParticlesTemp create_particles(Model *m,
+Particles create_particles(Model *m,
                                const BoundingBox3D &bb,
                                int n) {
-  ParticlesTemp ret;
+  Particles ret;
   for ( int i=0; i< n; ++i) {
     IMP_NEW(Particle, p, (m));
     XYZR d= XYZR::setup_particle(p);
@@ -77,12 +94,13 @@ ParticlesTemp create_particles(Model *m,
   return ret;
 }
 
+
 template <unsigned int NA, unsigned int NB, bool WHICH>
 void test_one(double range) {
   BoundingBox3D bb= get_cube_d<3>(50);
   IMP_NEW(Model, m, ());
-  ParticlesTemp psa= create_particles(m, bb, number_of_particles);
-  ParticlesTemp psb= create_particles(m, bb, number_of_particles);
+  Particles psa= create_particles(m, bb, number_of_particles);
+  Particles psb= create_particles(m, bb, number_of_particles);
   Sphere3D s(get_zero_vector_d<3>(), radius);
   Vector3Ds sas= get_uniform_surface_cover(s, NA);
   Vector3Ds sbs= get_uniform_surface_cover(s, NB);
