@@ -4,7 +4,7 @@ import scons_tools.paths
 import os
 # Install all files in this directory as data in (by default) /usr/share/imp/example
 # Use IMP::example::get_data_path(filename) to get the path for a data file
-env.IMPModuleData(env.IMPModuleGetData())
+env.IMPModuleData(env.IMPModuleGetData()+["AvroDataFileData.json"])
 if env["IMP_PASS"]=="BUILD":
   # what ridiculousness scons makes us do
   proto=File(scons_tools.paths.get_input_path(env, "npctransport.proto")).abspath
