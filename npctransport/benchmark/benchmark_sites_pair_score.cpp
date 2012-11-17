@@ -111,7 +111,7 @@ void test_one(double range) {
   IMP_NEW(ListSingletonContainer, lsca, (psa));
   IMP_NEW(ListSingletonContainer, lscb, (psb));
   IMP_NEW(AllBipartitePairContainer, abpc,(lsca, lscb));
-  {
+  if (WHICH) {
     Pointer<Restraint> r= create_restraint(sps.get(), abpc.get());
     r->set_model(m);
     double scores=0;
