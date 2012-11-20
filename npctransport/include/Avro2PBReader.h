@@ -52,8 +52,8 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
   bool is_valid();
 
  private:
-  //! close any open file if one exists
-  void close_current_reader();
+  //! close any open file if one exists and move cursor to next file index
+  void advance_current_reader();
 
  private:
   std::vector<std::string> avro_filenames_; // list of files to go over

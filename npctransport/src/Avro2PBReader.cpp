@@ -39,7 +39,7 @@ Avro2PBReader::Avro2PBReader(std::string avro_filename)
 
 /** closes any open files */
 Avro2PBReader::~Avro2PBReader(){
-  close_current_reader();
+  advance_current_reader();
 }
 
 std::string
@@ -56,8 +56,7 @@ Avro2PBReader::read_next()
   IMP_npctransport::wrapper data;
 
   if( ! (avro_reader_->read(data)) ){ // no more data = go to next
-    close_current_reader();
-    cur_file_++;
+    advance_current_reader();
     return read_next();
   }
   return std::string(data.value.begin(), data.value.end());
@@ -65,14 +64,16 @@ Avro2PBReader::read_next()
 
 bool
 Avro2PBReader::is_valid(){
-  return (cur_file_ < avro_filenames_.size());
+  bool is_valid= (cur_file_ < avro_filenames_.size());
+  return is_valid;
 }
 
 /*************** Private ****************/
 
-void Avro2PBReader::close_current_reader(){
+void Avro2PBReader::advance_current_reader(){
   if(avro_reader_) delete avro_reader_;
   avro_reader_ = nullptr;
+  cur_file_++;
 }
 
 
