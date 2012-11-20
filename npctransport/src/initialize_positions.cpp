@@ -138,7 +138,6 @@ void optimize_balls(const ParticlesTemp &ps,
             oss << i << " " << j;
             if(save) {
               save->update_always();
-              save->set_frame_name(oss.str());
             }
           }
           if (e < .000001) done=true;
@@ -207,8 +206,7 @@ void initialize_positions(SimulationData *sd,
   std::cout << "Initial energy is " << rsf->evaluate(false)
             << std::endl;
   sd->get_rmf_writer()->set_period(dump_interval);// restore output rate
-  sd->get_rmf_writer()->update_always();
-  sd->get_rmf_writer()->set_frame_name("done initializing");
+  sd->get_rmf_writer()->update_always("done initializing");
 
   // unpin previously unpinned fgs (= allow optimization)
   for (unsigned int i=0; i< previously_unpinned.size(); ++i) {
