@@ -77,7 +77,8 @@ void do_main_loop(SimulationData *sd,
   using namespace IMP;
   base::Pointer<rmf::SaveOptimizerState> final_sos;
   if (!final_conformations.empty()) {
-    final_sos = sd->create_rmf_writer(final_conformations);
+    RMF::FileHandle fh= RMF::create_rmf_file(final_conformations);
+    final_sos = sd->create_rmf_writer(fh);
   }
   sd->set_was_used(true);
   boost::timer total_time;

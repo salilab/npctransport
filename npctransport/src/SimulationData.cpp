@@ -180,8 +180,12 @@ void SimulationData::initialize(std::string output_file,
     create_slab_restraint_on_diffusers();
   }
 
+  if (data.has_rmf_conformation()) {
+    RMF::FileConstHandle fh
+      = RMF::open_rmf_buffer_read_only(data.rmf_conformation());
+    initialize_positions_from_rmf(fh, 0);
   // load from output file
-  if (data.conformation().sites_size()>0) {
+  } else if (data.has_conformation()) {
     std::cout << "Loading from output file " << std::endl;
      load_conformation(data.conformation(),
                        get_diffusers(),
@@ -338,8 +342,7 @@ Model *SimulationData::get_m() {
 // object. Use with great caution, otherwise unexpected results may come
 //
 // @throw RMF::IOException if couldn't open RMF file, or unsupported file format
-void SimulationData::initialize_positions_from_rmf(std::string fname, int frame) {
-  RMF::FileConstHandle f= RMF::open_rmf_file_read_only( fname );
+void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f, int frame) {
   link_hierarchies_with_sites( f, get_root().get_children() );
   if (frame==-1) {
     IMP::rmf::load_frame( f, f.get_number_of_frames() - 1 );
@@ -348,34 +351,29 @@ void SimulationData::initialize_positions_from_rmf(std::string fname, int frame)
   }
 }
 
-rmf::SaveOptimizerState *SimulationData::create_rmf_writer(std::string name) {
-  if (!rmf_writer_) {
-    IMP_LOG(TERSE, "Setting up dump" << std::endl);
-    RMF::FileHandle fh=RMF::create_rmf_file(name);
-    IMP_NEW(rmf::SaveOptimizerState, los,
-            (fh));
-    rmf_writer_=los;
-    los->set_period(dump_interval_frames_);
-    add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
-    IMP::rmf::add_restraints(fh, RestraintsTemp(1, get_predr()));
-    IMP::rmf::add_restraints(fh, chain_restraints_);
-    if(get_has_bounding_box()){
-      IMP::rmf::add_restraints(fh, RestraintsTemp(1, box_restraint_));
-      IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
-      IMP::rmf::add_geometries(fh, display::Geometries(1, bbg));
-    }
-    if( get_has_slab() ){
-      IMP::rmf::add_restraints(fh, RestraintsTemp(1, slab_restraint_));
-      IMP_NEW(SlabWireGeometry, slab_geometry,
-              ( slab_thickness_ , tunnel_radius_ , box_side_ ) );
-        IMP::rmf::add_static_geometries
-          (fh, slab_geometry->get_components() );
-        //      IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()) );
-        //      IMP::rmf::add_static_geometries
-        //          (fh, display::Geometries(1, cyl_geom));
-    }
+rmf::SaveOptimizerState *SimulationData::create_rmf_writer(RMF::FileHandle fh) const {
+  IMP_NEW(rmf::SaveOptimizerState, los,
+          (fh));
+  los->set_period(dump_interval_frames_);
+  add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
+  IMP::rmf::add_restraints(fh, RestraintsTemp(1, predr_));
+  IMP::rmf::add_restraints(fh, chain_restraints_);
+  if(get_has_bounding_box()){
+    IMP::rmf::add_restraints(fh, RestraintsTemp(1, box_restraint_));
+    IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
+    IMP::rmf::add_geometries(fh, display::Geometries(1, bbg));
   }
-  return rmf_writer_;
+  if( get_has_slab() ){
+    IMP::rmf::add_restraints(fh, RestraintsTemp(1, slab_restraint_));
+    IMP_NEW(SlabWireGeometry, slab_geometry,
+            ( slab_thickness_ , tunnel_radius_ , box_side_ ) );
+    IMP::rmf::add_static_geometries
+      (fh, slab_geometry->get_components() );
+    //      IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()) );
+    //      IMP::rmf::add_static_geometries
+    //          (fh, display::Geometries(1, cyl_geom));
+  }
+  return los.release();
 }
 
 // initialize a writer that outputs the particles hierarchy
@@ -384,7 +382,8 @@ rmf::SaveOptimizerState *SimulationData::create_rmf_writer(std::string name) {
 // \exception RMF::IOException if couldn't open RMF file
 rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
   if (!rmf_writer_) {
-    rmf_writer_= create_rmf_writer(get_rmf_file_name());
+    RMF::FileHandle fh= RMF::create_rmf_file(get_rmf_file_name());
+    rmf_writer_= create_rmf_writer(fh);
   }
   return rmf_writer_;
 }
@@ -1029,6 +1028,16 @@ SimulationData::update_statistics
   save_conformation(diffusers_,
                     sites_, conformation);
 
+  // save rmf too
+  {
+    std::string buf;
+    RMF::FileHandle fh= RMF::create_rmf_buffer(buf);
+    base::Pointer<rmf::SaveOptimizerState> writer
+      =create_rmf_writer(fh);
+    writer->update_always();
+    writer=nullptr;
+    output.set_rmf_conformation(buf);
+  }
 
   // dump to file
   std::ofstream outf(output_file_name_.c_str(), std::ios::binary);

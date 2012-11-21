@@ -346,7 +346,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
    @exception RMF::IOException if couldn't open RMF file, or unsupported file format
   */
-  void initialize_positions_from_rmf(std::string fname, int frame_number=-1);
+  void initialize_positions_from_rmf(RMF::FileConstHandle fname, int frame_number=-1);
 
   /**
    Initialize a writer that outputs the particles hierarchy
@@ -356,8 +356,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   */
   rmf::SaveOptimizerState *get_rmf_writer();
 
-  /** Create an rmf write for the file with the passed name.*/
-  rmf::SaveOptimizerState *create_rmf_writer(std::string name);
+  /** Create  writer to the given file */
+  rmf::SaveOptimizerState *create_rmf_writer(RMF::FileHandle name) const;
 
   void reset_rmf();
 
