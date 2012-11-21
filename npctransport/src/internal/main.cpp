@@ -76,13 +76,13 @@ void do_main_loop(SimulationData *sd,
                   bool quick, bool init_only, std::string final_conformations,
                   bool debug_initialize, std::string init_rmf) {
   using namespace IMP;
-  IMP::Pointer<rmf::SaveOptimizerState> conformations_sos
-    = sd->get_rmf_writer();
-  RMF::FileHandle final_fh;
-  if (!final_conformations.empty()) {
-    final_fh = sd->create_rmf_writer(final_conformations);
+  IMP::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
+    = sd->get_rmf_sos_writer();
+  RMF::FileHandle final_rmf_fh;
+  if(final_conformations.empty()){
+    final_rmf_fh=RMF::create_rmf_file(final_conformations);
+    sd->link_rmf_file_handle(final_rmf_fh);
   }
-  sd->set_was_used(true);
   boost::timer total_time;
   for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
     IMP::base::CreateLogContext clc("iteration");
@@ -103,9 +103,9 @@ void do_main_loop(SimulationData *sd,
     }
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
-    if (conformations_sos) {
-      conformations_sos->update_always();
-      conformations_sos->set_frame_name("before equilibration");
+    if (conformations_rmf_sos) {
+      conformations_rmf_sos->update_always();
+      //      conformations_rmf_sos->set_frame_name("before equilibration");
     }
     /*IMP::benchmark::Profiler p;
     if(i == 0)
@@ -132,20 +132,22 @@ void do_main_loop(SimulationData *sd,
       unsigned int nframes_run = (unsigned int)
         ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;
-      if (conformations_sos) {
-        conformations_sos->update_always();
-        conformations_sos->set_frame_name("after equilibration");
+      if (conformations_rmf_sos) {
+        conformations_rmf_sos->update_always();
+        //        conformations_rmf_sos->set_frame_name("after equilibration");
       }
       // now run the rest of the sim
       bool ok = run_it(sd, nframes_run, timer, total_time,
                        false /* silent stats */);
-      //p.reset();
-      if (conformations_sos) {
-        conformations_sos->update_always();
-      }
-      IMP::rmf::save_frame( final_fh, final_fh.get_number_of_frames() );
       if (! ok){
         return;
+      }
+      if (conformations_rmf_sos) {
+        conformations_rmf_sos->update_always();
+      }
+      if( !final_conformations.empty() ) {
+        IMP::rmf::save_frame
+          ( final_rmf_fh, final_rmf_fh.get_number_of_frames() );
       }
     }
   }

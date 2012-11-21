@@ -114,7 +114,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Pointer<container::PredicatePairsRestraint> predr_;
 
   // a writer to an RMF (Rich Molecular Format) type file
-  Pointer<rmf::SaveOptimizerState> rmf_writer_;
+  Pointer<rmf::SaveOptimizerState> rmf_sos_writer_;
 
   // the root of the model hierarchy
   Pointer<Particle> root_;
@@ -252,6 +252,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   */
   container::PredicatePairsRestraint* get_predr();
 
+  /**
+     const variant of get_predr()
+  */
+  container::PredicatePairsRestraint const* get_predr() const;
+
   /** get the number of interactions between two particles */
   int get_number_of_interactions(Particle *a, Particle *b) const;
 
@@ -346,24 +351,36 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
    @exception RMF::IOException if couldn't open RMF file, or unsupported file format
   */
-  void initialize_positions_from_rmf(std::string fname, int frame_number=-1);
+  void initialize_positions_from_rmf(RMF::FileConstHandle fname, int frame_number=-1);
+
+  /** Links a handle to an open rmf file with the
+      hierarchy and constraints of this simulation data,
+      so that writing frames into this handle will write
+      the updated state of the simulation
+
+      @return a handle to the file
+
+      \exception RMF::IOException IO error with RMF file handle
+  */
+  void link_rmf_file_handle(RMF::FileHandle fh) const;
 
   /**
-   Returns the internal periodic SaveOptimizerState writer that may output the
-   particles hierarchy using the file name returned by ::get_rmf_file_name().
-   If it does not exists, it is being initialized.
+     Returns the internal periodic SaveOptimizerState writer that
+     periodically outputs the particles hierarchy and restraints,
+     using the file name returned by ::get_rmf_file_name().  If it
+     does not exists, it is being initialized.
 
-   \exception RMF::IOException couldn't create RMF file
+     \exception RMF::IOException couldn't create RMF file
   */
-  rmf::SaveOptimizerState *get_rmf_writer();
+  rmf::SaveOptimizerState *get_rmf_sos_writer();
 
-  /** Create an rmf write for the file with the passed name
-      that may output the hierarchy stored in SimulationData
+  /**
+     Resets the RMF file to which the internal periodic SaveOptimizerState
+     writer dumps the output. If it does not exist, create it.
 
-      \exception RMF::IOException couldn't create RMF file
-  */
-  RMF::FileHandle create_rmf_writer(std::string name);
-
+     \exception RMF::IOException couldn't create RMF file or other IO related
+                                 problems with RMF
+   */
   void reset_rmf();
 
   void reset_statistics_optimizer_states();
@@ -435,7 +452,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   void set_rmf_file_name(const std::string& new_name)
   {
     rmf_file_name_ = new_name;
-    rmf_writer_ = IMP_NULLPTR; // invalidate the existing writer
+    rmf_sos_writer_ = nullptr; // invalidate the existing writer
   }
 
   IMP_OBJECT_INLINE(SimulationData,IMP_UNUSED(out),);

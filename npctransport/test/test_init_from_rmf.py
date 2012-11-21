@@ -66,7 +66,8 @@ class Tests(IMP.test.TestCase):
 
         # Restoration from first simulation:
         print "*** Initializing positions from RMF file " + output
-        sd2.initialize_positions_from_rmf( output )
+        fl= RMF.open_rmf_file_read_only(output)
+        sd2.initialize_positions_from_rmf( fl )
         print "*** After initializing positions from RMF file " + output
         coordsIII = self._get_diffusers_coords( sd2 )
 

@@ -1,3 +1,8 @@
+%include "std_vector.i"
+namespace std {
+   %template(VectorString) vector<string>;
+};
+
 %import "RMF.i"
 %{
 #include <RMF/FileConstHandle.h>
@@ -22,6 +27,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, ChainStatisticsOptimizerState, ChainStatistic
 IMP_SWIG_OBJECT(IMP::npctransport, BodyStatisticsOptimizerState, BodyStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, BipartitePairsStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, ParticleTransportStatisticsOptimizerStates);
+IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
 
 %apply unsigned int { boost::uint32_t }
 %apply unsigned long long { boost::uint64_t }
@@ -45,6 +51,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, Pa
 %include "IMP/npctransport/particle_types.h"
 %include "IMP/npctransport/automatic_parameters.h"
 %include "IMP/npctransport/initialize_positions.h"
+%include "IMP/npctransport/Avro2PBReader.h"
 
 %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{

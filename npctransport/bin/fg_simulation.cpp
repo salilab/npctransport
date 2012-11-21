@@ -243,8 +243,10 @@ int main(int argc, char *argv[])
   RMF::set_show_hdf5_errors( true );
   // preparation::
   IMP_NPC_STARTUP(sd); //
-  if(FLAGS_cylinder_nlayers > 0)
+  if(FLAGS_cylinder_nlayers > 0){
     set_fgs_in_cylinder(*sd, FLAGS_cylinder_nlayers);
+    std::cout << "Numbner of cylinder layers = " << FLAGS_cylinder_nlayers << std::endl;
+  }
   color_fgs( *sd );
   Restraints initialization_restraints;
   if(sd->get_has_slab()) { // if has slab, exclude from channel initially

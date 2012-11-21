@@ -138,7 +138,6 @@ void optimize_balls(const ParticlesTemp &ps,
             oss << i << " " << j;
             if(save) {
               save->update_always();
-              save->set_frame_name(oss.str());
             }
           }
           if (e < .000001) done=true;
@@ -162,9 +161,10 @@ void initialize_positions(SimulationData *sd,
                           //                          const ParticlePairsTemp &extra_links,
                           const RestraintsTemp &extra_restraints,
                           bool debug) {
+  sd->set_was_used(true);
   example::randomize_particles(sd->get_diffusers()->get_particles(),
                                sd->get_box());
-  sd->get_rmf_writer()->update();
+  sd->get_rmf_sos_writer()->update();
   RestraintsTemp rss=sd->get_chain_restraints();
   if(sd->get_has_bounding_box())  rss.push_back(sd->get_box_restraint());
   if(sd->get_has_slab()) rss.push_back(sd->get_slab_restraint());
@@ -191,14 +191,14 @@ void initialize_positions(SimulationData *sd,
   // Now optimize:
   int dump_interval = sd->get_rmf_dump_interval_frames();
   if (!debug) {
-    sd->get_rmf_writer()->set_period(dump_interval * 100);// reduce output rate:
+    sd->get_rmf_sos_writer()->set_period(dump_interval * 100);// reduce output rate:
   } else {
-    sd->get_rmf_writer()->set_period(100);
+    sd->get_rmf_sos_writer()->set_period(100);
   }
   optimize_balls(sd->get_diffusers()->get_particles(),
                  rss,
                  sd->get_cpc()->get_pair_filters(),
-                 sd->get_rmf_writer(),
+                 sd->get_rmf_sos_writer(),
                  sd->get_bd(),
                  sd->get_backbone_scores(),
                  PROGRESS, debug);
@@ -206,9 +206,8 @@ void initialize_positions(SimulationData *sd,
           (rss +RestraintsTemp(1, sd->get_predr()), "all restaints"));
   std::cout << "Initial energy is " << rsf->evaluate(false)
             << std::endl;
-  sd->get_rmf_writer()->set_period(dump_interval);// restore output rate
-  sd->get_rmf_writer()->update_always();
-  sd->get_rmf_writer()->set_frame_name("done initializing");
+  sd->get_rmf_sos_writer()->set_period(dump_interval);// restore output rate
+  sd->get_rmf_sos_writer()->update_always("done initializing");
 
   // unpin previously unpinned fgs (= allow optimization)
   for (unsigned int i=0; i< previously_unpinned.size(); ++i) {

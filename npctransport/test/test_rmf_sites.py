@@ -25,7 +25,7 @@ class ConeTests(IMP.test.TestCase):
                                      0, False, seed)
       rmf_name=self.get_tmp_file_name("rmf_sites.rmf")
       sd= IMP.npctransport.SimulationData(assignments_name, True, rmf_name)
-      wr= sd.get_rmf_writer()
+      wr= sd.get_rmf_sos_writer()
       wr.update_always()
       del wr
       back= RMF.open_rmf_file_read_only(rmf_name)
