@@ -45,7 +45,7 @@ Avro2PBReader::~Avro2PBReader(){
 std::string
 Avro2PBReader::read_next()
 {
-  if(!is_valid()){
+  if(!get_is_valid()){
     return "";
   }
   if(!avro_reader_){
@@ -63,7 +63,7 @@ Avro2PBReader::read_next()
 }
 
 bool
-Avro2PBReader::is_valid(){
+Avro2PBReader::get_is_valid(){
   bool is_valid= (cur_file_ < avro_filenames_.size());
   return is_valid;
 }

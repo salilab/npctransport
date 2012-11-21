@@ -51,7 +51,7 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
 
   //! returns true if there are still files to go over
   //! (though possibly no entries left in neither of them)
-  bool is_valid();
+  bool get_is_valid();
 
  private:
   //! close any open file if one exists and move cursor to next file index
