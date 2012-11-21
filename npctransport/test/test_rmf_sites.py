@@ -23,11 +23,11 @@ class ConeTests(IMP.test.TestCase):
       assignments_name= self.get_tmp_file_name("rmf_sites_assignments.pb")
       IMP.npctransport.assign_ranges(config_name, assignments_name,
                                      0, False, seed)
-      sd= IMP.npctransport.SimulationData(assignments_name, True)
       rmf_name=self.get_tmp_file_name("rmf_sites.rmf")
-
-      wr= sd.create_rmf_writer(rmf_name)
+      sd= IMP.npctransport.SimulationData(assignments_name, True, rmf_name)
+      wr= sd.get_rmf_writer()
       wr.update_always()
+      del wr
       back= RMF.open_rmf_file_read_only(rmf_name)
       fg= back.get_root_node().get_children()[0].get_children()[0].get_children()[0]
       sites= fg.get_children()

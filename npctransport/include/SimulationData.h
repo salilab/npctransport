@@ -349,15 +349,20 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   void initialize_positions_from_rmf(std::string fname, int frame_number=-1);
 
   /**
-   Initialize a writer that outputs the particles hierarchy
-   using the name returned by ::get_rmf_file_name()
+   Returns the internal periodic SaveOptimizerState writer that may output the
+   particles hierarchy using the file name returned by ::get_rmf_file_name().
+   If it does not exists, it is being initialized.
 
    \exception RMF::IOException couldn't create RMF file
   */
   rmf::SaveOptimizerState *get_rmf_writer();
 
-  /** Create an rmf write for the file with the passed name.*/
-  rmf::SaveOptimizerState *create_rmf_writer(std::string name);
+  /** Create an rmf write for the file with the passed name
+      that may output the hierarchy stored in SimulationData
+
+      \exception RMF::IOException couldn't create RMF file
+  */
+  RMF::FileHandle create_rmf_writer(std::string name);
 
   void reset_rmf();
 

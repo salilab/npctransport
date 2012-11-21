@@ -12,6 +12,7 @@
 #include <IMP/log.h>
 //#include <IMP/benchmark/Profiler.h>
 #include <IMP/npctransport/initialize_positions.h>
+#include <IMP/rmf/frames.h>
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 namespace {
@@ -75,9 +76,11 @@ void do_main_loop(SimulationData *sd,
                   bool quick, bool init_only, std::string final_conformations,
                   bool debug_initialize, std::string init_rmf) {
   using namespace IMP;
-  base::Pointer<rmf::SaveOptimizerState> final_sos;
+  IMP::Pointer<rmf::SaveOptimizerState> conformations_sos
+    = sd->get_rmf_writer();
+  RMF::FileHandle final_fh;
   if (!final_conformations.empty()) {
-    final_sos = sd->create_rmf_writer(final_conformations);
+    final_fh = sd->create_rmf_writer(final_conformations);
   }
   sd->set_was_used(true);
   boost::timer total_time;
@@ -95,13 +98,14 @@ void do_main_loop(SimulationData *sd,
           std::cout << " from scratch" << std::endl;
     }
     else{
-      sd->initialize_positions_from_rmf(init_rmf, i);
-      std::cout << " from existing RMF file " << init_rmf << std::endl;
+      sd->initialize_positions_from_rmf(init_rmf, -1);
+      std::cout << " from last frame of existing RMF file " << init_rmf << std::endl;
     }
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
-    if (final_sos) {
-      final_sos->update_always();
+    if (conformations_sos) {
+      conformations_sos->update_always();
+      conformations_sos->set_frame_name("before equilibration");
     }
     /*IMP::benchmark::Profiler p;
     if(i == 0)
@@ -128,15 +132,21 @@ void do_main_loop(SimulationData *sd,
       unsigned int nframes_run = (unsigned int)
         ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;
+      if (conformations_sos) {
+        conformations_sos->update_always();
+        conformations_sos->set_frame_name("after equilibration");
+      }
       // now run the rest of the sim
       bool ok = run_it(sd, nframes_run, timer, total_time,
-                       false /* verbose statistics */);
+                       false /* silent stats */);
       //p.reset();
-      if (final_sos) {
-        final_sos->update_always();
+      if (conformations_sos) {
+        conformations_sos->update_always();
       }
-      if (! ok)
+      IMP::rmf::save_frame( final_fh, final_fh.get_number_of_frames() );
+      if (! ok){
         return;
+      }
     }
   }
 }

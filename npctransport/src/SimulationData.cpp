@@ -282,7 +282,8 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
       for (unsigned int k=0; k < chain.size(); ++k) {
         fgs_stats_.back().back()
           .push_back(new BodyStatisticsOptimizerState(chain[k]));
-        fgs_stats_.back().back().back()->set_period(statistics_interval_frames_);
+        fgs_stats_.back().back()
+          .back()->set_period(statistics_interval_frames_);
       }
       hi.add_child(atom::Hierarchy(cur_particles.back()));
       if (data.interactions().value() > 0) {
@@ -348,43 +349,34 @@ void SimulationData::initialize_positions_from_rmf(std::string fname, int frame)
   }
 }
 
-rmf::SaveOptimizerState *SimulationData::create_rmf_writer(std::string name) {
-  if (!rmf_writer_) {
-    IMP_LOG(TERSE, "Setting up dump" << std::endl);
-    RMF::FileHandle fh=RMF::create_rmf_file(name);
-    IMP_NEW(rmf::SaveOptimizerState, los,
-            (fh));
-    rmf_writer_=los;
-    los->set_period(dump_interval_frames_);
-    add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
-    IMP::rmf::add_restraints(fh, RestraintsTemp(1, get_predr()));
-    IMP::rmf::add_restraints(fh, chain_restraints_);
-    if(get_has_bounding_box()){
-      IMP::rmf::add_restraints(fh, RestraintsTemp(1, box_restraint_));
-      IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
-      IMP::rmf::add_geometries(fh, display::Geometries(1, bbg));
-    }
-    if( get_has_slab() ){
-      IMP::rmf::add_restraints(fh, RestraintsTemp(1, slab_restraint_));
-      IMP_NEW(SlabWireGeometry, slab_geometry,
-              ( slab_thickness_ , tunnel_radius_ , box_side_ ) );
-        IMP::rmf::add_static_geometries
-          (fh, slab_geometry->get_components() );
-        //      IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()) );
-        //      IMP::rmf::add_static_geometries
-        //          (fh, display::Geometries(1, cyl_geom));
-    }
+RMF::FileHandle SimulationData::create_rmf_writer(std::string name) {
+  IMP_LOG(TERSE, "Setting up dump" << std::endl);
+  RMF::FileHandle fh=RMF::create_rmf_file(name);
+  add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
+  IMP::rmf::add_restraints(fh, RestraintsTemp(1, get_predr()));
+  IMP::rmf::add_restraints(fh, chain_restraints_);
+  if(get_has_bounding_box()){
+    IMP::rmf::add_restraints(fh, RestraintsTemp(1, box_restraint_));
+    IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
+    IMP::rmf::add_geometries(fh, display::Geometries(1, bbg));
   }
-  return rmf_writer_;
+  if( get_has_slab() ){
+    IMP::rmf::add_restraints(fh, RestraintsTemp(1, slab_restraint_));
+    IMP_NEW(SlabWireGeometry, slab_geometry,
+            ( slab_thickness_ , tunnel_radius_ , box_side_ ) );
+    IMP::rmf::add_static_geometries
+      (fh, slab_geometry->get_components() );
+  }
+  return fh;
 }
 
-// initialize a writer that outputs the particles hierarchy
-// using the name return by ::get_rmf_file_name()
-//
-// \exception RMF::IOException if couldn't open RMF file
+
 rmf::SaveOptimizerState *SimulationData::get_rmf_writer() {
   if (!rmf_writer_) {
-    rmf_writer_= create_rmf_writer(get_rmf_file_name());
+    RMF::FileHandle fh = create_rmf_writer(get_rmf_file_name());
+    IMP_NEW(rmf::SaveOptimizerState, los, (fh));
+    rmf_writer_ = los;
+    los->set_period( dump_interval_frames_ );
   }
   return rmf_writer_;
 }

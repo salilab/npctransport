@@ -25,7 +25,7 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
                 right now as sd received 'quick' in its constructor -
                 isn't this redundant? shouldn't quick mode be saved
                 in sd? or only externally?)
-   @param final_config name of a file for saving the final config
+   @param final_config name of a file for saving the final config from each trial
    @param debug_init if true, do the initialization in a verbose debug
                      mode, with lots of output
    @param init_rmf if of length one or more, initialize the coordinates
