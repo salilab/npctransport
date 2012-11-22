@@ -353,7 +353,7 @@ SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f, int frame)
 }
 
 void
-SimulationData::link_rmf_file_handle(RMF::FileHandle fh) const
+SimulationData::link_rmf_file_handle(RMF::FileHandle fh)
 {
   IMP_LOG(TERSE, "Setting up dump" << std::endl);
   add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
@@ -381,8 +381,8 @@ SimulationData::get_rmf_sos_writer()
     RMF::FileHandle fh=RMF::create_rmf_file(get_rmf_file_name());
     link_rmf_file_handle(fh);
     IMP_NEW(rmf::SaveOptimizerState, los, (fh));
-    rmf_sos_writer_ = los.release();
     los->set_period( dump_interval_frames_ );
+    rmf_sos_writer_ = los;
   }
   return rmf_sos_writer_;
 }
@@ -1031,8 +1031,8 @@ SimulationData::update_statistics
   {
     std::string buf;
     RMF::FileHandle fh= RMF::create_rmf_buffer(buf);
-    //const_cast<SimulationData*>(this)->
-    link_rmf_file_handle(fh);
+    const_cast<SimulationData*>(this)->
+      link_rmf_file_handle(fh);
     IMP::rmf::save_frame(fh, 0);
     output.set_rmf_conformation(buf);
   }

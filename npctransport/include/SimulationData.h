@@ -252,11 +252,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   */
   container::PredicatePairsRestraint* get_predr();
 
-  /**
-     const variant of get_predr()
-  */
-  container::PredicatePairsRestraint const* get_predr() const;
-
   /** get the number of interactions between two particles */
   int get_number_of_interactions(Particle *a, Particle *b) const;
 
@@ -351,7 +346,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
    @exception RMF::IOException if couldn't open RMF file, or unsupported file format
   */
-  void initialize_positions_from_rmf(RMF::FileConstHandle fname, int frame_number=-1);
+  void initialize_positions_from_rmf(RMF::FileConstHandle fh, int frame_number=-1);
 
   /** Links a handle to an open rmf file with the
       hierarchy and constraints of this simulation data,
@@ -362,7 +357,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
       \exception RMF::IOException IO error with RMF file handle
   */
-  void link_rmf_file_handle(RMF::FileHandle fh) const;
+  void link_rmf_file_handle(RMF::FileHandle fh);
 
   /**
      Returns the internal periodic SaveOptimizerState writer that

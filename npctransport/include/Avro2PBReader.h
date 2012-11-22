@@ -57,6 +57,10 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
   //! close any open file if one exists and move cursor to next file index
   void advance_current_reader();
 
+  // called from ctr, this pain is needed since constructor delegation
+  // is only supported from g++ 4.7, so we use init() for backward compatibility
+  void init(std::vector<std::string> avro_filenames);
+
  private:
   std::vector<std::string> avro_filenames_; // list of files to go over
   t_avro_reader* avro_reader_;

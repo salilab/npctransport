@@ -79,7 +79,7 @@ void do_main_loop(SimulationData *sd,
   IMP::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
     = sd->get_rmf_sos_writer();
   RMF::FileHandle final_rmf_fh;
-  if(final_conformations.empty()){
+  if(!final_conformations.empty()){
     final_rmf_fh=RMF::create_rmf_file(final_conformations);
     sd->link_rmf_file_handle(final_rmf_fh);
   }

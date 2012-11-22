@@ -23,19 +23,24 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 Avro2PBReader::Avro2PBReader
 (std::vector<std::string> avro_filenames)
-:
-avro_filenames_(avro_filenames),
-  avro_reader_(nullptr),
-  cur_file_(0)
 {
+  init( avro_filenames );
 }
 
 
 Avro2PBReader::Avro2PBReader(std::string avro_filename)
-  : Avro2PBReader( std::vector<std::string>(1, avro_filename) )
+// TODO: from gcc 4.7 it is possible to delegate
+// constructors but for now we keep backward comapibility pain
 {
+  init( std::vector<std::string>(1, avro_filename) );
 }
 
+void Avro2PBReader::init(std::vector<std::string> avro_filenames)
+{
+  avro_filenames_ = avro_filenames;
+  avro_reader_ = nullptr;
+  cur_file_ = 0;
+}
 
 /** closes any open files */
 Avro2PBReader::~Avro2PBReader(){

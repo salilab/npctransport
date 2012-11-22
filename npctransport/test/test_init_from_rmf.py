@@ -24,7 +24,7 @@ class Tests(IMP.test.TestCase):
               " and " + output_file
         sd.get_bd().optimize( 10 )
         # make sure final state is written
-        sd.get_rmf_writer().update_always()
+        sd.get_rmf_sos_writer().update_always()
         return sd
 
     def _get_diffuser_coords( self, sd, i ):

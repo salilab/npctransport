@@ -202,5 +202,5 @@ message Output {
   required Assignment assignment=1;
   required Statistics statistics=2;
   optional Conformation conformation=3;
-  optional string rmf_conformation=4;
+  optional bytes rmf_conformation=4;
 }
