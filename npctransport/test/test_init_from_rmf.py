@@ -88,14 +88,10 @@ class Tests(IMP.test.TestCase):
         f=open(output_pb1, "rb")
         config= Output()
         config.ParseFromString(f.read())
-#        print "RMF", len(config.rmf_conformation), config.rmf_conformation
         fl= RMF.open_rmf_buffer_read_only( config.rmf_conformation )
         sd.initialize_positions_from_rmf( fl )
         print "*** After initializing positions from RMF file " + output_rmf1
         coordsV = self._get_diffusers_coords( sd )
-        # make sure that all coordinates were restored and as sanity
-        # check control, also that the scrambled simulation is different than
-        # the first one:
         for i in range( len( coordsI ) ):
             for j in range(3):
                 self.assertEqual(coordsI[i][j], coordsV[i][j])
