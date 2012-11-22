@@ -381,6 +381,8 @@ SimulationData::get_rmf_sos_writer()
     RMF::FileHandle fh=RMF::create_rmf_file(get_rmf_file_name());
     link_rmf_file_handle(fh);
     IMP_NEW(rmf::SaveOptimizerState, los, (fh));
+    std::cout << "Dump interval for RMF SaveOptimizerState set to "
+              << dump_interval_frames_ << std::endl;
     los->set_period( dump_interval_frames_ );
     rmf_sos_writer_ = los;
   }

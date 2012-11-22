@@ -104,8 +104,7 @@ void do_main_loop(SimulationData *sd,
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
     if (conformations_rmf_sos) {
-      conformations_rmf_sos->update_always();
-      //      conformations_rmf_sos->set_frame_name("before equilibration");
+      conformations_rmf_sos->update_always("After initialization");
     }
     /*IMP::benchmark::Profiler p;
     if(i == 0)
@@ -133,8 +132,7 @@ void do_main_loop(SimulationData *sd,
         ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;
       if (conformations_rmf_sos) {
-        conformations_rmf_sos->update_always();
-        //        conformations_rmf_sos->set_frame_name("after equilibration");
+        conformations_rmf_sos->update_always("Before running (post equilibration)");
       }
       // now run the rest of the sim
       bool ok = run_it(sd, nframes_run, timer, total_time,
@@ -143,7 +141,7 @@ void do_main_loop(SimulationData *sd,
         return;
       }
       if (conformations_rmf_sos) {
-        conformations_rmf_sos->update_always();
+        conformations_rmf_sos->update_always("Final frame");
       }
       if( !final_conformations.empty() ) {
         IMP::rmf::save_frame
