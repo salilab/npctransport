@@ -17,7 +17,6 @@
 #include <IMP/base/value_macros.h>
 #include <IMP/base/showable_macros.h>
 #include <avro/DataFile.hh>
-#include <google/protobuf/text_format.h>
 #include <fstream>
 #include <iomanip>
 
