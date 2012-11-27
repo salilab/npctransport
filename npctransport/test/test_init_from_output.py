@@ -20,6 +20,7 @@ class Tests(IMP.test.TestCase):
                           0, True, 10 );
         sd= IMP.npctransport.SimulationData(output, False,
                                             self.get_tmp_file_name("out0.rmf"));
+        sites0= sd.get_sites(IMP.core.ParticleType("kap"))
         IMP.npctransport.initialize_positions(sd, [], False)
         timer= IMP.npctransport.timer();
         print "updating stats"
@@ -28,11 +29,13 @@ class Tests(IMP.test.TestCase):
         print "reloading"
         sdp= IMP.npctransport.SimulationData(output, False,
                                              self.get_tmp_file_name("out1.rmf"));
-
+        sites1= sd.get_sites(IMP.core.ParticleType("kap"))
         for p, pp in zip(sd.get_diffusers().get_particles(),
                          sdp.get_diffusers().get_particles()):
             self.assert_((IMP.core.XYZ(p).get_coordinates()
                          - IMP.core.XYZ(pp).get_coordinates()).get_magnitude() < .0001)
+        for s0,s1 in zip(sites0, sites1):
+            self.assert_(IMP.algebra.get_distance(s0,s1) < .0001)
 
 
 if __name__ == '__main__':

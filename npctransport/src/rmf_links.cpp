@@ -11,7 +11,29 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m):
-  rmf::HierarchyLoadLink(fh, m){}
+  rmf::HierarchyLoadLink(fh, m), bf_(fh) {}
+
+void HierarchyWithSitesLoadLink::do_add_link_recursive(Particle *root,
+                                                       Particle *p,
+                                                       RMF::NodeConstHandle cur) {
+  HierarchyLoadLink::do_add_link_recursive(root, p, cur);
+  if (atom::Hierarchy(p).get_number_of_children()==0
+      && core::Typed::particle_is_instance(p)) {
+    core::ParticleType tp= core::Typed(p).get_type();
+    algebra::Vector3Ds sites;
+    RMF::NodeConstHandles children= cur.get_children();
+    for (unsigned int i=0; i< children.size(); ++i) {
+      if (children[i].get_type()==RMF::GEOMETRY
+          && bf_.get_is(children[i])) {
+        RMF::BallConst b= bf_.get(children[i]);
+        RMF::Floats cs= b.get_coordinates();
+        sites.push_back(algebra::Vector3D(cs.begin(), cs.end()));
+      }
+    }
+    if (sd_) sd_->set_sites(tp, sites);
+  }
+}
+
 
 HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh):
   rmf::HierarchySaveLink(fh), bf_(fh), cf_(fh) {}
