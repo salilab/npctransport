@@ -42,7 +42,7 @@ namespace {
               boost::timer& timer,
               boost::timer& total_time,
               bool silent_statistics = false,
-              unsigned int max_frames_per_chunk = 10000) {
+              unsigned int max_frames_per_chunk = 50000) {
     do {
       unsigned int cur_nframes
         = std::min<unsigned int>(max_frames_per_chunk,
