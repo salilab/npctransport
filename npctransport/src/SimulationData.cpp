@@ -834,7 +834,7 @@ SimulationData::update_statistics
     nf = 0;
     is_stats_reset_ = false;
   }
-  std::cout << "Updateing statistics file " << output_file_name_
+  std::cout << "Updating statistics file " << output_file_name_
             << " that currently has " << nf << " frames, with "
             << nf_new << " additional frames" << std::endl;
   ParticlesTemp all;
