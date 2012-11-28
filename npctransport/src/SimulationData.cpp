@@ -43,6 +43,7 @@
 #include <RMF/FileConstHandle.h>
 #include <IMP/rmf/atom_io.h>
 #include <IMP/rmf/frames.h>
+#include <numeric>
 
 #include <set>
 
@@ -948,10 +949,10 @@ SimulationData::update_statistics
       UPDATE_AVG(cnf, nf_new,
              *stats.mutable_fgs(i), chain_diffusion_coefficient,
              chain_stats_[i][j]->get_diffusion_coefficient());
-      double df=chain_stats_[i][j]->get_diffusion_coefficient();
+      Floats df=chain_stats_[i][j]->get_diffusion_coefficients();
       UPDATE_AVG(cnf, nf_new,
              *stats.mutable_fgs(i), local_diffusion_coefficient,
-             df);
+             std::accumulate(df.begin(), df.end(), 0.0)/df.size());
       chain_stats_[i][j]->reset();
     }
   }
