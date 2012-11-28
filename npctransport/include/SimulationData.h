@@ -275,6 +275,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
     }
   }
 
+  /** Set the sites explicitly. */
+  void set_sites(core::ParticleType t0,
+                 const algebra::Vector3Ds &sites) {
+    sites_[t0]=sites;
+  }
+
   /**
       Returns the effective interaction range radius of a
       site on a floater */
