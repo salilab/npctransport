@@ -436,7 +436,7 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     RestraintsTemp rs= chain_restraints_;
     if(get_has_bounding_box()) rs.push_back(box_restraint_);
     if( get_has_slab() ) rs.push_back(slab_restraint_);
-    rs.push_back(predr_);
+    rs.push_back( this->get_predr() );
     IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
     bd_->set_scoring_function(rsf);
     // add all kind of observers to the optimization:

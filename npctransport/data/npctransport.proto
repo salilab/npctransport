@@ -4,11 +4,15 @@ package npctransport_proto;
 
 message Configuration {
   message IntRange {
+    // a range from lower to upper with specified number of steps
     required int32 lower=1;
     optional int32 upper=2;
     optional int32 steps=3;
   };
   message FloatRange {
+    // a range from lower to upper with specified number of steps
+    // evenly-spaced on a logarithmic space with specified base.
+    // if base == 1, standard uniform spacing is used
     required double lower=1;
     optional double upper=2;
     optional int32 steps=3;

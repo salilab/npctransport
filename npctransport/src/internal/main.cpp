@@ -13,6 +13,8 @@
 //#include <IMP/benchmark/Profiler.h>
 #include <IMP/npctransport/initialize_positions.h>
 #include <IMP/rmf/frames.h>
+#include <IMP/ScoringFunction.h>
+#include <IMP/Model.h>
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 namespace {
@@ -43,6 +45,9 @@ namespace {
               boost::timer& total_time,
               bool silent_statistics = false,
               unsigned int max_frames_per_chunk = 50000) {
+    // TODO: next line is a temporary hack - needed for some reason to
+    // force the pair predicates to evaluate predicate pairs restraints
+    sd->get_m()->update();
     do {
       unsigned int cur_nframes
         = std::min<unsigned int>(max_frames_per_chunk,
@@ -53,7 +58,13 @@ namespace {
         {
           std::cout << "Optimizing for " << cur_nframes
                     << " frames in this iteration" << std::endl;
-          sd->get_bd()->optimize(cur_nframes);
+          double score = sd->get_bd()->optimize(cur_nframes);
+          std::cout << "Score = " << score
+                    << "," << sd->get_bd()->get_scoring_function()->evaluate(false)
+                    << " ; PredicatePairsRestraint score = "
+                    << sd->get_predr()->get_last_score()
+                    << ", " << sd->get_predr()->evaluate(false)
+                    <<  std::endl;
           if(! silent_statistics) {
             sd->update_statistics(timer, cur_nframes);
           }
