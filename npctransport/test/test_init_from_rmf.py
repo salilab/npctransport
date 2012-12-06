@@ -23,7 +23,7 @@ class Tests(IMP.test.TestCase):
         print "Files are " + output_pb_file + \
               " and " + output_rmf_file
         timer = IMP.npctransport.create_boost_timer()
-        sd.get_bd().optimize( 10 )
+        sd.get_bd().optimize( 1000 )
         # make sure final state is written
         sd.get_rmf_sos_writer().update_always()
         # make sure statistics with final rmf conformation is written
@@ -54,23 +54,32 @@ class Tests(IMP.test.TestCase):
         output_rmf1= IMP.base.create_temporary_file_name( "output", ".rmf" );
         print "Starting first simulation with RMF file " + output_rmf1
         sd = self._make_and_run_simulation( output_pb1, output_rmf1, seed = 1)
+        e1 = sd.get_bd().get_scoring_function().evaluate(False)
         print "*** After first simulation"
+        print "Energy %.2f" % e1
         coordsI = self._get_diffusers_coords( sd )
+        sd = None
 
         # Second simulation with another seed:
         output_pb2= self.get_tmp_file_name( "output2.pb" );
         output_rmf2= IMP.base.create_temporary_file_name( "output", ".rmf" );
         print "*** Starting second simulation with RMF file " + output_rmf2
-        sd2 = self._make_and_run_simulation( output_pb2, output_rmf2, seed = 2)
+        sd = self._make_and_run_simulation( output_pb2, output_rmf2, seed = 2)
+        e2 = sd.get_bd().get_scoring_function().evaluate(False)
         print "*** After second simulation"
-        coordsII = self._get_diffusers_coords( sd2 )
+        print "Energy %.2f" % e2
+        coordsII = self._get_diffusers_coords( sd )
 
         # Restoration from first simulation through rmf file:
         print "*** Initializing positions from RMF file " + output_rmf1
         fl= RMF.open_rmf_file_read_only(output_rmf1)
-        sd2.initialize_positions_from_rmf( fl )
+        sd.initialize_positions_from_rmf( fl )
+        e3 = sd.get_bd().get_scoring_function().evaluate(False)
         print "*** After initializing positions from RMF file " + output_rmf1
-        coordsIII = self._get_diffusers_coords( sd2 )
+        print "Energy %.2f" % e3
+        self.assertEqual(e1, e3)
+        self.assertNotEqual(e1, e2)
+        coordsIII = self._get_diffusers_coords( sd )
         # make sure that all coordinates were restored and as sanity
         # check control, also that the second simulation is different than
         # the first one:
@@ -80,8 +89,10 @@ class Tests(IMP.test.TestCase):
                 self.assertNotEqual(coordsI[i][j], coordsII[i][j])
 
         # Simulate more to scramble stuff
-        sd2.get_bd().optimize( 20 )
-        coordsIV = self._get_diffusers_coords( sd2 )
+        sd.get_bd().optimize( 1000 )
+        e4 = sd.get_bd().get_scoring_function().evaluate(False)
+        print "Energy %.2f" % e4
+        coordsIV = self._get_diffusers_coords( sd )
 
         # Restoration from first simulation through output protobuf file:
         print "*** Initializing positions from ProtoBuf file " + output_pb1
@@ -90,7 +101,11 @@ class Tests(IMP.test.TestCase):
         config.ParseFromString(f.read())
         fl= RMF.open_rmf_buffer_read_only( config.rmf_conformation )
         sd.initialize_positions_from_rmf( fl )
+        e5 = sd.get_bd().get_scoring_function().evaluate(False)
         print "*** After initializing positions from RMF file " + output_rmf1
+        print "Energy %.2f" % e5
+        self.assertEqual(e1, e5)
+        self.assertNotEqual(e1, e4)
         coordsV = self._get_diffusers_coords( sd )
         for i in range( len( coordsI ) ):
             for j in range(3):
