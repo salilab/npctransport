@@ -153,7 +153,7 @@ Ranges get_ranges(std::string name,
       cur.lb= get_value(r, message, lfd);
       cur.ub= get_value(r, message, ufd);
       if (lfd->type()==FieldDescriptor::TYPE_INT32) {
-        cur.base=1;
+        cur.base=1; // evenly spaced
       } else {
         cur.base=r->GetDouble(*message, bfd);
       }

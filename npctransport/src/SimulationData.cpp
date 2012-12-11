@@ -349,6 +349,8 @@ SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f, int frame)
   RMF::show_hierarchy_with_values(f.get_root_node());
   link_hierarchies_with_sites( f, get_root().get_children() );
   if (frame==-1) {
+    std::cout << "Loading from last frame of RMF file with "
+              << f.get_number_of_frames() << " frames" << std::endl;
     IMP::rmf::load_frame( f, f.get_number_of_frames() - 1 );
   } else {
     IMP::rmf::load_frame( f, frame );
@@ -438,7 +440,7 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     RestraintsTemp rs= chain_restraints_;
     if(get_has_bounding_box()) rs.push_back(box_restraint_);
     if( get_has_slab() ) rs.push_back(slab_restraint_);
-    rs.push_back(predr_);
+    rs.push_back( this->get_predr() );
     IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
     bd_->set_scoring_function(rsf);
     // add all kind of observers to the optimization:
