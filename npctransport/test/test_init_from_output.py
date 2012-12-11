@@ -34,6 +34,11 @@ class Tests(IMP.test.TestCase):
                          sdp.get_diffusers().get_particles()):
             self.assert_((IMP.core.XYZ(p).get_coordinates()
                          - IMP.core.XYZ(pp).get_coordinates()).get_magnitude() < .0001)
+            q0= IMP.core.RigidBody(p).get_reference_frame().get_transformation_to().get_rotation().get_quaternion()
+            q1= IMP.core.RigidBody(pp).get_reference_frame().get_transformation_to().get_rotation().get_quaternion()
+            print q0, q1
+            for qa, qb in zip(q0, q1):
+                self.assertAlmostEqual(qa, qb, delta=.01)
         for s0,s1 in zip(sites0, sites1):
             self.assert_(IMP.algebra.get_distance(s0,s1) < .0001)
 
