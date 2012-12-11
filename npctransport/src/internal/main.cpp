@@ -18,6 +18,18 @@
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 namespace {
+  // TODO: move to H file?
+  //! print this score for the current state of sd
+  void print_score(SimulationData *sd, std::string header = "Score = ");
+
+  void print_score(SimulationData *sd, std::string header) {
+          std::cout << header
+                    << sd->get_bd()->get_scoring_function()->evaluate(false)
+                    << " ; PredicatePairsRestraint score = "
+                    << sd->get_predr()->evaluate(false)
+                    <<  std::endl;
+  }
+
   /**
      Run simulation <sd> for <number_of_frames> frames, in chunks of
      optimization that last <max_frames_per_chunks> frames each.
@@ -58,13 +70,8 @@ namespace {
         {
           std::cout << "Optimizing for " << cur_nframes
                     << " frames in this iteration" << std::endl;
-          double score = sd->get_bd()->optimize(cur_nframes);
-          std::cout << "Score = " << score
-                    << "," << sd->get_bd()->get_scoring_function()->evaluate(false)
-                    << " ; PredicatePairsRestraint score = "
-                    << sd->get_predr()->get_last_score()
-                    << ", " << sd->get_predr()->evaluate(false)
-                    <<  std::endl;
+          sd->get_bd()->optimize(cur_nframes);
+          print_score(sd);
           if(! silent_statistics) {
             sd->update_statistics(timer, cur_nframes);
           }
@@ -112,10 +119,19 @@ void do_main_loop(SimulationData *sd,
       sd->initialize_positions_from_rmf(init_rmf, -1);
       std::cout << " from last frame of existing RMF file " << init_rmf << std::endl;
     }
+    print_score( sd, "Initial score = " );
     if (debug_initialize) break;
     sd->get_bd()->set_log_level(IMP::PROGRESS);
     if (conformations_rmf_sos) {
       conformations_rmf_sos->update_always("After initialization");
+    }
+    {
+      ParticlesTemp ps = sd->get_diffusers()->get_particles();
+      for(unsigned int i = 0; i < ps.size(); i++){
+        std::cout << ps[i] << ", " <<
+          IMP::core::XYZ(ps[i]).get_coordinates()
+                  << std::endl;
+      }
     }
     /*IMP::benchmark::Profiler p;
     if(i == 0)
@@ -133,6 +149,7 @@ void do_main_loop(SimulationData *sd,
       if(! ok)
         return;
     }
+    std::cout << "Equilibration finished succesfully" << std::endl;
     if (init_only) {
       continue; // skip optimization
     }
@@ -155,9 +172,22 @@ void do_main_loop(SimulationData *sd,
         conformations_rmf_sos->update_always("Final frame");
       }
       if( !final_conformations.empty() ) {
+        std::cout << "Printing last frame to "
+                  << final_conformations << std::endl;
         IMP::rmf::save_frame
           ( final_rmf_fh, final_rmf_fh.get_number_of_frames() );
       }
+      std::cout << "Run trial #" << i << " finished succesfully" << std::endl;
+    }
+  }
+  std::cout << "Entire run finished" << std::endl;
+  print_score( sd, "Final score = " );
+  {
+    ParticlesTemp ps = sd->get_diffusers()->get_particles();
+    for(unsigned int i = 0; i < ps.size(); i++){
+      std::cout << ps[i] << ", " <<
+        IMP::core::XYZ(ps[i]).get_coordinates()
+                << std::endl;
     }
   }
 }

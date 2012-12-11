@@ -210,7 +210,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
  public:
   /**
      @param[out] output_file name of protobuf file that encapsulates the assignment
-     data for initializing the simulation params and the output statistics file
+     data for initializing the simulation params and the output statistics file.
+     The output file is assumed to already exist at this point and contain the assignment.
+     If it contains an rmf_conformation or conformation field, it will be used to initialize particle positions,
+     in that priority.
      @param[out] quick if true, perform a very short simulation,
                        typically for calibration or for initial testing
      @param[out] rmf_file_name RMF file to which simulation trajectory

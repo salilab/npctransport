@@ -347,6 +347,8 @@ SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f, int frame)
 {
   link_hierarchies_with_sites( f, get_root().get_children() );
   if (frame==-1) {
+    std::cout << "Loading from last frame of RMF file with "
+              << f.get_number_of_frames() << " frames" << std::endl;
     IMP::rmf::load_frame( f, f.get_number_of_frames() - 1 );
   } else {
     IMP::rmf::load_frame( f, frame );

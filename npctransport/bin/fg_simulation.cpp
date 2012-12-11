@@ -255,7 +255,6 @@ int main(int argc, char *argv[])
   }
   std::cout << initialization_restraints << std::endl;
   IMP_NPC_LOOP(sd, initialization_restraints );
-  std::cout << "Finished running of " << argv[0] << " app" << std::endl;
 
   return 0;
  }
