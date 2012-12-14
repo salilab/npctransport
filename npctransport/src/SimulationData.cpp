@@ -345,6 +345,8 @@ Model *SimulationData::get_m() {
 void
 SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f, int frame)
 {
+  f.set_current_frame(f.get_number_of_frames() - 1);
+  RMF::show_hierarchy_with_values(f.get_root_node());
   link_hierarchies_with_sites( f, get_root().get_children() );
   if (frame==-1) {
     std::cout << "Loading from last frame of RMF file with "
@@ -365,7 +367,7 @@ SimulationData::link_rmf_file_handle(RMF::FileHandle fh)
   if(get_has_bounding_box()){
     IMP::rmf::add_restraints(fh, RestraintsTemp(1, box_restraint_));
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
-    IMP::rmf::add_geometries(fh, display::Geometries(1, bbg));
+    IMP::rmf::add_static_geometries(fh, display::Geometries(1, bbg));
   }
   if( get_has_slab() ){
     IMP::rmf::add_restraints(fh, RestraintsTemp(1, slab_restraint_));
@@ -943,8 +945,8 @@ SimulationData::update_statistics
     for (unsigned int j=0; j<chain_stats_[i].size(); ++j) {
       unsigned int n=chain_stats_[i].size();
       unsigned int cnf=(nf)*n+j;
-      IMP_ALWAYS_CHECK(stats.fgs_size() >  static_cast<int>(i), "Not enough fgs",
-                         ValueException);
+      IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i), "Not enough fgs",
+                       ValueException);
       UPDATE_AVG(cnf, nf_new,
              *stats.mutable_fgs(i), chain_correlation_time,
              chain_stats_[i][j]->get_correlation_time());
