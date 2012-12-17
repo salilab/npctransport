@@ -2,7 +2,11 @@
 from IMP.npctransport import *
 import sys
 
-outfile = sys.argv[1]
+if(len(sys.argv) > 1):
+    outfile = sys.argv[1]
+else:
+    outfile = IMP.create_temporary_file_name("config", "pb")
+
 
 def get_basic_config():
     config = Configuration()
