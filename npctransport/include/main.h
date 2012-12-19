@@ -70,6 +70,9 @@ IMP_NPC_PARAMETER_STRING(output, "output.pb",
                          "output assignments and statistics file in protobuf format,"
                          " recording the assignment being executed"
                          " [default: %default]");
+IMP_NPC_PARAMETER_STRING(restart, "",
+                         "output assignments and statistics file in protobuf format to restart from"
+                         " [default: %default]");
 IMP_NPC_PARAMETER_STRING(conformations, "conformations.rmf",
                          "RMF file for recording the conforomations along the "
                          " simulation [default: %default]");
@@ -120,7 +123,7 @@ IMP_NPC_PARAMETER_UINT64(random_seed, 0,
                                             init_restraints,           \
                                             FLAGS_quick,               \
                                             FLAGS_initialize_only,     \
-                                            FLAGS_final_conformations,\
+                                            FLAGS_final_conformations,  \
                                             FLAGS_debug_initialization, \
                                             FLAGS_init_rmffile)
 
@@ -145,22 +148,39 @@ inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
     seed_randn_generator( FLAGS_random_seed );
   std::cout << "Random seed is " << actual_seed << std::endl;
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));
-  try {
-    int num=IMP::npctransport::assign_ranges
-        (FLAGS_configuration, FLAGS_output,
-         FLAGS_work_unit, FLAGS_show_steps, actual_seed);
-    if (FLAGS_show_number_of_work_units) {
+  IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
+  if (FLAGS_restart.empty()) {
+    try {
+      int num=IMP::npctransport::assign_ranges
+          (FLAGS_configuration, FLAGS_output,
+           FLAGS_work_unit, FLAGS_show_steps, actual_seed);
+      if (FLAGS_show_number_of_work_units) {
 #pragma omp critical
-      std::cout << "work units " << num << std::endl;
+        std::cout << "work units " << num << std::endl;
+      }
+      set_log_level(IMP::base::LogLevel(FLAGS_log_level));
+    } catch (const IMP::base::IOException &e) {
+#pragma omp critical
+      std::cerr << "Error: " << e.what() << std::endl;
+      return IMP_NULLPTR;
     }
-    set_log_level(IMP::base::LogLevel(FLAGS_log_level));
-  } catch (const IMP::base::IOException &e) {
-#pragma omp critical
-   std::cerr << "Error: " << e.what() << std::endl;
-    return IMP_NULLPTR;
+    sd= new IMP::npctransport::SimulationData(FLAGS_output,
+                                              FLAGS_quick);
+  } else {
+    std::cout << "Restart simulation" << std::endl;
+    ::npctransport_proto::Output data;
+    // copy to new file to avoid modifying input file
+    {
+      std::ifstream file(FLAGS_restart, std::ios::binary);
+      bool read=data.ParseFromIstream(&file);
+    }
+    {
+      std::ofstream outf(FLAGS_output.c_str(), std::ios::binary);
+      data.SerializeToOstream(&outf);
+    }
+    sd= new IMP::npctransport::SimulationData(FLAGS_output,
+                                              FLAGS_quick);
   }
-  IMP_NEW(IMP::npctransport::SimulationData, sd,(FLAGS_output,
-                              FLAGS_quick));
   try {
     if (!FLAGS_conformations.empty()) {
       sd->set_rmf_file_name(FLAGS_conformations);
