@@ -12,7 +12,7 @@ class Tests(IMP.test.TestCase):
     def _make_and_run_simulation(self, output_pb_file, output_rmf_file, seed):
         IMP.base.random_number_generator.seed( seed )
         RMF.set_show_hdf5_errors( True );
-        config= IMP.npctransport.get_data_path( "quick.pb" );
+        config= IMP.npctransport.get_data_path( "quick2.pb" );
         IMP.set_log_level( IMP.SILENT );
         print "assigning parameter ranges"
         num=assign_ranges( config, output_pb_file,
@@ -35,7 +35,8 @@ class Tests(IMP.test.TestCase):
             object sd """
         d = sd.get_diffusers().get_particles()[i]
         d_coords = IMP.core.XYZ( d ).get_coordinates()
-        print "Diffuser " + str(i) + ":", d, d_coords
+        d_rframe = IMP.core.RigidBody( d ).get_reference_frame()
+        print "Diffuser refframe" + str(i) + ":", d,  d_rframe
         return d_coords
 
     def _get_diffusers_coords( self, sd ):
@@ -62,7 +63,7 @@ class Tests(IMP.test.TestCase):
 
         # Second simulation with another seed:
         output_pb2= self.get_tmp_file_name( "output2.pb" );
-        output_rmf2= IMP.base.create_temporary_file_name( "output", ".rmf" );
+        output_rmf2= IMP.base.create_temporary_file_name( "output2", ".rmf" );
         print "*** Starting second simulation with RMF file " + output_rmf2
         sd = self._make_and_run_simulation( output_pb2, output_rmf2, seed = 2)
         e2 = sd.get_bd().get_scoring_function().evaluate(False)
