@@ -947,9 +947,9 @@ SimulationData::update_statistics
       unsigned int cnf=(nf)*n+j;
       IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i), "Not enough fgs",
                        ValueException);
-      UPDATE_AVG(cnf, nf_new,
+      /*UPDATE_AVG(cnf, nf_new,
              *stats.mutable_fgs(i), chain_correlation_time,
-             chain_stats_[i][j]->get_correlation_time());
+             chain_stats_[i][j]->get_correlation_time());*/
       UPDATE_AVG(cnf, nf_new,
              *stats.mutable_fgs(i), chain_diffusion_coefficient,
              chain_stats_[i][j]->get_diffusion_coefficient());
