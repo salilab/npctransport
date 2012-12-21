@@ -1,7 +1,15 @@
 nranges=1
 
 def create_range(field, lb, ub=None, steps=5, base=2):
-    """Create a range in the passed field"""
+    """
+    Create a range in the passed field
+    using a logarithmic-evenely distributed steps.
+
+    lb - lower bound value
+    ub - upper bound value
+    steps - number of steps from lb to ub
+    base - lograithmic base for spacing, use 1 for standard even-sized steps
+    """
     field.lower=lb
     if ub:
         field.upper=ub
