@@ -56,7 +56,9 @@ class IMPNPCTRANSPORTEXPORT Transporting:
     return (get_particle()->get_value(get_is_last_entry_from_top_key()) != 0);
   }
   //! Get the D key
-  static IntKey get_is_last_entry_from_top_key();
+  static IntKey get_is_last_entry_from_top_key() {
+    return IntKey("last entry is from top");
+  }
 
 };
 
