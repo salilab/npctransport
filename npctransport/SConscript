@@ -14,14 +14,14 @@ scons_tools.dependency.boost.add_boost_library( env, "FileSystem", "filesystem",
 scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
                                             "google/protobuf/text_format.h")
 
-scons_tools.dependency.add_external_cmake_library(env, "RMF",
-                                                  ["RMF"],
-                                                  "RMF/FileHandle.h",
-                                                  extra_libs=[scons_tools.dependency.boost.get_boost_lib_name(env, "system")])
+scons_tools.dependency.add_external_library(env, "RMF",
+                                            ["RMF"],
+                                            "RMF/FileHandle.h",
+                                            extra_libs=[scons_tools.dependency.boost.get_boost_lib_name(env, "system")])
 
-scons_tools.dependency.add_external_cmake_library(env, "AvroCpp", ["avrocpp"],
-                                            ["avro/Compiler.hh", "avro/ValidSchema.hh"],
-                                            body="""avro::compileJsonSchemaFromString(std::string("{}"));""")
+scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
+                                            ["avro/ValidSchema.hh"],
+                                            body=""" """)
 
 
 oenv=env.IMPModuleBuild(module="npctransport",
