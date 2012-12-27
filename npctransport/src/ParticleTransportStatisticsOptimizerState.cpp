@@ -7,9 +7,12 @@
  */
 
 #include <IMP/npctransport/ParticleTransportStatisticsOptimizerState.h>
+#include <IMP/npctransport/Transporting.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/compatibility/set.h>
 #include <IMP/compatibility/nullptr.h>
+#include <IMP/base/check_macros.h>
+#include <IMP/base/exception.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -25,6 +28,11 @@ ParticleTransportStatisticsOptimizerState::ParticleTransportStatisticsOptimizerS
     owner_(owner)
 {
   this->reset();
+  IMP_ALWAYS_CHECK( ! Transporting::particle_is_instance( p_ ),
+                    "Particle already defined as a transporting particle,"
+                    " and cannot be tracked by this object",
+                    IMP::base::ValueException);
+  Transporting::setup_particle(p_, false); // initial value doesn't matter
   cur_z_ = core::RigidBody(p_).get_coordinates()[2];
 }
 
@@ -43,6 +51,7 @@ ParticleTransportStatisticsOptimizerState::reset()
 void
 ParticleTransportStatisticsOptimizerState
 ::do_update(unsigned int) {
+  Transporting p_trans( p_ );
   prev_z_ = cur_z_;
   cur_z_ = core::RigidBody(p_).get_coordinates()[2];
   if(is_reset_){ // ignore previous z if reset
@@ -51,7 +60,7 @@ ParticleTransportStatisticsOptimizerState
   }
   // update transport events
   if(cur_z_ > top_z_ && prev_z_ <= top_z_
-     && n_entries_bottom_ > 0 && !is_last_entry_from_top_) {
+     && n_entries_bottom_ > 0 && ! p_trans.get_is_last_entry_from_top() ) {
     n_transports_up_++;
     double time = 0.0;
     if( owner_ != nullptr ) {
@@ -64,7 +73,7 @@ ParticleTransportStatisticsOptimizerState
               << std::endl;
   }
   if(cur_z_ < bottom_z_ && prev_z_ >= bottom_z_
-     && n_entries_top_ > 0 && is_last_entry_from_top_) {
+     && n_entries_top_ > 0 && p_trans.get_is_last_entry_from_top() ) {
     n_transports_down_++;
     double time = 0.0;
     if( owner_ != nullptr ) {
@@ -78,11 +87,11 @@ ParticleTransportStatisticsOptimizerState
   }
   // update channel entry directionality
   if(cur_z_ < top_z_ && prev_z_ >= top_z_) {
-    is_last_entry_from_top_ = true;
+    p_trans.set_is_last_entry_from_top( true );
     n_entries_top_++;
   }
   if(cur_z_ > bottom_z_ && prev_z_ <= bottom_z_) {
-    is_last_entry_from_top_ = false;
+    p_trans.set_is_last_entry_from_top( false );
     n_entries_bottom_++;
   }
 }

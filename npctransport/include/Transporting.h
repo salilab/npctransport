@@ -1,6 +1,6 @@
 /**
  *  \file IMP/npctransport/Transporting.h
- *  \brief A decorator for a diffusing particle.
+ *  \brief A decorator for a transporting particle, so as to keep track of its directionality.
  *
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  *
@@ -26,6 +26,7 @@ class IMPNPCTRANSPORTEXPORT Transporting:
  public:
   IMP_DECORATOR(Transporting, IMP::Decorator);
 
+ public:
   /** Create a decorator with the passed coordinates and D.
   */
   static Transporting setup_particle(Particle *p,
@@ -44,10 +45,13 @@ class IMPNPCTRANSPORTEXPORT Transporting:
     return m->get_has_attribute(get_is_last_entry_from_top_key(), p);
   }
 
-  void set_is_last_enrty_from_top(bool is_last_entry_from_top) {
+  //! sets whether the particle last enetered the transport moiety from its top
+  void set_is_last_entry_from_top(bool is_last_entry_from_top) {
     get_particle()->set_value(get_is_last_entry_from_top_key(),
                               is_last_entry_from_top ? 1 : 0);
   }
+
+  //! returns whether the particle last enetered the transport moiety from its top
   bool get_is_last_entry_from_top() const {
     return (get_particle()->get_value(get_is_last_entry_from_top_key()) != 0);
   }

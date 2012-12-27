@@ -15,6 +15,7 @@
 #include <IMP/rmf/frames.h>
 #include <IMP/ScoringFunction.h>
 #include <IMP/Model.h>
+#include <IMP/core/rigid_bodies.h>
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 namespace {
@@ -128,8 +129,9 @@ void do_main_loop(SimulationData *sd,
     {
       ParticlesTemp ps = sd->get_diffusers()->get_particles();
       for(unsigned int i = 0; i < ps.size(); i++){
-        std::cout << ps[i] << ", " <<
-          IMP::core::XYZ(ps[i]).get_coordinates()
+        std::cout << ps[i] << ", "
+          //        <<  IMP::core::XYZ(ps[i]).get_coordinates()
+                  << IMP::core::RigidBody(ps[i]).get_reference_frame()
                   << std::endl;
       }
     }
@@ -185,8 +187,9 @@ void do_main_loop(SimulationData *sd,
   {
     ParticlesTemp ps = sd->get_diffusers()->get_particles();
     for(unsigned int i = 0; i < ps.size(); i++){
-      std::cout << ps[i] << ", " <<
-        IMP::core::XYZ(ps[i]).get_coordinates()
+      std::cout << ps[i] << ", "
+        //      << IMP::core::XYZ(ps[i]).get_coordinates()
+                << IMP::core::RigidBody(ps[i]).get_reference_frame()
                 << std::endl;
     }
   }
