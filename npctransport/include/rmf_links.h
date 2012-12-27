@@ -20,6 +20,10 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink:
   public rmf::HierarchyLoadLink {
     WeakPointer<SimulationData> sd_;
   RMF::BallConstFactory bf_;
+  RMF::IntKey is_last_entry_from_top_key_;
+  IMP_PROTECTED_METHOD(virtual void, do_load_one,
+                       ( RMF::NodeConstHandle nh,
+                         Particle *o),,);
   IMP_PROTECTED_METHOD(virtual void, do_add_link_recursive,
       (Particle *root,
                              Particle *o, RMF::NodeConstHandle node),
@@ -35,9 +39,12 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
   WeakPointer<SimulationData> sd_;
   RMF::BallFactory bf_;
   RMF::ColoredFactory cf_;
+  RMF::IntKey is_last_entry_from_top_key_;
   IMP_PROTECTED_METHOD(virtual void, do_add_recursive,
               (Particle *root, Particle *p,
                              RMF::NodeHandle cur), IMP_OVERRIDE,);
+  IMP_PROTECTED_METHOD(virtual void, do_save_node, (Particle *p,
+                                                    RMF::NodeHandle n),,);
   std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const ;
   // for testing without sd
   compatibility::map<core::ParticleType, std::pair<double,

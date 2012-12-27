@@ -11,7 +11,30 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m):
-  rmf::HierarchyLoadLink(fh, m), bf_(fh) {}
+  rmf::HierarchyLoadLink(fh, m), bf_(fh)
+{
+  RMF::Category npc_cat= fh.get_category("npc");
+  RMF::IntKey is_last_entry_from_top_key_ =
+    fh.get_key(npc_cat, "is last entry from top");
+}
+
+
+void HierarchyWithSitesLoadLink::do_load_one( RMF::NodeConstHandle nh,
+                                              Particle *o) {
+  rmf::HierarchyLoadLink::do_load_one(nh, o);
+  // load particle transport directionality if needed
+  if (Transporting::particle_is_instance(o)) {
+    Transporting t(o);
+    if (nh.get_has_value(is_last_entry_from_top_key_)){
+      bool is_last_entry_from_top =
+        nh.get_value(is_last_entry_from_top_key);
+      t.set_is_last_entry_from_top( is_last_entry_from_top );
+      std::cout << "Setting is_last_entry_from_top value of particle " << *o
+                << " to " << is_last_entry_from_top << std::endl;
+    }
+  }
+}
+
 
 void HierarchyWithSitesLoadLink::do_add_link_recursive(Particle *root,
                                                        Particle *p,
@@ -36,7 +59,12 @@ void HierarchyWithSitesLoadLink::do_add_link_recursive(Particle *root,
 
 
 HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh):
-  rmf::HierarchySaveLink(fh), bf_(fh), cf_(fh) {}
+  rmf::HierarchySaveLink(fh), bf_(fh), cf_(fh)
+{
+  RMF::Category npc_cat= fh.get_category("npc");
+  RMF::IntKey is_last_entry_from_top_key_ =
+    fh.get_key(npc_cat, "is last entry from top");
+}
 
 std::pair<double, algebra::Vector3Ds>
 HierarchyWithSitesSaveLink::get_sites(core::ParticleType t) const  {
@@ -75,6 +103,16 @@ void HierarchyWithSitesSaveLink::do_add_recursive(Particle *root,
   rmf::HierarchySaveLink::do_add_recursive(root, p, cur);
 }
 
+void HierarchyWithSitesSaveLink::do_save_node(Particle *p,
+                                     RMF::NodeHandle n) {
+  rmf::HierarchySaveLink::do_save_node(p, n);
+  // update side of transport entry
+  if (Transporting::particle_is_instance(p)) {
+    Transporting t(p);
+    n.set_value(is_last_entry_from_top_key_,
+                t.get_is_last_entry_from_top() );
+  }
+}
 
 
 IMP_DEFINE_LINKERS(HierarchyWithSites,
