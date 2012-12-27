@@ -150,6 +150,12 @@ void do_main_loop(SimulationData *sd,
          true /* silent stats */);
       if(! ok)
         return;
+      //if(nframes_equilibrate > 0) {
+        // if equilibrated, ignore equilibration stats
+        // TODO: removed for now since this may be incosistent with
+        //       consecutive runs
+        //sd->reset_statistics_optimizer_states();
+      // }
     }
     std::cout << "Equilibration finished succesfully" << std::endl;
     if (init_only) {
@@ -157,7 +163,6 @@ void do_main_loop(SimulationData *sd,
     }
     {
       timer.restart();
-      sd->reset_statistics_optimizer_states();
       unsigned int nframes_run = (unsigned int)
         ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;

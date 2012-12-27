@@ -51,6 +51,7 @@ ParticleTransportStatisticsOptimizerState::reset()
 void
 ParticleTransportStatisticsOptimizerState
 ::do_update(unsigned int) {
+  const double fs_in_ns = 1.0E+6;
   Transporting p_trans( p_ );
   prev_z_ = cur_z_;
   cur_z_ = core::RigidBody(p_).get_coordinates()[2];
@@ -62,11 +63,11 @@ ParticleTransportStatisticsOptimizerState
   if(cur_z_ > top_z_ && prev_z_ <= top_z_
      && n_entries_bottom_ > 0 && ! p_trans.get_is_last_entry_from_top() ) {
     n_transports_up_++;
-    double time = 0.0;
+    double time_ns = 0.0;
     if( owner_ != nullptr ) {
-      time = owner_->get_current_time() / 1000000.0;
+      time_ns = owner_->get_current_time() / fs_in_ns;
     }
-    transport_time_points_in_ns_.push_back( time );
+    transport_time_points_in_ns_.push_back( time_ns );
     std::cout << "EXIT UP " << p_->get_name()
               << " n_transports_up = " << n_transports_up_
               << " prev_z = " << prev_z_
@@ -75,11 +76,11 @@ ParticleTransportStatisticsOptimizerState
   if(cur_z_ < bottom_z_ && prev_z_ >= bottom_z_
      && n_entries_top_ > 0 && p_trans.get_is_last_entry_from_top() ) {
     n_transports_down_++;
-    double time = 0.0;
+    double time_ns = 0.0;
     if( owner_ != nullptr ) {
-      time = owner_->get_current_time() / 1000000.0;
+      time_ns = owner_->get_current_time() / fs_in_ns;
     }
-    transport_time_points_in_ns_.push_back( time );
+    transport_time_points_in_ns_.push_back( time_ns );
     std::cout << "EXIT DOWN " << p_->get_name()
               << " n_transports_down = " << n_transports_down_
               << " prev_z = " << prev_z_

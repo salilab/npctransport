@@ -192,6 +192,13 @@ void SimulationData::initialize(std::string output_file,
                        get_diffusers(),
                        sites_);
    }
+  if (data.has_statistics()) {
+    if (data.statistics().has_bd_simulation_time_ns()) {
+      const double fs_in_ns = 1.0E+6;
+      get_bd()->set_current_time
+        ( data.statistics().bd_simulation_time_ns() * fs_in_ns );
+    }
+  }
 }
 
 /**
@@ -726,6 +733,7 @@ SimulationData
 
 void SimulationData::reset_statistics_optimizer_states() {
   is_stats_reset_ = true; // indicate to update_statistics()
+  get_bd()->set_current_time( 0.0 );
   for (unsigned int i=0; i< fgs_stats_.size(); ++i) {
     for (unsigned int j=0; j < fgs_stats_[i].size(); ++j) {
       for (unsigned int k=0; k < fgs_stats_[i][j].size(); ++k) {
@@ -796,29 +804,6 @@ namespace {
 }
 
 
-/*
-if (first_stats_) { // first initialization
-    for (unsigned int i=0; i<type_of_fg.size(); ++i) {
-      if (particles_.find(type_of_fg[i]) != particles_.end()) {
-        stats.add_fgs();
-        IMP_USAGE_CHECK(stats.fgs_size() ==static_cast<int>(i+1),
-                        "Wrong size: " << stats.fgs_size());
-      }
-    }
-    for (unsigned int i=0; i<type_of_float.size(); ++i) {
-      if (particles_.find(type_of_float[i]) != particles_.end()) {
-        stats.add_floaters();
-      }
-    }
-    for(unsigned int i = 0; i < interactions_stats_.size(); i++){
-      ::npctransport_proto::Statistics_InteractionStats*
-        pOutStats_i = stats.add_interactions();
-      InteractionType itype = interactions_stats_[i]->get_interaction_type();
-      pOutStats_i->set_type0( itype.first.get_string() );
-      pOutStats_i->set_type1( itype.second.get_string() );
-    }
-    first_stats_=false;
-*/
 // @param nf_new number of new frames accounted for in this statistics update
 void
 SimulationData::update_statistics
@@ -1028,6 +1013,10 @@ SimulationData::update_statistics
   stats.set_seconds_per_iteration( timer.elapsed() );
 
   stats.set_number_of_frames( nf + nf_new );
+  const double fs_in_ns = 1.0E+6;
+  stats.set_bd_simulation_time_ns
+    ( const_cast<SimulationData*>(this)->
+      get_bd()->get_current_time() / fs_in_ns );
 
   ::npctransport_proto::Conformation *conformation
       = output.mutable_conformation();

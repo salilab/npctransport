@@ -31,6 +31,8 @@
 #include <IMP/example/optimizing.h>
 
 #include <IMP/compatibility/nullptr.h>
+#include <IMP/base/check_macros.h>
+#include <IMP/base/exception.h>
 #include <boost/cstdint.hpp>
 #include <numeric>
 #include <cmath>
@@ -173,6 +175,8 @@ inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
     {
       std::ifstream file(FLAGS_restart, std::ios::binary);
       bool read=data.ParseFromIstream(&file);
+      IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << FLAGS_restart,
+                       IMP::base::ValueException);
     }
     {
       std::ofstream outf(FLAGS_output.c_str(), std::ios::binary);
