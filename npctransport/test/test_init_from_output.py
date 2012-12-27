@@ -22,6 +22,8 @@ class Tests(IMP.test.TestCase):
                                             self.get_tmp_file_name("out0.rmf"));
         sites0= sd.get_sites(IMP.core.ParticleType("kap"))
         IMP.npctransport.initialize_positions(sd, [], False)
+        obd= sd.get_bd()
+        obd.optimize(1)
         timer= IMP.npctransport.timer();
         print "updating stats"
         sd.update_statistics(timer, 0);
@@ -41,6 +43,9 @@ class Tests(IMP.test.TestCase):
                 self.assertAlmostEqual(qa, qb, delta=.01)
         for s0,s1 in zip(sites0, sites1):
             self.assert_(IMP.algebra.get_distance(s0,s1) < .0001)
+        bd = sdp.get_bd()
+        self.assert_(bd.get_current_time() >0)
+        self.assert_(bd.get_current_time()==obd.get_current_time())
 
 
 if __name__ == '__main__':
