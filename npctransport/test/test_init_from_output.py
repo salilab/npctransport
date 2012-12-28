@@ -20,13 +20,18 @@ class Tests(IMP.test.TestCase):
                           0, True, 10 );
         sd= IMP.npctransport.SimulationData(output, False,
                                             self.get_tmp_file_name("out0.rmf"));
-        sites0= sd.get_sites(IMP.core.ParticleType("kap"))
         IMP.npctransport.initialize_positions(sd, [], False)
         obd= sd.get_bd()
         obd.optimize(1)
         timer= IMP.npctransport.timer();
+        # lame test
+        rt= sd.get_root()
+        rtt= IMP.npctransport.Transporting.setup_particle(rt, True)
+        rtf= rt.get_child(0)
+        rttf= IMP.npctransport.Transporting.setup_particle(rtf, False)
         print "updating stats"
         sd.update_statistics(timer, 0);
+        sites0= sd.get_sites(IMP.core.ParticleType("kap"))
 
         print "reloading"
         sdp= IMP.npctransport.SimulationData(output, False,
@@ -46,7 +51,12 @@ class Tests(IMP.test.TestCase):
         bd = sdp.get_bd()
         self.assert_(bd.get_current_time() >0)
         self.assert_(bd.get_current_time()==obd.get_current_time())
-
+        rt= sdp.get_root()
+        self.assert_(rtt.get_is_last_entry_from_top())
+        rtf= rt.get_child(0)
+        self.assert_(not rttf.get_is_last_entry_from_top());
+        print "updating stats at end"
+        sd.update_statistics(timer, 0);
 
 if __name__ == '__main__':
     IMP.test.main()
