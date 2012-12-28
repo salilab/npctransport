@@ -57,10 +57,14 @@ class IMPNPCTRANSPORTEXPORT Transporting:
   }
   //! Get the D key
   static IntKey get_is_last_entry_from_top_key() {
-    return IntKey("last entry is from top");
+    static IntKey ik("last entry is from top");
+    return ik;
   }
-
 };
+
+inline void Transporting::show(std::ostream &out) const {
+  IMP_UNUSED(out);
+}
 
 IMP_DECORATORS(Transporting, Transportings, IMP::Decorators);
 
