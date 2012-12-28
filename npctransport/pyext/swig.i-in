@@ -28,6 +28,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, BodyStatisticsOptimizerState, BodyStatisticsO
 IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, BipartitePairsStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, ParticleTransportStatisticsOptimizerStates);
 IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
+IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 
 %apply unsigned int { boost::uint32_t }
 %apply unsigned long long { boost::uint64_t }
@@ -40,6 +41,7 @@ IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
 %include "IMP/npctransport/io.h"
 %include "IMP/npctransport/creating_particles.h"
 %include "IMP/npctransport/rmf_links.h"
+%include "IMP/npctransport/Transporting.h"
 %include "IMP/npctransport/protobuf.h"
 %include "IMP/npctransport/SlabSingletonScore.h"
 %include "IMP/npctransport/ExcludeZRangeSingletonScore.h"
