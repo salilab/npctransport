@@ -59,6 +59,7 @@ get_correlation_time()const {
   return sum/n;
 }
 double BodyStatisticsOptimizerState::get_diffusion_coefficient() const {
+  if (positions_.empty()) return 0;
   algebra::Vector3Ds
     displacements(positions_.size()-1);
   for (unsigned int i=1; i< positions_.size(); ++i) {

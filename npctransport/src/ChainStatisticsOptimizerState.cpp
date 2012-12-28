@@ -55,6 +55,7 @@ get_correlation_time()const {
 }
 
 Floats ChainStatisticsOptimizerState::get_diffusion_coefficients() const {
+  if (positions_.empty()) return Floats();
   base::Vector<algebra::Vector3Ds >
     displacements(positions_[0].size(),
                   algebra::Vector3Ds( positions_.size()-1));
@@ -92,6 +93,7 @@ void ChainStatisticsOptimizerState
 }
 
 double ChainStatisticsOptimizerState::get_diffusion_coefficient() const {
+  if (positions_.empty()) return 0;
   algebra::Vector3Ds positions(positions_.size());
   for (unsigned int i=0; i< positions_.size(); ++i) {
     positions[i]= std::accumulate(positions_[i].begin(), positions_[i].end(),
