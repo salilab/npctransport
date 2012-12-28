@@ -8,27 +8,30 @@
 
 #include <IMP/npctransport/rmf_links.h>
 #include <IMP/core/rigid_bodies.h>
+#include <IMP/npctransport/Transporting.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m):
   rmf::HierarchyLoadLink(fh, m), bf_(fh)
 {
   RMF::Category npc_cat= fh.get_category("npc");
-  RMF::IntKey is_last_entry_from_top_key_ =
-    fh.get_key(npc_cat, "is last entry from top");
+  is_last_entry_from_top_key_ =
+    fh.get_int_key(npc_cat, "last entry from top");
 }
 
 
-void HierarchyWithSitesLoadLink::do_load_one( RMF::NodeConstHandle nh,
-                                              Particle *o) {
-  rmf::HierarchyLoadLink::do_load_one(nh, o);
+void HierarchyWithSitesLoadLink::do_load_node( RMF::NodeConstHandle nh,
+                                               Particle *o) {
+  rmf::HierarchyLoadLink::do_load_node(nh, o);
   // load particle transport directionality if needed
-  if (Transporting::particle_is_instance(o)) {
-    Transporting t(o);
+  if (nh.get_has_value(is_last_entry_from_top_key_)) {
     if (nh.get_has_value(is_last_entry_from_top_key_)){
       bool is_last_entry_from_top =
-        nh.get_value(is_last_entry_from_top_key);
-      t.set_is_last_entry_from_top( is_last_entry_from_top );
+        nh.get_value(is_last_entry_from_top_key_);
+      if (!Transporting::particle_is_instance(o)) {
+        Transporting::setup_particle(o, true);
+      }
+      Transporting(o).set_is_last_entry_from_top( is_last_entry_from_top );
       std::cout << "Setting is_last_entry_from_top value of particle " << *o
                 << " to " << is_last_entry_from_top << std::endl;
     }
@@ -62,8 +65,8 @@ HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh):
   rmf::HierarchySaveLink(fh), bf_(fh), cf_(fh)
 {
   RMF::Category npc_cat= fh.get_category("npc");
-  RMF::IntKey is_last_entry_from_top_key_ =
-    fh.get_key(npc_cat, "is last entry from top");
+  is_last_entry_from_top_key_ =
+    fh.get_int_key(npc_cat, "last entry from top");
 }
 
 std::pair<double, algebra::Vector3Ds>

@@ -21,15 +21,13 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink:
     WeakPointer<SimulationData> sd_;
   RMF::BallConstFactory bf_;
   RMF::IntKey is_last_entry_from_top_key_;
-  IMP_PROTECTED_METHOD(virtual void, do_load_one,
-                       ( RMF::NodeConstHandle nh,
-                         Particle *o),,);
   IMP_PROTECTED_METHOD(virtual void, do_add_link_recursive,
       (Particle *root,
                              Particle *o, RMF::NodeConstHandle node),
     IMP_OVERRIDE,);
 
-
+  IMP_IMPLEMENT(void do_load_node(RMF::NodeConstHandle nh,
+                                  Particle *o));
  public:
   HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m);
 };
