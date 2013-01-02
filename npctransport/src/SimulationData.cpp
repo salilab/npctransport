@@ -438,6 +438,7 @@ atom::BrownianDynamics *SimulationData::get_bd() {
     bd_=new atom::BrownianDynamics(m_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_/4);
+    bd_->set_current_time( 0.0 );
     //#ifdef _OPENMP
     if (dump_interval_frames_ > 0 && !get_rmf_file_name().empty()) {
       bd_->add_optimizer_state(get_rmf_sos_writer());

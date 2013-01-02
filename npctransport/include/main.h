@@ -73,25 +73,29 @@ IMP_NPC_PARAMETER_STRING(output, "output.pb",
                          " recording the assignment being executed"
                          " [default: %default]");
 IMP_NPC_PARAMETER_STRING(restart, "",
-                         "output assignments and statistics file in protobuf format to restart from"
+                         "output file of a previous run, from which to restart"
+                         " this run (also initializing the final coordinates"
+                         " from this previous run, if they exist in the output"
+                         " file)"
                          " [default: %default]");
 IMP_NPC_PARAMETER_STRING(conformations, "conformations.rmf",
                          "RMF file for recording the conforomations along the "
                          " simulation [default: %default]");
 IMP_NPC_PARAMETER_STRING(init_rmffile, "",
-                         "RMF file for initializing the simulation with its"
-                         " last frame (to continue a previous run). If not"
-                         " specified, initialization is through"
-                         " pre-optimization");
+                         "[OBSOLETE]"
+                         " RMF file for initializing the simulation with its"
+                         " last frame (to continue a previous run). Note that"
+                         " this option overrides the coordinates specified in"
+                         " an older output file when using the --restart flag");
 IMP_NPC_PARAMETER_STRING(final_conformations, "final_conformations.rmf",
-                 "RMF file for recording the initial and final conformations "
+                         "RMF file for recording the initial and final conformations "
                          " [default: %default]");
 #ifdef IMP_NPC_GOOGLE
 IMP_NPC_PARAMETER_BOOL(profile, false,
                        "Whether to turn on profiling for the first run");
 #endif
-IMP_NPC_PARAMETER_BOOL(debug_initialization, false,
-                       "Print more info about initialization");
+IMP_NPC_PARAMETER_BOOL(verbose, false,
+                       "Print more info during run");
 IMP_NPC_PARAMETER_BOOL(initialize_only, false,
                        "Run the initialization and then stop");
 IMP_NPC_PARAMETER_BOOL(quick, false,
@@ -116,18 +120,27 @@ IMP_NPC_PARAMETER_UINT64(random_seed, 0,
 #define IMP_NPC_SET_PROF(p, tf)
 #endif
 
-/** Run simulation using preconstructed SimulationData (sim_data) object.
+/** Run simulation using preconstructed SimulationData object sim_data.
     init_restraints are used ad-hoc during initialization only,
     and unless initialized from an RMF file
 */
-#define IMP_NPC_LOOP(sim_data, init_restraints)                        \
-  IMP::npctransport::internal::do_main_loop(sim_data,                  \
-                                            init_restraints,           \
-                                            FLAGS_quick,               \
-                                            FLAGS_initialize_only,     \
-                                            FLAGS_final_conformations,  \
-                                            FLAGS_debug_initialization, \
-                                            FLAGS_init_rmffile)
+#define IMP_NPC_LOOP(sim_data, init_restraints)                         \
+  {                                                                     \
+  /** initial optimization and equilibration needed unless starting
+      from another output file or rmf file */                           \
+    bool is_initial_optimization =                                      \
+      FLAGS_restart.empty() && FLAGS_init_rmffile.empty();              \
+    bool is_BD_equilibration = is_initial_optimization;                 \
+    bool is_BD_full_run = !FLAGS_initialize_only;                       \
+    IMP::npctransport::internal::do_main_loop(sim_data,                 \
+                                              init_restraints,          \
+                                              FLAGS_quick,              \
+                                              is_initial_optimization,  \
+                                              is_BD_equilibration,      \
+                                              is_BD_full_run,           \
+                                              FLAGS_final_conformations,   \
+                                              FLAGS_verbose ); \
+  }
 
 //! seeds the random number generator of IMP with seed
 //! (or time if it is zero)
@@ -143,53 +156,64 @@ boost::uint64_t seed_randn_generator(boost::uint64_t seed)
   return seed;
 }
 
+/** writes the output assignment file based on the configuration parameters
+    either assign a new work unit from a configuration file, or restart
+    from a previous output file
+
+    @param actual_seed the actual random seed used in the simulation,
+                       to be saved in the output file
+*/
+inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
+   if (FLAGS_restart.empty()) {
+     int num=IMP::npctransport::assign_ranges
+       (FLAGS_configuration, FLAGS_output,
+        FLAGS_work_unit, FLAGS_show_steps, actual_seed);
+     if (FLAGS_show_number_of_work_units) {
+#pragma omp critical
+       std::cout << "work units " << num << std::endl;
+     }
+   } else { // FLAGS_resart.empty()
+#pragma omp critical
+     std::cout << "Restart simulation from " << FLAGS_restart << std::endl;
+     ::npctransport_proto::Output prev_output;
+     // copy to new file to avoid modifying input file
+     std::ifstream file(FLAGS_restart, std::ios::binary);
+     bool read=prev_output.ParseFromIstream(&file);
+     IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << FLAGS_restart,
+                      IMP::base::ValueException);
+     prev_output.mutable_assignment()->set_random_seed( actual_seed );
+     std::ofstream outf(FLAGS_output.c_str(), std::ios::binary);
+     prev_output.SerializeToOstream(&outf);
+   }
+}
+
+/**
+   initialize and return a simulation data object based on
+   program command line parameters
+ */
 inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
   IMP_NPC_PRINTHELP;
   boost::uint64_t actual_seed =
     seed_randn_generator( FLAGS_random_seed );
+#pragma omp critical
   std::cout << "Random seed is " << actual_seed << std::endl;
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));
   IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
-  if (FLAGS_restart.empty()) {
-    try {
-      int num=IMP::npctransport::assign_ranges
-          (FLAGS_configuration, FLAGS_output,
-           FLAGS_work_unit, FLAGS_show_steps, actual_seed);
-      if (FLAGS_show_number_of_work_units) {
-#pragma omp critical
-        std::cout << "work units " << num << std::endl;
-      }
-      set_log_level(IMP::base::LogLevel(FLAGS_log_level));
-    } catch (const IMP::base::IOException &e) {
-#pragma omp critical
-      std::cerr << "Error: " << e.what() << std::endl;
-      return IMP_NULLPTR;
-    }
-    sd= new IMP::npctransport::SimulationData(FLAGS_output,
-                                              FLAGS_quick);
-  } else {
-    std::cout << "Restart simulation" << std::endl;
-    ::npctransport_proto::Output data;
-    // copy to new file to avoid modifying input file
-    {
-      std::ifstream file(FLAGS_restart, std::ios::binary);
-      bool read=data.ParseFromIstream(&file);
-      IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << FLAGS_restart,
-                       IMP::base::ValueException);
-    }
-    {
-      std::ofstream outf(FLAGS_output.c_str(), std::ios::binary);
-      data.SerializeToOstream(&outf);
-    }
-    sd= new IMP::npctransport::SimulationData(FLAGS_output,
-                                              FLAGS_quick);
-  }
   try {
+    write_output_based_on_flags( actual_seed );
+    sd= new IMP::npctransport::SimulationData(FLAGS_output,
+                                            FLAGS_quick);
     if (!FLAGS_conformations.empty()) {
       sd->set_rmf_file_name(FLAGS_conformations);
     }
-  } catch(const RMF::Exception &e) {
+    if(!FLAGS_init_rmffile.empty()) {
+      sd->initialize_positions_from_rmf(FLAGS_init_rmffile, -1);
+#pragma omp critical
+      std::cout << "Initialize coordinates from last frame of an existing RMF file "
+                << FLAGS_init_rmffile << std::endl;
+    }
+  } catch (const IMP::base::IOException &e) {
 #pragma omp critical
     std::cerr << "Error: " << e.what() << std::endl;
     return IMP_NULLPTR;

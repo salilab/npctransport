@@ -21,14 +21,26 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 namespace {
   // TODO: move to H file?
   //! print this score for the current state of sd
-  void print_score(SimulationData *sd, std::string header = "Score = ");
+  void print_score_and_positions(SimulationData *sd,
+                                 bool print_positions = false,
+                                 std::string header = "Score = ");
 
-  void print_score(SimulationData *sd, std::string header) {
-          std::cout << header
-                    << sd->get_bd()->get_scoring_function()->evaluate(false)
-                    << " ; PredicatePairsRestraint score = "
-                    << sd->get_predr()->evaluate(false)
-                    <<  std::endl;
+  void print_score_and_positions(SimulationData *sd,
+                                 bool print_positions,
+                                 std::string header) {
+    std::cout << header
+              << sd->get_bd()->get_scoring_function()->evaluate(false)
+              << " ; PredicatePairsRestraint score = "
+              << sd->get_predr()->evaluate(false)
+              <<  std::endl;
+    if(print_positions){
+      ParticlesTemp ps = sd->get_diffusers()->get_particles();
+      for(unsigned int i = 0; i < ps.size(); i++){
+        std::cout << ps[i] << ", "
+                  << IMP::core::RigidBody(ps[i]).get_reference_frame()
+                  << std::endl;
+      }
+    }
   }
 
   /**
@@ -72,7 +84,7 @@ namespace {
           std::cout << "Optimizing for " << cur_nframes
                     << " frames in this iteration" << std::endl;
           sd->get_bd()->optimize(cur_nframes);
-          print_score(sd);
+          print_score_and_positions(sd);
           if(! silent_statistics) {
             sd->update_statistics(timer, cur_nframes);
           }
@@ -90,10 +102,18 @@ namespace {
   }
 }
 
+/**
+   is_initial_optimization - whether to do initial optimization of positions
+   is_full_run - whetehr to run the full BD simulation
+ */
 void do_main_loop(SimulationData *sd,
                   const RestraintsTemp &init_restraints,
-                  bool quick, bool init_only, std::string final_conformations,
-                  bool debug_initialize, std::string init_rmf) {
+                  bool quick,
+                  bool is_initial_optimization,
+                  bool is_equilibration,
+                  bool is_full_run,
+                  std::string final_conformations,
+                  bool debug) {
   using namespace IMP;
   IMP::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
     = sd->get_rmf_sos_writer();
@@ -111,38 +131,24 @@ void do_main_loop(SimulationData *sd,
               << sd->get_number_of_trials() << std::endl;
     if (!quick)
       sd->reset_rmf();
-    std::cout<< "Initializing...";
-    if (init_rmf == "") {
- 	  initialize_positions(sd, init_restraints, debug_initialize);
-          std::cout << " from scratch" << std::endl;
+    if (is_initial_optimization) {
+      std::cout<< "Doing initial coordinates optimization...";
+      initialize_positions(sd, init_restraints, debug);
+      sd->get_bd()->set_current_time( 0.0 );
     }
-    else{
-      sd->initialize_positions_from_rmf(init_rmf, -1);
-      std::cout << " from last frame of existing RMF file " << init_rmf << std::endl;
-    }
-    print_score( sd, "Initial score = " );
-    if (debug_initialize) break;
-    sd->get_bd()->set_log_level(IMP::PROGRESS);
+    print_score_and_positions( sd, debug, "Score right before BD = " );
     if (conformations_rmf_sos) {
-      conformations_rmf_sos->update_always("After initialization");
-    }
-    {
-      ParticlesTemp ps = sd->get_diffusers()->get_particles();
-      for(unsigned int i = 0; i < ps.size(); i++){
-        std::cout << ps[i] << ", "
-          //        <<  IMP::core::XYZ(ps[i]).get_coordinates()
-                  << IMP::core::RigidBody(ps[i]).get_reference_frame()
-                  << std::endl;
-      }
+      conformations_rmf_sos->update_always("Right before BD");
     }
     /*IMP::benchmark::Profiler p;
     if(i == 0)
       p.set("profiling.pprof");*/
-    sd->get_bd()->set_current_time(0);
-    {
-      double equilibrate_fraction =  1.0 - sd->get_statistics_fraction() ;
-      unsigned int nframes_equilibrate = (unsigned int)
-        (sd->get_number_of_frames() * equilibrate_fraction );
+    sd->get_bd()->set_log_level(IMP::PROGRESS);
+    unsigned int nframes_run = (unsigned int)
+        ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
+    unsigned int nframes_equilibrate =
+      sd->get_number_of_frames() - nframes_run;
+    if(is_equilibration){
       std::cout << "Equilibrating for " << nframes_equilibrate
                 << " frames..." << std::endl;
       bool ok = run_it
@@ -151,23 +157,20 @@ void do_main_loop(SimulationData *sd,
       if(! ok)
         return;
       //if(nframes_equilibrate > 0) {
-        // if equilibrated, ignore equilibration stats
-        // TODO: removed for now since this may be incosistent with
-        //       consecutive runs
-        //sd->reset_statistics_optimizer_states();
+      // if equilibrated, ignore equilibration stats
+      // TODO: removed for now since this may be incosistent with
+      //       consecutive runs
+      //sd->reset_statistics_optimizer_states();
       // }
+      sd->get_bd()->set_current_time( 0.0 );
+      std::cout << "Equilibration finished succesfully" << std::endl;
     }
-    std::cout << "Equilibration finished succesfully" << std::endl;
-    if (init_only) {
-      continue; // skip optimization
-    }
-    {
+    if(is_full_run) {
       timer.restart();
-      unsigned int nframes_run = (unsigned int)
-        ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;
       if (conformations_rmf_sos) {
-        conformations_rmf_sos->update_always("Before running (post equilibration)");
+        conformations_rmf_sos->update_always
+          ("Before running (post equilibration)");
       }
       // now run the rest of the sim
       bool ok = run_it(sd, nframes_run, timer, total_time,
@@ -175,28 +178,21 @@ void do_main_loop(SimulationData *sd,
       if (! ok){
         return;
       }
-      if (conformations_rmf_sos) {
-        conformations_rmf_sos->update_always("Final frame");
-      }
-      if( !final_conformations.empty() ) {
-        std::cout << "Printing last frame to "
-                  << final_conformations << std::endl;
-        IMP::rmf::save_frame
-          ( final_rmf_fh, final_rmf_fh.get_number_of_frames() );
-      }
       std::cout << "Run trial #" << i << " finished succesfully" << std::endl;
+    }
+    if (conformations_rmf_sos) {
+      conformations_rmf_sos->update_always("Final frame");
+    }
+    if( !final_conformations.empty() ) {
+      std::cout << "Printing last frame to "
+                << final_conformations << std::endl;
+      IMP::rmf::save_frame
+        ( final_rmf_fh, final_rmf_fh.get_number_of_frames() );
     }
   }
   std::cout << "Entire run finished" << std::endl;
-  print_score( sd, "Final score = " );
-  {
-    ParticlesTemp ps = sd->get_diffusers()->get_particles();
-    for(unsigned int i = 0; i < ps.size(); i++){
-      std::cout << ps[i] << ", "
-        //      << IMP::core::XYZ(ps[i]).get_coordinates()
-                << IMP::core::RigidBody(ps[i]).get_reference_frame()
-                << std::endl;
-    }
+  print_score_and_positions( sd, debug, "Final score = " );
+  if(debug){
   }
 }
 IMPNPCTRANSPORT_END_INTERNAL_NAMESPACE

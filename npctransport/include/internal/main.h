@@ -25,19 +25,20 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
                 right now as sd received 'quick' in its constructor -
                 isn't this redundant? shouldn't quick mode be saved
                 in sd? or only externally?)
+   @param is_initial_optimization whether to do initial optimization of positions
+   @param is_equilibration whether to do equilibration BD simulation
+   @param is_full_run whetehr to run the full BD simulation
    @param final_config name of a file for saving the final config from each trial
-   @param debug_init if true, do the initialization in a verbose debug
-                     mode, with lots of output
-   @param init_rmf if of length one or more, initialize the coordinates
-                   of the system from the last frame of the specified RMF file,
-                   likely that from a previous run using the same run params
- */
+   @param debug if true, do verbose debug outout
+*/ //TODO: replace all million flag params with a unified "flags" data structure
 IMPNPCTRANSPORTEXPORT void do_main_loop(SimulationData *sd,
                                         const RestraintsTemp &init_restraints,
-                                        bool quick, bool initialize_only,
+                                        bool quick,
+                                        bool is_initial_optimization,
+                                        bool is_equilibration,
+                                        bool is_full_run,
                                         std::string final_config,
-                                        bool debug_init,
-                                        std::string init_rmf="");
+                                        bool debug_init);
 IMPNPCTRANSPORT_END_INTERNAL_NAMESPACE
 
 #endif /* IMPNPCTRANSPORT_INTERNAL_MAIN_H */
