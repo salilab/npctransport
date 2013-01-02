@@ -33,7 +33,7 @@ void HierarchyWithSitesLoadLink::do_load_node( RMF::NodeConstHandle nh,
                        "is_last_entry_from_top is relevant only for particles"
                        " decorated with Transporting class - particle"
                        << *o,
-                       IMP::ValueException );
+                       IMP::base::ValueException );
       Transporting(o).set_is_last_entry_from_top( is_last_entry_from_top );
       std::cout << "Setting is_last_entry_from_top value "
                 << " to " << is_last_entry_from_top
