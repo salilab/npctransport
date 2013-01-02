@@ -11,11 +11,16 @@
 #include <avro/ValidSchema.hh>
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
-#include <IMP/npctransport/internal/npctransport.pb.h>
+#ifdef IMP_NPC_GOOGLE
+#include "third_party/npc/npctransport/data/npctransport.pb.h"
+#else
+#include "npctransport.pb.h"
+#endif
+
 #include <IMP/compatibility/vector.h>
 #include <IMP/compatibility/nullptr.h>
 #include <avro/DataFile.hh>
-#include <google/protobuf/text_format.h>
+//#include <google/protobuf/text_format.h>
 #include <fstream>
 #include <iomanip>
 
