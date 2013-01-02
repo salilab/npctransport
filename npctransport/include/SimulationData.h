@@ -222,7 +222,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
    */
   SimulationData(std::string output_file,
                  bool quick,
-                 std::string rmf_file_name = "");
+                 std::string rmf_file_name = std::string());
 
   Model *get_m();
 #ifndef SWIG

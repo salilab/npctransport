@@ -446,7 +446,9 @@ void SimulationData::dump_geometry()
 }
 
 void SimulationData::reset_rmf() {
-  get_rmf_sos_writer()->reset();
+  if (get_rmf_sos_writer()) {
+    get_rmf_sos_writer()->reset();
+  }
 }
 
 atom::BrownianDynamics *SimulationData::get_bd() {
