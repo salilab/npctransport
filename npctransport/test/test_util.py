@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from IMP.npctransport import *
 import sys
+import math
 
 def get_basic_config():
     config = Configuration()
@@ -32,8 +33,12 @@ def get_basic_config():
     config.tunnel_radius.lower=75
     return config
 
-def make_simple_cfg(outfile, is_slab_on = True):
-    """ Make a simple configuration, with or without tunnen-in-a-slab """
+def make_simple_cfg(outfile, is_slab_on = True, n_particles_factor = 1):
+    """
+    Make a simple configuration, with or without tunnen-in-a-slab
+    n_particles_factor - factor by which the number of particles in the system
+                         is multiplied, to generate a more complex configuration
+    """
     def add_interactions_for_fg(fg_name,
                                 k_kap_lower,
                                 k_kap_upper = 0, # relevant only if k_kap_steps > 1
@@ -67,17 +72,17 @@ def make_simple_cfg(outfile, is_slab_on = True):
     config.slab_thickness.lower=150
     config.tunnel_radius.lower=90
     fg= IMP.npctransport.add_fg_type(config,
-                                 number_of_beads=2,
-                                 number=1,
+                                 number_of_beads=int(math.floor(2 * n_particles_factor)),
+                                 number=int(math.floor(1 * n_particles_factor)),
                                  radius=6,
                                  interactions=1,
                                  rest_length_factor = 1.5)
     kap= IMP.npctransport.add_float_type(config,
-                                         number=1,
+                                         number=int(math.ceil(1 * n_particles_factor)),
                                          radius=20,
                                          interactions=12)
     nonspecifics= IMP.npctransport.add_float_type(config,
-                                                  number=1,
+                                                  number=int(math.ceil(1 * n_particles_factor)),
                                                   radius=20,
                                                   interactions=0)
     ###########

@@ -86,14 +86,13 @@ class Tests(IMP.test.TestCase):
         # random generator initialization
         IMP.set_log_level(IMP.SILENT)
         config= self.get_tmp_file_name( "simple_cfg.pb") ;
-        test_util.make_simple_cfg( config, is_slab_on = True)
+        test_util.make_simple_cfg( config, is_slab_on = True, n_particles_factor = 1.5)
         rt_output= self.get_tmp_file_name("round_trip_output.pb")
         sd = self.run_from_config( config, rt_output )
 
         print "reloading from output file ", rt_output
         sdp= IMP.npctransport.SimulationData(rt_output, False,
                                              self.get_tmp_file_name("out1.rmf"));
-        exit()
         self.assert_almost_equal_sds(sd, sdp)
 #        print "updating stats at end"
 #        sd.update_statistics(timer, 0);
