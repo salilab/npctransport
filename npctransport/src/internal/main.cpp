@@ -132,7 +132,7 @@ void do_main_loop(SimulationData *sd,
     if (!quick)
       sd->reset_rmf();
     if (is_initial_optimization) {
-      std::cout<< "Doing initial coordinates optimization...";
+      std::cout<< "Doing initial coordinates optimization..." << std::endl;
       initialize_positions(sd, init_restraints, debug);
       sd->get_bd()->set_current_time( 0.0 );
     }

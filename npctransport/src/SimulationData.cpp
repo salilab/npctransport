@@ -390,6 +390,8 @@ rmf::SaveOptimizerState *
 SimulationData::get_rmf_sos_writer()
 {
   if (!rmf_sos_writer_) {
+    IMP_ALWAYS_CHECK( !get_rmf_file_name().empty(),
+                      "RMF file name was not set", IMP::base::ValueException );
     RMF::FileHandle fh=RMF::create_rmf_file(get_rmf_file_name());
     link_rmf_file_handle(fh);
     IMP_NEW(rmf::SaveOptimizerState, los, (fh));
@@ -399,6 +401,20 @@ SimulationData::get_rmf_sos_writer()
     rmf_sos_writer_ = los;
   }
   return rmf_sos_writer_;
+}
+
+void SimulationData::set_rmf_file_name(const std::string& new_name)
+{
+  if( get_rmf_file_name() == new_name )
+    return;// nothing to do
+  if( rmf_sos_writer_ && bd_ ) {
+    bd_->remove_optimizer_state( rmf_sos_writer_ );
+    rmf_sos_writer_ = nullptr;
+  }
+  rmf_file_name_ = new_name;
+  if( bd_ ) {
+    bd_->add_optimizer_state( get_rmf_sos_writer() );
+  }
 }
 
 void SimulationData::dump_geometry()

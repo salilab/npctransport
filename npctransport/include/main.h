@@ -203,7 +203,7 @@ inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   try {
     write_output_based_on_flags( actual_seed );
     sd= new IMP::npctransport::SimulationData(FLAGS_output,
-                                            FLAGS_quick);
+                                              FLAGS_quick);
     if (!FLAGS_conformations.empty()) {
       sd->set_rmf_file_name(FLAGS_conformations);
     }

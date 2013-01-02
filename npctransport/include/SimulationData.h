@@ -217,11 +217,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      @param[out] quick if true, perform a very short simulation,
                        typically for calibration or for initial testing
      @param[out] rmf_file_name RMF file to which simulation trajectory
-                               is recorded
+                               is recorded (if empty, no RMF file is created upon construction)
+                               \see set_rmf_file_name()
    */
   SimulationData(std::string output_file,
                  bool quick,
-                 std::string rmf_file_name = "output.prmf");
+                 std::string rmf_file_name = "");
 
   Model *get_m();
 #ifndef SWIG
@@ -371,8 +372,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   /**
      Returns the internal periodic SaveOptimizerState writer that
      periodically outputs the particles hierarchy and restraints,
-     using the file name returned by ::get_rmf_file_name().  If it
-     does not exists, it is being initialized.
+     using the file name returned by ::get_rmf_file_name(), which is
+     assumed to be non empty.  If the writer does not exist, then
+     it is constructed first.
 
      \exception RMF::IOException couldn't create RMF file
   */
@@ -449,15 +451,15 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   std::string get_rmf_file_name() const { return rmf_file_name_; }
 
   /**
-     resets the name of the RMF file that records the simulation.
-     the previous RMF writer is invalidated by this action (closed and flushed)
-     TODO: make sure it is indeed closed and flushed
+     resets the name of the RMF file that records the simulation.  If
+     the new name is different than the old one, then the previous RMF
+     writer is invalidated by this action (closed and flushed).  If
+     the Brownian Dynamics object was already initialized, a new
+     writer with the new name is added as an optimizer state to it
+     instead of the existing one.
+     TODO: make sure the old writer is indeed closed and flushed
   */
-  void set_rmf_file_name(const std::string& new_name)
-  {
-    rmf_file_name_ = new_name;
-    rmf_sos_writer_ = nullptr; // invalidate the existing writer
-  }
+  void set_rmf_file_name(const std::string& new_name);
 
   IMP_OBJECT_INLINE(SimulationData,IMP_UNUSED(out),);
 };
