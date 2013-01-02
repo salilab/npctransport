@@ -9,7 +9,9 @@
 #define IMPNPCTRANSPORT_PROTOBUF_H
 
 #include "npctransport_config.h"
+#include <google/protobuf/repeated_field.h>
 #include <boost/cstdint.hpp>
+#include <set>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -52,6 +54,44 @@ assign_ranges(std::string fname, std::string output, unsigned int work_unit,
 
 IMPNPCTRANSPORTEXPORT int
 get_number_of_work_units(std::string configuration_file);
+
+/** returns an STL set with all unique (no duplicates) values in
+    ::google::protobuf::RepeatedField object
+
+    @param[in] src repeated field from which values of type value_type
+                   are copied
+*/
+template<class value_type>
+std::set< value_type >
+get_unique_set_from_repeated_field
+( ::google::protobuf::RepeatedField< value_type > const& src )
+{
+  std::set< value_type > ret_set;
+  for(int i = 0; i < src.size(); i++){
+    ret_set.insert( src.Get(i) );
+  }
+  return ret_set;
+}
+
+/** returns ::google::protobuf::RepeatedField object
+    based on an STL set
+
+    @param[in] src set from which values of type value_type
+                   are copied
+    @param[out] trg repeated field to which values are copied
+*/
+/* template<class value_type> */
+/* void copy_unique_set_to_repeated_field */
+/* ( std::set< value_type > const& src, */
+/*   ::google::protobuf::RepeatedField< value_type >& trg ) */
+/* { */
+/*   ::google::protobuf::RepeatedField< value_type > ret_val; */
+/*   std::set< value_type >::const_iterator;// iter; */
+/*   for(iter = src.begin(); iter != src.end(); iter++) { */
+/*     ret_val.push_back( *iter ); */
+/*   } */
+/*   return ret_val; */
+/* } */
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

@@ -391,4 +391,6 @@ get_number_of_work_units(std::string assignment_file) {
   int ret=assign_internal(ranges, 0, values, indexes, false);
   return ret;
 }
+
+
 IMPNPCTRANSPORT_END_NAMESPACE

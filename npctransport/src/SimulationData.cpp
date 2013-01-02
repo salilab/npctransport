@@ -11,6 +11,7 @@
 #include <IMP/npctransport/SlabGeometry.h>
 #include <IMP/npctransport/SlabSingletonScore.h>
 #include <IMP/npctransport/particle_types.h>
+#include <IMP/npctransport/protobuf.h>
 #ifdef IMP_NPC_GOOGLE
 #include "third_party/npc/npctransport/data/npctransport.pb.h"
 #else
@@ -894,36 +895,31 @@ SimulationData::update_statistics
   }
   // update avg number of transports per particle for each type of floats:
   if( slab_is_on_ ) {
-      // Note: for transports avg, no reseting is needed between updates,
-      // as we want to average over particles, but sum over time
-      // TODO: unless more than one trial?
     for (unsigned int type_i=0; type_i<float_transport_stats_.size(); ++type_i) {
       unsigned int n_particles = float_transport_stats_[type_i].size();
-      unsigned int sum_n_transports_type_i = 0;
-      for (unsigned int j = 0; j < n_particles ; ++j) {
-        sum_n_transports_type_i +=
-          float_transport_stats_[type_i][j]->get_total_n_transports();
-      }
-      double avg_n_transports_type_i =
-        sum_n_transports_type_i * 1.0 / n_particles;
-      (*stats.mutable_floaters(type_i)).set_avg_n_transports
-        ( avg_n_transports_type_i );
       // collect individual transport times in an ordered set,
-      // and add them to the statistics fils:
-      std::set<double> times_all;
-      for(unsigned int j = 0; j < n_particles ; ++j) {
-        Floats const& times_j =
+      // and add them to the statistics file:
+      std::set<double> times_i =
+        get_unique_set_from_repeated_field // load existing list
+        ( stats.floaters(type_i).transport_time_points_ns() );
+      for(unsigned int j = 0; j < n_particles ; ++j) { // add new
+        Floats const& new_times_ij =
           float_transport_stats_[type_i][j]->get_transport_time_points_in_ns();
-        for(unsigned int k = 0; k < times_j.size(); k++) {
-          times_all.insert( times_j[k] );
+        for(unsigned int k = 0; k < new_times_ij.size(); k++) {
+          times_i.insert( new_times_ij[k] );
         }
       }
       (*stats.mutable_floaters(type_i)).clear_transport_time_points_ns();
-      for(std::set<double>::const_iterator it = times_all.begin() ;
-          it != times_all.end() ; it++) {
+      for(std::set<double>::const_iterator it = times_i.begin() ;
+          it != times_i.end() ; it++) {
         (*stats.mutable_floaters(type_i))
           .add_transport_time_points_ns( *it );
       }
+      // update avg too
+      double avg_n_transports_type_i =
+        times_i.size() * 1.0 / n_particles;
+      (*stats.mutable_floaters(type_i)).set_avg_n_transports
+        ( avg_n_transports_type_i );
     }
   }
   for (unsigned int i=0; i<fgs_stats_.size(); ++i) {
