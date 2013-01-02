@@ -26,6 +26,12 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink:
                              Particle *o, RMF::NodeConstHandle node),
     IMP_OVERRIDE,);
 
+  /** load the values of a single particle from nh to o.  In addition
+      to calling parent rmf::HierarchLoadLink::do_load_node(), also
+      loads dynamic Transporting decorator transport directionality
+      information if needed (which is used in
+      ParticleTransportStatisticsOptimizerState)
+  */
   IMP_IMPLEMENT(void do_load_node(RMF::NodeConstHandle nh,
                                   Particle *o));
  public:
@@ -41,6 +47,13 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
   IMP_PROTECTED_METHOD(virtual void, do_add_recursive,
               (Particle *root, Particle *p,
                              RMF::NodeHandle cur), IMP_OVERRIDE,);
+
+  /** save the values of a single particle from o to n.  In addition
+      to calling parent rmf::HierarchSaveLink::do_save_node(), also
+      saves dynamic Transporting decorator transport directionality
+      information if exists (which is being used in
+      ParticleTransportStatisticsOptimizerState)
+  */
   IMP_PROTECTED_METHOD(virtual void, do_save_node, (Particle *p,
                                                     RMF::NodeHandle n),,);
   std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const ;

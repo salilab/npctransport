@@ -55,16 +55,10 @@ class IMPNPCTRANSPORTEXPORT Transporting:
   bool get_is_last_entry_from_top() const {
     return (get_particle()->get_value(get_is_last_entry_from_top_key()) != 0);
   }
-  //! Get the D key
-  static IntKey get_is_last_entry_from_top_key() {
-    static IntKey ik("last entry is from top");
-    return ik;
-  }
+  //! Get the decorator key for is_last_entry_from_top
+  static IntKey get_is_last_entry_from_top_key();
 };
 
-inline void Transporting::show(std::ostream &out) const {
-  IMP_UNUSED(out);
-}
 
 IMP_DECORATORS(Transporting, Transportings, IMP::Decorators);
 

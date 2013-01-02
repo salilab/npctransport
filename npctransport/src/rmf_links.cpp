@@ -9,6 +9,7 @@
 #include <IMP/npctransport/rmf_links.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/npctransport/Transporting.h>
+#include <IMP/base/exception.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m):
@@ -28,12 +29,15 @@ void HierarchyWithSitesLoadLink::do_load_node( RMF::NodeConstHandle nh,
     if (nh.get_has_value(is_last_entry_from_top_key_)){
       bool is_last_entry_from_top =
         nh.get_value(is_last_entry_from_top_key_);
-      if (!Transporting::particle_is_instance(o)) {
-        Transporting::setup_particle(o, true);
-      }
+      IMP_ALWAYS_CHECK(Transporting::particle_is_instance(o),
+                       "is_last_entry_from_top is relevant only for particles"
+                       " decorated with Transporting class - particle"
+                       << *o,
+                       IMP::ValueException );
       Transporting(o).set_is_last_entry_from_top( is_last_entry_from_top );
-      std::cout << "Setting is_last_entry_from_top value of particle " << *o
-                << " to " << is_last_entry_from_top << std::endl;
+      std::cout << "Setting is_last_entry_from_top value "
+                << " to " << is_last_entry_from_top
+                << " for particle " << *o << std::endl;
     }
   }
 }
