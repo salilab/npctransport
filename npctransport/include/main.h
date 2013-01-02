@@ -208,7 +208,8 @@ inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
       sd->set_rmf_file_name(FLAGS_conformations);
     }
     if(!FLAGS_init_rmffile.empty()) {
-      sd->initialize_positions_from_rmf(FLAGS_init_rmffile, -1);
+      sd->initialize_positions_from_rmf(RMF::open_rmf_file_read_only(FLAGS_init_rmffile),
+                                        -1);
 #pragma omp critical
       std::cout << "Initialize coordinates from last frame of an existing RMF file "
                 << FLAGS_init_rmffile << std::endl;
