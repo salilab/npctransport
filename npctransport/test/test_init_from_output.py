@@ -81,7 +81,7 @@ class Tests(IMP.test.TestCase):
         # check Transporting
         self.assert_transporting_equal(sd1, sd2)
 
-    def test_init_from_rmf(self):
+    def test_init_from_output(self):
         """ Testing whether positions are loaded properly from output file """
         # random generator initialization
         IMP.set_log_level(IMP.SILENT)
