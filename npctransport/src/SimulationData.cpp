@@ -842,6 +842,7 @@ SimulationData::update_statistics
     // TODO: what's if multiple trials?
     nf = 0;
     is_stats_reset_ = false;
+    (*stats.mutable_floaters(type_i)).clear_transport_time_points_ns();
   }
   std::cout << "Updating statistics file " << output_file_name_
             << " that currently has " << nf << " frames, with "
