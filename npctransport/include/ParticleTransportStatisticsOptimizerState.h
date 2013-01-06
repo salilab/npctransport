@@ -29,8 +29,6 @@ public core::PeriodicOptimizerState {
   Particle *p_; // the particle
   Float bottom_z_, top_z_; // channel boundaries on z-axis
   IMP::WeakPointer<IMP::atom::Simulator> owner_;
-  Float prev_z_; // particle z in previous round
-  Float cur_z_; // particle z in this round
   unsigned int n_transports_up_; // from bottom to top of channel
   unsigned int n_transports_down_; // from top to bottom of channOBel
   unsigned int n_entries_bottom_; // times particle entered channel from bottom

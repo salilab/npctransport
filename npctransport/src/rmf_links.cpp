@@ -26,19 +26,17 @@ void HierarchyWithSitesLoadLink::do_load_node( RMF::NodeConstHandle nh,
   rmf::HierarchyLoadLink::do_load_node(nh, o);
   // load particle transport directionality if needed
   if (nh.get_has_value(is_last_entry_from_top_key_)) {
-    if (nh.get_has_value(is_last_entry_from_top_key_)){
-      bool is_last_entry_from_top =
-        nh.get_value(is_last_entry_from_top_key_);
-      IMP_ALWAYS_CHECK(Transporting::particle_is_instance(o),
-                       "is_last_entry_from_top is relevant only for particles"
-                       " decorated with Transporting class - particle"
-                       << *o,
-                       IMP::base::ValueException );
-      Transporting(o).set_is_last_entry_from_top( is_last_entry_from_top );
-      std::cout << "Setting is_last_entry_from_top value "
-                << " to " << is_last_entry_from_top
-                << " for particle " << *o << std::endl;
-    }
+    IMP_ALWAYS_CHECK(Transporting::particle_is_instance(o),
+                     "is_last_entry_from_top is relevant only for particles"
+                     " decorated with Transporting class - particle " << *o,
+                     IMP::base::ValueException );
+    bool is_last_entry_from_top =
+      nh.get_value(is_last_entry_from_top_key_);
+    Transporting ot(o);
+    ot.set_is_last_entry_from_top( is_last_entry_from_top );
+    std::cout << "Setting is_last_entry_from_top value to "
+              << is_last_entry_from_top
+              << " for particle " << *o << std::endl;
   }
 }
 
