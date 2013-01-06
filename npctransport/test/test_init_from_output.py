@@ -26,7 +26,7 @@ class Tests(IMP.test.TestCase):
                                             self.get_tmp_file_name("out0.rmf"));
         IMP.npctransport.initialize_positions(sd, [], False)
         obd= sd.get_bd()
-        obd.optimize(10)
+        obd.optimize(2)
         timer= IMP.npctransport.timer();
         # # lame test
         # rt= sd.get_root()
@@ -52,6 +52,8 @@ class Tests(IMP.test.TestCase):
            print "Comparing transport statistics: ", t1, t2
            self.assert_(t1.get_is_last_entry_from_top()
                         == t2.get_is_last_entry_from_top() )
+           self.assertAlmostEqual(t1.get_last_tracked_z(),
+                        t2.get_last_tracked_z(), delta=.00001 )
 
     def assert_almost_equal_sds(self, sd1, sd2):
         """

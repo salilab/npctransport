@@ -12,8 +12,6 @@
 #include "npctransport_config.h"
 #include <IMP/Decorator.h>
 #include <IMP/decorator_macros.h>
-#include <IMP/core/XYZ.h>
-#include <IMP/base/exception.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -40,16 +38,7 @@ class IMPNPCTRANSPORTEXPORT Transporting:
                                     (rather than bottom or unknown)
   */
   static Transporting setup_particle(Particle *p,
-                                     bool is_last_entry_from_top = false) {
-    IMP_ALWAYS_CHECK(IMP::core::XYZ::particle_is_instance(p),
-                     "It is expected that a transporting particle would have "
-                     "coordinates, particle " << *p,
-                     IMP::base::ValueException);
-    p->add_attribute(get_is_last_entry_from_top_key(), is_last_entry_from_top);
-    double cur_z = IMP::core::XYZ(p).get_coordinates()[2];
-    p->add_attribute(get_last_tracked_z_key(), cur_z);
-    return Transporting(p);
-  }
+                                     bool is_last_entry_from_top = false);
 
   //! Return true if the particle is an instance of an Transporting
   static bool particle_is_instance(Particle *p) {

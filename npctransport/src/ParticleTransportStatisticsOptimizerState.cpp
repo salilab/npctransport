@@ -32,9 +32,7 @@ ParticleTransportStatisticsOptimizerState::ParticleTransportStatisticsOptimizerS
                     "Particle already defined as a transporting particle,"
                     " and cannot be tracked by this object",
                     IMP::base::ValueException);
-  double cur_z = core::XYZ(p_).get_coordinates()[2];
   Transporting::setup_particle(p_, false); // initial value doesn't matter
-
 }
 
 void
