@@ -31,8 +31,11 @@ class IMPNPCTRANSPORTEXPORT Transporting:
       statistics (number of transorts, etc.).  It is assumed the
       transport occurs along a z coordinate, and that the crossed barrier
       is bounded from top and bottom.
-      The last tracked z is set to the z coordinate of p, initially
-      @see set_last_tracked_z
+      The last tracked z is set to the z coordinate of p, initially,
+      and n entries from bottom and top are set to 0
+      @see get_last_tracked_z
+      @see get_n_entries_bottom
+      @see get_n_entries_top
 
       @param is_last_entry_from_top has particle last entered from top of barrier
                                     (rather than bottom or unknown)
@@ -44,13 +47,17 @@ class IMPNPCTRANSPORTEXPORT Transporting:
   static bool particle_is_instance(Particle *p) {
     return
       p->has_attribute(get_is_last_entry_from_top_key()) &&
-      p->has_attribute(get_last_tracked_z_key());
+      p->has_attribute(get_last_tracked_z_key()) &&
+      p->has_attribute(get_n_entries_bottom_key()) &&
+      p->has_attribute(get_n_entries_top_key());
   }
 
   //! Return true if the particle is an instance of an Transporting
   static bool particle_is_instance(Model *m, ParticleIndex pi) {
     return m->get_has_attribute(get_is_last_entry_from_top_key(), pi) &&
-      m->get_has_attribute(get_last_tracked_z_key(), pi);;
+      m->get_has_attribute(get_last_tracked_z_key(), pi) &&
+      m->get_has_attribute(get_n_entries_bottom_key(), pi) &&
+      m->get_has_attribute(get_n_entries_top_key(), pi);
   }
 
   //! sets whether the particle last enetered the transport moiety from its top
@@ -82,6 +89,36 @@ class IMPNPCTRANSPORTEXPORT Transporting:
 
   //! Get the decorator key last_tracked_z value
   static FloatKey get_last_tracked_z_key();
+
+  //! sets the number of times the particle crossed from the bottom
+  //! of the barrier into its interior
+  void set_n_entries_bottom(int n) {
+    get_particle()->set_value(get_n_entries_bottom_key(), n);
+  }
+
+  //! gets the number of times the particle crossed from the bottom
+  //! of the barrier into its interior
+  int get_n_entries_bottom() const {
+    return get_particle()->get_value( get_n_entries_bottom_key() );
+  }
+
+  //! Get the decorator key n_entries_bottom value
+  static IntKey get_n_entries_bottom_key();
+
+  //! sets the number of times the particle crossed from the top
+  //! of the barrier into its interior
+  void set_n_entries_top(int n) {
+    get_particle()->set_value(get_n_entries_top_key(), n);
+  }
+
+  //! gets the number of times the particle crossed from the top
+  //! of the barrier into its interior
+  int get_n_entries_top() const {
+    return get_particle()->get_value( get_n_entries_top_key() );
+  }
+
+  //! Get the decorator key n_entries_top value
+  static IntKey get_n_entries_top_key();
 };
 
 

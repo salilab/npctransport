@@ -20,7 +20,10 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink:
   public rmf::HierarchyLoadLink {
     WeakPointer<SimulationData> sd_;
   RMF::BallConstFactory bf_;
+  // Transporting decorator related keys:
   RMF::IntKey is_last_entry_from_top_key_;
+  RMF::IntKey n_entries_bottom_key_;
+  RMF::IntKey n_entries_top_key_;
   IMP_PROTECTED_METHOD(virtual void, do_add_link_recursive,
       (Particle *root,
                              Particle *o, RMF::NodeConstHandle node),
@@ -43,7 +46,10 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
   WeakPointer<SimulationData> sd_;
   RMF::BallFactory bf_;
   RMF::ColoredFactory cf_;
+  // Transporting decorator related keys:
   RMF::IntKey is_last_entry_from_top_key_;
+  RMF::IntKey n_entries_bottom_key_;
+  RMF::IntKey n_entries_top_key_;
   IMP_PROTECTED_METHOD(virtual void, do_add_recursive,
               (Particle *root, Particle *p,
                              RMF::NodeHandle cur), IMP_OVERRIDE,);

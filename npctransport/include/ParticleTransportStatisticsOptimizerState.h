@@ -31,8 +31,6 @@ public core::PeriodicOptimizerState {
   IMP::WeakPointer<IMP::atom::Simulator> owner_;
   unsigned int n_transports_up_; // from bottom to top of channel
   unsigned int n_transports_down_; // from top to bottom of channOBel
-  unsigned int n_entries_bottom_; // times particle entered channel from bottom
-  unsigned int n_entries_top_; // times particle entered channel from top
   Floats transport_time_points_in_ns_; // simulation time points of each
                                        // transport event
   // MOVED NEXT LINE TO DECORATOR (TODO: perhaps also other stats)

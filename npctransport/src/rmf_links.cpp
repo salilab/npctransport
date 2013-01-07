@@ -20,6 +20,10 @@ HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, 
   RMF::Category npc_cat= fh.get_category("npc");
   is_last_entry_from_top_key_ =
     fh.get_int_key(npc_cat, "last entry from top");
+  n_entries_bottom_key_ =
+    fh.get_int_key(npc_cat, "n entries bottom");
+  n_entries_top_key_ =
+    fh.get_int_key(npc_cat, "n entries top");
 }
 
 
@@ -32,9 +36,12 @@ void HierarchyWithSitesLoadLink::do_load_node( RMF::NodeConstHandle nh,
                      "is_last_entry_from_top is relevant only for particles"
                      " decorated with Transporting class - particle " << *o,
                      IMP::base::ValueException );
-    IMP_ALWAYS_CHECK(IMP::core::XYZ::particle_is_instance(o),
+    IMP_ALWAYS_CHECK(IMP::core::XYZ::particle_is_instance(o) &&
+                     nh.get_has_value(n_entries_bottom_key_) &&
+                     nh.get_has_value(n_entries_top_key_),
                      "It is expected that a transporting particle would have "
-                     "coordinates, particle " << *o,
+                     "coordinates and the RMF node would have all relevant "
+                     "keys for a transporting particle, particle " << *o,
                      IMP::base::ValueException);
     bool is_last_entry_from_top =
       nh.get_value(is_last_entry_from_top_key_);
@@ -42,10 +49,14 @@ void HierarchyWithSitesLoadLink::do_load_node( RMF::NodeConstHandle nh,
     ot.set_is_last_entry_from_top( is_last_entry_from_top );
     double cur_z = IMP::core::XYZ(o).get_coordinates()[2];
     ot.set_last_tracked_z( cur_z );
+    ot.set_n_entries_bottom( nh.get_value(n_entries_bottom_key_) );
+    ot.set_n_entries_top( nh.get_value(n_entries_top_key_) );
     std::cout << "Setting is_last_entry_from_top value to "
               << is_last_entry_from_top
-              << " and last_tracked_z to " << cur_z
-              << " for particle " << *o << std::endl;
+              << "; last_tracked_z to " << cur_z
+              << "; n_entries_bottom " << nh.get_value(n_entries_bottom_key_)
+              << "; n_entries_top " << nh.get_value(n_entries_top_key_)
+              << " - for particle " << *o << std::endl;
   }
 }
 
@@ -78,6 +89,11 @@ HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh):
   RMF::Category npc_cat= fh.get_category("npc");
   is_last_entry_from_top_key_ =
     fh.get_int_key(npc_cat, "last entry from top");
+  n_entries_bottom_key_ =
+    fh.get_int_key(npc_cat, "n entries bottom");
+  n_entries_top_key_ =
+    fh.get_int_key(npc_cat, "n entries top");
+
 }
 
 std::pair<double, algebra::Vector3Ds>
@@ -125,6 +141,10 @@ void HierarchyWithSitesSaveLink::do_save_node(Particle *p,
     Transporting t(p);
     n.set_value(is_last_entry_from_top_key_,
                 t.get_is_last_entry_from_top() );
+    n.set_value(n_entries_bottom_key_,
+                t.get_n_entries_bottom() );
+    n.set_value(n_entries_top_key_,
+                t.get_n_entries_top() );
   }
 }
 

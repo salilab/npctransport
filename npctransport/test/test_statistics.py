@@ -94,7 +94,9 @@ class Tests(IMP.test.TestCase):
         dt= 10
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_maximum_time_step(dt)
+        print "hey"
         os= IMP.npctransport.ParticleTransportStatisticsOptimizerState(p,10,20)
+        print "ho"
         num_steps=10000
         os.set_period( num_steps / 1000 )
         bd.add_optimizer_state( os )

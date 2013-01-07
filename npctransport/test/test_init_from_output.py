@@ -54,6 +54,10 @@ class Tests(IMP.test.TestCase):
                         == t2.get_is_last_entry_from_top() )
            self.assertAlmostEqual(t1.get_last_tracked_z(),
                         t2.get_last_tracked_z(), delta=.00001 )
+           self.assert_(t1.get_n_entries_bottom()
+                        == t2.get_n_entries_bottom() );
+           self.assert_(t1.get_n_entries_top()
+                        == t2.get_n_entries_top() );
 
     def assert_almost_equal_sds(self, sd1, sd2):
         """
