@@ -24,21 +24,4 @@ scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
                                             body=""" """)
 
 
-oenv=env.IMPModuleBuild(module="npctransport",
-                        version='develop',
-                        required_modules=['container',
-                                          'display', 'core',
-                                          'atom',
-                                          'statistics', 'rmf',
-                                          'benchmark',
-                                          'example',
-                                          'score_functor',
-                                          'kernel',
-                                          'algebra',
-                                          'domino',
-                                          'base'],
-                        lib_only_optional_modules=['cgal'],
-                        cpppath=[Dir("#/build/src/npctransport")],
-                        required_dependencies= ['RMF', 'Boost.ProgramOptions',
-                                                'Boost.FileSystem',
-                                                'ProtoBuf', 'AvroCpp'])
+oenv=env.IMPModuleBuild(cpppath=[Dir("#/build/src/npctransport")])
