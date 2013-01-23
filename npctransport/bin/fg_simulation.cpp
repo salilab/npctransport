@@ -18,6 +18,7 @@
 #include <RMF/utility.h>
 #include <IMP/container/SingletonsRestraint.h>
 #include <IMP/base/CreateLogContext.h>
+#include <IMP/base/exception.h>
 #include <IMP/npctransport.h>
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
@@ -233,6 +234,9 @@ IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
                         " the config file, with specified number of FG layers"
                         " (no cylinder anchoring if equals to 0)");
 
+IMP_NPC_PARAMETER_BOOL(surface_anchoring, false,
+                       "anchor FG nups to bottom of cube");
+
 
 int main(int argc, char *argv[])
 {
@@ -243,6 +247,13 @@ int main(int argc, char *argv[])
   RMF::set_show_hdf5_errors( true );
   // preparation::
   IMP_NPC_STARTUP(sd); //
+  if(FLAGS_surface_anchoring){
+    IMP_ALWAYS_CHECK(FLAGS_cylinder_nlayers == 0,
+                     "surface anchoring and cylinder"
+                     " anchoring flags are mutually exclusive",
+                     IMP::base::ValueException);
+    set_fg_grid(*sd);
+  }
   if(FLAGS_cylinder_nlayers > 0){
     set_fgs_in_cylinder(*sd, FLAGS_cylinder_nlayers);
     std::cout << "Numbner of cylinder layers = " << FLAGS_cylinder_nlayers << std::endl;
