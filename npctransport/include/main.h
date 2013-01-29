@@ -21,6 +21,7 @@
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/base/random.h>
 #include "SimulationData.h"
+#include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport.h>
 //#include <IMP/benchmark/Profiler.h>
 

@@ -15,7 +15,7 @@
 #ifdef IMP_NPC_GOOGLE
 #include "third_party/npc/npctransport/data/npctransport.pb.h"
 #else
-#include "npctransport.pb.h"
+#include <IMP/npctransport/internal/npctransport.pb.h>
 #endif
 #include <IMP/npctransport/creating_particles.h>
 #include <IMP/npctransport/io.h>

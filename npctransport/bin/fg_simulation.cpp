@@ -240,7 +240,6 @@ int main(int argc, char *argv[])
 
   // logging stuff:
   IMP::base::CreateLogContext main("main");
-  RMF::set_show_hdf5_errors( true );
   // preparation::
   IMP_NPC_STARTUP(sd); //
   if(FLAGS_cylinder_nlayers > 0){

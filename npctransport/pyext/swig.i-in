@@ -1,3 +1,5 @@
+%include "IMP_base.exceptions.i"
+
 %include "std_vector.i"
 namespace std {
    %template(VectorString) vector<string>;

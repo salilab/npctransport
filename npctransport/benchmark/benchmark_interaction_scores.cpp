@@ -56,7 +56,7 @@ void test_one(std::string name, Score *score,
 }
 
 int main(int argc, char**argv) {
-  IMP_BENCHMARK();
+  IMP::base::setup_from_argv(argc, argv, "benchmark interaction scores");
   BoundingBox3D bb= get_cube_d<3>(10);
   IMP_NEW(Model, m, ());
   ParticlesTemp psa= create_particles(m, bb, number_of_particles);
