@@ -12,8 +12,6 @@
 #include <avro/ValidSchema.hh>
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
-#include <IMP/compatibility/vector.h>
-#include <IMP/compatibility/nullptr.h>
 #include <IMP/base/value_macros.h>
 #include <IMP/base/showable_macros.h>
 #include <avro/DataFile.hh>
