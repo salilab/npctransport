@@ -33,17 +33,16 @@
 #include <boost/timer.hpp>
 #include <string>
 
-//#ifndef SWIG
-#ifdef IMP_NPC_GOOGLE
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-#else
-#include "npctransport.pb.h"
-#endif
-//#endif
-
 #ifdef SWIG
 namespace boost{
   struct timer{};
+}
+#endif
+#ifndef SWIG
+namespace npctransport_proto {
+class Assignment_FGAssignment;
+class Assignment_InteractionAssignment;
+class Assignment_FloaterAssignment;
 }
 #endif
 

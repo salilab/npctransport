@@ -12,8 +12,6 @@ int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
   using namespace IMP;
   using namespace IMP::npctransport;
   using namespace IMP::algebra;
-
-  RMF:: set_show_hdf5_errors(true);
   //  sd->add_interaction(type_of_float[0], type_of_fg[0]);
   //  sd->add_interaction(type_of_float[1], type_of_fg[0]);
 

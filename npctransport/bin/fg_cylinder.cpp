@@ -15,7 +15,6 @@ int main(int argc, char *argv[]) {
   using namespace IMP::npctransport;
 
   IMP_NPC_STARTUP(sd);
-  RMF:: set_show_hdf5_errors(true);
   //  sd->add_interaction(type_of_float[0], type_of_fg[0]);
   //  sd->add_interaction(type_of_float[1], type_of_fg[0]);
 

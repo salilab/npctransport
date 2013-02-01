@@ -163,36 +163,36 @@ public:
     IMP_UNUSED(max);
     return evaluate_index(m, p, da);
                        });
-  IMP_IMPLEMENT_INLINE(double
+  virtual double
   evaluate_indexes(Model *m,
                    const ParticleIndexPairs &p,
                    DerivativeAccumulator *da,
                    unsigned int lower_bound,
-                   unsigned int upper_bound) const IMP_OVERRIDE,
+                   unsigned int upper_bound) const IMP_OVERRIDE
   {
     double ret=0;
     for (unsigned int i=lower_bound; i < upper_bound; ++i) {
       ret+= evaluate_index(m, p[i], da);
     }
     return ret;
-  });
-  IMP_IMPLEMENT_INLINE(double
+  }
+  double
   evaluate_if_good_index(Model *m,
                          const ParticleIndexPairs &p,
                          DerivativeAccumulator *da,
                          double max,
                          unsigned int lower_bound,
-                         unsigned int upper_bound) const, {
+                         unsigned int upper_bound) const {
     double ret=0;
     for (unsigned int i=lower_bound; i < upper_bound; ++i) {
       ret+= evaluate_if_good_index(m, p[i], da, max-ret);
       if (ret>max) return std::numeric_limits<double>::max();
     }
     return ret;
-                       });
-  IMP_IMPLEMENT(ModelObjectsTemp
+  }
+  ModelObjectsTemp
   do_get_inputs(Model *m,
-                const ParticleIndexes &pis) const IMP_OVERRIDE);
+                const ParticleIndexes &pis) const IMP_OVERRIDE;
   IMP_OBJECT(LinearInteractionPairScore);
 };
 

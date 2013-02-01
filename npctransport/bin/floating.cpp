@@ -10,7 +10,6 @@
 #include <RMF/utility.h>
 
 int main(int argc, char *argv[]) {
-  RMF::set_show_hdf5_errors(true);
   IMP_NPC_STARTUP(sd);
   IMP_NPC_LOOP(sd, IMP::RestraintsTemp());
   return 0;

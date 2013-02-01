@@ -9,10 +9,10 @@
 #define IMPNPCTRANSPORT_AUTOMATIC_PARAMETERS_H
 
 #include "npctransport_config.h"
-#ifdef IMP_NPC_GOOGLE
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-#else
-#include "npctransport.pb.h"
+#ifndef SWIG
+namespace npctransport_proto {
+class Assignment;
+}
 #endif
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE

@@ -1,5 +1,10 @@
 Import('env')
 import scons_tools.dependency.boost
+import scons_tools.install
+import scons_tools.paths
+from SCons.Script import Copy
+
+import os
 
 scons_tools.dependency.boost.add_boost_library(env, "ProgramOptions",
                                                "program_options",
@@ -14,6 +19,10 @@ scons_tools.dependency.boost.add_boost_library( env, "FileSystem", "filesystem",
 scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
                                             "google/protobuf/text_format.h")
 
+scons_tools.dependency.add_external_library(env, "log4cxx",
+                                            ["log4cxx"],
+                                            header="log4cxx/ndc.h")
+
 scons_tools.dependency.add_external_library(env, "RMF",
                                             ["RMF"],
                                             "RMF/FileHandle.h",
@@ -24,21 +33,46 @@ scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
                                             body=""" """)
 
 
-oenv=env.IMPModuleBuild(module="npctransport",
-                        version='develop',
-                        required_modules=['container',
-                                          'display', 'core',
-                                          'atom',
-                                          'statistics', 'rmf',
-                                          'benchmark',
-                                          'example',
-                                          'score_functor',
-                                          'kernel',
-                                          'algebra',
-                                          'domino',
-                                          'base'],
-                        lib_only_optional_modules=['cgal'],
-                        cpppath=[Dir("#/build/src/npctransport")],
-                        required_dependencies= ['RMF', 'Boost.ProgramOptions',
-                                                'Boost.FileSystem',
-                                                'ProtoBuf', 'AvroCpp'])
+if env["IMP_PASS"]=="BUILD":
+  # what ridiculousness scons makes us do
+
+  path=Dir("#/build/data/npctransport").abspath
+  proto=path+"/npctransport.proto"
+  #print proto, path
+  # work around dumb script
+  try:
+    os.makedirs(Dir("#/build/lib/IMP/npctransport/").abspath)
+  except:
+    pass
+  try:
+    os.makedirs(Dir("#/build/src/npctransport").abspath)
+  except:
+    pass
+  proto_files = env.Protoc(
+      [],
+      proto,
+      PROTOCPROTOPATH=[path],
+      PROTOCPYTHONOUTDIR=Dir("#/build/lib/IMP/npctransport/").abspath,
+      PROTOCOUTDIR = Dir("#/build/src/npctransport/").abspath,
+      PROTOCINCLUDE = "IMP/npctransport/npctransport_config.h",
+      PROTOCCPPOUTFLAGS = "dllexport_decl=IMPNPCTRANSPORTEXPORT:"
+      )
+  env.Command(File("#/build/include/IMP/npctransport/internal/npctransport.pb.h"),
+              File("#/build/src/npctransport/npctransport.pb.h"),
+              Copy("$TARGET", "$SOURCE"))
+  env.Command(File("#/build/src/npctransport/npctransport.pb.cpp"),
+              File("#/build/src/npctransport/npctransport.pb.cc"),
+              Copy("$TARGET", "$SOURCE"))
+
+  def build_avro(target, source, env):
+        cmd="avrogencpp -i %(json)s -o %(header)s -n IMP_npctransport"%{
+     "json":source[0].abspath,
+     "header":target[0].abspath}
+        print "cmd=", cmd
+        env.Execute(cmd)
+  env['BUILDERS']['AvroCpp']=Builder(action=build_avro)
+  env.AvroCpp(source=[File("data/AvroDataFileData.json")],
+              target=[File("#/build/include/IMP/npctransport/AvroDataFileData.h")])
+
+
+oenv=env.IMPModuleBuild()
