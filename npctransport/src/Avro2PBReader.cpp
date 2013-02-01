@@ -17,8 +17,6 @@
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #endif
 
-#include <IMP/compatibility/vector.h>
-#include <IMP/compatibility/nullptr.h>
 #include <avro/DataFile.hh>
 //#include <google/protobuf/text_format.h>
 #include <fstream>
