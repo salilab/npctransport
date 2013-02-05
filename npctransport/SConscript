@@ -30,7 +30,8 @@ scons_tools.dependency.add_external_library(env, "RMF",
 
 scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
                                             ["avro/ValidSchema.hh"],
-                                            body=""" """)
+                                            body=""" """,
+                                            build_script="dependency/install_avro.sh")
 
 
 if env["IMP_PASS"]=="BUILD":
