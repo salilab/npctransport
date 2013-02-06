@@ -1,4 +1,4 @@
 required_modules='container:display:core:atom:statistics:rmf:benchmark:example:score_functor:kernel:algebra:domino:base'
 lib_only_optional_modules='cgal'
 required_dependencies='RMF:Boost.ProgramOptions:Boost.FileSystem:ProtoBuf:AvroCpp'
-optional_dependencies="log4cxx"
+optional_dependencies=""

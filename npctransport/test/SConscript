@@ -1,27 +1,3 @@
 Import('env')
 
-# This finds all python files matching test_*.py and all cpp files
-# matching test_*.cpp
-env.IMPModuleTest(python_tests= env.IMPModuleGetPythonTests(),
-                  cpp_tests= env.IMPModuleGetCPPTests(),
-                  spelling_exceptions=["npc", "fg", "kap", "cpc", "predr", "rmf", "avro"],
-                  function_name_exceptions=["append_npc", "display_npc",
-                                            "relax_npc", "simulate_npc",
-                                            "SimulationData.initialize_positions_from_rmf",
-                                            "VectorString.append",
-                                            "VectorString.assign",
-                                            "VectorString.back",
-                                            "VectorString.begin",
-                                            "VectorString.capacity",
-                                            "VectorString.empty",
-                                            "VectorString.end",
-                                            "VectorString.erase",
-                                            "VectorString.front",
-                                            "VectorString.insert",
-                                            "VectorString.iterator",
-                                            "VectorString.rbegin",
-                                            "VectorString.rend",
-                                            "VectorString.resize",
-                                             "VectorString.size"],
-                  value_object_exceptions=["timer","VectorString"],
-                  show_exceptions=["timer","VectorString"])
+env.IMPModuleTest()
