@@ -194,7 +194,6 @@ inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
  */
 inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
-  IMP_NPC_PRINTHELP;
   boost::uint64_t actual_seed =
     seed_randn_generator( FLAGS_random_seed );
 #pragma omp critical
