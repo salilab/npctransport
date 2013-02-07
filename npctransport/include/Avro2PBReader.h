@@ -13,6 +13,7 @@
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
 #include <IMP/base/value_macros.h>
+#include <IMP/base/types.h>
 #include <IMP/base/showable_macros.h>
 #include <avro/DataFile.hh>
 #include <fstream>
@@ -28,7 +29,7 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
   /** Initiates a reader that goes over all output
       entries in all files specified in avro_filenames
   */
-  Avro2PBReader(std::vector<std::string> avro_filenames);
+  Avro2PBReader(const Strings& avro_filenames);
 
   /** Initiates a reader that goes over all output
       entries in all files specified in avro_filenames
@@ -56,10 +57,10 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
 
   // called from ctr, this pain is needed since constructor delegation
   // is only supported from g++ 4.7, so we use init() for backward compatibility
-  void init(std::vector<std::string> avro_filenames);
+  void init(const Strings& avro_filenames);
 
  private:
-  std::vector<std::string> avro_filenames_; // list of files to go over
+  Strings avro_filenames_; // list of files to go over
   t_avro_reader* avro_reader_;
   unsigned int cur_file_; // file index we're reading now
 
