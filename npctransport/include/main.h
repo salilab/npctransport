@@ -31,7 +31,8 @@
 #include <IMP/example/counting.h>
 #include <IMP/example/optimizing.h>
 
-#include <IMP/compatibility/nullptr.h>
+#include <IMP/base/nullptr.h>
+#include <IMP/base/nullptr_macros.h>
 #include <IMP/base/check_macros.h>
 #include <IMP/base/exception.h>
 #include <boost/cstdint.hpp>
