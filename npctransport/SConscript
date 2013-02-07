@@ -16,22 +16,6 @@ scons_tools.dependency.boost.add_boost_library( env, "FileSystem", "filesystem",
                                                 body="boost::filesystem::path p;",
                                                 extra_boost_libs=["system"])
 
-scons_tools.dependency.add_external_library(env, "ProtoBuf", ["protobuf"],
-                                            "google/protobuf/text_format.h")
-
-scons_tools.dependency.add_external_library(env, "log4cxx",
-                                            ["log4cxx"],
-                                            header="log4cxx/ndc.h")
-
-scons_tools.dependency.add_external_library(env, "RMF",
-                                            ["RMF"],
-                                            "RMF/FileHandle.h",
-                                            extra_libs=[scons_tools.dependency.boost.get_boost_lib_name(env, "system")])
-
-scons_tools.dependency.add_external_library(env, "AvroCpp", ["avrocpp"],
-                                            ["avro/ValidSchema.hh"],
-                                            body=""" """,
-                                            build_script="dependency/install_avro.sh")
 
 
 if env["IMP_PASS"]=="BUILD":

@@ -77,10 +77,7 @@ namespace {
       unsigned int cur_nframes
         = std::min<unsigned int>(max_frames_per_chunk,
                                  number_of_frames);
-#pragma omp parallel num_threads(3)
-      {
-#pragma omp single
-        {
+      //IMP_THREADS((sd, silent_statistics, cur_nframes),{
           std::cout << "Optimizing for " << cur_nframes
                     << " frames in this iteration" << std::endl;
           sd->get_bd()->optimize(cur_nframes);
@@ -88,8 +85,7 @@ namespace {
           if(! silent_statistics) {
             sd->update_statistics(timer, cur_nframes);
           }
-        }
-      }
+          //});
       if (sd->get_maximum_number_of_minutes() > 0
           && total_time.elapsed()/60 > sd->get_maximum_number_of_minutes()) {
         sd->set_interrupted(true);
