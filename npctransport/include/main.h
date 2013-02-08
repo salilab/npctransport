@@ -92,12 +92,10 @@ IMP_NPC_PARAMETER_STRING(init_rmffile, "",
 IMP_NPC_PARAMETER_STRING(final_conformations, "final_conformations.rmf",
                          "RMF file for recording the initial and final conformations "
                          " [default: %default]");
-#ifdef IMP_NPC_GOOGLE
-IMP_NPC_PARAMETER_BOOL(profile, false,
-                       "Whether to turn on profiling for the first run");
-#endif
 IMP_NPC_PARAMETER_BOOL(verbose, false,
                        "Print more info during run");
+IMP_NPC_PARAMETER_BOOL(first_only, false,
+                       "Only do the first simulation block");
 IMP_NPC_PARAMETER_BOOL(initialize_only, false,
                        "Run the initialization and then stop");
 IMP_NPC_PARAMETER_BOOL(quick, false,
@@ -112,15 +110,6 @@ IMP_NPC_PARAMETER_UINT64(random_seed, 0,
                          " or zero, IMP will use system time as a seed."
                          " (Note: if in doubt, use a 32 bit unsigned integer"
                          " seed in the range 0 to 4,294,967,295)");
-
-
-#ifdef IMP_BENCHMARK_USE_GOOGLE_PERFTOOLS_PROFILE
-#define IMP_NPC_SET_PROF(p, tf) if (FLAGS_profile && i==0) {          \
-  p.set("profiling.pprof");                                           \
-  }
-#else
-#define IMP_NPC_SET_PROF(p, tf)
-#endif
 
 /** Run simulation using preconstructed SimulationData object sim_data.
     init_restraints are used ad-hoc during initialization only,
@@ -140,8 +129,9 @@ IMP_NPC_PARAMETER_UINT64(random_seed, 0,
                                               is_initial_optimization,  \
                                               is_BD_equilibration,      \
                                               is_BD_full_run,           \
-                                              FLAGS_final_conformations,   \
-                                              FLAGS_verbose ); \
+                                              FLAGS_final_conformations, \
+                                              FLAGS_verbose,            \
+                                              FLAGS_first_only);        \
   }
 
 //! seeds the random number generator of IMP with seed

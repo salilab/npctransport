@@ -69,13 +69,15 @@ namespace {
               boost::timer& timer,
               boost::timer& total_time,
               bool silent_statistics = false,
-              unsigned int max_frames_per_chunk = 50000) {
+              unsigned int max_frames_per_chunk = 50000,
+              bool first_only=false) {
     // TODO: next line is a temporary hack - needed for some reason to
     // force the pair predicates to evaluate predicate pairs restraints
     sd->get_m()->update();
     do {
       unsigned int cur_nframes
-        = std::min<unsigned int>(max_frames_per_chunk,
+        = std::min<unsigned int>(first_only
+                                 ?max_frames_per_chunk/10:max_frames_per_chunk,
                                  number_of_frames);
       //IMP_THREADS((sd, silent_statistics, cur_nframes),{
           std::cout << "Optimizing for " << cur_nframes
@@ -85,6 +87,7 @@ namespace {
           if(! silent_statistics) {
             sd->update_statistics(timer, cur_nframes);
           }
+          std::cout << "Done" << std::endl;
           //});
       if (sd->get_maximum_number_of_minutes() > 0
           && total_time.elapsed()/60 > sd->get_maximum_number_of_minutes()) {
@@ -93,7 +96,7 @@ namespace {
         return false;
       }
       number_of_frames-=cur_nframes;
-    } while (number_of_frames > 0);
+    } while (number_of_frames > 0 && !first_only);
     return true;
   }
 }
@@ -109,7 +112,8 @@ void do_main_loop(SimulationData *sd,
                   bool is_equilibration,
                   bool is_full_run,
                   std::string final_conformations,
-                  bool debug) {
+                  bool debug,
+                  bool first_only) {
   using namespace IMP;
   IMP::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
     = sd->get_rmf_sos_writer();
@@ -149,8 +153,8 @@ void do_main_loop(SimulationData *sd,
                 << " frames..." << std::endl;
       bool ok = run_it
         (sd, nframes_equilibrate, timer, total_time,
-         true /* silent stats */);
-      if(! ok)
+         true /* silent stats */, 50000, first_only);
+      if(! ok || first_only)
         return;
       //if(nframes_equilibrate > 0) {
       // if equilibrated, ignore equilibration stats
@@ -170,7 +174,7 @@ void do_main_loop(SimulationData *sd,
       }
       // now run the rest of the sim
       bool ok = run_it(sd, nframes_run, timer, total_time,
-                       false /* silent stats */);
+                       false /* silent stats */, 50000, first_only);
       if (! ok){
         return;
       }
