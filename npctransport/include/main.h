@@ -169,7 +169,7 @@ inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
      std::cout << "Restart simulation from " << FLAGS_restart << std::endl;
      ::npctransport_proto::Output prev_output;
      // copy to new file to avoid modifying input file
-     std::ifstream file(FLAGS_restart, std::ios::binary);
+     std::ifstream file(FLAGS_restart.c_str(), std::ios::binary);
      bool read=prev_output.ParseFromIstream(&file);
      IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << FLAGS_restart,
                       IMP::base::ValueException);
