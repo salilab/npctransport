@@ -1,2 +1,2 @@
-libraries="avrocpp"
 headers="avro/ValidSchema.hh"
+libraries="avrocpp"

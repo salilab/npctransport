@@ -38,7 +38,8 @@ IMPNPCTRANSPORTEXPORT void do_main_loop(SimulationData *sd,
                                         bool is_equilibration,
                                         bool is_full_run,
                                         std::string final_config,
-                                        bool debug_init);
+                                        bool debug_init,
+                                        bool first_only);
 IMPNPCTRANSPORT_END_INTERNAL_NAMESPACE
 
 #endif /* IMPNPCTRANSPORT_INTERNAL_MAIN_H */
