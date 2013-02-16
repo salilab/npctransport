@@ -21,7 +21,11 @@
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/base/random.h>
 #include "SimulationData.h"
+#ifdef IMP_NPC_GOOGLE
+#include "third_party/npc/npctransport/data/npctransport.pb.h"
+#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
+#endif
 #include <IMP/npctransport.h>
 //#include <IMP/benchmark/Profiler.h>
 
