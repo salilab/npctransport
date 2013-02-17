@@ -21,7 +21,7 @@ add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/include/IMP/npctransport/intern
                           COMMAND mv "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h" "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h.out"
                           COMMAND echo "\"\#include\"" "\"<IMP/npctransport/npctransport_config.h>\"" > "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h"
                           COMMAND cat "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h.out" >> "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h"
-                          COMMAND ln -s "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h" "${PROJECT_BINARY_DIR}/include/IMP/npctransport/internal/npctrasnport.pb.h"
+                          COMMAND ln -s "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h" "${PROJECT_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
                           DEPENDS "${PROJECT_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
                           COMMENT "Creating protoc stuff for npctransport"
                           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/src/npctransport")

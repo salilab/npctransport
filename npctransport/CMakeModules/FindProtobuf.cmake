@@ -15,10 +15,14 @@ find_path(Protobuf_INCLUDE_DIR
 )
 
 # Finally the library itself
-find_library(Protobuf_LIBRARY
-  NAMES protobuf
+foreach(lib protobuf)
+find_library(${lib}_LIBRARY
+  NAMES ${lib}
   PATHS ${Protobuf_PKGCONF_LIBRARY_DIRS}
 )
+set(Protobuf_LIBRARY ${Protobuf_LIBRARY} ${${lib}_LIBRARY})
+endforeach(lib)
+
 
 # Set the include dir variables and the libraries and let libfind_process do the rest.
 # NOTE: Singular variables for this library, plural for libraries this this lib depends on.
@@ -26,16 +30,29 @@ set(Protobuf_PROCESS_INCLUDES Protobuf_INCLUDE_DIR)
 set(Protobuf_PROCESS_LIBS Protobuf_LIBRARY)
 libfind_process(Protobuf)
 
-if (${Protobuf_LIBRARY} MATCHES "Protobuf_LIBRARY-NOTFOUND"
-    OR ${Protobuf_INCLUDE_DIR} MATCHES "Protobuf_INCLUDE_DIR-NOTFOUND")
+if ("${Protobuf_LIBRARY}" MATCHES ".*NOTFOUND.*"
+    OR "${Protobuf_INCLUDE_DIR}" MATCHES ".*NOTFOUND.*")
   message(STATUS "Protobuf not found")
   file(WRITE "${PROJECT_BINARY_DIR}/data/build_info/Protobuf" "ok=False")
 else()
-  message(STATUS "Protobuf found " ${Protobuf_INCLUDE_DIR} " " ${Protobuf_LIBRARY})
-  file(WRITE "${PROJECT_BINARY_DIR}/data/build_info/Protobuf" "ok=True")
-  #set(PROTOBUF_LINK_PATH ${Protobuf_LIBRARY_DIRS} CACHE INTERNAL ""  FORCE)
-  set(PROTOBUF_INCLUDE_PATH ${Protobuf_INCLUDE_DIR} CACHE INTERNAL "" FORCE)
-  set(PROTOBUF_LIBRARIES ${Protobuf_LIBRARY} CACHE INTERNAL "" FORCE)
+  include(CheckCXXSourceCompiles)
+  set(CMAKE_REQUIRED_LIBRARIES "${Protobuf_LIBRARY}")
+  set(body "#include <google/protobuf/text_format.h>
+int main(int,char*[]) {
+  
+  return 0;
+}")
+  check_cxx_source_compiles("${body}"
+ Protobuf_COMPILES)
+  if ("Protobuf_COMPILES" MATCHES "1")
+    message(STATUS "Protobuf found " ${Protobuf_INCLUDE_DIR} " " ${Protobuf_LIBRARY})
+    file(WRITE "${PROJECT_BINARY_DIR}/data/build_info/Protobuf" "ok=True")
+    #set(PROTOBUF_LINK_PATH ${Protobuf_LIBRARY_DIRS} CACHE INTERNAL ""  FORCE)
+    set(PROTOBUF_INCLUDE_PATH ${Protobuf_INCLUDE_DIR} CACHE INTERNAL "" FORCE)
+    set(PROTOBUF_LIBRARIES ${Protobuf_LIBRARY} CACHE INTERNAL "" FORCE)
+  else()
+    file(WRITE "${PROJECT_BINARY_DIR}/data/build_info/Protobuf" "ok=False")
+  endif()
 endif()
 
 else()

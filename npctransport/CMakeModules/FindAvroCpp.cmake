@@ -15,10 +15,14 @@ find_path(AvroCpp_INCLUDE_DIR
 )
 
 # Finally the library itself
-find_library(AvroCpp_LIBRARY
-  NAMES avrocpp
+foreach(lib avrocpp)
+find_library(${lib}_LIBRARY
+  NAMES ${lib}
   PATHS ${AvroCpp_PKGCONF_LIBRARY_DIRS}
 )
+set(AvroCpp_LIBRARY ${AvroCpp_LIBRARY} ${${lib}_LIBRARY})
+endforeach(lib)
+
 
 # Set the include dir variables and the libraries and let libfind_process do the rest.
 # NOTE: Singular variables for this library, plural for libraries this this lib depends on.
@@ -26,16 +30,29 @@ set(AvroCpp_PROCESS_INCLUDES AvroCpp_INCLUDE_DIR)
 set(AvroCpp_PROCESS_LIBS AvroCpp_LIBRARY)
 libfind_process(AvroCpp)
 
-if (${AvroCpp_LIBRARY} MATCHES "AvroCpp_LIBRARY-NOTFOUND"
-    OR ${AvroCpp_INCLUDE_DIR} MATCHES "AvroCpp_INCLUDE_DIR-NOTFOUND")
+if ("${AvroCpp_LIBRARY}" MATCHES ".*NOTFOUND.*"
+    OR "${AvroCpp_INCLUDE_DIR}" MATCHES ".*NOTFOUND.*")
   message(STATUS "AvroCpp not found")
   file(WRITE "${PROJECT_BINARY_DIR}/data/build_info/AvroCpp" "ok=False")
 else()
-  message(STATUS "AvroCpp found " ${AvroCpp_INCLUDE_DIR} " " ${AvroCpp_LIBRARY})
-  file(WRITE "${PROJECT_BINARY_DIR}/data/build_info/AvroCpp" "ok=True")
-  #set(AVROCPP_LINK_PATH ${AvroCpp_LIBRARY_DIRS} CACHE INTERNAL ""  FORCE)
-  set(AVROCPP_INCLUDE_PATH ${AvroCpp_INCLUDE_DIR} CACHE INTERNAL "" FORCE)
-  set(AVROCPP_LIBRARIES ${AvroCpp_LIBRARY} CACHE INTERNAL "" FORCE)
+  include(CheckCXXSourceCompiles)
+  set(CMAKE_REQUIRED_LIBRARIES "${AvroCpp_LIBRARY}")
+  set(body "#include <avro/ValidSchema.hh>
+int main(int,char*[]) {
+  
+  return 0;
+}")
+  check_cxx_source_compiles("${body}"
+ AvroCpp_COMPILES)
+  if ("AvroCpp_COMPILES" MATCHES "1")
+    message(STATUS "AvroCpp found " ${AvroCpp_INCLUDE_DIR} " " ${AvroCpp_LIBRARY})
+    file(WRITE "${PROJECT_BINARY_DIR}/data/build_info/AvroCpp" "ok=True")
+    #set(AVROCPP_LINK_PATH ${AvroCpp_LIBRARY_DIRS} CACHE INTERNAL ""  FORCE)
+    set(AVROCPP_INCLUDE_PATH ${AvroCpp_INCLUDE_DIR} CACHE INTERNAL "" FORCE)
+    set(AVROCPP_LIBRARIES ${AvroCpp_LIBRARY} CACHE INTERNAL "" FORCE)
+  else()
+    file(WRITE "${PROJECT_BINARY_DIR}/data/build_info/AvroCpp" "ok=False")
+  endif()
 endif()
 
 else()
