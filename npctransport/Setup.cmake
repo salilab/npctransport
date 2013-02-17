@@ -13,6 +13,7 @@ message(STATUS "Setting up proto " "${PROJECT_BINARY_DIR}/src/npctransport/npctr
 add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
                           "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h"
                           "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.cpp"
+                          COMMAND mkdir -p "${PROJECT_BINARY_DIR}/src/npctransport/"
                           COMMAND protoc "--cpp_out=dllexport_decl=IMPNPCTRANSPORTEXPORT:."
                           "-I${PROJECT_SOURCE_DIR}/modules/npctransport/data/"
                           "${PROJECT_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"

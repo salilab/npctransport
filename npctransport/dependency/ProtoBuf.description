@@ -1,2 +1,0 @@
-libraries="protobuf"
-headers="google/protobuf/text_format.h"
