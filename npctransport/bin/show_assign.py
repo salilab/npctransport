@@ -2,6 +2,6 @@
 from IMP.npctransport import *
 import sys
 f=open(sys.argv[1], "rb")
-config= Assignment()
-config.ParseFromString(f.read())
-print config
+output= Output()
+output.ParseFromString(f.read())
+print output.assignment
