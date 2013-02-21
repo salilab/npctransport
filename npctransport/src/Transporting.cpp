@@ -16,7 +16,6 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 Transporting Transporting::setup_particle(Particle *p,
                                           bool is_last_entry_from_top)
 {
-  int hinum = 0;
   IMP_ALWAYS_CHECK(IMP::core::XYZ::particle_is_instance(p),
                    "It is expected that a transporting particle would have "
                    "coordinates, particle " << *p,

@@ -34,6 +34,5 @@ typedef unsigned int UInt64Arg;
   InitGoogle(argv[0],                           \
              &argc, &argv, true);
 
-#define IMP_NPC_PRINTHELP
 #endif
 #endif /* IMPNPCTRANSPORT_GOOGLE_MAIN_H */

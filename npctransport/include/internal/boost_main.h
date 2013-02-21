@@ -8,76 +8,29 @@
 #define IMPNPCTRANSPORT_BOOST_MAIN_H
 
 #ifdef IMP_NPC_MAIN
-#include <boost/program_options.hpp>
-#include <boost/cstdint.hpp>
+#include <IMP/base/flags.h>
 
-typedef boost::int64_t Int64Arg;
-typedef boost::uint64_t UInt64Arg;
-
-
-#define IMP_NPC_PARAMETER(name, def, description)                       \
-  double FLAGS_##name=def;                                              \
-  Adder name##add(#name,                                                \
-                                     &FLAGS_##name,                     \
-                                     description);                      \
-  Pusher name##_pusher(#name, &FLAGS_##name)
-
-
-#define IMP_NPC_PARAMETER_BOOL(name, def, description)    \
-  bool FLAGS_##name=def;                                  \
-  Adder name##add(#name, &FLAGS_##name,                   \
-                                         description)
+#define IMP_NPC_PARAMETER_BOOL(name, def, description)                  \
+  bool FLAGS_##name=def;                                                \
+  IMP::base::AddBoolFlag name##adder(#name, description, &FLAGS_##name)
 
 #define IMP_NPC_PARAMETER_INT64(name, def, description)                 \
-  Int64Arg FLAGS_##name=def;                                            \
-  Adder name##add(#name, &FLAGS_##name,                                 \
-                  description);                                         \
+  int FLAGS_##name=def;                                                 \
+  IMP::base::AddIntFlag name##adder(#name, description, &FLAGS_##name)
 
 #define IMP_NPC_PARAMETER_UINT64(name, def, description)                \
-  UInt64Arg FLAGS_##name=def;                                           \
-  Adder name##add(#name, &FLAGS_##name,                                 \
-                  description);                                         \
+  int FLAGS_##name=def;                                                 \
+  IMP::base::AddIntFlag name##adder(#name, description, &FLAGS_##name)
+
 
 #define IMP_NPC_PARAMETER_STRING(name, def, description)                \
   std::string FLAGS_##name=def;                                         \
-  Adder name##add(#name, &FLAGS_##name,                                 \
-                  description);
+  IMP::base::AddStringFlag name##adder(#name, description, &FLAGS_##name)
 
 #define IMP_NPC_PARSE_OPTIONS(argc, argv)                               \
-  boost::program_options::variables_map vm;                             \
-  boost::program_options::store(boost                                   \
-                                ::program_options::parse_command_line(argc, \
-                                                                      argv, \
-                                                                      desc), \
-                                vm);                                    \
-  boost::program_options::notify(vm);                                   \
-  if (vm.count("help")) {                                               \
-    std::cout << desc << "\n";                                          \
-    return IMP_NULLPTR;                                                 \
-  }
-
-#define IMP_NPC_PRINTHELP                       \
-  if (FLAGS_help) {                             \
-    std::cerr << desc;                          \
-    return IMP_NULLPTR;                         \
-  }
+  IMP::base::setup_from_argv(argc, argv, "Something npcish");
 
 #endif
-boost::program_options::options_description desc;
-struct Adder {
-  template <class V>
-  Adder(std::string name, V*v, std::string description) {
-    desc.add_options()(name.c_str(), boost::program_options::value<V>(v),
-                       description.c_str());
-  }
-  Adder(std::string name, bool *b, std::string description) {
-    desc.add_options()(name.c_str(),
-                       boost::program_options::value<bool>(b)->zero_tokens(),
-                       description.c_str());
-  }
-};
-
-IMP_NPC_PARAMETER_BOOL(help, false, "Print help");
 
 
 

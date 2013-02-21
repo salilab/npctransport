@@ -21,7 +21,11 @@
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/base/random.h>
 #include "SimulationData.h"
+#ifdef IMP_NPC_GOOGLE
+#include "third_party/npc/npctransport/data/npctransport.pb.h"
+#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
+#endif
 #include <IMP/npctransport.h>
 //#include <IMP/benchmark/Profiler.h>
 
@@ -31,7 +35,8 @@
 #include <IMP/example/counting.h>
 #include <IMP/example/optimizing.h>
 
-#include <IMP/compatibility/nullptr.h>
+#include <IMP/base/nullptr.h>
+#include <IMP/base/nullptr_macros.h>
 #include <IMP/base/check_macros.h>
 #include <IMP/base/exception.h>
 #include <boost/cstdint.hpp>
@@ -91,12 +96,10 @@ IMP_NPC_PARAMETER_STRING(init_rmffile, "",
 IMP_NPC_PARAMETER_STRING(final_conformations, "final_conformations.rmf",
                          "RMF file for recording the initial and final conformations "
                          " [default: %default]");
-#ifdef IMP_NPC_GOOGLE
-IMP_NPC_PARAMETER_BOOL(profile, false,
-                       "Whether to turn on profiling for the first run");
-#endif
 IMP_NPC_PARAMETER_BOOL(verbose, false,
                        "Print more info during run");
+IMP_NPC_PARAMETER_BOOL(first_only, false,
+                       "Only do the first simulation block");
 IMP_NPC_PARAMETER_BOOL(initialize_only, false,
                        "Run the initialization and then stop");
 IMP_NPC_PARAMETER_BOOL(quick, false,
@@ -111,15 +114,6 @@ IMP_NPC_PARAMETER_UINT64(random_seed, 0,
                          " or zero, IMP will use system time as a seed."
                          " (Note: if in doubt, use a 32 bit unsigned integer"
                          " seed in the range 0 to 4,294,967,295)");
-
-
-#ifdef IMP_BENCHMARK_USE_GOOGLE_PERFTOOLS_PROFILE
-#define IMP_NPC_SET_PROF(p, tf) if (FLAGS_profile && i==0) {          \
-  p.set("profiling.pprof");                                           \
-  }
-#else
-#define IMP_NPC_SET_PROF(p, tf)
-#endif
 
 /** Run simulation using preconstructed SimulationData object sim_data.
     init_restraints are used ad-hoc during initialization only,
@@ -139,8 +133,9 @@ IMP_NPC_PARAMETER_UINT64(random_seed, 0,
                                               is_initial_optimization,  \
                                               is_BD_equilibration,      \
                                               is_BD_full_run,           \
-                                              FLAGS_final_conformations,   \
-                                              FLAGS_verbose ); \
+                                              FLAGS_final_conformations, \
+                                              FLAGS_verbose,            \
+                                              FLAGS_first_only);        \
   }
 
 //! seeds the random number generator of IMP with seed
@@ -178,7 +173,7 @@ inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
      std::cout << "Restart simulation from " << FLAGS_restart << std::endl;
      ::npctransport_proto::Output prev_output;
      // copy to new file to avoid modifying input file
-     std::ifstream file(FLAGS_restart, std::ios::binary);
+     std::ifstream file(FLAGS_restart.c_str(), std::ios::binary);
      bool read=prev_output.ParseFromIstream(&file);
      IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << FLAGS_restart,
                       IMP::base::ValueException);
@@ -194,7 +189,6 @@ inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
  */
 inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
-  IMP_NPC_PRINTHELP;
   boost::uint64_t actual_seed =
     seed_randn_generator( FLAGS_random_seed );
 #pragma omp critical

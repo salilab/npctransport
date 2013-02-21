@@ -9,7 +9,6 @@
 #define IMPNPCTRANSPORT_PROTOBUF_H
 
 #include "npctransport_config.h"
-#include <google/protobuf/repeated_field.h>
 #include <boost/cstdint.hpp>
 #include <set>
 
@@ -61,12 +60,12 @@ get_number_of_work_units(std::string configuration_file);
     @param[in] src repeated field from which values of type value_type
                    are copied
 */
-template<class value_type>
-std::set< value_type >
+template<class RF>
+std::set< typename RF::value_type >
 get_unique_set_from_repeated_field
-( ::google::protobuf::RepeatedField< value_type > const& src )
+( RF const& src )
 {
-  std::set< value_type > ret_set;
+  std::set< typename RF::value_type > ret_set;
   for(int i = 0; i < src.size(); i++){
     ret_set.insert( src.Get(i) );
   }
