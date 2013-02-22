@@ -61,6 +61,8 @@ namespace {
                               (e.g., during equilibration)
      @param max_frames_per_chunk maximal number of frames to be simulated
                                  in a single optimization chunk
+     @param first_only some debug mode parameter for having a real short
+                        simulation
 
      @return true if succesful, false if terminated abnormally
   */
@@ -115,84 +117,89 @@ void do_main_loop(SimulationData *sd,
                   bool debug,
                   bool first_only) {
   using namespace IMP;
-  IMP::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
-    = sd->get_rmf_sos_writer();
-  RMF::FileHandle final_rmf_fh;
-  if(!final_conformations.empty()){
-    final_rmf_fh=RMF::create_rmf_file(final_conformations);
-    sd->link_rmf_file_handle(final_rmf_fh);
-  }
-  boost::timer total_time;
-  for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
-    IMP::base::CreateLogContext clc("iteration");
-    boost::timer timer;
-    IMP::set_log_level(SILENT);
-    std::cout << "Simulation trial " << i << " out of "
-              << sd->get_number_of_trials() << std::endl;
-    if (!quick)
-      sd->reset_rmf();
-    if (is_initial_optimization) {
-      std::cout<< "Doing initial coordinates optimization..." << std::endl;
-      initialize_positions(sd, init_restraints, debug);
-      sd->get_bd()->set_current_time( 0.0 );
+  const int max_frames_per_chunk=50000;
+  try {
+    IMP::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
+      = sd->get_rmf_sos_writer();
+    RMF::FileHandle final_rmf_fh;
+    if(!final_conformations.empty()){
+      final_rmf_fh=RMF::create_rmf_file(final_conformations);
+      sd->link_rmf_file_handle(final_rmf_fh);
     }
-    print_score_and_positions( sd, debug, "Score right before BD = " );
-    if (conformations_rmf_sos) {
-      conformations_rmf_sos->update_always("Right before BD");
-    }
-    /*IMP::benchmark::Profiler p;
-    if(i == 0)
-      p.set("profiling.pprof");*/
-    sd->get_bd()->set_log_level(IMP::PROGRESS);
-    unsigned int nframes_run = (unsigned int)
-        ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
-    unsigned int nframes_equilibrate =
-      sd->get_number_of_frames() - nframes_run;
-    if(is_equilibration){
-      std::cout << "Equilibrating for " << nframes_equilibrate
-                << " frames..." << std::endl;
-      bool ok = run_it
-        (sd, nframes_equilibrate, timer, total_time,
-         true /* silent stats */, 50000, first_only);
-      if(! ok || first_only)
-        return;
-      //if(nframes_equilibrate > 0) {
-      // if equilibrated, ignore equilibration stats
-      // TODO: removed for now since this may be incosistent with
-      //       consecutive runs
-      //sd->reset_statistics_optimizer_states();
-      // }
-      sd->get_bd()->set_current_time( 0.0 );
-      std::cout << "Equilibration finished succesfully" << std::endl;
-    }
-    if(is_full_run) {
-      timer.restart();
-      std::cout << "Running for " << nframes_run << " frames..." << std::endl;
+    boost::timer total_time;
+    for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
+      IMP::base::CreateLogContext clc("iteration");
+      boost::timer timer;
+      IMP::set_log_level(SILENT);
+      std::cout << "Simulation trial " << i << " out of "
+                << sd->get_number_of_trials() << std::endl;
+      if (!quick)
+        sd->reset_rmf();
+      if (is_initial_optimization) {
+        std::cout<< "Doing initial coordinates optimization..." << std::endl;
+        initialize_positions(sd, init_restraints, debug);
+        sd->get_bd()->set_current_time( 0.0 );
+      }
+      print_score_and_positions( sd, debug, "Score right before BD = " );
       if (conformations_rmf_sos) {
-        conformations_rmf_sos->update_always
-          ("Before running (post equilibration)");
+        conformations_rmf_sos->update_always("Right before BD");
       }
-      // now run the rest of the sim
-      bool ok = run_it(sd, nframes_run, timer, total_time,
-                       false /* silent stats */, 50000, first_only);
-      if (! ok){
-        return;
+      /*IMP::benchmark::Profiler p;
+        if(i == 0)
+        p.set("profiling.pprof");*/
+      sd->get_bd()->set_log_level(IMP::PROGRESS);
+      unsigned int nframes_run = (unsigned int)
+        ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
+      unsigned int nframes_equilibrate =
+        sd->get_number_of_frames() - nframes_run;
+      if(is_equilibration){
+        std::cout << "Equilibrating for " << nframes_equilibrate
+                  << " frames..." << std::endl;
+        bool ok = run_it
+          (sd, nframes_equilibrate, timer, total_time,
+           true /* silent stats */, max_frames_per_chunk, first_only);
+        if(! ok || first_only)
+          return;
+        //if(nframes_equilibrate > 0) {
+        // if equilibrated, ignore equilibration stats
+        // TODO: removed for now since this may be incosistent with
+        //       consecutive runs
+        //sd->reset_statistics_optimizer_states();
+        // }
+        sd->get_bd()->set_current_time( 0.0 );
+        std::cout << "Equilibration finished succesfully" << std::endl;
       }
-      std::cout << "Run trial #" << i << " finished succesfully" << std::endl;
+      if(is_full_run) {
+        timer.restart();
+        std::cout << "Running for " << nframes_run << " frames..." << std::endl;
+        if (conformations_rmf_sos) {
+          conformations_rmf_sos->update_always
+            ("Before running (post equilibration)");
+        }
+        // now run the rest of the sim
+        bool ok = run_it(sd, nframes_run, timer, total_time,
+                         false /* silent stats */, max_frames_per_chunk, first_only);
+        if (! ok){
+          return;
+        }
+        std::cout << "Run trial #" << i << " finished succesfully" << std::endl;
+      }
+      if (conformations_rmf_sos) {
+        conformations_rmf_sos->update_always("Final frame");
+      }
+      if( !final_conformations.empty() ) {
+        std::cout << "Printing last frame to "
+                  << final_conformations << std::endl;
+        IMP::rmf::save_frame
+          ( final_rmf_fh, final_rmf_fh.get_number_of_frames() );
+      }
     }
-    if (conformations_rmf_sos) {
-      conformations_rmf_sos->update_always("Final frame");
-    }
-    if( !final_conformations.empty() ) {
-      std::cout << "Printing last frame to "
-                << final_conformations << std::endl;
-      IMP::rmf::save_frame
-        ( final_rmf_fh, final_rmf_fh.get_number_of_frames() );
-    }
+    std::cout << "Entire run finished" << std::endl;
+    print_score_and_positions( sd, debug, "Final score = " );
   }
-  std::cout << "Entire run finished" << std::endl;
-  print_score_and_positions( sd, debug, "Final score = " );
-  if(debug){
+  catch (IMP::base::Exception& e){
+    std::cout << "Internal do_main_loop() function aborted with exception:\n\t"
+              << e.what() << std::endl;
   }
 }
 IMPNPCTRANSPORT_END_INTERNAL_NAMESPACE
