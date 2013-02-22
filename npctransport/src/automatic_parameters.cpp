@@ -8,7 +8,10 @@
 
 #include <IMP/npctransport/automatic_parameters.h>
 #ifdef IMP_NPC_GOOGLE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
 #include "third_party/npc/npctransport/data/npctransport.pb.h"
+#pragma GCC diagnostic pop
 #else
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <google/protobuf/descriptor.h>

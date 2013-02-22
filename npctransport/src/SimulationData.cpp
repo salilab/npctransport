@@ -13,7 +13,10 @@
 #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/protobuf.h>
 #ifdef IMP_NPC_GOOGLE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
 #include "third_party/npc/npctransport/data/npctransport.pb.h"
+#pragma GCC diagnostic pop
 #else
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #endif

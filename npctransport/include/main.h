@@ -22,7 +22,10 @@
 #include <IMP/base/random.h>
 #include "SimulationData.h"
 #ifdef IMP_NPC_GOOGLE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
 #include "third_party/npc/npctransport/data/npctransport.pb.h"
+#pragma GCC diagnostic pop
 #else
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #endif
@@ -143,10 +146,10 @@ IMP_NPC_PARAMETER_UINT64(random_seed, 0,
 /**
    returns the actual seed used to initialize the generator
  */
-boost::uint64_t seed_randn_generator(boost::uint64_t seed)
+inline std::size_t seed_randn_generator(std::size_t seed)
 {
   if(seed == 0){
-    seed =  static_cast<boost::uint64_t> (std::time(0)); //IMP::nullptr)) ;
+    seed =  static_cast<std::size_t> (std::time(0)); //IMP::nullptr)) ;
   }
   IMP::base::random_number_generator.seed( seed );
   return seed;
