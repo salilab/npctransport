@@ -38,7 +38,7 @@
 
 
 
-
+namespace {
 /**
     anchors all the fgs to a planar surface
     at the edge of the simulation bounding box
@@ -226,6 +226,7 @@ IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint
           sr,
           (score, particles, "ExcludeZRangeRestraint") );
   return sr;
+}
 }
 
 IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
