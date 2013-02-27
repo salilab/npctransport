@@ -1,4 +1,4 @@
 required_modules='container:display:core:atom:statistics:rmf:benchmark:example:score_functor:kernel:algebra:base'
 lib_only_optional_modules='cgal'
-required_dependencies='RMF:Protobuf:AvroCpp'
+required_dependencies='RMF:Protobuf'
 optional_dependencies=""

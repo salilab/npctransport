@@ -4,7 +4,6 @@ include_directories(${IMP_PYTHON_INCLUDE_PATH})
 add_definitions(-DIMP_SWIG_WRAPPER)
 
 include_directories(${ANN_INCLUDE_PATH}
-        ${AVROCPP_INCLUDE_PATH}
         ${BOOST.FILESYSTEM_INCLUDE_PATH}
         ${BOOST.GRAPH_INCLUDE_PATH}
         ${BOOST.PROGRAMOPTIONS_INCLUDE_PATH}
@@ -20,7 +19,6 @@ include_directories(${ANN_INCLUDE_PATH}
         ${TCMALLOC_HEAPCHECKER_INCLUDE_PATH}
         ${TCMALLOC_HEAPPROFILER_INCLUDE_PATH})
 link_directories(${ANN_LINK_PATH}
-        ${AVROCPP_LINK_PATH}
         ${BOOST.FILESYSTEM_LINK_PATH}
         ${BOOST.GRAPH_LINK_PATH}
         ${BOOST.PROGRAMOPTIONS_LINK_PATH}
@@ -45,7 +43,6 @@ set(swig_path ${IMP_SWIG_PATH})
 
 # this is needed for some reason that I don't understand
 set(swigpath ${ANN_SWIG_PATH}
-        ${AVROCPP_SWIG_PATH}
         ${BOOST.FILESYSTEM_SWIG_PATH}
         ${BOOST.GRAPH_SWIG_PATH}
         ${BOOST.PROGRAMOPTIONS_SWIG_PATH}
@@ -64,18 +61,7 @@ foreach(swig ${swigpath})
 set(swig_path ${swig}:${swig_path})
 endforeach(swig)
 
-execute_process(COMMAND ${PROJECT_SOURCE_DIR}/tools/build/make_swig_deps.py
-                    "--swig=${SWIG_EXECUTABLE}"
-                    "--includepath=${include_path}"
-                    "--swigpath=${swig_path}"
-                    "--name=npctransport"
-                    RESULT_VARIABLE swigdeps
-                    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-if( ${swigdeps})
-message(FATAL_ERROR " Failed to run swig dependency computation")
-endif()
-
-file(STRINGS "${PROJECT_BINARY_DIR}/src/npctransport_swig.deps" SWIGDEPS)
+file(STRINGS "${PROJECT_BINARY_DIR}/src/npctransport_swig.deps" swigdeps)
 
 set(source ${PROJECT_BINARY_DIR}/src/npctransport_swig/wrap.cpp
                           ${PROJECT_BINARY_DIR}/src/npctransport_swig/wrap.h)
@@ -87,7 +73,7 @@ add_custom_command(OUTPUT ${source}
             "--swigpath=${swig_path}"
             "--includepath=${include_path}"
             "--module=npctransport"
-   DEPENDS ${SWIGDEPS}
+   DEPENDS ${swigdeps}
    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
    COMMENT "Running swig on npctransport")
 
@@ -102,7 +88,7 @@ endif()
 target_link_libraries(_IMP_npctransport
     imp_npctransport
     ${IMP_BASE_LIBRARY} ${IMP_BENCHMARK_LIBRARY} ${IMP_CGAL_LIBRARY} ${IMP_ALGEBRA_LIBRARY} ${IMP_KERNEL_LIBRARY} ${IMP_DISPLAY_LIBRARY} ${IMP_SCORE_FUNCTOR_LIBRARY} ${IMP_CORE_LIBRARY} ${IMP_CONTAINER_LIBRARY} ${IMP_STATISTICS_LIBRARY} ${IMP_ATOM_LIBRARY} ${IMP_RMF_LIBRARY} ${IMP_DOMINO_LIBRARY} ${IMP_EXAMPLE_LIBRARY}
-    ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES}
+    ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES}
     ${SWIG_PYTHON_LIBRARIES}
   )
 
