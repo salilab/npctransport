@@ -8,6 +8,8 @@
 #include <IMP/npctransport/main.h>
 #include <IMP/ParticleTuple.h>
 #include <RMF/utility.h>
+
+namespace {
 int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
   using namespace IMP;
   using namespace IMP::npctransport;
@@ -53,6 +55,7 @@ int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
   }
   IMP_NPC_LOOP(sd, IMP::RestraintsTemp());
   return 0;
+}
 }
 
 int main(int argc, char *argv[]) {
