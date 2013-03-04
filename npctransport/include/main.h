@@ -138,12 +138,13 @@ IMP_NPC_PARAMETER_UINT64(random_seed, 0,
                                               FLAGS_first_only);        \
   }
 
+namespace {
 //! seeds the random number generator of IMP with seed
 //! (or time if it is zero)
 /**
    returns the actual seed used to initialize the generator
  */
-boost::uint64_t seed_randn_generator(boost::uint64_t seed)
+inline boost::uint64_t seed_randn_generator(boost::uint64_t seed)
 {
   if(seed == 0){
     seed =  static_cast<boost::uint64_t> (std::time(0)); //IMP::nullptr)) ;
@@ -216,7 +217,7 @@ inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   }
   return sd.release();
 }
-
+}
 #endif // IMP_NPC_MAIN
 
 #endif /* IMPNPCTRANSPORT_MAIN_H */

@@ -788,6 +788,8 @@ namespace {
                          const compatibility::map<core::ParticleType,
                                                   algebra::Vector3Ds> &sites,
                          ::npctransport_proto::Conformation *conformation) {
+    typedef compatibility::map<core::ParticleType,
+                               algebra::Vector3Ds> Sites;
     conformation->clear_sites();
     conformation->clear_particle();
     IMP_CONTAINER_FOREACH(SingletonContainer, diffusers,
@@ -806,13 +808,13 @@ namespace {
                             pcur->set_j(tr.get_rotation().get_quaternion()[2]);
                             pcur->set_k(tr.get_rotation().get_quaternion()[3]);
                           });
-    for (auto it = sites.begin(); it != sites.end() ;it++) {
+    for (Sites::const_iterator it = sites.begin(); it != sites.end() ;it++) {
       ::npctransport_proto::Conformation::Sites *cur
         = conformation->add_sites();
       cur->set_name(it->first.get_string());
-      auto coords = it->second;
-      for (auto coord = coords.begin();
-             coord != coords.end(); coord++) {
+      algebra::Vector3Ds coords = it->second;
+      for (algebra::Vector3Ds::const_iterator coord = coords.begin();
+           coord != coords.end(); coord++) {
         ::npctransport_proto::Conformation::Coordinates
           *out_coords= cur->add_coordinates();
         out_coords->set_x((*coord)[0]);
