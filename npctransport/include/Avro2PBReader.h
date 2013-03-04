@@ -15,7 +15,12 @@
 #include <IMP/base/value_macros.h>
 #include <IMP/base/types.h>
 #include <IMP/base/showable_macros.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wextra"
 #include <avro/DataFile.hh>
+#pragma GCC diagnostic pop
+
 #include <fstream>
 #include <iomanip>
 
