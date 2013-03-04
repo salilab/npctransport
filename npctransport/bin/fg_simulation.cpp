@@ -36,7 +36,7 @@
 
 
 
-
+namespace {
 
 /**
     anchors all the fgs to a planar surface
@@ -198,7 +198,7 @@ IMP::ParticlesTemp get_kaps_and_craps( IMP::npctransport::SimulationData& sd ) {
   using namespace IMP;
 
   ParticlesTemp ret;
-  unsigned int n = IMP::npctransport::get_n_types_of_float();
+  unsigned int n = IMP::npctransport::get_number_of_types_of_float();
   for(unsigned int i = 0; i < n ; i++) {
     IMP::core::ParticleType float_type =
       IMP::npctransport::get_type_of_float(i);
@@ -232,7 +232,7 @@ IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
                         " dimensions that are specified in"
                         " the config file, with specified number of FG layers"
                         " (no cylinder anchoring if equals to 0)");
-
+}
 
 int main(int argc, char *argv[])
 {

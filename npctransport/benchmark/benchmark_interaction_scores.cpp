@@ -16,6 +16,8 @@ using namespace IMP::algebra;
 using namespace IMP::benchmark;
 using namespace IMP::core;
 using namespace IMP::container;
+
+namespace {
 const double radius=2;
 #if IMP_BUILD < IMP_FAST
 int number_of_particles=5;
@@ -53,6 +55,7 @@ void test_one(std::string name, Score *score,
       ++n;
     }, time);
   report("linear interaction", name, time, scores/n);
+}
 }
 
 int main(int argc, char**argv) {
