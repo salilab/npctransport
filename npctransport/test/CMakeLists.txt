@@ -40,7 +40,7 @@ File(GLOB runtimepytests "${PROJECT_BINARY_DIR}/test/npctransport/test_*.py")
 set(pytests ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_avro_reader.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_exclude_zrange_score.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_glue.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_init_from_output.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_init_from_rmf.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_linear.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_linear_scores.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_protobufs.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_rmf_sites.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_sites.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_slabss.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_statistics.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_util.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_well.py )
 
 foreach (test ${runtimepytests} ${pytests})
-   GET_FILENAME_COMPONENT(name ${test} NAME_WE)
+  GET_FILENAME_COMPONENT(name ${test} NAME_WE)
   if(EXISTS "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests")
     FILE(READ "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests" contents)
     STRING(REGEX REPLACE ";" "\\\\;" contents "${contents}")
