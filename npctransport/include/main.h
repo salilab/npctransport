@@ -179,7 +179,7 @@ inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));
   IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
   try {
-    write_output_based_on_flags( IMO::base::get_random_seed() );
+    write_output_based_on_flags( IMP::base::get_random_seed() );
     sd= new IMP::npctransport::SimulationData(FLAGS_output,
                                               FLAGS_quick);
     if (!FLAGS_conformations.empty()) {
