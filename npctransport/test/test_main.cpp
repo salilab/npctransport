@@ -11,8 +11,6 @@
 int main(int , char *[]) {
   // TODO: emulate real runtime parameters by initializig fake argc / argv?
   try {
-    FLAGS_random_seed = 1.0; // use time instead of constant?
-    IMP::base::random_number_generator.seed( FLAGS_random_seed );
     std::string config
         = IMP::npctransport::get_data_path("quick.pb");
     std::string assignment
