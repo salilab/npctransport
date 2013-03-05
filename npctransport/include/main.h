@@ -111,12 +111,6 @@ IMP_NPC_PARAMETER_BOOL(show_steps, false,
                        "Show the steps for each modified variable");
 IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
                        "Show the number of work units");
-IMP_NPC_PARAMETER_UINT64(random_seed, 0,
-                         "an unsigned integer to be used as a random seed"
-                         " in the IMP random numbers generator. If unspecified"
-                         " or zero, IMP will use system time as a seed."
-                         " (Note: if in doubt, use a 32 bit unsigned integer"
-                         " seed in the range 0 to 4,294,967,295)");
 
 /** Run simulation using preconstructed SimulationData object sim_data.
     init_restraints are used ad-hoc during initialization only,
@@ -142,19 +136,6 @@ IMP_NPC_PARAMETER_UINT64(random_seed, 0,
   }
 
 namespace {
-//! seeds the random number generator of IMP with seed
-//! (or time if it is zero)
-/**
-   returns the actual seed used to initialize the generator
- */
-inline std::size_t seed_randn_generator(std::size_t seed)
-{
-  if(seed == 0){
-    seed =  static_cast<std::size_t> (std::time(0)); //IMP::nullptr)) ;
-  }
-  IMP::base::random_number_generator.seed( seed );
-  return seed;
-}
 
 /** writes the output assignment file based on the configuration parameters
     either assign a new work unit from a configuration file, or restart
@@ -193,14 +174,12 @@ inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
  */
 inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
-  boost::uint64_t actual_seed =
-    seed_randn_generator( FLAGS_random_seed );
-#pragma omp critical
-  std::cout << "Random seed is " << actual_seed << std::endl;
+ #pragma omp critical
+  std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
   set_log_level(IMP::base::LogLevel(FLAGS_log_level));
   IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
   try {
-    write_output_based_on_flags( actual_seed );
+    write_output_based_on_flags( IMO::base::get_random_seed() );
     sd= new IMP::npctransport::SimulationData(FLAGS_output,
                                               FLAGS_quick);
     if (!FLAGS_conformations.empty()) {
