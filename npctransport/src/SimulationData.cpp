@@ -811,7 +811,7 @@ namespace {
                           });
     typedef compatibility::map<core::ParticleType,
                                algebra::Vector3Ds>  M;
-    for (typename M::const_iterator it = sites.begin(); it != sites.end() ;it++) {
+    for ( M::const_iterator it = sites.begin(); it != sites.end() ;it++) {
       ::npctransport_proto::Conformation::Sites *cur
         = conformation->add_sites();
       cur->set_name(it->first.get_string());
