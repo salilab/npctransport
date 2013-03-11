@@ -909,9 +909,9 @@ SimulationData::update_statistics
       unsigned int n_particles = float_transport_stats_[type_i].size();
       // collect individual transport times in an ordered set,
       // and add them to the statistics file:
-      std::set<double> times_i =
-        get_unique_set_from_repeated_field // load existing list
-        ( stats.floaters(type_i).transport_time_points_ns() );
+      ::google::protobuf::RepeatedField< double > const& protobuf_times_i
+          = stats.floaters(type_i).transport_time_points_ns();
+      std::set<double> times_i( protobuf_times_i.begin(), protobuf_times_i.end());
       for(unsigned int j = 0; j < n_particles ; ++j) { // add new
         Floats const& new_times_ij =
           float_transport_stats_[type_i][j]->get_transport_time_points_in_ns();
