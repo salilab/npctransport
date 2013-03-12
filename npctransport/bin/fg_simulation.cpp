@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
     initialization_restraints.push_back( r );
   }
   std::cout << initialization_restraints << std::endl;
-  IMP_NPC_LOOP(sd, initialization_restraints );
+  do_main_loop(sd, initialization_restraints );
 
   return 0;
  }

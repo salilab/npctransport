@@ -11,6 +11,6 @@
 
 int main(int argc, char *argv[]) {
   IMP_NPC_STARTUP(sd);
-  IMP_NPC_LOOP(sd, IMP::RestraintsTemp());
+  do_main_loop(sd, IMP::RestraintsTemp());
   return 0;
 }

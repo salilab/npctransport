@@ -6,7 +6,7 @@
  *
  */
 
-#include <IMP/npctransport/internal/main.h>
+#include <IMP/npctransport/main.h>
 #include <IMP/base_types.h>
 #include <boost/timer.hpp>
 #include <IMP/log.h>
@@ -61,8 +61,7 @@ namespace {
                               (e.g., during equilibration)
      @param max_frames_per_chunk maximal number of frames to be simulated
                                  in a single optimization chunk
-     @param first_only some debug mode parameter for having a real short
-                        simulation
+     @note if FLAGS_first_only==true, make a really short simulation
 
      @return true if succesful, false if terminated abnormally
   */
@@ -71,14 +70,13 @@ namespace {
               boost::timer& timer,
               boost::timer& total_time,
               bool silent_statistics = false,
-              unsigned int max_frames_per_chunk = 50000,
-              bool first_only=false) {
+              unsigned int max_frames_per_chunk = 50000) {
     // TODO: next line is a temporary hack - needed for some reason to
     // force the pair predicates to evaluate predicate pairs restraints
     sd->get_m()->update();
     do {
       unsigned int cur_nframes
-        = std::min<unsigned int>(first_only
+        = std::min<unsigned int>(FLAGS_first_only
                                  ?max_frames_per_chunk/10:max_frames_per_chunk,
                                  number_of_frames);
       //IMP_THREADS((sd, silent_statistics, cur_nframes),{
@@ -98,32 +96,29 @@ namespace {
         return false;
       }
       number_of_frames-=cur_nframes;
-    } while (number_of_frames > 0 && !first_only);
+    } while (number_of_frames > 0 && !FLAGS_first_only);
     return true;
   }
 }
 
 /**
-   is_initial_optimization - whether to do initial optimization of positions
-   is_full_run - whetehr to run the full BD simulation
  */
 void do_main_loop(SimulationData *sd,
-                  const RestraintsTemp &init_restraints,
-                  bool quick,
-                  bool is_initial_optimization,
-                  bool is_equilibration,
-                  bool is_full_run,
-                  std::string final_conformations,
-                  bool debug,
-                  bool first_only) {
+                  const RestraintsTemp &init_restraints)
   using namespace IMP;
   const int max_frames_per_chunk=50000;
+  /** initial optimization and equilibration needed unless starting
+      from another output file or rmf file */
+  bool is_initial_optimization =
+      FLAGS_restart.empty() && FLAGS_init_rmffile.empty();
+  bool is_BD_equilibration = is_initial_optimization;
+  bool is_BD_full_run = !FLAGS_initialize_only;
   try {
     IMP::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
       = sd->get_rmf_sos_writer();
     RMF::FileHandle final_rmf_fh;
-    if(!final_conformations.empty()){
-      final_rmf_fh=RMF::create_rmf_file(final_conformations);
+    if(!FLAGS_final_conformations.empty()){
+      final_rmf_fh=RMF::create_rmf_file(FLAGS_final_conformations);
       sd->link_rmf_file_handle(final_rmf_fh);
     }
     boost::timer total_time;
@@ -133,14 +128,12 @@ void do_main_loop(SimulationData *sd,
       IMP::set_log_level(SILENT);
       std::cout << "Simulation trial " << i << " out of "
                 << sd->get_number_of_trials() << std::endl;
-      if (!quick)
-        sd->reset_rmf();
       if (is_initial_optimization) {
         std::cout<< "Doing initial coordinates optimization..." << std::endl;
-        initialize_positions(sd, init_restraints, debug);
+        initialize_positions(sd, init_restraints, FLAGS_verbose);
         sd->get_bd()->set_current_time( 0.0 );
       }
-      print_score_and_positions( sd, debug, "Score right before BD = " );
+      print_score_and_positions( sd, FLAGS_verbose, "Score right before BD = " );
       if (conformations_rmf_sos) {
         conformations_rmf_sos->update_always("Right before BD");
       }
@@ -152,13 +145,13 @@ void do_main_loop(SimulationData *sd,
         ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
       unsigned int nframes_equilibrate =
         sd->get_number_of_frames() - nframes_run;
-      if(is_equilibration){
+      if(is_BD_equilibration){
         std::cout << "Equilibrating for " << nframes_equilibrate
                   << " frames..." << std::endl;
         bool ok = run_it
           (sd, nframes_equilibrate, timer, total_time,
-           true /* silent stats */, max_frames_per_chunk, first_only);
-        if(! ok || first_only)
+           true /* silent stats */, max_frames_per_chunk);
+        if(! ok || FLAGS_first_only)
           return;
         //if(nframes_equilibrate > 0) {
         // if equilibrated, ignore equilibration stats
@@ -169,7 +162,7 @@ void do_main_loop(SimulationData *sd,
         sd->get_bd()->set_current_time( 0.0 );
         std::cout << "Equilibration finished succesfully" << std::endl;
       }
-      if(is_full_run) {
+      if(is_BD_full_run) {
         timer.restart();
         std::cout << "Running for " << nframes_run << " frames..." << std::endl;
         if (conformations_rmf_sos) {
@@ -178,7 +171,7 @@ void do_main_loop(SimulationData *sd,
         }
         // now run the rest of the sim
         bool ok = run_it(sd, nframes_run, timer, total_time,
-                         false /* silent stats */, max_frames_per_chunk, first_only);
+                         false /* silent stats */, max_frames_per_chunk);
         if (! ok){
           return;
         }
@@ -187,15 +180,15 @@ void do_main_loop(SimulationData *sd,
       if (conformations_rmf_sos) {
         conformations_rmf_sos->update_always("Final frame");
       }
-      if( !final_conformations.empty() ) {
+      if( !FLAGS_final_conformations.empty() ) {
         std::cout << "Printing last frame to "
-                  << final_conformations << std::endl;
+                  << FLAGS_final_conformations << std::endl;
         IMP::rmf::save_frame
           ( final_rmf_fh, final_rmf_fh.get_number_of_frames() );
       }
     }
     std::cout << "Entire run finished" << std::endl;
-    print_score_and_positions( sd, debug, "Final score = " );
+    print_score_and_positions( sd, FLAGS_verbose, "Final score = " );
   }
   catch (IMP::base::Exception& e){
     std::cout << "Internal do_main_loop() function aborted with exception:\n\t"

@@ -112,28 +112,14 @@ IMP_NPC_PARAMETER_BOOL(show_steps, false,
 IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
                        "Show the number of work units");
 
-/** Run simulation using preconstructed SimulationData object sim_data.
-    init_restraints are used ad-hoc during initialization only,
-    and unless initialized from an RMF file
+/** Run simulation using preconstructed SimulationData object sd.
+
+    @param sd SimulationData object to optimize
+    @param init_restraints ad-hoc restraints during initialization only
 */
-#define IMP_NPC_LOOP(sim_data, init_restraints)                         \
-  {                                                                     \
-  /** initial optimization and equilibration needed unless starting
-      from another output file or rmf file */                           \
-    bool is_initial_optimization =                                      \
-      FLAGS_restart.empty() && FLAGS_init_rmffile.empty();              \
-    bool is_BD_equilibration = is_initial_optimization;                 \
-    bool is_BD_full_run = !FLAGS_initialize_only;                       \
-    IMP::npctransport::internal::do_main_loop(sim_data,                 \
-                                              init_restraints,          \
-                                              FLAGS_quick,              \
-                                              is_initial_optimization,  \
-                                              is_BD_equilibration,      \
-                                              is_BD_full_run,           \
-                                              FLAGS_final_conformations, \
-                                              FLAGS_verbose,            \
-                                              FLAGS_first_only);        \
-  }
+void do_main_loop(SimulationData *sd,
+                  const RestraintsTemp &init_restraints);
+
 
 namespace {
 
@@ -144,39 +130,39 @@ namespace {
     @param actual_seed the actual random seed used in the simulation,
                        to be saved in the output file
 */
-inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
-   if (FLAGS_restart.empty()) {
-     int num=IMP::npctransport::assign_ranges
-       (FLAGS_configuration, FLAGS_output,
-        FLAGS_work_unit, FLAGS_show_steps, actual_seed);
-     if (FLAGS_show_number_of_work_units) {
+  inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
+    if (FLAGS_restart.empty()) {
+      int num=IMP::npctransport::assign_ranges
+        (FLAGS_configuration, FLAGS_output,
+         FLAGS_work_unit, FLAGS_show_steps, actual_seed);
+      if (FLAGS_show_number_of_work_units) {
 #pragma omp critical
-       std::cout << "work units " << num << std::endl;
-     }
-   } else { // FLAGS_resart.empty()
+        std::cout << "work units " << num << std::endl;
+      }
+    } else { // FLAGS_resart.empty()
 #pragma omp critical
-     std::cout << "Restart simulation from " << FLAGS_restart << std::endl;
-     ::npctransport_proto::Output prev_output;
-     // copy to new file to avoid modifying input file
-     std::ifstream file(FLAGS_restart.c_str(), std::ios::binary);
-     bool read=prev_output.ParseFromIstream(&file);
-     IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << FLAGS_restart,
-                      IMP::base::ValueException);
-     prev_output.mutable_assignment()->set_random_seed( actual_seed );
-     std::ofstream outf(FLAGS_output.c_str(), std::ios::binary);
-     prev_output.SerializeToOstream(&outf);
-   }
-}
+      std::cout << "Restart simulation from " << FLAGS_restart << std::endl;
+      ::npctransport_proto::Output prev_output;
+      // copy to new file to avoid modifying input file
+      std::ifstream file(FLAGS_restart.c_str(), std::ios::binary);
+      bool read=prev_output.ParseFromIstream(&file);
+      IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << FLAGS_restart,
+                       IMP::base::ValueException);
+      prev_output.mutable_assignment()->set_random_seed( actual_seed );
+      std::ofstream outf(FLAGS_output.c_str(), std::ios::binary);
+      prev_output.SerializeToOstream(&outf);
+    }
+  }
 
-/**
+  /**
    initialize and return a simulation data object based on
    program command line parameters
- */
-inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
-  IMP_NPC_PARSE_OPTIONS(argc, argv);
- #pragma omp critical
-  std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
-  set_log_level(IMP::base::LogLevel(FLAGS_log_level));
+  */
+  inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
+    IMP_NPC_PARSE_OPTIONS(argc, argv);
+#pragma omp critical
+    std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
+    set_log_level(IMP::base::LogLevel(FLAGS_log_level));
   IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
   try {
     write_output_based_on_flags( IMP::base::get_random_seed() );
@@ -198,7 +184,7 @@ inline IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
     return IMP_NULLPTR;
   }
   return sd.release();
-}
+  }
 }
 #endif // IMP_NPC_MAIN
 
