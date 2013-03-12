@@ -16,10 +16,12 @@
 #include <IMP/base/types.h>
 #include <IMP/base/showable_macros.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wextra"
+#ifndef SWIG
+IMP_GCC_PUSH_POP( diagnostic push )
+IMP_GCC_PRAGMA( diagnostic ignored "-Wextra" )
 #include <avro/DataFile.hh>
-#pragma GCC diagnostic pop
+IMP_GCC_PUSH_POP( diagnostic pop )
+#endif
 
 #include <fstream>
 #include <iomanip>

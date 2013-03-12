@@ -7,7 +7,6 @@
 #ifndef IMPNPCTRANSPORT_GOOGLE_MAIN_H
 #define IMPNPCTRANSPORT_GOOGLE_MAIN_H
 
-#ifdef IMP_NPC_MAIN
 #include "base/init_google.h"
 #include "base/commandlineflags.h"
 
@@ -34,5 +33,4 @@ typedef unsigned int UInt64Arg;
   InitGoogle(argv[0],                           \
              &argc, &argv, true);
 
-#endif
 #endif /* IMPNPCTRANSPORT_GOOGLE_MAIN_H */

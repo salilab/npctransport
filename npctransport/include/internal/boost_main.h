@@ -7,7 +7,6 @@
 #ifndef IMPNPCTRANSPORT_BOOST_MAIN_H
 #define IMPNPCTRANSPORT_BOOST_MAIN_H
 
-#ifdef IMP_NPC_MAIN
 #include <IMP/base/flags.h>
 
 #define IMP_NPC_PARAMETER_BOOL(name, def, description)                  \
@@ -29,10 +28,6 @@
 
 #define IMP_NPC_PARSE_OPTIONS(argc, argv)                               \
   IMP::base::setup_from_argv(argc, argv, "Something npcish");
-
-#endif
-
-
 
 
 #endif /* IMPNPCTRANSPORT_BOOST_MAIN_H */

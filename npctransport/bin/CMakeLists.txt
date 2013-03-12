@@ -38,7 +38,7 @@ link_directories(${ANN_LINK_PATH}
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NPCTRANSPORT_CXX_FLAGS}")
 
 
-set(cppbins ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/avro_cat.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/avro_scan.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/avro_show.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/avro_show_barak.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/fg_array.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/fg_cylinder.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/fg_simulation.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/floating.cpp)
+set(cppbins ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/avro_cat.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/avro_scan.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/avro_show.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/avro_show_barak.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/fg_array.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/fg_simulation.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/bin/floating.cpp)
 
 foreach (bin ${cppbins})
    GET_FILENAME_COMPONENT(name ${bin} NAME_WE)
