@@ -50,8 +50,8 @@ foreach (bin ${cppbenchmarks})
                          RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/benchmark/npctransport"
                          OUTPUT_NAME ${name})
    add_test(npctransport.${name} ${PROJECT_BINARY_DIR}/setup_environment.sh
-            "${PROJECT_BINARY_DIR}/benchmark/npctransport/${name}")
-   set_tests_properties(npctransport.${name} PROPERTIES LABELS "npctransport;benchmark")
+            "${PROJECT_BINARY_DIR}/benchmark/npctransport/${name}${CMAKE_EXECUTABLE_SUFFIX}")
+   set_tests_properties(npctransport.${name} PROPERTIES LABELS "IMP.npctransport;benchmark")
    set(executables ${executables} npctransport.${name})
 endforeach(bin)
 
@@ -62,6 +62,7 @@ add_custom_target("imp_npctransport_benchmarks" ALL DEPENDS ${executables}
 set(pybenchmarks )
 foreach (test ${pybenchmarks})
  GET_FILENAME_COMPONENT(name ${test} NAME_WE)
- add_test("npctransport.${name}" ${PROJECT_BINARY_DIR}/imppy.sh ${IMP_PYTHON} ${test})
- set_tests_properties("npctransport.${name}" PROPERTIES LABELS "npctransport;benchmark")
+ add_test("npctransport.${name}" ${PROJECT_BINARY_DIR}/setup_environment.sh
+          ${IMP_PYTHON} ${test})
+ set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;benchmark")
 endforeach(test)
