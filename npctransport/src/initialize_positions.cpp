@@ -127,9 +127,9 @@ void optimize_balls(const ParticlesTemp &ps,
     for (int j=0; j< 5; ++j) {
       mc->set_kt(100.0/(3*j+1));
       bool done=false;
-#pragma omp parallel num_threads(3)
+      IMP_OMP_PRAGMA(parallel num_threads(3))
       {
-#pragma omp single
+        IMP_OMP_PRAGMA( single)
         {
           double e= mc->optimize(ps.size()*(j+1)*500);
           std::cout << "Energy is " << e << " at " << i << ", " << j << std::endl;
@@ -145,9 +145,9 @@ void optimize_balls(const ParticlesTemp &ps,
       }
       if (done) break;
     }
-#pragma omp parallel num_threads(3)
+    IMP_OMP_PRAGMA( parallel num_threads(3))
     {
-#pragma omp single
+      IMP_OMP_PRAGMA( single)
       {
         double e=local->optimize(1000);
         std::cout << "Energy after bd is " << e << std::endl;

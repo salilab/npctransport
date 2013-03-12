@@ -27,6 +27,8 @@ using namespace IMP::algebra;
 using namespace IMP::benchmark;
 using namespace IMP::core;
 using namespace IMP::container;
+
+namespace {
 const double radius=2;
 #if IMP_BUILD < IMP_FAST
 int number_of_particles=5;
@@ -142,6 +144,7 @@ void test_ranges() {
   for (double range=.1*radius; range < .5*radius; range*=2) {
     test_one<NA, NB, WHICH>(range);
   }
+}
 }
 
 int main(int, char**) {

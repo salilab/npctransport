@@ -16,6 +16,7 @@ using namespace IMP::algebra;
 using namespace IMP::benchmark;
 using namespace IMP::core;
 using namespace IMP::container;
+
 namespace {
 const double radius=2;
 #if IMP_BUILD < IMP_FAST

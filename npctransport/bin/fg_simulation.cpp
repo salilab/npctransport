@@ -199,7 +199,7 @@ IMP::ParticlesTemp get_kaps_and_craps( IMP::npctransport::SimulationData& sd ) {
   using namespace IMP;
 
   ParticlesTemp ret;
-  unsigned int n = IMP::npctransport::get_n_types_of_float();
+  unsigned int n = IMP::npctransport::get_number_of_types_of_float();
   for(unsigned int i = 0; i < n ; i++) {
     IMP::core::ParticleType float_type =
       IMP::npctransport::get_type_of_float(i);
@@ -227,7 +227,6 @@ IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint
           (score, particles, "ExcludeZRangeRestraint") );
   return sr;
 }
-}
 
 IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
                         "anchor FG nups to a cylindrical pore with a slab of"
@@ -238,6 +237,7 @@ IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
 IMP_NPC_PARAMETER_BOOL(surface_anchoring, false,
                        "anchor FG nups to bottom of cube");
 
+}
 
 int main(int argc, char *argv[])
 {

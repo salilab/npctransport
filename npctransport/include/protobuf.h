@@ -54,23 +54,6 @@ assign_ranges(std::string fname, std::string output, unsigned int work_unit,
 IMPNPCTRANSPORTEXPORT int
 get_number_of_work_units(std::string configuration_file);
 
-/** returns an STL set with all unique (no duplicates) values in
-    ::google::protobuf::RepeatedField object
-
-    @param[in] src repeated field from which values of type value_type
-                   are copied
-*/
-template<class RF>
-std::set< typename RF::value_type >
-get_unique_set_from_repeated_field
-( RF const& src )
-{
-  std::set< typename RF::value_type > ret_set;
-  for(int i = 0; i < src.size(); i++){
-    ret_set.insert( src.Get(i) );
-  }
-  return ret_set;
-}
 
 /** returns ::google::protobuf::RepeatedField object
     based on an STL set

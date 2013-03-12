@@ -5,6 +5,7 @@ include_directories(${ANN_INCLUDE_PATH}
         ${BOOST.FILESYSTEM_INCLUDE_PATH}
         ${BOOST.GRAPH_INCLUDE_PATH}
         ${BOOST.PROGRAMOPTIONS_INCLUDE_PATH}
+        ${BOOST.RANDOM_INCLUDE_PATH}
         ${BOOST.REGEX_INCLUDE_PATH}
         ${BOOST.SYSTEM_INCLUDE_PATH}
         ${CGAL_INCLUDE_PATH}
@@ -21,6 +22,7 @@ link_directories(${ANN_LINK_PATH}
         ${BOOST.FILESYSTEM_LINK_PATH}
         ${BOOST.GRAPH_LINK_PATH}
         ${BOOST.PROGRAMOPTIONS_LINK_PATH}
+        ${BOOST.RANDOM_LINK_PATH}
         ${BOOST.REGEX_LINK_PATH}
         ${BOOST.SYSTEM_LINK_PATH}
         ${CGAL_LINK_PATH}
@@ -39,10 +41,25 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NPCTRANSPORT_CXX_FLAGS}")
 File(GLOB runtimepytests "${PROJECT_BINARY_DIR}/test/npctransport/test_*.py")
 set(pytests ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_avro_reader.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_exclude_zrange_score.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_glue.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_init_from_output.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_init_from_rmf.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_linear.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_linear_scores.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_protobufs.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_rmf_sites.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_sites.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_slabss.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_statistics.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_util.py ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_well.py )
 
-foreach (test ${runtimepyttests} ${pytests})
-   GET_FILENAME_COMPONENT(name ${test} NAME_WE)
-  add_test("npctransport.${name}" ${PROJECT_BINARY_DIR}/setup_environment.sh ${IMP_PYTHON} ${test})
-  set_tests_properties("npctransport.${name}" PROPERTIES LABELS "npctransport;test")
+foreach (test ${runtimepytests} ${pytests})
+  GET_FILENAME_COMPONENT(name ${test} NAME_WE)
+  if(EXISTS "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests")
+    FILE(READ "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests" contents)
+    STRING(REGEX REPLACE ";" "\\\\;" contents "${contents}")
+    STRING(REGEX REPLACE "\n" ";" contents "${contents}")
+    foreach(testline ${contents})
+      string(REGEX REPLACE "([A-Za-z0-9_]+\\.[A-Za-z0-9_]+) (.*)" 
+                           "\\1;\\2" split "${testline}")
+      list(GET split 0 methname)
+      list(GET split 1 docstring)
+      add_test("npctransport.${name}.${methname}" ${PROJECT_BINARY_DIR}/setup_environment.sh ${IMP_PYTHON} ${test} "${methname}")
+      set_tests_properties("npctransport.${name}.${methname}" PROPERTIES LABELS "npctransport;test")
+      set_tests_properties("npctransport.${name}.${methname}" PROPERTIES MEASUREMENT "docstring=${docstring}")
+    endforeach()
+  else()
+    add_test("npctransport.${name}" ${PROJECT_BINARY_DIR}/setup_environment.sh ${IMP_PYTHON} ${test})
+    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "npctransport;test")
+  endif()
 endforeach(test)
 
 set(cpp_tests ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_main.cpp )
@@ -52,7 +69,7 @@ foreach (test ${cpp_tests})
    add_executable("npctransport.${name}" ${test})
    target_link_libraries("npctransport.${name}"     imp_npctransport
     ${IMP_BASE_LIBRARY} ${IMP_BENCHMARK_LIBRARY} ${IMP_CGAL_LIBRARY} ${IMP_ALGEBRA_LIBRARY} ${IMP_KERNEL_LIBRARY} ${IMP_DISPLAY_LIBRARY} ${IMP_SCORE_FUNCTOR_LIBRARY} ${IMP_CORE_LIBRARY} ${IMP_CONTAINER_LIBRARY} ${IMP_STATISTICS_LIBRARY} ${IMP_ATOM_LIBRARY} ${IMP_RMF_LIBRARY} ${IMP_DOMINO_LIBRARY} ${IMP_EXAMPLE_LIBRARY}
-    ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES})
+    ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${BOOST.RANDOM_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES})
    set_target_properties("npctransport.${name}" PROPERTIES
                          RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/test/npctransport/"
                          OUTPUT_NAME ${name})

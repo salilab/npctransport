@@ -11,8 +11,6 @@
 int main(int , char *[]) {
   // TODO: emulate real runtime parameters by initializig fake argc / argv?
   try {
-    FLAGS_random_seed = 1.0; // use time instead of constant?
-    IMP::base::random_number_generator.seed( FLAGS_random_seed );
     std::string config
         = IMP::npctransport::get_data_path("quick.pb");
     std::string assignment
@@ -22,7 +20,7 @@ int main(int , char *[]) {
     set_log_level(IMP::base::LogLevel(IMP::base::SILENT));
     FLAGS_quick=true;
     int num=IMP::npctransport::assign_ranges
-      (config, assignment, 0, true, FLAGS_random_seed);
+      (config, assignment, 0, true, IMP::base::get_random_seed());
     std::cout << "num ranges " << num << std::endl;
     IMP_NEW(IMP::npctransport::SimulationData, sd,(assignment, true));
     sd->set_rmf_file_name(output);
