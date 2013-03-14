@@ -2,6 +2,7 @@
 %{
 #include <RMF.h>
 #include <RMF/HDF5.h>
+IMP_CLANG_PRAGMA(diagnostic ignored "-Wc++11-long-long")
 %}
 IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
