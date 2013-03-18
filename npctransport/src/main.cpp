@@ -103,6 +103,7 @@ IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+namespace {
 /*********************************** internal functions *********************************/
 
 // TODO: move to H file?
@@ -114,7 +115,7 @@ void print_score_and_positions(SimulationData *sd,
 void print_score_and_positions(SimulationData *sd,
                                bool print_positions,
                                std::string header) {
-#pragma omp critical
+IMP_OMP_PRAGMA(critical)
   std::cout << header
             << sd->get_bd()->get_scoring_function()->evaluate(false)
             << " ; PredicatePairsRestraint score = "
@@ -123,8 +124,8 @@ void print_score_and_positions(SimulationData *sd,
   if(print_positions){
     ParticlesTemp ps = sd->get_diffusers()->get_particles();
       for(unsigned int i = 0; i < ps.size(); i++){
-#pragma omp critical
-        std::cout << ps[i] << ", "
+IMP_OMP_PRAGMA(critical)
+       std::cout << ps[i] << ", "
                   << IMP::core::RigidBody(ps[i]).get_reference_frame()
                   << std::endl;
       }
@@ -144,11 +145,11 @@ inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
       (FLAGS_configuration, FLAGS_output,
        FLAGS_work_unit, FLAGS_show_steps, actual_seed);
     if (FLAGS_show_number_of_work_units) {
-#pragma omp critical
+IMP_OMP_PRAGMA(critical)
       std::cout << "work units " << num << std::endl;
     }
   } else { // FLAGS_resart.empty()
-#pragma omp critical
+IMP_OMP_PRAGMA(critical)
     std::cout << "Restart simulation from " << FLAGS_restart << std::endl;
       ::npctransport_proto::Output prev_output;
     // copy to new file to avoid modifying input file
@@ -160,32 +161,6 @@ inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
     std::ofstream outf(FLAGS_output.c_str(), std::ios::binary);
     prev_output.SerializeToOstream(&outf);
   }
-}
-
-/********************* public functions **********************/
-
-// initialize and return a simulation data object based on
-// program command line parameters
-IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
-  IMP_NPC_PARSE_OPTIONS(argc, argv);
-#pragma omp critical
-  std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
-  set_log_level(IMP::base::LogLevel(FLAGS_log_level));
-  IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
-  write_output_based_on_flags( IMP::base::get_random_seed() );
-  sd= new IMP::npctransport::SimulationData(FLAGS_output,
-                                            FLAGS_quick);
-    if (!FLAGS_conformations.empty()) {
-      sd->set_rmf_file_name(FLAGS_conformations);
-    }
-    if(!FLAGS_init_rmffile.empty()) {
-      sd->initialize_positions_from_rmf(RMF::open_rmf_file_read_only(FLAGS_init_rmffile),
-                                        -1);
-#pragma omp critical
-      std::cout << "Initialize coordinates from last frame of an existing RMF file "
-                << FLAGS_init_rmffile << std::endl;
-    }
-    return sd.release();
 }
 
 
@@ -244,6 +219,34 @@ bool run_it(SimulationData *sd,
     number_of_frames-=cur_nframes;
   } while (number_of_frames > 0 && !FLAGS_first_only);
   return true;
+}
+}
+
+
+/********************* public functions **********************/
+
+// initialize and return a simulation data object based on
+// program command line parameters
+IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
+  IMP_NPC_PARSE_OPTIONS(argc, argv);
+IMP_OMP_PRAGMA(critical)
+  std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
+  set_log_level(IMP::base::LogLevel(FLAGS_log_level));
+  IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
+  write_output_based_on_flags( IMP::base::get_random_seed() );
+  sd= new IMP::npctransport::SimulationData(FLAGS_output,
+                                            FLAGS_quick);
+    if (!FLAGS_conformations.empty()) {
+      sd->set_rmf_file_name(FLAGS_conformations);
+    }
+    if(!FLAGS_init_rmffile.empty()) {
+      sd->initialize_positions_from_rmf(RMF::open_rmf_file_read_only(FLAGS_init_rmffile),
+                                        -1);
+IMP_OMP_PRAGMA(critical)
+      std::cout << "Initialize coordinates from last frame of an existing RMF file "
+                << FLAGS_init_rmffile << std::endl;
+    }
+    return sd.release();
 }
 
 //  Run simulation using preconstructed SimulationData object sd,
