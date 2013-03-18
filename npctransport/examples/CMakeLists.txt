@@ -39,7 +39,7 @@ set(pytests ${PROJECT_SOURCE_DIR}/modules/npctransport/examples/display_slab.py 
 
 foreach (test ${pytests})
  GET_FILENAME_COMPONENT(name ${test} NAME_WE)
- add_test("npctransport.${name}" ${PROJECT_BINARY_DIR}/setup_environment.sh ${IMP_PYTHON} ${test})
+ add_test("npctransport.${name}" ${PROJECT_BINARY_DIR}/setup_environment.sh python ${test})
  set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;example")
   #add_dependencies(${name} RMFPython)
 endforeach(test)
