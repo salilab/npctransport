@@ -7,7 +7,6 @@
 #ifndef IMPNPCTRANSPORT_BOOST_MAIN_H
 #define IMPNPCTRANSPORT_BOOST_MAIN_H
 
-#ifdef IMP_NPC_MAIN
 #include <IMP/base/flags.h>
 
 #define IMP_NPC_PARAMETER_BOOL(name, def, description)                  \
@@ -15,11 +14,11 @@
   IMP::base::AddBoolFlag name##adder(#name, description, &FLAGS_##name)
 
 #define IMP_NPC_PARAMETER_INT64(name, def, description)                 \
-  int FLAGS_##name=def;                                                 \
+  boost::int64_t FLAGS_##name=def;                                      \
   IMP::base::AddIntFlag name##adder(#name, description, &FLAGS_##name)
 
 #define IMP_NPC_PARAMETER_UINT64(name, def, description)                \
-  int FLAGS_##name=def;                                                 \
+  boost::int64_t FLAGS_##name=def;                                      \
   IMP::base::AddIntFlag name##adder(#name, description, &FLAGS_##name)
 
 
@@ -29,10 +28,6 @@
 
 #define IMP_NPC_PARSE_OPTIONS(argc, argv)                               \
   IMP::base::setup_from_argv(argc, argv, "Something npcish");
-
-#endif
-
-
 
 
 #endif /* IMPNPCTRANSPORT_BOOST_MAIN_H */

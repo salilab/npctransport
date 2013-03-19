@@ -11,7 +11,6 @@ class Tests(IMP.test.TestCase):
 
     def _make_and_run_simulation(self, output_pb_file, output_rmf_file, seed):
         IMP.base.random_number_generator.seed( seed )
-        RMF.set_show_hdf5_errors( True );
         config= IMP.npctransport.get_data_path( "quick2.pb" );
         IMP.set_log_level( IMP.SILENT );
         print "assigning parameter ranges"

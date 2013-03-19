@@ -13,6 +13,7 @@ include_directories(${ANN_INCLUDE_PATH}
         ${BOOST.FILESYSTEM_INCLUDE_PATH}
         ${BOOST.GRAPH_INCLUDE_PATH}
         ${BOOST.PROGRAMOPTIONS_INCLUDE_PATH}
+        ${BOOST.RANDOM_INCLUDE_PATH}
         ${BOOST.REGEX_INCLUDE_PATH}
         ${BOOST.SYSTEM_INCLUDE_PATH}
         ${CGAL_INCLUDE_PATH}
@@ -29,6 +30,7 @@ link_directories(${ANN_LINK_PATH}
         ${BOOST.FILESYSTEM_LINK_PATH}
         ${BOOST.GRAPH_LINK_PATH}
         ${BOOST.PROGRAMOPTIONS_LINK_PATH}
+        ${BOOST.RANDOM_LINK_PATH}
         ${BOOST.REGEX_LINK_PATH}
         ${BOOST.SYSTEM_LINK_PATH}
         ${CGAL_LINK_PATH}
@@ -40,11 +42,11 @@ link_directories(${ANN_LINK_PATH}
         ${RMF_LINK_PATH}
         ${TCMALLOC_HEAPCHECKER_LINK_PATH}
         ${TCMALLOC_HEAPPROFILER_LINK_PATH})
-add_definitions("-DIMPNPCTRANSPORT_EXPORT")
+add_definitions("-DIMPNPCTRANSPORT_EXPORTS")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NPCTRANSPORT_CXX_FLAGS}")
 
-set(headers ${PROJECT_SOURCE_DIR}/modules/npctransport/include/Avro2PBReader.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/BipartitePairsStatisticsOptimizerState.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/BodyStatisticsOptimizerState.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/ChainStatisticsOptimizerState.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/ExcludeZRangeSingletonScore.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/ParticleTransportStatisticsOptimizerState.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/SimulationData.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/SitesPairScore.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/SlabGeometry.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/SlabSingletonScore.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/Transporting.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/automatic_parameters.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/avro.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/creating_particles.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/functor_linear_distance_pair_scores.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/initialize_positions.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/io.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/linear_distance_pair_scores.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/main.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/particle_types.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/protobuf.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/rmf_links.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/typedefs.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/internal/boost_main.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/internal/google_main.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/internal/main.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/internal/sites.h)
+set(headers ${PROJECT_SOURCE_DIR}/modules/npctransport/include/Avro2PBReader.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/BipartitePairsStatisticsOptimizerState.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/BodyStatisticsOptimizerState.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/ChainStatisticsOptimizerState.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/ExcludeZRangeSingletonScore.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/ParticleTransportStatisticsOptimizerState.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/SimulationData.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/SitesPairScore.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/SlabGeometry.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/SlabSingletonScore.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/Transporting.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/automatic_parameters.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/avro.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/creating_particles.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/functor_linear_distance_pair_scores.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/initialize_positions.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/io.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/linear_distance_pair_scores.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/main.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/particle_types.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/protobuf.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/rmf_links.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/typedefs.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/internal/boost_main.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/internal/google_main.h ${PROJECT_SOURCE_DIR}/modules/npctransport/include/internal/sites.h)
 
 if(DEFINED IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES)
   set_source_files_properties(${IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES}
@@ -52,7 +54,7 @@ if(DEFINED IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES)
 endif()
 
 if(DEFINED IMP_npctransport_IS_PER_CPP)
-  set(sources ${PROJECT_SOURCE_DIR}/modules/npctransport/src/Avro2PBReader.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/BipartitePairsStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/BodyStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/ChainStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/ExcludeZRangeSingletonScore.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/ParticleTransportStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SimulationData.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SitesPairScore.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SlabGeometry.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SlabSingletonScore.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/Transporting.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/automatic_parameters.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/avro.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/creating_particles.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/initialize_positions.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/io.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/linear_distance_pair_scores.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/particle_types.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/protobuf.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/rmf_links.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/internal/main.cpp)
+  set(sources ${PROJECT_SOURCE_DIR}/modules/npctransport/src/Avro2PBReader.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/BipartitePairsStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/BodyStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/ChainStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/ExcludeZRangeSingletonScore.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/ParticleTransportStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SimulationData.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SitesPairScore.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SlabGeometry.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SlabSingletonScore.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/Transporting.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/automatic_parameters.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/avro.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/creating_particles.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/initialize_positions.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/io.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/linear_distance_pair_scores.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/main.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/particle_types.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/protobuf.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/rmf_links.cpp)
 
   add_library(imp_npctransport SHARED ${gensources} ${genheaders}
               ${headers} ${sources}
@@ -74,7 +76,7 @@ endif()
 
 target_link_libraries(imp_npctransport
                       ${IMP_BASE_LIBRARY} ${IMP_BENCHMARK_LIBRARY} ${IMP_CGAL_LIBRARY} ${IMP_ALGEBRA_LIBRARY} ${IMP_KERNEL_LIBRARY} ${IMP_DISPLAY_LIBRARY} ${IMP_SCORE_FUNCTOR_LIBRARY} ${IMP_CORE_LIBRARY} ${IMP_CONTAINER_LIBRARY} ${IMP_STATISTICS_LIBRARY} ${IMP_ATOM_LIBRARY} ${IMP_RMF_LIBRARY} ${IMP_DOMINO_LIBRARY} ${IMP_EXAMPLE_LIBRARY}
-                      ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES}
+                      ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${BOOST.RANDOM_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES}
   )
 
 set(IMP_NPCTRANSPORT_LIBRARY imp_npctransport CACHE INTERNAL "" FORCE)

@@ -5,7 +5,6 @@
 # * Copyright 2007-2012 IMP Inventors. All rights reserved.
 # */
 
-#define IMP_NPC_MAIN
 #include <IMP/npctransport/main.h>
 #include <IMP/npctransport/npctransport_config.h>
 #include <IMP/npctransport/particle_types.h>
@@ -28,6 +27,11 @@
 #include <numeric>
 #include <cmath>
 #include <iostream>
+#ifdef IMP_NPC_GOOGLE // TODO: replace with a unified include
+#include <IMP/npctransport/internal/google_main.h>
+#else
+#include <IMP/npctransport/internal/boost_main.h>
+#endif
 
 // use the example code for now to work bugs out of it
 #include <IMP/example/creating_restraints.h>
@@ -199,7 +203,7 @@ IMP::ParticlesTemp get_kaps_and_craps( IMP::npctransport::SimulationData& sd ) {
   using namespace IMP;
 
   ParticlesTemp ret;
-  unsigned int n = IMP::npctransport::get_n_types_of_float();
+  unsigned int n = IMP::npctransport::get_number_of_types_of_float();
   for(unsigned int i = 0; i < n ; i++) {
     IMP::core::ParticleType float_type =
       IMP::npctransport::get_type_of_float(i);
@@ -227,7 +231,6 @@ IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint
           (score, particles, "ExcludeZRangeRestraint") );
   return sr;
 }
-}
 
 IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
                         "anchor FG nups to a cylindrical pore with a slab of"
@@ -238,6 +241,7 @@ IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
 IMP_NPC_PARAMETER_BOOL(surface_anchoring, false,
                        "anchor FG nups to bottom of cube");
 
+}
 
 int main(int argc, char *argv[])
 {
@@ -246,26 +250,32 @@ int main(int argc, char *argv[])
   // logging stuff:
   IMP::base::CreateLogContext main("main");
   // preparation::
-  IMP_NPC_STARTUP(sd); //
-  if(FLAGS_surface_anchoring){
-    IMP_ALWAYS_CHECK(FLAGS_cylinder_nlayers == 0,
-                     "surface anchoring and cylinder"
-                     " anchoring flags are mutually exclusive",
-                     IMP::base::ValueException);
-    set_fg_grid(*sd);
+  try {
+    IMP::base::Pointer<npctransport::SimulationData> sd
+      = npctransport::startup(argc, argv);
+    if(FLAGS_surface_anchoring){
+      IMP_ALWAYS_CHECK(FLAGS_cylinder_nlayers == 0,
+                       "surface anchoring and cylinder"
+                       " anchoring flags are mutually exclusive",
+                       IMP::base::ValueException);
+      set_fg_grid(*sd);
+    }
+    if(FLAGS_cylinder_nlayers > 0){
+      set_fgs_in_cylinder(*sd, FLAGS_cylinder_nlayers);
+      std::cout << "Numbner of cylinder layers = " << FLAGS_cylinder_nlayers << std::endl;
+    }
+    color_fgs( *sd );
+    Restraints initialization_restraints;
+    if(sd->get_has_slab()) { // if has slab, exclude from channel initially
+      IMP::Pointer<IMP::Restraint> r= get_exclude_from_channel_restraint( *sd );
+      initialization_restraints.push_back( r );
+    }
+    std::cout << initialization_restraints << std::endl;
+    npctransport::do_main_loop(sd, initialization_restraints );
   }
-  if(FLAGS_cylinder_nlayers > 0){
-    set_fgs_in_cylinder(*sd, FLAGS_cylinder_nlayers);
-    std::cout << "Numbner of cylinder layers = " << FLAGS_cylinder_nlayers << std::endl;
+  catch (const IMP::base::Exception& e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+    return -1;
   }
-  color_fgs( *sd );
-  Restraints initialization_restraints;
-  if(sd->get_has_slab()) { // if has slab, exclude from channel initially
-    IMP::Pointer<IMP::Restraint> r= get_exclude_from_channel_restraint( *sd );
-    initialization_restraints.push_back( r );
-  }
-  std::cout << initialization_restraints << std::endl;
-  IMP_NPC_LOOP(sd, initialization_restraints );
-
   return 0;
  }

@@ -3,30 +3,33 @@
 add_subdirectory(${PROJECT_SOURCE_DIR}/modules/npctransport/dependency)
 include(${PROJECT_SOURCE_DIR}/modules/npctransport/Setup.cmake)
 
-execute_process(COMMAND ${PROJECT_SOURCE_DIR}/tools/build/setup_module.py
+imp_get_process_exit_code("setup_module npctransport" status ${PROJECT_BINARY_DIR}
+                          COMMAND ${PROJECT_SOURCE_DIR}/tools/build/setup_module.py
                           --name=npctransport
                           --datapath=${IMP_DATAPATH}
                           --defines=${IMP_NPCTRANSPORT_CONFIG}:
-                           --source=${PROJECT_SOURCE_DIR}
-                           RESULT_VARIABLE status
-                           WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+                           --source=${PROJECT_SOURCE_DIR})
 if(NOT ${status})
-execute_process(COMMAND ${PROJECT_SOURCE_DIR}/tools/build/setup_swig_wrappers.py
+message("Module IMP.npctransport ok")
+imp_execute_process("setup_swig_wrappers npctransport" ${PROJECT_BINARY_DIR}
+                    COMMAND ${PROJECT_SOURCE_DIR}/tools/build/setup_swig_wrappers.py
                           --module=npctransport
                           --datapath=${IMP_DATAPATH}
-                           --source=${PROJECT_SOURCE_DIR}
-                           WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+                           --source=${PROJECT_SOURCE_DIR})
+
+if(${IMP_SPLIT_PYTHON_TESTS})
+imp_execute_process("get_python_tests npctransport" ${PROJECT_BINARY_DIR}
+                    COMMAND ${PROJECT_SOURCE_DIR}/tools/build/get_python_tests.py
+                          --module=npctransport
+                          ${PROJECT_SOURCE_DIR})
+endif()
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/modules/npctransport/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/modules/npctransport/test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/modules/npctransport/examples)
-add_subdirectory(${PROJECT_SOURCE_DIR}/modules/npctransport/pyext)
-add_custom_target(npctransport DEPENDS
-  imp_npctransport
-  imp_npctransport_wrapper
-  imp_npctransport_bins
-  imp_npctransport_tests
-  imp_npctransport_benchmarks)
+add_subdirectory(${PROJECT_SOURCE_DIR}/modules/npctransport/benchmark)
+add_subdirectory(${PROJECT_SOURCE_DIR}/modules/npctransport/bin)
 else()
-message(STATUS "Module IMP.npctransport disabled")
+message("Module IMP.npctransport disabled")
 set(IMP_NPCTRANSPORT_LIBRARY CACHE INTERNAL "" FORCE)
 endif()

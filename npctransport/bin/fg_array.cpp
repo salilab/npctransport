@@ -6,8 +6,11 @@
 
 #define IMP_NPC_MAIN
 #include <IMP/npctransport/main.h>
+#include <IMP/npctransport/particle_types.h>
 #include <IMP/ParticleTuple.h>
 #include <RMF/utility.h>
+
+namespace {
 int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
   using namespace IMP;
   using namespace IMP::npctransport;
@@ -51,13 +54,15 @@ int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
                                sd->get_box().get_corner(0)[2]));
     d.set_coordinates_are_optimized(false);
   }
-  IMP_NPC_LOOP(sd, IMP::RestraintsTemp());
+  IMP::npctransport::do_main_loop(sd, IMP::RestraintsTemp());
   return 0;
+}
 }
 
 int main(int argc, char *argv[]) {
   int ret;
-  IMP_NPC_STARTUP(sd);
+  IMP::base::Pointer<IMP::npctransport::SimulationData> sd
+    = IMP::npctransport::startup(argc, argv);
 
   ret=do_it(sd);
 

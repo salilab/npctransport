@@ -10,7 +10,9 @@
 #include <RMF/utility.h>
 
 int main(int argc, char *argv[]) {
-  IMP_NPC_STARTUP(sd);
-  IMP_NPC_LOOP(sd, IMP::RestraintsTemp());
+  using namespace IMP::npctransport;
+  IMP::base::Pointer<SimulationData> sd
+    = startup(argc, argv);
+  do_main_loop(sd, IMP::RestraintsTemp());
   return 0;
 }

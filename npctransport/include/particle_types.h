@@ -27,7 +27,7 @@ core::ParticleType get_type_of_fg(unsigned int index)
 }
 
 inline IMPNPCTRANSPORTEXPORT
-unsigned int get_n_types_of_fg()
+unsigned int get_number_of_types_of_fg()
 {
   return type_of_fg.size();
 }
@@ -39,7 +39,7 @@ core::ParticleType get_type_of_float(unsigned int index)
 }
 
 inline IMPNPCTRANSPORTEXPORT
-unsigned int get_n_types_of_float()
+unsigned int get_number_of_types_of_float()
 {
   return type_of_float.size();
 }
