@@ -8,7 +8,7 @@ class Tests(IMP.test.TestCase):
     in_avro= self.get_input_file_name( "avro.sample" );
     print "parsing", in_avro
     a=Avro2PBReader(in_avro)
-    o = Output()
+    o = IMP.npctransport.Output()
     while(a.get_is_valid()):
       s = a.read_next()
       if(not a.get_is_valid()): break;
