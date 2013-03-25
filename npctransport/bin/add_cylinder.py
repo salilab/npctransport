@@ -58,6 +58,8 @@ def main():
   IMP.base.add_string_flag("input", "", "The RMF file to add cylinders to.")
   IMP.base.add_float_flag("radius", 5, "The radius of the cylinder.")
   IMP.base.add_float_flag("site_radius", 2, "The radius of the sites.")
+  IMP.base.add_bool_flag("recolor_fgs", "recolor fg nup chains")
+  IMP.base.add_bool_flag("recolor_floats", "recolor floating (diffusing) molecules")
   IMP.base.setup_from_argv(sys.argv, "Prettify a movie")
   fh= RMF.open_rmf_file(IMP.base.get_string_flag("input"))
   radius= IMP.base.get_float_flag("radius")
@@ -72,9 +74,11 @@ def main():
   float_types = [IMP.npctransport.get_type_of_float(i).get_string() for i in range(0, IMP.npctransport.get_number_of_types_of_float())]
   fh.set_current_frame(RMF.ALL_FRAMES)
 
-  _recolor(fh.get_root_node(), tf, cdf, fg_types, fg_color)
-  _recolor(fh.get_root_node(), tf, cdf, float_types[0:1], kap_color)
-  _recolor(fh.get_root_node(), tf, cdf, float_types[1:], crap_color)
+  if(IMP.base.get_bool_flag("recolor_fgs")):
+    _recolor(fh.get_root_node(), tf, cdf, fg_types, fg_color)
+  if(IMP.base.get_bool_flag("recolor_floats")):
+    _recolor(fh.get_root_node(), tf, cdf, float_types[0:1], kap_color)
+    _recolor(fh.get_root_node(), tf, cdf, float_types[1:], crap_color)
 
   _resize_sites(fh.get_root_node(), bf, IMP.base.get_float_flag("site_radius"))
 
