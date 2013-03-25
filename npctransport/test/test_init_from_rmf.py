@@ -97,7 +97,7 @@ class Tests(IMP.test.TestCase):
         # Restoration from first simulation through output protobuf file:
         print "*** Initializing positions from ProtoBuf file " + output_pb1
         f=open(output_pb1, "rb")
-        config= Output()
+        config= IMP.npctransport.Output()
         config.ParseFromString(f.read())
         fl= RMF.open_rmf_buffer_read_only( config.rmf_conformation )
         sd.initialize_positions_from_rmf( fl )
