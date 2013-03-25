@@ -71,11 +71,12 @@ endforeach(swig)
 
 file(STRINGS "${PROJECT_BINARY_DIR}/src/npctransport_swig.deps" swigdeps)
 
+set(wrap_py "${PROJECT_BINARY_DIR}/lib/IMP/npctransport/__init__.py")
+set(wrap_py_orig "${PROJECT_BINARY_DIR}/src/npctransport_swig/IMP.npctransport.py")
 set(source ${PROJECT_BINARY_DIR}/src/npctransport_swig/wrap.cpp
                           ${PROJECT_BINARY_DIR}/src/npctransport_swig/wrap.h)
 
-add_custom_command(OUTPUT ${source}
-                          "${PROJECT_BINARY_DIR}/lib/IMP/npctransport/__init__.py"
+add_custom_command(OUTPUT ${source} ${wrap_py} ${wrap_py_orig}
    COMMAND "${PROJECT_SOURCE_DIR}/tools/build/make_swig_wrapper.py"
             "--swig=${SWIG_EXECUTABLE}"
             "--swigpath=${swig_path}"
@@ -96,11 +97,17 @@ endif()
 target_link_libraries(_IMP_npctransport
     imp_npctransport
     ${IMP_BASE_LIBRARY} ${IMP_BENCHMARK_LIBRARY} ${IMP_CGAL_LIBRARY} ${IMP_ALGEBRA_LIBRARY} ${IMP_KERNEL_LIBRARY} ${IMP_DISPLAY_LIBRARY} ${IMP_SCORE_FUNCTOR_LIBRARY} ${IMP_CORE_LIBRARY} ${IMP_CONTAINER_LIBRARY} ${IMP_STATISTICS_LIBRARY} ${IMP_ATOM_LIBRARY} ${IMP_RMF_LIBRARY} ${IMP_DOMINO_LIBRARY} ${IMP_EXAMPLE_LIBRARY}
-    ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${BOOST.RANDOM_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES}
+    ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${BOOST.RANDOM_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES}
     ${IMP_SWIG_LIBRARIES}
   )
 
 add_custom_target("imp_npctransport_python" ALL DEPENDS ${source} _IMP_npctransport
+                  ${wrap_py}
 )
 
 INSTALL(TARGETS _IMP_npctransport DESTINATION ${CMAKE_INSTALL_PYTHONDIR})
+# Install the original wrapper, since wrap_py is a symlink and install does
+# not dereference symlinks
+INSTALL(FILES ${wrap_py_orig}
+        DESTINATION ${CMAKE_INSTALL_PYTHONDIR}/IMP/npctransport
+        RENAME __init__.py)

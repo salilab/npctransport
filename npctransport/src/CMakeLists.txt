@@ -56,13 +56,13 @@ endif()
 if(DEFINED IMP_npctransport_IS_PER_CPP)
   set(sources ${PROJECT_SOURCE_DIR}/modules/npctransport/src/Avro2PBReader.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/BipartitePairsStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/BodyStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/ChainStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/ExcludeZRangeSingletonScore.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/ParticleTransportStatisticsOptimizerState.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SimulationData.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SitesPairScore.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SlabGeometry.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/SlabSingletonScore.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/Transporting.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/automatic_parameters.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/avro.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/creating_particles.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/initialize_positions.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/io.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/linear_distance_pair_scores.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/main.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/particle_types.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/protobuf.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/src/rmf_links.cpp)
 
-  add_library(imp_npctransport SHARED ${gensources} ${genheaders}
+  add_library(imp_npctransport ${IMP_LIB_TYPE} ${gensources} ${genheaders}
               ${headers} ${sources}
               ${IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES}
               )
 else()
 
-  add_library(imp_npctransport SHARED ${gensources} ${genheaders}
+  add_library(imp_npctransport ${IMP_LIB_TYPE} ${gensources} ${genheaders}
               ${headers} ${PROJECT_BINARY_DIR}/src/npctransport_all.cpp
               ${IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES}
               )
@@ -76,7 +76,7 @@ endif()
 
 target_link_libraries(imp_npctransport
                       ${IMP_BASE_LIBRARY} ${IMP_BENCHMARK_LIBRARY} ${IMP_CGAL_LIBRARY} ${IMP_ALGEBRA_LIBRARY} ${IMP_KERNEL_LIBRARY} ${IMP_DISPLAY_LIBRARY} ${IMP_SCORE_FUNCTOR_LIBRARY} ${IMP_CORE_LIBRARY} ${IMP_CONTAINER_LIBRARY} ${IMP_STATISTICS_LIBRARY} ${IMP_ATOM_LIBRARY} ${IMP_RMF_LIBRARY} ${IMP_DOMINO_LIBRARY} ${IMP_EXAMPLE_LIBRARY}
-                      ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${BOOST.RANDOM_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES}
+                      ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${BOOST.RANDOM_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES}
   )
 
 set(IMP_NPCTRANSPORT_LIBRARY imp_npctransport CACHE INTERNAL "" FORCE)
