@@ -1,18 +1,3 @@
-message(STATUS "Setting up avro "${PROJECT_BINARY_DIR}/include/IMP/npctransport/AvroDataFileData.h)
-
-if(NOT DEFINED AVROGENCPP)
-set(AVROGENCPP avrogencpp)
-endif()
-
-add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/include/IMP/npctransport/AvroDataFileData.h"
-     COMMAND ${AVROGENCPP} "--input" "${PROJECT_SOURCE_DIR}/modules/npctransport/data/AvroDataFileData.json"
-     "--output" "${PROJECT_BINARY_DIR}/include/IMP/npctransport/AvroDataFileData.h" "--namespace" "IMP_npctransport"
-     DEPENDS "${PROJECT_SOURCE_DIR}/modules/npctransport/data/AvroDataFileData.json"
-     ${AVROGENCPP_DEPENDENCY}
-     COMMENT "Creating json header for npctransport")
-
-add_custom_target(npctransport_avro ALL DEPENDS "${PROJECT_BINARY_DIR}/include/IMP/npctransport/AvroDataFileData.h" )
-
 message(STATUS "Setting up proto " "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.cpp")
 
 # there is a #include 'npctransport.ph.h' in the cpp file
@@ -52,4 +37,4 @@ add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/lib/IMP/npctransport/npctranspo
 
 add_custom_target(npctransport_python_proto ALL DEPENDS "${PROJECT_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py" )
 
-set(IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES npctransport_proto npctransport_avro CACHE INTERNAL "" FORCE)
+set(IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES npctransport_proto CACHE INTERNAL "" FORCE)
