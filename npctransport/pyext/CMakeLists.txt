@@ -38,17 +38,12 @@ link_directories(${ANN_LINK_PATH}
         ${TCMALLOC_HEAPPROFILER_LINK_PATH})
 
 GET_DIRECTORY_PROPERTY(includes INCLUDE_DIRECTORIES)
-foreach(include ${includes})
-set(include_path ${include_path}:${include})
-endforeach(include)
 
 # SWIG doesn't need Python.h in its own include path
 include_directories(${PYTHON_INCLUDE_DIRS})
 
-set(swig_path ${IMP_SWIG_PATH})
-
 # this is needed for some reason that I don't understand
-set(swigpath ${ANN_SWIG_PATH}
+set(swig_path ${ANN_SWIG_PATH}
         ${AVROCPP_SWIG_PATH}
         ${BOOST.FILESYSTEM_SWIG_PATH}
         ${BOOST.GRAPH_SWIG_PATH}
@@ -64,10 +59,7 @@ set(swigpath ${ANN_SWIG_PATH}
         ${PROTOBUF_SWIG_PATH}
         ${RMF_SWIG_PATH}
         ${TCMALLOC_HEAPCHECKER_SWIG_PATH}
-        ${TCMALLOC_HEAPPROFILER_SWIG_PATH})
-foreach(swig ${swigpath})
-set(swig_path ${swig}:${swig_path})
-endforeach(swig)
+        ${TCMALLOC_HEAPPROFILER_SWIG_PATH} ${IMP_SWIG_PATH})
 
 file(STRINGS "${PROJECT_BINARY_DIR}/src/npctransport_swig.deps" swigdeps)
 
@@ -76,12 +68,19 @@ set(wrap_py_orig "${PROJECT_BINARY_DIR}/src/npctransport_swig/IMP.npctransport.p
 set(source ${PROJECT_BINARY_DIR}/src/npctransport_swig/wrap.cpp
                           ${PROJECT_BINARY_DIR}/src/npctransport_swig/wrap.h)
 
+set(PATH_ARGS )
+foreach(path ${includes})
+  list(APPEND PATH_ARGS "--includepath=${path}")
+endforeach(path)
+foreach(path ${swig_path})
+  list(APPEND PATH_ARGS "--swigpath=${path}")
+endforeach(path)
 add_custom_command(OUTPUT ${source} ${wrap_py} ${wrap_py_orig}
-   COMMAND "${PROJECT_SOURCE_DIR}/tools/build/make_swig_wrapper.py"
+   COMMAND  python
+            "${PROJECT_SOURCE_DIR}/tools/build/make_swig_wrapper.py"
             "--swig=${SWIG_EXECUTABLE}"
-            "--swigpath=${swig_path}"
-            "--includepath=${include_path}"
             "--module=npctransport"
+            ${PATH_ARGS}
    DEPENDS ${swigdeps} ${IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES}
    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
    COMMENT "Running swig on npctransport")

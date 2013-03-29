@@ -39,7 +39,7 @@ set(pytests ${PROJECT_SOURCE_DIR}/modules/npctransport/examples/display_slab.py 
 
 foreach (test ${pytests})
  GET_FILENAME_COMPONENT(name ${test} NAME_WE)
- add_test("npctransport.${name}" ${PROJECT_BINARY_DIR}/setup_environment.sh python ${test})
+ add_test("npctransport.${name}" ${IMP_TEST_SETUP} python ${test})
  set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;example")
   #add_dependencies(${name} RMFPython)
 endforeach(test)
@@ -55,7 +55,7 @@ foreach (test ${cpp_tests})
    set_target_properties("npctransport.${name}" PROPERTIES
                          RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/test/npctransport/"
                          OUTPUT_NAME "${name}")
-   add_test("npctransport.${name}" ${PROJECT_BINARY_DIR}/setup_environment.sh "${PROJECT_BINARY_DIR}/test/npctransport/${name}${CMAKE_EXECUTABLE_SUFFIX}")
+   add_test("npctransport.${name}" ${IMP_TEST_SETUP} "${PROJECT_BINARY_DIR}/test/npctransport/${name}${CMAKE_EXECUTABLE_SUFFIX}")
    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;example")
    set(executables ${executables} "npctransport.${name}")
 endforeach(test)
