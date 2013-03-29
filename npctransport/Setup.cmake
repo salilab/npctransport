@@ -19,9 +19,9 @@ add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/include/IMP/npctransport/intern
 
 add_custom_target(npctransport_proto ALL DEPENDS "${PROJECT_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h" )
 
-set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.cpp" "${PROJECT_BINARY_DIR}/include/IMP/npctransport/AvroDataFileData.h" CACHE INTERNAL "" FORCE)
+set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.cpp" CACHE INTERNAL "" FORCE)
 
-set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_DEPENDENCIES npctransport_proto npctransport_avro CACHE INTERNAL "" FORCE)
+set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_DEPENDENCIES npctransport_proto CACHE INTERNAL "" FORCE)
 
 
 # there is a #include 'npctransport.ph.h' in the cpp file
@@ -37,4 +37,4 @@ add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/lib/IMP/npctransport/npctranspo
 
 add_custom_target(npctransport_python_proto ALL DEPENDS "${PROJECT_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py" )
 
-set(IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES npctransport_proto CACHE INTERNAL "" FORCE)
+set(IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES npctransport_python_proto CACHE INTERNAL "" FORCE)
