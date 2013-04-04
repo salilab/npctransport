@@ -3,6 +3,12 @@ syntax="proto2";
 package npctransport_proto;
 
 message Configuration {
+  message XYZ {
+  // XYZ coordinates for a particle etc.
+    required double x=1;
+    required double y=2;
+    required double z=3;
+  };
   message IntRange {
     // a range from lower to upper with specified number of steps
     required int32 lower=1;
@@ -27,6 +33,7 @@ message Configuration {
     required FloatRange d_factor=6;
     required FloatRange interaction_k_factor=7;
     required FloatRange interaction_range_factor=8;
+    repeated XYZ anchor_coordinates=9; // a fixed coordinate for the first bead in the chain
   };
   message FloatConfiguration {
     required IntRange number=1;
@@ -74,6 +81,12 @@ message Configuration {
 // if you add any parameters you must update automatic_parameters.cpp
 // accordingly
 message Assignment {
+  message XYZ {
+  // XYZ coordinates for a particle etc.
+    required double x=1;
+    required double y=2;
+    required double z=3;
+  };
   message IntAssignment {
     required int32 value=1;
     optional int32 index=2;
@@ -91,6 +104,7 @@ message Assignment {
     required FloatAssignment d_factor=6;
     required FloatAssignment interaction_k_factor=7;
     required FloatAssignment interaction_range_factor=8;
+    repeated XYZ anchor_coordinates=9; // a fixed coordinate for the first bead in the chain
   };
   message FloaterAssignment {
     required IntAssignment number=1;

@@ -291,6 +291,13 @@ create_fgs(const ::npctransport_proto::Assignment_FGAssignment&data,
                                       display::Color(.3,.3,.3), type, "fg"));
       cur_particles.push_back(hc);
       ParticlesTemp chain=hc.get_children();
+      if(data.anchor_coordinates_size() > j){
+        ::npctransport_proto::Assignment_XYZ
+          xyz = data.anchor_coordinates(j);
+        core::XYZ d( chain[0] );
+        d.set_coordinates( algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()) );
+        d.set_coordinates_are_optimized( false);
+      }
       chain_stats_.back()
         .push_back(new ChainStatisticsOptimizerState(chain));
       chain_stats_.back().back()->set_period(statistics_interval_frames_);
