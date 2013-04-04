@@ -8,7 +8,6 @@
 #include <IMP/npctransport.h>
 #include <IMP/benchmark.h>
 #include <IMP/container.h>
-#include <IMP/example/optimizing.h>
 
 using namespace IMP;
 using namespace IMP::npctransport;
