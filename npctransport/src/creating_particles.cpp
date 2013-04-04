@@ -13,7 +13,7 @@
 #include <IMP/atom/Mass.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/atom/Diffusion.h>
-#include <IMP/example/creating_restraints.h>
+//#include <IMP/example/creating_restraints.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 Particle* create_particle(SimulationData *sd, double radius,
