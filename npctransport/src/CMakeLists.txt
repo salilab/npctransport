@@ -68,6 +68,7 @@ ${PROJECT_SOURCE_DIR}/modules/npctransport/include/linear_distance_pair_scores.h
 ${PROJECT_SOURCE_DIR}/modules/npctransport/include/main.h
 ${PROJECT_SOURCE_DIR}/modules/npctransport/include/particle_types.h
 ${PROJECT_SOURCE_DIR}/modules/npctransport/include/protobuf.h
+${PROJECT_SOURCE_DIR}/modules/npctransport/include/randomize_particles.h
 ${PROJECT_SOURCE_DIR}/modules/npctransport/include/rmf_links.h
 ${PROJECT_SOURCE_DIR}/modules/npctransport/include/typedefs.h
 ${PROJECT_SOURCE_DIR}/modules/npctransport/include/internal/boost_main.h

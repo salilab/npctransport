@@ -49,8 +49,7 @@ void randomize_particles(const ParticlesList &ps,
       core::RigidMember rm( ps[i] );
       core::RigidBody parent_rb = rm.get_rigid_body();
       if( parent_rb.get_coordinates_are_optimized() ) {
-        randomize_rigid_body( parent_rb.get_rigid_body(),
-                              bv);
+        randomize_rigid_body( parent_rb, bv );
       }
     }
   }
