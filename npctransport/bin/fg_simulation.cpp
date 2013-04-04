@@ -34,10 +34,10 @@
 #endif
 
 // use the example code for now to work bugs out of it
-#include <IMP/example/creating_restraints.h>
-#include <IMP/example/randomizing.h>
-#include <IMP/example/counting.h>
-#include <IMP/example/optimizing.h>
+//#include <IMP/example/creating_restraints.h>
+//#include <IMP/example/randomizing.h>
+//#include <IMP/example/counting.h>
+//#include <IMP/example/optimizing.h>
 
 
 

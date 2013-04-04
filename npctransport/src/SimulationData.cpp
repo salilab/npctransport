@@ -40,8 +40,8 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/display/PymolWriter.h>
 #include <IMP/display/primitive_geometries.h>
 #include <IMP/display/restraint_geometry.h>
-#include <IMP/example/optimizing.h>
-#include <IMP/example/randomizing.h>
+//#include <IMP/example/optimizing.h>
+//#include <IMP/example/randomizing.h>
 #include <IMP/npctransport/rmf_links.h>
 #include <RMF/FileHandle.h>
 #include <RMF/FileConstHandle.h>
