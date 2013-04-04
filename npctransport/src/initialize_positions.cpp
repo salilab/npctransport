@@ -36,7 +36,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 namespace {
 
-core::Mover* create_serial_mover(const ParticlesTemp &ps) {
+core::MonteCarloMover*
+create_serial_mover(const ParticlesTemp &ps) {
   core::Movers movers;
   for (unsigned int i=0; i< ps.size(); ++i) {
     double scale= core::XYZR(ps[i]).get_radius();

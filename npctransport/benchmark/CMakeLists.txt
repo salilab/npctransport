@@ -37,21 +37,52 @@ link_directories(${ANN_LINK_PATH}
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NPCTRANSPORT_CXX_FLAGS}")
 
-set(cppbenchmarks ${PROJECT_SOURCE_DIR}/modules/npctransport/benchmark/benchmark_interaction_scores.cpp ${PROJECT_SOURCE_DIR}/modules/npctransport/benchmark/benchmark_sites_pair_score.cpp)
+set(cppbenchmarks ${PROJECT_SOURCE_DIR}/modules/npctransport/benchmark/benchmark_interaction_scores.cpp
+${PROJECT_SOURCE_DIR}/modules/npctransport/benchmark/benchmark_sites_pair_score.cpp)
 
 foreach (bin ${cppbenchmarks})
    GET_FILENAME_COMPONENT(name ${bin} NAME_WE)
    add_executable(npctransport.${name} ${bin})
    target_link_libraries(npctransport.${name}     imp_npctransport
-    ${IMP_BASE_LIBRARY} ${IMP_BENCHMARK_LIBRARY} ${IMP_CGAL_LIBRARY} ${IMP_ALGEBRA_LIBRARY} ${IMP_KERNEL_LIBRARY} ${IMP_DISPLAY_LIBRARY} ${IMP_SCORE_FUNCTOR_LIBRARY} ${IMP_CORE_LIBRARY} ${IMP_CONTAINER_LIBRARY} ${IMP_STATISTICS_LIBRARY} ${IMP_ATOM_LIBRARY} ${IMP_RMF_LIBRARY} ${IMP_DOMINO_LIBRARY} ${IMP_EXAMPLE_LIBRARY}
+    ${IMP_BASE_LIBRARY}
+${IMP_BENCHMARK_LIBRARY}
+${IMP_CGAL_LIBRARY}
+${IMP_ALGEBRA_LIBRARY}
+${IMP_KERNEL_LIBRARY}
+${IMP_DISPLAY_LIBRARY}
+${IMP_SCORE_FUNCTOR_LIBRARY}
+${IMP_CORE_LIBRARY}
+${IMP_CONTAINER_LIBRARY}
+${IMP_STATISTICS_LIBRARY}
+${IMP_ATOM_LIBRARY}
+${IMP_RMF_LIBRARY}
+${IMP_DOMINO_LIBRARY}
+${IMP_EXAMPLE_LIBRARY}
     ${IMP_BENCHMARK_LIBRARY}
-    ${RMF_LIBRARIES} ${PROTOBUF_LIBRARIES} ${AVROCPP_LIBRARIES} ${BOOST.FILESYSTEM_LIBRARIES} ${BOOST.PROGRAMOPTIONS_LIBRARIES} ${BOOST.SYSTEM_LIBRARIES} ${GPERFTOOLS_LIBRARIES} ${TCMALLOC_HEAPPROFILER_LIBRARIES} ${TCMALLOC_HEAPCHECKER_LIBRARIES} ${LOG4CXX_LIBRARIES} ${BOOST.RANDOM_LIBRARIES} ${CGAL_LIBRARIES} ${ANN_LIBRARIES} ${BOOST.REGEX_LIBRARIES} ${BOOST.GRAPH_LIBRARIES} ${HDF5_LIBRARIES} ${EXAMPLEDEPENDENCY_LIBRARIES})
+    ${RMF_LIBRARIES}
+${PROTOBUF_LIBRARIES}
+${AVROCPP_LIBRARIES}
+${BOOST.FILESYSTEM_LIBRARIES}
+${BOOST.PROGRAMOPTIONS_LIBRARIES}
+${BOOST.SYSTEM_LIBRARIES}
+${GPERFTOOLS_LIBRARIES}
+${TCMALLOC_HEAPPROFILER_LIBRARIES}
+${TCMALLOC_HEAPCHECKER_LIBRARIES}
+${LOG4CXX_LIBRARIES}
+${BOOST.RANDOM_LIBRARIES}
+${CGAL_LIBRARIES}
+${ANN_LIBRARIES}
+${BOOST.REGEX_LIBRARIES}
+${BOOST.GRAPH_LIBRARIES}
+${HDF5_LIBRARIES}
+${EXAMPLEDEPENDENCY_LIBRARIES})
    set_target_properties(npctransport.${name} PROPERTIES
                          RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/benchmark/npctransport"
                          OUTPUT_NAME ${name})
-   add_test(npctransport.${name} ${PROJECT_BINARY_DIR}/setup_environment.sh
+   add_test(npctransport.${name} ${IMP_TEST_SETUP}
             "${PROJECT_BINARY_DIR}/benchmark/npctransport/${name}${CMAKE_EXECUTABLE_SUFFIX}")
    set_tests_properties(npctransport.${name} PROPERTIES LABELS "IMP.npctransport;benchmark")
+   set_tests_properties(npctransport.${name} PROPERTIES TIMEOUT 1200)
    set(executables ${executables} npctransport.${name})
 endforeach(bin)
 
@@ -62,7 +93,7 @@ add_custom_target("imp_npctransport_benchmarks" ALL DEPENDS ${executables}
 set(pybenchmarks )
 foreach (test ${pybenchmarks})
  GET_FILENAME_COMPONENT(name ${test} NAME_WE)
- add_test("npctransport.${name}" ${PROJECT_BINARY_DIR}/setup_environment.sh
-          python ${test})
+ add_test("npctransport.${name}" ${IMP_TEST_SETUP} python ${test})
  set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;benchmark")
+ set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT 1200)
 endforeach(test)
