@@ -7,7 +7,7 @@
  */
 
 #include <IMP/npctransport/initialize_positions.h>
-#include <IMP/example/randomizing.h>
+#include <IMP/npctransport/randomize_particles.h>
 #include <IMP/npctransport/particle_types.h>
 #include <IMP/core/DistancePairScore.h>
 #include <IMP/core/XYZR.h>
@@ -163,8 +163,8 @@ void initialize_positions(SimulationData *sd,
                           const RestraintsTemp &extra_restraints,
                           bool debug) {
   sd->set_was_used(true);
-  example::randomize_particles(sd->get_diffusers()->get_particles(),
-                               sd->get_box());
+  randomize_particles(sd->get_diffusers()->get_particles(),
+                      sd->get_box());
   sd->get_rmf_sos_writer()->update();
   RestraintsTemp rss=sd->get_chain_restraints();
   if(sd->get_has_bounding_box())  rss.push_back(sd->get_box_restraint());
