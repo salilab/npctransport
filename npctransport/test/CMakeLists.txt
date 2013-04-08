@@ -34,6 +34,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NPCTRANSPORT_CXX_FLAGS}")
 
 File(GLOB runtimepytests "${PROJECT_BINARY_DIR}/test/npctransport/test_*.py")
 
+math(EXPR short_timeout "${IMP_TIMEOUT_FACTOR} * 5")
+math(EXPR medium_timeout "${IMP_TIMEOUT_FACTOR} * 15")
+math(EXPR expensive_timeout "${IMP_TIMEOUT_FACTOR} * 120")
 
 # should make into function
 foreach (test ${runtimepytests} ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_avro_reader.py
@@ -50,7 +53,7 @@ ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_slabss.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_statistics.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_util.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_well.py)
-  GET_FILENAME_COMPONENT(name ${test} NAME_WE)
+  GET_FILENAME_COMPONENT(name ${test} NAME)
   if(EXISTS "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests")
     FILE(READ "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests" contents)
     STRING(REGEX REPLACE ";" "\\\\;" contents "${contents}")
@@ -61,19 +64,20 @@ ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_well.py)
       list(GET split 0 methname)
       list(GET split 1 docstring)
       add_test("npctransport.${name}.${methname}" ${IMP_TEST_SETUP} python ${test} "${methname}")
-      set_tests_properties("npctransport.${name}.${methname}" PROPERTIES LABELS "IMP.npctransport;test")
+      set_tests_properties("npctransport.${name}.${methname}" PROPERTIES LABELS "IMP.npctransport;test;length_short")
       set_tests_properties("npctransport.${name}.${methname}" PROPERTIES MEASUREMENT "docstring=${docstring}")
       set_tests_properties("npctransport.${name}.${methname}" PROPERTIES TIMEOUT 5)
     endforeach()
   else()
     add_test("npctransport.${name}" ${IMP_TEST_SETUP} python ${test})
-    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test")
-    set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT 20)
+    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test;length_short")
+    set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${short_timeout})
+    set_tests_properties("npctransport.${name}" PROPERTIES COST 1)
   endif()
 endforeach(test)
 
 foreach (test )
-  GET_FILENAME_COMPONENT(name ${test} NAME_WE)
+  GET_FILENAME_COMPONENT(name ${test} NAME)
   if(EXISTS "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests")
     FILE(READ "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests" contents)
     STRING(REGEX REPLACE ";" "\\\\;" contents "${contents}")
@@ -84,21 +88,47 @@ foreach (test )
       list(GET split 0 methname)
       list(GET split 1 docstring)
       add_test("npctransport.${name}.${methname}" ${IMP_TEST_SETUP} python ${test} "${methname}")
-      set_tests_properties("npctransport.${name}.${methname}" PROPERTIES LABELS "IMP.npctransport;test")
+      set_tests_properties("npctransport.${name}.${methname}" PROPERTIES LABELS "IMP.npctransport;test;length_medium")
       set_tests_properties("npctransport.${name}.${methname}" PROPERTIES MEASUREMENT "docstring=${docstring}")
       set_tests_properties("npctransport.${name}.${methname}" PROPERTIES TIMEOUT 120)
     endforeach()
   else()
     add_test("npctransport.${name}" ${IMP_TEST_SETUP} python ${test})
-    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test;expensive")
-    set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT 120)
+    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test;length_medium")
+    set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${medium_timeout})
+    set_tests_properties("npctransport.${name}" PROPERTIES COST 2)
+  endif()
+endforeach(test)
+
+foreach (test )
+  GET_FILENAME_COMPONENT(name ${test} NAME)
+  if(EXISTS "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests")
+    FILE(READ "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests" contents)
+    STRING(REGEX REPLACE ";" "\\\\;" contents "${contents}")
+    STRING(REGEX REPLACE "\n" ";" contents "${contents}")
+    foreach(testline ${contents})
+      string(REGEX REPLACE "([A-Za-z0-9_]+\\.[A-Za-z0-9_]+) (.*)"
+                           "\\1;\\2" split "${testline}")
+      list(GET split 0 methname)
+      list(GET split 1 docstring)
+      add_test("npctransport.${name}.${methname}" ${IMP_TEST_SETUP} python ${test} "${methname}")
+      set_tests_properties("npctransport.${name}.${methname}" PROPERTIES LABELS "IMP.npctransport;test;length_expensive")
+      set_tests_properties("npctransport.${name}.${methname}" PROPERTIES MEASUREMENT "docstring=${docstring}")
+      set_tests_properties("npctransport.${name}.${methname}" PROPERTIES TIMEOUT 120)
+    endforeach()
+  else()
+    add_test("npctransport.${name}" ${IMP_TEST_SETUP} python ${test})
+    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test;length_expensive")
+    set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${expensive_timeout})
+    set_tests_properties("npctransport.${name}" PROPERTIES COST 3)
   endif()
 endforeach(test)
 
 set(cpp_tests ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_main.cpp )
 
 foreach (test ${cpp_tests})
-   GET_FILENAME_COMPONENT(name ${test} NAME_WE)
+   GET_FILENAME_COMPONENT(name ${test} NAME)
+   GET_FILENAME_COMPONENT(name_we ${test} NAME_WE)
    add_executable("npctransport.${name}" ${test})
    target_link_libraries("npctransport.${name}"     imp_npctransport
     ${IMP_BASE_LIBRARY}
@@ -108,9 +138,9 @@ ${IMP_ALGEBRA_LIBRARY}
 ${IMP_KERNEL_LIBRARY}
 ${IMP_DISPLAY_LIBRARY}
 ${IMP_SCORE_FUNCTOR_LIBRARY}
+${IMP_STATISTICS_LIBRARY}
 ${IMP_CORE_LIBRARY}
 ${IMP_CONTAINER_LIBRARY}
-${IMP_STATISTICS_LIBRARY}
 ${IMP_ATOM_LIBRARY}
 ${IMP_RMF_LIBRARY}
     ${RMF_LIBRARIES}
@@ -129,11 +159,12 @@ ${ANN_LIBRARIES}
 ${BOOST.REGEX_LIBRARIES})
    set_target_properties("npctransport.${name}" PROPERTIES
                          RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/test/npctransport/"
-                         OUTPUT_NAME ${name})
+                         OUTPUT_NAME ${name_we})
    add_test("npctransport.${name}" ${IMP_TEST_SETUP}
-            "${PROJECT_BINARY_DIR}/test/npctransport/${name}${CMAKE_EXECUTABLE_SUFFIX}")
+            "${PROJECT_BINARY_DIR}/test/npctransport/${name_we}${CMAKE_EXECUTABLE_SUFFIX}")
    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test")
-   set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT 5)
+   set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${short_timeout})
+   set_tests_properties("npctransport.${name}" PROPERTIES COST 1)
    set(executables ${executables} "npctransport.${name}")
 endforeach(test)
 
