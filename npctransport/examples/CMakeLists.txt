@@ -33,17 +33,22 @@ set(pytests ${PROJECT_SOURCE_DIR}/modules/npctransport/examples/display_slab.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/examples/make_cfg.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/examples/slab.py)
 
+math(EXPR timeout "${IMP_TIMEOUT_FACTOR} * 180")
+
+
 foreach (test ${pytests})
- GET_FILENAME_COMPONENT(name ${test} NAME_WE)
+ GET_FILENAME_COMPONENT(name ${test} NAME)
  add_test("npctransport.${name}" ${IMP_TEST_SETUP} python ${test})
  set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;example")
+ set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${timeout})
+ set_tests_properties("npctransport.${name}" PROPERTIES COST 3)
   #add_dependencies(${name} RMFPython)
 endforeach(test)
 
 set(cpp_tests )
 
 foreach (test ${cpp_tests})
-   GET_FILENAME_COMPONENT(name ${test} NAME_WE)
+   GET_FILENAME_COMPONENT(name ${test} NAME)
    add_executable("npctransport.${name}" ${test})
    target_link_libraries("npctransport.${name}"     imp_npctransport
     ${IMP_BASE_LIBRARY}
@@ -53,9 +58,9 @@ ${IMP_ALGEBRA_LIBRARY}
 ${IMP_KERNEL_LIBRARY}
 ${IMP_DISPLAY_LIBRARY}
 ${IMP_SCORE_FUNCTOR_LIBRARY}
+${IMP_STATISTICS_LIBRARY}
 ${IMP_CORE_LIBRARY}
 ${IMP_CONTAINER_LIBRARY}
-${IMP_STATISTICS_LIBRARY}
 ${IMP_ATOM_LIBRARY}
 ${IMP_RMF_LIBRARY}
     ${RMF_LIBRARIES}
@@ -77,6 +82,8 @@ ${BOOST.REGEX_LIBRARIES})
                          OUTPUT_NAME "${name}")
    add_test("npctransport.${name}" ${IMP_TEST_SETUP} "${PROJECT_BINARY_DIR}/test/npctransport/${name}${CMAKE_EXECUTABLE_SUFFIX}")
    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;example")
+   set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${timeout})
+   set_tests_properties("npctransport.${name}" PROPERTIES COST 3)
    set(executables ${executables} "npctransport.${name}")
 endforeach(test)
 
