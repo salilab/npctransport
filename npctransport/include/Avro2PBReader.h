@@ -58,6 +58,15 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
   //! (though possibly no entries left in neither of them)
   bool get_is_valid();
 
+  //! returns the name of the file that is currently being read
+  //! or "" if reader is at invalid state
+  std::string get_cur_file_name()
+    {
+      if( ! get_is_valid() )
+        return "";
+      return avro_filenames_[cur_file_];
+    }
+
  private:
   //! close any open file if one exists and move cursor to next file index
   void advance_current_reader();

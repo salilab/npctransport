@@ -1,6 +1,6 @@
 binary="fg_simulation"
 extra_arguments=["--cylinder_nlayers", "4"]
-tasks=300000 # for 3x50x20 steps x 150 jobs
+tasks=300000 # for 3x50x20 steps x 100 jobs
 #tasks=2500
 iterations=8
 description=["""
