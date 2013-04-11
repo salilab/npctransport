@@ -31,6 +31,8 @@ void randomize_rigid_body(RigidBody rbi,
 
 /** Randomize the positions of a set of particles within a bounding
     volume. Rigid bodies have their orientation randomized too.
+    @note Particles are randomized only if their coordinates are optimizable,
+    that is, get_coordinates_are_optimized() == true)
 */
 template <class ParticlesList, class BoundingVolume>
 void randomize_particles(const ParticlesList &ps,
