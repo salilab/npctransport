@@ -10,16 +10,18 @@
 #include <IMP/base/flags.h>
 #include <IMP/base/exception.h>
 
-int main(int , char *[]) {
+int main(int argc, char *argv[]) {
   // TODO: emulate real runtime parameters by initializig fake argc / argv?
   try {
+    IMP::base::setup_from_argv(argc, argv,
+                               "Test of the main loop for npc transport");
     std::string config
         = IMP::npctransport::get_data_path("quick.pb");
     std::string assignment
         = IMP::base::create_temporary_file_name("output", ".pb");
     std::string output
         = IMP::base::create_temporary_file_name("output", ".rmf");
-    set_log_level(IMP::base::LogLevel(IMP::base::SILENT));
+    IMP::base::set_log_level(IMP::base::LogLevel(IMP::base::SILENT));
     int num=IMP::npctransport::assign_ranges
       (config, assignment, 0, true, IMP::base::get_random_seed());
     std::cout << "num ranges " << num << std::endl;

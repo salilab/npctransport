@@ -61,7 +61,6 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 
 
 IMP_NPC_PARAMETER_INT64(work_unit, -1, "The work unit");
-IMP_NPC_PARAMETER_INT64(log_level, 0, "The log level to use");
 IMP_NPC_PARAMETER_STRING(configuration, "configuration.pb",
                          "input configuration file in protobuf format"
                          " [default: %default]");
@@ -231,7 +230,6 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
 IMP_OMP_PRAGMA(critical)
   std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
-  set_log_level(IMP::base::LogLevel(FLAGS_log_level));
   IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
   write_output_based_on_flags( IMP::base::get_random_seed() );
   sd= new IMP::npctransport::SimulationData(FLAGS_output,
@@ -274,7 +272,7 @@ void do_main_loop(SimulationData *sd,
   for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
     IMP::base::CreateLogContext clc("iteration");
     boost::timer timer;
-    IMP::set_log_level(SILENT);
+    //IMP::set_log_level(SILENT);
     std::cout << "Simulation trial " << i << " out of "
               << sd->get_number_of_trials() << std::endl;
     if (is_initial_optimization) {
@@ -289,7 +287,7 @@ void do_main_loop(SimulationData *sd,
     /*IMP::benchmark::Profiler p;
       if(i == 0)
       p.set("profiling.pprof");*/
-    sd->get_bd()->set_log_level(IMP::PROGRESS);
+    //sd->get_bd()->set_log_level(IMP::PROGRESS);
     unsigned int nframes_run = (unsigned int)
       ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
     unsigned int nframes_equilibrate =

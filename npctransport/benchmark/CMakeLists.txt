@@ -31,7 +31,13 @@ link_directories(${ANN_LINK_PATH}
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NPCTRANSPORT_CXX_FLAGS}")
 
-math(EXPR timeout "${IMP_TIMEOUT_FACTOR} * 180")
+math(EXPR timeout "${IMP_TIMEOUT_FACTOR} * 300")
+
+if (NOT ${IMP_MAX_CHECKS} MATCHES "NONE")
+set(testarg "--run_quick_test")
+else()
+set(testarg "")
+endif()
 
 set(cppbenchmarks ${PROJECT_SOURCE_DIR}/modules/npctransport/benchmark/benchmark_interaction_scores.cpp
 ${PROJECT_SOURCE_DIR}/modules/npctransport/benchmark/benchmark_sites_pair_score.cpp)
@@ -71,7 +77,7 @@ ${BOOST.REGEX_LIBRARIES})
                          RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/benchmark/npctransport"
                          OUTPUT_NAME ${name})
    add_test(npctransport.${name} ${IMP_TEST_SETUP}
-            "${PROJECT_BINARY_DIR}/benchmark/npctransport/${name}${CMAKE_EXECUTABLE_SUFFIX}")
+            "${PROJECT_BINARY_DIR}/benchmark/npctransport/${name}${CMAKE_EXECUTABLE_SUFFIX} ${testarg}")
    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;benchmark")
    set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${timeout})
    set_tests_properties("npctransport.${name}" PROPERTIES COST 1)
