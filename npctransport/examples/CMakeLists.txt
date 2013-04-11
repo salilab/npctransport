@@ -36,7 +36,7 @@ ${PROJECT_SOURCE_DIR}/modules/npctransport/examples/slab.py)
 math(EXPR timeout "${IMP_TIMEOUT_FACTOR} * 180")
 
 if (${IMP_MAX_CHECKS} MATCHES "INTERNAL")
-set(testarg "--run_quick_test")
+set(testarg "--test")
 else()
 set(testarg "")
 endif()

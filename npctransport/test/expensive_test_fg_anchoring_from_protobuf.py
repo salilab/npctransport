@@ -64,7 +64,9 @@ class Tests(IMP.test.TestCase):
             self.assertEqual(d2, 0)
 
     def test_fg_anchoring_through_protobuf(self):
-        ''' test that FG nups can be anchored properly through protobuf file '''
+        '''
+        Test that FG nups can be anchored properly through protobuf file
+        '''
 
         IMP.base.set_log_level(IMP.SILENT)
         cfg_file = self.get_tmp_file_name("barak_config.pb")

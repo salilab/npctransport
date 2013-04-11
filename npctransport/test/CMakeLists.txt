@@ -46,10 +46,12 @@ ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_init_from_output.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_init_from_rmf.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_linear.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_linear_scores.py
+${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_me.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_protobufs.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_rmf_sites.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_sites.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_slabss.py
+${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_stam.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_statistics.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_util.py
 ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_well.py)
@@ -100,7 +102,7 @@ foreach (test )
   endif()
 endforeach(test)
 
-foreach (test )
+foreach (test ${PROJECT_SOURCE_DIR}/modules/npctransport/test/expensive_test_fg_anchoring_from_protobuf.py)
   GET_FILENAME_COMPONENT(name ${test} NAME)
   if(EXISTS "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests")
     FILE(READ "${PROJECT_BINARY_DIR}/test/npctransport/${name}.pytests" contents)
@@ -124,7 +126,7 @@ foreach (test )
   endif()
 endforeach(test)
 
-set(cpp_tests ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_main.cpp)
+set(cpp_tests ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_main.cpp )
 
 foreach (test ${cpp_tests})
    GET_FILENAME_COMPONENT(name ${test} NAME)
@@ -162,97 +164,8 @@ ${BOOST.REGEX_LIBRARIES})
                          OUTPUT_NAME ${name_we})
    add_test("npctransport.${name}" ${IMP_TEST_SETUP}
             "${PROJECT_BINARY_DIR}/test/npctransport/${name_we}${CMAKE_EXECUTABLE_SUFFIX}")
-   set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test;length_short")
+   set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test")
    set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${short_timeout})
-   set_tests_properties("npctransport.${name}" PROPERTIES COST 1)
-   set(executables ${executables} "npctransport.${name}")
-endforeach(test)
-
-
-set(mdcpp_tests )
-
-foreach (test ${mdcpp_tests})
-   GET_FILENAME_COMPONENT(name ${test} NAME)
-   GET_FILENAME_COMPONENT(name_we ${test} NAME_WE)
-   add_executable("npctransport.${name}" ${test})
-   target_link_libraries("npctransport.${name}"     imp_npctransport
-    ${IMP_BASE_LIBRARY}
-${IMP_BENCHMARK_LIBRARY}
-${IMP_CGAL_LIBRARY}
-${IMP_ALGEBRA_LIBRARY}
-${IMP_KERNEL_LIBRARY}
-${IMP_DISPLAY_LIBRARY}
-${IMP_SCORE_FUNCTOR_LIBRARY}
-${IMP_STATISTICS_LIBRARY}
-${IMP_CORE_LIBRARY}
-${IMP_CONTAINER_LIBRARY}
-${IMP_ATOM_LIBRARY}
-${IMP_RMF_LIBRARY}
-    ${RMF_LIBRARIES}
-${PROTOBUF_LIBRARIES}
-${AVROCPP_LIBRARIES}
-${BOOST.FILESYSTEM_LIBRARIES}
-${BOOST.PROGRAMOPTIONS_LIBRARIES}
-${BOOST.SYSTEM_LIBRARIES}
-${GPERFTOOLS_LIBRARIES}
-${TCMALLOC_HEAPPROFILER_LIBRARIES}
-${TCMALLOC_HEAPCHECKER_LIBRARIES}
-${LOG4CXX_LIBRARIES}
-${BOOST.RANDOM_LIBRARIES}
-${CGAL_LIBRARIES}
-${ANN_LIBRARIES}
-${BOOST.REGEX_LIBRARIES})
-   set_target_properties("npctransport.${name}" PROPERTIES
-                         RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/test/npctransport/"
-                         OUTPUT_NAME ${name_we})
-   add_test("npctransport.${name}" ${IMP_TEST_SETUP}
-            "${PROJECT_BINARY_DIR}/test/npctransport/${name_we}${CMAKE_EXECUTABLE_SUFFIX}")
-   set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test;length_medium")
-   set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${medium_timeout})
-   set_tests_properties("npctransport.${name}" PROPERTIES COST 1)
-   set(executables ${executables} "npctransport.${name}")
-endforeach(test)
-
-set(excpp_tests )
-
-foreach (test ${excpp_tests})
-   GET_FILENAME_COMPONENT(name ${test} NAME)
-   GET_FILENAME_COMPONENT(name_we ${test} NAME_WE)
-   add_executable("npctransport.${name}" ${test})
-   target_link_libraries("npctransport.${name}"     imp_npctransport
-    ${IMP_BASE_LIBRARY}
-${IMP_BENCHMARK_LIBRARY}
-${IMP_CGAL_LIBRARY}
-${IMP_ALGEBRA_LIBRARY}
-${IMP_KERNEL_LIBRARY}
-${IMP_DISPLAY_LIBRARY}
-${IMP_SCORE_FUNCTOR_LIBRARY}
-${IMP_STATISTICS_LIBRARY}
-${IMP_CORE_LIBRARY}
-${IMP_CONTAINER_LIBRARY}
-${IMP_ATOM_LIBRARY}
-${IMP_RMF_LIBRARY}
-    ${RMF_LIBRARIES}
-${PROTOBUF_LIBRARIES}
-${AVROCPP_LIBRARIES}
-${BOOST.FILESYSTEM_LIBRARIES}
-${BOOST.PROGRAMOPTIONS_LIBRARIES}
-${BOOST.SYSTEM_LIBRARIES}
-${GPERFTOOLS_LIBRARIES}
-${TCMALLOC_HEAPPROFILER_LIBRARIES}
-${TCMALLOC_HEAPCHECKER_LIBRARIES}
-${LOG4CXX_LIBRARIES}
-${BOOST.RANDOM_LIBRARIES}
-${CGAL_LIBRARIES}
-${ANN_LIBRARIES}
-${BOOST.REGEX_LIBRARIES})
-   set_target_properties("npctransport.${name}" PROPERTIES
-                         RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/test/npctransport/"
-                         OUTPUT_NAME ${name_we})
-   add_test("npctransport.${name}" ${IMP_TEST_SETUP}
-            "${PROJECT_BINARY_DIR}/test/npctransport/${name_we}${CMAKE_EXECUTABLE_SUFFIX}")
-   set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test;length_expensive")
-   set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${expensive_timeout})
    set_tests_properties("npctransport.${name}" PROPERTIES COST 1)
    set(executables ${executables} "npctransport.${name}")
 endforeach(test)
