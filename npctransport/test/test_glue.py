@@ -53,6 +53,9 @@ class Tests(IMP.test.TestCase):
 
     def _test_two(self, site_range, site_k, nonspec_range, nonspec_k,
                   soft_sphere_k, dt):
+        nsteps = 2000
+        if(IMP.base.get_check_level() >= IMP.base.USAGE):
+            nsteps /= 10
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
         ds= [self._create_particle(m) for i in range(0,3)]
@@ -83,7 +86,7 @@ class Tests(IMP.test.TestCase):
         sos= IMP.rmf.SaveOptimizerState(f)
         sos.set_period(1000)
         bd.add_optimizer_state(sos)
-        bd.optimize(2000)
+        bd.optimize(nsteps)
         sos.update_always()
     def test_two(self):
         """Check two interactions"""
