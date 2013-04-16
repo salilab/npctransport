@@ -13,8 +13,19 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 // TODO: the specific type names ("fg0", etc.)  should all be user parameters
 core::ParticleType type_of_fga[]={core::ParticleType("fg0"),
-                                 core::ParticleType("fg1"),
-                                 core::ParticleType("fg2")};
+                                  core::ParticleType("fg1"),
+                                  core::ParticleType("fg2"),
+                                  core::ParticleType("fg3"),
+                                  core::ParticleType("fg4"),
+                                  core::ParticleType("fg5"),
+                                  core::ParticleType("fg6"),
+                                  core::ParticleType("fg7"),
+                                  core::ParticleType("fg8"),
+                                  core::ParticleType("fg9"),
+                                  core::ParticleType("fg10"),
+                                  core::ParticleType("fg11"),
+                                  core::ParticleType("fg12")};
+
 core::ParticleType type_of_floata[]={core::ParticleType("kap"),
                                     core::ParticleType("crap0"),
                                     core::ParticleType("crap1")};

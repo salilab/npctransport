@@ -31,18 +31,24 @@
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/base/raii_macros.h>
 #include <IMP/log.h>
+#include <IMP/example/optimizing.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 namespace {
 
+//! adds a BallMover to all optimized particles in ps
+//! and wraps it in a SerialMover
 core::MonteCarloMover*
 create_serial_mover(const ParticlesTemp &ps) {
   core::Movers movers;
   for (unsigned int i=0; i< ps.size(); ++i) {
-    double scale= core::XYZR(ps[i]).get_radius();
-    movers.push_back(new core::BallMover(ParticlesTemp(1, ps[i]),
-                                         scale*2));
+    core::XYZR d = core::XYZR(ps[i]);
+    double scale= d.get_radius();
+    if(d.get_coordinates_are_optimized()){
+      movers.push_back(new core::BallMover(ParticlesTemp(1, ps[i]),
+                                           scale*2));
+    }
   }
   IMP_NEW(core::SerialMover, sm, (get_as<core::MoversTemp>(movers)));
   return sm.release();
@@ -67,7 +73,9 @@ class SetLength: public base::RAII {
 
 /** Take a set of core::XYZR particles and relax them relative to a set of
     restraints. Excluded volume is handle separately, so don't include it
-in the passed list of restraints. */
+    in the passed list of restraints.
+    (Note: optimize only particles that are flagged as 'optimized')
+*/
 void optimize_balls(const ParticlesTemp &ps,
                     const RestraintsTemp &rs,
                     const PairPredicates &excluded,
@@ -79,6 +87,8 @@ void optimize_balls(const ParticlesTemp &ps,
   // make sure that errors and log messages are marked as coming from this
   // function
   IMP_FUNCTION_LOG;
+
+
   base::SetLogState sls(ll);
   IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.", ValueException);
   IMP_ALWAYS_CHECK(local, "local optimizer unspecified", ValueException);
@@ -158,13 +168,36 @@ void optimize_balls(const ParticlesTemp &ps,
 }
 }
 
+// print the first atoms of all the fgs in sd
+void print_fgs(IMP::npctransport::SimulationData& sd) {
+  using namespace IMP;
+  using atom::Hierarchy;
+  using atom::Hierarchies;
+
+  static int call_num = 0;
+  std::cout << "INITIALIZE POSITIONS print_fgs() - Call # " << ++call_num << std::endl;
+
+  Hierarchy root = sd.get_root() ;
+  Hierarchies chains = IMP::npctransport::get_fg_chains(root);
+  for(unsigned int k = 0 ; k < chains.size() ; k++)
+    {
+      Hierarchy cur_chain( chains[k] );
+      core::XYZ d( cur_chain.get_child(0) );
+      std::cout << "d # " << k << " = " << d << std::endl;
+      std::cout << "is optimizable = " << d.get_coordinates_are_optimized() << std::endl;
+    }
+}
+
+
 void initialize_positions(SimulationData *sd,
                           //                          const ParticlePairsTemp &extra_links,
                           const RestraintsTemp &extra_restraints,
                           bool debug) {
   sd->set_was_used(true);
+  print_fgs( *sd );
   randomize_particles(sd->get_diffusers()->get_particles(),
                       sd->get_box());
+  print_fgs( *sd );
   sd->get_rmf_sos_writer()->update();
   RestraintsTemp rss=sd->get_chain_restraints();
   if(sd->get_has_bounding_box())  rss.push_back(sd->get_box_restraint());
@@ -178,6 +211,7 @@ void initialize_positions(SimulationData *sd,
       core::XYZ(chains[i].get_child(0)).set_coordinates_are_optimized(false);
     }
   }
+  print_fgs( *sd );
   rss += extra_restraints;
   // for (unsigned int i=0; i< extra_links.size(); ++i) {
   //   double d= core::XYZR(extra_links[i][0]).get_radius()
@@ -203,6 +237,7 @@ void initialize_positions(SimulationData *sd,
                  sd->get_bd(),
                  sd->get_backbone_scores(),
                  PROGRESS, debug);
+  print_fgs( *sd );
   IMP_NEW(core::RestraintsScoringFunction, rsf,
           (rss +RestraintsTemp(1, sd->get_predr()), "all restaints"));
   std::cout << "Initial energy is " << rsf->evaluate(false)
@@ -214,6 +249,7 @@ void initialize_positions(SimulationData *sd,
   for (unsigned int i=0; i< previously_unpinned.size(); ++i) {
     previously_unpinned[i].set_coordinates_are_optimized(true);
   }
+  print_fgs( *sd );
 }
 
 

@@ -27,23 +27,16 @@ class ConeTests(IMP.test.TestCase):
                                     0, False, seed)
      rmf_name=self.get_tmp_file_name("rmf_sites.rmf")
      sd= IMP.npctransport.SimulationData(assignments_name, True, rmf_name)
-     print "hi"
      wr= sd.get_rmf_sos_writer()
-     print "ho"
      wr.update_always()
      del wr
-     print "hoo"
      del sd
      back= RMF.open_rmf_file_read_only(rmf_name)
-     print "hey"
      fg= back.get_root_node().get_children()[0].get_children()[0].get_children()[0]
-     print "hee"
      sites= fg.get_children()
-     print "heeya"
      self.assertEqual(len(sites), 2)
      del back
      del cfg
-     print "hoohaa"
      IMP.base.set_log_level(IMP.base.MEMORY)
      #del sd
      del fg
