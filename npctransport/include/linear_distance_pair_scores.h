@@ -77,7 +77,7 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore:
       IMP_INDEX_PAIR_SCORE(LinearSoftSpherePairScore);
     };
 
-
+#ifndef IMP_DOXYGEN
 // evaluates the soft linear repulsive score, using the internal Model
 // indexing to access particles data (see Model/include/internal/)
 inline double LinearSoftSpherePairScore
@@ -101,7 +101,7 @@ inline double LinearSoftSpherePairScore
   return do_evaluate_index
     (m, pp, da, delta, delta_length, x0, -k_);
 }
-
+#endif
 
 
 
@@ -196,6 +196,7 @@ public:
   IMP_OBJECT(LinearInteractionPairScore);
 };
 
+#ifndef IMP_DOXYGEN
 inline double LinearInteractionPairScore
 ::evaluate_index(Model *m, const ParticleIndexPair& pp,
                  DerivativeAccumulator *da) const {
@@ -229,6 +230,7 @@ inline double LinearInteractionPairScore
   }
 }
 
+#endif
 
 
 
@@ -256,6 +258,7 @@ public:
   IMP_INDEX_PAIR_SCORE(LinearWellPairScore);
 };
 
+#ifndef IMP_DOXYGEN
 inline double LinearWellPairScore
 ::evaluate_index(Model *m, const ParticleIndexPair& pp,
                  DerivativeAccumulator *da) const {
@@ -275,6 +278,7 @@ inline double LinearWellPairScore
       do_evaluate_index(m, pp, da, delta, delta_length, x0_, -k_);
   }
 }
+#endif
 
 IMP_OBJECTS(LinearWellPairScore, LinearWellPairScores);
 

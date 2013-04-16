@@ -20,9 +20,9 @@ IMPNPCTRANSPORTEXPORT
    volumes and bounding box restraints (but not interaction
    restraints).
 
-   The initialization data is dumped to the RMF file sd->get_rmf_file_name()
-   using dump interval sd->get_rmf_dump_interval_frames() * 100, or every
-   frame in case that <debug> is true.
+   The initialization data is dumped to the RMF file `sd->get_rmf_file_name()`
+   using dump interval `sd->get_rmf_dump_interval_frames() * 100`, or every
+   frame in case that `debug` is true.
 
    @param sd the simulationd data object containing diffusing particles
    @param extra_restraints a list of additional ad-hoc restraints that will be

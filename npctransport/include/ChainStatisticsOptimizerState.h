@@ -1,5 +1,5 @@
 /**
- *  \file npctransport/statistics_optimizer_states.h
+ *  \file npctransport/ChainStatisticsOptimizerState.h
  *  \brief description
  *
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.

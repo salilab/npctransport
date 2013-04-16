@@ -1,5 +1,5 @@
 /**
- *  \file SeparateSingletonScore.h
+ *  \file ExcludeZRangeSingletonScore.h
  *  \brief XXXXXXXXXXXXXX
  *
  *  Copyright 2007-8 Sali Lab. All rights reserved.

@@ -1,5 +1,5 @@
 /**
- *  \file simulation_data.h
+ *  \file npctransport/SimulationData.h
  *  \brief description
  *
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
