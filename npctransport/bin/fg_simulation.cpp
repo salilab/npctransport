@@ -232,6 +232,26 @@ IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint
   return sr;
 }
 
+// print the first atoms of all the fgs in sd
+void print_fgs(IMP::npctransport::SimulationData& sd) {
+  using namespace IMP;
+  using atom::Hierarchy;
+  using atom::Hierarchies;
+
+  static int call_num = 0;
+  std::cout << "print_fgs() - Call # " << ++call_num << std::endl;
+
+  Hierarchy root = sd.get_root() ;
+  Hierarchies chains = IMP::npctransport::get_fg_chains(root);
+  for(unsigned int k = 0 ; k < chains.size() ; k++)
+    {
+      Hierarchy cur_chain( chains[k] );
+      core::XYZ d( cur_chain.get_child(0) );
+      std::cout << "d # " << k << " = " << d << std::endl;
+      std::cout << "is optimizable = " << d.get_coordinates_are_optimized() << std::endl;
+    }
+}
+
 IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
                         "anchor FG nups to a cylindrical pore with a slab of"
                         " dimensions that are specified in"
@@ -243,6 +263,7 @@ IMP_NPC_PARAMETER_BOOL(surface_anchoring, false,
 
 }
 
+
 int main(int argc, char *argv[])
 {
   using namespace IMP;
@@ -253,6 +274,7 @@ int main(int argc, char *argv[])
   try {
     IMP::base::Pointer<npctransport::SimulationData> sd
       = npctransport::startup(argc, argv);
+    print_fgs(*sd);
     if(FLAGS_surface_anchoring){
       IMP_ALWAYS_CHECK(FLAGS_cylinder_nlayers == 0,
                        "surface anchoring and cylinder"
@@ -271,7 +293,9 @@ int main(int argc, char *argv[])
       initialization_restraints.push_back( r );
     }
     std::cout << initialization_restraints << std::endl;
+    print_fgs(*sd);
     npctransport::do_main_loop(sd, initialization_restraints );
+    print_fgs(*sd);
   }
   catch (const IMP::base::Exception& e) {
     std::cerr << "Error: " << e.what() << std::endl;

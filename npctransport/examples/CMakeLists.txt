@@ -36,7 +36,7 @@ ${PROJECT_SOURCE_DIR}/modules/npctransport/examples/slab.py)
 math(EXPR timeout "${IMP_TIMEOUT_FACTOR} * 180")
 
 if (${IMP_MAX_CHECKS} MATCHES "INTERNAL")
-set(testarg "--test")
+set(testarg "--run_quick_test")
 else()
 set(testarg "")
 endif()
@@ -54,8 +54,10 @@ set(cpp_tests )
 
 foreach (test ${cpp_tests})
    GET_FILENAME_COMPONENT(name ${test} NAME)
-   add_executable("npctransport.${name}" ${test})
-   target_link_libraries("npctransport.${name}"     imp_npctransport
+   GET_FILENAME_COMPONENT(name_we ${test} NAME_WE)
+   add_executable("npctransport.${name_we}" ${test})
+   target_link_libraries("npctransport.${name_we}"
+    imp_npctransport
     ${IMP_BASE_LIBRARY}
 ${IMP_BENCHMARK_LIBRARY}
 ${IMP_CGAL_LIBRARY}
@@ -82,14 +84,15 @@ ${BOOST.RANDOM_LIBRARIES}
 ${CGAL_LIBRARIES}
 ${ANN_LIBRARIES}
 ${BOOST.REGEX_LIBRARIES})
-   set_target_properties("npctransport.${name}" PROPERTIES
+   set_target_properties("npctransport.${name_we}" PROPERTIES
                          RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/test/npctransport/"
-                         OUTPUT_NAME "${name}")
-   add_test("npctransport.${name}" ${IMP_TEST_SETUP} "${PROJECT_BINARY_DIR}/test/npctransport/${name}${CMAKE_EXECUTABLE_SUFFIX} ${testarg}")
+                         OUTPUT_NAME "${name_we}")
+   add_test("npctransport.${name}" ${IMP_TEST_SETUP}
+            "${PROJECT_BINARY_DIR}/test/npctransport/${name_we}${CMAKE_EXECUTABLE_SUFFIX}" ${testarg})
    set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;example")
    set_tests_properties("npctransport.${name}" PROPERTIES TIMEOUT ${timeout})
    set_tests_properties("npctransport.${name}" PROPERTIES COST 3)
-   set(executables ${executables} "npctransport.${name}")
+   set(executables ${executables} "npctransport.${name_we}")
 endforeach(test)
 
 add_custom_target("imp_npctransport_examples" ALL DEPENDS ${executables})
