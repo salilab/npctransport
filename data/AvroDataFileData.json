@@ -1,0 +1,14 @@
+{
+  "type":"record",
+  "name":"wrapper",
+  "fields":[
+    {
+      "name":"key",
+      "type":"string"
+    },
+    {
+      "name":"value",
+      "type":"bytes"
+    }
+  ]
+}

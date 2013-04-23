@@ -1,0 +1,8 @@
+#Import('env')
+
+#env.IMPModuleTest()
+
+spelling_exceptions=['avro','rmf','cpc','predr']
+show_exceptions=['timer']
+value_object_exceptions=['timer']
+function_name_exceptions=['SimulationData.initialize_positions_from_rmf']

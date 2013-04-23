@@ -1,0 +1,62 @@
+%import "RMF.i"
+%{
+#include <RMF.h>
+#include <RMF/HDF5.h>
+IMP_CLANG_PRAGMA(diagnostic ignored "-Wc++11-long-long")
+%}
+IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, SimulationData, SimulationDatas);
+IMP_SWIG_OBJECT(IMP::npctransport, SitesGeometry, SitesGeometries);
+IMP_SWIG_OBJECT(IMP::npctransport, TypedSitesGeometry, TypedSitesGeometries);
+IMP_SWIG_OBJECT(IMP::npctransport, SlabSingletonScore, SlabSingletonScores);
+IMP_SWIG_OBJECT(IMP::npctransport, ExcludeZRangeSingletonScore, ExcludeZRangeSingletonScores);
+IMP_SWIG_OBJECT(IMP::npctransport, SlabWireGeometry, SlabWireGeometries);
+IMP_SWIG_OBJECT(IMP::npctransport, SlabSurfaceGeometry, SlabSurfaceGeometries);
+IMP_SWIG_OBJECT(IMP::npctransport, LinearSoftSpherePairScore, LinearSoftSpherePairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, FunctorLinearSoftSpherePairScore, FunctorLinearSoftSpherePairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, LinearInteractionPairScore, LinearInteractionPairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, FunctorLinearInteractionPairScore, FunctorLinearInteractionPairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, LinearWellPairScore, LinearWellPairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, HierarchyWithSitesSaveLink, HierarchyWithSitesSaveLinks);
+IMP_SWIG_OBJECT(IMP::npctransport, HierarchyWithSitesLoadLink, HierarchyWithSitesLoadLinks);
+IMP_SWIG_OBJECT(IMP::npctransport, ChainStatisticsOptimizerState, ChainStatisticsptimizerStates);
+IMP_SWIG_OBJECT(IMP::npctransport, BodyStatisticsOptimizerState, BodyStatisticsOptimizerStates);
+IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, BipartitePairsStatisticsOptimizerStates);
+IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, ParticleTransportStatisticsOptimizerStates);
+IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
+IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
+
+%apply unsigned int { boost::uint32_t }
+%apply unsigned long long { boost::uint64_t }
+
+%include "IMP/npctransport/typedefs.h"
+%include "IMP/npctransport/linear_distance_pair_scores.h"
+%include "IMP/npctransport/functor_linear_distance_pair_scores.h"
+%include "IMP/npctransport/SitesPairScore.h"
+%include "IMP/npctransport/SimulationData.h"
+%include "IMP/npctransport/io.h"
+%include "IMP/npctransport/creating_particles.h"
+%include "IMP/npctransport/rmf_links.h"
+%include "IMP/npctransport/Transporting.h"
+%include "IMP/npctransport/protobuf.h"
+%include "IMP/npctransport/SlabSingletonScore.h"
+%include "IMP/npctransport/ExcludeZRangeSingletonScore.h"
+%include "IMP/npctransport/SlabGeometry.h"
+%include "IMP/npctransport/BodyStatisticsOptimizerState.h"
+%include "IMP/npctransport/ParticleTransportStatisticsOptimizerState.h"
+%include "IMP/npctransport/ChainStatisticsOptimizerState.h"
+%include "IMP/npctransport/BipartitePairsStatisticsOptimizerState.h"
+%include "IMP/npctransport/particle_types.h"
+%include "IMP/npctransport/automatic_parameters.h"
+%include "IMP/npctransport/initialize_positions.h"
+%include "IMP/npctransport/Avro2PBReader.h"
+
+%rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
+%pythoncode %{
+try:
+  from npctransport_pb2 import *
+except:
+  print "no protobuf support in python"
+from _configuration import *
+%}
