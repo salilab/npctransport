@@ -7,6 +7,7 @@
  */
 
 #include <IMP/npctransport/creating_particles.h>
+#include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/display/Colored.h>
 #include <IMP/atom/Hierarchy.h>
