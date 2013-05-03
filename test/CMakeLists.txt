@@ -99,7 +99,8 @@ foreach (test ${PROJECT_SOURCE_DIR}/modules/npctransport/test/medium_test_init_f
   endif()
 endforeach(test)
 
-foreach (test ${PROJECT_SOURCE_DIR}/modules/npctransport/test/expensive_test_fg_anchoring_from_protobuf.py)
+foreach (test ${PROJECT_SOURCE_DIR}/modules/npctransport/test/expensive_test_fg_anchoring_from_protobuf.py
+${PROJECT_SOURCE_DIR}/modules/npctransport/test/expensive_test_init_from_output.py)
   GET_FILENAME_COMPONENT(name ${test} NAME)
   if(EXISTS "${PROJECT_BINARY_DIR}/test/npctransport/${name}tests")
     FILE(READ "${PROJECT_BINARY_DIR}/test/npctransport/${name}tests" contents)

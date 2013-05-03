@@ -7,8 +7,10 @@ import math
 import IMP.base
 import test_util
 from IMP.npctransport import *
+import time
 
-
+# TODO: currently this is slow only due to initial optimization algorithm
+#       that must be imporved
 
 class Tests(IMP.test.TestCase):
     def run_from_config(self, config, output):
@@ -24,9 +26,12 @@ class Tests(IMP.test.TestCase):
                           0, True, 10 );
         sd= IMP.npctransport.SimulationData(output, False,
                                             self.get_tmp_file_name("out0.rmf"));
+        print "BEFORE INIT", time.ctime()
         IMP.npctransport.initialize_positions(sd, [], False)
+        print "AFTER INIT", time.ctime()
         obd= sd.get_bd()
         obd.optimize(2)
+        print "AFTER OPTIMIZE", time.ctime()
         timer= IMP.npctransport.timer();
         # # lame test
         # rt= sd.get_root()
@@ -99,6 +104,7 @@ class Tests(IMP.test.TestCase):
         print "reloading from output file ", rt_output
         sdp= IMP.npctransport.SimulationData(rt_output, False,
                                              self.get_tmp_file_name("out1.rmf"));
+        print "After reload", time.ctime()
         self.assert_almost_equal_sds(sd, sdp)
 #        print "updating stats at end"
 #        sd.update_statistics(timer, 0);
