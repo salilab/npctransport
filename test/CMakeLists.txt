@@ -59,7 +59,7 @@ ${PROJECT_SOURCE_DIR}/modules/npctransport/test/test_well.py)
   set_tests_properties("npctransport.${name}" PROPERTIES COST 1)
 endforeach(test)
 
-foreach (test )
+foreach (test ${PROJECT_SOURCE_DIR}/modules/npctransport/test/medium_test_init_from_output.py)
   GET_FILENAME_COMPONENT(name ${test} NAME)
   add_test("npctransport.${name}" ${IMP_TEST_SETUP} python ${test})
   set_tests_properties("npctransport.${name}" PROPERTIES LABELS "IMP.npctransport;test;length_medium")

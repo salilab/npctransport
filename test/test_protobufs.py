@@ -55,7 +55,7 @@ class ConeTests(IMP.test.TestCase):
         f=open(assignment_name, "rb")
         output.ParseFromString(f.read())
         assign= output.assignment
-        self.assertEqual(assign.interaction_k.value, 20)
+        self.assertAlmostEqual(assign.interaction_k.value, 20, delta=1e-5)
         self.assertEqual(assign.interactions[0].is_on.value, 1)
 if __name__ == '__main__':
     IMP.test.main()

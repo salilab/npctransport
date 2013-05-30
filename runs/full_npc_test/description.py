@@ -1,5 +1,5 @@
 binary="fg_simulation"
-extra_arguments=["--restart", "output.2.1000ns.pb"]
+extra_arguments=["--restart", "output.2.500ns.pb"]
 tasks=50000
 #tasks=2500
 iterations=10
