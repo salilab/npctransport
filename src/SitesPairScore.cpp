@@ -56,15 +56,6 @@ SitesPairScore::SitesPairScore(double range, double k_attraction,
   nn_= new algebra::NearestNeighbor3D(nnsites_);
 }
 
-void SitesPairScore::do_show(std::ostream & o) const {
-  P::do_show( o );
-  o << " Site specific range and attraction "
-    << range_ << ", " << k_ << std::endl;
-  o << "Sites 0: " << (sites_first_ ? sites_ : nnsites_) << std::endl;
-  o << "Sites 1: " << (sites_first_ ? nnsites_ : sites_) << std::endl;
-}
-
-
 ModelObjectsTemp
 SitesPairScore::do_get_inputs(Model *m,
                               const ParticleIndexes &pis) const {

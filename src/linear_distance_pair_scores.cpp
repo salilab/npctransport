@@ -15,9 +15,7 @@ LinearSoftSpherePairScore
     PairScore(name),
     k_(k) {
 }
-void LinearSoftSpherePairScore::do_show(std::ostream &) const
-{
-}
+
 ModelObjectsTemp
 LinearSoftSpherePairScore::do_get_inputs(Model *m,
                                       const ParticleIndexes &pis) const {
@@ -55,9 +53,6 @@ LinearWellPairScore
     x0_(x0), k_(k) {
 }
 
-void LinearWellPairScore::do_show(std::ostream & ) const
-{
-}
 ModelObjectsTemp
 LinearWellPairScore::do_get_inputs(Model *m,
                                       const ParticleIndexes &pis) const {

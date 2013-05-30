@@ -31,13 +31,14 @@ show_ranges(std::string fname);
    range [1..8] with 3 steps and base 2 will be enumerated as (1,4,8)
 
    @param fname input file name
-   @param ofname output filename
+   @param output output filename
    @param work_unit the index of combination of range values to be used. If the
                     total of possible combinations of all fields with ranges is k,
                     it is guaranteed that iterating over work_unit between 0..k-1
                     will enumerate over all possible combinations, and that
                     work_unit and (work_unit % k) will return the same output for
                     the same input.
+   @param show_steps show the steps that occur
    @param random_seed the random seed used to initialize the IMP random number
                       generator for this simulation
 
