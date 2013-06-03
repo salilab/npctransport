@@ -168,6 +168,7 @@ void optimize_balls(const ParticlesTemp &ps,
 }
 }
 
+namespace {
 // print the first atoms of all the fgs in sd
 void print_fgs(IMP::npctransport::SimulationData& sd) {
   using namespace IMP;
@@ -186,6 +187,7 @@ void print_fgs(IMP::npctransport::SimulationData& sd) {
       std::cout << "d # " << k << " = " << d << std::endl;
       std::cout << "is optimizable = " << d.get_coordinates_are_optimized() << std::endl;
     }
+}
 }
 
 
