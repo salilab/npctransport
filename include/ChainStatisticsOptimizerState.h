@@ -13,7 +13,6 @@
 #include <IMP/OptimizerState.h>
 #include <IMP/optimizer_state_macros.h>
 #include <IMP/core/PeriodicOptimizerState.h>
-#include <IMP/core/periodic_optimizer_state_macros.h>
 #include <IMP/npctransport/typedefs.h>
 #include <deque>
 
