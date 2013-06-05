@@ -41,7 +41,7 @@ namespace {
 //! and wraps it in a SerialMover
 core::MonteCarloMover*
 create_serial_mover(const ParticlesTemp &ps) {
-  core::Movers movers;
+  core::MonteCarloMovers movers;
   for (unsigned int i=0; i< ps.size(); ++i) {
     core::XYZR d = core::XYZR(ps[i]);
     double scale= d.get_radius();
@@ -50,7 +50,7 @@ create_serial_mover(const ParticlesTemp &ps) {
                                            scale*2));
     }
   }
-  IMP_NEW(core::SerialMover, sm, (get_as<core::MoversTemp>(movers)));
+  IMP_NEW(core::SerialMover, sm, (get_as<core::MonteCarloMoversTemp>(movers)));
   return sm.release();
 }
 
