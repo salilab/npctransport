@@ -21,7 +21,8 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 /**
-     Maintains transport statistics about a particle p in a z-axis aligned channel,
+     Maintains transport statistics about a particle p in a z-axis
+     aligned channel,
  */
 class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState:
 public core::PeriodicOptimizerState {
