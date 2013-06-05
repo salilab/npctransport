@@ -98,8 +98,8 @@ public core::PeriodicOptimizerState {
 
   /** resets the number of transports statistics to 0 */
   void reset();
-
-  IMP_CORE_PERIODIC_OPTIMIZER_STATE(ParticleTransportStatisticsOptimizerState);
+  virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(ParticleTransportStatisticsOptimizerState);
 };
 
 IMP_OBJECTS(ParticleTransportStatisticsOptimizerState,

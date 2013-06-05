@@ -36,7 +36,8 @@ class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState:
   double get_correlation_time()const;
   double get_diffusion_coefficient() const;
   void reset();
-  IMP_CORE_PERIODIC_OPTIMIZER_STATE(BodyStatisticsOptimizerState);
+  virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(BodyStatisticsOptimizerState);
 };
 IMP_OBJECTS(BodyStatisticsOptimizerState,
             BodyStatisticsOptimizerStates);

@@ -80,14 +80,4 @@ void BodyStatisticsOptimizerState
   }
 }
 
-void BodyStatisticsOptimizerState
-::do_show(std::ostream& o) const {
-  o << "Particle "<< *p_
-    << " Correlation time " << this->get_correlation_time()
-    << std::endl;
-}
-
-
-
-
 IMPNPCTRANSPORT_END_NAMESPACE

@@ -103,12 +103,4 @@ void BipartitePairsStatisticsOptimizerState
   ++updates_;
 }
 
-void BipartitePairsStatisticsOptimizerState
-::do_show(std::ostream& o) const {
-  o << "Average ncontacts " << avg_ncontacts_
-    << "after " << updates_ << "updates" << std::endl;
-}
-
-
-
 IMPNPCTRANSPORT_END_NAMESPACE

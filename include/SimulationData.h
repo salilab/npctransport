@@ -460,7 +460,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   */
   void set_rmf_file_name(const std::string& new_name);
 
-  IMP_OBJECT_INLINE(SimulationData,IMP_UNUSED(out),);
+  IMP_OBJECT_METHODS(SimulationData);
 };
 
 inline IMPNPCTRANSPORTEXPORT

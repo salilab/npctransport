@@ -119,8 +119,8 @@ public core::PeriodicOptimizerState {
   { return n_particles_II_; }
 
   void reset();
-
-  IMP_CORE_PERIODIC_OPTIMIZER_STATE(BipartitePairsStatisticsOptimizerState);
+  virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(BipartitePairsStatisticsOptimizerState);
 };
 IMP_OBJECTS(BipartitePairsStatisticsOptimizerState,
             BipartitePairsStatisticsOptimizerStates);

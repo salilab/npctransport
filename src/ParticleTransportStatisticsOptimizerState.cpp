@@ -98,11 +98,4 @@ ParticleTransportStatisticsOptimizerState
   }
 }
 
-void ParticleTransportStatisticsOptimizerState
-::do_show(std::ostream& o) const {
-  o << "Particle "<< *p_
-    << " Number of transports up: " << n_transports_up_
-    << " Number of transports down: " << n_transports_down_
-    << std::endl;
-}
 IMPNPCTRANSPORT_END_NAMESPACE

@@ -42,7 +42,8 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState:
      Resets all the statistics about that chain
   */
   void reset();
-  IMP_CORE_PERIODIC_OPTIMIZER_STATE(ChainStatisticsOptimizerState);
+  virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(ChainStatisticsOptimizerState);
 };
 IMP_OBJECTS(ChainStatisticsOptimizerState,
             ChainStatisticsOptimizerStates);

@@ -88,10 +88,6 @@ void ChainStatisticsOptimizerState
   }
 }
 
-void ChainStatisticsOptimizerState
-::do_show(std::ostream&) const {
-}
-
 double ChainStatisticsOptimizerState::get_diffusion_coefficient() const {
   if (positions_.empty()) return 0;
   algebra::Vector3Ds positions(positions_.size());
