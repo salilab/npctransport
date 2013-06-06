@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     std::string input = IMP::npctransport::get_data_path("benchmark_full.pb");
     std::string output = IMP::base::create_temporary_file_name("output", ".pb");
     {
-      IMP_OMP_PRAGMA(critical)
+      IMP_OMP_PRAGMA(critical);
           ::npctransport_proto::Output prev_output;
       std::ifstream file(input.c_str(), std::ios::binary);
       bool read=prev_output.ParseFromIstream(&file);
