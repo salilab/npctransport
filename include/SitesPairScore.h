@@ -12,7 +12,7 @@
 #include "linear_distance_pair_scores.h"
 #include <IMP/PairScore.h>
 #include <IMP/UnaryFunction.h>
-#include <IMP/Pointer.h>
+#include <IMP/base/Pointer.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/core/Typed.h>
 #include <IMP/core/SphereDistancePairScore.h>

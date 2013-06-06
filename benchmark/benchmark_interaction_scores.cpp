@@ -43,10 +43,10 @@ ParticlesTemp create_particles(Model *m,
 template <class Score>
 void test_one(std::string name, Score *score,
               AllBipartitePairContainer *abpc) {
-  Pointer<Restraint> r= create_restraint(score, abpc);
+  base::Pointer<Restraint> r= create_restraint(score, abpc);
   double scores=0;
   double time=0;
-  Pointer<ScoringFunction> sf=r->create_scoring_function();
+  base::Pointer<ScoringFunction> sf=r->create_scoring_function();
   sf->evaluate(true);
   int n=0;
   IMP_TIME({

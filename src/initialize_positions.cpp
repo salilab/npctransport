@@ -30,7 +30,7 @@
 #include <IMP/container/generic.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/base/raii_macros.h>
-#include <IMP/log.h>
+#include <IMP/base/log.h>
 #include <IMP/example/optimizing.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -220,7 +220,7 @@ void initialize_positions(SimulationData *sd,
   //       +  core::XYZR(extra_links[i][1]).get_radius();
   //   IMP_NEW(core::HarmonicDistancePairScore, link,
   //           (d,sd->get_backbone_k(), "linker ps"));
-  //   Pointer<Restraint> r
+  //   base::Pointer<Restraint> r
   //       = IMP::create_restraint(link.get(), extra_links[i]);
   //   rss.push_back(r);
   // }
@@ -238,7 +238,7 @@ void initialize_positions(SimulationData *sd,
                  sd->get_rmf_sos_writer(),
                  sd->get_bd(),
                  sd->get_backbone_scores(),
-                 PROGRESS, debug);
+                 base::PROGRESS, debug);
   print_fgs( *sd );
   IMP_NEW(core::RestraintsScoringFunction, rsf,
           (rss +RestraintsTemp(1, sd->get_predr()), "all restaints"));

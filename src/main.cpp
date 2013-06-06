@@ -11,7 +11,7 @@
 #include <IMP/npctransport/main.h>
 #include <IMP/base_types.h>
 #include <boost/timer.hpp>
-#include <IMP/log.h>
+#include <IMP/base/log.h>
 //#include <IMP/benchmark/Profiler.h>
 #include <IMP/npctransport/initialize_positions.h>
 #include <IMP/rmf/frames.h>
@@ -261,7 +261,7 @@ void do_main_loop(SimulationData *sd,
   bool is_BD_equilibration = is_initial_optimization;
   bool is_BD_full_run = !FLAGS_initialize_only;
 
-  IMP::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
+  base::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
     = sd->get_rmf_sos_writer();
   RMF::FileHandle final_rmf_fh;
   if(!FLAGS_final_conformations.empty()){

@@ -69,14 +69,15 @@ double get_time_step(const ::npctransport_proto::Assignment& config,
                      double max_trans_relative_to_radius= 0.1);
 
 /**
-   computes the number of frames needed to acheive simulation time required in the
-   confiugration time, with time step computed from config.
+   computes the number of frames needed to acheive simulation time
+   required in the confiugration time, with time step computed from
+   config.
 
    @param config the simulation parameters
    @param time_step the time step in femtoseconds
 
-   @throw ValueException if maximum number of frames specified in config is exceeded
-*/
+   @throw ValueException if maximum number of frames specified in
+        config is exceeded */
 IMPNPCTRANSPORTEXPORT
 int get_number_of_frames
 (const ::npctransport_proto::Assignment& config, double time_step);

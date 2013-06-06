@@ -21,6 +21,7 @@
 #include <IMP/npctransport.h>
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
+#include <IMP/base/Pointer.h>
 #include <IMP/Restraint.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/core/Typed.h>
@@ -215,7 +216,7 @@ IMP::ParticlesTemp get_kaps_and_craps( IMP::npctransport::SimulationData& sd ) {
 }
 
 
-IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint
+IMP::base::Pointer<IMP::Restraint> get_exclude_from_channel_restraint
 ( IMP::npctransport::SimulationData& sd ) {
   using namespace IMP;
 
@@ -289,7 +290,8 @@ int main(int argc, char *argv[])
     color_fgs( *sd );
     Restraints initialization_restraints;
     if(sd->get_has_slab()) { // if has slab, exclude from channel initially
-      IMP::Pointer<IMP::Restraint> r= get_exclude_from_channel_restraint( *sd );
+      base::Pointer<IMP::Restraint> r
+          = get_exclude_from_channel_restraint( *sd );
       initialization_restraints.push_back( r );
     }
     std::cout << initialization_restraints << std::endl;

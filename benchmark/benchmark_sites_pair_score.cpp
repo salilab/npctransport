@@ -23,7 +23,7 @@
 #include <IMP/base/log_macros.h>
 #include <IMP/Model.h>
 #include <IMP/Particle.h>
-#include <IMP/Pointer.h>
+#include <IMP/base/Pointer.h>
 #include <IMP/Restraint.h>
 #include <IMP/scoped.h>
 #include <IMP/PairPredicate.h>
@@ -120,7 +120,8 @@ namespace {
       movers.push_back(new core::BallMover(ParticlesTemp(1, ps[i]),
                                            scale*2));
     }
-    IMP_NEW(core::SerialMover, sm, (get_as<core::MonteCarloMoversTemp>(movers)));
+    IMP_NEW(core::SerialMover, sm,
+            (get_as<core::MonteCarloMoversTemp>(movers)));
     return sm.release();
   }
 
@@ -166,7 +167,7 @@ namespace {
       IMP_NEW(container::ClosePairContainer, cpc,
               (lsc, 0, core::XYZR(ps[0]).get_radius()));
       cpc->add_pair_filters(excluded);
-      Pointer<Restraint> r= container::create_restraint(ssps.get(),
+      base::Pointer<Restraint> r= container::create_restraint(ssps.get(),
                                                         cpc.get());
       r->set_model(ps[0]->get_model());
       cg->set_restraints(rs+RestraintsTemp(1, r.get()));
@@ -244,7 +245,7 @@ namespace {
     IMP_NEW(ListSingletonContainer, lscb, (psb));
     IMP_NEW(AllBipartitePairContainer, abpc,(lsca, lscb));
     if (WHICH) {
-      Pointer<Restraint> r= create_restraint(sps.get(), abpc.get());
+      base::Pointer<Restraint> r= create_restraint(sps.get(), abpc.get());
       r->set_model(m);
       double scores=0;
       double time=0;
@@ -256,7 +257,7 @@ namespace {
       report(oss.str(), time, scores);
     }
     {
-      Pointer<Restraint> r= create_restraint(tsps.get(), abpc.get());
+      base::Pointer<Restraint> r= create_restraint(tsps.get(), abpc.get());
       r->set_model(m);
       double scores=0;
       double time=0;

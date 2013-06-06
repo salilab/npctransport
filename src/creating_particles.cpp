@@ -62,7 +62,7 @@ inline Restraint* create_chain_restraint(const ParticlesTemp &ps,
   // this assumption accelerates certain computations
   IMP_NEW(container::ExclusiveConsecutivePairContainer, cpc,
           (ps, name+" consecutive pairs"));
-  Pointer<Restraint> r= container::create_restraint(pps, cpc.get(),
+  base::Pointer<Restraint> r= container::create_restraint(pps, cpc.get(),
                                                     "chain restraint %1%");
   // make sure it is not freed
   return r.release();
@@ -80,7 +80,7 @@ create_chain(SimulationData *sd, int n, double radius,
     ret.push_back(create_particle(sd, radius, angular_D_factor,
                                   D_factor, c, t, name));
   }
-  Pointer<Restraint> cr=create_chain_restraint(ret,
+  base::Pointer<Restraint> cr=create_chain_restraint(ret,
                                                ps,
                                                name+"chain restraint");
   sd->add_chain_restraint(cr);

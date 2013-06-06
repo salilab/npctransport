@@ -431,7 +431,7 @@ void SimulationData::set_rmf_file_name(const std::string& new_name)
 void SimulationData::dump_geometry()
 {
   IMP_OBJECT_LOG;
-  Pointer<display::Writer> w= display::create_writer("dump.pym");
+  base::Pointer<display::Writer> w= display::create_writer("dump.pym");
   IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
   for (compatibility::map<core::ParticleType,
          algebra::Vector3Ds>::const_iterator it= sites_.begin();
@@ -659,7 +659,7 @@ SimulationData::add_interaction
 
 void SimulationData::write_geometry(std::string out) {
   IMP_OBJECT_LOG;
-  Pointer<display::Writer> w= display::create_writer(out);
+  base::Pointer<display::Writer> w= display::create_writer(out);
   {
     IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
     for (compatibility::map<core::ParticleType,
@@ -1005,7 +1005,7 @@ SimulationData::update_statistics
                          "Not enough fgs", ValueException);
     ::npctransport_proto::Statistics_InteractionStats*
       pOutStats_i = stats.mutable_interactions(i);
-    IMP::Pointer<BipartitePairsStatisticsOptimizerState>
+    base::Pointer<BipartitePairsStatisticsOptimizerState>
       pInStats_i = interactions_stats_[i];
     // verify correct interaction type is stored
     InteractionType itype = pInStats_i->get_interaction_type();

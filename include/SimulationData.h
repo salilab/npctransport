@@ -28,7 +28,7 @@
 #include "SlabSingletonScore.h"
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/container/PredicatePairsRestraint.h>
-#include <IMP/Pointer.h>
+#include <IMP/base/Pointer.h>
 
 #include <boost/timer.hpp>
 #include <string>
@@ -96,31 +96,31 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   compatibility::map<core::ParticleType, double> interaction_k_factors_;
 #endif
   // the model on which the simulation is run
-  Pointer<Model> m_;
+  base::Pointer<Model> m_;
 
   // The BrownianDynamic simulator
-  Pointer<atom::BrownianDynamics> bd_;
+  base::Pointer<atom::BrownianDynamics> bd_;
 
-  Pointer<container::ListSingletonContainer> diffusers_;
+  base::Pointer<container::ListSingletonContainer> diffusers_;
 
-  Pointer<container::ClosePairContainer> cpc_;
+  base::Pointer<container::ClosePairContainer> cpc_;
 
   // generates hash values ('predicates') for ordered types pairs
   // (e.g., pairs of ParticleTypes)
-  Pointer<core::OrderedTypePairPredicate> otpp_;
+  base::Pointer<core::OrderedTypePairPredicate> otpp_;
 
   // contains all restraints between pairs of particle types
-  Pointer<container::PredicatePairsRestraint> predr_;
+  base::Pointer<container::PredicatePairsRestraint> predr_;
 
   // a writer to an RMF (Rich Molecular Format) type file
-  Pointer<rmf::SaveOptimizerState> rmf_sos_writer_;
+  base::Pointer<rmf::SaveOptimizerState> rmf_sos_writer_;
 
   // the root of the model hierarchy
-  Pointer<Particle> root_;
+  base::Pointer<Particle> root_;
 
-  Pointer<display::Geometry> static_geom_;
-  Pointer<Restraint> box_restraint_;
-  Pointer<Restraint> slab_restraint_;
+  base::Pointer<display::Geometry> static_geom_;
+  base::Pointer<Restraint> box_restraint_;
+  base::Pointer<Restraint> slab_restraint_;
   Restraints chain_restraints_;
   compatibility::map<core::ParticleType, algebra::Vector3Ds> sites_;
   compatibility::map<core::ParticleType, double> ranges_;
