@@ -22,6 +22,7 @@
 #include <IMP/core/pair_predicates.h>
 #include "linear_distance_pair_scores.h"
 #include <IMP/core/Typed.h>
+#include <IMP/base/map.h>
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/container/PairContainerSet.h>
 #include <IMP/rmf/SaveOptimizerState.h>
@@ -92,8 +93,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   Parameter<double> maximum_number_of_minutes_;
 
   // Per type scaling factors for the interaction parameters
-  compatibility::map<core::ParticleType, double> interaction_range_factors_;
-  compatibility::map<core::ParticleType, double> interaction_k_factors_;
+  base::map<core::ParticleType, double> interaction_range_factors_;
+  base::map<core::ParticleType, double> interaction_k_factors_;
 #endif
   // the model on which the simulation is run
   base::Pointer<Model> m_;
@@ -122,13 +123,13 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   base::Pointer<Restraint> box_restraint_;
   base::Pointer<Restraint> slab_restraint_;
   Restraints chain_restraints_;
-  compatibility::map<core::ParticleType, algebra::Vector3Ds> sites_;
-  compatibility::map<core::ParticleType, double> ranges_;
+  base::map<core::ParticleType, algebra::Vector3Ds> sites_;
+  base::map<core::ParticleType, double> ranges_;
   LinearWellPairScores backbone_scores_;
 
   // the list of particles for each particle type
   // e.g., particles_[ ParticleType("fg0") ]
-  compatibility::map<core::ParticleType, ParticlesTemp> particles_;
+  base::map<core::ParticleType, ParticlesTemp> particles_;
 
   // the file to which simulation statistics are dumped:
   std::string output_file_name_;
@@ -406,7 +407,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
       of type 'type', or empty list if not found
   */
   ParticlesTemp get_particles(core::ParticleType type) const {
-    compatibility::map<core::ParticleType, ParticlesTemp>::const_iterator iter;
+    base::map<core::ParticleType, ParticlesTemp>::const_iterator iter;
     iter = particles_.find(type);
     if(iter != particles_.end())
       return iter->second;

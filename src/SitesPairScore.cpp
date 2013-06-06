@@ -153,9 +153,10 @@ void SitesGeometry::do_show(std::ostream &out) const {
 
 IMP::display::Geometries TypedSitesGeometry::get_components() const {
   display::Geometries ret;
-  IMP_FOREACH_SINGLETON(get_container(), {
-      core::ParticleType t= core::Typed(_1).get_type();
-      IMP_NEW(SitesGeometry, g, (_1, sites_.find(t)->second));
+  Model *m = get_container()->get_model();
+  IMP_CONTAINER_FOREACH(SingletonContainer, get_container(), {
+      core::ParticleType t= core::Typed(m, _1).get_type();
+      IMP_NEW(SitesGeometry, g, (m->get_particle(_1), sites_.find(t)->second));
       ret.push_back(g);
     });
   return ret;

@@ -14,7 +14,6 @@
 #include <IMP/container/ClosePairContainer.h>
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
-#include <IMP/compatibility/set.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BodyStatisticsOptimizerState

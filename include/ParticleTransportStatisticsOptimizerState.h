@@ -15,7 +15,6 @@
 #include <IMP/core/PeriodicOptimizerState.h>
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/atom/Simulator.h>
-#include <IMP/compatibility/nullptr.h>
 #include <deque>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE

@@ -12,6 +12,7 @@
 #include "SimulationData.h"
 #include <IMP/rmf/atom_links.h>
 #include <IMP/rmf/link_macros.h>
+#include <IMP/base/map.h>
 #include <IMP/base/WeakPointer.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -64,7 +65,7 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
                                                     RMF::NodeHandle n),,);
   std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const ;
   // for testing without sd
-  compatibility::map<core::ParticleType, std::pair<double,
+  base::map<core::ParticleType, std::pair<double,
       algebra::Vector3Ds > > sites_;
  public:
   HierarchyWithSitesSaveLink(RMF::FileHandle fh);

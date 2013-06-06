@@ -21,6 +21,7 @@
 #include <IMP/algebra/vector_search.h>
 #include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/atom/estimates.h>
+#include <IMP/base/set.h>
 #include "internal/sites.h"
 
 #include <boost/array.hpp>
@@ -212,7 +213,7 @@ public:
 /** Show the sites. */
 class IMPNPCTRANSPORTEXPORT TypedSitesGeometry:
     public display::SingletonsGeometry {
-  compatibility::map<core::ParticleType,
+  base::map<core::ParticleType,
       algebra::Vector3Ds> sites_;
 public:
   TypedSitesGeometry(SingletonContainer *sc):

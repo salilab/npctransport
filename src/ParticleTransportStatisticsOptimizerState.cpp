@@ -9,8 +9,6 @@
 #include <IMP/npctransport/ParticleTransportStatisticsOptimizerState.h>
 #include <IMP/npctransport/Transporting.h>
 #include <IMP/core/rigid_bodies.h>
-#include <IMP/compatibility/set.h>
-#include <IMP/compatibility/nullptr.h>
 #include <IMP/base/check_macros.h>
 #include <IMP/base/exception.h>
 

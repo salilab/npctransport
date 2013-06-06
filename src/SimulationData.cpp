@@ -71,7 +71,7 @@ namespace {
 
  void load_conformation(const ::npctransport_proto::Conformation &conformation,
                          SingletonContainer *diffusers,
-                         compatibility::map<core::ParticleType,
+                         base::map<core::ParticleType,
                                             algebra::Vector3Ds> &sites) {
     IMP_CONTAINER_FOREACH(SingletonContainer, diffusers,
                           {
@@ -433,7 +433,7 @@ void SimulationData::dump_geometry()
   IMP_OBJECT_LOG;
   base::Pointer<display::Writer> w= display::create_writer("dump.pym");
   IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
-  for (compatibility::map<core::ParticleType,
+  for (base::map<core::ParticleType,
          algebra::Vector3Ds>::const_iterator it= sites_.begin();
        it != sites_.end(); ++it) {
     g->set_sites(it->first, it->second);
@@ -662,7 +662,7 @@ void SimulationData::write_geometry(std::string out) {
   base::Pointer<display::Writer> w= display::create_writer(out);
   {
     IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
-    for (compatibility::map<core::ParticleType,
+    for (base::map<core::ParticleType,
            algebra::Vector3Ds>::const_iterator it= sites_.begin();
          it != sites_.end(); ++it) {
       g->set_sites(it->first, it->second);
@@ -795,7 +795,7 @@ void SimulationData::reset_statistics_optimizer_states() {
 
 namespace {
   void save_conformation(SingletonContainer *diffusers,
-                         const compatibility::map<core::ParticleType,
+                         const base::map<core::ParticleType,
                                                   algebra::Vector3Ds> &sites,
                          ::npctransport_proto::Conformation *conformation) {
     conformation->clear_sites();
@@ -816,7 +816,7 @@ namespace {
                             pcur->set_j(tr.get_rotation().get_quaternion()[2]);
                             pcur->set_k(tr.get_rotation().get_quaternion()[3]);
                           });
-    typedef compatibility::map<core::ParticleType,
+    typedef base::map<core::ParticleType,
                                algebra::Vector3Ds>  M;
     for ( M::const_iterator it = sites.begin(); it != sites.end() ;it++) {
       ::npctransport_proto::Conformation::Sites *cur
