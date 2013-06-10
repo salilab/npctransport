@@ -31,11 +31,6 @@ LinearInteractionPairScore
     attr_range_(attr_range), k_rep_(krep), k_attr_(kattr)  {
 }
 
-void LinearInteractionPairScore::do_show(std::ostream & o) const
-{
-  o << "k_repulsive = " << k_rep_ << " ; k_attraction = " << k_attr_
-    << " ; attraction range = " << attr_range_ << std::endl;
-}
 ModelObjectsTemp
 LinearInteractionPairScore::do_get_inputs(Model *m,
                                       const ParticleIndexes &pis) const {

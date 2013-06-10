@@ -193,7 +193,7 @@ public:
   ModelObjectsTemp
   do_get_inputs(Model *m,
                 const ParticleIndexes &pis) const IMP_OVERRIDE;
-  IMP_OBJECT(LinearInteractionPairScore);
+  IMP_OBJECT_METHODS(LinearInteractionPairScore);
 };
 
 #ifndef IMP_DOXYGEN
