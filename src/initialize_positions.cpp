@@ -31,9 +31,18 @@
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/base/raii_macros.h>
 #include <IMP/base/log.h>
+#include <IMP/base/flags.h>
 #include <IMP/example/optimizing.h>
-
+#ifdef IMP_NPC_GOOGLE
+#include <IMP/npctransport/internal/google_main.h>
+#else
+#include <IMP/npctransport/internal/boost_main.h>
+#endif
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
+bool short_initialize = false;
+base::AddBoolFlag short_adder("short_initialize",
+                              "Run an abbreviated version of initialize",
+                              &short_initialize);
 
 namespace {
 
@@ -142,7 +151,7 @@ void optimize_balls(const ParticlesTemp &ps,
       {
         IMP_OMP_PRAGMA( single)
         {
-          double e= mc->optimize(ps.size()*(j+1)*500);
+          double e= mc->optimize(!short_initialize ? ps.size()*(j+1)*500: 1000);
           std::cout << "Energy is " << e << " at " << i << ", " << j << std::endl;
           if (debug) {
             std::ostringstream oss;
@@ -154,6 +163,7 @@ void optimize_balls(const ParticlesTemp &ps,
           if (e < .000001) done=true;
         }
       }
+      if (short_initialize) return;
       if (done) break;
     }
     IMP_OMP_PRAGMA( parallel num_threads(3))
@@ -200,7 +210,9 @@ void initialize_positions(SimulationData *sd,
   randomize_particles(sd->get_diffusers()->get_particles(),
                       sd->get_box());
   print_fgs( *sd );
-  sd->get_rmf_sos_writer()->update();
+  if (sd->get_rmf_sos_writer()) {
+    sd->get_rmf_sos_writer()->update();
+  }
   RestraintsTemp rss=sd->get_chain_restraints();
   if(sd->get_has_bounding_box())  rss.push_back(sd->get_box_restraint());
   if(sd->get_has_slab()) rss.push_back(sd->get_slab_restraint());
@@ -225,12 +237,14 @@ void initialize_positions(SimulationData *sd,
   //   rss.push_back(r);
   // }
 
-  // Now optimize:
   int dump_interval = sd->get_rmf_dump_interval_frames();
-  if (!debug) {
-    sd->get_rmf_sos_writer()->set_period(dump_interval * 100);// reduce output rate:
-  } else {
-    sd->get_rmf_sos_writer()->set_period(100);
+  if (sd->get_rmf_sos_writer()) {
+    // Now optimize:
+    if (!debug) {
+      sd->get_rmf_sos_writer()->set_period(dump_interval * 100);// reduce output rate:
+    } else {
+      sd->get_rmf_sos_writer()->set_period(100);
+    }
   }
   optimize_balls(sd->get_diffusers()->get_particles(),
                  rss,
@@ -244,9 +258,10 @@ void initialize_positions(SimulationData *sd,
           (rss +RestraintsTemp(1, sd->get_predr()), "all restaints"));
   std::cout << "Initial energy is " << rsf->evaluate(false)
             << std::endl;
-  sd->get_rmf_sos_writer()->set_period(dump_interval);// restore output rate
-  sd->get_rmf_sos_writer()->update_always("done initializing");
-
+  if (sd->get_rmf_sos_writer()) {
+    sd->get_rmf_sos_writer()->set_period(dump_interval);// restore output rate
+    sd->get_rmf_sos_writer()->update_always("done initializing");
+  }
   // unpin previously unpinned fgs (= allow optimization)
   for (unsigned int i=0; i< previously_unpinned.size(); ++i) {
     previously_unpinned[i].set_coordinates_are_optimized(true);
