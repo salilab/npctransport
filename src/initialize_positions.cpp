@@ -28,6 +28,7 @@
 #include <IMP/scoped.h>
 #include <IMP/PairPredicate.h>
 #include <IMP/container/generic.h>
+#include <IMP/base/internal/graph_utility.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/base/raii_macros.h>
 #include <IMP/base/log.h>
@@ -43,6 +44,10 @@ bool short_initialize = false;
 base::AddBoolFlag short_adder("short_initialize",
                               "Run an abbreviated version of initialize",
                               &short_initialize);
+bool show_dependency_graph = false;
+base::AddBoolFlag show_dep_adder("show_dependency_graph",
+                              "Show the dependency graph",
+                              &show_dependency_graph);
 
 namespace {
 
@@ -120,6 +125,12 @@ void optimize_balls(const ParticlesTemp &ps,
     // use special incremental support for the non-bonded part
     isf->add_close_pair_score(ssps, 0, ps, excluded);
     // make pointer vector
+  }
+
+  if (show_dependency_graph) {
+    DependencyGraph dg = get_dependency_graph(ps[0]->get_model());
+    std::ofstream dgf("dependency_graph.dot");
+    base::internal::show_as_graphviz(dg, dgf);
   }
 
   IMP_LOG(PROGRESS, "Performing initial optimization" << std::endl);

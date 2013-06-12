@@ -43,14 +43,15 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 
 int main(int argc, char *argv[])
 {
-  // preparation::
-  try {
-    IMP_NPC_PARSE_OPTIONS(argc, argv);
 #ifdef IMP_NPC_GOOGLE
     std::string input = "third_party/npc/npctransport/data/benchmark_initialize.pb";
 #else
     std::string input = IMP::npctransport::get_data_path("benchmark_initialize.pb");
 #endif
+    IMP::base::AddStringFlag add_input("input", "Input file", &input);
+  // preparation::
+  try {
+    IMP_NPC_PARSE_OPTIONS(argc, argv);
     std::string output = IMP::base::create_temporary_file_name("output", ".pb");
 
 
