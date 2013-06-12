@@ -102,10 +102,5 @@ display::Geometries SlabWireGeometry::get_components() const {
   return ret;
 }
 
-void SlabWireGeometry::do_show(std::ostream &out) const {
-  out << "height: " << height_ << std::endl;
-  out << "radius: " << radius_ << std::endl;
-  out << "width: " << length_ << std::endl;
-}
 
 IMPNPCTRANSPORT_END_NAMESPACE
