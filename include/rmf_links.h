@@ -25,10 +25,10 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink:
   RMF::IntKey is_last_entry_from_top_key_;
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
-  IMP_PROTECTED_METHOD(virtual void, do_add_link_recursive,
-      (Particle *root,
-                             Particle *o, RMF::NodeConstHandle node),
-    IMP_OVERRIDE,);
+protected:
+  virtual void do_add_link_recursive(Particle *root,
+                                     Particle *o, RMF::NodeConstHandle node)
+      IMP_OVERRIDE;
 
   /** load the values of a single particle from nh to o.  In addition
       to calling parent rmf::HierarchLoadLink::do_load_node(), also
@@ -36,8 +36,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink:
       information if needed (which is used in
       ParticleTransportStatisticsOptimizerState)
   */
-  IMP_IMPLEMENT(void do_load_node(RMF::NodeConstHandle nh,
-                                  Particle *o));
+  void do_load_node(RMF::NodeConstHandle nh,
+                    Particle *o);
  public:
   HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m);
 };
@@ -51,9 +51,15 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
   RMF::IntKey is_last_entry_from_top_key_;
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
-  IMP_PROTECTED_METHOD(virtual void, do_add_recursive,
+
+  std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const ;
+  // for testing without sd
+  base::map<core::ParticleType, std::pair<double,
+      algebra::Vector3Ds > > sites_;
+protected:
+  virtual void do_add_recursive
               (Particle *root, Particle *p,
-                             RMF::NodeHandle cur), IMP_OVERRIDE,);
+               RMF::NodeHandle cur) IMP_OVERRIDE;
 
   /** save the values of a single particle from o to n.  In addition
       to calling parent rmf::HierarchSaveLink::do_save_node(), also
@@ -61,12 +67,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
       information if exists (which is being used in
       ParticleTransportStatisticsOptimizerState)
   */
-  IMP_PROTECTED_METHOD(virtual void, do_save_node, (Particle *p,
-                                                    RMF::NodeHandle n),,);
-  std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const ;
-  // for testing without sd
-  base::map<core::ParticleType, std::pair<double,
-      algebra::Vector3Ds > > sites_;
+  virtual void do_save_node(Particle *p,
+                            RMF::NodeHandle n);
  public:
   HierarchyWithSitesSaveLink(RMF::FileHandle fh);
   // for testing
