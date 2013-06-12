@@ -81,11 +81,15 @@ public:
                  const algebra::Vector3Ds &sites0,
                  const algebra::Vector3Ds &sites1);
 
-  IMP_INDEX_PAIR_SCORE(SitesPairScore);
-
+  virtual double evaluate_index(Model *m, const ParticleIndexPair& p,
+                                DerivativeAccumulator *da) const IMP_OVERRIDE;
+  virtual ModelObjectsTemp do_get_inputs(Model *m,
+                                         const ParticleIndexes &pis) const;
   Restraints do_create_current_decomposition(Model *m,
                                           const ParticleIndexPair& vt)
       const IMP_OVERRIDE;
+  IMP_PAIR_SCORE_METHODS(SitesPairScore);
+  IMP_OBJECT_METHODS(SitesPairScore);;
 };
 
 class TemplateBaseSitesPairScore: public LinearInteractionPairScore {

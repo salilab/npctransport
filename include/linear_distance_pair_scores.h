@@ -74,8 +74,13 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore:
       LinearSoftSpherePairScore(double k,
                                 std::string name="LinearSSPairScore%1%"
                                 );
-      IMP_INDEX_PAIR_SCORE(LinearSoftSpherePairScore);
-    };
+      virtual double evaluate_index(Model *m, const ParticleIndexPair& p,
+                            DerivativeAccumulator *da) const IMP_OVERRIDE;
+      virtual ModelObjectsTemp do_get_inputs(Model *m,
+                                     const ParticleIndexes &pis) const;
+      IMP_PAIR_SCORE_METHODS(LinearSoftSpherePairScore);
+      IMP_OBJECT_METHODS(LinearSoftSpherePairScore);;
+};
 
 #ifndef IMP_DOXYGEN
 // evaluates the soft linear repulsive score, using the internal Model
@@ -255,7 +260,12 @@ public:
   double get_x0() const {
     return x0_;
   }
-  IMP_INDEX_PAIR_SCORE(LinearWellPairScore);
+  double evaluate_index(Model *m, const ParticleIndexPair& p,
+  DerivativeAccumulator *da) const IMP_OVERRIDE;
+  ModelObjectsTemp do_get_inputs(Model *m,
+                                 const ParticleIndexes &pis) const;
+  IMP_PAIR_SCORE_METHODS(LinearWellPairScore);
+  IMP_OBJECT_METHODS(LinearWellPairScore);;
 };
 
 #ifndef IMP_DOXYGEN
