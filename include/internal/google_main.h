@@ -9,28 +9,27 @@
 
 #include "base/init_google.h"
 #include "base/commandlineflags.h"
+#include <IMP/base/flags.h>
+#include <boost/scoped_array.hpp>
 
 typedef int Int64Arg;
 typedef unsigned int UInt64Arg;
 
-#define IMP_NPC_PARAMETER(name, def, description)        \
-  DEFINE_double(name, def, description);             \
-  Pusher name##_pusher(#name, &FLAGS_##name)
-
-#define IMP_NPC_PARAMETER_BOOL(name, def, description)        \
-  DEFINE_bool(name, def, description)
-
-#define IMP_NPC_PARAMETER_INT64(name, def, description)        \
-  DEFINE_int64(name, def, description)
-
-#define IMP_NPC_PARAMETER_UINT64(name, def, description)        \
-  DEFINE_int64(name, def, description)
-
-#define IMP_NPC_PARAMETER_STRING(name, def, description) \
-  DEFINE_string(name, def, description)
+inline void parse_argv_argc(int argc, char ** argv) {
+  IMP::Strings gargs = IMP::base::setup_from_argv_allowing_unknown(argc, argv,
+                                                                   "something npc");
+  gargs.insert(gargs.begin(), argv[0]);
+  int gargc = gargs.size();
+  boost::scoped_array<char*> gargv(new char*[gargs.size()]);
+  for (unsigned int i = 0; i < gargs.size(); ++i) {
+    gargv[i] = const_cast<char*>(gargs[i].c_str());
+  }
+  char ** gargvp = gargv.get();
+  InitGoogle("Something npc related",
+             &gargc, &gargvp, true);
+}
 
 #define IMP_NPC_PARSE_OPTIONS(argc, argv)       \
-  InitGoogle(argv[0],                           \
-             &argc, &argv, true);
+  parse_argv_argc(argc, argv);
 
 #endif /* IMPNPCTRANSPORT_GOOGLE_MAIN_H */

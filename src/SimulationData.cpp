@@ -401,8 +401,7 @@ rmf::SaveOptimizerState *
 SimulationData::get_rmf_sos_writer()
 {
   if (!rmf_sos_writer_) {
-    IMP_ALWAYS_CHECK( !get_rmf_file_name().empty(),
-                      "RMF file name was not set", IMP::base::ValueException );
+    if (get_rmf_file_name().empty()) return nullptr;
     RMF::FileHandle fh=RMF::create_rmf_file(get_rmf_file_name());
     link_rmf_file_handle(fh);
     IMP_NEW(rmf::SaveOptimizerState, los, (fh));

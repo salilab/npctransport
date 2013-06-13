@@ -22,7 +22,8 @@ class IMPNPCTRANSPORTEXPORT SlabWireGeometry: public display::Geometry
   double height_, radius_, length_;
 public:
   SlabWireGeometry(double height, double radius, double length);
-  IMP_GEOMETRY(SlabWireGeometry);
+  virtual IMP::display::Geometries get_components() const IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(SlabWireGeometry);
 };
 
 class IMPNPCTRANSPORTEXPORT SlabSurfaceGeometry:

@@ -253,14 +253,19 @@ void print_fgs(IMP::npctransport::SimulationData& sd) {
     }
 }
 
-IMP_NPC_PARAMETER_INT64(cylinder_nlayers, 0,
-                        "anchor FG nups to a cylindrical pore with a slab of"
-                        " dimensions that are specified in"
-                        " the config file, with specified number of FG layers"
-                        " (no cylinder anchoring if equals to 0)");
 
-IMP_NPC_PARAMETER_BOOL(surface_anchoring, false,
-                       "anchor FG nups to bottom of cube");
+boost::int64_t cylinder_nlayers = 0;
+IMP::base::AddIntFlag cylinder_adder("cylinder_nlayers",
+                                     "anchor FG nups to a cylindrical pore with a slab of"
+                                     " dimensions that are specified in"
+                                     " the config file, with specified number of FG layers"
+                                     " (no cylinder anchoring if equals to 0)",
+                                     &cylinder_nlayers);
+
+bool surface_anchoring = false;
+IMP::base::AddBoolFlag surface_adder("surface_anchoring",
+                                     "anchor FG nups to bottom of cube",
+                                     &surface_anchoring);
 
 }
 
@@ -276,16 +281,16 @@ int main(int argc, char *argv[])
     IMP::base::Pointer<npctransport::SimulationData> sd
       = npctransport::startup(argc, argv);
     print_fgs(*sd);
-    if(FLAGS_surface_anchoring){
-      IMP_ALWAYS_CHECK(FLAGS_cylinder_nlayers == 0,
+    if(surface_anchoring){
+      IMP_ALWAYS_CHECK(cylinder_nlayers == 0,
                        "surface anchoring and cylinder"
                        " anchoring flags are mutually exclusive",
                        IMP::base::ValueException);
       set_fg_grid(*sd);
     }
-    if(FLAGS_cylinder_nlayers > 0){
-      set_fgs_in_cylinder(*sd, FLAGS_cylinder_nlayers);
-      std::cout << "Numbner of cylinder layers = " << FLAGS_cylinder_nlayers << std::endl;
+    if(cylinder_nlayers > 0){
+      set_fgs_in_cylinder(*sd, cylinder_nlayers);
+      std::cout << "Numbner of cylinder layers = " << cylinder_nlayers << std::endl;
     }
     color_fgs( *sd );
     Restraints initialization_restraints;

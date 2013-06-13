@@ -59,48 +59,64 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 
 #include <IMP/npctransport/protobuf.h>
 
+IMPNPCTRANSPORT_BEGIN_NAMESPACE
+boost::int64_t work_unit = -1;
+IMP::base::AddIntFlag work_unitadder("work_unit", "The work unit", &work_unit);
 
-IMP_NPC_PARAMETER_INT64(work_unit, -1, "The work unit");
-IMP_NPC_PARAMETER_STRING(configuration, "configuration.pb",
-                         "input configuration file in protobuf format"
-                         " [default: %default]");
-IMP_NPC_PARAMETER_STRING(output, "output.pb",
-                         "output assignments and statistics file in protobuf format,"
-                         " recording the assignment being executed"
-                         " [default: %default]");
-IMP_NPC_PARAMETER_STRING(restart, "",
-                         "output file of a previous run, from which to restart"
-                         " this run (also initializing the final coordinates"
-                         " from this previous run, if they exist in the output"
-                         " file)"
-                         " [default: %default]");
-IMP_NPC_PARAMETER_STRING(conformations, "conformations.rmf",
-                         "RMF file for recording the conforomations along the "
-                         " simulation [default: %default]");
-IMP_NPC_PARAMETER_STRING(init_rmffile, "",
-                         "[OBSOLETE]"
+
+std::string configuration = "configuration.pb";
+IMP::base::AddStringFlag configuration_adder("configuration",
+                                             "input configuration file in protobuf format"
+                                             " [default: %default]",
+                                             &configuration);
+std::string output = "output.pb";
+IMP::base::AddStringFlag output_adder("output",
+                                      "output assignments and statistics file in protobuf format,"
+                                      " recording the assignment being executed"
+                                      " [default: %default]",
+                                      &output);
+std::string restart = "";
+IMP::base::AddStringFlag restart_adder("restart",
+                                       "output file of a previous run, from which to restart"
+                                       " this run (also initializing the final coordinates"
+                                       " from this previous run, if they exist in the output"
+                                       " file)"
+                                       " [default: %default]",
+                                       &restart);
+std::string conformations = "conformations.rmf";
+IMP::base::AddStringFlag conformations_adder("conformations",
+                                             "RMF file for recording the conforomations along the "
+                                             " simulation [default: %default]",
+                                             &conformations);
+std::string init_rmffile = "";
+IMP::base::AddStringFlag init_rmf_adder("init_rmffile", "[OBSOLETE]"
                          " RMF file for initializing the simulation with its"
                          " last frame (to continue a previous run). Note that"
                          " this option overrides the coordinates specified in"
-                         " an older output file when using the --restart flag");
-IMP_NPC_PARAMETER_STRING(final_conformations, "final_conformations.rmf",
-                         "RMF file for recording the initial and final conformations "
-                         " [default: %default]");
-IMP_NPC_PARAMETER_BOOL(verbose, false,
-                       "Print more info during run");
-IMP_NPC_PARAMETER_BOOL(first_only, false,
-                       "Only do the first simulation block");
-IMP_NPC_PARAMETER_BOOL(initialize_only, false,
-                       "Run the initialization and then stop");
-IMP_NPC_PARAMETER_BOOL(quick, false,
-                       "Reduce all steps to the minimum");
-IMP_NPC_PARAMETER_BOOL(show_steps, false,
-                       "Show the steps for each modified variable");
-IMP_NPC_PARAMETER_BOOL(show_number_of_work_units, false,
-                       "Show the number of work units");
+                                        " an older output file when using the --restart flag",
+                                        &init_rmffile);
+std::string final_conformations = "final_conformations.rmf";
+IMP::base::AddStringFlag final_conformations_adder("final_conformations",
+                                                   "RMF file for recording the initial and final conformations "
+                                                   " [default: %default]", &final_conformations);
+bool verbose = false;
+IMP::base::AddBoolFlag verbose_adder("verbose", "Print more info during run", &verbose);
+bool first_only = false;
+IMP::base::AddBoolFlag first_only_adder("first_only", "Only do the first simulation block",
+                                        &first_only);
+bool initialize_only = false;
+IMP::base::AddBoolFlag initialize_only_adder("initialize_only",
+                                             "Run the initialization and then stop",
+                                             &initialize_only);
+bool show_steps = false;
+IMP::base::AddBoolFlag show_steps_adder("show_steps",
+                                        "Show the steps for each modified variable",
+                                        &show_steps);
+bool show_number_of_work_units = false;
+IMP::base::AddBoolFlag show_work_units_adder("show_number_of_work_units",
+                                             "Show the number of work units",
+                                             &show_number_of_work_units);
 
-
-IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 namespace {
 /*********************************** internal functions *********************************/
@@ -139,25 +155,25 @@ IMP_OMP_PRAGMA(critical)
                        to be saved in the output file
 */
 inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
-  if (FLAGS_restart.empty()) {
+  if (restart.empty()) {
     int num=IMP::npctransport::assign_ranges
-      (FLAGS_configuration, FLAGS_output,
-       FLAGS_work_unit, FLAGS_show_steps, actual_seed);
-    if (FLAGS_show_number_of_work_units) {
+      (configuration, output,
+       work_unit, show_steps, actual_seed);
+    if (show_number_of_work_units) {
 IMP_OMP_PRAGMA(critical)
       std::cout << "work units " << num << std::endl;
     }
-  } else { // FLAGS_resart.empty()
+  } else { // resart.empty()
 IMP_OMP_PRAGMA(critical)
-    std::cout << "Restart simulation from " << FLAGS_restart << std::endl;
+    std::cout << "Restart simulation from " << restart << std::endl;
       ::npctransport_proto::Output prev_output;
     // copy to new file to avoid modifying input file
-    std::ifstream file(FLAGS_restart.c_str(), std::ios::binary);
+    std::ifstream file(restart.c_str(), std::ios::binary);
     bool read=prev_output.ParseFromIstream(&file);
-    IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << FLAGS_restart,
+    IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << restart,
                      IMP::base::ValueException);
     prev_output.mutable_assignment()->set_random_seed( actual_seed );
-    std::ofstream outf(FLAGS_output.c_str(), std::ios::binary);
+    std::ofstream outf(output.c_str(), std::ios::binary);
     prev_output.SerializeToOstream(&outf);
   }
 }
@@ -181,7 +197,7 @@ IMP_OMP_PRAGMA(critical)
           (e.g., during equilibration)
    @param max_frames_per_chunk maximal number of frames to be simulated
                                in a single optimization chunk
-   @note if FLAGS_first_only==true, make a really short simulation
+   @note if first_only==true, make a really short simulation
 
    @return true if succesful, false if terminated abnormally
 */
@@ -196,7 +212,7 @@ bool run_it(SimulationData *sd,
   sd->get_m()->update();
   do {
     unsigned int cur_nframes
-      = std::min<unsigned int>(FLAGS_first_only
+      = std::min<unsigned int>(first_only
                                ?max_frames_per_chunk/10:max_frames_per_chunk,
                                number_of_frames);
     //IMP_THREADS((sd, silent_statistics, cur_nframes),{
@@ -216,7 +232,7 @@ bool run_it(SimulationData *sd,
       return false;
     }
     number_of_frames-=cur_nframes;
-  } while (number_of_frames > 0 && !FLAGS_first_only);
+  } while (number_of_frames > 0 && !first_only);
   return true;
 }
 }
@@ -232,17 +248,17 @@ IMP_OMP_PRAGMA(critical)
   std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
   IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
   write_output_based_on_flags( IMP::base::get_random_seed() );
-  sd= new IMP::npctransport::SimulationData(FLAGS_output,
-                                            FLAGS_quick);
-    if (!FLAGS_conformations.empty()) {
-      sd->set_rmf_file_name(FLAGS_conformations);
+  sd= new IMP::npctransport::SimulationData(output,
+                                            IMP::base::run_quick_test);
+    if (!conformations.empty()) {
+      sd->set_rmf_file_name(conformations);
     }
-    if(!FLAGS_init_rmffile.empty()) {
-      sd->initialize_positions_from_rmf(RMF::open_rmf_file_read_only(FLAGS_init_rmffile),
+    if(!init_rmffile.empty()) {
+      sd->initialize_positions_from_rmf(RMF::open_rmf_file_read_only(init_rmffile),
                                         -1);
 IMP_OMP_PRAGMA(critical)
       std::cout << "Initialize coordinates from last frame of an existing RMF file "
-                << FLAGS_init_rmffile << std::endl;
+                << init_rmffile << std::endl;
     }
     return sd.release();
 }
@@ -257,15 +273,15 @@ void do_main_loop(SimulationData *sd,
   /** initial optimization and equilibration needed unless starting
       from another output file or rmf file */
   bool is_initial_optimization =
-      FLAGS_restart.empty() && FLAGS_init_rmffile.empty();
+      restart.empty() && init_rmffile.empty();
   bool is_BD_equilibration = is_initial_optimization;
-  bool is_BD_full_run = !FLAGS_initialize_only;
+  bool is_BD_full_run = !initialize_only;
 
   base::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
     = sd->get_rmf_sos_writer();
   RMF::FileHandle final_rmf_fh;
-  if(!FLAGS_final_conformations.empty()){
-    final_rmf_fh=RMF::create_rmf_file(FLAGS_final_conformations);
+  if(!final_conformations.empty()){
+    final_rmf_fh=RMF::create_rmf_file(final_conformations);
     sd->link_rmf_file_handle(final_rmf_fh);
   }
   boost::timer total_time;
@@ -277,10 +293,10 @@ void do_main_loop(SimulationData *sd,
               << sd->get_number_of_trials() << std::endl;
     if (is_initial_optimization) {
       std::cout<< "Doing initial coordinates optimization..." << std::endl;
-      initialize_positions(sd, init_restraints, FLAGS_verbose);
+      initialize_positions(sd, init_restraints, verbose);
       sd->get_bd()->set_current_time( 0.0 );
     }
-    print_score_and_positions( sd, FLAGS_verbose, "Score right before BD = " );
+    print_score_and_positions( sd, verbose, "Score right before BD = " );
     if (conformations_rmf_sos) {
       conformations_rmf_sos->update_always("Right before BD");
     }
@@ -298,7 +314,7 @@ void do_main_loop(SimulationData *sd,
       bool ok = run_it
         (sd, nframes_equilibrate, timer, total_time,
          true /* silent stats */, max_frames_per_chunk);
-      if(! ok || FLAGS_first_only)
+      if(! ok || first_only)
         return;
       //if(nframes_equilibrate > 0) {
       // if equilibrated, ignore equilibration stats
@@ -327,15 +343,15 @@ void do_main_loop(SimulationData *sd,
     if (conformations_rmf_sos) {
       conformations_rmf_sos->update_always("Final frame");
     }
-    if( !FLAGS_final_conformations.empty() ) {
+    if( !final_conformations.empty() ) {
       std::cout << "Printing last frame to "
-                << FLAGS_final_conformations << std::endl;
+                << final_conformations << std::endl;
       IMP::rmf::save_frame
         ( final_rmf_fh, final_rmf_fh.get_number_of_frames() );
     }
   }
   std::cout << "Entire run finished" << std::endl;
-  print_score_and_positions( sd, FLAGS_verbose, "Final score = " );
+  print_score_and_positions( sd, verbose, "Final score = " );
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE
