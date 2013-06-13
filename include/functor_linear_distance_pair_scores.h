@@ -25,10 +25,22 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 typedef score_functor::SphereDistance<score_functor::LinearLowerBound>
 LinearSoftSphereScore;
 #endif
-IMP_FUNCTOR_DISTANCE_PAIR_SCORE(FunctorLinearSoftSpherePairScore,
-                                LinearSoftSphereScore,
-                                (double k,
-                                 std::string name="LinearSSPairScore%1%"), (k));
+
+/* IMP_FUNCTOR_DISTANCE_PAIR_SCORE(FunctorLinearSoftSpherePairScore, */
+/*                                 LinearSoftSphereScore, */
+/*                                 (double k, */
+/*                                  std::string name="LinearSSPairScore%1%"), (k)); */
+class FunctorLinearSoftSpherePairScore
+: public IMP::score_functor::DistancePairScore<LinearSoftSphereScore>
+{
+  typedef IMP::score_functor::DistancePairScore<LinearSoftSphereScore> P;
+ public:
+  FunctorLinearSoftSpherePairScore(double k,
+                                   std::string name="LinearSSPairScore%1%") :
+  P(LinearSoftSphereScore(k), name)
+    {}
+};
+
 
 #ifndef SWIG
 /**
@@ -89,12 +101,21 @@ public:
 
 typedef score_functor::SphereDistance<LinearInteraction>
 LinearInteractionScore;
-IMP_FUNCTOR_DISTANCE_PAIR_SCORE(FunctorLinearInteractionPairScore,
-                                LinearInteractionScore,
-                                (double krep, double attr_range, double kattr,
-                                 std::string name="LinearSSPairScore%1%"),
-                                (LinearInteraction( krep, attr_range, kattr ) )
-                                );
+
+class FunctorLinearInteractionPairScore
+: public IMP::score_functor::DistancePairScore<LinearInteractionScore>
+{
+  typedef IMP::score_functor::DistancePairScore<LinearInteractionScore> P;
+ public:
+  FunctorLinearInteractionPairScore
+    (double krep, double attr_range, double kattr,
+     std::string name="LinearSSPairScore%1%")
+    : P( LinearInteractionScore
+         ( LinearInteraction( krep, attr_range, kattr ) ),
+         name )
+    {}
+};
+
 
 
 IMPNPCTRANSPORT_END_NAMESPACE

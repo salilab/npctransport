@@ -125,10 +125,10 @@ class SetLength: public base::RAII {
      @param debug - if true, save is added as an optimizer state to the MC
      @param n_movers - number of movrs to apply in each MC step
    */
-  IMP::Pointer<core::MonteCarlo> create_mc
+  IMP::base::Pointer<core::MonteCarlo> create_mc
   (const ParticlesTemp & ps,
-   IMP::Pointer<core::IncrementalScoringFunction> isf,
-   IMP::Pointer<core::SoftSpherePairScore> ssps,
+   IMP::base::Pointer<core::IncrementalScoringFunction> isf,
+   IMP::base::Pointer<core::SoftSpherePairScore> ssps,
    const PairPredicates &excluded,
    rmf::SaveOptimizerState *save,
    bool debug,
@@ -180,7 +180,7 @@ void optimize_balls(const ParticlesTemp &ps,
   IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));
   IMP_NEW(core::SoftSpherePairScore, ssps, (10));
   unsigned int n_movers = 1 + ps.size() / 600; // movers applied in one MC step
-  IMP::Pointer<core::MonteCarlo> mc =
+  IMP::base::Pointer<core::MonteCarlo> mc =
     create_mc(ps, isf, ssps, excluded, save, debug, n_movers ) ;
 
 
