@@ -270,9 +270,9 @@ void optimize_balls(const ParticlesTemp &ps,
           // std::cout << "Energy is " << e << " at " << i << ", " << j << std::endl;
           if (debug) {
             std::ostringstream oss;
-            oss << i << " " << j;
+            oss << "Init after " << i << " " << j;
             if(save) {
-              save->update_always();
+              save->update_always(oss.str());
             }
           }
           // if (e < .000001) done=true; // TODO: replace stopping condition
