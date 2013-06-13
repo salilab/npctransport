@@ -237,6 +237,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
    */
   container::ListSingletonContainer *get_diffusers();
 
+  /**
+     returns a reference to the collection of score functions for FG backbones
+     (can be used to e.g. scale them up or down during optimization)
+   */
   LinearWellPairScores get_backbone_scores() const {
     return backbone_scores_;
   }
