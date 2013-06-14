@@ -147,7 +147,6 @@ class SetLength: public base::RAII {
       movers.push_back(create_serial_mover(ps));
     }
     mc->set_movers(movers);
-    mc->set_score_threshold( ps.size() * .1 );
     // we are special casing the nbl term for montecarlo, but using all for CG
     mc->set_incremental_scoring_function( isf );
     // use special incremental support for the non-bonded part
