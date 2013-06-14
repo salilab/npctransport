@@ -187,7 +187,7 @@ void optimize_balls(const ParticlesTemp &ps,
   if (show_dependency_graph) {
     DependencyGraph dg = get_dependency_graph(ps[0]->get_model());
     std::ofstream dgf("dependency_graph.dot");
-    base::internal::show_as_graphviz(dg, dgf);
+    show_as_graphviz(dg, dgf);
   }
 
   IMP_LOG(PROGRESS, "Performing initial optimization" << std::endl);
