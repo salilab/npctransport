@@ -75,11 +75,12 @@ SlabSingletonScore::get_displacement_vector(const algebra::Vector3D &v) const
 }
 
 
-double SlabSingletonScore::evaluate(Particle *p,
+double SlabSingletonScore::evaluate_index(Model *m,
+                                          const ParticleIndex pi,
                                     DerivativeAccumulator *da) const {
   using algebra::Vector3D;
   IMP_OBJECT_LOG;
-  core::XYZR d(p);
+  core::XYZR d(m, pi);
   if (!d.get_coordinates_are_optimized()) return false;
   // early abort if above or below slab
   if ( (d.get_z()-d.get_radius() > top_) ||
@@ -112,19 +113,11 @@ double SlabSingletonScore::evaluate(Particle *p,
   }
   return score;
 }
-ParticlesTemp
-SlabSingletonScore::get_input_particles(Particle*p) const {
-  return ParticlesTemp(1,p);
-}
 
-ContainersTemp
-SlabSingletonScore::get_input_containers(Particle*) const {
-  return ContainersTemp();
-}
-
-
-void SlabSingletonScore::do_show(std::ostream &out) const {
-  out << "SeparateSingletonModifier" << std::endl;
+ModelObjectsTemp
+SlabSingletonScore::do_get_inputs(Model *m,
+                                  const ParticleIndexes &pis) const {
+  return IMP::kernel::get_particles(m, pis);
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

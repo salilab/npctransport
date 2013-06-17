@@ -19,12 +19,12 @@ ExcludeZRangeSingletonScore::ExcludeZRangeSingletonScore
 {   }
 
 
-double ExcludeZRangeSingletonScore::evaluate
-(Particle *p,
+double ExcludeZRangeSingletonScore::evaluate_index
+(Model *m, ParticleIndex pi,
  DerivativeAccumulator *da) const {
   using algebra::Vector3D;
   IMP_OBJECT_LOG;
-  core::XYZR d(p);
+  core::XYZR d(m, pi);
   if (!d.get_coordinates_are_optimized()) return false;
   // check for violation
   double z = d.get_z();
@@ -45,20 +45,10 @@ double ExcludeZRangeSingletonScore::evaluate
   return score;
 }
 
-ParticlesTemp
-ExcludeZRangeSingletonScore::get_input_particles(Particle*p) const {
-  return ParticlesTemp(1,p);
-}
-
-ContainersTemp
-ExcludeZRangeSingletonScore::get_input_containers(Particle*) const {
-  return ContainersTemp();
-}
-
-
-void ExcludeZRangeSingletonScore::do_show(std::ostream &out) const {
-  out << "ExcludeZRangeSingletonScore " << bottom_ << " to " << top_
-      << " ; k = " << k_ << std::endl;
+ModelObjectsTemp
+ExcludeZRangeSingletonScore::do_get_inputs(Model *m,
+                                           const ParticleIndexes &pis) const {
+  return IMP::kernel::get_particles(m, pis);
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

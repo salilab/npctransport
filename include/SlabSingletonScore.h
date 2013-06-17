@@ -36,11 +36,10 @@ class IMPNPCTRANSPORTEXPORT SlabSingletonScore: public SingletonScore
 
   double midZ_; // (top + bottom) / 2, for caching some calculations
 
- public:
+public:
   //! Get the individual particles from the passed SingletonContainer
   SlabSingletonScore(double thickness, double radius, double k);
 
-  IMP_SINGLETON_SCORE(SlabSingletonScore);
   algebra::Vector3D
       get_displacement_direction(const algebra::Vector3D &v) const {
     return get_displacement_vector(v).second;
@@ -55,7 +54,13 @@ class IMPNPCTRANSPORTEXPORT SlabSingletonScore: public SingletonScore
   /** returns the highest slab z coordinate */
   double get_top_z() { return top_; }
 
- private:
+   virtual double evaluate_index(Model *m, ParticleIndex p,
+                                DerivativeAccumulator *da) const IMP_OVERRIDE;
+  virtual ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis)
+      const IMP_OVERRIDE;
+  IMP_SINGLETON_SCORE_METHODS(SlabSingletonScore);
+  IMP_OBJECT_METHODS(SlabSingletonScore);
+private:
   // computes the displacement of v from a z-axis aligned cylinder
   //
   // @return <distance, a vector pointing out>,

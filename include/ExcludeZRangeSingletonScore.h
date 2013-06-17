@@ -27,8 +27,6 @@ class IMPNPCTRANSPORTEXPORT ExcludeZRangeSingletonScore: public SingletonScore
    */
   ExcludeZRangeSingletonScore(double bottom, double top, double k);
 
-  IMP_SINGLETON_SCORE(ExcludeZRangeSingletonScore);
-
   /** returns the lowest slab z coordinate */
   double get_bottom_z() const { return bottom_; }
 
@@ -38,6 +36,12 @@ class IMPNPCTRANSPORTEXPORT ExcludeZRangeSingletonScore: public SingletonScore
   /** returns the force constant for repulsion out of the z-range */
   double get_k() const { return k_; }
 
+  virtual double evaluate_index(Model *m, ParticleIndex p,
+                                DerivativeAccumulator *da) const IMP_OVERRIDE;
+  virtual ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis)
+                                     const IMP_OVERRIDE;
+  IMP_SINGLETON_SCORE_METHODS(ExcludeZRangeSingletonScore);
+  IMP_OBJECT_METHODS(ExcludeZRangeSingletonScore);
 };
 
 IMPNPCTRANSPORT_END_NAMESPACE
