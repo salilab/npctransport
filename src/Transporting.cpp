@@ -14,8 +14,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 Transporting Transporting::setup_particle(Particle *p,
-                                          bool is_last_entry_from_top)
-{
+                                          bool is_last_entry_from_top) {
   IMP_ALWAYS_CHECK(IMP::core::XYZ::particle_is_instance(p),
                    "It is expected that a transporting particle would have "
                    "coordinates, particle " << *p,
@@ -48,12 +47,10 @@ IntKey Transporting::get_n_entries_top_key() {
   return ik;
 }
 
-void Transporting::show(std::ostream &out) const
-{
+void Transporting::show(std::ostream &out) const {
   out << "Transporting is_last_entry_from_top = "
-      << get_is_last_entry_from_top() <<
-    " ; last_tracked_z = "
-      << get_last_tracked_z();
+      << get_is_last_entry_from_top()
+      << " ; last_tracked_z = " << get_last_tracked_z();
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

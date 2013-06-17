@@ -31,7 +31,7 @@
 #include <cmath>
 #include <iostream>
 #include <IMP/npctransport/protobuf.h>
-#ifdef IMP_NPC_GOOGLE // TODO: replace with a unified include
+#ifdef IMP_NPC_GOOGLE  // TODO: replace with a unified include
 #include <IMP/npctransport/internal/google_main.h>
 #else
 #include <IMP/npctransport/internal/boost_main.h>
@@ -47,9 +47,7 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/npctransport/internal/boost_main.h>
 #endif
 
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   try {
     IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
     IMP_NPC_PARSE_OPTIONS(argc, argv);
@@ -61,30 +59,31 @@ int main(int argc, char *argv[])
     std::string output = IMP::base::create_temporary_file_name("output", ".pb");
     {
       IMP_OMP_PRAGMA(critical);
-          ::npctransport_proto::Output prev_output;
+      ::npctransport_proto::Output prev_output;
       std::ifstream file(input.c_str(), std::ios::binary);
-      bool read=prev_output.ParseFromIstream(&file);
+      bool read = prev_output.ParseFromIstream(&file);
       IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << input,
                        IMP::base::ValueException);
       prev_output.mutable_assignment()
-          ->set_random_seed(IMP::base::get_random_seed() );
+          ->set_random_seed(IMP::base::get_random_seed());
       std::ofstream outf(output.c_str(), std::ios::binary);
       prev_output.SerializeToOstream(&outf);
     }
-    sd= new IMP::npctransport::SimulationData(output, false);
+    sd = new IMP::npctransport::SimulationData(output, false);
 
-     sd->get_m()->update();
-     double timev, score = 0;
-     IMP_TIME(score += sd->get_bd()->optimize(1000), timev);
+    sd->get_m()->update();
+    double timev, score = 0;
+    IMP_TIME(score += sd->get_bd()->optimize(1000), timev);
 #ifdef _OMP
-     std::string algo = "openmp";
+    std::string algo = "openmp";
 #else
-     std::string algo = "serial";
+    std::string algo = "serial";
 #endif
-     IMP::benchmark::report("full npc", algo, timev, score);
-  } catch (const IMP::base::Exception& e) {
+    IMP::benchmark::report("full npc", algo, timev, score);
+  }
+  catch (const IMP::base::Exception & e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }
   return 0;
- }
+}

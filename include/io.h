@@ -28,4 +28,4 @@ IMPNPCTRANSPORTEXPORT void write_geometry(const ParticlesTemp &kaps,
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_IO_H */
+#endif /* IMPNPCTRANSPORT_IO_H */

@@ -19,19 +19,20 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 /** Compute various statistics of a chain.*/
-class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState:
-  public core::PeriodicOptimizerState {
-    // particles in the chain:
-    ParticlesTemp ps_;
+class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
+    : public core::PeriodicOptimizerState {
+  // particles in the chain:
+  ParticlesTemp ps_;
 
-     // time series of the positions of particles in the chain:
-    std::deque<algebra::Vector3Ds > positions_;
+  // time series of the positions of particles in the chain:
+  std::deque<algebra::Vector3Ds> positions_;
 
-    double get_dt() const;
+  double get_dt() const;
+
  public:
   ChainStatisticsOptimizerState(const ParticlesTemp &p);
 
-  double get_correlation_time()const;
+  double get_correlation_time() const;
 
   Floats get_diffusion_coefficients() const;
 
@@ -44,9 +45,8 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState:
   virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
   IMP_OBJECT_METHODS(ChainStatisticsOptimizerState);
 };
-IMP_OBJECTS(ChainStatisticsOptimizerState,
-            ChainStatisticsOptimizerStates);
+IMP_OBJECTS(ChainStatisticsOptimizerState, ChainStatisticsOptimizerStates);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_CHAIN_STATISTICS_OPTIMIZER_STATE_H */
+#endif /* IMPNPCTRANSPORT_CHAIN_STATISTICS_OPTIMIZER_STATE_H */

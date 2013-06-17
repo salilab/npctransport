@@ -17,10 +17,10 @@
 #include <IMP/base/showable_macros.h>
 
 #ifndef SWIG
-IMP_GCC_PUSH_POP( diagnostic push )
-IMP_GCC_PRAGMA( diagnostic ignored "-Wextra" )
+IMP_GCC_PUSH_POP(diagnostic push)
+IMP_GCC_PRAGMA(diagnostic ignored "-Wextra")
 #include <avro/DataFile.hh>
-IMP_GCC_PUSH_POP( diagnostic pop )
+IMP_GCC_PUSH_POP(diagnostic pop)
 #endif
 
 #include <fstream>
@@ -43,7 +43,6 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
   */
   Avro2PBReader(std::string avro_filename);
 
-
   /** closes any open files */
   ~Avro2PBReader();
 
@@ -60,12 +59,10 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
 
   //! returns the name of the file that is currently being read
   //! or "" if reader is at invalid state
-  std::string get_cur_file_name()
-    {
-      if( ! get_is_valid() )
-        return "";
-      return avro_filenames_[cur_file_];
-    }
+  std::string get_cur_file_name() {
+    if (!get_is_valid()) return "";
+    return avro_filenames_[cur_file_];
+  }
 
  private:
   //! close any open file if one exists and move cursor to next file index
@@ -76,19 +73,18 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
   void init(const Strings& avro_filenames);
 
  private:
-  Strings avro_filenames_; // list of files to go over
+  Strings avro_filenames_;  // list of files to go over
   t_avro_reader* avro_reader_;
-  unsigned int cur_file_; // file index we're reading now
+  unsigned int cur_file_;  // file index we're reading now
 
  public:
   IMP_SHOWABLE_INLINE(Avro2PBReader,
-                      out << "Avro2PBReader with "
-                           << avro_filenames_.size() << " input avro files"  );
-
+                      out << "Avro2PBReader with " << avro_filenames_.size()
+                          << " input avro files");
 };
 
 IMP_VALUES(Avro2PBReader, Avro2PBReaders);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_AVRO2PB_READER_H */
+#endif /* IMPNPCTRANSPORT_AVRO2PB_READER_H */

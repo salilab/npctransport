@@ -8,14 +8,11 @@
 #ifndef IMPNPCTRANSPORT_MAIN_H
 #define IMPNPCTRANSPORT_MAIN_H
 
-
-
 #include "npctransport_config.h"
 #include "SimulationData.h"
 #include <IMP/base_types.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-
 
 /**
    initialize and return a simulation data object based on
@@ -32,13 +29,8 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]);
     @param init_restraints ad-hoc restraints during initialization only
 */
 IMPNPCTRANSPORTEXPORT
-void do_main_loop(SimulationData *sd,
-                  const RestraintsTemp &init_restraints);
-
-
+void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints);
 
 IMPNPCTRANSPORT_END_NAMESPACE
-
-
 
 #endif /* IMPNPCTRANSPORT_MAIN_H */

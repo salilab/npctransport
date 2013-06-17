@@ -9,8 +9,7 @@
 
 #include <IMP/base/flags.h>
 
-#define IMP_NPC_PARSE_OPTIONS(argc, argv)                               \
+#define IMP_NPC_PARSE_OPTIONS(argc, argv) \
   IMP::base::setup_from_argv(argc, argv, "Something npcish");
-
 
 #endif /* IMPNPCTRANSPORT_BOOST_MAIN_H */

@@ -12,16 +12,15 @@
 #include <iomanip>
 
 int main(int argc, char *argv[]) {
-  if (argc <2) {
+  if (argc < 2) {
     std::cerr << "Usage: " << argv[0] << " avrofiles" << std::endl;
     return 1;
   }
-  std::string out = argv[argc-1];
+  std::string out = argv[argc - 1];
 
-
-  for ( int i=1; i< argc; ++i) {
-    avro::DataFileReader<IMP_npctransport::wrapper>
-      rd(argv[i], IMP::npctransport::get_avro_data_file_schema());
+  for (int i = 1; i < argc; ++i) {
+    avro::DataFileReader<IMP_npctransport::wrapper> rd(
+        argv[i], IMP::npctransport::get_avro_data_file_schema());
     rd.readerSchema().toJson(std::cout);
     rd.dataSchema().toJson(std::cout);
     IMP_npctransport::wrapper data;

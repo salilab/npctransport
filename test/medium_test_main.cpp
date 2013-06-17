@@ -15,24 +15,23 @@ int main(int argc, char *argv[]) {
   try {
     IMP::base::setup_from_argv(argc, argv,
                                "Test of the main loop for npc transport");
-    std::string config
-        = IMP::npctransport::get_data_path("quick.pb");
-    std::string assignment
-        = IMP::base::create_temporary_file_name("output", ".pb");
-    std::string output
-        = IMP::base::create_temporary_file_name("output", ".rmf");
+    std::string config = IMP::npctransport::get_data_path("quick.pb");
+    std::string assignment =
+        IMP::base::create_temporary_file_name("output", ".pb");
+    std::string output =
+        IMP::base::create_temporary_file_name("output", ".rmf");
     IMP::base::set_log_level(IMP::base::LogLevel(IMP::base::SILENT));
-    int num=IMP::npctransport::assign_ranges
-      (config, assignment, 0, true, IMP::base::get_random_seed());
+    int num = IMP::npctransport::assign_ranges(config, assignment, 0, true,
+                                               IMP::base::get_random_seed());
     std::cout << "num ranges " << num << std::endl;
-    IMP_NEW(IMP::npctransport::SimulationData, sd,(assignment, true /* quick */));
+    IMP_NEW(IMP::npctransport::SimulationData, sd,
+            (assignment, true /* quick */));
     sd->set_rmf_file_name(output);
     sd->get_m()->set_log_level(IMP::base::SILENT);
-    std::cout << "Files are " << assignment
-              << " and " << output
-              << std::endl;
-  IMP::npctransport::do_main_loop(sd, IMP::RestraintsTemp());
-  } catch (IMP::base::Exception e) {
+    std::cout << "Files are " << assignment << " and " << output << std::endl;
+    IMP::npctransport::do_main_loop(sd, IMP::RestraintsTemp());
+  }
+  catch (IMP::base::Exception e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;
   }

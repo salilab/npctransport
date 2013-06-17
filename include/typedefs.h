@@ -15,10 +15,9 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 // an interaction that involves particles of two types
-typedef std::pair
-<IMP::core::ParticleType, IMP::core::ParticleType> InteractionType;
-
+typedef std::pair<IMP::core::ParticleType, IMP::core::ParticleType>
+    InteractionType;
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_TYPEDEFS_H */
+#endif /* IMPNPCTRANSPORT_TYPEDEFS_H */

@@ -23,8 +23,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
     with particles from another group, within some specified contat
     range
 */
-class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState:
-public core::PeriodicOptimizerState {
+class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
+    : public core::PeriodicOptimizerState {
  private:
   // the model on which the simulation is run and to which all particles are
   // assumed to belong
@@ -38,15 +38,15 @@ public core::PeriodicOptimizerState {
 
   // maintains a list of nearby particle pairs in a bipartite graph
   IMP::base::OwnerPointer<IMP::container::CloseBipartitePairContainer>
-    close_bipartite_pair_container_;
+      close_bipartite_pair_container_;
 
   // avergae number of times all pairs of particles contacted each other
   // per update round
   Float avg_ncontacts_;
 
   // average fraction of time that each partilce is in contact
-  Float avg_pct_bound_particles_I_; // for particles in group I
-  Float avg_pct_bound_particles_II_; // particles in group II
+  Float avg_pct_bound_particles_I_;   // for particles in group I
+  Float avg_pct_bound_particles_II_;  // particles in group II
 
   // total number of particles in each group
   Int n_particles_I_;
@@ -68,54 +68,50 @@ public core::PeriodicOptimizerState {
                               CloseBiparyiyrPairContainer, this affects only
                               performance - touch only if you know why
   */
-  BipartitePairsStatisticsOptimizerState
-    (Model* m,
-     InteractionType interaction_type, // TODO: remove this from class?
-                                        //       a bit ugly and ungeneral
-     const ParticlesTemp& particlesI,
-     const ParticlesTemp& particlesII,
-     double contact_range = 1.0,
-     double slack = 1.0 );
+  BipartitePairsStatisticsOptimizerState(
+      Model* m,
+      InteractionType interaction_type,  // TODO: remove this from class?
+                                         //       a bit ugly and ungeneral
+      const ParticlesTemp& particlesI, const ParticlesTemp& particlesII,
+      double contact_range = 1.0, double slack = 1.0);
 
   /**
      returns the particle types of the first and second group of particles,
      respectively. This might change in the future, since types can be mixed
   */
-  InteractionType get_interaction_type() const
-  { return interaction_type_; }
+  InteractionType get_interaction_type() const { return interaction_type_; }
 
   /**
      returns the average number of all pairs of particles that
      touch each other per update
   */
-  Float get_average_number_of_contacts() const
-  { return avg_ncontacts_; }
+  Float get_average_number_of_contacts() const { return avg_ncontacts_; }
 
   /**
      returns the average fraction of particles from group I
      that are bound in each update round
   */
-  Float get_average_percentage_bound_particles_1() const
-  { return avg_pct_bound_particles_I_; }
+  Float get_average_percentage_bound_particles_1() const {
+    return avg_pct_bound_particles_I_;
+  }
 
   /**
      returns the average fraction of particles from group II
      that are bound in each update round
   */
-  Float get_average_percentage_bound_particles_2() const
-  { return avg_pct_bound_particles_II_; }
+  Float get_average_percentage_bound_particles_2() const {
+    return avg_pct_bound_particles_II_;
+  }
 
   /**
      return the total number of particles in the first group
   */
-  Int get_number_of_particles_1()
-  { return n_particles_I_; }
+  Int get_number_of_particles_1() { return n_particles_I_; }
 
   /**
      return the total number of particles in the second group
   */
-  Int get_number_of_particles_2()
-  { return n_particles_II_; }
+  Int get_number_of_particles_2() { return n_particles_II_; }
 
   void reset();
   virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
@@ -124,8 +120,6 @@ public core::PeriodicOptimizerState {
 IMP_OBJECTS(BipartitePairsStatisticsOptimizerState,
             BipartitePairsStatisticsOptimizerStates);
 
-
-
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_BIPARTITE_PAIRS_STATISTICS_OPTIMIZER_STATE_H */
+#endif /* IMPNPCTRANSPORT_BIPARTITE_PAIRS_STATISTICS_OPTIMIZER_STATE_H */

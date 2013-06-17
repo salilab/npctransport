@@ -63,88 +63,86 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 boost::int64_t work_unit = -1;
 IMP::base::AddIntFlag work_unitadder("work_unit", "The work unit", &work_unit);
 
-
 std::string configuration = "configuration.pb";
-IMP::base::AddStringFlag configuration_adder("configuration",
-                                             "input configuration file in protobuf format"
-                                             " [default: %default]",
-                                             &configuration);
+IMP::base::AddStringFlag configuration_adder(
+    "configuration", "input configuration file in protobuf format"
+                     " [default: %default]",
+    &configuration);
 std::string output = "output.pb";
-IMP::base::AddStringFlag output_adder("output",
-                                      "output assignments and statistics file in protobuf format,"
-                                      " recording the assignment being executed"
-                                      " [default: %default]",
-                                      &output);
+IMP::base::AddStringFlag output_adder(
+    "output", "output assignments and statistics file in protobuf format,"
+              " recording the assignment being executed"
+              " [default: %default]",
+    &output);
 std::string restart = "";
-IMP::base::AddStringFlag restart_adder("restart",
-                                       "output file of a previous run, from which to restart"
-                                       " this run (also initializing the final coordinates"
-                                       " from this previous run, if they exist in the output"
-                                       " file)"
-                                       " [default: %default]",
-                                       &restart);
+IMP::base::AddStringFlag restart_adder(
+    "restart", "output file of a previous run, from which to restart"
+               " this run (also initializing the final coordinates"
+               " from this previous run, if they exist in the output"
+               " file)"
+               " [default: %default]",
+    &restart);
 std::string conformations = "conformations.rmf";
-IMP::base::AddStringFlag conformations_adder("conformations",
-                                             "RMF file for recording the conforomations along the "
-                                             " simulation [default: %default]",
-                                             &conformations);
+IMP::base::AddStringFlag conformations_adder(
+    "conformations", "RMF file for recording the conforomations along the "
+                     " simulation [default: %default]",
+    &conformations);
 std::string init_rmffile = "";
-IMP::base::AddStringFlag init_rmf_adder("init_rmffile", "[OBSOLETE]"
-                         " RMF file for initializing the simulation with its"
-                         " last frame (to continue a previous run). Note that"
-                         " this option overrides the coordinates specified in"
-                                        " an older output file when using the --restart flag",
-                                        &init_rmffile);
+IMP::base::AddStringFlag init_rmf_adder(
+    "init_rmffile", "[OBSOLETE]"
+                    " RMF file for initializing the simulation with its"
+                    " last frame (to continue a previous run). Note that"
+                    " this option overrides the coordinates specified in"
+                    " an older output file when using the --restart flag",
+    &init_rmffile);
 std::string final_conformations = "final_conformations.rmf";
-IMP::base::AddStringFlag final_conformations_adder("final_conformations",
-                                                   "RMF file for recording the initial and final conformations "
-                                                   " [default: %default]", &final_conformations);
+IMP::base::AddStringFlag final_conformations_adder(
+    "final_conformations",
+    "RMF file for recording the initial and final conformations "
+    " [default: %default]",
+    &final_conformations);
 bool verbose = false;
-IMP::base::AddBoolFlag verbose_adder("verbose", "Print more info during run", &verbose);
+IMP::base::AddBoolFlag verbose_adder("verbose", "Print more info during run",
+                                     &verbose);
 bool first_only = false;
-IMP::base::AddBoolFlag first_only_adder("first_only", "Only do the first simulation block",
+IMP::base::AddBoolFlag first_only_adder("first_only",
+                                        "Only do the first simulation block",
                                         &first_only);
 bool initialize_only = false;
-IMP::base::AddBoolFlag initialize_only_adder("initialize_only",
-                                             "Run the initialization and then stop",
-                                             &initialize_only);
+IMP::base::AddBoolFlag initialize_only_adder(
+    "initialize_only", "Run the initialization and then stop",
+    &initialize_only);
 bool show_steps = false;
-IMP::base::AddBoolFlag show_steps_adder("show_steps",
-                                        "Show the steps for each modified variable",
-                                        &show_steps);
+IMP::base::AddBoolFlag show_steps_adder(
+    "show_steps", "Show the steps for each modified variable", &show_steps);
 bool show_number_of_work_units = false;
 IMP::base::AddBoolFlag show_work_units_adder("show_number_of_work_units",
                                              "Show the number of work units",
                                              &show_number_of_work_units);
 
-
 namespace {
-/*********************************** internal functions *********************************/
+/*********************************** internal functions
+ * *********************************/
 
 // TODO: move to H file?
 //! print this score for the current state of sd
-void print_score_and_positions(SimulationData *sd,
-                                 bool print_positions = false,
-                                 std::string header = "Score = ");
+void print_score_and_positions(SimulationData *sd, bool print_positions = false,
+                               std::string header = "Score = ");
 
-void print_score_and_positions(SimulationData *sd,
-                               bool print_positions,
+void print_score_and_positions(SimulationData *sd, bool print_positions,
                                std::string header) {
-IMP_OMP_PRAGMA(critical)
-  std::cout << header
-            << sd->get_bd()->get_scoring_function()->evaluate(false)
+  IMP_OMP_PRAGMA(critical)
+  std::cout << header << sd->get_bd()->get_scoring_function()->evaluate(false)
             << " ; PredicatePairsRestraint score = "
-            << sd->get_predr()->evaluate(false)
-            <<  std::endl;
-  if(print_positions){
+            << sd->get_predr()->evaluate(false) << std::endl;
+  if (print_positions) {
     ParticlesTemp ps = sd->get_diffusers()->get_particles();
-      for(unsigned int i = 0; i < ps.size(); i++){
-IMP_OMP_PRAGMA(critical)
-       std::cout << ps[i] << ", "
-                  << IMP::core::RigidBody(ps[i]).get_reference_frame()
-                  << std::endl;
-      }
+    for (unsigned int i = 0; i < ps.size(); i++) {
+      IMP_OMP_PRAGMA(critical)
+      std::cout << ps[i] << ", " << IMP::core::RigidBody(ps[i])
+                                        .get_reference_frame() << std::endl;
     }
+  }
 }
 
 /** writes the output assignment file based on the configuration parameters
@@ -154,30 +152,28 @@ IMP_OMP_PRAGMA(critical)
     @param actual_seed the actual random seed used in the simulation,
                        to be saved in the output file
 */
-inline void write_output_based_on_flags( boost::uint64_t actual_seed ) {
+inline void write_output_based_on_flags(boost::uint64_t actual_seed) {
   if (restart.empty()) {
-    int num=IMP::npctransport::assign_ranges
-      (configuration, output,
-       work_unit, show_steps, actual_seed);
+    int num = IMP::npctransport::assign_ranges(configuration, output, work_unit,
+                                               show_steps, actual_seed);
     if (show_number_of_work_units) {
-IMP_OMP_PRAGMA(critical)
+      IMP_OMP_PRAGMA(critical)
       std::cout << "work units " << num << std::endl;
     }
-  } else { // resart.empty()
-IMP_OMP_PRAGMA(critical)
+  } else {  // resart.empty()
+    IMP_OMP_PRAGMA(critical)
     std::cout << "Restart simulation from " << restart << std::endl;
-      ::npctransport_proto::Output prev_output;
+    ::npctransport_proto::Output prev_output;
     // copy to new file to avoid modifying input file
     std::ifstream file(restart.c_str(), std::ios::binary);
-    bool read=prev_output.ParseFromIstream(&file);
+    bool read = prev_output.ParseFromIstream(&file);
     IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << restart,
                      IMP::base::ValueException);
-    prev_output.mutable_assignment()->set_random_seed( actual_seed );
+    prev_output.mutable_assignment()->set_random_seed(actual_seed);
     std::ofstream outf(output.c_str(), std::ios::binary);
     prev_output.SerializeToOstream(&outf);
   }
 }
-
 
 /**
    Run simulation <sd> for <number_of_frames> frames, in chunks of
@@ -201,42 +197,38 @@ IMP_OMP_PRAGMA(critical)
 
    @return true if succesful, false if terminated abnormally
 */
-bool run_it(SimulationData *sd,
-            unsigned int number_of_frames,
-            boost::timer& timer,
-            boost::timer& total_time,
+bool run_it(SimulationData *sd, unsigned int number_of_frames,
+            boost::timer &timer, boost::timer &total_time,
             bool silent_statistics = false,
             unsigned int max_frames_per_chunk = 50000) {
   // TODO: next line is a temporary hack - needed for some reason to
   // force the pair predicates to evaluate predicate pairs restraints
   sd->get_m()->update();
   do {
-    unsigned int cur_nframes
-      = std::min<unsigned int>(first_only
-                               ?max_frames_per_chunk/10:max_frames_per_chunk,
-                               number_of_frames);
-    //IMP_THREADS((sd, silent_statistics, cur_nframes),{
-    std::cout << "Optimizing for " << cur_nframes
-              << " frames in this iteration" << std::endl;
+    unsigned int cur_nframes = std::min<unsigned int>(
+        first_only ? max_frames_per_chunk / 10 : max_frames_per_chunk,
+        number_of_frames);
+    // IMP_THREADS((sd, silent_statistics, cur_nframes),{
+    std::cout << "Optimizing for " << cur_nframes << " frames in this iteration"
+              << std::endl;
     sd->get_bd()->optimize(cur_nframes);
     print_score_and_positions(sd);
-    if(! silent_statistics) {
+    if (!silent_statistics) {
       sd->update_statistics(timer, cur_nframes);
     }
     std::cout << "Done" << std::endl;
     //});
-    if (sd->get_maximum_number_of_minutes() > 0
-        && total_time.elapsed()/60 > sd->get_maximum_number_of_minutes()) {
+    if (sd->get_maximum_number_of_minutes() > 0 &&
+        total_time.elapsed() / 60 > sd->get_maximum_number_of_minutes()) {
       sd->set_interrupted(true);
       std::cout << "Terminating..." << std::endl;
       return false;
     }
-    number_of_frames-=cur_nframes;
+    number_of_frames -= cur_nframes;
   } while (number_of_frames > 0 && !first_only);
   return true;
 }
 }
-
 
 /********************* public functions **********************/
 
@@ -244,98 +236,92 @@ bool run_it(SimulationData *sd,
 // program command line parameters
 IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
-IMP_OMP_PRAGMA(critical)
+  IMP_OMP_PRAGMA(critical)
   std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
   IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
-  write_output_based_on_flags( IMP::base::get_random_seed() );
-  sd= new IMP::npctransport::SimulationData(output,
-                                            IMP::base::run_quick_test);
-    if (!conformations.empty()) {
-      sd->set_rmf_file_name(conformations);
-    }
-    if(!init_rmffile.empty()) {
-      sd->initialize_positions_from_rmf(RMF::open_rmf_file_read_only(init_rmffile),
-                                        -1);
-IMP_OMP_PRAGMA(critical)
-      std::cout << "Initialize coordinates from last frame of an existing RMF file "
-                << init_rmffile << std::endl;
-    }
-    return sd.release();
+  write_output_based_on_flags(IMP::base::get_random_seed());
+  sd = new IMP::npctransport::SimulationData(output, IMP::base::run_quick_test);
+  if (!conformations.empty()) {
+    sd->set_rmf_file_name(conformations);
+  }
+  if (!init_rmffile.empty()) {
+    sd->initialize_positions_from_rmf(
+        RMF::open_rmf_file_read_only(init_rmffile), -1);
+    IMP_OMP_PRAGMA(critical)
+    std::cout
+        << "Initialize coordinates from last frame of an existing RMF file "
+        << init_rmffile << std::endl;
+  }
+  return sd.release();
 }
 
 //  Run simulation using preconstructed SimulationData object sd,
 //  with ad-hoc init restratins init_restraints
-void do_main_loop(SimulationData *sd,
-                  const RestraintsTemp &init_restraints)
-{
+void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   using namespace IMP;
-  const int max_frames_per_chunk=50000;
+  const int max_frames_per_chunk = 50000;
   /** initial optimization and equilibration needed unless starting
       from another output file or rmf file */
-  bool is_initial_optimization =
-      restart.empty() && init_rmffile.empty();
+  bool is_initial_optimization = restart.empty() && init_rmffile.empty();
   bool is_BD_equilibration = is_initial_optimization;
   bool is_BD_full_run = !initialize_only;
 
-  base::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos
-    = sd->get_rmf_sos_writer();
+  base::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos =
+      sd->get_rmf_sos_writer();
   RMF::FileHandle final_rmf_fh;
-  if(!final_conformations.empty()){
-    final_rmf_fh=RMF::create_rmf_file(final_conformations);
+  if (!final_conformations.empty()) {
+    final_rmf_fh = RMF::create_rmf_file(final_conformations);
     sd->link_rmf_file_handle(final_rmf_fh);
   }
   boost::timer total_time;
-  for (unsigned int i=0; i< sd->get_number_of_trials(); ++i) {
+  for (unsigned int i = 0; i < sd->get_number_of_trials(); ++i) {
     IMP::base::CreateLogContext clc("iteration");
     boost::timer timer;
-    //IMP::set_log_level(SILENT);
+    // IMP::set_log_level(SILENT);
     std::cout << "Simulation trial " << i << " out of "
               << sd->get_number_of_trials() << std::endl;
     if (is_initial_optimization) {
-      std::cout<< "Doing initial coordinates optimization..." << std::endl;
+      std::cout << "Doing initial coordinates optimization..." << std::endl;
       initialize_positions(sd, init_restraints, verbose);
-      sd->get_bd()->set_current_time( 0.0 );
+      sd->get_bd()->set_current_time(0.0);
     }
-    print_score_and_positions( sd, verbose, "Score right before BD = " );
+    print_score_and_positions(sd, verbose, "Score right before BD = ");
     if (conformations_rmf_sos) {
       conformations_rmf_sos->update_always("Right before BD");
     }
     /*IMP::benchmark::Profiler p;
       if(i == 0)
       p.set("profiling.pprof");*/
-    //sd->get_bd()->set_log_level(IMP::PROGRESS);
-    unsigned int nframes_run = (unsigned int)
-      ( sd->get_number_of_frames() * sd->get_statistics_fraction() );
-    unsigned int nframes_equilibrate =
-      sd->get_number_of_frames() - nframes_run;
-    if(is_BD_equilibration){
-      std::cout << "Equilibrating for " << nframes_equilibrate
-                << " frames..." << std::endl;
-      bool ok = run_it
-        (sd, nframes_equilibrate, timer, total_time,
-         true /* silent stats */, max_frames_per_chunk);
-      if(! ok || first_only)
-        return;
-      //if(nframes_equilibrate > 0) {
+    // sd->get_bd()->set_log_level(IMP::PROGRESS);
+    unsigned int nframes_run = (unsigned int)(sd->get_number_of_frames() *
+                                              sd->get_statistics_fraction());
+    unsigned int nframes_equilibrate = sd->get_number_of_frames() - nframes_run;
+    if (is_BD_equilibration) {
+      std::cout << "Equilibrating for " << nframes_equilibrate << " frames..."
+                << std::endl;
+      bool ok = run_it(sd, nframes_equilibrate, timer, total_time,
+                       true /* silent stats */, max_frames_per_chunk);
+      if (!ok || first_only) return;
+      // if(nframes_equilibrate > 0) {
       // if equilibrated, ignore equilibration stats
       // TODO: removed for now since this may be incosistent with
       //       consecutive runs
-      //sd->reset_statistics_optimizer_states();
+      // sd->reset_statistics_optimizer_states();
       // }
-      sd->get_bd()->set_current_time( 0.0 );
+      sd->get_bd()->set_current_time(0.0);
       std::cout << "Equilibration finished succesfully" << std::endl;
     }
-    if(is_BD_full_run) {
+    if (is_BD_full_run) {
       timer.restart();
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;
       if (conformations_rmf_sos) {
-        conformations_rmf_sos->update_always
-          ("Before running (post equilibration)");
+        conformations_rmf_sos->update_always(
+            "Before running (post equilibration)");
       }
       // now run the rest of the sim
       bool ok = run_it(sd, nframes_run, timer, total_time,
                        false /* silent stats */, max_frames_per_chunk);
-      if (! ok){
+      if (!ok) {
         return;
       }
       std::cout << "Run trial #" << i << " finished succesfully" << std::endl;
@@ -343,15 +329,14 @@ void do_main_loop(SimulationData *sd,
     if (conformations_rmf_sos) {
       conformations_rmf_sos->update_always("Final frame");
     }
-    if( !final_conformations.empty() ) {
-      std::cout << "Printing last frame to "
-                << final_conformations << std::endl;
-      IMP::rmf::save_frame
-        ( final_rmf_fh, final_rmf_fh.get_number_of_frames() );
+    if (!final_conformations.empty()) {
+      std::cout << "Printing last frame to " << final_conformations
+                << std::endl;
+      IMP::rmf::save_frame(final_rmf_fh, final_rmf_fh.get_number_of_frames());
     }
   }
   std::cout << "Entire run finished" << std::endl;
-  print_score_and_positions( sd, verbose, "Final score = " );
+  print_score_and_positions(sd, verbose, "Final score = ");
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

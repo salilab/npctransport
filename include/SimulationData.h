@@ -35,8 +35,8 @@
 #include <string>
 
 #ifdef SWIG
-namespace boost{
-  struct timer{};
+namespace boost {
+struct timer {};
 }
 #endif
 #ifndef SWIG
@@ -49,27 +49,26 @@ class Assignment_FloaterAssignment;
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-
-class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
+class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
  private:
 #ifndef SWIG
   template <class T>
-    struct Parameter
-    {
-      T t_;
-      bool init_;
-    public:
-    Parameter(): init_(false){}
-      operator T() const {
-        IMP_USAGE_CHECK(init_, "Not initialized");
-        return t_;
-      }
-      void operator=(T t) {
-        t_=t;
-        init_=true;
-      }
-        bool is_init() { return init_; }
-    };
+  struct Parameter {
+    T t_;
+    bool init_;
+
+   public:
+    Parameter() : init_(false) {}
+    operator T() const {
+      IMP_USAGE_CHECK(init_, "Not initialized");
+      return t_;
+    }
+    void operator=(T t) {
+      t_ = t;
+      init_ = true;
+    }
+    bool is_init() { return init_; }
+  };
   Parameter<double> interaction_k_;
   Parameter<double> interaction_range_;
   Parameter<double> backbone_k_;
@@ -137,18 +136,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   std::string rmf_file_name_;
 
   // statistics about all FG nups individual particles, for each FG type
-  base::Vector<base::Vector<BodyStatisticsOptimizerStates> >
-    fgs_stats_;
+  base::Vector<base::Vector<BodyStatisticsOptimizerStates> > fgs_stats_;
 
   // statistics about all Kaps and non-specific binders ("floats"),
   // for each floats type
-  base::Vector<BodyStatisticsOptimizerStates>
-    float_stats_;
+  base::Vector<BodyStatisticsOptimizerStates> float_stats_;
 
   // transport statistics about all Kaps and non-specific binders ("floats"),
   // for each floats type
   base::Vector<ParticleTransportStatisticsOptimizerStates>
-    float_transport_stats_;
+      float_transport_stats_;
 
   // statistics about entire FG chains, for each FG type
   base::Vector<ChainStatisticsOptimizerStates> chain_stats_;
@@ -159,27 +156,26 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   // true if statistics were recently reset, so that update_statistics
   // should restart averaging from 0 frames
   mutable bool is_stats_reset_;
+
  private:
 
-  boost::tuple<double,double,double,double>
-      get_interactions_and_interacting(const ParticlesTemp &kaps,
-                                       const base::Vector<ParticlesTemps> &fgs)
-    const;
+  boost::tuple<double, double, double, double> get_interactions_and_interacting(
+      const ParticlesTemp &kaps, const base::Vector<ParticlesTemps> &fgs) const;
 
   /**
      Adds the FG Nup chains to the model hierarchy,
      based on the settings in data
    */
-  void create_fgs(const  ::npctransport_proto::Assignment_FGAssignment&data,
+  void create_fgs(const ::npctransport_proto::Assignment_FGAssignment &data,
                   core::ParticleType type);
 
   /**
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
      based on the settings in data
    */
-  void create_floaters
-    (const ::npctransport_proto::Assignment_FloaterAssignment&data,
-     core::ParticleType type, display::Color color);
+  void create_floaters(
+      const ::npctransport_proto::Assignment_FloaterAssignment &data,
+      core::ParticleType type, display::Color color);
 
   /**
      Creates bounding box restraint based on the box_size_
@@ -204,31 +200,33 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
       @param quick whether to perform a quick simulation with a small number
                    of iterations
   */
-  void initialize(std::string assignments_file,
-                  bool quick);
+  void initialize(std::string assignments_file, bool quick);
 
  public:
   /**
-     @param[out] output_file name of protobuf file that encapsulates the assignment
+     @param[out] output_file name of protobuf file that encapsulates the
+     assignment
      data for initializing the simulation params and the output statistics file.
-     The output file is assumed to already exist at this point and contain the assignment.
-     If it contains an rmf_conformation or conformation field, it will be used to initialize particle positions,
+     The output file is assumed to already exist at this point and contain the
+     assignment.
+     If it contains an rmf_conformation or conformation field, it will be used
+     to initialize particle positions,
      in that priority.
      @param[out] quick if true, perform a very short simulation,
                        typically for calibration or for initial testing
      @param[out] rmf_file_name RMF file to which simulation trajectory
-                               is recorded (if empty, no RMF file is created upon construction)
+                               is recorded (if empty, no RMF file is created
+     upon construction)
                                \see set_rmf_file_name()
    */
-  SimulationData(std::string output_file,
-                 bool quick,
+  SimulationData(std::string output_file, bool quick,
                  std::string rmf_file_name = std::string());
 
   Model *get_m();
 #ifndef SWIG
-  Model *get_m() const  {return m_;}
+  Model *get_m() const { return m_; }
 #endif
-  double get_range() const {return range_;}
+  double get_range() const { return range_; }
   atom::BrownianDynamics *get_bd();
 
   /**
@@ -241,24 +239,23 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      returns a reference to the collection of score functions for FG backbones
      (can be used to e.g. scale them up or down during optimization)
    */
-  LinearWellPairScores get_backbone_scores() const {
-    return backbone_scores_;
-  }
+  LinearWellPairScores get_backbone_scores() const { return backbone_scores_; }
 
   /**
      a close pair container for all diffusers except diffusers that
      appear consecutively within the model (e.g., fg repeats)
   */
-  container::ClosePairContainer* get_cpc();
+  container::ClosePairContainer *get_cpc();
 
   /**
-     Returns the container for restraints over pairs of particles. Different scores
+     Returns the container for restraints over pairs of particles. Different
+     scores
      are used for particles of different (ordered) particle types.
      When called for the first time, returns a new PredicatePairsRestraints
      over all diffusing particles and sets a default linear repulsion restraint
      between all close pairs returned by get_cpc()
   */
-  container::PredicatePairsRestraint* get_predr();
+  container::PredicatePairsRestraint *get_predr();
 
   /** get the number of interactions between two particles */
   int get_number_of_interactions(Particle *a, Particle *b) const;
@@ -267,8 +264,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
       Create n interaction sites spread around the surface of a ball of
       radius r, and associate these sites with all particles of type t0
   */
-  void set_sites(core::ParticleType t0,
-                 unsigned int n, double r);
+  void set_sites(core::ParticleType t0, unsigned int n, double r);
 
   /**
       returns a list of 3D coordinates for the interaction sites associated
@@ -284,9 +280,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   }
 
   /** Set the sites explicitly. */
-  void set_sites(core::ParticleType t0,
-                 const algebra::Vector3Ds &sites) {
-    sites_[t0]=sites;
+  void set_sites(core::ParticleType t0, const algebra::Vector3Ds &sites) {
+    sites_[t0] = sites;
   }
 
   /**
@@ -295,9 +290,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   // TODO: this is not the true value - the true one might depend on the
   //       specific range of each interaction type, so range_ is more
   //       like an upper bound
-  double get_site_radius(core::ParticleType) const {
-    return range_/2;
-  }
+  double get_site_radius(core::ParticleType) const { return range_ / 2; }
 
   // returns true if a bounding box restraint has been defined */
   bool get_has_bounding_box() const { return box_restraint_; }
@@ -305,7 +298,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   /** returns true if a slab restraint has been defined */
   bool get_has_slab() const { return slab_restraint_; }
 
-  double get_statistics_fraction() const {return statistics_fraction_;}
+  double get_statistics_fraction() const { return statistics_fraction_; }
 
   //! Return the maximum number of minutes the simulation can run
   /** Or 0 for no limit. */
@@ -313,7 +306,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
     return maximum_number_of_minutes_;
   }
 
-  // swig doesn't equate the two protobuf types
+// swig doesn't equate the two protobuf types
 #ifndef SWIG
   /**
      add a SitesPairScore restraint that applies to particles of
@@ -329,28 +322,32 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      @param idata the protobuf data about the interaction (particle types,
             interaction coefficients, etc.)
   */
-  void add_interaction
-    ( const ::npctransport_proto::Assignment_InteractionAssignment& idata );
+  void add_interaction(
+      const ::npctransport_proto::Assignment_InteractionAssignment &idata);
 #endif
 
   algebra::BoundingBox3D get_box() const {
-    return algebra::get_cube_d<3>(.5*box_side_);
+    return algebra::get_cube_d<3>(.5 * box_side_);
   }
 
   algebra::Cylinder3D get_cylinder() const;
 
-  double get_backbone_k() const {return backbone_k_;}
+  double get_backbone_k() const { return backbone_k_; }
 
-  double get_interaction_k() const {return interaction_k_;}
+  double get_interaction_k() const { return interaction_k_; }
 
   /**
-   Open the specified RMF file, links it to the hierarchies of this object, and copy
+   Open the specified RMF file, links it to the hierarchies of this object, and
+   copy
    the XYZ coordinates from its last frame into the particles of this object.
 
-   @note this method assumes that the hierarchies that are stored in the RMF file
+   @note this method assumes that the hierarchies that are stored in the RMF
+   file
    was constructed in the same way as the hierarchies within this SimulationData
-   object. The only major difference between the two is assumed to be the coordinates of
-   the various particles. Otherwise, results might be unexpected, and it is not guaranteed
+   object. The only major difference between the two is assumed to be the
+   coordinates of
+   the various particles. Otherwise, results might be unexpected, and it is not
+   guaranteed
    that a mismatch would be detected at runtime.
    \see IMP::rmf::link_hierarchies()
    \see IMP::rmf::load_frame()
@@ -358,9 +355,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
    The frame number is the frame in the file to use, if, eg, there are several
    initial frames to use. If it is -1, the last frame is used.
 
-   @exception RMF::IOException if couldn't open RMF file, or unsupported file format
+   @exception RMF::IOException if couldn't open RMF file, or unsupported file
+   format
   */
-  void initialize_positions_from_rmf(RMF::FileConstHandle fh, int frame_number=-1);
+  void initialize_positions_from_rmf(RMF::FileConstHandle fh,
+                                     int frame_number = -1);
 
   /** Links a handle to an open rmf file with the
       hierarchy and constraints of this simulation data,
@@ -395,9 +394,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
 
   void reset_statistics_optimizer_states();
 
-  void add_chain_restraint(Restraint *r) {
-    chain_restraints_.push_back(r);
-  }
+  void add_chain_restraint(Restraint *r) { chain_restraints_.push_back(r); }
 
   /**
      Write the geometry to the file path 'out'
@@ -413,8 +410,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
   ParticlesTemp get_particles(core::ParticleType type) const {
     base::map<core::ParticleType, ParticlesTemp>::const_iterator iter;
     iter = particles_.find(type);
-    if(iter != particles_.end())
-      return iter->second;
+    if (iter != particles_.end()) return iter->second;
     return ParticlesTemp();
   }
 
@@ -431,24 +427,24 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
                     should be advanced. This is used to weight the
                     contribution of average statistics over time.
    */
-  void update_statistics
-    (const boost::timer &timer, unsigned int nf_new = 1) const;
+  void update_statistics(const boost::timer &timer,
+                         unsigned int nf_new = 1) const;
 
-  unsigned int get_number_of_frames() const {return number_of_frames_;}
+  unsigned int get_number_of_frames() const { return number_of_frames_; }
 
-  unsigned int get_number_of_trials() const {return number_of_trials_;}
+  unsigned int get_number_of_trials() const { return number_of_trials_; }
 
-  atom::Hierarchy get_root() const {return atom::Hierarchy(root_);}
+  atom::Hierarchy get_root() const { return atom::Hierarchy(root_); }
 
-  Restraints get_chain_restraints() const {return chain_restraints_;}
+  Restraints get_chain_restraints() const { return chain_restraints_; }
 
-  Restraint* get_box_restraint() const {return box_restraint_;}
+  Restraint *get_box_restraint() const { return box_restraint_; }
 
-  Restraint* get_slab_restraint() const {return slab_restraint_;}
+  Restraint *get_slab_restraint() const { return slab_restraint_; }
 
   double get_slab_thickness() const { return slab_thickness_; }
 
-  display::Geometry* get_static_geometry();
+  display::Geometry *get_static_geometry();
 
   int get_rmf_dump_interval_frames() const { return dump_interval_frames_; }
 
@@ -463,18 +459,14 @@ class IMPNPCTRANSPORTEXPORT SimulationData: public base::Object {
      instead of the existing one.
      TODO: make sure the old writer is indeed closed and flushed
   */
-  void set_rmf_file_name(const std::string& new_name);
+  void set_rmf_file_name(const std::string &new_name);
 
   IMP_OBJECT_METHODS(SimulationData);
 };
 
-inline IMPNPCTRANSPORTEXPORT
-boost::timer create_boost_timer()
-{
+inline IMPNPCTRANSPORTEXPORT boost::timer create_boost_timer() {
   return boost::timer();
 }
-
-
 
 inline WeakObjectKey get_simulation_data_key() {
   static WeakObjectKey simdata("simulation data");
@@ -483,4 +475,4 @@ inline WeakObjectKey get_simulation_data_key() {
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_SIMULATION_DATA_H */
+#endif /* IMPNPCTRANSPORT_SIMULATION_DATA_H */

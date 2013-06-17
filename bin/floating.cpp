@@ -11,8 +11,7 @@
 
 int main(int argc, char *argv[]) {
   using namespace IMP::npctransport;
-  IMP::base::Pointer<SimulationData> sd
-    = startup(argc, argv);
+  IMP::base::Pointer<SimulationData> sd = startup(argc, argv);
   do_main_loop(sd, IMP::RestraintsTemp());
   return 0;
 }

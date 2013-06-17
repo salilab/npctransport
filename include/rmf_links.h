@@ -17,18 +17,18 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink:
-  public rmf::HierarchyLoadLink {
+class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
+    : public rmf::HierarchyLoadLink {
   base::WeakPointer<SimulationData> sd_;
   RMF::BallConstFactory bf_;
   // Transporting decorator related keys:
   RMF::IntKey is_last_entry_from_top_key_;
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
-protected:
-  virtual void do_add_link_recursive(Particle *root,
-                                     Particle *o, RMF::NodeConstHandle node)
-      IMP_OVERRIDE;
+
+ protected:
+  virtual void do_add_link_recursive(Particle *root, Particle *o,
+                                     RMF::NodeConstHandle node) IMP_OVERRIDE;
 
   /** load the values of a single particle from nh to o.  In addition
       to calling parent rmf::HierarchLoadLink::do_load_node(), also
@@ -36,14 +36,14 @@ protected:
       information if needed (which is used in
       ParticleTransportStatisticsOptimizerState)
   */
-  void do_load_node(RMF::NodeConstHandle nh,
-                    Particle *o);
+  void do_load_node(RMF::NodeConstHandle nh, Particle *o);
+
  public:
   HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m);
 };
 
-class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
-  public rmf::HierarchySaveLink {
+class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
+    : public rmf::HierarchySaveLink {
   base::WeakPointer<SimulationData> sd_;
   RMF::BallFactory bf_;
   RMF::ColoredFactory cf_;
@@ -52,14 +52,13 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink:
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
 
-  std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const ;
+  std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const;
   // for testing without sd
-  base::map<core::ParticleType, std::pair<double,
-      algebra::Vector3Ds > > sites_;
-protected:
-  virtual void do_add_recursive
-              (Particle *root, Particle *p,
-               RMF::NodeHandle cur) IMP_OVERRIDE;
+  base::map<core::ParticleType, std::pair<double, algebra::Vector3Ds> > sites_;
+
+ protected:
+  virtual void do_add_recursive(Particle *root, Particle *p,
+                                RMF::NodeHandle cur) IMP_OVERRIDE;
 
   /** save the values of a single particle from o to n.  In addition
       to calling parent rmf::HierarchSaveLink::do_save_node(), also
@@ -67,23 +66,19 @@ protected:
       information if exists (which is being used in
       ParticleTransportStatisticsOptimizerState)
   */
-  virtual void do_save_node(Particle *p,
-                            RMF::NodeHandle n);
+  virtual void do_save_node(Particle *p, RMF::NodeHandle n);
+
  public:
   HierarchyWithSitesSaveLink(RMF::FileHandle fh);
   // for testing
-  void add_sites(core::ParticleType t,
-                 double range,
-                 algebra::Vector3Ds sites) {
-    sites_[t]=std::make_pair(range, sites);
+  void add_sites(core::ParticleType t, double range, algebra::Vector3Ds sites) {
+    sites_[t] = std::make_pair(range, sites);
   }
 };
 
 // for testing
-IMPNPCTRANSPORTEXPORT void add_sites(RMF::FileHandle fh,
-                                     core::ParticleType t,
-                                     double radius,
-                                     algebra::Vector3Ds sites);
+IMPNPCTRANSPORTEXPORT void add_sites(RMF::FileHandle fh, core::ParticleType t,
+                                     double radius, algebra::Vector3Ds sites);
 
 // note that the corresponding define macro in the .cpp file implicitly
 // uses the HierarchyWithSitesLoadLink and HierarchyWithSitesSaveLink
@@ -109,4 +104,4 @@ IMP_DECLARE_LINKERS(HierarchyWithSites,
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_RMF_LINKS_H */
+#endif /* IMPNPCTRANSPORT_RMF_LINKS_H */

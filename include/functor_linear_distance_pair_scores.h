@@ -17,30 +17,33 @@
 
 #include <boost/array.hpp>
 
-
-
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 #ifndef SWIG
 typedef score_functor::SphereDistance<score_functor::LinearLowerBound>
-LinearSoftSphereScore;
+    LinearSoftSphereScore;
 #endif
 
 /* IMP_FUNCTOR_DISTANCE_PAIR_SCORE(FunctorLinearSoftSpherePairScore, */
 /*                                 LinearSoftSphereScore, */
 /*                                 (double k, */
-/*                                  std::string name="LinearSSPairScore%1%"), (k)); */
+/*                                  std::string name="LinearSSPairScore%1%"),
+ * (k)); */
 class FunctorLinearSoftSpherePairScore
-: public IMP::score_functor::DistancePairScore<LinearSoftSphereScore>
-{
+    : public
+#ifndef SWIG
+      IMP::score_functor::DistancePairScore<LinearSoftSphereScore>
+#else
+      IMP::kernel::PairScore
+#endif
+      {
   typedef IMP::score_functor::DistancePairScore<LinearSoftSphereScore> P;
+
  public:
   FunctorLinearSoftSpherePairScore(double k,
-                                   std::string name="LinearSSPairScore%1%") :
-  P(LinearSoftSphereScore(k), name)
-    {}
+                                   std::string name = "LinearSSPairScore%1%")
+      : P(LinearSoftSphereScore(k), name) {}
 };
-
 
 #ifndef SWIG
 /**
@@ -51,73 +54,69 @@ class FunctorLinearSoftSpherePairScore
    penetrate each other, the score rises linearly with slope k_rep_
    (= repulsion), though it may be negative for small penetration.
 */
-class LinearInteraction: public score_functor::LinearLowerBound {
+class LinearInteraction : public score_functor::LinearLowerBound {
   typedef score_functor::LinearLowerBound P;
-  double attr_range_; // range of attraction between particles
-  double k_attr_;     // attraction coefficient
-public:
-  LinearInteraction(double krep, double attr_range, double kattr):
-    P(krep) {
-    attr_range_=attr_range;
-    k_attr_=kattr;
+  double attr_range_;  // range of attraction between particles
+  double k_attr_;      // attraction coefficient
+ public:
+  LinearInteraction(double krep, double attr_range, double kattr) : P(krep) {
+    attr_range_ = attr_range;
+    k_attr_ = kattr;
   }
   // depend on get_is_trivially_zero
   template <unsigned int D>
-  double get_score(Model *m, const base::Array<D, ParticleIndex>&pp,
+  double get_score(Model *m, const base::Array<D, ParticleIndex> &pp,
                    double distance) const {
     if (distance < 0) {
-      return P::get_score(m, pp, distance)-k_attr_*attr_range_;
+      return P::get_score(m, pp, distance) - k_attr_ * attr_range_;
     } else {
-      IMP_USAGE_CHECK(distance <= attr_range_,
-                      "It is trivially 0.");
-      return k_attr_*(distance-attr_range_);
+      IMP_USAGE_CHECK(distance <= attr_range_, "It is trivially 0.");
+      return k_attr_ * (distance - attr_range_);
     }
   }
   template <unsigned int D>
-  DerivativePair get_score_and_derivative(Model *m,
-                                          const  base::Array<D, ParticleIndex>&p,
-                                          double distance) const {
-    if (distance< 0) {
-      DerivativePair dp= P::get_score_and_derivative(m, p, distance);
-      return DerivativePair(dp.first-k_attr_*attr_range_,
-                            dp.second);
-    } else  {
-      return DerivativePair(k_attr_*(distance-attr_range_),
-                            k_attr_);
+  DerivativePair get_score_and_derivative(
+      Model *m, const base::Array<D, ParticleIndex> &p, double distance) const {
+    if (distance < 0) {
+      DerivativePair dp = P::get_score_and_derivative(m, p, distance);
+      return DerivativePair(dp.first - k_attr_ * attr_range_, dp.second);
+    } else {
+      return DerivativePair(k_attr_ * (distance - attr_range_), k_attr_);
     }
   }
   template <unsigned int D>
   double get_maximum_range(Model *,
-                           const base::Array<D, ParticleIndex>& ) const {
+                           const base::Array<D, ParticleIndex> &) const {
     return attr_range_;
   }
   template <unsigned int D>
-  bool get_is_trivially_zero(Model *, const base::Array<D, ParticleIndex>& ,
+  bool get_is_trivially_zero(Model *, const base::Array<D, ParticleIndex> &,
                              double squared_distance) const {
     return squared_distance > algebra::get_squared(attr_range_);
   }
 };
 #endif
 
-typedef score_functor::SphereDistance<LinearInteraction>
-LinearInteractionScore;
+typedef score_functor::SphereDistance<LinearInteraction> LinearInteractionScore;
 
 class FunctorLinearInteractionPairScore
-: public IMP::score_functor::DistancePairScore<LinearInteractionScore>
-{
+    : public
+#ifndef SWIG
+      IMP::score_functor::DistancePairScore<LinearInteractionScore>
+#else
+      IMP::kernel::PairScore
+#endif
+      {
   typedef IMP::score_functor::DistancePairScore<LinearInteractionScore> P;
+
  public:
-  FunctorLinearInteractionPairScore
-    (double krep, double attr_range, double kattr,
-     std::string name="LinearSSPairScore%1%")
-    : P( LinearInteractionScore
-         ( LinearInteraction( krep, attr_range, kattr ) ),
-         name )
-    {}
+  FunctorLinearInteractionPairScore(double krep, double attr_range,
+                                    double kattr,
+                                    std::string name = "LinearSSPairScore%1%")
+      : P(LinearInteractionScore(LinearInteraction(krep, attr_range, kattr)),
+          name) {}
 };
-
-
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_FUNCTOR_LINEAR_DISTANCE_PAIR_SCORES_H */
+#endif /* IMPNPCTRANSPORT_FUNCTOR_LINEAR_DISTANCE_PAIR_SCORES_H */

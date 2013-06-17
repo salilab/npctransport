@@ -21,27 +21,24 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 /** Track the rotational correlation time of a rigid body particle*/
 /** The correlation with at most the last 100 updates is tracked*/
-class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState:
-  public core::PeriodicOptimizerState {
+class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
+    : public core::PeriodicOptimizerState {
   Particle *p_;
   std::deque<algebra::Transformation3D> positions_;
-  Particle *get_particle() const {return p_;}
-  void add_orientation(algebra::Rotation3D rot) {
-    positions_.push_back(rot);
-  }
+  Particle *get_particle() const { return p_; }
+  void add_orientation(algebra::Rotation3D rot) { positions_.push_back(rot); }
   double get_dt() const;
+
  public:
   BodyStatisticsOptimizerState(Particle *p);
-  double get_correlation_time()const;
+  double get_correlation_time() const;
   double get_diffusion_coefficient() const;
   void reset();
   virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
   IMP_OBJECT_METHODS(BodyStatisticsOptimizerState);
 };
-IMP_OBJECTS(BodyStatisticsOptimizerState,
-            BodyStatisticsOptimizerStates);
-
+IMP_OBJECTS(BodyStatisticsOptimizerState, BodyStatisticsOptimizerStates);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_BODY_STATISTICS_OPTIMIZER_STATE_H */
+#endif /* IMPNPCTRANSPORT_BODY_STATISTICS_OPTIMIZER_STATE_H */

@@ -17,21 +17,18 @@ using namespace IMP::core;
 using namespace IMP::container;
 
 namespace {
-const double radius=2;
+const double radius = 2;
 #if IMP_BUILD < IMP_FAST
-int number_of_particles=5;
+int number_of_particles = 5;
 #else
-int number_of_particles=40;
+int number_of_particles = 40;
 #endif
 
-
-ParticlesTemp create_particles(Model *m,
-                               const BoundingBox3D &bb,
-                               int n) {
+ParticlesTemp create_particles(Model *m, const BoundingBox3D &bb, int n) {
   ParticlesTemp ret;
-  for ( int i=0; i< n; ++i) {
+  for (int i = 0; i < n; ++i) {
     IMP_NEW(Particle, p, (m));
-    XYZR d= XYZR::setup_particle(p);
+    XYZR d = XYZR::setup_particle(p);
     d.set_radius(radius);
     d.set_coordinates(get_random_vector_in(bb));
     ret.push_back(p);
@@ -41,30 +38,30 @@ ParticlesTemp create_particles(Model *m,
 }
 
 template <class Score>
-void test_one(std::string name, Score *score,
-              AllBipartitePairContainer *abpc) {
-  base::Pointer<Restraint> r= create_restraint(score, abpc);
-  double scores=0;
-  double time=0;
-  base::Pointer<ScoringFunction> sf=r->create_scoring_function();
+void test_one(std::string name, Score *score, AllBipartitePairContainer *abpc) {
+  base::Pointer<Restraint> r = create_restraint(score, abpc);
+  double scores = 0;
+  double time = 0;
+  base::Pointer<ScoringFunction> sf = r->create_scoring_function();
   sf->evaluate(true);
-  int n=0;
+  int n = 0;
   IMP_TIME({
-      scores+=sf->evaluate(true);
-      ++n;
-    }, time);
-  report("linear interaction", name, time, scores/n);
+    scores += sf->evaluate(true);
+    ++n;
+  },
+           time);
+  report("linear interaction", name, time, scores / n);
 }
 }
 
-int main(int argc, char**argv) {
+int main(int argc, char **argv) {
   IMP::base::setup_from_argv(argc, argv, "benchmark interaction scores");
-  BoundingBox3D bb= get_cube_d<3>(10);
+  BoundingBox3D bb = get_cube_d<3>(10);
   IMP_NEW(Model, m, ());
-  ParticlesTemp psa= create_particles(m, bb, number_of_particles);
-  ParticlesTemp psb= create_particles(m, bb, number_of_particles);
-  IMP_NEW(AllBipartitePairContainer, abpc,(psa, psb));
-  test_one("functor", new FunctorLinearInteractionPairScore(1,2,.5), abpc);
-  test_one("custom", new LinearInteractionPairScore(1,2,.5), abpc);
+  ParticlesTemp psa = create_particles(m, bb, number_of_particles);
+  ParticlesTemp psb = create_particles(m, bb, number_of_particles);
+  IMP_NEW(AllBipartitePairContainer, abpc, (psa, psb));
+  test_one("functor", new FunctorLinearInteractionPairScore(1, 2, .5), abpc);
+  test_one("custom", new LinearInteractionPairScore(1, 2, .5), abpc);
   return IMP::benchmark::get_return_value();
 }

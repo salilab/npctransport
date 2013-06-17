@@ -31,11 +31,10 @@ IMPNPCTRANSPORTEXPORT
                 every frame to RMF file)
  */
 void initialize_positions(SimulationData *sd,
-                          const RestraintsTemp &extra_restraints
-                          = RestraintsTemp(),
-                          bool debug=false);
-
+                          const RestraintsTemp &extra_restraints =
+                              RestraintsTemp(),
+                          bool debug = false);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_INITIALIZE_POSITIONS_H */
+#endif /* IMPNPCTRANSPORT_INITIALIZE_POSITIONS_H */

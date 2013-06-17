@@ -16,10 +16,8 @@
  * limitations under the License.
  */
 
-
 #ifndef INCLUDE_ACRODATAFILEDATA_H_2861103865__H_
 #define INCLUDE_ACRODATAFILEDATA_H_2861103865__H_
-
 
 #include "boost/any.hpp"
 #include "avro/Specific.hh"
@@ -28,22 +26,21 @@
 
 namespace IMP_npctransport {
 struct wrapper {
-    std::string key;
-    std::vector<uint8_t> value;
+  std::string key;
+  std::vector<uint8_t> value;
 };
-
 }
 namespace avro {
-template<> struct codec_traits<IMP_npctransport::wrapper> {
-    static void encode(Encoder& e, const IMP_npctransport::wrapper& v) {
-        avro::encode(e, v.key);
-        avro::encode(e, v.value);
-    }
-    static void decode(Decoder& d, IMP_npctransport::wrapper& v) {
-        avro::decode(d, v.key);
-        avro::decode(d, v.value);
-    }
+template <>
+struct codec_traits<IMP_npctransport::wrapper> {
+  static void encode(Encoder& e, const IMP_npctransport::wrapper& v) {
+    avro::encode(e, v.key);
+    avro::encode(e, v.value);
+  }
+  static void decode(Decoder& d, IMP_npctransport::wrapper& v) {
+    avro::decode(d, v.key);
+    avro::decode(d, v.value);
+  }
 };
-
 }
 #endif

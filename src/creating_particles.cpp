@@ -17,23 +17,22 @@
 //#include <IMP/example/creating_restraints.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-Particle* create_particle(SimulationData *sd, double radius,
-                          double angular_D_factor,
-                          double D_factor, display::Color c,
-                          core::ParticleType type,
+Particle *create_particle(SimulationData *sd, double radius,
+                          double angular_D_factor, double D_factor,
+                          display::Color c, core::ParticleType type,
                           std::string name) {
-  core::XYZR pc= core::XYZR::setup_particle(new Particle(sd->get_m()));
+  core::XYZR pc = core::XYZR::setup_particle(new Particle(sd->get_m()));
   pc->set_name(name);
   pc.set_radius(radius);
   pc.set_coordinates(algebra::get_zero_vector_d<3>());
   display::Colored::setup_particle(pc, c);
   core::Typed::setup_particle(pc, type);
-  core::RigidBody rb
-      =core::RigidBody::setup_particle(pc, algebra::ReferenceFrame3D());
-  atom::RigidBodyDiffusion diff= atom::RigidBodyDiffusion::setup_particle(rb);
-  double rdo=diff.get_rotational_diffusion_coefficient();
-  diff.set_rotational_diffusion_coefficient(angular_D_factor*D_factor*rdo);
-  diff.set_d(D_factor*diff.get_d());
+  core::RigidBody rb =
+      core::RigidBody::setup_particle(pc, algebra::ReferenceFrame3D());
+  atom::RigidBodyDiffusion diff = atom::RigidBodyDiffusion::setup_particle(rb);
+  double rdo = diff.get_rotational_diffusion_coefficient();
+  diff.set_rotational_diffusion_coefficient(angular_D_factor * D_factor * rdo);
+  diff.set_d(D_factor * diff.get_d());
   // rb.set_coordinates(IMP.algebra.get_random_vector_in(bb));
   rb.set_coordinates_are_optimized(true);
   pc->add_attribute(get_simulation_data_key(), sd);
@@ -52,7 +51,7 @@ namespace {
 
     The restraint is not added to the model.
 */
-inline Restraint* create_chain_restraint(const ParticlesTemp &ps,
+inline Restraint *create_chain_restraint(const ParticlesTemp &ps,
                                          LinearWellPairScore *pps,
                                          std::string name) {
   IMP_USAGE_CHECK(!ps.empty(), "No Particles passed.");
@@ -61,32 +60,28 @@ inline Restraint* create_chain_restraint(const ParticlesTemp &ps,
   // ConsecutivePairContainer
   // this assumption accelerates certain computations
   IMP_NEW(container::ExclusiveConsecutivePairContainer, cpc,
-          (ps, name+" consecutive pairs"));
-  base::Pointer<Restraint> r= container::create_restraint(pps, cpc.get(),
-                                                    "chain restraint %1%");
+          (ps, name + " consecutive pairs"));
+  base::Pointer<Restraint> r =
+      container::create_restraint(pps, cpc.get(), "chain restraint %1%");
   // make sure it is not freed
   return r.release();
 }
 }
 
-Particle*
-create_chain(SimulationData *sd, int n, double radius,
-             double angular_D_factor, double D_factor,
-             LinearWellPairScore *ps,
-             display::Color c,
-             core::ParticleType t, std::string name) {
+Particle *create_chain(SimulationData *sd, int n, double radius,
+                       double angular_D_factor, double D_factor,
+                       LinearWellPairScore *ps, display::Color c,
+                       core::ParticleType t, std::string name) {
   ParticlesTemp ret;
-  for ( int i=0; i< n; ++i) {
-    ret.push_back(create_particle(sd, radius, angular_D_factor,
-                                  D_factor, c, t, name));
+  for (int i = 0; i < n; ++i) {
+    ret.push_back(
+        create_particle(sd, radius, angular_D_factor, D_factor, c, t, name));
   }
-  base::Pointer<Restraint> cr=create_chain_restraint(ret,
-                                               ps,
-                                               name+"chain restraint");
+  base::Pointer<Restraint> cr =
+      create_chain_restraint(ret, ps, name + "chain restraint");
   sd->add_chain_restraint(cr);
-  atom::Hierarchy root
-      = atom::Hierarchy::setup_particle(new Particle(sd->get_m()),
-                                        ret);
+  atom::Hierarchy root =
+      atom::Hierarchy::setup_particle(new Particle(sd->get_m()), ret);
   root->set_name(name);
   return root;
 }

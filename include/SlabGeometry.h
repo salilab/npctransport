@@ -17,23 +17,21 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 //! XXXX
 /** XXXXXX.
  */
-class IMPNPCTRANSPORTEXPORT SlabWireGeometry: public display::Geometry
-{
+class IMPNPCTRANSPORTEXPORT SlabWireGeometry : public display::Geometry {
   double height_, radius_, length_;
-public:
+
+ public:
   SlabWireGeometry(double height, double radius, double length);
   virtual IMP::display::Geometries get_components() const IMP_OVERRIDE;
   IMP_OBJECT_METHODS(SlabWireGeometry);
 };
 
-class IMPNPCTRANSPORTEXPORT SlabSurfaceGeometry:
-  public display::SurfaceMeshGeometry
-{
-public:
+class IMPNPCTRANSPORTEXPORT SlabSurfaceGeometry
+    : public display::SurfaceMeshGeometry {
+ public:
   SlabSurfaceGeometry(double height, double radius, double length);
 };
 
-
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_SLAB_GEOMETRY_H */
+#endif /* IMPNPCTRANSPORT_SLAB_GEOMETRY_H */

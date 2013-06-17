@@ -12,23 +12,23 @@
 #include <iomanip>
 
 int main(int argc, char *argv[]) {
-  if (argc <3) {
+  if (argc < 3) {
     std::cerr << "Usage: " << argv[0] << " avrofile" << std::endl;
     return 1;
   }
-  std::string out = argv[argc-1];
+  std::string out = argv[argc - 1];
 
-  avro::DataFileReader<IMP_npctransport::wrapper>
-      rd(out.c_str(), IMP::npctransport::get_avro_data_file_schema());
-
+  avro::DataFileReader<IMP_npctransport::wrapper> rd(
+      out.c_str(), IMP::npctransport::get_avro_data_file_schema());
 
   IMP_npctransport::wrapper data;
   while (rd.read(data)) {
     std::cout << data.key << " ";
     npctransport_proto::Output pb;
     std::string str(data.value.begin(), data.value.end());
-    IMP_INTERNAL_CHECK(str.size()== data.value.size(),
-                       "Sizes don't match " << str.size() << " vs " << data.value.size());
+    IMP_INTERNAL_CHECK(
+        str.size() == data.value.size(),
+        "Sizes don't match " << str.size() << " vs " << data.value.size());
     pb.ParseFromString(str);
     std::cout << " work unit " << pb.assignment().work_unit() << std::endl;
   }

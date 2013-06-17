@@ -28,13 +28,9 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
    @param type the type of the particle
    @param name particle name
  */
-IMPNPCTRANSPORTEXPORT Particle* create_particle(SimulationData *sd,
-                                                double radius,
-                                                double angular_D_factor,
-                                                double D_factor,
-                                                display::Color c,
-                                                core::ParticleType type,
-                                                std::string name);
+IMPNPCTRANSPORTEXPORT Particle *create_particle(
+    SimulationData *sd, double radius, double angular_D_factor, double D_factor,
+    display::Color c, core::ParticleType type, std::string name);
 
 /**
    Create a chain particle hierarchy, associated with the model of sd
@@ -60,14 +56,11 @@ IMPNPCTRANSPORTEXPORT Particle* create_particle(SimulationData *sd,
    @return chain particle (a particle that is the root of the chain hierarchy)
 
  */
-IMPNPCTRANSPORTEXPORT Particle*
-create_chain(SimulationData *sd, int n, double radius,
-             double angular_D_factor,
-             double D_factor,
-             LinearWellPairScore *ps,
-             display::Color c,
-             core::ParticleType t, std::string name);
+IMPNPCTRANSPORTEXPORT Particle *create_chain(
+    SimulationData *sd, int n, double radius, double angular_D_factor,
+    double D_factor, LinearWellPairScore *ps, display::Color c,
+    core::ParticleType t, std::string name);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_CREATING_PARTICLES_H */
+#endif /* IMPNPCTRANSPORT_CREATING_PARTICLES_H */

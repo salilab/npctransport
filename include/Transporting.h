@@ -1,6 +1,7 @@
 /**
  *  \file IMP/npctransport/Transporting.h
- *  \brief A decorator for a transporting particle, so as to keep track of its directionality.
+ *  \brief A decorator for a transporting particle, so as to keep track of its
+* directionality.
  *
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  *
@@ -19,9 +20,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 /** \ingroup helper
     \ingroup decorators
  */
-class IMPNPCTRANSPORTEXPORT Transporting:
-  public IMP::Decorator
-{
+class IMPNPCTRANSPORTEXPORT Transporting : public IMP::Decorator {
 
  public:
   IMP_DECORATOR(Transporting, IMP::Decorator);
@@ -37,7 +36,8 @@ class IMPNPCTRANSPORTEXPORT Transporting:
       @see get_n_entries_bottom
       @see get_n_entries_top
 
-      @param is_last_entry_from_top has particle last entered from top of barrier
+      @param is_last_entry_from_top has particle last entered from top of
+     barrier
                                     (rather than bottom or unknown)
   */
   static Transporting setup_particle(Particle *p,
@@ -45,19 +45,18 @@ class IMPNPCTRANSPORTEXPORT Transporting:
 
   //! Return true if the particle is an instance of an Transporting
   static bool particle_is_instance(Particle *p) {
-    return
-      p->has_attribute(get_is_last_entry_from_top_key()) &&
-      p->has_attribute(get_last_tracked_z_key()) &&
-      p->has_attribute(get_n_entries_bottom_key()) &&
-      p->has_attribute(get_n_entries_top_key());
+    return p->has_attribute(get_is_last_entry_from_top_key()) &&
+           p->has_attribute(get_last_tracked_z_key()) &&
+           p->has_attribute(get_n_entries_bottom_key()) &&
+           p->has_attribute(get_n_entries_top_key());
   }
 
   //! Return true if the particle is an instance of an Transporting
   static bool particle_is_instance(Model *m, ParticleIndex pi) {
     return m->get_has_attribute(get_is_last_entry_from_top_key(), pi) &&
-      m->get_has_attribute(get_last_tracked_z_key(), pi) &&
-      m->get_has_attribute(get_n_entries_bottom_key(), pi) &&
-      m->get_has_attribute(get_n_entries_top_key(), pi);
+           m->get_has_attribute(get_last_tracked_z_key(), pi) &&
+           m->get_has_attribute(get_n_entries_bottom_key(), pi) &&
+           m->get_has_attribute(get_n_entries_top_key(), pi);
   }
 
   //! sets whether the particle last enetered the transport moiety from its top
@@ -66,7 +65,8 @@ class IMPNPCTRANSPORTEXPORT Transporting:
                               is_last_entry_from_top ? 1 : 0);
   }
 
-  //! returns whether the particle last enetered the transport moiety from its top
+  //! returns whether the particle last enetered the transport moiety from its
+  //top
   bool get_is_last_entry_from_top() const {
     return (get_particle()->get_value(get_is_last_entry_from_top_key()) != 0);
   }
@@ -77,14 +77,13 @@ class IMPNPCTRANSPORTEXPORT Transporting:
   //! set the Z coordinate of the particle, the last
   //! time it was tracked for transport statistics
   void set_last_tracked_z(double last_tracked_z) {
-    get_particle()->set_value(get_last_tracked_z_key(),
-                              last_tracked_z);
+    get_particle()->set_value(get_last_tracked_z_key(), last_tracked_z);
   }
 
   //! returns the Z coordinate of the particle, the last
   //! time it was tracked for transport statistics
   double get_last_tracked_z() const {
-    return get_particle()->get_value( get_last_tracked_z_key() );
+    return get_particle()->get_value(get_last_tracked_z_key());
   }
 
   //! Get the decorator key last_tracked_z value
@@ -99,7 +98,7 @@ class IMPNPCTRANSPORTEXPORT Transporting:
   //! gets the number of times the particle crossed from the bottom
   //! of the barrier into its interior
   int get_n_entries_bottom() const {
-    return get_particle()->get_value( get_n_entries_bottom_key() );
+    return get_particle()->get_value(get_n_entries_bottom_key());
   }
 
   //! Get the decorator key n_entries_bottom value
@@ -114,16 +113,15 @@ class IMPNPCTRANSPORTEXPORT Transporting:
   //! gets the number of times the particle crossed from the top
   //! of the barrier into its interior
   int get_n_entries_top() const {
-    return get_particle()->get_value( get_n_entries_top_key() );
+    return get_particle()->get_value(get_n_entries_top_key());
   }
 
   //! Get the decorator key n_entries_top value
   static IntKey get_n_entries_top_key();
 };
 
-
 IMP_DECORATORS(Transporting, Transportings, IMP::Decorators);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_TRANSPORTING_H */
+#endif /* IMPNPCTRANSPORT_TRANSPORTING_H */

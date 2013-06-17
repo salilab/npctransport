@@ -39,33 +39,31 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/npctransport/internal/boost_main.h>
 #endif
 
-
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 #ifdef IMP_NPC_GOOGLE
-    std::string input = "third_party/npc/npctransport/data/benchmark_initialize.pb";
+  std::string input =
+      "third_party/npc/npctransport/data/benchmark_initialize.pb";
 #else
-    std::string input = IMP::npctransport::get_data_path("benchmark_initialize.pb");
+  std::string input =
+      IMP::npctransport::get_data_path("benchmark_initialize.pb");
 #endif
-    IMP::base::AddStringFlag add_input("input", "Input file", &input);
+  IMP::base::AddStringFlag add_input("input", "Input file", &input);
   // preparation::
   try {
     IMP_NPC_PARSE_OPTIONS(argc, argv);
     std::string output = IMP::base::create_temporary_file_name("output", ".pb");
 
+    int num = IMP::npctransport::assign_ranges(input, output, 100, false,
+                                               IMP::base::get_random_seed());
 
-    int num=IMP::npctransport::assign_ranges
-        (input, output, 100, false, IMP::base::get_random_seed() );
-
-    IMP::base::Pointer<IMP::npctransport::SimulationData> sd
-        = new IMP::npctransport::SimulationData(output, true);
+    IMP::base::Pointer<IMP::npctransport::SimulationData> sd =
+        new IMP::npctransport::SimulationData(output, true);
 
     IMP::npctransport::initialize_positions(sd, IMP::RestraintsTemp(), false);
   }
-  catch (const IMP::base::Exception& e) {
+  catch (const IMP::base::Exception & e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return -1;
   }
   return 0;
- }
+}

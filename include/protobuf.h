@@ -14,10 +14,9 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-class OutputConfiguration; // TODO: is this needed?
+class OutputConfiguration;  // TODO: is this needed?
 
-IMPNPCTRANSPORTEXPORT void
-show_ranges(std::string fname);
+IMPNPCTRANSPORTEXPORT void show_ranges(std::string fname);
 
 /**
    reads the protobuf message in [fname], which may contain submessages with
@@ -33,28 +32,32 @@ show_ranges(std::string fname);
    @param fname input file name
    @param output output filename
    @param work_unit the index of combination of range values to be used. If the
-                    total of possible combinations of all fields with ranges is k,
-                    it is guaranteed that iterating over work_unit between 0..k-1
+                    total of possible combinations of all fields with ranges is
+   k,
+                    it is guaranteed that iterating over work_unit between
+   0..k-1
                     will enumerate over all possible combinations, and that
-                    work_unit and (work_unit % k) will return the same output for
+                    work_unit and (work_unit % k) will return the same output
+   for
                     the same input.
    @param show_steps show the steps that occur
    @param random_seed the random seed used to initialize the IMP random number
                       generator for this simulation
 
-   @throw IMP::base::ValueException if any of the values in the configuration file
-              are in conflict (e.g., simulation time and maximal number of frames)
+   @throw IMP::base::ValueException if any of the values in the configuration
+   file
+              are in conflict (e.g., simulation time and maximal number of
+   frames)
 */
 // Each range field also has .steps and .base field.
-IMPNPCTRANSPORTEXPORT int
-assign_ranges(std::string fname, std::string output, unsigned int work_unit,
-              bool show_steps,
-              boost::uint64_t random_seed // do not use boost::uint64_t cause of SWIG
-              );
+IMPNPCTRANSPORTEXPORT int assign_ranges(
+    std::string fname, std::string output, unsigned int work_unit,
+    bool show_steps,
+    boost::uint64_t random_seed  // do not use boost::uint64_t cause of SWIG
+    );
 
-IMPNPCTRANSPORTEXPORT int
-get_number_of_work_units(std::string configuration_file);
-
+IMPNPCTRANSPORTEXPORT int get_number_of_work_units(
+    std::string configuration_file);
 
 /** returns ::google::protobuf::RepeatedField object
     based on an STL set
@@ -78,4 +81,4 @@ get_number_of_work_units(std::string configuration_file);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_PROTOBUF_H */
+#endif /* IMPNPCTRANSPORT_PROTOBUF_H */

@@ -20,7 +20,7 @@ IMPNPCTRANSPORTEXPORT
 double get_close_pairs_range(double max_range, double max_range_factor);
 
 /** returns an upper bound on the contact range between any two particles in the
-    system */ // TODO: maybe different ranges for different pair types?
+    system */  // TODO: maybe different ranges for different pair types?
 IMPNPCTRANSPORTEXPORT
 double get_close_pairs_range(const ::npctransport_proto::Assignment& config);
 
@@ -46,11 +46,11 @@ double get_close_pairs_range(const ::npctransport_proto::Assignment& config);
 
     @return time step size in femtoseconds required for stable simulation
 */
-IMPNPCTRANSPORTEXPORT // TODO: is max_k also correct for springs?
-double get_time_step(double max_d_factor,
-                     double max_k, double min_radius,
-                     double max_trans_relative_to_radius = 0.1,
-                     double time_step_factor = 1.0);
+IMPNPCTRANSPORTEXPORT  // TODO: is max_k also correct for springs?
+    double
+        get_time_step(double max_d_factor, double max_k, double min_radius,
+                      double max_trans_relative_to_radius = 0.1,
+                      double time_step_factor = 1.0);
 
 /** computes the time step size that is required for a stable simulation,
     where the translation of any particle at any simulation time step is
@@ -66,7 +66,7 @@ double get_time_step(double max_d_factor,
 */
 IMPNPCTRANSPORTEXPORT
 double get_time_step(const ::npctransport_proto::Assignment& config,
-                     double max_trans_relative_to_radius= 0.1);
+                     double max_trans_relative_to_radius = 0.1);
 
 /**
    computes the number of frames needed to acheive simulation time
@@ -79,8 +79,8 @@ double get_time_step(const ::npctransport_proto::Assignment& config,
    @throw ValueException if maximum number of frames specified in
         config is exceeded */
 IMPNPCTRANSPORTEXPORT
-int get_number_of_frames
-(const ::npctransport_proto::Assignment& config, double time_step);
+int get_number_of_frames(const ::npctransport_proto::Assignment& config,
+                         double time_step);
 
 /**
    computes the number of frames for the specified dump_interval,
@@ -90,8 +90,8 @@ int get_number_of_frames
    @param time_step the time step in femtoseconds
 */
 IMPNPCTRANSPORTEXPORT
-int get_dump_interval_in_frames
-(const ::npctransport_proto::Assignment& config, double time_step);
+int get_dump_interval_in_frames(const ::npctransport_proto::Assignment& config,
+                                double time_step);
 
 /**
    computes the number of frames for the specified statistics_interval,
@@ -101,10 +101,9 @@ int get_dump_interval_in_frames
    @param time_step the time step in femtoseconds
 */
 IMPNPCTRANSPORTEXPORT
-int get_statistics_interval_in_frames
-(const ::npctransport_proto::Assignment& config, double time_step);
-
+int get_statistics_interval_in_frames(
+    const ::npctransport_proto::Assignment& config, double time_step);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_AUTOMATIC_PARAMETERS_H */
+#endif /* IMPNPCTRANSPORT_AUTOMATIC_PARAMETERS_H */

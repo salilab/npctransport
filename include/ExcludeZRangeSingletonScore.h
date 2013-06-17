@@ -14,12 +14,12 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-class IMPNPCTRANSPORTEXPORT ExcludeZRangeSingletonScore: public SingletonScore
-{
+class IMPNPCTRANSPORTEXPORT ExcludeZRangeSingletonScore
+    : public SingletonScore {
  private:
   double bottom_;  // bottom z coordinated for exclusion
-  double top_; // top z coordinated for exclusion
-  double k_; // the force constant for repulsion out of the z range
+  double top_;     // top z coordinated for exclusion
+  double k_;       // the force constant for repulsion out of the z range
  public:
   /**
      Exclude particles from the range of z coordinates [bottom_..top_]
@@ -38,12 +38,13 @@ class IMPNPCTRANSPORTEXPORT ExcludeZRangeSingletonScore: public SingletonScore
 
   virtual double evaluate_index(Model *m, ParticleIndex p,
                                 DerivativeAccumulator *da) const IMP_OVERRIDE;
-  virtual ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis)
-                                     const IMP_OVERRIDE;
+  virtual ModelObjectsTemp do_get_inputs(Model *m,
+                                         const ParticleIndexes &pis) const
+      IMP_OVERRIDE;
   IMP_SINGLETON_SCORE_METHODS(ExcludeZRangeSingletonScore);
   IMP_OBJECT_METHODS(ExcludeZRangeSingletonScore);
 };
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif  /* IMPNPCTRANSPORT_EXCLUDE_Z_RANGE_SINGLETON_SCORE_H */
+#endif /* IMPNPCTRANSPORT_EXCLUDE_Z_RANGE_SINGLETON_SCORE_H */
