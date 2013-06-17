@@ -171,9 +171,11 @@ void optimize_balls(const ParticlesTemp &ps,
   // function
   IMP_FUNCTION_LOG;
 
+
   base::SetLogState sls(ll);
   IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.", ValueException);
   IMP_ALWAYS_CHECK(local, "local optimizer unspecified", ValueException);
+  Model *m= ps[0]->get_model();
   //double scale = core::XYZR(ps[0]).get_radius();
 
   IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));

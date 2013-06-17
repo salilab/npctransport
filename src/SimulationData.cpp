@@ -586,14 +586,14 @@ SimulationData::add_interaction
     * interaction_range_factors_.find(type0)->second
     * interaction_range_factors_.find(type1)->second;
 
-  std::cout << "creating interaction "
+  /*std::cout << "creating interaction "
             << idata.type0() << "," << idata.type1()
             << " effective_k = " << interaction_k
             << ", effective_range = " << interaction_range
             << ", nonspecific k = " << nonspecific_k_
             << ", nonspecific range = " << nonspecific_range_
             << ", excluded volume k = " << excluded_volume_k_
-            << std::endl;
+            << std::endl;*/
 
   // create interaction
   container::PredicatePairsRestraint *ppr= get_predr();
