@@ -169,13 +169,14 @@ class TemplateSitesPairScore : public TemplateBaseSitesPairScore {
 };
 
 /**
-   @param range    range for specific attraction
+   @param rangea    range for specific attraction
    @param ka       coefficient for specific attraction
    @param rangena  range for non-specific attraction
    @param kna      coefficient for non-specific attraction
    @param kr       coefficient for repulsion between penetrating particles
    @param sites0
    @param sites1
+   @param value
    @param ppr
 */
 IMPNPCTRANSPORTEXPORT

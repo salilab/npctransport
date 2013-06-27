@@ -13,18 +13,18 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-Transporting Transporting::setup_particle(Particle *p,
-                                          bool is_last_entry_from_top) {
-  IMP_ALWAYS_CHECK(IMP::core::XYZ::particle_is_instance(p),
+void Transporting::do_setup_particle(IMP::Model* m,
+                                             ParticleIndex pi,
+                                             bool is_last_entry_from_top) {
+  IMP_ALWAYS_CHECK(IMP::core::XYZ::get_is_setup(m, pi),
                    "It is expected that a transporting particle would have "
-                   "coordinates, particle " << *p,
+                   "coordinates, particle index " << pi,
                    IMP::base::ValueException);
-  p->add_attribute(get_is_last_entry_from_top_key(), is_last_entry_from_top);
-  double cur_z = IMP::core::XYZ(p).get_coordinates()[2];
-  p->add_attribute(get_last_tracked_z_key(), cur_z);
-  p->add_attribute(get_n_entries_bottom_key(), 0);
-  p->add_attribute(get_n_entries_top_key(), 0);
-  return Transporting(p);
+  double cur_z = IMP::core::XYZ(m,pi).get_coordinates()[2];
+  m->add_attribute(get_last_tracked_z_key(), pi, cur_z);
+  m->add_attribute(get_n_entries_bottom_key(), pi, 0);
+  m->add_attribute(get_n_entries_top_key(), pi, 0);
+  m->add_attribute(get_is_last_entry_from_top_key(), pi, is_last_entry_from_top);
 }
 
 IntKey Transporting::get_is_last_entry_from_top_key() {

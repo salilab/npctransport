@@ -15,7 +15,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 IMPNPCTRANSPORTEXPORT
 
 /**
-   pre-optimize the positions of all diffusing particles in <sd> whose
+   pre-optimize the positions of all diffusing particles in 'sd' whose
    coordinates are optimizable, using only chain restraints, excluded
    volumes and bounding box restraints (but not interaction
    restraints).

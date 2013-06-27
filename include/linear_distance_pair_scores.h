@@ -24,12 +24,15 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
    is returned.
    Also, updates the derivative vectors of the particles in the model m.
 
-   @param m[out]    a model for the particles, in which particle derivatives are
+   @param[out] m    a model for the particles, in which particle derivatives are
                     updated
-   @param pp[in]    a pair of particle indices for fast access through internal
+   @param[in] pp    a pair of particle indices for fast access through internal
                     model methods
-   @param delta[in] a vector that represents the displacement between the
+   @param[in,out] da accumulator for score derivatives to be updated
+   @param[in] delta a vector that represents the displacement between the
                     two particles
+   @param delta_length the cached length of delta, assumed correct, and required
+                       for faster calculation
    @param x0        resting distance (where score = 0)
    @param k         score linear coefficient. Note that the score is attractive
                     for a positive k, and repulsive for a negative k

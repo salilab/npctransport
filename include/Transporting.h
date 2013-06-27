@@ -23,9 +23,9 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 class IMPNPCTRANSPORTEXPORT Transporting : public IMP::Decorator {
 
  public:
-  IMP_DECORATOR(Transporting, IMP::Decorator);
+  IMP_DECORATOR_METHODS(Transporting, Decorator);
 
- public:
+
   /** Decorate a transporting particle, mainly for tracking transport
       statistics (number of transorts, etc.).  It is assumed the
       transport occurs along a z coordinate, and that the crossed barrier
@@ -40,25 +40,38 @@ class IMPNPCTRANSPORTEXPORT Transporting : public IMP::Decorator {
      barrier
                                     (rather than bottom or unknown)
   */
-  static Transporting setup_particle(Particle *p,
-                                     bool is_last_entry_from_top = false);
+  IMP_DECORATOR_SETUP_1(Transporting,  bool, is_last_entry_from_top = false);
+  //  IMP_DECORATOR(Transporting, IMP::Decorator);
+
+ private:
+  /** Decorate a transporting particle, mainly for tracking transport
+      statistics (number of transorts, etc.).  It is assumed the
+      transport occurs along a z coordinate, and that the crossed barrier
+      is bounded from top and bottom.
+      The last tracked z is set to the z coordinate of p, initially,
+      and n entries from bottom and top are set to 0
+      @see get_last_tracked_z
+      @see get_n_entries_bottom
+      @see get_n_entries_top
+
+      @param m the model
+      @param pi the particle index
+      @param is_last_entry_from_top has particle last entered from top of
+                                    barrier (rather than bottom or unknown)
+  */
+  static void do_setup_particle(IMP::Model* m,
+                                ParticleIndex pi,
+                                bool is_last_entry_from_top = false);
 
   //! Return true if the particle is an instance of an Transporting
-  static bool particle_is_instance(Particle *p) {
-    return p->has_attribute(get_is_last_entry_from_top_key()) &&
-           p->has_attribute(get_last_tracked_z_key()) &&
-           p->has_attribute(get_n_entries_bottom_key()) &&
-           p->has_attribute(get_n_entries_top_key());
-  }
-
-  //! Return true if the particle is an instance of an Transporting
-  static bool particle_is_instance(Model *m, ParticleIndex pi) {
+  static bool get_is_setup(Model *m, ParticleIndex pi) {
     return m->get_has_attribute(get_is_last_entry_from_top_key(), pi) &&
            m->get_has_attribute(get_last_tracked_z_key(), pi) &&
            m->get_has_attribute(get_n_entries_bottom_key(), pi) &&
            m->get_has_attribute(get_n_entries_top_key(), pi);
   }
 
+ public:
   //! sets whether the particle last enetered the transport moiety from its top
   void set_is_last_entry_from_top(bool is_last_entry_from_top) {
     get_particle()->set_value(get_is_last_entry_from_top_key(),
@@ -119,6 +132,8 @@ class IMPNPCTRANSPORTEXPORT Transporting : public IMP::Decorator {
   //! Get the decorator key n_entries_top value
   static IntKey get_n_entries_top_key();
 };
+
+
 
 IMP_DECORATORS(Transporting, Transportings, IMP::Decorators);
 

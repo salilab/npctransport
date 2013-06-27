@@ -35,7 +35,7 @@ IMPNPCTRANSPORTEXPORT Particle *create_particle(
 /**
    Create a chain particle hierarchy, associated with the model of sd
 
-   @param sd[out] the simulation data whose model is associated with the
+   @param[out] sd the simulation data whose model is associated with the
                   new chain. A chain restraint is added to the simulation data
                   itself, and the particle is added to the simulation data
                   diffusers list.
@@ -43,15 +43,10 @@ IMPNPCTRANSPORTEXPORT Particle *create_particle(
    @param radius  the radius of each particle
    @param angular_D_factor   angular diffusion factor of chain particles
    @param D_factor diffusion factor of chain particles
-   @param rest_length_factor the spring resting distance between consecutive
-                             particles is [rest_length_factor * 2 * radius]
-   @param spring_constant    the spring constant restraining consecutive chain
-                             particles
+   @param ps       pair score for consecutive chain residues? (TODO: need to verify)
    @param c        color of chain particles
    @param t        the type of the particles in the chain
    @param name     name of the particle at the root of the chain hierarchy
-   @param bonds[out] the list of consecutive bonded particles is added as
-                     a container in bonds
 
    @return chain particle (a particle that is the root of the chain hierarchy)
 
