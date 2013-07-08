@@ -36,6 +36,8 @@ class IMPNPCTRANSPORTEXPORT Transporting : public IMP::Decorator {
       @see get_n_entries_bottom
       @see get_n_entries_top
 
+      @param m the model
+      @param pi particle index
       @param is_last_entry_from_top has particle last entered from top of
      barrier
                                     (rather than bottom or unknown)

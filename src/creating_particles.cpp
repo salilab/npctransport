@@ -32,7 +32,7 @@ Particle *create_particle(SimulationData *sd, double radius,
   atom::RigidBodyDiffusion diff = atom::RigidBodyDiffusion::setup_particle(rb);
   double rdo = diff.get_rotational_diffusion_coefficient();
   diff.set_rotational_diffusion_coefficient(angular_D_factor * D_factor * rdo);
-  diff.set_d(D_factor * diff.get_d());
+  diff.set_diffusion_coefficient(D_factor * diff.get_diffusion_coefficient());
   // rb.set_coordinates(IMP.algebra.get_random_vector_in(bb));
   rb.set_coordinates_are_optimized(true);
   pc->add_attribute(get_simulation_data_key(), sd);

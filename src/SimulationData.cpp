@@ -29,6 +29,7 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/atom/Diffusion.h>
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/atom/Selection.h>
+#include <IMP/base/log.h>
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/core/DistancePairScore.h>
 #include <IMP/core/SphereDistancePairScore.h>
@@ -177,7 +178,7 @@ void SimulationData::initialize(std::string output_file, bool quick) {
     initialize_positions_from_rmf(fh, 0);
     // load from output file
   } else if (data.has_conformation()) {
-    std::cout << "Loading from output file " << std::endl;
+    std::cout << "Loading from output file " << std::endl ;
     load_conformation(data.conformation(), get_diffusers(), sites_);
   }
   if (data.has_statistics()) {
@@ -206,7 +207,7 @@ void SimulationData::create_floaters(
     // create a sub hierarchy with this type of floaters:
     atom::Hierarchy cur_root =
         atom::Hierarchy::setup_particle(new Particle(get_m()));
-    std::cout << "   type " << type.get_string() << std::endl;
+    IMP_LOG(WARNING,  "   type " << type.get_string() << std::endl);
     cur_root->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(cur_root);
     // populate hierarchy with particles:
@@ -233,7 +234,7 @@ void SimulationData::create_floaters(
       // add interaction sites to particles of this type:
       if (data.interactions().value() > 0) {
         int nsites = data.interactions().value();
-        std::cout << nsites << " sites added " << std::endl;
+        IMP_LOG(WARNING, nsites << " sites added " << std::endl);
         set_sites(type, nsites, data.radius().value());
       }
     }
@@ -766,7 +767,7 @@ void save_conformation(
 
 // @param nf_new number of new frames accounted for in this statistics update
 void SimulationData::update_statistics(const boost::timer &timer,
-                                       unsigned int nf_new) const {
+                                       unsigned int nf_new) {
   IMP_OBJECT_LOG;
   ::npctransport_proto::Output output;
 
@@ -957,8 +958,11 @@ void SimulationData::update_statistics(const boost::timer &timer,
     interactions_stats_[i]->reset();
   }
 
-  UPDATE_AVG(nf, nf_new, stats, energy_per_particle,  // TODO: reset?
-             get_m()->evaluate(false) / all.size());
+  {
+    double total_energy  = get_bd()->get_scoring_function()->evaluate(false);
+    UPDATE_AVG(nf, nf_new, stats, energy_per_particle,  // TODO: reset?
+               total_energy / all.size());
+  }
 
   // Todo: define better what we want of timer
   // UPDATE_AVG(nf, nf_new, stats, seconds_per_iteration, timer.elapsed());

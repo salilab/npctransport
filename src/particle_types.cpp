@@ -38,7 +38,7 @@ atom::Hierarchies get_fg_chains(atom::Hierarchy root) {
   // is contained in [type_of_fg]
   if (root.get_number_of_children() > 0) {
     atom::Hierarchy c = root.get_child(0);
-    if (core::Typed::particle_is_instance(c)) {
+    if (core::Typed::get_is_setup(c)) {
       core::ParticleType t = core::Typed(c).get_type();
       if (std::find(type_of_fg.begin(), type_of_fg.end(), t) !=
           type_of_fg.end()) {

@@ -24,6 +24,7 @@
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/core/SphereDistancePairScore.h>
 #include <IMP/base/log_macros.h>
+#include <IMP/base/log.h>
 #include <IMP/container/ListSingletonContainer.h>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -194,8 +195,8 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     for (unsigned int j = 0; j < dps.size(); ++j) {
       lengths.push_back(new SetLength(dps[j], length_factor));
     }
-    std::cout << "Optimizing with radii at " << factor << " of full"
-              << " and length factor " << length_factor << std::endl;
+    IMP_LOG(PROGRESS,  "Optimizing with radii at " << factor << " of full"
+            << " and length factor " << length_factor << std::endl);
     isf->set_moved_particles(isf->get_movable_particles());
     double desired_accept_rate =
         0.2;  // acceptance rate for which to tune move size (per mover)
@@ -241,8 +242,8 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
             // rescale_move_size( mc, move_rescale);
             // kt /= move_rescale;
             double e_bd = local->optimize(n_bd_inner);
-            std::cout << "Energy after bd is " << e_bd << " at " << i << ", "
-                      << j << "," << k << std::endl;
+            IMP_LOG(PROGRESS, "Energy after bd is " << e_bd << " at " << i << ", "
+                    << j << "," << k << std::endl);
             //            mc->get_mover(0)->reset_statistics();
             if (--timer == 0) {/*exit(0);*/
             }
@@ -268,7 +269,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     IMP_OMP_PRAGMA(parallel num_threads(3)) {
       IMP_OMP_PRAGMA(single) {
         double e = local->optimize(1000);
-        std::cout << "Energy after bd is " << e << std::endl;
+        IMP_LOG(PROGRESS, "Energy after bd is " << e << std::endl);
       }
     }
   }
@@ -284,17 +285,17 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
   using atom::Hierarchies;
 
   static int call_num = 0;
-  std::cout << "INITIALIZE POSITIONS print_fgs() - Call # " << ++call_num
-            << std::endl;
+  IMP_LOG(PROGRESS, "INITIALIZE POSITIONS print_fgs() - Call # " << ++call_num
+          << std::endl);
 
   Hierarchy root = sd.get_root();
   Hierarchies chains = IMP::npctransport::get_fg_chains(root);
   for (unsigned int k = 0; k < chains.size(); k++) {
     Hierarchy cur_chain(chains[k]);
     core::XYZ d(cur_chain.get_child(0));
-    std::cout << "d # " << k << " = " << d << std::endl;
-    std::cout << "is optimizable = " << d.get_coordinates_are_optimized()
-              << std::endl;
+    IMP_LOG(PROGRESS, "d # " << k << " = " << d << std::endl);
+    IMP_LOG(PROGRESS, "is optimizable = " << d.get_coordinates_are_optimized()
+            << std::endl);
   }
 }
 }
@@ -352,7 +353,7 @@ void initialize_positions(SimulationData *sd,
   print_fgs(*sd);
   IMP_NEW(core::RestraintsScoringFunction, rsf,
           (rss + RestraintsTemp(1, sd->get_predr()), "all restaints"));
-  std::cout << "Initial energy is " << rsf->evaluate(false) << std::endl;
+  IMP_LOG(WARNING, "Initial energy is " << rsf->evaluate(false) << std::endl);
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->set_period(dump_interval);  // restore output rate
     sd->get_rmf_sos_writer()->update_always("done initializing");

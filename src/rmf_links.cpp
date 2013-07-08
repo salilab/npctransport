@@ -12,6 +12,7 @@
 #include <IMP/core/XYZ.h>
 #include <IMP/base/check_macros.h>
 #include <IMP/base/exception.h>
+#include <IMP/base/log.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh,
@@ -28,11 +29,11 @@ void HierarchyWithSitesLoadLink::do_load_node(RMF::NodeConstHandle nh,
   rmf::HierarchyLoadLink::do_load_node(nh, o);
   // load particle transport directionality if needed
   if (nh.get_has_value(is_last_entry_from_top_key_)) {
-    IMP_ALWAYS_CHECK(Transporting::particle_is_instance(o),
+    IMP_ALWAYS_CHECK(Transporting::get_is_setup(o),
                      "is_last_entry_from_top is relevant only for particles"
                      " decorated with Transporting class - particle " << *o,
                      IMP::base::ValueException);
-    IMP_ALWAYS_CHECK(IMP::core::XYZ::particle_is_instance(o) &&
+    IMP_ALWAYS_CHECK(IMP::core::XYZ::get_is_setup(o) &&
                          nh.get_has_value(n_entries_bottom_key_) &&
                          nh.get_has_value(n_entries_top_key_),
                      "It is expected that a transporting particle would have "
@@ -46,11 +47,11 @@ void HierarchyWithSitesLoadLink::do_load_node(RMF::NodeConstHandle nh,
     ot.set_last_tracked_z(cur_z);
     ot.set_n_entries_bottom(nh.get_value(n_entries_bottom_key_));
     ot.set_n_entries_top(nh.get_value(n_entries_top_key_));
-    std::cout << "Setting is_last_entry_from_top value to "
-              << is_last_entry_from_top << "; last_tracked_z to " << cur_z
-              << "; n_entries_bottom " << nh.get_value(n_entries_bottom_key_)
-              << "; n_entries_top " << nh.get_value(n_entries_top_key_)
-              << " - for particle " << *o << std::endl;
+    IMP_LOG(VERBOSE, "Setting is_last_entry_from_top value to "
+            << is_last_entry_from_top << "; last_tracked_z to " << cur_z
+            << "; n_entries_bottom " << nh.get_value(n_entries_bottom_key_)
+            << "; n_entries_top " << nh.get_value(n_entries_top_key_)
+            << " - for particle " << *o << std::endl);
   }
 }
 
@@ -58,7 +59,7 @@ void HierarchyWithSitesLoadLink::do_add_link_recursive(
     Particle *root, Particle *p, RMF::NodeConstHandle cur) {
   HierarchyLoadLink::do_add_link_recursive(root, p, cur);
   if (atom::Hierarchy(p).get_number_of_children() == 0 &&
-      core::Typed::particle_is_instance(p)) {
+      core::Typed::get_is_setup(p)) {
     core::ParticleType tp = core::Typed(p).get_type();
     algebra::Vector3Ds sites;
     RMF::NodeConstHandles children = cur.get_children();
@@ -98,7 +99,7 @@ void HierarchyWithSitesSaveLink::do_add_recursive(Particle *root, Particle *p,
     Object *o = p->get_value(get_simulation_data_key());
     sd_ = dynamic_cast<SimulationData *>(o);
   }
-  if (core::Typed::particle_is_instance(p)) {
+  if (core::Typed::get_is_setup(p)) {
     core::ParticleType type = core::Typed(p).get_type();
     std::pair<double, algebra::Vector3Ds> sites = get_sites(type);
     for (unsigned int i = 0; i < sites.second.size(); ++i) {
@@ -122,7 +123,7 @@ void HierarchyWithSitesSaveLink::do_add_recursive(Particle *root, Particle *p,
 void HierarchyWithSitesSaveLink::do_save_node(Particle *p, RMF::NodeHandle n) {
   rmf::HierarchySaveLink::do_save_node(p, n);
   // update side of transport entry
-  if (Transporting::particle_is_instance(p)) {
+  if (Transporting::get_is_setup(p)) {
     Transporting t(p);
     n.set_value(is_last_entry_from_top_key_, t.get_is_last_entry_from_top());
     n.set_value(n_entries_bottom_key_, t.get_n_entries_bottom());

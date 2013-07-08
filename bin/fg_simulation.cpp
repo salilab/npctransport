@@ -117,7 +117,7 @@ void color_fgs(IMP::npctransport::SimulationData& sd) {
     // apply color
     atom::Hierarchies children = chains[i].get_children();
     for (unsigned int j = 0; j < children.size(); j++) {
-      if (Colored::particle_is_instance(children[j])) {
+      if (Colored::get_is_setup(children[j])) {
         Colored(children[j]).set_color(color);
       } else {
         Colored::setup_particle(children[j], color);

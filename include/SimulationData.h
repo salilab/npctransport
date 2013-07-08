@@ -191,12 +191,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
    */
   void create_slab_restraint_on_diffusers();
 
-  /** Initializes the simulation and keeps the assignment file and the stats
-      file in protobuf format.
-      If the two filenames assignments_file and stats_file are the same,
-      both are encapsulated in a single Output protobuf, otherwise they are
-      kept each in a separate file.
+  /** Initializes the simulation based on the specified assignment file
 
+      @param assignments_file the file with the current assignment, which
+                              is also to be used for progress and statistics
+                              output
       @param quick whether to perform a quick simulation with a small number
                    of iterations
   */
@@ -375,7 +374,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   /**
      Returns the internal periodic SaveOptimizerState writer that
      periodically outputs the particles hierarchy and restraints,
-     using the file name returned by ::get_rmf_file_name(), which is
+     using the file name returned by SimulationData::get_rmf_file_name(), which is
      assumed to be non empty.  If the writer does not exist, then
      it is constructed first.
 
@@ -426,9 +425,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
       @param nf_new the number of frames by which the statistics file
                     should be advanced. This is used to weight the
                     contribution of average statistics over time.
+
+      @note this method is not const cause it may invoke e.g., energy evaluation
+            though it does not substantially change anything in the state of the object
    */
   void update_statistics(const boost::timer &timer,
-                         unsigned int nf_new = 1) const;
+                         unsigned int nf_new = 1);
 
   unsigned int get_number_of_frames() const { return number_of_frames_; }
 

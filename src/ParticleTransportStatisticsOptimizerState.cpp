@@ -11,6 +11,7 @@
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/base/check_macros.h>
 #include <IMP/base/exception.h>
+#include <IMP/base/log.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -24,7 +25,7 @@ ParticleTransportStatisticsOptimizerState::
       bottom_z_(bottom_z),
       top_z_(top_z),
       owner_(owner) {
-  IMP_ALWAYS_CHECK(!Transporting::particle_is_instance(p_),
+  IMP_ALWAYS_CHECK(!Transporting::get_is_setup(p_),
                    "Particle already defined as a transporting particle,"
                    " and cannot be tracked by this object",
                    IMP::base::ValueException);
@@ -39,7 +40,7 @@ void ParticleTransportStatisticsOptimizerState::reset() {
   Transporting(p_).set_n_entries_bottom(0);
   Transporting(p_).set_n_entries_top(0);
   is_reset_ = true;
-  std::cout << "ParticleTransportStatistics - RESET" << std::endl;
+  IMP_LOG(PROGRESS, "ParticleTransportStatistics - RESET" << std::endl);
 }
 
 void ParticleTransportStatisticsOptimizerState::do_update(unsigned int) {
@@ -61,8 +62,8 @@ void ParticleTransportStatisticsOptimizerState::do_update(unsigned int) {
       time_ns = owner_->get_current_time() / fs_in_ns;
     }
     transport_time_points_in_ns_.push_back(time_ns);
-    std::cout << "EXIT UP " << p_->get_name() << " n_transports_up = "
-              << n_transports_up_ << " prev_z = " << prev_z << std::endl;
+    IMP_LOG(PROGRESS, "EXIT UP " << p_->get_name() << " n_transports_up = "
+            << n_transports_up_ << " prev_z = " << prev_z << std::endl);
   }
   if (cur_z < bottom_z_ && prev_z >= bottom_z_ && pt.get_n_entries_top() > 0 &&
       pt.get_is_last_entry_from_top()) {
@@ -72,8 +73,8 @@ void ParticleTransportStatisticsOptimizerState::do_update(unsigned int) {
       time_ns = owner_->get_current_time() / fs_in_ns;
     }
     transport_time_points_in_ns_.push_back(time_ns);
-    std::cout << "EXIT DOWN " << p_->get_name() << " n_transports_down = "
-              << n_transports_down_ << " prev_z = " << prev_z << std::endl;
+    IMP_LOG(PROGRESS,"EXIT DOWN " << p_->get_name() << " n_transports_down = "
+            << n_transports_down_ << " prev_z = " << prev_z << std::endl);
   }
   // update channel entry directionality
   if (cur_z < top_z_ && prev_z >= top_z_) {
