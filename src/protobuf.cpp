@@ -44,7 +44,7 @@ void show_ranges(std::string name, const Message* message) {
   if (lfd) {
     const FieldDescriptor* fd(d->FindFieldByName("upper"));
     if (r->HasField(*message, fd)) {
-      std::cout << "found " << name << std::endl;
+      IMP_LOG(PROGRESS, "Found " << name << std::endl);
     }
   } else {
     for (int i = 0; i < d->field_count(); ++i) {
@@ -309,7 +309,6 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   }
   // output work units and automatic parameters
   double time_step = get_time_step(output);
-  std::cout << "DEBUG protobug auto" << std::endl;
   output.set_time_step(time_step);
   output.set_work_unit(work_unit);
   output.set_number_of_frames(get_number_of_frames(output, time_step));
