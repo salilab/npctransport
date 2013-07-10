@@ -85,4 +85,6 @@ Particle *create_chain(SimulationData *sd, int n, double radius,
   root->set_name(name);
   return root;
 }
+
+
 IMPNPCTRANSPORT_END_NAMESPACE

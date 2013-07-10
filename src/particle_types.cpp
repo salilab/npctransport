@@ -18,7 +18,8 @@ core::ParticleType type_of_fga[] = {
   core::ParticleType("fg6"), core::ParticleType("fg7"),
   core::ParticleType("fg8"), core::ParticleType("fg9"),
   core::ParticleType("fg10"), core::ParticleType("fg11"),
-  core::ParticleType("fg12")
+  core::ParticleType("fg12"), core::ParticleType("fg13"),
+  core::ParticleType("fg14"), core::ParticleType("fg15")
 };
 
 core::ParticleType type_of_floata[] = {core::ParticleType("kap"),

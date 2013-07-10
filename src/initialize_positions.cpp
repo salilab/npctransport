@@ -199,7 +199,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
             << " and length factor " << length_factor << std::endl);
     isf->set_moved_particles(isf->get_movable_particles());
     double desired_accept_rate =
-        0.2;  // acceptance rate for which to tune move size (per mover)
+      0.2;  // acceptance rate for which to tune move size (per mover)
     for (int j = 0; j < 5; ++j) {
       local->set_temperature((1.5 - (i + j / 5.0) / 11.0) *
                              bd_temperature_orig);

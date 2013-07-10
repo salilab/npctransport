@@ -103,6 +103,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   base::Pointer<container::ListSingletonContainer> diffusers_;
 
+  bool diffusers_updated_; // keeps track of whether the diffusers list is
+                           // up to date (can be invalid if particles added)
+
   base::Pointer<container::ClosePairContainer> cpc_;
 
   // generates hash values ('predicates') for ordered types pairs
@@ -165,17 +168,28 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   /**
      Adds the FG Nup chains to the model hierarchy,
      based on the settings in data
+
+     @param data data for fgs of this type in protobuf format as specified
+                 in data/npctransport.proto
+     @param default_type for backward compatibility only, a default type of particle
+                         if one is not specified in data.type
    */
   void create_fgs(const ::npctransport_proto::Assignment_FGAssignment &data,
-                  core::ParticleType type);
+                  core::ParticleType default_type);
 
   /**
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
      based on the settings in data
+
+     @param data data for floater in protobuf format as specified
+                 in data/npctransport.proto
+     @param default_type for backward compatibility only, a default type
+                         of particle if one is not specified in data.type
+     @param color a color for all floaters of this type
    */
   void create_floaters(
       const ::npctransport_proto::Assignment_FloaterAssignment &data,
-      core::ParticleType type, display::Color color);
+      core::ParticleType default_type, display::Color color);
 
   /**
      Creates bounding box restraint based on the box_size_
