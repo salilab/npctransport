@@ -278,10 +278,11 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   if (!success) {
     IMP_THROW("Unable to read from protobuf " << fname, IOException);
   }
-  npctransport_proto::Output output_output;
-  npctransport_proto::Assignment& output = *output_output.mutable_assignment();
+  npctransport_proto::Output output;
+  npctransport_proto::Assignment& assignment = *output.mutable_assignment();
+  npctransport_proto::Statistics& statistics = *output.mutable_statistics();
   base::SetLogState sls(base::VERBOSE);
-  Ranges ranges = get_ranges("all", &input, &output);
+  Ranges ranges = get_ranges("all", &input, &assignment);
   /*for (unsigned int i=0; i< ranges.size(); ++i) {
     std::cout << ranges[i].lb << " " << ranges[i].ub << " " << ranges[i].steps
               << " " << ranges[i].base << std::endl;
@@ -307,48 +308,69 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
       r->SetInt32(ranges[i].m, ifd, indexes[i]);
     }
   }
-  // output work units and automatic parameters
-  double time_step = get_time_step(output);
-  output.set_time_step(time_step);
-  output.set_work_unit(work_unit);
-  output.set_number_of_frames(get_number_of_frames(output, time_step));
-  output.set_dump_interval_frames(
-      get_dump_interval_in_frames(output, time_step));
-  output.set_statistics_interval_frames(
-      get_statistics_interval_in_frames(output, time_step));
-  output.set_range(get_close_pairs_range(output));
-  output.set_random_seed(random_seed);
+  // assignment work units and automatic parameters
+  double time_step = get_time_step(assignment);
+  assignment.set_time_step(time_step);
+  assignment.set_work_unit(work_unit);
+  assignment.set_number_of_frames(get_number_of_frames(assignment, time_step));
+  assignment.set_dump_interval_frames(
+      get_dump_interval_in_frames(assignment, time_step));
+  assignment.set_statistics_interval_frames(
+      get_statistics_interval_in_frames(assignment, time_step));
+  assignment.set_range(get_close_pairs_range(assignment));
+  assignment.set_random_seed(random_seed);
   std::fstream out(ofname.c_str(), std::ios::out | std::ios::binary);
   if (!out) {
     IMP_THROW("Could not open file " << ofname, IOException);
   }
-
+  // add fg for statistical purposes + fill in types if needed
   {
-    for (int i = 0; i < output.fgs_size(); ++i) {
-      if (output.fgs(i).number().value() != 0) {
-        output_output.mutable_statistics()->add_fgs();
+    for (int i = 0; i < assignment.fgs_size(); ++i) {
+      // store default type if one does not exist
+      if (! assignment.fgs(i).has_type() ) {
+        assignment.mutable_fgs(i)->set_type
+          ( type_of_fg[i].get_string() );
+      }
+      if (assignment.fgs(i).number().value() != 0) {
+        statistics.add_fgs();
         IMP_USAGE_CHECK(
-            output_output.mutable_statistics()->fgs_size() ==
+            statistics.fgs_size() ==
                 static_cast<int>(i + 1),
-            "Wrong size: " << output_output.mutable_statistics()->fgs_size());
+            "Wrong size: " << statistics.fgs_size());
+        statistics.mutable_fgs(i)->set_type
+          ( assignment.fgs(i).type() );
       }
     }
-    for (int i = 0; i < output.floaters_size(); ++i) {
-      if (output.floaters(i).number().value() != 0) {
-        output_output.mutable_statistics()->add_floaters();
+    // add floater for statistical purposes + fill in types if needed
+    for (int i = 0; i < assignment.floaters_size(); ++i) {
+      // store default type if one does not exist
+      if (! assignment.floaters(i).has_type() ) {
+        assignment.mutable_floaters(i)->set_type
+          ( type_of_float[i].get_string() );
+      }
+      if (assignment.floaters(i).number().value() != 0) {
+        statistics.add_floaters();
+        IMP_USAGE_CHECK(
+            statistics.floaters_size() ==
+            static_cast<int>(i + 1),
+            "Wrong size: "
+            << statistics.floaters_size());
+        statistics.mutable_floaters(i)->set_type
+          ( assignment.floaters(i).type() );
       }
     }
-    for (int i = 0; i < output.interactions_size(); i++) {
-      if (output.interactions(i).is_on().value()) {
+    // add interaction statistics
+    for (int i = 0; i < assignment.interactions_size(); i++) {
+      if (assignment.interactions(i).is_on().value()) {
         ::npctransport_proto::Statistics_InteractionStats* pOutStats_i =
-            output_output.mutable_statistics()->add_interactions();
-        pOutStats_i->set_type0(output.interactions(i).type0());
-        pOutStats_i->set_type1(output.interactions(i).type1());
+            statistics.add_interactions();
+        pOutStats_i->set_type0(assignment.interactions(i).type0());
+        pOutStats_i->set_type1(assignment.interactions(i).type1());
       }
     }
   }
 
-  bool written = output_output.SerializeToOstream(&out);
+  bool written = output.SerializeToOstream(&out);
   if (!written) {
     IMP_THROW("Unable to write to " << ofname, IOException);
   }
@@ -363,9 +385,9 @@ int get_number_of_work_units(std::string assignment_file) {
     IMP_THROW("Could not open file " << assignment_file, IOException);
   }
   input.ParseFromIstream(&in);
-  npctransport_proto::Assignment output;
+  npctransport_proto::Assignment assignment;
   base::SetLogState sls(base::VERBOSE);
-  Ranges ranges = get_ranges("all", &input, &output);
+  Ranges ranges = get_ranges("all", &input, &assignment);
   Floats values;
   Ints indexes;
   int ret = assign_internal(ranges, 0, values, indexes, false);

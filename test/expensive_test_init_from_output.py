@@ -97,8 +97,10 @@ class Tests(IMP.test.TestCase):
         # random generator initialization
         IMP.set_log_level(IMP.SILENT)
         config= self.get_tmp_file_name( "simple_cfg.pb") ;
+        print "Config: ", config
         test_util.make_simple_cfg( config, is_slab_on = True, n_particles_factor = 1.5)
         rt_output= self.get_tmp_file_name("round_trip_output.pb")
+        print "RT output: ", rt_output
         sd = self.run_from_config( config, rt_output )
 
         print "reloading from output file ", rt_output

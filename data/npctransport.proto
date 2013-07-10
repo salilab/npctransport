@@ -169,6 +169,7 @@ message Statistics {
     optional double chain_diffusion_coefficient=6 [default=0];
     optional double chain_correlation_time=7 [default=0];
     optional double local_diffusion_coefficient=8 [default=0];
+    optional string type=9; // type name, e.g. "fg_nsp1"
   }
   message FloatStats {
     optional double interactions=1 [default=0];
@@ -179,6 +180,7 @@ message Statistics {
     optional double correlation_time=6 [default=0];
     optional double avg_n_transports=7 [default=0]; // avg number of times a particle of this type has crossed the channel
     repeated double transport_time_points_ns=8; // records the time points of transports in simulation time (TODO: assuming single trial?)
+    optional string type=9; // type name, e.g. "kap121"
   }
   message InteractionStats {
     required string type0=1;
