@@ -327,7 +327,9 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   {
     for (int i = 0; i < assignment.fgs_size(); ++i) {
       // store default type if one does not exist
-      if (! assignment.fgs(i).has_type() ) {
+      if (! assignment.fgs(i).has_type() ||
+          assignment.fgs(i).type() == "" ) {
+        std::cout << "Setting assignment fg " << i << " to type " << type_of_fg[i].get_string() << std::endl;
         assignment.mutable_fgs(i)->set_type
           ( type_of_fg[i].get_string() );
       }
@@ -344,7 +346,8 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
     // add floater for statistical purposes + fill in types if needed
     for (int i = 0; i < assignment.floaters_size(); ++i) {
       // store default type if one does not exist
-      if (! assignment.floaters(i).has_type() ) {
+      if (! assignment.floaters(i).has_type() ||
+          assignment.floaters(i).type() == "" ) {
         assignment.mutable_floaters(i)->set_type
           ( type_of_float[i].get_string() );
       }
