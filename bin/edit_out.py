@@ -2,7 +2,6 @@
 from IMP.npctransport import *
 import sys
 import math
-import read_nups
 
 # fetch params
 # Usage: <cmd> <outfile> <newoutfle> <new_time_ns> <new_dump_ns>
