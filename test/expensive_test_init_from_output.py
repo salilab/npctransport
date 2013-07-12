@@ -24,6 +24,14 @@ class Tests(IMP.test.TestCase):
         print "assigning parameter ranges from config"
         num=assign_ranges( config, output,
                           0, True, 10 );
+        print
+        print
+        o=Output()
+        f=open(output, "rb")
+        o.ParseFromString(f.read())
+        print o
+        del o
+        del f
         sd= IMP.npctransport.SimulationData(output, False,
                                             self.get_tmp_file_name("out0.rmf"));
         print "BEFORE INIT", time.ctime()
