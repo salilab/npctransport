@@ -24,6 +24,7 @@ class Tests(IMP.test.TestCase):
         print "assigning parameter ranges from config"
         num=assign_ranges( config, output,
                           0, True, 10 );
+#        IMP.set_log_level(IMP.TERSE)
         sd= IMP.npctransport.SimulationData(output, False,
                                             self.get_tmp_file_name("out0.rmf"));
         print "BEFORE INIT", time.ctime()
@@ -99,6 +100,7 @@ class Tests(IMP.test.TestCase):
         config= self.get_tmp_file_name( "simple_cfg.pb") ;
         test_util.make_simple_cfg( config, is_slab_on = True, n_particles_factor = 1.5)
         rt_output= self.get_tmp_file_name("round_trip_output.pb")
+        print "RT output: ", rt_output
         sd = self.run_from_config( config, rt_output )
 
         print "reloading from output file ", rt_output

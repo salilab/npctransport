@@ -34,6 +34,7 @@ message Configuration {
     required FloatRange interaction_k_factor=7;
     required FloatRange interaction_range_factor=8;
     repeated XYZ anchor_coordinates=9; // a fixed coordinate for the first bead in the chain
+    optional string type=10; // type name, e.g. "fg_nsp1"
   };
   message FloatConfiguration {
     required IntRange number=1;
@@ -42,10 +43,11 @@ message Configuration {
     required FloatRange d_factor=4;
     required FloatRange interaction_k_factor=7;
     required FloatRange interaction_range_factor=8;
+    optional string type=9; // type name, e.g. "kap121"
   };
   message Interaction {
-    required string type0=1;
-    required string type1=2;
+    required string type0=1; // e.g., "fg_nsp1"
+    required string type1=2; // e.g., "kap121"
     required IntRange is_on=3;
     optional FloatRange interaction_k=4;
     optional FloatRange interaction_range=5;
@@ -105,6 +107,7 @@ message Assignment {
     required FloatAssignment interaction_k_factor=7;
     required FloatAssignment interaction_range_factor=8;
     repeated XYZ anchor_coordinates=9; // a fixed coordinate for the first bead in the chain
+    optional string type=10; // e.g., "fg_nsp1"
   };
   message FloaterAssignment {
     required IntAssignment number=1;
@@ -113,10 +116,11 @@ message Assignment {
     required FloatAssignment d_factor=4;
     required FloatAssignment interaction_k_factor=5;
     required FloatAssignment interaction_range_factor=7;
+    optional string type=8; // e.g., "kap121"
   };
   message InteractionAssignment {
-    required string type0=1;
-    required string type1=2;
+    required string type0=1; // e.g., "fg_nsp1"
+    required string type1=2; // e.g., "kap121"
     required IntAssignment is_on=3;
     optional FloatAssignment interaction_k=4;
     optional FloatAssignment interaction_range=5;
@@ -165,6 +169,7 @@ message Statistics {
     optional double chain_diffusion_coefficient=6 [default=0];
     optional double chain_correlation_time=7 [default=0];
     optional double local_diffusion_coefficient=8 [default=0];
+    optional string type=9; // type name, e.g. "fg_nsp1"
   }
   message FloatStats {
     optional double interactions=1 [default=0];
@@ -175,6 +180,7 @@ message Statistics {
     optional double correlation_time=6 [default=0];
     optional double avg_n_transports=7 [default=0]; // avg number of times a particle of this type has crossed the channel
     repeated double transport_time_points_ns=8; // records the time points of transports in simulation time (TODO: assuming single trial?)
+    optional string type=9; // type name, e.g. "kap121"
   }
   message InteractionStats {
     required string type0=1;

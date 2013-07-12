@@ -58,9 +58,10 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 SimulationData::SimulationData(std::string output_file, bool quick,
                                std::string rmf_file_name)
-    : Object("SimulationData%1%"),
-      rmf_file_name_(rmf_file_name),
-      is_stats_reset_(false) {
+: Object("SimulationData%1%"),
+  diffusers_updated_(false),
+  rmf_file_name_(rmf_file_name),
+  is_stats_reset_(false) {
   initialize(output_file, quick);
 }
 
@@ -143,16 +144,6 @@ void SimulationData::initialize(std::string output_file, bool quick) {
     create_floaters(data.assignment().floaters(i), type_of_float[i],
                     display::get_display_color(i));
   }
-  IMP_INTERNAL_CHECK(get_diffusers()->get_indexes().empty(),
-                     "Particles should not be in diffusers yet");
-
-  // Add all leaves of th hierarchy as the set of diffusers returned by
-  // get_diffusers()
-  ParticlesTemp leaves = get_as<ParticlesTemp>(atom::get_leaves(get_root()));
-  IMP_LOG(TERSE, "Leaves are " << leaves << std::endl);
-  get_diffusers()->set_particles(leaves);
-  IMP_USAGE_CHECK(leaves.size() == get_diffusers()->get_indexes().size(),
-                  "Set and get don't match");
 
   IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
   for (int i = 0; i < data.assignment().interactions_size(); ++i) {
@@ -196,7 +187,12 @@ void SimulationData::initialize(std::string output_file, bool quick) {
 */
 void SimulationData::create_floaters(
     const ::npctransport_proto::Assignment_FloaterAssignment &data,
-    core::ParticleType type, display::Color color) {
+    core::ParticleType default_type, display::Color color) {
+  core:: ParticleType type(default_type);
+  if (data.has_type()){
+    type = core::ParticleType(data.type());
+  }
+  diffusers_updated_ = false; // cause this method will add some
   if (data.number().value() > 0) {
     // prepare statistics for this type of floaters:
     float_stats_.push_back(BodyStatisticsOptimizerStates());
@@ -250,7 +246,12 @@ void SimulationData::create_floaters(
 */
 void SimulationData::create_fgs(
     const ::npctransport_proto::Assignment_FGAssignment &data,
-    core::ParticleType type) {
+    core::ParticleType default_type) {
+  core:: ParticleType type(default_type);
+  if (data.has_type()){
+    type = core::ParticleType(data.type());
+  }
+  diffusers_updated_ = false; // cause this method will add some
   if (data.number().value() > 0) {
     fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
     chain_stats_.push_back(ChainStatisticsOptimizerStates());
@@ -329,7 +330,7 @@ Model *SimulationData::get_m() {
 
 // Note and beware: this method assumes that the hierarchy in the RMF file
 // was constructed in the same way as the hierarchy within this SimulationData
-// object. Use with great caution, otherwise unexpected results may come
+// object. Use with great caution, otherwise unexpected results may arise
 void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
                                                    int frame) {
   f.set_current_frame(f.get_number_of_frames() - 1);
@@ -466,8 +467,19 @@ atom::BrownianDynamics *SimulationData::get_bd() {
 }
 
 container::ListSingletonContainer *SimulationData::get_diffusers() {
-  if (!diffusers_) {
+  if (!diffusers_ || !diffusers_updated_) {
     diffusers_ = new container::ListSingletonContainer(m_);
+
+    IMP_INTERNAL_CHECK(get_diffusers()->get_indexes().empty(),
+                       "Particles should not be in diffusers yet");
+    // Add all leaves of the hierarchy as the set of diffusers returned by
+    // get_diffusers()
+    ParticlesTemp leaves = get_as<ParticlesTemp>(atom::get_leaves(get_root()));
+    IMP_LOG(TERSE, "Leaves are " << leaves << std::endl);
+    diffusers_->set_particles(leaves);
+    IMP_USAGE_CHECK(leaves.size() == get_diffusers()->get_indexes().size(),
+                    "Set and get don't match");
+    diffusers_updated_ = true;
   }
   return diffusers_;
 }
@@ -577,12 +589,12 @@ void SimulationData::add_interaction(
   // add statistics about this interaction to interactions_stats_
   // between all diffusing particles
   ParticlesTemp set0, set1;
-  for (unsigned int i = 0; i < diffusers_->get_particles().size(); i++) {
-    if (IMP::core::Typed(diffusers_->get_particles()[i]).get_type() == type0) {
-      set0.push_back(diffusers_->get_particles()[i]);
+  for (unsigned int i = 0; i < get_diffusers()->get_particles().size(); i++) {
+    if (IMP::core::Typed(get_diffusers()->get_particles()[i]).get_type() == type0) {
+      set0.push_back(get_diffusers()->get_particles()[i]);
     }
-    if (IMP::core::Typed(diffusers_->get_particles()[i]).get_type() == type1) {
-      set1.push_back(diffusers_->get_particles()[i]);
+    if (IMP::core::Typed(get_diffusers()->get_particles()[i]).get_type() == type1) {
+      set1.push_back(get_diffusers()->get_particles()[i]);
     }
   }
   double stats_contact_range = 1.5;  // TODO: make a param
@@ -976,7 +988,7 @@ void SimulationData::update_statistics(const boost::timer &timer,
 
   ::npctransport_proto::Conformation *conformation =
       output.mutable_conformation();
-  save_conformation(diffusers_, sites_, conformation);
+  save_conformation(get_diffusers(), sites_, conformation);
 
   // save rmf too
   {
