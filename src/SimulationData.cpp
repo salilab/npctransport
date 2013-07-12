@@ -476,7 +476,7 @@ container::ListSingletonContainer *SimulationData::get_diffusers() {
     // get_diffusers()
     ParticlesTemp leaves = get_as<ParticlesTemp>(atom::get_leaves(get_root()));
     IMP_LOG(TERSE, "Leaves are " << leaves << std::endl);
-    get_diffusers()->set_particles(leaves);
+    diffusers_->set_particles(leaves);
     IMP_USAGE_CHECK(leaves.size() == get_diffusers()->get_indexes().size(),
                     "Set and get don't match");
     diffusers_updated_ = true;
