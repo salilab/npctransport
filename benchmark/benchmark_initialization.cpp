@@ -8,12 +8,7 @@
 #include <IMP/npctransport/main.h>
 #include <IMP/npctransport/npctransport_config.h>
 #include <IMP/npctransport/particle_types.h>
-#include <IMP/algebra.h>
-#include <IMP/core.h>
-#include <IMP/atom.h>
-#include <IMP/display.h>
-#include <IMP/rmf.h>
-#include <IMP.h>
+#include <IMP/npctransport/util.h>
 #include <RMF/utility.h>
 #include <IMP/container/SingletonsRestraint.h>
 #include <IMP/base/CreateLogContext.h>
@@ -26,40 +21,48 @@
 #include <IMP/SingletonScore.h>
 #include <IMP/core/Typed.h>
 #include <numeric>
-#include <cmath>
 #include <iostream>
+
 #ifdef IMP_NPC_GOOGLE
-IMP_GCC_PUSH_POP(diagnostic push)
-IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/npctransport/internal/google_main.h>
 #else
-#include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/internal/boost_main.h>
 #endif
 
+
+
 int main(int argc, char *argv[]) {
 #ifdef IMP_NPC_GOOGLE
-  std::string input =
-      "third_party/npc/npctransport/data/benchmark_initialize.pb";
+  std::string config_txt =
+    "third_party/npc/npctransport/data/benchmark_initialize.txt";
 #else
-  std::string input =
-      IMP::npctransport::get_data_path("benchmark_initialize.pb");
+  std::string config_txt =
+    IMP::npctransport::get_data_path("benchmark_initialize.txt");
 #endif
-  IMP::base::AddStringFlag add_input("input", "Input file", &input);
+  IMP::base::AddStringFlag add_input("input", "Input file", &config_txt);
   // preparation::
   try {
-    IMP_NPC_PARSE_OPTIONS(argc, argv);
-    std::string output = IMP::base::create_temporary_file_name("output", ".pb");
+     IMP_NPC_PARSE_OPTIONS(argc, argv);
+     std::string config_pb = IMP::base::create_temporary_file_name
+       ("benchmark_initalize.pb", ".pb");
+     IMP::npctransport::configuration_txt2pb(config_txt, config_pb);
+     std::string output = IMP::base::create_temporary_file_name("output", ".pb");
 
-    int num = IMP::npctransport::assign_ranges(input, output, 100, false,
+    int num = IMP::npctransport::assign_ranges(config_pb, output, 100, false,
                                                IMP::base::get_random_seed());
 
     IMP::base::Pointer<IMP::npctransport::SimulationData> sd =
         new IMP::npctransport::SimulationData(output, true);
 
-    IMP::npctransport::initialize_positions(sd, IMP::RestraintsTemp(), false);
+    bool verbose = false;
+    unsigned int acceleration_factor = 20;
+    double short_init_factor = 1.0 / acceleration_factor;
+    IMP::npctransport::initialize_positions(sd, IMP::RestraintsTemp(),
+                                            verbose, short_init_factor);
+    std::cout << "Energy after benchmark initialization "
+              << "(acclerated by x" << acceleration_factor << "): "
+              << sd->get_bd()->get_scoring_function()->evaluate(false)
+              << std::endl;
   }
   catch (const IMP::base::Exception & e) {
     std::cerr << "Error: " << e.what() << std::endl;

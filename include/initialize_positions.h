@@ -29,11 +29,15 @@ IMPNPCTRANSPORTEXPORT
                            used only throughout initialization
    @param debug if true, the initialization will dump much more output (e.g.
                 every frame to RMF file)
+   @param short_init_factor a factor between >0 and 1 for decreasing
+                            the number of optimization cycles at each
+                            round
  */
 void initialize_positions(SimulationData *sd,
                           const RestraintsTemp &extra_restraints =
                               RestraintsTemp(),
-                          bool debug = false);
+                          bool debug = false,
+                          double short_init_factor = 1.0);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

@@ -61,64 +61,74 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 boost::int64_t work_unit = -1;
-IMP::base::AddIntFlag work_unitadder("work_unit", "The work unit", &work_unit);
-
+IMP::base::AddIntFlag work_unitadder
+( "work_unit", "The work unit",
+  &work_unit);
 std::string configuration = "configuration.pb";
-IMP::base::AddStringFlag configuration_adder(
-    "configuration", "input configuration file in protobuf format"
-                     " [default: %default]",
-    &configuration);
+IMP::base::AddStringFlag configuration_adder
+( "configuration", "input configuration file in protobuf format"
+  " [default: %default]",
+  &configuration);
 std::string output = "output.pb";
-IMP::base::AddStringFlag output_adder(
-    "output", "output assignments and statistics file in protobuf format,"
-              " recording the assignment being executed"
-              " [default: %default]",
-    &output);
+IMP::base::AddStringFlag output_adder
+( "output", "output assignments and statistics file in protobuf format,"
+  " recording the assignment being executed"
+  " [default: %default]",
+  &output);
 std::string restart = "";
-IMP::base::AddStringFlag restart_adder(
-    "restart", "output file of a previous run, from which to restart"
-               " this run (also initializing the final coordinates"
-               " from this previous run, if they exist in the output"
-               " file)"
-               " [default: %default]",
-    &restart);
+IMP::base::AddStringFlag restart_adder
+( "restart", "output file of a previous run, from which to restart"
+  " this run (also initializing the final coordinates"
+  " from this previous run, if they exist in the output"
+  " file)"
+  " [default: %default]",
+  &restart);
 std::string conformations = "conformations.rmf";
-IMP::base::AddStringFlag conformations_adder(
-    "conformations", "RMF file for recording the conforomations along the "
-                     " simulation [default: %default]",
-    &conformations);
+IMP::base::AddStringFlag conformations_adder
+( "conformations", "RMF file for recording the conforomations along the "
+  " simulation [default: %default]",
+  &conformations);
 std::string init_rmffile = "";
-IMP::base::AddStringFlag init_rmf_adder(
-    "init_rmffile", "[OBSOLETE]"
-                    " RMF file for initializing the simulation with its"
-                    " last frame (to continue a previous run). Note that"
-                    " this option overrides the coordinates specified in"
-                    " an older output file when using the --restart flag",
-    &init_rmffile);
+IMP::base::AddStringFlag init_rmf_adder
+( "init_rmffile", "[OBSOLETE]"
+  " RMF file for initializing the simulation with its"
+  " last frame (to continue a previous run). Note that"
+  " this option overrides the coordinates specified in"
+  " an older output file when using the --restart flag",
+  &init_rmffile);
 std::string final_conformations = "final_conformations.rmf";
-IMP::base::AddStringFlag final_conformations_adder(
-    "final_conformations",
-    "RMF file for recording the initial and final conformations "
-    " [default: %default]",
-    &final_conformations);
+IMP::base::AddStringFlag final_conformations_adder
+( "final_conformations",
+  "RMF file for recording the initial and final conformations "
+  " [default: %default]",
+  &final_conformations);
 bool verbose = false;
-IMP::base::AddBoolFlag verbose_adder("verbose", "Print more info during run",
-                                     &verbose);
+IMP::base::AddBoolFlag verbose_adder
+( "verbose", "Print more info during run",
+  &verbose);
 bool first_only = false;
-IMP::base::AddBoolFlag first_only_adder("first_only",
-                                        "Only do the first simulation block",
-                                        &first_only);
+IMP::base::AddBoolFlag first_only_adder
+( "first_only",
+  "Only do the first simulation block",
+  &first_only);
 bool initialize_only = false;
-IMP::base::AddBoolFlag initialize_only_adder(
-    "initialize_only", "Run the initialization and then stop",
-    &initialize_only);
+IMP::base::AddBoolFlag initialize_only_adder
+( "initialize_only", "Run the initialization and then stop",
+  &initialize_only);
 bool show_steps = false;
-IMP::base::AddBoolFlag show_steps_adder(
-    "show_steps", "Show the steps for each modified variable", &show_steps);
+IMP::base::AddBoolFlag show_steps_adder
+( "show_steps", "Show the steps for each modified variable",
+  &show_steps);
 bool show_number_of_work_units = false;
-IMP::base::AddBoolFlag show_work_units_adder("show_number_of_work_units",
-                                             "Show the number of work units",
-                                             &show_number_of_work_units);
+IMP::base::AddBoolFlag show_work_units_adder
+( "show_number_of_work_units",
+  "Show the number of work units",
+  &show_number_of_work_units);
+bool short_initialize = false;
+base::AddBoolFlag short_initialize_adder
+( "short_initialize",
+  "Run an abbreviated version of initialize",
+  &short_initialize);
 
 namespace {
 /*********************************** internal functions
@@ -282,7 +292,9 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
               << sd->get_number_of_trials() << std::endl;
     if (is_initial_optimization) {
       std::cout << "Doing initial coordinates optimization..." << std::endl;
-      initialize_positions(sd, init_restraints, verbose);
+      double short_init_factor = 1.0;
+      if(short_initialize) short_init_factor = 0.01;
+      initialize_positions(sd, init_restraints, verbose, short_init_factor);
       sd->get_bd()->set_current_time(0.0);
     }
     print_score_and_positions(sd, verbose, "Score right before BD = ");

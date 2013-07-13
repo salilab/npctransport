@@ -42,11 +42,9 @@
 #else
 #include <IMP/npctransport/internal/boost_main.h>
 #endif
+#include <cmath>
+
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-bool short_initialize = false;
-base::AddBoolFlag short_adder("short_initialize",
-                              "Run an abbreviated version of initialize",
-                              &short_initialize);
 bool show_dependency_graph = false;
 base::AddBoolFlag show_dep_adder("show_dependency_graph",
                                  "Show the dependency graph",
@@ -148,12 +146,17 @@ IMP::base::Pointer<core::MonteCarlo> create_mc(
     restraints. Excluded volume is handle separately, so don't include it
     in the passed list of restraints.
     (Note: optimize only particles that are flagged as 'optimized')
+
+    @param short_init_factor a factor between >0 and 1 for decreasing
+                             the number of optimization cycles at each
+                             round
 */
 void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
                     const PairPredicates &excluded,
                     rmf::SaveOptimizerState *save,
                     atom::BrownianDynamics *local, LinearWellPairScores dps,
-                    base::LogLevel ll, bool debug) {
+                    base::LogLevel ll, bool debug,
+                    double short_init_factor = 1.0) {
   // make sure that errors and log messages are marked as coming from this
   // function
   IMP_FUNCTION_LOG;
@@ -161,6 +164,9 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
   base::SetLogState sls(ll);
   IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.", ValueException);
   IMP_ALWAYS_CHECK(local, "local optimizer unspecified", ValueException);
+  IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
+                   "short init factor should be in range (0,1]",
+                   ValueException);
   Model *m = ps[0]->get_model();
   // double scale = core::XYZR(ps[0]).get_radius();
 
@@ -241,7 +247,8 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
             // std::endl;
             // rescale_move_size( mc, move_rescale);
             // kt /= move_rescale;
-            double e_bd = local->optimize(n_bd_inner);
+            double e_bd = local->optimize
+              ( std::ceil(n_bd_inner * short_init_factor) ) ;
             IMP_LOG(PROGRESS, "Energy after bd is " << e_bd << " at " << i << ", "
                     << j << "," << k << std::endl);
             //            mc->get_mover(0)->reset_statistics();
@@ -263,7 +270,6 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
           // if (e < .000001) done=true; // TODO: replace stopping condition
         }
       }
-      if (short_initialize) return;
       if (done) break;
     }  // for j
     IMP_OMP_PRAGMA(parallel num_threads(3)) {
@@ -272,7 +278,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
         IMP_LOG(PROGRESS, "Energy after bd is " << e << std::endl);
       }
     }
-  }
+  } // for i
   local->set_temperature(bd_temperature_orig);
 }
 }
@@ -304,11 +310,15 @@ void initialize_positions(SimulationData *sd,
                           //                          const ParticlePairsTemp
                           // &extra_links,
                           const RestraintsTemp &extra_restraints,
-                          bool debug) {
+                          bool debug,
+                          double short_init_factor) {
   sd->set_was_used(true);
-  print_fgs(*sd);
+  IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
+                   "short init factor should be in range (0,1]",
+                   ValueException);
+  //  print_fgs(*sd);
   randomize_particles(sd->get_diffusers()->get_particles(), sd->get_box());
-  print_fgs(*sd);
+  //  print_fgs(*sd);
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
   }
@@ -324,7 +334,7 @@ void initialize_positions(SimulationData *sd,
       core::XYZ(chains[i].get_child(0)).set_coordinates_are_optimized(false);
     }
   }
-  print_fgs(*sd);
+  //  print_fgs(*sd);
   rss += extra_restraints;
   // for (unsigned int i=0; i< extra_links.size(); ++i) {
   //   double d= core::XYZR(extra_links[i][0]).get_radius()
@@ -349,7 +359,7 @@ void initialize_positions(SimulationData *sd,
   optimize_balls(sd->get_diffusers()->get_particles(), rss,
                  sd->get_cpc()->get_pair_filters(), sd->get_rmf_sos_writer(),
                  sd->get_bd(), sd->get_backbone_scores(), base::PROGRESS,
-                 debug);
+                 debug, short_init_factor);
   print_fgs(*sd);
   IMP_NEW(core::RestraintsScoringFunction, rsf,
           (rss + RestraintsTemp(1, sd->get_predr()), "all restaints"));
