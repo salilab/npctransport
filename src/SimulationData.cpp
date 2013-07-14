@@ -469,16 +469,12 @@ atom::BrownianDynamics *SimulationData::get_bd() {
 container::ListSingletonContainer *SimulationData::get_diffusers() {
   if (!diffusers_ || !diffusers_updated_) {
     diffusers_ = new container::ListSingletonContainer(m_);
-
-    IMP_INTERNAL_CHECK(get_diffusers()->get_indexes().empty(),
-                       "Particles should not be in diffusers yet");
-    // Add all leaves of the hierarchy as the set of diffusers returned by
-    // get_diffusers()
+    // Add all leaves of the hierarchy as diffusers
     ParticlesTemp leaves = get_as<ParticlesTemp>(atom::get_leaves(get_root()));
     IMP_LOG(TERSE, "Leaves are " << leaves << std::endl);
     diffusers_->set_particles(leaves);
-    IMP_USAGE_CHECK(leaves.size() == get_diffusers()->get_indexes().size(),
-                    "Set and get don't match");
+    IMP_USAGE_CHECK(leaves.size() == diffusers_->get_indexes().size(),
+                    "Set and get particles don't match");
     diffusers_updated_ = true;
   }
   return diffusers_;
