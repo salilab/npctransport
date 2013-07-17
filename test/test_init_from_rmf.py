@@ -49,6 +49,7 @@ class Tests(IMP.test.TestCase):
     def test_init_from_rmf(self):
         """ Testing whether initialize_positions_from_rmf indeed
             restores the diffusers coordinates correctly """
+        IMP.set_log_level( IMP.SILENT );
         # First simulation with one seed:
         output_pb1= self.get_tmp_file_name( "output1.pb" );
         output_rmf1= IMP.base.create_temporary_file_name( "output", ".rmf" );

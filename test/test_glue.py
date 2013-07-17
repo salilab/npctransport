@@ -31,7 +31,7 @@ class Tests(IMP.test.TestCase):
         sites=([IMP.algebra.Vector3D(radius, 0,0)], [IMP.algebra.Vector3D(-radius, 0,0)])
         ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
                                             nonspec_k, soft_sphere_k, sites[0], sites[1])
-        ps.set_log_level(IMP.VERBOSE)
+#        ps.set_log_level(IMP.VERBOSE)
         r= IMP.core.PairRestraint(ps, ds)
         m.add_restraint(r)
         bd= IMP.atom.BrownianDynamics(m)
@@ -47,6 +47,7 @@ class Tests(IMP.test.TestCase):
         sos.update_always()
     def test_one(self):
         """Check interaction score repulsion for glue test"""
+        IMP.set_log_level(IMP.SILENT)
         k=500
         dt=IMP.npctransport.get_time_step(1, k, radius)
         self._test_one(radius, k, .2*radius, .5*k, k, dt)
@@ -72,7 +73,7 @@ class Tests(IMP.test.TestCase):
         for p in [(0,1), (1,2), (0,2)]:
           ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
                                               nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
-          ps.set_log_level(IMP.VERBOSE)
+#          ps.set_log_level(IMP.VERBOSE)
           r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
           rs.append(r)
         bd= IMP.atom.BrownianDynamics(m)
@@ -90,6 +91,7 @@ class Tests(IMP.test.TestCase):
         sos.update_always()
     def test_two(self):
         """Check two interactions"""
+        IMP.set_log_level(IMP.SILENT)
         k=500
         dt=IMP.npctransport.get_time_step(1, k, radius)
         self._test_two(radius, k, .2*radius, .5*k, k, dt)
@@ -108,7 +110,7 @@ class Tests(IMP.test.TestCase):
         for p in [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)]:
           ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
                                               nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
-          ps.set_log_level(IMP.VERBOSE)
+#          ps.set_log_level(IMP.VERBOSE)
           r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
           rs.append(r)
           r.evaluate(False)
@@ -146,18 +148,21 @@ class Tests(IMP.test.TestCase):
         sos.update_always()
     def test_three(self):
         """Check three interactions"""
+        IMP.set_log_level(IMP.SILENT)
         k=500
         dt=IMP.npctransport.get_time_step(1, k, radius)
         self._test_three(radius, k, .2*radius, .5*k, k, dt)
     def _rescore_three(self):
-      f= RMF.open_rmf_file_read_only(self.get_tmp_file_name("glue3.rmf"))
-      m= IMP.Model()
-      ds= IMP.rmf.create_hierarchies(f, m)
-      k=500
-      rs= self._create_restraint_three(m, ds,  radius, k, .2*radius, .5*k, k)
-      IMP.rmf.load_frame(f, 0)
-      print rs[0].evaluate(True)
-      IMP.rmf.load_frame(f, f.get_number_of_frames()-1)
-      print rs[0].evaluate(True)
+        IMP.set_log_level(IMP.SILENT)
+        f= RMF.open_rmf_file_read_only(self.get_tmp_file_name("glue3.rmf"))
+        m= IMP.Model()
+        IMP.set_log_level(IMP.SILENT)
+        ds= IMP.rmf.create_hierarchies(f, m)
+        k=500
+        rs= self._create_restraint_three(m, ds,  radius, k, .2*radius, .5*k, k)
+        IMP.rmf.load_frame(f, 0)
+        print rs[0].evaluate(True)
+        IMP.rmf.load_frame(f, f.get_number_of_frames()-1)
+        print rs[0].evaluate(True)
 if __name__ == '__main__':
     IMP.test.main()
