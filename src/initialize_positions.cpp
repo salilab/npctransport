@@ -203,7 +203,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     }
     IMP_LOG(PROGRESS,  "Optimizing with radii at " << factor << " of full"
             << " and length factor " << length_factor << std::endl);
-    isf->set_moved_particles(isf->get_movable_particles());
+    isf->set_moved_particles(isf->get_movable_indexes());
     double desired_accept_rate =
       0.2;  // acceptance rate for which to tune move size (per mover)
     for (int j = 0; j < 5; ++j) {
