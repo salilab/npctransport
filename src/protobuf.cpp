@@ -281,7 +281,7 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   npctransport_proto::Output output;
   npctransport_proto::Assignment& assignment = *output.mutable_assignment();
   npctransport_proto::Statistics& statistics = *output.mutable_statistics();
-  base::SetLogState sls(base::VERBOSE);
+  base::SetLogState sls(base::WARNING);
   Ranges ranges = get_ranges("all", &input, &assignment);
   /*for (unsigned int i=0; i< ranges.size(); ++i) {
     std::cout << ranges[i].lb << " " << ranges[i].ub << " " << ranges[i].steps
