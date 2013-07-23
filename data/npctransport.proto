@@ -45,6 +45,16 @@ message Configuration {
     required FloatRange interaction_range_factor=8;
     optional string type=9; // type name, e.g. "kap121"
   };
+  message ObstacleConfiguration {
+    repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
+    required FloatRange radius=2;
+    required IntRange interactions=3;
+    required int32 is_static=4 [default=1];
+    required FloatRange d_factor=5; // diffusion factor for scaling the default coefficient from Stokes radius interpreation of 'radius', relevant only if is_static=0
+    required FloatRange interaction_k_factor=6;
+    required FloatRange interaction_range_factor=7;
+    required string type=8; // type name, e.g. "nup53"
+  };
   message Interaction {
     required string type0=1; // e.g., "fg_nsp1"
     required string type1=2; // e.g., "kap121"
@@ -67,6 +77,7 @@ message Configuration {
   required double maximal_number_of_frames=14;
   repeated FGConfiguration fgs=15;
   repeated FloatConfiguration floaters=16;
+  repeated ObstacleConfiguration obstacles=27;
   repeated Interaction interactions=17;
   required double dump_interval_ns=18; // 0 = every frame
   required FloatRange nonspecific_range=19;
@@ -78,6 +89,7 @@ message Configuration {
   // percent of time in actual running (as opposed to equlibration):
   required FloatRange statistics_fraction=25;
   optional double maximum_number_of_minutes=26;
+  // n=27
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -118,6 +130,16 @@ message Assignment {
     required FloatAssignment interaction_range_factor=7;
     optional string type=8; // e.g., "kap121"
   };
+  message ObstacleAssignment {
+    repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
+    required FloatAssignment radius=2;
+    required IntAssignment interactions=3;
+    required int32 is_static=4 [default=1];
+    required FloatAssignment d_factor=5; // diffusion factor for scaling the default coefficient from Stokes radius interpreation of 'radius'
+    required FloatAssignment interaction_k_factor=6;
+    required FloatAssignment interaction_range_factor=7;
+    required string type=8; // type name, e.g. "nup53"
+  };
   message InteractionAssignment {
     required string type0=1; // e.g., "fg_nsp1"
     required string type1=2; // e.g., "kap121"
@@ -141,6 +163,7 @@ message Assignment {
   required double maximal_number_of_frames=14;
   repeated FGAssignment fgs=15;
   repeated FloaterAssignment floaters=16;
+  repeated ObstacleAssignment obstacles=33;
   repeated InteractionAssignment interactions=17;
   required double dump_interval_ns=18; // 0 = every frame
   required FloatAssignment nonspecific_range=19;
@@ -157,6 +180,7 @@ message Assignment {
   required FloatAssignment statistics_fraction=30;
   optional double maximum_number_of_minutes=31;
   optional uint64 random_seed = 32; // random seed used to initialize this run
+  // n=33
 }
 
 message Statistics {

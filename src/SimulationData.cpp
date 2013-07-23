@@ -60,6 +60,7 @@ SimulationData::SimulationData(std::string output_file, bool quick,
                                std::string rmf_file_name)
 : Object("SimulationData%1%"),
   diffusers_updated_(false),
+  obstacles_updated_(false),
   rmf_file_name_(rmf_file_name),
   is_stats_reset_(false) {
   initialize(output_file, quick);
@@ -144,6 +145,9 @@ void SimulationData::initialize(std::string output_file, bool quick) {
     create_floaters(data.assignment().floaters(i), type_of_float[i],
                     display::get_display_color(i));
   }
+  for (int i = 0; i < data.assignment().obstacles_size(); ++i) {
+    create_obstacles(data.assignment().obstacles(i));
+  }
 
   IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
   for (int i = 0; i < data.assignment().interactions_size(); ++i) {
@@ -180,6 +184,65 @@ void SimulationData::initialize(std::string output_file, bool quick) {
     }
   }
 }
+
+
+/**
+   Adds the FG Nup chains to the model hierarchy,
+   based on the settings in data
+*/
+void SimulationData::create_fgs(
+    const ::npctransport_proto::Assignment_FGAssignment &data,
+    core::ParticleType default_type) {
+  core:: ParticleType type(default_type);
+  if (data.has_type()){
+    type = core::ParticleType(data.type());
+  }
+  diffusers_updated_ = false; // cause this method will add some
+  if (data.number().value() > 0) {
+    fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
+    chain_stats_.push_back(ChainStatisticsOptimizerStates());
+    ParticlesTemp cur_particles;
+    atom::Hierarchy hi = atom::Hierarchy::setup_particle(new Particle(get_m()));
+    hi->set_name(type.get_string());
+    atom::Hierarchy(get_root()).add_child(hi);
+    double rlf = data.rest_length_factor().value();
+    backbone_scores_.push_back(new LinearWellPairScore(
+        rlf * data.radius().value() * 2.0, backbone_k_));
+    for (int j = 0; j < data.number().value(); ++j) {
+      double dc = data.d_factor().value();
+      atom::Hierarchy hc(create_chain(this, data.number_of_beads().value(),
+                                      data.radius().value(), angular_d_factor_,
+                                      dc, backbone_scores_.back(),
+                                      display::Color(.3, .3, .3), type, "fg"));
+      cur_particles.push_back(hc);
+      ParticlesTemp chain = hc.get_children();
+      if (data.anchor_coordinates_size() > j) {
+        ::npctransport_proto::Assignment_XYZ xyz = data.anchor_coordinates(j);
+        core::XYZ d(chain[0]);
+        d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
+        d.set_coordinates_are_optimized(false);
+      }
+      chain_stats_.back().push_back(new ChainStatisticsOptimizerState(chain));
+      chain_stats_.back().back()->set_period(statistics_interval_frames_);
+      fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
+      for (unsigned int k = 0; k < chain.size(); ++k) {
+        fgs_stats_.back().back()
+            .push_back(new BodyStatisticsOptimizerState(chain[k]));
+        fgs_stats_.back().back().back()
+            ->set_period(statistics_interval_frames_);
+      }
+      hi.add_child(atom::Hierarchy(cur_particles.back()));
+      if (data.interactions().value() > 0) {
+        int nsites = data.interactions().value();
+        set_sites(type, nsites, data.radius().value());
+      }
+    }
+    particles_[type] = cur_particles;
+    interaction_range_factors_[type] = data.interaction_range_factor().value();
+    interaction_k_factors_[type] = data.interaction_k_factor().value();
+  }
+}
+
 
 /**
    Adds the 'floaters' (free diffusing particles) to the model hierarchy,
@@ -241,60 +304,43 @@ void SimulationData::create_floaters(
 }
 
 /**
-   Adds the FG Nup chains to the model hierarchy,
-   based on the settings in data
+   Adds the 'obstacles' (possibly static e.g. nups that make the pore)
+   to the model hierarchy, based on the settings in data
 */
-void SimulationData::create_fgs(
-    const ::npctransport_proto::Assignment_FGAssignment &data,
-    core::ParticleType default_type) {
-  core:: ParticleType type(default_type);
-  if (data.has_type()){
-    type = core::ParticleType(data.type());
-  }
-  diffusers_updated_ = false; // cause this method will add some
-  if (data.number().value() > 0) {
-    fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
-    chain_stats_.push_back(ChainStatisticsOptimizerStates());
-    ParticlesTemp cur_particles;
-    atom::Hierarchy hi = atom::Hierarchy::setup_particle(new Particle(get_m()));
-    hi->set_name(type.get_string());
-    atom::Hierarchy(get_root()).add_child(hi);
-    double rlf = data.rest_length_factor().value();
-    backbone_scores_.push_back(new LinearWellPairScore(
-        rlf * data.radius().value() * 2.0, backbone_k_));
-    for (int j = 0; j < data.number().value(); ++j) {
+void SimulationData::create_obstacles
+( const ::npctransport_proto::Assignment_ObstacleAssignment &data)
+{
+  core::ParticleType type = core::ParticleType(data.type());
+  obstacles_updated_ = false; // cause this method will add some
+  // create a sub hierarchy with this type of floaters:
+  atom::Hierarchy cur_root =
+    atom::Hierarchy::setup_particle(new Particle(get_m()));
+  IMP_LOG(WARNING,  "   obstacle type " << type.get_string() << std::endl);
+  cur_root->set_name(type.get_string());
+  atom::Hierarchy(get_root()).add_child(cur_root);
+  // populate hierarchy with particles:
+  ParticlesTemp cur_particles;
+  for (int j = 0; j < data.xyzs_size(); ++j) {
       double dc = data.d_factor().value();
-      atom::Hierarchy hc(create_chain(this, data.number_of_beads().value(),
-                                      data.radius().value(), angular_d_factor_,
-                                      dc, backbone_scores_.back(),
-                                      display::Color(.3, .3, .3), type, "fg"));
-      cur_particles.push_back(hc);
-      ParticlesTemp chain = hc.get_children();
-      if (data.anchor_coordinates_size() > j) {
-        ::npctransport_proto::Assignment_XYZ xyz = data.anchor_coordinates(j);
-        core::XYZ d(chain[0]);
-        d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
-        d.set_coordinates_are_optimized(false);
-      }
-      chain_stats_.back().push_back(new ChainStatisticsOptimizerState(chain));
-      chain_stats_.back().back()->set_period(statistics_interval_frames_);
-      fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
-      for (unsigned int k = 0; k < chain.size(); ++k) {
-        fgs_stats_.back().back()
-            .push_back(new BodyStatisticsOptimizerState(chain[k]));
-        fgs_stats_.back().back().back()
-            ->set_period(statistics_interval_frames_);
-      }
-      hi.add_child(atom::Hierarchy(cur_particles.back()));
+      Particle *cur_p =
+        create_particle(this, data.radius().value(), angular_d_factor_, dc,
+                        display::Color(.3, .6, .6), type, type.get_string());
+      cur_particles.push_back( cur_p );
+      cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
+      ::npctransport_proto::Assignment_XYZ xyz = data.xyzs(j);
+      core::XYZ p_xyz(cur_p);
+      p_xyz.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
+      p_xyz.set_coordinates_are_optimized( !data.is_static() );
+      // add interaction sites to particles of this type:
       if (data.interactions().value() > 0) {
         int nsites = data.interactions().value();
+        IMP_LOG(WARNING, nsites << " sites added " << std::endl);
         set_sites(type, nsites, data.radius().value());
       }
-    }
-    particles_[type] = cur_particles;
-    interaction_range_factors_[type] = data.interaction_range_factor().value();
-    interaction_k_factors_[type] = data.interaction_k_factor().value();
   }
+  particles_[type] = cur_particles;
+  interaction_range_factors_[type] = data.interaction_range_factor().value();
+  interaction_k_factors_[type] = data.interaction_k_factor().value();
 }
 
 /**
@@ -467,7 +513,7 @@ atom::BrownianDynamics *SimulationData::get_bd() {
 }
 
 container::ListSingletonContainer *SimulationData::get_diffusers() {
-  if (!diffusers_ || !diffusers_updated_) {
+  if (!diffusers_ || !diffusers_updated_ || !obstacles_updated_) {
     diffusers_ = new container::ListSingletonContainer(m_);
     // Add all leaves of the hierarchy as diffusers
     ParticlesTemp leaves = get_as<ParticlesTemp>(atom::get_leaves(get_root()));
@@ -476,6 +522,7 @@ container::ListSingletonContainer *SimulationData::get_diffusers() {
     IMP_USAGE_CHECK(leaves.size() == diffusers_->get_indexes().size(),
                     "Set and get particles don't match");
     diffusers_updated_ = true;
+    obstacles_updated_ = true;
   }
   return diffusers_;
 }

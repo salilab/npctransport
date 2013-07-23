@@ -44,8 +44,10 @@ namespace npctransport_proto {
 class Assignment_FGAssignment;
 class Assignment_InteractionAssignment;
 class Assignment_FloaterAssignment;
+class Assignment_ObstacleAssignment;
 }
 #endif
+
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -105,6 +107,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   bool diffusers_updated_; // keeps track of whether the diffusers list is
                            // up to date (can be invalid if particles added)
+  bool obstacles_updated_; // keeps track of whether the obstacles list is
+                           // up to date (can be invalid if particles added)
+                           // TODO: possibly need be same as diffusers - matter
+                           //       of efficiency
 
   base::Pointer<container::ClosePairContainer> cpc_;
 
@@ -190,6 +196,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   void create_floaters(
       const ::npctransport_proto::Assignment_FloaterAssignment &data,
       core::ParticleType default_type, display::Color color);
+
+  /**
+     Adds the 'obstacles' (possibly static e.g. nups that make the pore)
+     to the model hierarchy, based on the settings in data
+
+     @param data data for obstacles in protobuf format as specified in
+                 data/npctransport.proto
+  */
+  void create_obstacles
+    ( const ::npctransport_proto::Assignment_ObstacleAssignment &data);
 
   /**
      Creates bounding box restraint based on the box_size_
