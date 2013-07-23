@@ -43,6 +43,9 @@ class FunctorLinearSoftSpherePairScore
   FunctorLinearSoftSpherePairScore(double k,
                                    std::string name = "LinearSSPairScore%1%")
       : P(LinearSoftSphereScore(k), name) {}
+#ifdef SWIG
+  IMP_OBJECT_METHODS(FunctorLinearSoftSpherePairScore);
+#endif
 };
 
 #ifndef SWIG
@@ -115,6 +118,9 @@ class FunctorLinearInteractionPairScore
                                     std::string name = "LinearSSPairScore%1%")
       : P(LinearInteractionScore(LinearInteraction(krep, attr_range, kattr)),
           name) {}
+#ifdef SWIG
+  IMP_OBJECT_METHODS(FunctorLinearInteractionPairScore);
+#endif
 };
 
 IMPNPCTRANSPORT_END_NAMESPACE
