@@ -14,18 +14,31 @@ def is_fg_fg(i):
     """ checks if interaction i is between fg and fg """
     return ( re.match("fg", i.type0) and re.match("fg", i.type1) ) \
 
+def change_simulation_time(a, t_ns):
+    """
+    a - protobuf assignment object
+    t - new time in ns
+    """
+    old_t_ns = a.simulation_time_ns
+    time_step_ps = a.time_step # in picosecond = 10E-6 ns
+    ps_in_ns = 1000000
+    a.simulation_time_ns=t_ns
+    a.number_of_frames = int( math.ceil(t_ns * ps_in_ns / time_step_ps) )
+
+
 # fetch params
 # Usage: <cmd> <outfile> <newoutfle>
 outfile = sys.argv[1]
 newoutfile = sys.argv[2]
+new_diffusers_R = 45 # A
 f=open(outfile, "rb")
 output= Output()
 output.ParseFromString(f.read())
 f.close()
 assignment = output.assignment
-assignment.simulation_time_ns=1000
+change_simulation_time(assignment, 1000)
 for floater in assignment.floaters:
-    floater.radius.value = 45
+    floater.radius.value = new_diffusers_R
 for k1 in arange(2.5,4.51,0.5):
     for k2 in arange(2.5,4.51,0.5):
         for i in assignment.interactions:
