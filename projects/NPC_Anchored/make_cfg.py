@@ -3,6 +3,7 @@ from IMP.npctransport import *
 import sys
 import math
 import read_nups
+import re
 
 # fetch params
 # Usage: <cmd> <outfile> [kaps_R=25.0]
@@ -43,12 +44,6 @@ def get_basic_config():
     return config
 
 
-def add_anchor_to_fg(coords,fgs, mean_loc):
-    ''' add an anchor at 3D coordinates 'coords' to the fgs assignment,
-        normalized by mean location mean_loc.
-        updates the globals max_xy, max_x, max_y and max_z
-        '''
-
 
 def add_interactions_for_fg(fg_name,
                             k_kap_lower,
@@ -71,40 +66,73 @@ def add_interactions_for_fg(fg_name,
                                        interaction_k=0,
                                        interaction_range=0)
 
-
 def add_fg_based_on(config, mrc_filename, k, nbeads, mean_loc=None):
     ''' Read mrc_filename, cluster to k clusters, and create k
         fgs with nbeads beads, anchored at the clusters, normalized by
         mean_loc.
 
-        @note if mean_loc==False, initiate it as a 3D coordinate that
+        @note if mean_loc==None, initiate it as a 3D coordinate that
         is the mean coordinate of the MRC file in mrc_filename.
         @note also updates global variables max_xy, max_x, max_y, max_z
 
         @return the mean location of the MRC file
         '''
-    global max_xy, max_x, max_y, max_z
+    global max_r, max_x, max_y, max_z
+    # get type name as filename without folder and extension parts
+    type_search= re.search("([^/]*?)(?:[.].*)*$", mrc_filename)
+    type_name = type_search.groups(0)[0]
+    # cluster anchors from MRC file
     kmeans, centers, new_mean, pos_voxels = read_nups.cluster_MRC_file(mrc_filename, k)
     if(mean_loc is None):
         mean_loc = new_mean
     fgs= IMP.npctransport.add_fg_type(config,
-                                     number_of_beads= nbeads,
-                                     number=len(centers),
-                                     radius=6,
-                                     interactions=1,
-                                     rest_length_factor = 1.5)
-    add_interactions_for_fg("fg%d" % (len(config.fgs)-1), 3.0)
+                                      type_name= type_name,
+                                      number_of_beads= nbeads,
+                                      number=len(centers),
+                                      radius=6,
+                                      interactions=1,
+                                      rest_length_factor = 1.5)
+    add_interactions_for_fg(type_name, 3.0)
     for center in centers:
         pos=fgs.anchor_coordinates.add()
         pos.x=center[0] - mean_loc[0]
         pos.y=center[1] - mean_loc[1]
         pos.z=center[2] - mean_loc[2]
         print pos
-        max_xy = max(max_xy, math.sqrt((pos.x + pos.y)**2) )
+        max_r = max(max_r, math.sqrt(pos.x**2 + pos.y**2) )
         max_x = max(max_x, abs(pos.x))
         max_y = max(max_y, abs(pos.y))
         max_z = max(max_z, abs(pos.z))
     return new_mean
+
+def add_obstacle(config, mrc_filename, k, R, mean_loc=None):
+    ''' Read mrc_filename, cluster to k clusters, and create k
+        obstacles of radius R, anchored at the clusters, normalized by
+        mean_loc.
+
+        @note if mean_loc==None, initiate it as a 3D coordinate that
+        is the mean coordinate of the MRC file in mrc_filename.
+
+        @return the mean location of the MRC file
+        '''
+    # get type name as filename without folder and extension parts
+    print mrc_filename
+    type_search= re.search("([^/]*?)(?:[.].*)*$", mrc_filename)
+    type_name = type_search.groups(0)[0]
+    # cluster anchors from MRC file
+    kmeans, centers, new_mean, pos_voxels = read_nups.cluster_MRC_file(mrc_filename, k)
+    if(mean_loc is None):
+        mean_loc = new_mean
+    obstacle = IMP.npctransport.add_obstacle_type \
+        (config, type_name=type_name, R=R)
+    for center in centers:
+        pos=obstacle.xyzs.add()
+        pos.x=center[0] - mean_loc[0]
+        pos.y=center[1] - mean_loc[1]
+        pos.z=center[2] - mean_loc[2]
+        print pos
+    return new_mean
+
 
 
 # ************** MAIN: *************
@@ -112,47 +140,66 @@ config= get_basic_config()
 config.dump_interval_ns=0.1
 config.simulation_time_ns=10
 
-# Add FGs
-
-# Add FG anchors
-max_xy=0
+# Add FGs with anchors
+# (Stoicheometries from Alber et al. 2007b, Determining..., Fig. 3)
+max_r=0
 max_x=0
 max_y=0
 max_z=0
-# stoicheometries from Frank's paper
 mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nbeads=15))
-add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nbeads = 17, mean_loc=mean_loc)
-add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nbeads = 33, mean_loc=mean_loc)
-add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nbeads = 33, mean_loc=mean_loc)
-add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nbeads=20, mean_loc=mean_loc) # nbeads 20-24 = real number for Nup159, depending how you count double motifs
-add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nbeads=46, mean_loc=mean_loc)
-add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nbeads=21, mean_loc=mean_loc) # nbeads 21-27, depending on treratment of double motifs
-add_fg_based_on(config, "MRCs/Nup100_8copies_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
-add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
-add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
-# Nuclear:
-add_fg_based_on(config, "MRCs/Nup1_8copies.mrc", k=8, nbeads=27, mean_loc=mean_loc)
-add_fg_based_on(config, "MRCs/Nup59_16copies.mrc", k=8, nbeads=5, mean_loc=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 265-394 ; Uniprot), which supposedly overlaps some of the FGs
-add_fg_based_on(config, "MRCs/Nup60_8copies.mrc", k=16, nbeads=11, mean_loc=mean_loc) # nup60 is supposed to tether Nup2 (depending on Gsp1p-GTP (Ran) switch, for which Nup2 has a binding site 583-720 ; Denning, Rexach et al. JCB 2001) ; Nup2 also interacts with cargo 35-50 and RNA (RRM Nup35-type domain) - from Uniprot)
-add_fg_based_on(config, "MRCs/Nup53_16copies_chimera.mrc", k=16, nbeads=4, mean_loc=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 247-352 ; Uniprot), which supposedly overlaps some of the FGs ; and also a PSE1/Kap121 binding domain in a non-FG fashion, for which there might be a crystal structure (405-438 ; Uniprot)
+# add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nbeads = 17, mean_loc=mean_loc)
+# add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nbeads = 33, mean_loc=mean_loc)
+# add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nbeads = 33, mean_loc=mean_loc)
+# add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nbeads=20, mean_loc=mean_loc) # nbeads 20-24 = real number for Nup159, depending how you count double motifs
+# add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nbeads=46, mean_loc=mean_loc)
+# add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nbeads=21, mean_loc=mean_loc) # nbeads 21-27, depending on treratment of double motifs
+# add_fg_based_on(config, "MRCs/Nup100_8copies_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
+# add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
+# add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
+# # Nuclear:
+# add_fg_based_on(config, "MRCs/Nup1_8copies.mrc", k=8, nbeads=27, mean_loc=mean_loc)
+# add_fg_based_on(config, "MRCs/Nup59_16copies.mrc", k=16, nbeads=5, mean_loc=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 265-394 ; Uniprot), which supposedly overlaps some of the FGs
+# add_fg_based_on(config, "MRCs/Nup60_8copies.mrc", k=8, nbeads=11, mean_loc=mean_loc) # nup60 is supposed to tether Nup2 (depending on Gsp1p-GTP (Ran) switch, for which Nup2 has a binding site 583-720 ; Denning, Rexach et al. JCB 2001) ; Nup2 also interacts with cargo 35-50 and RNA (RRM Nup35-type domain) - from Uniprot)
+# add_fg_based_on(config, "MRCs/Nup53_16copies_chimera.mrc", k=16, nbeads=4, mean_loc=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 247-352 ; Uniprot), which supposedly overlaps some of the FGs ; and also a PSE1/Kap121 binding domain in a non-FG fashion, for which there might be a crystal structure (405-438 ; Uniprot)
 
-
+# Add Structural nups as obstacles
+# (Alber et al. 2007b, Deteriming..., Figure 3)
+add_obstacle(config, "MRCs/Nup192_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup188_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup157_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup133_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup120_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nic96_16copies_1.mrc", k=16, R=30, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nic96_16copies_2.mrc", k=16, R=30, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup85_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup84_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup82_8copies_1.mrc", k=8, R=35, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup82_8copies_2.mrc", k=8, R=35, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Nup145C_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Ndc1_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Gle1_8copies.mrc", k=8, R=30, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Gle2_16copies.mrc", k=16, R=23, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Seh1_16copies.mrc", k=16, R=22, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Pom34_16copies.mrc", k=16, R=20, mean_loc=mean_loc)
+# add_obstacle(config, "MRCs/Sec13_16copies.mrc", k=16, R=21, mean_loc=mean_loc)
 
 # add bounding volumes
 config.box_is_on.lower=1
 config.box_side.lower=max(max_z,max_x,max_y)*6 # 2000
 config.slab_is_on.lower=1
-config.tunnel_radius.lower=max_xy + config.fgs[0].radius.lower # or also upper when there's steps?
-config.slab_thickness.lower=max_z + config.fgs[0].radius.lower  # or also upper when there's steps?
+config.tunnel_radius.lower=max_r - config.fgs[0].radius.lower # or also upper when there's steps?
+config.slab_thickness.lower=max_z - config.fgs[0].radius.lower  # or also upper when there's steps?
 
 # Add floaters
 kaps= IMP.npctransport.add_float_type(config,
-                                     number=30,
+                                     number=3, # 30
                                      radius=kaps_R,
                                      interactions=12)
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics= IMP.npctransport.add_float_type(config,
-                                              number=30,
+                                              number=3, # 30
                                               radius=kaps_R, #-1,
                                               interactions=0)
 #create_range(nonspecifics.radius, lb = 10, ub = 30, steps = 5, base = 1)
@@ -166,12 +213,13 @@ config.nonspecific_range.lower= 1.5
 
 #create_range(interactionFG_FG.interaction_k, lb = 2.5, ub = 7.5, steps = 10, base = 1)
 # internal FG-FG
-n_fg_types = len(config.fgs)
-for i in range(n_fg_types):
-    for j in range(i,n_fg_types):
+#n_fg_types = len(config.fgs)
+for i,fg0 in enumerate(config.fgs):
+    for j,fg1 in enumerate(config.fgs):
+        if(i>j): continue # avoid duplicates
         interactionFG_FG= IMP.npctransport.add_interaction(config,
-                                                           name0= "fg%d" % i,
-                                                           name1= "fg%d" % j,
+                                                           name0= fg0.type,
+                                                           name1= fg1.type,
                                                            interaction_k= 3.5,
                                                            interaction_range= 2)
 

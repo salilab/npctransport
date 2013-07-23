@@ -47,10 +47,11 @@ def set_default_configuration(config):
     config.excluded_volume_k.lower=20
     config.statistics_fraction.lower=.5;
 
-def add_fg_type(config, number_of_beads, number, radius,
+def add_fg_type(config, type_name, number_of_beads, number, radius,
                 interactions=1, rest_length_factor=1, d_factor=1,
                 interaction_k_factor=1, interaction_range_factor=1):
     fg= config.fgs.add()
+    fg.type = type_name
     fg.number_of_beads.lower=number_of_beads
     fg.number.lower=number
     fg.radius.lower=radius
@@ -64,14 +65,31 @@ def add_fg_type(config, number_of_beads, number, radius,
 def add_float_type(config, number, radius,
                    interactions=1,  d_factor=1,
                 interaction_k_factor=1, interaction_range_factor=1):
-    fg= config.floaters.add()
-    fg.number.lower=number
-    fg.radius.lower=radius
-    fg.interactions.lower=interactions
-    fg.d_factor.lower=d_factor
-    fg.interaction_k_factor.lower=interaction_k_factor
-    fg.interaction_range_factor.lower=interaction_range_factor
-    return fg
+    f= config.floaters.add()
+    f.number.lower=number
+    f.radius.lower=radius
+    f.interactions.lower=interactions
+    f.d_factor.lower=d_factor
+    f.interaction_k_factor.lower=interaction_k_factor
+    f.interaction_range_factor.lower=interaction_range_factor
+    return f
+
+def add_obstacle_type(config, type_name, R, is_static=1,
+                   interactions=0,  d_factor=1,
+                interaction_k_factor=1, interaction_range_factor=1):
+    """
+    add an obstacle type name type_name, with radius R
+    Note that the .xyzs vector field must be filled in to get actual instances
+    """
+    o= config.obstacles.add()
+    o.type = type_name
+    o.radius.lower= R
+    o.interactions.lower= interactions
+    o.is_static= is_static
+    o.d_factor.lower= d_factor
+    o.interaction_k_factor.lower= interaction_k_factor
+    o.interaction_range_factor.lower= interaction_range_factor
+    return o
 
 def add_interaction(config, name0, name1,
                     interaction_k=None, interaction_range=None, is_on=1):
