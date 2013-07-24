@@ -182,7 +182,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     show_as_graphviz(dg, dgf);
   }
 
-  IMP_LOG(PROGRESS, "Performing initial optimization" << std::endl);
+  std::cout << "Performing initial optimization" << std::endl;
   // shrink each of the particles, relax the configuration, repeat
   double bd_temperature_orig = local->get_temperature();
   for (int i = 0; i < 11; ++i) {
@@ -201,8 +201,11 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     for (unsigned int j = 0; j < dps.size(); ++j) {
       lengths.push_back(new SetLength(dps[j], length_factor));
     }
-    IMP_LOG(PROGRESS,  "Optimizing with radii at " << factor << " of full"
-            << " and length factor " << length_factor << std::endl);
+    std::cout << "Optimizing with radii at " << factor << " of full"
+              << " and length factor " << length_factor;
+    std::cout << " energy before = "
+              << local->get_scoring_function()->evaluate(false) << std::endl;
+
     isf->set_moved_particles(isf->get_movable_indexes());
     double desired_accept_rate =
       0.2;  // acceptance rate for which to tune move size (per mover)
@@ -274,8 +277,8 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     }  // for j
     IMP_OMP_PRAGMA(parallel num_threads(3)) {
       IMP_OMP_PRAGMA(single) {
-        double e = local->optimize(1000);
-        IMP_LOG(PROGRESS, "Energy after bd is " << e << std::endl);
+        double e = local->optimize(std::ceil(1000 * short_init_factor));
+        std::cout << "Energy after initialization is " << e << std::endl;
       }
     }
   } // for i

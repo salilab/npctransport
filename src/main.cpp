@@ -12,6 +12,8 @@
 #include <IMP/base_types.h>
 #include <boost/timer.hpp>
 #include <IMP/base/log.h>
+#include <IMP/base/exception.h>
+#include <IMP/base/check_macros.h>
 //#include <IMP/benchmark/Profiler.h>
 #include <IMP/npctransport/initialize_positions.h>
 #include <IMP/rmf/frames.h>
@@ -19,12 +21,12 @@
 #include <IMP/Model.h>
 #include <IMP/core/rigid_bodies.h>
 
-#include <IMP/algebra.h>
-#include <IMP/core.h>
-#include <IMP/atom.h>
-#include <IMP/display.h>
-#include <IMP/rmf.h>
-#include <IMP.h>
+//#include <IMP/algebra.h>
+//#include <IMP/core.h>
+//#include <IMP/atom.h>
+//#include <IMP/display.h>
+//#include <IMP/rmf.h>
+//#include <IMP.h>
 #include <IMP/container.h>
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/base/random.h>
@@ -122,57 +124,59 @@ IMP::base::AddBoolFlag show_steps_adder
 bool show_number_of_work_units = false;
 IMP::base::AddBoolFlag show_work_units_adder
 ( "show_number_of_work_units",
-  "Show the number of work units",
+  "Show the number of work units" ,
   &show_number_of_work_units);
-bool short_initialize = false;
-base::AddBoolFlag short_initialize_adder
-( "short_initialize",
-  "Run an abbreviated version of initialize",
-  &short_initialize);
+double short_init_factor = 1.0;
+base::AddFloatFlag short_init_adder
+( "short_init_factor",
+  "Run an abbreviated version of system initialization, which takes"
+  " a fraction of a full initialization, in the range (0.0..1.0]"
+  " [default=1.0]",
+  &short_init_factor);
 
 namespace {
-/*********************************** internal functions
- * *********************************/
+  /*********************************** internal functions
+   * *********************************/
 
-// TODO: move to H file?
-//! print this score for the current state of sd
-void print_score_and_positions(SimulationData *sd, bool print_positions = false,
-                               std::string header = "Score = ");
+  // TODO: move to H file?
+  //! print this score for the current state of sd
+  void print_score_and_positions(SimulationData *sd, bool print_positions = false,
+                                 std::string header = "Score = ");
 
-void print_score_and_positions(SimulationData *sd, bool print_positions,
-                               std::string header) {
-  IMP_OMP_PRAGMA(critical)
-  std::cout << header << sd->get_bd()->get_scoring_function()->evaluate(false)
-            << " ; PredicatePairsRestraint score = "
-            << sd->get_predr()->evaluate(false) << std::endl;
-  if (print_positions) {
-    ParticlesTemp ps = sd->get_diffusers()->get_particles();
-    for (unsigned int i = 0; i < ps.size(); i++) {
-      IMP_OMP_PRAGMA(critical)
-      std::cout << ps[i] << ", " << IMP::core::RigidBody(ps[i])
-                                        .get_reference_frame() << std::endl;
+  void print_score_and_positions(SimulationData *sd, bool print_positions,
+                                 std::string header) {
+    IMP_OMP_PRAGMA(critical)
+      std::cout << header << sd->get_bd()->get_scoring_function()->evaluate(false)
+                << " ; PredicatePairsRestraint score = "
+                << sd->get_predr()->evaluate(false) << std::endl;
+    if (print_positions) {
+      ParticlesTemp ps = sd->get_diffusers()->get_particles();
+      for (unsigned int i = 0; i < ps.size(); i++) {
+        IMP_OMP_PRAGMA(critical)
+          std::cout << ps[i] << ", " << IMP::core::RigidBody(ps[i])
+          .get_reference_frame() << std::endl;
+      }
     }
   }
-}
 
-/** writes the output assignment file based on the configuration parameters
-    either assign a new work unit from a configuration file, or restart
-    from a previous output file
+  /** writes the output assignment file based on the configuration parameters
+      either assign a new work unit from a configuration file, or restart
+      from a previous output file
 
-    @param actual_seed the actual random seed used in the simulation,
-                       to be saved in the output file
-*/
-inline void write_output_based_on_flags(boost::uint64_t actual_seed) {
-  if (restart.empty()) {
-    int num = IMP::npctransport::assign_ranges(configuration, output, work_unit,
+      @param actual_seed the actual random seed used in the simulation,
+      to be saved in the output file
+  */
+  inline void write_output_based_on_flags(boost::uint64_t actual_seed) {
+    if (restart.empty()) {
+      int num = IMP::npctransport::assign_ranges(configuration, output, work_unit,
                                                show_steps, actual_seed);
-    if (show_number_of_work_units) {
+      if (show_number_of_work_units) {
       IMP_OMP_PRAGMA(critical)
-      std::cout << "work units " << num << std::endl;
+        std::cout << "work units " << num << std::endl;
     }
-  } else {  // resart.empty()
+    } else {  // resart.empty()
     IMP_OMP_PRAGMA(critical)
-    std::cout << "Restart simulation from " << restart << std::endl;
+      std::cout << "Restart simulation from " << restart << std::endl;
     ::npctransport_proto::Output prev_output;
     // copy to new file to avoid modifying input file
     std::ifstream file(restart.c_str(), std::ios::binary);
@@ -182,63 +186,65 @@ inline void write_output_based_on_flags(boost::uint64_t actual_seed) {
     prev_output.mutable_assignment()->set_random_seed(actual_seed);
     std::ofstream outf(output.c_str(), std::ios::binary);
     prev_output.SerializeToOstream(&outf);
+    }
   }
-}
 
-/**
-   Run simulation <sd> for <number_of_frames> frames, in chunks of
-   optimization that last <max_frames_per_chunks> frames each.
-   Statistics are updated after each chunk of optimization, using
-   <timer> to time the current simulation.
+  /**
+     Run simulation <sd> for <number_of_frames> frames, in chunks of
+     optimization that last <max_frames_per_chunks> frames each.
+     Statistics are updated after each chunk of optimization, using
+     <timer> to time the current simulation.
 
-   @param sd simulation data used for optimization
-   @param number_of_frames total number of simulation frames requires
-   @param timer a timer that was reset before this simulation trial was
-                initialized, to be used for tracking statistics
-   @param total_time the total time that the simulation has spent.
+     @param sd simulation data used for optimization
+     @param number_of_frames total number of simulation frames requires
+     @param timer a timer that was reset before this simulation trial was
+     initialized, to be used for tracking statistics
+     @param total_time the total time that the simulation has spent.
                        The simulation would terminate at the end of an
                        optimization chunk in which this time has
                        elapsed, that is sd->get_maximum_number_of_minutes()
-   @param silent_statistics if true, do not update statistics file
-          (e.g., during equilibration)
-   @param max_frames_per_chunk maximal number of frames to be simulated
-                               in a single optimization chunk
-   @note if first_only==true, make a really short simulation
+     @param silent_statistics if true, do not update statistics file (e.g.,
+                              during equilibration)
+     @param max_frames_per_chunk maximal number of frames to be simulated
+                                 in a single optimization chunk
 
-   @return true if succesful, false if terminated abnormally
-*/
-bool run_it(SimulationData *sd, unsigned int number_of_frames,
-            boost::timer &timer, boost::timer &total_time,
-            bool silent_statistics = false,
-            unsigned int max_frames_per_chunk = 50000) {
-  // TODO: next line is a temporary hack - needed for some reason to
-  // force the pair predicates to evaluate predicate pairs restraints
-  sd->get_model()->update();
-  do {
-    unsigned int cur_nframes = std::min<unsigned int>(
-        first_only ? max_frames_per_chunk / 10 : max_frames_per_chunk,
-        number_of_frames);
-    // IMP_THREADS((sd, silent_statistics, cur_nframes),{
-    std::cout << "Optimizing for " << cur_nframes << " frames in this iteration"
-              << std::endl;
-    sd->get_bd()->optimize(cur_nframes);
-    print_score_and_positions(sd);
-    if (!silent_statistics) {
-      sd->update_statistics(timer, cur_nframes);
-    }
-    std::cout << "Done" << std::endl;
-    //});
-    if (sd->get_maximum_number_of_minutes() > 0 &&
-        total_time.elapsed() / 60 > sd->get_maximum_number_of_minutes()) {
-      sd->set_interrupted(true);
-      std::cout << "Terminating..." << std::endl;
-      return false;
-    }
-    number_of_frames -= cur_nframes;
-  } while (number_of_frames > 0 && !first_only);
-  return true;
-}
-}
+     @note if first_only==true, make a really short simulation
+
+     @return true if succesful, false if terminated abnormally
+  */
+  bool run_it(SimulationData *sd, unsigned int number_of_frames,
+              boost::timer &timer, boost::timer &total_time,
+              bool silent_statistics = false,
+              unsigned int max_frames_per_chunk = 50000) {
+    // TODO: next line is a temporary hack - needed for some reason to
+    // force the pair predicates to evaluate predicate pairs restraints
+    sd->get_model()->update();
+    do {
+      unsigned int cur_nframes = std::min<unsigned int>
+        ( first_only ? max_frames_per_chunk / 10 : max_frames_per_chunk,
+          number_of_frames);
+      // IMP_THREADS((sd, silent_statistics, cur_nframes),{
+      std::cout << "Optimizing for " << cur_nframes << " frames in this iteration"
+                << std::endl;
+      sd->get_bd()->optimize(cur_nframes);
+      print_score_and_positions(sd);
+      if (!silent_statistics) {
+        sd->update_statistics(timer, cur_nframes);
+      }
+      std::cout << "Done" << std::endl;
+      //});
+      if (sd->get_maximum_number_of_minutes() > 0 &&
+          total_time.elapsed() / 60 > sd->get_maximum_number_of_minutes()) {
+        sd->set_interrupted(true);
+        std::cout << "Terminating..." << std::endl;
+        return false;
+      }
+      number_of_frames -= cur_nframes;
+    } while (number_of_frames > 0 && !first_only);
+    return true;
+  }
+
+} // anonymous namespace
 
 /********************* public functions **********************/
 
@@ -246,6 +252,9 @@ bool run_it(SimulationData *sd, unsigned int number_of_frames,
 // program command line parameters
 IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
+  IMP_ALWAYS_CHECK( short_init_factor <= 1.0 && short_init_factor > 0,
+                    "short_init_factor must be in the range (0..1.0]",
+                    IMP::base::ValueException );
   IMP_OMP_PRAGMA(critical)
   std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
   IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
@@ -287,13 +296,11 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   for (unsigned int i = 0; i < sd->get_number_of_trials(); ++i) {
     IMP::base::CreateLogContext clc("iteration");
     boost::timer timer;
-    // IMP::set_log_level(SILENT);
+    //    IMP::base::set_log_level(IMP::base::PROGRESS);
     std::cout << "Simulation trial " << i << " out of "
               << sd->get_number_of_trials() << std::endl;
     if (is_initial_optimization) {
       std::cout << "Doing initial coordinates optimization..." << std::endl;
-      double short_init_factor = 1.0;
-      if(short_initialize) short_init_factor = 0.01;
       initialize_positions(sd, init_restraints, verbose, short_init_factor);
       sd->get_bd()->set_current_time(0.0);
     }
