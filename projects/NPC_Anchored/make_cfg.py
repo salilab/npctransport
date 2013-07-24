@@ -146,44 +146,44 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nbeads=5)) # XXXXXXXXXXXXXX nbeads=16 is the true number XXXXXXXXXXXXXXXXXXXx
-# add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nbeads = 17, mean_loc=mean_loc)
-# add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nbeads = 33, mean_loc=mean_loc)
-# add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nbeads = 33, mean_loc=mean_loc)
-# add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nbeads=20, mean_loc=mean_loc) # nbeads 20-24 = real number for Nup159, depending how you count double motifs
-# add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nbeads=46, mean_loc=mean_loc)
-# add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nbeads=21, mean_loc=mean_loc) # nbeads 21-27, depending on treratment of double motifs
-# add_fg_based_on(config, "MRCs/Nup100_8copies_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
-# add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
-# add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
-# # Nuclear:
-# add_fg_based_on(config, "MRCs/Nup1_8copies.mrc", k=8, nbeads=27, mean_loc=mean_loc)
-# add_fg_based_on(config, "MRCs/Nup59_16copies.mrc", k=16, nbeads=5, mean_loc=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 265-394 ; Uniprot), which supposedly overlaps some of the FGs
-# add_fg_based_on(config, "MRCs/Nup60_8copies.mrc", k=8, nbeads=11, mean_loc=mean_loc) # nup60 is supposed to tether Nup2 (depending on Gsp1p-GTP (Ran) switch, for which Nup2 has a binding site 583-720 ; Denning, Rexach et al. JCB 2001) ; Nup2 also interacts with cargo 35-50 and RNA (RRM Nup35-type domain) - from Uniprot)
-# add_fg_based_on(config, "MRCs/Nup53_16copies_chimera.mrc", k=16, nbeads=4, mean_loc=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 247-352 ; Uniprot), which supposedly overlaps some of the FGs ; and also a PSE1/Kap121 binding domain in a non-FG fashion, for which there might be a crystal structure (405-438 ; Uniprot)
+mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nbeads=16))
+add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nbeads = 17, mean_loc=mean_loc)
+add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nbeads = 33, mean_loc=mean_loc)
+add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nbeads = 33, mean_loc=mean_loc)
+add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nbeads=20, mean_loc=mean_loc) # nbeads 20-24 = real number for Nup159, depending how you count double motifs
+add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nbeads=46, mean_loc=mean_loc)
+add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nbeads=21, mean_loc=mean_loc) # nbeads 21-27, depending on treratment of double motifs
+add_fg_based_on(config, "MRCs/Nup100_8copies_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
+add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
+add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nbeads=44, mean_loc=mean_loc)
+# Nuclear:
+add_fg_based_on(config, "MRCs/Nup1_8copies.mrc", k=8, nbeads=27, mean_loc=mean_loc)
+add_fg_based_on(config, "MRCs/Nup59_16copies.mrc", k=16, nbeads=5, mean_loc=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 265-394 ; Uniprot), which supposedly overlaps some of the FGs
+add_fg_based_on(config, "MRCs/Nup60_8copies.mrc", k=8, nbeads=11, mean_loc=mean_loc) # nup60 is supposed to tether Nup2 (depending on Gsp1p-GTP (Ran) switch, for which Nup2 has a binding site 583-720 ; Denning, Rexach et al. JCB 2001) ; Nup2 also interacts with cargo 35-50 and RNA (RRM Nup35-type domain) - from Uniprot)
+add_fg_based_on(config, "MRCs/Nup53_16copies_chimera.mrc", k=16, nbeads=4, mean_loc=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 247-352 ; Uniprot), which supposedly overlaps some of the FGs ; and also a PSE1/Kap121 binding domain in a non-FG fashion, for which there might be a crystal structure (405-438 ; Uniprot)
 
 # Add Structural nups as obstacles
 # (Alber et al. 2007b, Deteriming..., Figure 3)
 add_obstacle(config, "MRCs/Nup192_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup188_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup157_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup133_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup120_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nic96_16copies_1.mrc", k=16, R=30, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nic96_16copies_2.mrc", k=16, R=30, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup85_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup84_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup82_8copies_1.mrc", k=8, R=35, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup82_8copies_2.mrc", k=8, R=35, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Nup145C_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Ndc1_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Gle1_8copies.mrc", k=8, R=30, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Gle2_16copies.mrc", k=16, R=23, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Seh1_16copies.mrc", k=16, R=22, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Pom34_16copies.mrc", k=16, R=20, mean_loc=mean_loc)
-# add_obstacle(config, "MRCs/Sec13_16copies.mrc", k=16, R=21, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup188_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup157_16copies.mrc", k=16, R=40, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup133_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup120_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nic96_16copies_1.mrc", k=16, R=30, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nic96_16copies_2.mrc", k=16, R=30, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup85_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup84_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup82_8copies_1.mrc", k=8, R=35, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup82_8copies_2.mrc", k=8, R=35, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Nup145C_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Ndc1_16copies.mrc", k=16, R=30, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Gle1_8copies.mrc", k=8, R=30, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Gle2_16copies.mrc", k=16, R=23, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Seh1_16copies.mrc", k=16, R=22, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Pom34_16copies.mrc", k=16, R=20, mean_loc=mean_loc)
+add_obstacle(config, "MRCs/Sec13_16copies.mrc", k=16, R=21, mean_loc=mean_loc)
 
 # add bounding volumes
 config.box_is_on.lower=1
@@ -194,12 +194,12 @@ config.slab_thickness.lower=max_z - config.fgs[0].radius.lower  # or also upper 
 
 # Add floaters
 kaps= IMP.npctransport.add_float_type(config,
-                                     number=3, # 30
+                                     number=30,
                                      radius=kaps_R,
                                      interactions=12)
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics= IMP.npctransport.add_float_type(config,
-                                              number=3, # 30
+                                              number=30,
                                               radius=kaps_R, #-1,
                                               interactions=0)
 #create_range(nonspecifics.radius, lb = 10, ub = 30, steps = 5, base = 1)
