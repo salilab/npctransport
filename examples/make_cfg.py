@@ -45,7 +45,7 @@ def add_interactions_for_fg(fg_name,
                             k_kap_steps = 1):
     interactionFG_KAP= IMP.npctransport.add_interaction(config,
                                      name0=fg_name,
-                                     name1="kap",
+                                     name1="my_kap",
                                      interaction_k=k_kap_lower,
                                      interaction_range=2)
     if(k_kap_steps > 1):
@@ -54,7 +54,7 @@ def add_interactions_for_fg(fg_name,
                      steps = k_kap_steps)
     interactionFG_CRAP= IMP.npctransport.add_interaction(config,
                                        name0=fg_name,
-                                       name1="crap0",
+                                       name1="my_crap",
                                        interaction_k=0,
                                        interaction_range=0)
 
@@ -69,22 +69,25 @@ config.slab_thickness.lower=150
 config.tunnel_radius.lower=90
 
 fg= IMP.npctransport.add_fg_type(config,
+                                 type_name="my_fg",
                                  number_of_beads=4,
                                  number=1,
                                  radius=6,
                                  interactions=1,
                                  rest_length_factor = 1.5)
 kap= IMP.npctransport.add_float_type(config,
+                                     type_name="my_kap",
                                      number=1,
                                      radius=25,
                                      interactions=12)
 nonspecifics= IMP.npctransport.add_float_type(config,
+                                              type_name="my_crap",
                                               number=1,
                                               radius=25,
                                               interactions=0)
 ###########
 # fg with kaps / craps
-add_interactions_for_fg("fg0",
+add_interactions_for_fg("my_fg",
                         k_kap_lower=1,
                         k_kap_upper=20,
                         k_kap_steps=15)
@@ -98,8 +101,8 @@ config.nonspecific_k.lower= 1.5
 
 # internal FG-FG
 interactionFG_FG= IMP.npctransport.add_interaction(config,
-                                                   name0= "fg0",
-                                                   name1= "fg0",
+                                                   name0= "my_fg",
+                                                   name1= "my_fg",
                                                    interaction_k= 1.5,
                                                    interaction_range= 2)
 ##############

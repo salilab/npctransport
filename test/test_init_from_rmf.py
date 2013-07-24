@@ -18,7 +18,7 @@ class Tests(IMP.test.TestCase):
                           0, True, seed );
         print "num ranges %d" % num
         sd = SimulationData( output_pb_file, False, output_rmf_file );
-        sd.get_m().set_log_level( IMP.SILENT );
+        sd.get_model().set_log_level( IMP.SILENT );
         print "Files are " + output_pb_file + \
               " and " + output_rmf_file
         timer = IMP.npctransport.create_boost_timer()

@@ -15,9 +15,10 @@
 #include "ChainStatisticsOptimizerState.h"
 #include "BipartitePairsStatisticsOptimizerState.h"
 #include <IMP/Model.h>
+#include <IMP/PairContainer.h>
 #include <IMP/atom/BrownianDynamics.h>
 #include <IMP/atom/Hierarchy.h>
-#include <IMP/container/ClosePairContainer.h>
+#include <IMP/container/CloseBipartitePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
 #include <IMP/core/pair_predicates.h>
 #include "linear_distance_pair_scores.h"
@@ -112,7 +113,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
                            // TODO: possibly need be same as diffusers - matter
                            //       of efficiency
 
-  base::Pointer<container::ClosePairContainer> cpc_;
+  // see get_close_diffusers_container()
+  base::Pointer<IMP::PairContainer> close_diffusers_container_;
 
   // generates hash values ('predicates') for ordered types pairs
   // (e.g., pairs of ParticleTypes)
@@ -251,9 +253,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   SimulationData(std::string output_file, bool quick,
                  std::string rmf_file_name = std::string());
 
-  Model *get_m();
+  Model *get_model();
 #ifndef SWIG
-  Model *get_m() const { return m_; }
+  Model *get_model() const { return m_; }
 #endif
   double get_range() const { return range_; }
   atom::BrownianDynamics *get_bd();
@@ -271,10 +273,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   LinearWellPairScores get_backbone_scores() const { return backbone_scores_; }
 
   /**
-     a close pair container for all diffusers except diffusers that
-     appear consecutively within the model (e.g., fg repeats)
+     a pair container that returns all pairs of particles (a,b) such that:
+     1) a is an optimizable diffuser particle and b is any diffuser
+        particle (static or not).
+     2) a and b are close (sphere surfaces within range get_range())
+     3) a and b do not appear consecutively within the model (e.g., fg repeats)
+
+     @note TODO: right now will not return any consecutive particles - that's
+                 erroneous though may be negligible
   */
-  container::ClosePairContainer *get_cpc();
+  IMP::PairContainer *get_close_diffusers_container();
 
   /**
      Returns the container for restraints over pairs of particles. Different
@@ -282,7 +290,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
      are used for particles of different (ordered) particle types.
      When called for the first time, returns a new PredicatePairsRestraints
      over all diffusing particles and sets a default linear repulsion restraint
-     between all close pairs returned by get_cpc()
+     between all pairs returned by get_close_diffusers_container()
   */
   container::PredicatePairsRestraint *get_predr();
 

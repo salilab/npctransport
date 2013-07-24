@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     IMP_NEW(IMP::npctransport::SimulationData, sd,
             (assignment, true /* quick */));
     sd->set_rmf_file_name(output);
-    sd->get_m()->set_log_level(IMP::base::SILENT);
+    sd->get_model()->set_log_level(IMP::base::SILENT);
     std::cout << "Files are " << assignment << " and " << output << std::endl;
     IMP::npctransport::do_main_loop(sd, IMP::RestraintsTemp());
   }

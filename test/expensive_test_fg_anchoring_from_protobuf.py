@@ -22,6 +22,7 @@ class Tests(IMP.test.TestCase):
         config.box_is_on.lower=1
         config.box_side.lower=300
         fgs= IMP.npctransport.add_fg_type(config,
+                                          type_name="my_fg",
                                           number_of_beads=2, # 16, # 17 is real number for Nup49 ; 15 for Nup57
                                           number=3,
                                           radius=6,

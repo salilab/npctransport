@@ -21,7 +21,7 @@ Particle *create_particle(SimulationData *sd, double radius,
                           double angular_D_factor, double D_factor,
                           display::Color c, core::ParticleType type,
                           std::string name) {
-  core::XYZR pc = core::XYZR::setup_particle(new Particle(sd->get_m()));
+  core::XYZR pc = core::XYZR::setup_particle(new Particle(sd->get_model()));
   pc->set_name(name);
   pc.set_radius(radius);
   pc.set_coordinates(algebra::get_zero_vector_d<3>());
@@ -81,7 +81,7 @@ Particle *create_chain(SimulationData *sd, int n, double radius,
       create_chain_restraint(ret, ps, name + "chain restraint");
   sd->add_chain_restraint(cr);
   atom::Hierarchy root =
-      atom::Hierarchy::setup_particle(new Particle(sd->get_m()), ret);
+      atom::Hierarchy::setup_particle(new Particle(sd->get_model()), ret);
   root->set_name(name);
   return root;
 }

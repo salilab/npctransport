@@ -34,6 +34,7 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/core/DistancePairScore.h>
 #include <IMP/core/SphereDistancePairScore.h>
 #include <IMP/core/HarmonicUpperBound.h>
+#include <IMP/core/pair_predicates.h>
 #include <IMP/core/RestraintsScoringFunction.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/core/generic.h>
@@ -134,7 +135,7 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   }
 
   // create particles hierarchy
-  root_ = new Particle(get_m());
+  root_ = new Particle(get_model());
   root_->add_attribute(get_simulation_data_key(), this);
   atom::Hierarchy hr = atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
@@ -202,7 +203,7 @@ void SimulationData::create_fgs(
     fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
     chain_stats_.push_back(ChainStatisticsOptimizerStates());
     ParticlesTemp cur_particles;
-    atom::Hierarchy hi = atom::Hierarchy::setup_particle(new Particle(get_m()));
+    atom::Hierarchy hi = atom::Hierarchy::setup_particle(new Particle(get_model()));
     hi->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(hi);
     double rlf = data.rest_length_factor().value();
@@ -265,7 +266,7 @@ void SimulationData::create_floaters(
     }
     // create a sub hierarchy with this type of floaters:
     atom::Hierarchy cur_root =
-        atom::Hierarchy::setup_particle(new Particle(get_m()));
+        atom::Hierarchy::setup_particle(new Particle(get_model()));
     IMP_LOG(WARNING,  "   type " << type.get_string() << std::endl);
     cur_root->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(cur_root);
@@ -314,7 +315,7 @@ void SimulationData::create_obstacles
   obstacles_updated_ = false; // cause this method will add some
   // create a sub hierarchy with this type of floaters:
   atom::Hierarchy cur_root =
-    atom::Hierarchy::setup_particle(new Particle(get_m()));
+    atom::Hierarchy::setup_particle(new Particle(get_model()));
   IMP_LOG(WARNING,  "   obstacle type " << type.get_string() << std::endl);
   cur_root->set_name(type.get_string());
   atom::Hierarchy(get_root()).add_child(cur_root);
@@ -366,7 +367,7 @@ void SimulationData::create_slab_restraint_on_diffusers() {
       slab_score.get(), get_diffusers(), "bounding slab");
 }
 
-Model *SimulationData::get_m() {
+Model *SimulationData::get_model() {
   set_was_used(true);
   if (!m_) {
     m_ = new Model("NPC model %1%");
@@ -523,30 +524,75 @@ container::ListSingletonContainer *SimulationData::get_diffusers() {
                     "Set and get particles don't match");
     diffusers_updated_ = true;
     obstacles_updated_ = true;
+    // if predicate pair restraint was already set - need to update it
+    // note that this will cause a recursion, which should be fine
+    if(predr_) {
+      predr_=nullptr;
+      get_predr(); // just to update
+    }
+
   }
   return diffusers_;
 }
 
 // a close pair container for all diffusers
-container::ClosePairContainer *SimulationData::get_cpc() {
-  if (!cpc_) {
-    cpc_ = new container::ClosePairContainer(get_diffusers(), range_, slack_);
-    cpc_->add_pair_filter(new container::ExclusiveConsecutivePairFilter());
-  }
-  return cpc_;
+IMP::PairContainer
+*SimulationData::get_close_diffusers_container()
+{
+  // TODO: only get_diffusers() sets updated to true, but that's ok, cause we
+  //       call get_diffusers(). But it may be bug prone - check it out in
+  //       the future.
+  if (!close_diffusers_container_ || !diffusers_updated_ || !obstacles_updated_)
+    {
+      // populate a list of optimizable (spatially dynamic) diffusers
+      IMP::ParticlesTemp optimizable_diffusers;
+      IMP_CONTAINER_FOREACH
+        (container::ListSingletonContainer,
+         get_diffusers(),
+         {
+           if(core::XYZ::get_is_setup(get_model(), _1)) {
+             core::XYZ p_xyz(get_model(), _1);
+             if(p_xyz.get_coordinates_are_optimized()){
+               optimizable_diffusers.push_back
+                 ( get_model()->get_particle(_1) );
+             }
+           }
+         }
+         );
+      // create the cbpc and store it in close_diffusers_container_
+      IMP_NEW( container::CloseBipartitePairContainer, cpc,
+               ( optimizable_diffusers, get_diffusers(),
+                 get_range(), slack_) );
+      // IMP_NEW( container::ClosePairContainer, cpc,
+      //         ( get_diffusers(),
+      //           get_range(), slack_) );
+      IMP_NEW( container::ExclusiveConsecutivePairFilter, ecpf, () );
+      IMP_NEW( core::AllSamePairPredicate, aspp, () );//bipartite can do same
+      cpc->add_pair_filter( ecpf );
+      cpc->add_pair_filter( aspp );
+      close_diffusers_container_ = cpc;
+      // if predicate pair restraint was already set - need to update it
+      // note that this will cause a recursion, which should be fine
+      if(predr_) {
+        predr_=nullptr;
+        get_predr(); // just to update
+      }
+    }
+  return close_diffusers_container_;
 }
 
 container::PredicatePairsRestraint *SimulationData::get_predr() {
   if (!predr_) {
     // set linear repulsion upon penetration between all close pairs
-    // returned by get_cpc(), with different scores for interactions
+    // returned by get_close_diffusers_container(), with different scores for interactions
     // between particles of different (ordered) types
     IMP_NEW(core::OrderedTypePairPredicate, otpp, ());
     otpp_ = otpp;
-    IMP_NEW(container::PredicatePairsRestraint, ppr, (otpp, get_cpc()));
-    predr_ = ppr;
+    IMP_NEW(container::PredicatePairsRestraint, ppr,
+            (otpp, get_close_diffusers_container()) );
     IMP_NEW(LinearSoftSpherePairScore, ssps, (excluded_volume_k_));
     ppr->set_unknown_score(ssps.get());
+    predr_ = ppr;
   }
   return predr_;
 }
@@ -649,7 +695,7 @@ void SimulationData::add_interaction(
   if (set0.size() > 0 && set1.size() > 0) {
     InteractionType interaction_type = std::make_pair(type0, type1);
     IMP_NEW(BipartitePairsStatisticsOptimizerState, bpsos,
-            (get_m(), interaction_type, set0, set1, stats_contact_range));
+            (get_model(), interaction_type, set0, set1, stats_contact_range));
     bpsos->set_period(statistics_interval_frames_);
     interactions_stats_.push_back(bpsos);
   }

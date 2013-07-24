@@ -152,7 +152,7 @@ IMP::base::Pointer<core::MonteCarlo> create_mc(
                              round
 */
 void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
-                    const PairPredicates &excluded,
+                    const PairPredicates excluded,
                     rmf::SaveOptimizerState *save,
                     atom::BrownianDynamics *local, LinearWellPairScores dps,
                     base::LogLevel ll, bool debug,
@@ -356,8 +356,16 @@ void initialize_positions(SimulationData *sd,
       sd->get_rmf_sos_writer()->set_period(100);
     }
   }
-  optimize_balls(sd->get_diffusers()->get_particles(), rss,
-                 sd->get_cpc()->get_pair_filters(), sd->get_rmf_sos_writer(),
+  // avoid consecutive particles, e.g. consecutive FG repeats
+  // NOTE/TODO: this is an error, since consecutive particles in
+  //            the model may not be so in the chain itself
+  PairPredicates excluded;
+  IMP_NEW( container::ExclusiveConsecutivePairFilter, ecpf, () );
+  excluded.push_back(ecpf);
+  optimize_balls(sd->get_diffusers()->get_particles(),
+                 rss,
+                 excluded ,
+                 sd->get_rmf_sos_writer(),
                  sd->get_bd(), sd->get_backbone_scores(), base::PROGRESS,
                  debug, short_init_factor);
   print_fgs(*sd);

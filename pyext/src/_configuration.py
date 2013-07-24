@@ -64,7 +64,8 @@ def add_fg_type(config, type_name, number_of_beads, number, radius,
 
 def add_float_type(config, number, radius,
                    interactions=1,  d_factor=1,
-                interaction_k_factor=1, interaction_range_factor=1):
+                interaction_k_factor=1, interaction_range_factor=1,
+                   type_name=None):
     f= config.floaters.add()
     f.number.lower=number
     f.radius.lower=radius
@@ -72,18 +73,31 @@ def add_float_type(config, number, radius,
     f.d_factor.lower=d_factor
     f.interaction_k_factor.lower=interaction_k_factor
     f.interaction_range_factor.lower=interaction_range_factor
+    if(type_name <> None):
+        f.type = type_name
     return f
 
-def add_obstacle_type(config, type_name, R, is_static=1,
-                   interactions=0,  d_factor=1,
-                interaction_k_factor=1, interaction_range_factor=1):
+def add_obstacle_type(config, type_name, R, xyzs=[],
+                      is_static=1,
+                      interactions=0,  d_factor=1,
+                      interaction_k_factor=1, interaction_range_factor=1):
     """
     add an obstacle type name type_name, with radius R
     Note that the .xyzs vector field must be filled in to get actual instances
+    and is by default empty
+
+    params:
+    xyzs - an array of x,y,z coordinates triplets
     """
     o= config.obstacles.add()
     o.type = type_name
     o.radius.lower= R
+    for xyz in xyzs:
+        assert(len(xyz) == 3)
+        new_xyz=o.xyzs.add()
+        new_xyz.x = xyz[0]
+        new_xyz.y = xyz[1]
+        new_xyz.z = xyz[2]
     o.interactions.lower= interactions
     o.is_static= is_static
     o.d_factor.lower= d_factor

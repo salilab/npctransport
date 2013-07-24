@@ -72,6 +72,7 @@ def make_simple_cfg(outfile, is_slab_on = True, n_particles_factor = 1):
     config.slab_thickness.lower=150
     config.tunnel_radius.lower=90
     fg= IMP.npctransport.add_fg_type(config,
+                                 type_name="my_fg",
                                  number_of_beads=int(math.floor(2 * n_particles_factor)),
                                  number=int(math.floor(1 * n_particles_factor)),
                                  radius=6,
@@ -85,9 +86,14 @@ def make_simple_cfg(outfile, is_slab_on = True, n_particles_factor = 1):
                                                   number=int(math.ceil(1 * n_particles_factor)),
                                                   radius=20,
                                                   interactions=0)
+    obstacle_xyzs = [[10.0,30.0,0.0], [-10.0,30.0,0.0]]
+    obstacle= IMP.npctransport.add_obstacle_type(config,
+                                                 type_name="my_obstacle",
+                                                 R=20,
+                                                 xyzs = obstacle_xyzs)
     ###########
     # fg with kaps / craps
-    add_interactions_for_fg("fg0",
+    add_interactions_for_fg("my_fg",
                             k_kap_lower=0.1)
      #############
 
@@ -97,8 +103,8 @@ def make_simple_cfg(outfile, is_slab_on = True, n_particles_factor = 1):
 
     # internal FG-FG
     interactionFG_FG= IMP.npctransport.add_interaction(config,
-                                                       name0= "fg0",
-                                                       name1= "fg0",
+                                                       name0= "my_fg",
+                                                       name1= "my_fg",
                                                        interaction_k= 0.1,
                                                        interaction_range= 2)
     ##############

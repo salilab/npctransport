@@ -146,7 +146,7 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nbeads=15))
+mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nbeads=5)) # XXXXXXXXXXXXXX nbeads=16 is the true number XXXXXXXXXXXXXXXXXXXx
 # add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nbeads = 17, mean_loc=mean_loc)
 # add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nbeads = 33, mean_loc=mean_loc)
 # add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nbeads = 33, mean_loc=mean_loc)

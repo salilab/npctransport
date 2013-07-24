@@ -213,7 +213,7 @@ bool run_it(SimulationData *sd, unsigned int number_of_frames,
             unsigned int max_frames_per_chunk = 50000) {
   // TODO: next line is a temporary hack - needed for some reason to
   // force the pair predicates to evaluate predicate pairs restraints
-  sd->get_m()->update();
+  sd->get_model()->update();
   do {
     unsigned int cur_nframes = std::min<unsigned int>(
         first_only ? max_frames_per_chunk / 10 : max_frames_per_chunk,

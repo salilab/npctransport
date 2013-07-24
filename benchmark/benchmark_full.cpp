@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
     }
     sd = new IMP::npctransport::SimulationData(output, false);
 
-    sd->get_m()->update();
+    sd->get_model()->update();
     double timev, score = 0;
     IMP_TIME(score += sd->get_bd()->optimize(1000), timev);
 #ifdef _OMP
