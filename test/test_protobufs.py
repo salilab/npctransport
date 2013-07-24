@@ -16,6 +16,7 @@ class ConeTests(IMP.test.TestCase):
         IMP.npctransport.create_range(config.nonspecific_k, .2, 20, 3)
 
         fg= IMP.npctransport.add_fg_type(config,
+                                         type_name="fg",
                                          number_of_beads=10,
                                          number=1,
                                          radius=10,
@@ -28,10 +29,14 @@ class ConeTests(IMP.test.TestCase):
         IMP.npctransport.create_range(kap.number,0, 10,3)
         IMP.npctransport.create_range(kap.interactions, 1, 10, 3)
 
-        interaction= IMP.npctransport.add_interaction(config, "fg0", "fg0")
+        obstacle = IMP.npctransport.add_obstacle_type \
+            (config, type_name="obstacle", R=10)
+        IMP.npctransport.create_range(obstacle.radius, 1, 10, 3)
+
+        interaction= IMP.npctransport.add_interaction(config, "fg", "fg")
         IMP.npctransport.create_range(interaction.is_on,0,1,2)
 
-        interaction= IMP.npctransport.add_interaction(config, "fg0", "kap")
+        interaction= IMP.npctransport.add_interaction(config, "fg", "kap")
         f=open(name, "wb")
         f.write(config.SerializeToString())
     def test_1(self):
@@ -49,7 +54,7 @@ class ConeTests(IMP.test.TestCase):
         self.assertAlmostEqual(assign.interaction_k.value, .2, delta=.0000001)
         self.assertEqual(assign.interactions[0].is_on.value, 0)
         num= IMP.npctransport.get_number_of_work_units(config_name)
-        self.assertEqual(num, 5*5*3*3*3*3*3*2)
+        self.assertEqual(num, 5*5*3*3*3*3*3*3*2) # all options
         assignment_name= self.get_tmp_file_name("final.pb")
         IMP.npctransport.assign_ranges(config_name, assignment_name, num-1, True, seed)
         f=open(assignment_name, "rb")
