@@ -73,7 +73,8 @@ double get_time_step(double max_d_factor, double max_k, double min_radius,
 }
 
 double get_time_step(const ::npctransport_proto::Assignment& config,
-                     double max_trans_relative_to_radius) {
+                     double max_trans_relative_to_radius)
+{
   double time_step_factor = config.time_step_factor().value();
   double max_d_factor = 1;
   double min_radius = std::numeric_limits<double>::max();
