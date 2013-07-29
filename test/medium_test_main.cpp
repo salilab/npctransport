@@ -5,6 +5,7 @@
  */
 
 #define IMP_NPC_MAIN
+#include <IMP/npctransport/Scoring.h>
 #include <IMP/npctransport.h>
 #include <IMP/npctransport/main.h>
 #include <IMP/base/exception.h>

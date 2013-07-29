@@ -98,7 +98,8 @@ Scoring::get_close_diffusers_container() const
       // populate a list of optimizable (spatially dynamic) diffusers
       IMP::ParticlesTemp all_diffusers;
       IMP::ParticlesTemp optimizable_diffusers;
-      IMP::Model* m = get_sd()->get_model();
+      IMP::Model* m =
+        const_cast<Scoring*>(this)->get_sd()->get_model();
       IMP_CONTAINER_FOREACH
         (container::ListSingletonContainer,
          get_diffusers(),
@@ -291,7 +292,7 @@ void Scoring::create_slab_restraint_on_diffusers()  {
 container::ListSingletonContainer const*
 Scoring::get_diffusers() const
 {
-  return const_cast<SimulationData*>(get_sd())->get_diffusers();
+  return const_cast<Scoring*>(this)->get_sd()->get_diffusers();
 }
 
 

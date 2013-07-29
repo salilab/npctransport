@@ -24,7 +24,7 @@
 #include <IMP/core/Typed.h>
 #include "linear_distance_pair_scores.h"
 #include "Parameter.h"
-#include "SimulationData.h"
+//#include "SimulationData.h"
 #include "SlabSingletonScore.h"
 
 #include <boost/timer.hpp>
@@ -41,6 +41,8 @@ namespace npctransport_proto {
 #endif
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
+
+class SimulationData;
 
 class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 {
@@ -64,7 +66,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
  private:
 
-  base::WeakPointer<SimulationData> owner_sd_;
+  base::UncheckedWeakPointer<SimulationData> owner_sd_;
 
   /* NOTE: the following ar mutable cause they do not affect the
      external logical state of the scoring functions
@@ -125,10 +127,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
     return owner_sd_;
   }
 
-  /** return the SimulationData object that owns this ScoringFunction */
-  SimulationData const* get_sd() const{
-    return owner_sd_;
-  }
 
   /**
      a pair container that returns all pairs of particles (a,b) such that:

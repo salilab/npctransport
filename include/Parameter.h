@@ -13,26 +13,36 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-#ifndef SWIG
 template <class T>
-struct Parameter {
+class Parameter {
+ private:
   T t_;
   bool init_;
 
-public:
-Parameter() : init_(false) {}
+ public:
+ Parameter() : init_(false) {}
+
+ Parameter(T t) : t_(t), init_(true) {}
+
+  T get_value() const {
+  IMP_USAGE_CHECK(init_, "Not initialized");
+  return t_;
+  }
+
+#ifndef SWIG
   operator T() const {
-    IMP_USAGE_CHECK(init_, "Not initialized");
-    return t_;
-  }
+  return get_value();
+}
+
   void operator=(T t) {
-    t_ = t;
-    init_ = true;
-  }
-    bool is_init() { return init_; }
+  t_ = t;
+  init_ = true;
+}
+#endif
+
+  bool is_init() { return init_; }
 };
 
-#endif
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

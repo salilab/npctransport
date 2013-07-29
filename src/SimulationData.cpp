@@ -68,6 +68,7 @@ SimulationData::SimulationData(std::string output_file, bool quick,
 }
 
 void SimulationData::initialize(std::string output_file, bool quick) {
+  ::npctransport_proto::Output pb_data_;
   output_file_name_ = output_file;
   std::ifstream file(output_file_name_.c_str(), std::ios::binary);
   bool read = pb_data_.ParseFromIstream(&file);
@@ -96,6 +97,8 @@ void SimulationData::initialize(std::string output_file, bool quick) {
     number_of_frames_ = 2;
     number_of_trials_ = 1;
   }
+  // initialize scoring
+  scoring_ = new Scoring(this, pb_assignment);
 
   // create particles hierarchy
   root_ = new Particle(get_model());
@@ -474,9 +477,7 @@ void SimulationData::reset_rmf() {
 
 Scoring * SimulationData::get_scoring()
 {
-  if(scoring_ == nullptr){
-    scoring_ = new Scoring(this, pb_data_.assignment());
-  }
+  IMP_USAGE_CHECK(scoring_ != nullptr, "Null scoring");
   return scoring_;
 }
 

@@ -8,8 +8,8 @@
 #ifndef IMPNPCTRANSPORT_SIMULATION_DATA_H
 #define IMPNPCTRANSPORT_SIMULATION_DATA_H
 
+
 #include "npctransport_config.h"
-#include <IMP/npctransport/Scoring.h>
 #include <IMP/Model.h>
 #include <IMP/PairContainer.h>
 #include <IMP/atom/BrownianDynamics.h>
@@ -43,20 +43,11 @@ struct timer {};
 #endif
 #ifndef SWIG
 namespace npctransport_proto {
-class Output;
 class Assignment_FGAssignment;
 class Assignment_InteractionAssignment;
 class Assignment_FloaterAssignment;
 class Assignment_ObstacleAssignment;
 }
-#ifdef IMP_NPC_GOOGLE
-IMP_GCC_PUSH_POP(diagnostic push)
-IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-IMP_GCC_PUSH_POP(diagnostic pop)
-#else
-#include <IMP/npctransport/internal/npctransport.pb.h>
-#endif // IMP_NPC_GOOGLE
 #endif // SWIG
 
 
@@ -64,10 +55,6 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
  private:
-#ifndef SWIG
-  // protobuf data used for assignment
-  ::npctransport_proto::Output
-    pb_data_;
   // params
   Parameter<double> box_side_;
   Parameter<double> tunnel_radius_;
@@ -83,7 +70,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<double> time_step_;
   Parameter<double> statistics_fraction_;
   Parameter<double> maximum_number_of_minutes_;
-#endif
+
   // the model on which the simulation is run
   base::Pointer<Model> m_;
 
@@ -91,7 +78,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   base::Pointer<atom::BrownianDynamics> bd_;
 
   // The scoring function wrapper for the simulation
-   base::Pointer<Scoring> scoring_;
+  base::Pointer< IMP::npctransport::Scoring >
+    scoring_;
 
   // keeps track of whether the diffusers list has
   // changed (can be invalid if particles added)
@@ -161,21 +149,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   boost::tuple<double, double, double, double> get_interactions_and_interacting(
       const ParticlesTemp &kaps, const base::Vector<ParticlesTemps> &fgs) const;
 
-  /** mark that the list of diffusers may have changed recently */
-  void set_diffusers_changed(bool is_changed){
-    diffusers_changed_ = is_changed;
-    if(diffusers_changed_){
-      get_scoring()->update_particles();
-    }
-  }
-
-  /** mark that the list of obstacles may have changed recently */
-  void set_obstacles_changed(bool is_changed){
-    obstacles_changed_ = is_changed;
-    if(obstacles_changed_){
-      get_scoring()->update_particles();
-    }
-  }
 
   /**
      Adds the FG Nup chains to the model hierarchy,
@@ -183,8 +156,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
      @param fg_data data for fgs of this type in protobuf format as specified
                  in data/npctransport.proto
-     @param default_type for backward compatibility only, a default type of particle
-                         if one is not specified in data.type
    */
 void create_fgs
 ( const ::npctransport_proto::Assignment_FGAssignment &fg_data );
@@ -453,6 +424,23 @@ void create_fgs
   void set_rmf_file_name(const std::string &new_name);
 
   IMP_OBJECT_METHODS(SimulationData);
+ private:
+  /** mark that the list of diffusers may have changed recently */
+  void set_diffusers_changed(bool is_changed){
+    diffusers_changed_ = is_changed;
+    if(diffusers_changed_){
+      get_scoring()->update_particles();
+    }
+  }
+
+  /** mark that the list of obstacles may have changed recently */
+  void set_obstacles_changed(bool is_changed){
+    obstacles_changed_ = is_changed;
+    if(obstacles_changed_){
+      get_scoring()->update_particles();
+    }
+  }
+
 };
 
 inline IMPNPCTRANSPORTEXPORT boost::timer create_boost_timer() {
