@@ -256,6 +256,36 @@ inline double LinearWellPairScore::evaluate_index(
 
 IMP_OBJECTS(LinearWellPairScore, LinearWellPairScores);
 
+
+/** An RAII class for rescaling the x0 length of a LinearWellPairScore
+    by some factor f (upon construction or using set()). Restores the
+    original value upon destruction
+*/
+class LinearWellSetLength : public base::RAII {
+  base::WeakPointer<LinearWellPairScore> ps_;
+  double orig_;
+  bool was_set_;
+
+ public:
+  IMP_RAII
+    ( LinearWellSetLength, (LinearWellPairScore *ps, double f),
+      { //Initialize
+        was_set_ = false;
+      },
+      { // Set
+        was_set_ = true;
+        ps_ = ps;
+        orig_ = ps_->get_x0();
+        ps_->set_x0(orig_ * f);
+      },
+      { // Reset
+        if(was_set_){
+          ps_->set_x0(orig_);
+        }
+      },
+      { // Show });
+      } );
+};
 IMPNPCTRANSPORT_END_NAMESPACE
 
 #endif /* IMPNPCTRANSPORT_LINEAR_DISTANCE_PAIR_SCORES_H */

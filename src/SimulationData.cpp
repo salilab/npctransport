@@ -1,8 +1,8 @@
 /**
- *  \file simulation_data.cpp
+ *  \file SimulationData.cpp
  *  \brief description.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -27,12 +27,8 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
-#include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/base/log.h>
-#include <IMP/container/ConsecutivePairContainer.h>
-#include <IMP/core/DistancePairScore.h>
-#include <IMP/core/SphereDistancePairScore.h>
 #include <IMP/core/HarmonicUpperBound.h>
 #include <IMP/core/pair_predicates.h>
 #include <IMP/core/RestraintsScoringFunction.h>
@@ -54,78 +50,45 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <set>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-#define GET_ASSIGNMENT(name) name##_ = data.assignment().name().value()
-#define GET_VALUE(name) name##_ = data.assignment().name()
+#define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()
+#define GET_VALUE(name) name##_ = pb_assignment.name()
 
 SimulationData::SimulationData(std::string output_file, bool quick,
                                std::string rmf_file_name)
 : Object("SimulationData%1%"),
-  diffusers_updated_(false),
-  obstacles_updated_(false),
+  m_(nullptr),
+  bd_(nullptr),
+  scoring_(nullptr),
+  diffusers_changed_(false),
+  obstacles_changed_(false),
   rmf_file_name_(rmf_file_name),
-  is_stats_reset_(false) {
+  is_stats_reset_(false)
+{
   initialize(output_file, quick);
-}
-
-namespace {
-
-void load_conformation(
-    const ::npctransport_proto::Conformation &conformation,
-    SingletonContainer *diffusers,
-    base::map<core::ParticleType, algebra::Vector3Ds> &sites) {
-  IMP_CONTAINER_FOREACH(SingletonContainer, diffusers, {
-    const ::npctransport_proto::Conformation_Particle &pcur =
-        conformation.particle(_2);
-    core::RigidBody rb(diffusers->get_model(), _1);
-    algebra::Vector3D translation(pcur.x(), pcur.y(), pcur.z());
-    algebra::Rotation3D rotation(
-        algebra::Vector4D(pcur.r(), pcur.i(), pcur.j(), pcur.k()));
-
-    algebra::Transformation3D tr(rotation, translation);
-    rb.set_reference_frame(algebra::ReferenceFrame3D(tr));
-  });
-  for (int i = 0; i < conformation.sites_size(); ++i) {
-    const ::npctransport_proto::Conformation::Sites &cur =
-        conformation.sites(i);
-    core::ParticleType pt(cur.name());
-    sites[pt].clear();
-    for (int j = 0; j < cur.coordinates_size(); ++j) {
-      const ::npctransport_proto::Conformation::Coordinates &coords =
-          cur.coordinates(j);
-      sites[pt]
-          .push_back(algebra::Vector3D(coords.x(), coords.y(), coords.z()));
-    }
-  }
-}
 }
 
 void SimulationData::initialize(std::string output_file, bool quick) {
   output_file_name_ = output_file;
-  ::npctransport_proto::Output data;
-  data.mutable_statistics();
   std::ifstream file(output_file_name_.c_str(), std::ios::binary);
-  bool read = data.ParseFromIstream(&file);
+  bool read = pb_data_.ParseFromIstream(&file);
   if (!read) {
-    IMP_THROW("Unable to read from protobuf", base::IOException);
+    IMP_THROW("Unable to read data from protobuf" << output_file_name_,
+              base::IOException);
   }
-  GET_ASSIGNMENT(interaction_k);
-  GET_ASSIGNMENT(interaction_range);
-  GET_ASSIGNMENT(backbone_k);
+  pb_data_.mutable_statistics(); // create it if not there
+  const ::npctransport_proto::Assignment &
+      pb_assignment= pb_data_.assignment();
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
   GET_ASSIGNMENT(slab_thickness);
   GET_ASSIGNMENT(slab_is_on);
   GET_ASSIGNMENT(box_is_on);
-  GET_ASSIGNMENT(slack);
   GET_VALUE(number_of_trials);
   GET_VALUE(number_of_frames);
   GET_VALUE(dump_interval_frames);
-  GET_ASSIGNMENT(nonspecific_k);
-  GET_ASSIGNMENT(nonspecific_range);
   GET_ASSIGNMENT(angular_d_factor);
-  GET_VALUE(statistics_interval_frames);
-  GET_ASSIGNMENT(excluded_volume_k);
   GET_VALUE(range);
+  GET_VALUE(statistics_interval_frames);
   GET_VALUE(time_step);
   GET_ASSIGNMENT(statistics_fraction);
   GET_VALUE(maximum_number_of_minutes);
@@ -139,49 +102,52 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   root_->add_attribute(get_simulation_data_key(), this);
   atom::Hierarchy hr = atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
-  for (int i = 0; i < data.assignment().fgs_size(); ++i) {
-    create_fgs(data.assignment().fgs(i), type_of_fg[i]);
+  for (int i = 0; i < pb_assignment.fgs_size(); ++i) {
+    if (!pb_assignment.fgs(i).has_type()) {
+      std::string type_i = type_of_fg[i].get_string();
+      pb_data_.mutable_assignment()->mutable_fgs(i)
+        ->set_type(type_i);
+    }
+    create_fgs(pb_assignment.fgs(i));
   }
-  for (int i = 0; i < data.assignment().floaters_size(); ++i) {
-    create_floaters(data.assignment().floaters(i), type_of_float[i],
+  for (int i = 0; i < pb_assignment.floaters_size(); ++i) {
+    create_floaters(pb_assignment.floaters(i), type_of_float[i],
                     display::get_display_color(i));
   }
-  for (int i = 0; i < data.assignment().obstacles_size(); ++i) {
-    create_obstacles(data.assignment().obstacles(i));
+  for (int i = 0; i < pb_assignment.obstacles_size(); ++i) {
+    create_obstacles(pb_assignment.obstacles(i));
   }
 
   IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
-  for (int i = 0; i < data.assignment().interactions_size(); ++i) {
+  for (int i = 0; i < pb_assignment.interactions_size(); ++i) {
     const ::npctransport_proto::Assignment_InteractionAssignment &
-        interaction_i = data.assignment().interactions(i);
-    if (interaction_i.is_on().value()) {
-      IMP_LOG(TERSE, "   Adding interacton " << i << std::endl);
-      add_interaction(interaction_i);
-    }
+        interaction_i = pb_assignment.interactions(i);
+    add_interaction(interaction_i);
   }
 
   // bounding box / slab constraints on diffusers
   if (box_is_on_) {
-    create_bounding_box_restraint_on_diffusers();
+    get_scoring()->create_bounding_box_restraint_on_diffusers();
   }
   if (slab_is_on_) {
-    create_slab_restraint_on_diffusers();
+    get_scoring()->create_slab_restraint_on_diffusers();
   }
 
-  if (data.has_rmf_conformation()) {
+  if (pb_data_.has_rmf_conformation()) {
     RMF::FileConstHandle fh =
-        RMF::open_rmf_buffer_read_only(data.rmf_conformation());
+        RMF::open_rmf_buffer_read_only(pb_data_.rmf_conformation());
     initialize_positions_from_rmf(fh, 0);
     // load from output file
-  } else if (data.has_conformation()) {
+  } else if (pb_data_.has_conformation()) {
     std::cout << "Loading from output file " << std::endl ;
-    load_conformation(data.conformation(), get_diffusers(), sites_);
+    load_pb_conformation(pb_data_.conformation(), get_diffusers(), sites_);
   }
-  if (data.has_statistics()) {
-    if (data.statistics().has_bd_simulation_time_ns()) {
+  if (pb_data_.has_statistics()) {
+    if (pb_data_.statistics().has_bd_simulation_time_ns()) {
       const double fs_in_ns = 1.0E+6;
-      get_bd()->set_current_time(data.statistics().bd_simulation_time_ns() *
-                                 fs_in_ns);
+      get_bd()->set_current_time
+        (pb_data_.statistics().bd_simulation_time_ns()
+         * fs_in_ns);
     }
   }
 }
@@ -191,57 +157,59 @@ void SimulationData::initialize(std::string output_file, bool quick) {
    Adds the FG Nup chains to the model hierarchy,
    based on the settings in data
 */
-void SimulationData::create_fgs(
-    const ::npctransport_proto::Assignment_FGAssignment &data,
-    core::ParticleType default_type) {
-  core:: ParticleType type(default_type);
-  if (data.has_type()){
-    type = core::ParticleType(data.type());
-  }
-  diffusers_updated_ = false; // cause this method will add some
-  if (data.number().value() > 0) {
+void SimulationData::create_fgs
+( const ::npctransport_proto::Assignment_FGAssignment &fg_data)
+{
+  // set type
+  core:: ParticleType type(fg_data.type());
+  if (fg_data.number().value() > 0) {
     fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
     chain_stats_.push_back(ChainStatisticsOptimizerStates());
-    ParticlesTemp cur_particles;
-    atom::Hierarchy hi = atom::Hierarchy::setup_particle(new Particle(get_model()));
-    hi->set_name(type.get_string());
-    atom::Hierarchy(get_root()).add_child(hi);
-    double rlf = data.rest_length_factor().value();
-    backbone_scores_.push_back(new LinearWellPairScore(
-        rlf * data.radius().value() * 2.0, backbone_k_));
-    for (int j = 0; j < data.number().value(); ++j) {
-      double dc = data.d_factor().value();
-      atom::Hierarchy hc(create_chain(this, data.number_of_beads().value(),
-                                      data.radius().value(), angular_d_factor_,
-                                      dc, backbone_scores_.back(),
-                                      display::Color(.3, .3, .3), type, "fg"));
-      cur_particles.push_back(hc);
-      ParticlesTemp chain = hc.get_children();
-      if (data.anchor_coordinates_size() > j) {
-        ::npctransport_proto::Assignment_XYZ xyz = data.anchor_coordinates(j);
-        core::XYZ d(chain[0]);
+    ParticlesTemp fg_particles;
+    IMP_NEW( Particle, p, (get_model()) );
+    atom::Hierarchy fg_root = atom::Hierarchy::setup_particle(p);
+    fg_root->set_name(type.get_string());
+    atom::Hierarchy(get_root()).add_child(fg_root);
+    for (int j = 0; j < fg_data.number().value(); ++j) {
+      IMP::Particle* pc=
+        create_fg_chain(this, fg_data, display::Color(.3, .3, .3));
+      atom::Hierarchy hc(pc);
+      fg_root.add_child(hc);
+      fg_particles.push_back(pc);
+      ParticlesTemp chain_beads = hc.get_children();
+      // set chain anchors if specified
+      if (fg_data.anchor_coordinates_size() > j) {
+        ::npctransport_proto::Assignment_XYZ xyz =
+          fg_data.anchor_coordinates(j);
+        core::XYZ d(chain_beads[0]);
         d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
         d.set_coordinates_are_optimized(false);
       }
-      chain_stats_.back().push_back(new ChainStatisticsOptimizerState(chain));
+      // stats
+      chain_stats_.back().push_back
+        ( new ChainStatisticsOptimizerState(chain_beads) );
       chain_stats_.back().back()->set_period(statistics_interval_frames_);
       fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
-      for (unsigned int k = 0; k < chain.size(); ++k) {
+      for (unsigned int k = 0; k < chain_beads.size(); ++k) {
         fgs_stats_.back().back()
-            .push_back(new BodyStatisticsOptimizerState(chain[k]));
+            .push_back( new BodyStatisticsOptimizerState(chain_beads[k]) );
         fgs_stats_.back().back().back()
             ->set_period(statistics_interval_frames_);
       }
-      hi.add_child(atom::Hierarchy(cur_particles.back()));
-      if (data.interactions().value() > 0) {
-        int nsites = data.interactions().value();
-        set_sites(type, nsites, data.radius().value());
-      }
+    } // for j
+    particles_[type] = fg_particles;
+    // add sites for this type
+    if (fg_data.interactions().value() > 0) {
+      int nsites = fg_data.interactions().value();
+      set_sites(type, nsites, fg_data.radius().value());
     }
-    particles_[type] = cur_particles;
-    interaction_range_factors_[type] = data.interaction_range_factor().value();
-    interaction_k_factors_[type] = data.interaction_k_factor().value();
-  }
+    // add general scoring scale factors
+    get_scoring()->set_interaction_range_factor
+    ( type, fg_data.interaction_range_factor().value());
+    get_scoring()->set_interaction_k_factor
+      ( type, fg_data.interaction_k_factor().value());
+    set_diffusers_changed(true);
+  } // if
 }
 
 
@@ -250,14 +218,13 @@ void SimulationData::create_fgs(
    based on the settings in data
 */
 void SimulationData::create_floaters(
-    const ::npctransport_proto::Assignment_FloaterAssignment &data,
+    const ::npctransport_proto::Assignment_FloaterAssignment &f_data,
     core::ParticleType default_type, display::Color color) {
   core:: ParticleType type(default_type);
-  if (data.has_type()){
-    type = core::ParticleType(data.type());
+  if (f_data.has_type()){
+    type = core::ParticleType(f_data.type());
   }
-  diffusers_updated_ = false; // cause this method will add some
-  if (data.number().value() > 0) {
+  if (f_data.number().value() > 0) {
     // prepare statistics for this type of floaters:
     float_stats_.push_back(BodyStatisticsOptimizerStates());
     if (slab_is_on_) {  // if has tunnel, create a list of particle stats
@@ -272,11 +239,12 @@ void SimulationData::create_floaters(
     atom::Hierarchy(get_root()).add_child(cur_root);
     // populate hierarchy with particles:
     ParticlesTemp cur_particles;
-    for (int j = 0; j < data.number().value(); ++j) {
-      double dc = data.d_factor().value();
+    for (int j = 0; j < f_data.number().value(); ++j) {
+      double dc = f_data.d_factor().value();
       Particle *cur_p =
-          create_particle(this, data.radius().value(), angular_d_factor_, dc,
-                          color, type, type.get_string());
+          create_particle(this, f_data.radius().value(),
+                          angular_d_factor_, dc,
+                          color, type);
       cur_particles.push_back(cur_p);
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
       // add particle statistics:
@@ -291,16 +259,21 @@ void SimulationData::create_floaters(
         ptsos->set_period(statistics_interval_frames_);
         float_transport_stats_.back().push_back(ptsos);
       }
-      // add interaction sites to particles of this type:
-      if (data.interactions().value() > 0) {
-        int nsites = data.interactions().value();
-        IMP_LOG(WARNING, nsites << " sites added " << std::endl);
-        set_sites(type, nsites, data.radius().value());
-      }
     }
     particles_[type] = cur_particles;
-    interaction_range_factors_[type] = data.interaction_range_factor().value();
-    interaction_k_factors_[type] = data.interaction_k_factor().value();
+    // add interaction sites to particles of this type:
+    if (f_data.interactions().value() > 0) {
+      int nsites = f_data.interactions().value();
+      IMP_LOG(WARNING, nsites << " sites added " << std::endl);
+      set_sites(type, nsites, f_data.radius().value());
+    }
+    // add type-specific scoring scale factors
+    get_scoring()->set_interaction_range_factor
+    ( type, f_data.interaction_range_factor().value());
+    get_scoring()->set_interaction_k_factor
+      ( type, f_data.interaction_k_factor().value());
+
+    set_diffusers_changed(true);
   }
 }
 
@@ -309,10 +282,9 @@ void SimulationData::create_floaters(
    to the model hierarchy, based on the settings in data
 */
 void SimulationData::create_obstacles
-( const ::npctransport_proto::Assignment_ObstacleAssignment &data)
+( const ::npctransport_proto::Assignment_ObstacleAssignment &o_data)
 {
-  core::ParticleType type = core::ParticleType(data.type());
-  obstacles_updated_ = false; // cause this method will add some
+  core::ParticleType type = core::ParticleType(o_data.type());
   // create a sub hierarchy with this type of floaters:
   atom::Hierarchy cur_root =
     atom::Hierarchy::setup_particle(new Particle(get_model()));
@@ -321,50 +293,81 @@ void SimulationData::create_obstacles
   atom::Hierarchy(get_root()).add_child(cur_root);
   // populate hierarchy with particles:
   ParticlesTemp cur_particles;
-  for (int j = 0; j < data.xyzs_size(); ++j) {
-      double dc = data.d_factor().value();
+  for (int j = 0; j < o_data.xyzs_size(); ++j) {
+      double dc = o_data.d_factor().value();
       Particle *cur_p =
-        create_particle(this, data.radius().value(), angular_d_factor_, dc,
-                        display::Color(.3, .6, .6), type, type.get_string());
+        create_particle(this, o_data.radius().value(),
+                        angular_d_factor_, dc,
+                        display::Color(.3, .6, .6), type);
       cur_particles.push_back( cur_p );
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
-      ::npctransport_proto::Assignment_XYZ xyz = data.xyzs(j);
+      ::npctransport_proto::Assignment_XYZ xyz = o_data.xyzs(j);
       core::XYZ p_xyz(cur_p);
       p_xyz.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
-      p_xyz.set_coordinates_are_optimized( !data.is_static() );
-      // add interaction sites to particles of this type:
-      if (data.interactions().value() > 0) {
-        int nsites = data.interactions().value();
-        IMP_LOG(WARNING, nsites << " sites added " << std::endl);
-        set_sites(type, nsites, data.radius().value());
-      }
-  }
+      p_xyz.set_coordinates_are_optimized( !o_data.is_static() );
+   }
   particles_[type] = cur_particles;
-  interaction_range_factors_[type] = data.interaction_range_factor().value();
-  interaction_k_factors_[type] = data.interaction_k_factor().value();
+  // add interaction sites to particles of this type:
+  if (o_data.interactions().value() > 0) {
+    int nsites = o_data.interactions().value();
+    IMP_LOG(WARNING, nsites << " sites added " << std::endl);
+    set_sites(type, nsites, o_data.radius().value());
+  }
+  // add type-specific scoring scale factors
+  get_scoring()->set_interaction_range_factor
+    ( type, o_data.interaction_range_factor().value());
+  get_scoring()->set_interaction_k_factor
+    ( type, o_data.interaction_k_factor().value());
+  set_obstacles_changed(true);
 }
 
-/**
-   Creates bounding volume restraints such as box restraint and slab restraints,
-   based on the box_size_, slab_height_, slab_radius_, etc. class variables
-*/
-void SimulationData::create_bounding_box_restraint_on_diffusers() {
-  // Add bounding box restraint
-  // TODO: what does backbone_spring_k_ has to do
-  //       with bounding box constraint?
-  IMP_NEW(core::HarmonicUpperBound, hub, (0, excluded_volume_k_));
-  IMP_NEW(core::GenericBoundingBox3DSingletonScore<core::HarmonicUpperBound>,
-          bbss, (hub.get(), get_box()));
-  box_restraint_ =
-      container::create_restraint(bbss.get(), get_diffusers(), "bounding box");
-}
+void SimulationData::add_interaction
+( const ::npctransport_proto::Assignment_InteractionAssignment & idata)
+{
+  // TODO: if diffusers added later, need to update interaction statistics!
+  core::ParticleType type0(idata.type0());
+  core::ParticleType type1(idata.type1());
+  if (idata.is_on().value()) {
+    IMP_LOG(TERSE, "   Adding interacton between " << type0
+            << " and " << type1  << std::endl);
+  } else {
+    return;
+  }
+  get_scoring()->add_interaction(idata);
+  // add statistics about this interaction to interactions_stats_
+  // between all diffusing particles
+  Particles set0, set1; // TODO: turn to a real set?!
+  IMP_CONTAINER_FOREACH // _1 is the particle index
+    ( SingletonContainer,
+      get_diffusers(),
+      {
+        if (IMP::core::Typed(get_model(), _1).get_type() == type0)
+          {
+            set0.push_back( get_model()->get_particle(_1) );
+          }
+        if (IMP::core::Typed(get_model(), _1).get_type() == type1)
+          {
+            set1.push_back( get_model()->get_particle(_1) );
+          }
+      }
+      );
+  double stats_contact_range = 1.5;  // TODO: make a param
+  double stats_slack = 30; // TODO: make a param - this is only efficiency of
+                           //       ClosePairContainer
+  IMP_LOG(PROGRESS,
+          "Interaction " << type0.get_string() << ", " << type1.get_string()
+          << "  sizes: " << set0.size() << ", " << set1.size()
+          << " statistics range: " << stats_contact_range
+          << std::endl);
+  if (set0.size() > 0 && set1.size() > 0) {
+    InteractionType interaction_type = std::make_pair(type0, type1);
+    IMP_NEW(BipartitePairsStatisticsOptimizerState, bpsos,
+            (get_model(), interaction_type, set0, set1,
+             stats_contact_range, stats_slack));
+    bpsos->set_period(statistics_interval_frames_);
+    interactions_stats_.push_back(bpsos);
+  }
 
-void SimulationData::create_slab_restraint_on_diffusers() {
-  // Add cylinder restraint
-  IMP_NEW(SlabSingletonScore, slab_score,
-          (slab_thickness_ /* h */, tunnel_radius_ /*r*/, excluded_volume_k_));
-  slab_restraint_ = container::create_restraint(
-      slab_score.get(), get_diffusers(), "bounding slab");
 }
 
 Model *SimulationData::get_model() {
@@ -394,16 +397,17 @@ void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
 
 void SimulationData::link_rmf_file_handle(RMF::FileHandle fh) {
   IMP_LOG(TERSE, "Setting up dump" << std::endl);
+  Scoring* s=get_scoring();
   add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
-  IMP::rmf::add_restraints(fh, RestraintsTemp(1, get_predr()));
-  IMP::rmf::add_restraints(fh, chain_restraints_);
-  if (get_has_bounding_box()) {
-    IMP::rmf::add_restraints(fh, RestraintsTemp(1, box_restraint_));
+  IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_predr()));
+  IMP::rmf::add_restraints(fh, s->get_chain_restraints());
+  if (s->get_has_bounding_box()) {
+    IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_box_restraint()));
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
     IMP::rmf::add_static_geometries(fh, display::Geometries(1, bbg));
   }
-  if (get_has_slab()) {
-    IMP::rmf::add_restraints(fh, RestraintsTemp(1, slab_restraint_));
+  if (s->get_has_slab()) {
+    IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_slab_restraint()));
     IMP_NEW(SlabWireGeometry, slab_geometry,
             (slab_thickness_, tunnel_radius_, box_side_));
     IMP::rmf::add_static_geometries(fh, slab_geometry->get_components());
@@ -446,12 +450,12 @@ void SimulationData::dump_geometry() {
     g->set_sites(it->first, it->second);
   }
   w->add_geometry(g);
-  if (get_has_bounding_box()) {
+  if (box_is_on_) {
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
     bbg->set_was_used(true);
     w->add_geometry(bbg);
   }
-  if (get_has_slab()) {
+  if (slab_is_on_) {
     IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
     w->add_geometry(cyl_geom);
     // IMP_NEW(SlabWireGeometry, slab_geometry,
@@ -468,6 +472,15 @@ void SimulationData::reset_rmf() {
   }
 }
 
+Scoring * SimulationData::get_scoring()
+{
+  if(scoring_ == nullptr){
+    scoring_ = new Scoring(this, pb_data_.assignment());
+  }
+  return scoring_;
+}
+
+
 atom::BrownianDynamics *SimulationData::get_bd() {
   set_was_used(true);
   if (!bd_) {
@@ -480,13 +493,8 @@ atom::BrownianDynamics *SimulationData::get_bd() {
       bd_->add_optimizer_state(get_rmf_sos_writer());
     }
     //#endif
-    // set up the restraints for the BD simulation:
-    RestraintsTemp rs = chain_restraints_;
-    if (get_has_bounding_box()) rs.push_back(box_restraint_);
-    if (get_has_slab()) rs.push_back(slab_restraint_);
-    rs.push_back(this->get_predr());
-    IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
-    bd_->set_scoring_function(rsf);
+    bd_->set_scoring_function
+      ( get_scoring()->get_scoring_function() );
     // add all kind of observers to the optimization:
     for (unsigned int i = 0; i < fgs_stats_.size(); ++i) {
       for (unsigned int j = 0; j < fgs_stats_[i].size(); ++j) {
@@ -513,8 +521,9 @@ atom::BrownianDynamics *SimulationData::get_bd() {
   return bd_;
 }
 
-container::ListSingletonContainer *SimulationData::get_diffusers() {
-  if (!diffusers_ || !diffusers_updated_ || !obstacles_updated_) {
+container::ListSingletonContainer *
+SimulationData::get_diffusers(){
+  if (!diffusers_ || diffusers_changed_ | obstacles_changed_) {
     diffusers_ = new container::ListSingletonContainer(m_);
     // Add all leaves of the hierarchy as diffusers
     ParticlesTemp leaves = get_as<ParticlesTemp>(atom::get_leaves(get_root()));
@@ -522,79 +531,11 @@ container::ListSingletonContainer *SimulationData::get_diffusers() {
     diffusers_->set_particles(leaves);
     IMP_USAGE_CHECK(leaves.size() == diffusers_->get_indexes().size(),
                     "Set and get particles don't match");
-    diffusers_updated_ = true;
-    obstacles_updated_ = true;
-    // if predicate pair restraint was already set - need to update it
-    // note that this will cause a recursion, which should be fine
-    if(predr_) {
-      predr_=nullptr;
-      get_predr(); // just to update
-    }
-
+    // mark the update
+    set_diffusers_changed(false);
+    set_obstacles_changed(false);
   }
   return diffusers_;
-}
-
-// a close pair container for all diffusers
-IMP::PairContainer
-*SimulationData::get_close_diffusers_container()
-{
-  // TODO: only get_diffusers() sets updated to true, but that's ok, cause we
-  //       call get_diffusers(). But it may be bug prone - check it out in
-  //       the future.
-  if (!close_diffusers_container_ || !diffusers_updated_ || !obstacles_updated_)
-    {
-      // populate a list of optimizable (spatially dynamic) diffusers
-      IMP::ParticlesTemp optimizable_diffusers;
-      IMP_CONTAINER_FOREACH
-        (container::ListSingletonContainer,
-         get_diffusers(),
-         {
-           if(core::XYZ::get_is_setup(get_model(), _1)) {
-             core::XYZ p_xyz(get_model(), _1);
-             if(p_xyz.get_coordinates_are_optimized()){
-               optimizable_diffusers.push_back
-                 ( get_model()->get_particle(_1) );
-             }
-           }
-         }
-         );
-      // create the cbpc and store it in close_diffusers_container_
-      IMP_NEW( container::CloseBipartitePairContainer, cpc,
-               ( optimizable_diffusers, get_diffusers(),
-                 get_range(), slack_) );
-      // IMP_NEW( container::ClosePairContainer, cpc,
-      //         ( get_diffusers(),
-      //           get_range(), slack_) );
-      IMP_NEW( container::ExclusiveConsecutivePairFilter, ecpf, () );
-      IMP_NEW( core::AllSamePairPredicate, aspp, () );//bipartite can do same
-      cpc->add_pair_filter( ecpf );
-      cpc->add_pair_filter( aspp );
-      close_diffusers_container_ = cpc;
-      // if predicate pair restraint was already set - need to update it
-      // note that this will cause a recursion, which should be fine
-      if(predr_) {
-        predr_=nullptr;
-        get_predr(); // just to update
-      }
-    }
-  return close_diffusers_container_;
-}
-
-container::PredicatePairsRestraint *SimulationData::get_predr() {
-  if (!predr_) {
-    // set linear repulsion upon penetration between all close pairs
-    // returned by get_close_diffusers_container(), with different scores for interactions
-    // between particles of different (ordered) types
-    IMP_NEW(core::OrderedTypePairPredicate, otpp, ());
-    otpp_ = otpp;
-    IMP_NEW(container::PredicatePairsRestraint, ppr,
-            (otpp, get_close_diffusers_container()) );
-    IMP_NEW(LinearSoftSpherePairScore, ssps, (excluded_volume_k_));
-    ppr->set_unknown_score(ssps.get());
-    predr_ = ppr;
-  }
-  return predr_;
 }
 
 void SimulationData::set_sites(core::ParticleType t0, unsigned int n,
@@ -604,102 +545,6 @@ void SimulationData::set_sites(core::ParticleType t0, unsigned int n,
   sites_[t0] = algebra::Vector3Ds(sites.begin(), sites.begin() + n);
 }
 
-/**
-   add a SitesPairScore restraint that applies to particles of
-   types t0 and t1 to the PredicatePairsRestraint object returned by
-   get_predr().
-
-   A SitesPairScore interaction means site-specific
-   attractive forces between bidning sites on each particle,
-   and non-specific attraction and repulsion (upon penetraion)
-   between the particles themselves.
-*/
-void SimulationData::add_interaction(
-    const ::npctransport_proto::Assignment_InteractionAssignment &idata) {
-  // extract interaction params
-  core::ParticleType type0(idata.type0());
-  core::ParticleType type1(idata.type1());
-  double base_k = interaction_k_;
-  if (idata.has_interaction_k()) {
-    base_k = idata.interaction_k().value();
-  }
-  // no particles so drop it
-  if (interaction_k_factors_.find(type0) == interaction_k_factors_.end() ||
-      interaction_k_factors_.find(type1) == interaction_k_factors_.end()) {
-    return;
-  }
-  double interaction_k = base_k * interaction_k_factors_.find(type0)
-                                      ->second  // TODO: validate type exists
-                         *
-                         interaction_k_factors_.find(type1)->second;
-  double base_range = interaction_range_;
-  if (idata.has_interaction_range()) {
-    base_range = idata.interaction_range().value();
-  }
-  double interaction_range =
-      base_range * interaction_range_factors_.find(type0)->second *
-      interaction_range_factors_.find(type1)->second;
-
-  /*std::cout << "creating interaction "
-            << idata.type0() << "," << idata.type1()
-            << " effective_k = " << interaction_k
-            << ", effective_range = " << interaction_range
-            << ", nonspecific k = " << nonspecific_k_
-            << ", nonspecific range = " << nonspecific_range_
-            << ", excluded volume k = " << excluded_volume_k_
-            << std::endl;*/
-
-  // create interaction
-  container::PredicatePairsRestraint *ppr = get_predr();
-  // add the interaction restraint both for (t0,t1) and (t1,t0)
-  {
-    // TODO: repulsion was also added in get_predr - do we double count here?
-    core::ParticleTypes ts;
-    ts.push_back(type0);
-    ts.push_back(type1);
-    int interaction_id = otpp_->get_value(ts);
-    set_sites_score(
-        interaction_range,                  // site-specific
-        interaction_k, nonspecific_range_,  // non-specific = entire particle
-        nonspecific_k_, excluded_volume_k_, sites_[type0], sites_[type1],
-        interaction_id, ppr);
-  }
-  {
-    core::ParticleTypes ts;
-    ts.push_back(type1);
-    ts.push_back(type0);
-    int interaction_id = otpp_->get_value(ts);
-    set_sites_score(
-        interaction_range,                  // site-specific
-        interaction_k, nonspecific_range_,  // non-specific = entire particle
-        nonspecific_k_, excluded_volume_k_, sites_[type0], sites_[type1],
-        interaction_id, ppr);
-  }
-  // add statistics about this interaction to interactions_stats_
-  // between all diffusing particles
-  ParticlesTemp set0, set1;
-  for (unsigned int i = 0; i < get_diffusers()->get_particles().size(); i++) {
-    if (IMP::core::Typed(get_diffusers()->get_particles()[i]).get_type() == type0) {
-      set0.push_back(get_diffusers()->get_particles()[i]);
-    }
-    if (IMP::core::Typed(get_diffusers()->get_particles()[i]).get_type() == type1) {
-      set1.push_back(get_diffusers()->get_particles()[i]);
-    }
-  }
-  double stats_contact_range = 1.5;  // TODO: make a param
-  IMP_LOG(PROGRESS,
-          "Interaction " << type0.get_string() << ", " << type1.get_string()
-                         << "  sizes: " << set0.size() << ", " << set1.size()
-                         << " statistics range: " << stats_contact_range
-                         << std::endl);
-  if (set0.size() > 0 && set1.size() > 0) {
-    InteractionType interaction_type = std::make_pair(type0, type1);
-    IMP_NEW(BipartitePairsStatisticsOptimizerState, bpsos,
-            (get_model(), interaction_type, set0, set1, stats_contact_range));
-    bpsos->set_period(statistics_interval_frames_);
-    interactions_stats_.push_back(bpsos);
-  }
-}
 
 void SimulationData::write_geometry(std::string out) {
   IMP_OBJECT_LOG;
@@ -713,27 +558,28 @@ void SimulationData::write_geometry(std::string out) {
     }
     w->add_geometry(g);
   }
-  for (unsigned int i = 0; i < chain_restraints_.size(); ++i) {
-    IMP_NEW(display::RestraintGeometry, rsg, (chain_restraints_[i]));
+  Scoring * s = get_scoring();
+  for (unsigned int i = 0; i < s->get_chain_restraints().size(); ++i) {
+    IMP_NEW(display::RestraintGeometry, rsg, (s->get_chain_restraints()[i]));
     w->add_geometry(rsg);
   }
-  if (get_has_bounding_box()) {
-    IMP_NEW(display::RestraintGeometry, rsg, (box_restraint_));
+  if (s->get_has_bounding_box()) {
+    IMP_NEW(display::RestraintGeometry, rsg, (s->get_box_restraint()));
     w->add_geometry(rsg);
   }
-  if (get_has_slab()) {
-    IMP_NEW(display::RestraintGeometry, slab_rsg, (slab_restraint_));
+  if (s->get_has_slab()) {
+    IMP_NEW(display::RestraintGeometry, slab_rsg, (s->get_slab_restraint()));
     w->add_geometry(slab_rsg);
   }
   {
-    IMP_NEW(display::RestraintGeometry, prsg, (predr_));
+    IMP_NEW(display::RestraintGeometry, prsg, (s->get_predr()));
     w->add_geometry(prsg);
   }
-  if (get_has_bounding_box()) {
+  if (box_is_on_) {
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
     w->add_geometry(bbg);
   }
-  if (get_has_slab()) {
+  if (slab_is_on_) {
     // IMP_NEW(SlabWireGeometry, slab_geometry,
     //         (1000 /* h */ , 100 /* r */, 300 /* w */) );
     // w->add_geometry(slab_geometry);
@@ -753,6 +599,7 @@ void SimulationData::write_geometry(std::string out) {
                                             n_new_frames *new_value) /    \
                         (n_frames + n_new_frames));
 
+// number of site-site interactions between a and b
 int SimulationData::get_number_of_interactions(Particle *a, Particle *b) const {
   if (core::get_distance(core::XYZR(a), core::XYZR(b)) > range_) return 0;
   const algebra::Vector3Ds &sa = sites_.find(core::Typed(a).get_type())->second;
@@ -768,13 +615,14 @@ int SimulationData::get_number_of_interactions(Particle *a, Particle *b) const {
   return ct;
 }
 
+// see doc in .h file
 boost::tuple<double, double, double, double>
 SimulationData::get_interactions_and_interacting(
     const ParticlesTemp &kaps, const base::Vector<ParticlesTemps> &fgs) const {
   double interactions = 0, interacting = 0, bead_partners = 0,
          chain_partners = 0;
   for (unsigned int i = 0; i < kaps.size(); ++i) {
-    bool found = false;
+    bool kap_found = false;
     for (unsigned int j = 0; j < fgs.size(); ++j) {
       for (unsigned int k = 0; k < fgs[j].size(); ++k) {
         bool chain_found = false;
@@ -783,8 +631,8 @@ SimulationData::get_interactions_and_interacting(
           if (num > 0) {
             interactions += num;
             ++bead_partners;
-            if (!found) ++interacting;
-            found = true;
+            if (!kap_found) ++interacting;
+            kap_found = true;
             if (!chain_found) ++chain_partners;
             chain_found = true;
           }
@@ -828,43 +676,6 @@ void SimulationData::reset_statistics_optimizer_states() {
   }
 }
 
-namespace {
-void save_conformation(
-    SingletonContainer *diffusers,
-    const base::map<core::ParticleType, algebra::Vector3Ds> &sites,
-    ::npctransport_proto::Conformation *conformation) {
-  conformation->clear_sites();
-  conformation->clear_particle();
-  IMP_CONTAINER_FOREACH(SingletonContainer, diffusers, {
-    ::npctransport_proto::Conformation_Particle *pcur =
-        conformation->add_particle();
-    core::RigidBody rb(diffusers->get_model(), _1);
-    algebra::Transformation3D tr =
-        rb.get_reference_frame().get_transformation_to();
-    pcur->set_x(tr.get_translation()[0]);
-    pcur->set_y(tr.get_translation()[1]);
-    pcur->set_z(tr.get_translation()[2]);
-    pcur->set_r(tr.get_rotation().get_quaternion()[0]);
-    pcur->set_i(tr.get_rotation().get_quaternion()[1]);
-    pcur->set_j(tr.get_rotation().get_quaternion()[2]);
-    pcur->set_k(tr.get_rotation().get_quaternion()[3]);
-  });
-  typedef base::map<core::ParticleType, algebra::Vector3Ds> M;
-  for (M::const_iterator it = sites.begin(); it != sites.end(); it++) {
-    ::npctransport_proto::Conformation::Sites *cur = conformation->add_sites();
-    cur->set_name(it->first.get_string());
-    algebra::Vector3Ds coords = it->second;
-    for (algebra::Vector3Ds::const_iterator coord = coords.begin();
-         coord != coords.end(); coord++) {
-      ::npctransport_proto::Conformation::Coordinates *out_coords =
-          cur->add_coordinates();
-      out_coords->set_x((*coord)[0]);
-      out_coords->set_y((*coord)[1]);
-      out_coords->set_z((*coord)[2]);
-    }
-  }
-}
-}
 
 // @param nf_new number of new frames accounted for in this statistics update
 void SimulationData::update_statistics(const boost::timer &timer,
@@ -1077,7 +888,7 @@ void SimulationData::update_statistics(const boost::timer &timer,
 
   ::npctransport_proto::Conformation *conformation =
       output.mutable_conformation();
-  save_conformation(get_diffusers(), sites_, conformation);
+  save_pb_conformation(get_diffusers(), sites_, conformation);
 
   // save rmf too
   {
@@ -1111,10 +922,16 @@ display::Geometry *SimulationData::get_static_geometry() {
   return static_geom_;
 }
 
+algebra::BoundingBox3D SimulationData::get_box() const {
+  return algebra::get_cube_d<3>(.5 * box_side_);
+}
+
 algebra::Cylinder3D SimulationData::get_cylinder() const {
   algebra::Vector3D pt(0, 0, slab_thickness_ / 2.0);
   algebra::Segment3D seg(pt, -pt);
   return algebra::Cylinder3D(seg, tunnel_radius_);
 }
+#undef GET_ASSIGNMENT
+#undef GET_VALUE
 
 IMPNPCTRANSPORT_END_NAMESPACE

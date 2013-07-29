@@ -9,28 +9,29 @@
 #define IMPNPCTRANSPORT_SIMULATION_DATA_H
 
 #include "npctransport_config.h"
-#include "io.h"
-#include "BodyStatisticsOptimizerState.h"
-#include "ParticleTransportStatisticsOptimizerState.h"
-#include "ChainStatisticsOptimizerState.h"
-#include "BipartitePairsStatisticsOptimizerState.h"
+#include <IMP/npctransport/Scoring.h>
 #include <IMP/Model.h>
 #include <IMP/PairContainer.h>
 #include <IMP/atom/BrownianDynamics.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
+#include <IMP/container/PairContainerSet.h>
+#include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/core/pair_predicates.h>
-#include "linear_distance_pair_scores.h"
+#include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/core/Typed.h>
 #include <IMP/base/map.h>
 #include <IMP/display/declare_Geometry.h>
-#include <IMP/container/PairContainerSet.h>
 #include <IMP/rmf/SaveOptimizerState.h>
-#include "SlabSingletonScore.h"
-#include <IMP/core/BoundingBox3DSingletonScore.h>
-#include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/base/Pointer.h>
+#include "io.h"
+#include "BodyStatisticsOptimizerState.h"
+#include "ParticleTransportStatisticsOptimizerState.h"
+#include "ChainStatisticsOptimizerState.h"
+#include "BipartitePairsStatisticsOptimizerState.h"
+#include "Parameter.h"
+#include "Scoring.h"
 
 #include <boost/timer.hpp>
 #include <string>
@@ -42,12 +43,21 @@ struct timer {};
 #endif
 #ifndef SWIG
 namespace npctransport_proto {
+class Output;
 class Assignment_FGAssignment;
 class Assignment_InteractionAssignment;
 class Assignment_FloaterAssignment;
 class Assignment_ObstacleAssignment;
 }
-#endif
+#ifdef IMP_NPC_GOOGLE
+IMP_GCC_PUSH_POP(diagnostic push)
+IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
+#include "third_party/npc/npctransport/data/npctransport.pb.h"
+IMP_GCC_PUSH_POP(diagnostic pop)
+#else
+#include <IMP/npctransport/internal/npctransport.pb.h>
+#endif // IMP_NPC_GOOGLE
+#endif // SWIG
 
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -55,48 +65,24 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
  private:
 #ifndef SWIG
-  template <class T>
-  struct Parameter {
-    T t_;
-    bool init_;
-
-   public:
-    Parameter() : init_(false) {}
-    operator T() const {
-      IMP_USAGE_CHECK(init_, "Not initialized");
-      return t_;
-    }
-    void operator=(T t) {
-      t_ = t;
-      init_ = true;
-    }
-    bool is_init() { return init_; }
-  };
-  Parameter<double> interaction_k_;
-  Parameter<double> interaction_range_;
-  Parameter<double> backbone_k_;
+  // protobuf data used for assignment
+  ::npctransport_proto::Output
+    pb_data_;
+  // params
   Parameter<double> box_side_;
   Parameter<double> tunnel_radius_;
   Parameter<double> slab_thickness_;
   Parameter<bool> box_is_on_;
   Parameter<bool> slab_is_on_;
-  Parameter<double> slack_;
   Parameter<int> number_of_trials_;
   Parameter<int> number_of_frames_;
   Parameter<int> dump_interval_frames_;
-  Parameter<double> nonspecific_k_;
-  Parameter<double> nonspecific_range_;
   Parameter<double> angular_d_factor_;
-  Parameter<int> statistics_interval_frames_;
-  Parameter<double> excluded_volume_k_;
   Parameter<double> range_;
+  Parameter<int> statistics_interval_frames_;
   Parameter<double> time_step_;
   Parameter<double> statistics_fraction_;
   Parameter<double> maximum_number_of_minutes_;
-
-  // Per type scaling factors for the interaction parameters
-  base::map<core::ParticleType, double> interaction_range_factors_;
-  base::map<core::ParticleType, double> interaction_k_factors_;
 #endif
   // the model on which the simulation is run
   base::Pointer<Model> m_;
@@ -104,24 +90,21 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   // The BrownianDynamic simulator
   base::Pointer<atom::BrownianDynamics> bd_;
 
-  base::Pointer<container::ListSingletonContainer> diffusers_;
+  // The scoring function wrapper for the simulation
+   base::Pointer<Scoring> scoring_;
 
-  bool diffusers_updated_; // keeps track of whether the diffusers list is
-                           // up to date (can be invalid if particles added)
-  bool obstacles_updated_; // keeps track of whether the obstacles list is
-                           // up to date (can be invalid if particles added)
-                           // TODO: possibly need be same as diffusers - matter
-                           //       of efficiency
+  // keeps track of whether the diffusers list has
+  // changed (can be invalid if particles added)
+   bool diffusers_changed_;
 
-  // see get_close_diffusers_container()
-  base::Pointer<IMP::PairContainer> close_diffusers_container_;
 
-  // generates hash values ('predicates') for ordered types pairs
-  // (e.g., pairs of ParticleTypes)
-  base::Pointer<core::OrderedTypePairPredicate> otpp_;
+  // keeps track of whether the obstacles list
+  // chnaged (can be invalid if particles added)
+  // TODO: possibly need be same as diffusers - matter
+  //       of efficiency
+   bool obstacles_changed_;
 
-  // contains all restraints between pairs of particle types
-  base::Pointer<container::PredicatePairsRestraint> predr_;
+   base::Pointer<container::ListSingletonContainer> diffusers_;
 
   // a writer to an RMF (Rich Molecular Format) type file
   base::Pointer<rmf::SaveOptimizerState> rmf_sos_writer_;
@@ -130,12 +113,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   base::Pointer<Particle> root_;
 
   base::Pointer<display::Geometry> static_geom_;
-  base::Pointer<Restraint> box_restraint_;
-  base::Pointer<Restraint> slab_restraint_;
-  Restraints chain_restraints_;
+
   base::map<core::ParticleType, algebra::Vector3Ds> sites_;
+
   base::map<core::ParticleType, double> ranges_;
-  LinearWellPairScores backbone_scores_;
 
   // the list of particles for each particle type
   // e.g., particles_[ ParticleType("fg0") ]
@@ -143,6 +124,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   // the file to which simulation statistics are dumped:
   std::string output_file_name_;
+
   // the RMF format file to which simulation output is dumped:
   std::string rmf_file_name_;
 
@@ -170,58 +152,66 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
  private:
 
+  // return a 4-tuple (1,2,3,4) with:
+  // 1 - total # of individual site-site interactions between the specified kaps
+  //     and fgs
+  // 2 - total # of bead pairs that make any site-site interaction
+  // 3 - total # of kaps that contact any FG
+  // 4 - sum of # of individual fg chains contacted by each kap
   boost::tuple<double, double, double, double> get_interactions_and_interacting(
       const ParticlesTemp &kaps, const base::Vector<ParticlesTemps> &fgs) const;
+
+  /** mark that the list of diffusers may have changed recently */
+  void set_diffusers_changed(bool is_changed){
+    diffusers_changed_ = is_changed;
+    if(diffusers_changed_){
+      get_scoring()->update_particles();
+    }
+  }
+
+  /** mark that the list of obstacles may have changed recently */
+  void set_obstacles_changed(bool is_changed){
+    obstacles_changed_ = is_changed;
+    if(obstacles_changed_){
+      get_scoring()->update_particles();
+    }
+  }
 
   /**
      Adds the FG Nup chains to the model hierarchy,
      based on the settings in data
 
-     @param data data for fgs of this type in protobuf format as specified
+     @param fg_data data for fgs of this type in protobuf format as specified
                  in data/npctransport.proto
      @param default_type for backward compatibility only, a default type of particle
                          if one is not specified in data.type
    */
-  void create_fgs(const ::npctransport_proto::Assignment_FGAssignment &data,
-                  core::ParticleType default_type);
+void create_fgs
+( const ::npctransport_proto::Assignment_FGAssignment &fg_data );
 
   /**
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
      based on the settings in data
 
-     @param data data for floater in protobuf format as specified
+     @param f_data data for floater in protobuf format as specified
                  in data/npctransport.proto
      @param default_type for backward compatibility only, a default type
                          of particle if one is not specified in data.type
      @param color a color for all floaters of this type
    */
   void create_floaters(
-      const ::npctransport_proto::Assignment_FloaterAssignment &data,
+      const ::npctransport_proto::Assignment_FloaterAssignment &f_data,
       core::ParticleType default_type, display::Color color);
 
   /**
      Adds the 'obstacles' (possibly static e.g. nups that make the pore)
      to the model hierarchy, based on the settings in data
 
-     @param data data for obstacles in protobuf format as specified in
+     @param o_data data for obstacles in protobuf format as specified in
                  data/npctransport.proto
   */
   void create_obstacles
-    ( const ::npctransport_proto::Assignment_ObstacleAssignment &data);
-
-  /**
-     Creates bounding box restraint based on the box_size_
-     class variable, and apply it to all diffusers returned
-     by get_diffusers()
-   */
-  void create_bounding_box_restraint_on_diffusers();
-
-  /**
-     Creates slab bounding volume restraint, based on the slab_thickness_
-     and tunnel_radius_ class variables, and apply it to all diffusers
-     returned by get_diffusers()
-   */
-  void create_slab_restraint_on_diffusers();
+    ( const ::npctransport_proto::Assignment_ObstacleAssignment &o_data);
 
   /** Initializes the simulation based on the specified assignment file
 
@@ -257,44 +247,30 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 #ifndef SWIG
   Model *get_model() const { return m_; }
 #endif
-  double get_range() const { return range_; }
+
+  /** returns a scoring object that is updated with the current list of
+      diffusers and obstacles
+  */
+ Scoring * get_scoring();
+
+
+  /** gets the Brownian Dynamics object that is capable of simulating
+      this data
+  */
   atom::BrownianDynamics *get_bd();
 
+  /** returns the simulation angular d factor */
+  double get_angular_d_factor(){
+    return angular_d_factor_;
+  }
+
   /**
-     returns all diffusing particles that currently exist in
+     returns the container of all diffusing particles that currently exist in
      this simulation data object (or an empty list if none exists)
    */
   container::ListSingletonContainer *get_diffusers();
 
-  /**
-     returns a reference to the collection of score functions for FG backbones
-     (can be used to e.g. scale them up or down during optimization)
-   */
-  LinearWellPairScores get_backbone_scores() const { return backbone_scores_; }
-
-  /**
-     a pair container that returns all pairs of particles (a,b) such that:
-     1) a is an optimizable diffuser particle and b is any diffuser
-        particle (static or not).
-     2) a and b are close (sphere surfaces within range get_range())
-     3) a and b do not appear consecutively within the model (e.g., fg repeats)
-
-     @note TODO: right now will not return any consecutive particles - that's
-                 erroneous though may be negligible
-  */
-  IMP::PairContainer *get_close_diffusers_container();
-
-  /**
-     Returns the container for restraints over pairs of particles. Different
-     scores
-     are used for particles of different (ordered) particle types.
-     When called for the first time, returns a new PredicatePairsRestraints
-     over all diffusing particles and sets a default linear repulsion restraint
-     between all pairs returned by get_close_diffusers_container()
-  */
-  container::PredicatePairsRestraint *get_predr();
-
-  /** get the number of interactions between two particles */
+  /** get the number of site-site interactions between two particles */
   int get_number_of_interactions(Particle *a, Particle *b) const;
 
   /**
@@ -329,12 +305,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   //       like an upper bound
   double get_site_radius(core::ParticleType) const { return range_ / 2; }
 
-  // returns true if a bounding box restraint has been defined */
-  bool get_has_bounding_box() const { return box_restraint_; }
-
-  /** returns true if a slab restraint has been defined */
-  bool get_has_slab() const { return slab_restraint_; }
-
   double get_statistics_fraction() const { return statistics_fraction_; }
 
   //! Return the maximum number of minutes the simulation can run
@@ -346,15 +316,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 // swig doesn't equate the two protobuf types
 #ifndef SWIG
   /**
-     add a SitesPairScore restraint that applies to particles of
-     types t0 and t1 (specified in idata) to the PredicatePairsRestraint
-     object that is returned by get_predr().
-     The restraint is symmetric, and applies to both (t0,t1) and (t1,t0).
+     add the specified interaction to the scoring.
      In additions, adds statistics optimizer state about pairs of this type.
-
-     A SitesPairScore restraint means site-specific
-     attractive forces between surface bidning sites on each particle +
-     non-specific attraction and soft repulsion between the entire particles.
 
      @param idata the protobuf data about the interaction (particle types,
             interaction coefficients, etc.)
@@ -363,15 +326,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
       const ::npctransport_proto::Assignment_InteractionAssignment &idata);
 #endif
 
-  algebra::BoundingBox3D get_box() const {
-    return algebra::get_cube_d<3>(.5 * box_side_);
-  }
+  // get the bounding box for this simulation
+  algebra::BoundingBox3D get_box() const;
 
+  // get the cylinder in the slab for this simulation
   algebra::Cylinder3D get_cylinder() const;
-
-  double get_backbone_k() const { return backbone_k_; }
-
-  double get_interaction_k() const { return interaction_k_; }
 
   /**
    Open the specified RMF file, links it to the hierarchies of this object, and
@@ -431,8 +390,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   void reset_statistics_optimizer_states();
 
-  void add_chain_restraint(Restraint *r) { chain_restraints_.push_back(r); }
-
   /**
      Write the geometry to the file path 'out'
   */
@@ -475,12 +432,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   unsigned int get_number_of_trials() const { return number_of_trials_; }
 
   atom::Hierarchy get_root() const { return atom::Hierarchy(root_); }
-
-  Restraints get_chain_restraints() const { return chain_restraints_; }
-
-  Restraint *get_box_restraint() const { return box_restraint_; }
-
-  Restraint *get_slab_restraint() const { return slab_restraint_; }
 
   double get_slab_thickness() const { return slab_thickness_; }
 

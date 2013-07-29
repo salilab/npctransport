@@ -30,6 +30,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %apply unsigned int { boost::uint32_t }
 %apply unsigned long long { boost::uint64_t }
 
+%include "IMP_npctransport.Parameter.i"
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"

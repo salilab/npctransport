@@ -9,12 +9,21 @@
 #define IMPNPCTRANSPORT_PROTOBUF_H
 
 #include "npctransport_config.h"
+#include <IMP/SingletonContainer.h>
+#include <IMP/core/Typed.h>
 #include <boost/cstdint.hpp>
 #include <set>
 
+#ifndef SWIG
+// instead of including protobuf header, which is problematic due to
+// minor issue with google headers namespaces
+namespace npctransport_proto {
+  class Conformation;
+}
+#endif
+
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-class OutputConfiguration;  // TODO: is this needed?
 
 IMPNPCTRANSPORTEXPORT void show_ranges(std::string fname);
 
@@ -59,25 +68,42 @@ IMPNPCTRANSPORTEXPORT int assign_ranges(
 IMPNPCTRANSPORTEXPORT int get_number_of_work_units(
     std::string configuration_file);
 
-/** returns ::google::protobuf::RepeatedField object
-    based on an STL set
+#ifndef SWIG
+/**
+   Loads a protobuf conformation into the diffusers and sites
 
-    @param[in] src set from which values of type value_type
-                   are copied
-    @param[out] trg repeated field to which values are copied
+   @param conformation the saved conformation protobuf message
+   @param diffusers corresponding diffusers to be updated
+   @param sites a map of sites for each diffuser particle type
+                to be updated
+
+   @note the diffusers and sites must have the same structure
+                       as the ones used when saving (e.g. their
+                       non-changing variables are expected to
+                       be identical, and they differ only in the
+                       dynamic ones)
+   \see save_pb_conformation
 */
-/* template<class value_type> */
-/* void copy_unique_set_to_repeated_field */
-/* ( std::set< value_type > const& src, */
-/*   ::google::protobuf::RepeatedField< value_type >& trg ) */
-/* { */
-/*   ::google::protobuf::RepeatedField< value_type > ret_val; */
-/*   std::set< value_type >::const_iterator;// iter; */
-/*   for(iter = src.begin(); iter != src.end(); iter++) { */
-/*     ret_val.push_back( *iter ); */
-/*   } */
-/*   return ret_val; */
-/* } */
+void load_pb_conformation
+( const ::npctransport_proto::Conformation &conformation,
+  IMP::SingletonContainer *diffusers,
+  base::map<core::ParticleType, algebra::Vector3Ds> &sites);
+
+/**
+   Saves a protobuf conformation from the diffusers and sites
+
+   @param diffusers diffusers to save
+   @param sites a map of sites for each diffuser particle type
+                to be saved
+   @param conformation the conformation protobuf message to be save
+
+   \see load_pb_conformation
+ */
+void save_pb_conformation
+( IMP::SingletonContainer *diffusers,
+  const base::map<core::ParticleType, algebra::Vector3Ds> &sites,
+  ::npctransport_proto::Conformation *conformation );
+#endif
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

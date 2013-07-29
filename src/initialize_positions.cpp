@@ -21,6 +21,7 @@
 #include <IMP/core/SerialMover.h>
 #include <IMP/core/BallMover.h>
 #include <IMP/container/ClosePairContainer.h>
+#include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/core/SphereDistancePairScore.h>
 #include <IMP/base/log_macros.h>
@@ -90,22 +91,6 @@ void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
   }
 }
 
-class SetLength : public base::RAII {
-  base::WeakPointer<LinearWellPairScore> ps_;
-  double orig_;
-
- public:
-  IMP_RAII(SetLength, (LinearWellPairScore *ps, double f), {}, {
-    ps_ = ps;
-    orig_ = ps_->get_x0();
-    ps_->set_x0(orig_ * f);
-  },
-           {
-    ps_->set_x0(orig_);
-  },
-           {});
-};
-
 /**
    create a Monte-Carlo object for partices ps, scored by isd,
    with a soft sphere pair score ssps, and move step size scaling move_scaling
@@ -154,7 +139,8 @@ IMP::base::Pointer<core::MonteCarlo> create_mc(
 void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
                     const PairPredicates excluded,
                     rmf::SaveOptimizerState *save,
-                    atom::BrownianDynamics *local, LinearWellPairScores dps,
+                    atom::BrownianDynamics *local,
+                    LinearWellPairScores lwps,
                     base::LogLevel ll, bool debug,
                     double short_init_factor = 1.0) {
   // make sure that errors and log messages are marked as coming from this
@@ -188,7 +174,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
   for (int i = 0; i < 11; ++i) {
     boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > attrs(
         new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()]);
-    boost::ptr_vector<SetLength> lengths;
+    boost::ptr_vector<LinearWellSetLength> lengths;
     double factor = .1 * i;
     double length_factor = .7 + .3 * factor;
     // rescale radii
@@ -197,9 +183,9 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
           new ScopedSetFloatAttribute(ps[j], core::XYZR::get_radius_key(),
                                       core::XYZR(ps[j]).get_radius() * factor));
     }
-    // rescale bond length
-    for (unsigned int j = 0; j < dps.size(); ++j) {
-      lengths.push_back(new SetLength(dps[j], length_factor));
+    // rescale bond length temporarily
+    for (unsigned int j = 0; j < lwps.size(); ++j) {
+      lengths.push_back(new LinearWellSetLength(lwps[j], length_factor));
     }
     std::cout << "Optimizing with radii at " << factor << " of full"
               << " and length factor " << length_factor;
@@ -325,9 +311,12 @@ void initialize_positions(SimulationData *sd,
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
   }
-  RestraintsTemp rss = sd->get_chain_restraints();
-  if (sd->get_has_bounding_box()) rss.push_back(sd->get_box_restraint());
-  if (sd->get_has_slab()) rss.push_back(sd->get_slab_restraint());
+  base::Pointer<Scoring> scoring=sd->get_scoring();
+  RestraintsTemp rss = scoring->get_chain_restraints();
+  if (scoring->get_has_bounding_box())
+    rss.push_back(scoring->get_box_restraint());
+  if (scoring->get_has_slab())
+    rss.push_back(scoring->get_slab_restraint());
   // pin first link of fgs, if not already pinned
   core::XYZs previously_unpinned;
   atom::Hierarchies chains = get_fg_chains(sd->get_root());
@@ -369,11 +358,15 @@ void initialize_positions(SimulationData *sd,
                  rss,
                  excluded ,
                  sd->get_rmf_sos_writer(),
-                 sd->get_bd(), sd->get_backbone_scores(), base::PROGRESS,
+                 sd->get_bd(),
+                 sd->get_scoring()->get_chain_scores(),
+                 base::PROGRESS,
                  debug, short_init_factor);
   print_fgs(*sd);
   IMP_NEW(core::RestraintsScoringFunction, rsf,
-          (rss + RestraintsTemp(1, sd->get_predr()), "all restaints"));
+          (rss + RestraintsTemp(1,
+                                sd->get_scoring()->get_predr()),
+           "all restaints"));
   IMP_LOG(WARNING, "Initial energy is " << rsf->evaluate(false) << std::endl);
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->set_period(dump_interval);  // restore output rate

@@ -146,9 +146,11 @@ namespace {
   void print_score_and_positions(SimulationData *sd, bool print_positions,
                                  std::string header) {
     IMP_OMP_PRAGMA(critical)
-      std::cout << header << sd->get_bd()->get_scoring_function()->evaluate(false)
+      std::cout << header
+                << sd->get_bd()->get_scoring_function()->evaluate(false)
                 << " ; PredicatePairsRestraint score = "
-                << sd->get_predr()->evaluate(false) << std::endl;
+                << sd->get_scoring()->get_predr()->evaluate(false)
+                << std::endl;
     if (print_positions) {
       ParticlesTemp ps = sd->get_diffusers()->get_particles();
       for (unsigned int i = 0; i < ps.size(); i++) {

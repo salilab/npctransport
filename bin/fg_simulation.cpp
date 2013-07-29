@@ -268,7 +268,8 @@ int main(int argc, char* argv[]) {
     }
     color_fgs(*sd);
     Restraints initialization_restraints;
-    if (sd->get_has_slab()) {  // if has slab, exclude from channel initially
+    if (sd->get_scoring()->get_has_slab()) {
+      // if has slab, exclude from channel initially
       IMP::base::Pointer<IMP::Restraint> r =
           get_exclude_from_channel_restraint(*sd);
       initialization_restraints.push_back(r);

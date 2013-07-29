@@ -10,6 +10,7 @@ Simulate an fg and a kap interacting
 #ifndef IMPNPCTRANSPORT_UTIL_H
 #define IMPNPCTRANSPORT_UTIL_H
 
+#include "npctransport_config.h"
 #include <string>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
