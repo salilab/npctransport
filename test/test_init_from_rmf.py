@@ -23,10 +23,12 @@ class Tests(IMP.test.TestCase):
               " and " + output_rmf_file
         timer = IMP.npctransport.create_boost_timer()
         sd.get_bd().optimize( 1000 )
+        print "AAA"
         # make sure final state is written
         sd.get_rmf_sos_writer().update_always()
         # make sure statistics with final rmf conformation is written
         sd.update_statistics( timer )
+        print "who"
         return sd
 
     def _get_diffuser_coords( self, sd, i ):
@@ -65,7 +67,9 @@ class Tests(IMP.test.TestCase):
         output_pb2= self.get_tmp_file_name( "output2.pb" );
         output_rmf2= IMP.base.create_temporary_file_name( "output2", ".rmf" );
         print "*** Starting second simulation with RMF file " + output_rmf2
+        print "YYY"
         sd = self._make_and_run_simulation( output_pb2, output_rmf2, seed = 2)
+        print "XXX"
         e2 = sd.get_bd().get_scoring_function().evaluate(False)
         print "*** After second simulation"
         print "Energy %.2f" % e2
@@ -112,7 +116,8 @@ class Tests(IMP.test.TestCase):
             for j in range(3):
                 self.assertEqual(coordsI[i][j], coordsV[i][j])
                 self.assertNotEqual(coordsI[i][j], coordsIV[i][j])
-
+        print "almost end"
 
 if __name__ == '__main__':
     IMP.test.main()
+    print "end"

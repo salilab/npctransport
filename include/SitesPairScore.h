@@ -2,7 +2,7 @@
  *  \file SitesPairScore.h
  *  \brief A Score on the distance between a pair of particles.
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_SITES_PAIR_SCORE_H
@@ -169,48 +169,27 @@ class TemplateSitesPairScore : public TemplateBaseSitesPairScore {
 };
 
 /**
+   Create a score function between particles with site lists
+   sites0 and sites1 on their surface, with specified interaction
+   parameters.
+
    @param rangea    range for specific attraction
    @param ka       coefficient for specific attraction
    @param rangena  range for non-specific attraction
    @param kna      coefficient for non-specific attraction
    @param kr       coefficient for repulsion between penetrating particles
-   @param sites0
-   @param sites1
-   @param value
-   @param ppr
+   @param sites0   location of sites on particles from one side
+   @param sites1   location of sites on particles from other side
+
+   @return a PairScore that works on site-site interaction between
+           adjacent particles
 */
 IMPNPCTRANSPORTEXPORT
-void set_sites_score(double rangea, double ka, double rangena, double kna,
-                     double kr, const algebra::Vector3Ds &sites0,
-                     const algebra::Vector3Ds &sites1, int value,
-                     container::PredicatePairsRestraint *ppr);
+IMP::PairScore* create_sites_pair_score
+( double rangea, double ka, double rangena, double kna,
+  double kr, const algebra::Vector3Ds &sites0,
+  const algebra::Vector3Ds &sites1);
 
-/** Show the sites. */
-class IMPNPCTRANSPORTEXPORT SitesGeometry : public core::XYZRGeometry {
-  algebra::Vector3Ds sites_;
-
- public:
-  SitesGeometry(Particle *p, algebra::Vector3Ds sites)
-      : core::XYZRGeometry(p), sites_(sites) {}
-  virtual IMP::display::Geometries get_components() const IMP_OVERRIDE;
-  IMP_OBJECT_METHODS(SitesGeometry);
-};
-
-/** Show the sites. */
-class IMPNPCTRANSPORTEXPORT TypedSitesGeometry
-    : public display::SingletonsGeometry {
-  base::map<core::ParticleType, algebra::Vector3Ds> sites_;
-
- public:
-  TypedSitesGeometry(SingletonContainer *sc)
-      : display::SingletonsGeometry(sc) {}
-  void set_sites(core::ParticleType t, algebra::Vector3Ds s) {
-    // std::cout << t << " gets " << s.size() << std::endl;
-    sites_[t] = s;
-  }
-  virtual IMP::display::Geometries get_components() const IMP_OVERRIDE;
-  IMP_OBJECT_METHODS(TypedSitesGeometry);
-};
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

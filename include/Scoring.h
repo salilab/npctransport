@@ -22,6 +22,7 @@
 #include <IMP/core/pair_predicates.h>
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/core/Typed.h>
+#include <IMP/core/RestraintsScoringFunction.h>
 #include "linear_distance_pair_scores.h"
 #include "Parameter.h"
 //#include "SimulationData.h"
@@ -76,22 +77,35 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
   // true if the list of particles in the owner_sd has changed
   // and in the middle of changing it
-  mutable bool is_updating_particles_;
+  //  mutable bool is_updating_particles_;
 
   // see get_close_diffusers_container()
-  mutable
-  base::Pointer<IMP::PairContainer> close_diffusers_container_;
+  mutable base::Pointer
+    <IMP::PairContainer> close_diffusers_container_;
 
   // generates hash values ('predicates') for ordered types pairs
   // (e.g., pairs of ParticleTypes)
-  mutable base::Pointer<core::OrderedTypePairPredicate> otpp_;
+  mutable base::Pointer
+    <IMP::core::OrderedTypePairPredicate> otpp_;
+
+  mutable base::Pointer
+    <IMP::core::RestraintsScoringFunction> scoring_function_;
 
   // contains all restraints between pairs of particle types
-  mutable base::Pointer<container::PredicatePairsRestraint> predr_;
+  mutable base::Pointer
+    <container::PredicatePairsRestraint> predr_;
 
-  mutable base::Pointer<Restraint> box_restraint_;
+  // scores between particle, mapped by their interaction id,
+  // where interaction id is from OrderedTypePairPredicate otpp_
+  // applied on each interacting particle type
+  mutable IMP::base::map< int, base::Pointer< IMP::PairScore > >
+    sites_pair_scores_;
 
-  mutable base::Pointer<Restraint> slab_restraint_;
+  mutable base::Pointer
+    <IMP::Restraint> box_restraint_;
+
+  mutable base::Pointer
+    <IMP::Restraint> slab_restraint_;
 
   mutable Restraints chain_restraints_;
 
@@ -117,9 +131,9 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   /** update the scoring function that the list of particles,
       to be retrieved from owning simulation data, has changed
    */
-  void update_particles() const{
-    is_updating_particles_ = true;
-  }
+  //  void update_particles() const{
+  //    is_updating_particles_ = true;
+  //  }
 
 
   /** return the SimulationData object that owns this ScoringFunction */
@@ -151,10 +165,12 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   container::PredicatePairsRestraint *get_predr() const;
 
   // returns true if a bounding box restraint has been defined */
-  bool get_has_bounding_box() const { return box_restraint_ != nullptr; }
+  bool get_has_bounding_box() const
+  { return box_restraint_ != nullptr && box_is_on_; }
 
   /** returns true if a slab restraint has been defined */
-  bool get_has_slab() const { return slab_restraint_ != nullptr; }
+  bool get_has_slab() const
+  { return slab_restraint_ != nullptr && slab_is_on_; }
 
   // swig doesn't equate the two protobuf types
 #ifndef SWIG
@@ -163,7 +179,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      types t0 and t1 (specified in idata) to the PredicatePairsRestraint
      object that is returned by get_predr().
      The restraint is symmetric, and applies to both (t0,t1) and (t1,t0).
-     In additions, adds statistics optimizer state about pairs of this type.
 
      A SitesPairScore restraint means site-specific
      attractive forces between surface bidning sites on each particle +
@@ -171,6 +186,8 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
      @param idata the protobuf data about the interaction (particle types,
             interaction coefficients, etc.)
+
+     \see SitesPairScore
   */
   void add_interaction(
       const ::npctransport_proto::Assignment_InteractionAssignment &idata);
@@ -210,7 +227,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
 
   Restraint *get_box_restraint() const {
-    if (is_updating_particles_ && get_has_bounding_box()){
+    if ((/*is_updating_particles_ ||*/ !box_restraint_) && box_is_on_){
       const_cast<Scoring *>(this)->
         create_bounding_box_restraint_on_diffusers();
     }
@@ -218,7 +235,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   }
 
   Restraint *get_slab_restraint() const {
-    if (is_updating_particles_ && get_has_slab()) {
+    if ((/*is_updating_particles_ ||*/ !slab_restraint_) && slab_is_on_){
       const_cast<Scoring *>(this)->
         create_slab_restraint_on_diffusers();
     }
@@ -273,6 +290,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      this simulation data object get_sd() (or an empty list if none exists)
    */
   container::ListSingletonContainer const* get_diffusers() const;
+
 
  public:
   IMP_OBJECT_METHODS(Scoring);

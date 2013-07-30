@@ -7,7 +7,7 @@
  */
 
 #include <IMP/npctransport/SimulationData.h>
-#include <IMP/npctransport/SitesPairScore.h>
+#include <IMP/npctransport/SitesGeometry.h>
 #include <IMP/npctransport/SlabGeometry.h>
 #include <IMP/npctransport/SlabSingletonScore.h>
 #include <IMP/npctransport/particle_types.h>
@@ -61,6 +61,8 @@ SimulationData::SimulationData(std::string output_file, bool quick,
   scoring_(nullptr),
   diffusers_changed_(false),
   obstacles_changed_(false),
+  optimizable_diffusers_(nullptr),
+  diffusers_(nullptr),
   rmf_file_name_(rmf_file_name),
   is_stats_reset_(false)
 {
@@ -129,12 +131,6 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   }
 
   // bounding box / slab constraints on diffusers
-  if (box_is_on_) {
-    get_scoring()->create_bounding_box_restraint_on_diffusers();
-  }
-  if (slab_is_on_) {
-    get_scoring()->create_slab_restraint_on_diffusers();
-  }
 
   if (pb_data_.has_rmf_conformation()) {
     RMF::FileConstHandle fh =
@@ -169,8 +165,8 @@ void SimulationData::create_fgs
     fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
     chain_stats_.push_back(ChainStatisticsOptimizerStates());
     ParticlesTemp fg_particles;
-    IMP_NEW( Particle, p, (get_model()) );
-    atom::Hierarchy fg_root = atom::Hierarchy::setup_particle(p);
+    IMP::Particle* p_fg_root = new IMP::Particle( get_model() );
+    atom::Hierarchy fg_root = atom::Hierarchy::setup_particle(p_fg_root);
     fg_root->set_name(type.get_string());
     atom::Hierarchy(get_root()).add_child(fg_root);
     for (int j = 0; j < fg_data.number().value(); ++j) {
@@ -399,6 +395,9 @@ void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
 }
 
 void SimulationData::link_rmf_file_handle(RMF::FileHandle fh) {
+  // TODO: this should be updated if particles are updated / restraints are
+  //       probably restraints linkage should be handled internally in
+  //       Scoring.cpp (for better encapsulation
   IMP_LOG(TERSE, "Setting up dump" << std::endl);
   Scoring* s=get_scoring();
   add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
@@ -524,8 +523,12 @@ atom::BrownianDynamics *SimulationData::get_bd() {
 
 container::ListSingletonContainer *
 SimulationData::get_diffusers(){
-  if (!diffusers_ || diffusers_changed_ | obstacles_changed_) {
+  // TODO: obstacles ?
+  bool new_diffusers = !diffusers_ || diffusers_changed_ || obstacles_changed_;
+  if (!diffusers_) {
     diffusers_ = new container::ListSingletonContainer(m_);
+  }
+  if (new_diffusers) {
     // Add all leaves of the hierarchy as diffusers
     ParticlesTemp leaves = get_as<ParticlesTemp>(atom::get_leaves(get_root()));
     IMP_LOG(TERSE, "Leaves are " << leaves << std::endl);
@@ -538,6 +541,31 @@ SimulationData::get_diffusers(){
   }
   return diffusers_;
 }
+
+container::ListSingletonContainer *
+SimulationData::get_optimizable_diffusers()
+{
+  if (!optimizable_diffusers_) {
+    optimizable_diffusers_ = new container::ListSingletonContainer(m_);
+  }
+  IMP::ParticlesTemp optimizable_diffusers;
+  IMP_CONTAINER_FOREACH
+    (container::ListSingletonContainer,
+     get_diffusers(),
+     {
+       Particle* p = m_->get_particle(_1);
+       if(core::XYZ::get_is_setup(p)) {
+         core::XYZ p_xyz(p);
+         if(p_xyz.get_coordinates_are_optimized()){
+           optimizable_diffusers.push_back ( p );
+         }
+       }
+     }
+     );
+  optimizable_diffusers_->set_particles(optimizable_diffusers);
+  return optimizable_diffusers_;
+}
+
 
 void SimulationData::set_sites(core::ParticleType t0, unsigned int n,
                                double r) {

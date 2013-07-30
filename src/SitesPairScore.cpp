@@ -123,31 +123,16 @@ inline double SitesPairScore::evaluate_index(Model *m,
   return sum + soft;                               // specific + non-specific
 }
 
-IMP::display::Geometries SitesGeometry::get_components() const {
-  display::Geometries ret;
-  algebra::ReferenceFrame3D rf =
-      core::RigidBody(get_particle()).get_reference_frame();
-  double r = .1 * core::XYZR(get_particle()).get_radius();
-  for (unsigned int i = 0; i < sites_.size(); ++i) {
-    IMP_NEW(display::SphereGeometry, g,
-            (algebra::Sphere3D(
-                rf.get_transformation_to().get_transformed(sites_[i]), r)));
-    g->set_color(display::Color(1, 0, 0));
-    ret.push_back(g);
+Restraints SitesPairScore::do_create_current_decomposition(
+    Model *m, const ParticleIndexPair &pi) const {
+  Restraints ret;
+  if (evaluate_index(m, pi, nullptr) < 0) {
+    return Restraints(1, IMP::internal::create_tuple_restraint(this, m, pi));
+  } else {
+    return Restraints();
   }
-  return ret + core::XYZRGeometry::get_components();
 }
 
-IMP::display::Geometries TypedSitesGeometry::get_components() const {
-  display::Geometries ret;
-  Model *m = get_container()->get_model();
-  IMP_CONTAINER_FOREACH(SingletonContainer, get_container(), {
-    core::ParticleType t = core::Typed(m, _1).get_type();
-    IMP_NEW(SitesGeometry, g, (m->get_particle(_1), sites_.find(t)->second));
-    ret.push_back(g);
-  });
-  return ret;
-}
 
 #define IMP_HS(na, nb)                                   \
   else if (sites0.size() == na && sites1.size() == nb) { \
@@ -181,46 +166,35 @@ IMP::display::Geometries TypedSitesGeometry::get_components() const {
    @param rangena  range for non-specific attraction
    @param kna      coefficient for non-specific attraction
    @param kr       coefficient for repulsion between penetrating particles
-   @param sites0
-   @param sites1
-   @param value
-   @param ppr
+   @param sites0   sites on side of first particle
+   @param sites1   sites on side of other particle
 */
-void set_sites_score(double rangea, double ka, double rangena, double kna,
-                     double kr, const algebra::Vector3Ds &sites0,
-                     const algebra::Vector3Ds &sites1, int value,
-                     container::PredicatePairsRestraint *ppr) {
+IMP::PairScore* create_sites_pair_score
+( double rangea, double ka, double rangena,
+  double kna, double kr,
+  const algebra::Vector3Ds &sites0,
+  const algebra::Vector3Ds &sites1)
+{
   // use the point-location based one if appropriate
   if ((sites0.size() >= 4 && sites1.size() >= 4 &&
        (sites0.size() > .5 * sites1.size() ||
         sites1.size() > .5 * sites0.size()))) {
     IMP_NEW(SitesPairScore, ps, (rangea, ka, rangena, kna, kr, sites0, sites1));
-    ppr->set_score(value, ps.get());
+    return ps.release();
   }
-      // too slow (TODO: what is too slow?)
-      // TODO: check if the approach of the next clause (originally
-      // IMP_ADD_CASE)
-      //       can accelerate computations by having a template for spefified
-      //       site sizes
-      // BOOST_PP_SEQ_FOR_EACH_PRODUCT(IMP_MACRO, (IMP_S0)(IMP_S0))
-      //  IMP_ADD_CASE(1,15)
-      else if (sites0.size() == 1 && sites1.size() == 15) {
+  // TODO: check if the approach of the next clause (originally
+  // IMP_ADD_CASE) can accelerate computations by having a template
+  // for spefified site sizes
+  // BOOST_PP_SEQ_FOR_EACH_PRODUCT(IMP_MACRO, (IMP_S0)(IMP_S0))
+  //  IMP_ADD_CASE(1,15)
+  else if (sites0.size() == 1 && sites1.size() == 15) {
     typedef TemplateSitesPairScore<1, 15, true> TSPS;
-    IMP_NEW(TSPS, ps, (rangea, ka, rangena, kna, kr, sites0, sites1));
-    ppr->set_score(value, ps.get());
+    IMP_NEW(TSPS, tsps, (rangea, ka, rangena, kna, kr, sites0, sites1));
+    return tsps.release();
   } else {
     IMP_NEW(SitesPairScore, ps, (rangea, ka, rangena, kna, kr, sites0, sites1));
-    ppr->set_score(value, ps.get());
+    return ps.release();
   }
 }
 
-Restraints SitesPairScore::do_create_current_decomposition(
-    Model *m, const ParticleIndexPair &pi) const {
-  Restraints ret;
-  if (evaluate_index(m, pi, nullptr) < 0) {
-    return Restraints(1, IMP::internal::create_tuple_restraint(this, m, pi));
-  } else {
-    return Restraints();
-  }
-}
 IMPNPCTRANSPORT_END_NAMESPACE

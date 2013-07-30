@@ -92,6 +92,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   //       of efficiency
    bool obstacles_changed_;
 
+  base::Pointer
+    <IMP::container::ListSingletonContainer> optimizable_diffusers_;
+
    base::Pointer<container::ListSingletonContainer> diffusers_;
 
   // a writer to an RMF (Rich Molecular Format) type file
@@ -240,6 +243,14 @@ void create_fgs
      this simulation data object (or an empty list if none exists)
    */
   container::ListSingletonContainer *get_diffusers();
+
+  /**
+     returns all diffusing particles that currently exist in
+     this simulation data object get_sd(), which are also optimizable
+     (or an empty list if none exists)
+   */
+  container::ListSingletonContainer* get_optimizable_diffusers();
+
 
   /** get the number of site-site interactions between two particles */
   int get_number_of_interactions(Particle *a, Particle *b) const;
@@ -429,7 +440,7 @@ void create_fgs
   void set_diffusers_changed(bool is_changed){
     diffusers_changed_ = is_changed;
     if(diffusers_changed_){
-      get_scoring()->update_particles();
+      //      get_scoring()->update_particles();
     }
   }
 
@@ -437,7 +448,7 @@ void create_fgs
   void set_obstacles_changed(bool is_changed){
     obstacles_changed_ = is_changed;
     if(obstacles_changed_){
-      get_scoring()->update_particles();
+      //      get_scoring()->update_particles();
     }
   }
 

@@ -6,8 +6,8 @@
  *
  */
 
-#include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/Scoring.h>
+#include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
 #include <IMP/npctransport/SlabSingletonScore.h>
 #ifdef IMP_NPC_GOOGLE
@@ -38,6 +38,7 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/core/pair_predicates.h>
 #include <IMP/core/RestraintsScoringFunction.h>
 #include <IMP/core/XYZ.h>
+
 #include <numeric>
 #include <set>
 
@@ -50,7 +51,13 @@ Scoring::Scoring
  const ::npctransport_proto::Assignment &data)
 : Object("Scoring%1%"),
   owner_sd_(owner_sd),
-  is_updating_particles_(false)
+  //  is_updating_particles_(false),
+  close_diffusers_container_(nullptr),
+  otpp_(new core::OrderedTypePairPredicate()),
+  scoring_function_(nullptr),
+  predr_(nullptr),
+  box_restraint_(nullptr),
+  slab_restraint_(nullptr)
 {
   IMP_ALWAYS_CHECK(owner_sd_ != nullptr,
                    "Must have non-null owner simulation data",
@@ -68,7 +75,7 @@ Scoring::Scoring
   GET_ASSIGNMENT(nonspecific_range);
   GET_ASSIGNMENT(excluded_volume_k);
   GET_VALUE(range);
-  update_particles();
+  //  update_particles();
 }
 
 IMP::ScoringFunction*
@@ -76,14 +83,17 @@ Scoring::get_scoring_function() const
 {
   // set up the restraints for the BD simulation:
   RestraintsTemp rs = chain_restraints_;
-  if (get_has_bounding_box())
+  if (box_is_on_) {
     rs.push_back(get_box_restraint());
-  if (get_has_slab())
+  }
+  if (slab_is_on_) {
     rs.push_back(get_slab_restraint());
+  }
   rs.push_back(this->get_predr());
-  is_updating_particles_ = false; // everything is supposed to be updated now
-  IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
-  return rsf.release();
+  //  is_updating_particles_ = false; // everything is supposed to be updated now
+  //  IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
+  scoring_function_  = new core::RestraintsScoringFunction(rs);
+  return scoring_function_;
 }
 
 // a close pair container for all diffusers
@@ -93,67 +103,59 @@ Scoring::get_close_diffusers_container() const
   // TODO: only get_diffusers() sets updated to true, but that's ok, cause we
   //       call get_diffusers(). But it may be bug prone - check it out in
   //       the future.
-  if (!close_diffusers_container_ || is_updating_particles_)
+  if (!close_diffusers_container_) // || is_updating_particles_)
     {
       // populate a list of optimizable (spatially dynamic) diffusers
       IMP::ParticlesTemp all_diffusers;
-      IMP::ParticlesTemp optimizable_diffusers;
-      IMP::Model* m =
-        const_cast<Scoring*>(this)->get_sd()->get_model();
-      IMP_CONTAINER_FOREACH
-        (container::ListSingletonContainer,
-         get_diffusers(),
-         {
-           Particle* p = m->get_particle(_1);
-           all_diffusers.push_back(p);
-           if(core::XYZ::get_is_setup(p)) {
-             core::XYZ p_xyz(p);
-             if(p_xyz.get_coordinates_are_optimized()){
-               optimizable_diffusers.push_back ( p );
-             }
-           }
-         }
-         );
       // create the cbpc and store it in close_diffusers_container_
       IMP_NEW( container::CloseBipartitePairContainer, cpc,
-               ( optimizable_diffusers, all_diffusers,
+               ( const_cast<Scoring*>(this)->get_sd()
+                  ->get_optimizable_diffusers(),
+                 const_cast<Scoring*>(this)->get_sd()
+                  ->get_diffusers(),
                  get_range(), slack_) );
       IMP_NEW( core::AllSamePairPredicate, aspp, () );
       cpc->add_pair_filter( aspp ); // only relevant for bipartite
       // IMP_NEW( container::ClosePairContainer, cpc,
-      //          ( all_diffusers,
+      //                 const_cast<Scoring*>(this)->get_sd()
+      //                   ->get_diffusers(),
       //            get_range(), slack_) );
       IMP_NEW( container::ExclusiveConsecutivePairFilter, ecpf, () );
       cpc->add_pair_filter( ecpf );
       close_diffusers_container_ = cpc;
-      // if predicate pair restraint was already set - need to update it
-      // note that this will cause a recursion, which should be fine
-      if(predr_) {
-        predr_=nullptr;
-        get_predr(); // just to update
-      }
     }
   return close_diffusers_container_;
 }
 
 container::PredicatePairsRestraint *Scoring::get_predr() const {
-  if (!predr_ || is_updating_particles_) {
+  if (!predr_) { // || is_updating_particles_) {
     // set linear repulsion upon penetration between all close pairs
-    // returned by get_close_diffusers_container(), with different scores for interactions
-    // between particles of different (ordered) types
-    IMP_NEW(core::OrderedTypePairPredicate, otpp, ());
-    otpp_ = otpp;
-    IMP_NEW(container::PredicatePairsRestraint, ppr,
-            (otpp, get_close_diffusers_container()) );
+    // returned by get_close_diffusers_container(), with different
+    // scores for interactions between particles of different
+    // (ordered) types
+    predr_ = new container::PredicatePairsRestraint
+      ( otpp_, get_close_diffusers_container() );
     IMP_NEW(LinearSoftSpherePairScore, ssps, (excluded_volume_k_));
-    ppr->set_unknown_score(ssps.get());
-    predr_ = ppr;
+    predr_->set_unknown_score(ssps.get());
+    // add interaction scores with site-specific interactions
+    IMP::base::map< int, base::Pointer< PairScore > >
+      ::const_iterator site_iter;
+    for(site_iter = sites_pair_scores_.begin();
+        site_iter != sites_pair_scores_.end();
+        site_iter++)
+      {
+        // first = interaction_id; second = pair-score
+        // TODO: using SitesPairScore as map type would be more efficient
+        //       as set_score() method is templated
+        predr_->set_score(site_iter->first, site_iter->second);
+      }
+
   }
   return predr_;
 }
 
 /**
-   add a SitesPairScore restraint that applies to particles of
+   add a pair score restraint that applies to particles of
    types t0 and t1 to the PredicatePairsRestraint object returned by
    get_predr().
 
@@ -161,6 +163,9 @@ container::PredicatePairsRestraint *Scoring::get_predr() const {
    attractive forces between bidning sites on each particle,
    and non-specific attraction and repulsion (upon penetraion)
    between the particles themselves.
+
+   \see SitesPairScore
+   \see create_sites_pair_score
 */
 void Scoring::add_interaction
 ( const ::npctransport_proto::Assignment_InteractionAssignment &idata)
@@ -200,35 +205,35 @@ void Scoring::add_interaction
             << std::endl
           );
 
-  // create interaction into get_predr()
-  container::PredicatePairsRestraint *ppr = get_predr();
-  // add the interaction restraint both for (t0,t1) and (t1,t0)
-  {
+  // add the interaction restraint both for (t0,t1) and (t1,t0)  {
     // TODO: repulsion was also added in get_predr - do we double count here?
-    core::ParticleTypes ts;
-    ts.push_back(type0);
-    ts.push_back(type1);
-    int interaction_id = otpp_->get_value(ts);
-    set_sites_score(
-        interaction_range,                  // site-specific
+  {
+    core::ParticleTypes ts1;
+    ts1.push_back(type0);
+    ts1.push_back(type1);
+    int interaction_id1 = otpp_->get_value(ts1);
+    IMP::PairScore* ps1 = create_sites_pair_score
+      ( interaction_range,                  // site-specific
         interaction_k, nonspecific_range_,  // non-specific = entire particle
         nonspecific_k_, excluded_volume_k_,
         get_sd()->get_sites(type0),
-        get_sd()->get_sites(type1),
-        interaction_id, ppr );
+        get_sd()->get_sites(type1)
+        );
+    sites_pair_scores_[interaction_id1] = ps1;
   }
   {
-    core::ParticleTypes ts;
-    ts.push_back(type1);
-    ts.push_back(type0);
-    int interaction_id = otpp_->get_value(ts);
-    set_sites_score
+    core::ParticleTypes ts2;
+    ts2.push_back(type1);
+    ts2.push_back(type0);
+    int interaction_id2 = otpp_->get_value(ts2);
+    IMP::PairScore* ps2 = create_sites_pair_score
       (  interaction_range,                  // site-specific
          interaction_k, nonspecific_range_,  // non-specific = entire particle
          nonspecific_k_, excluded_volume_k_,
          get_sd()->get_sites(type0),
-         get_sd()->get_sites(type1),
-         interaction_id, ppr );
+         get_sd()->get_sites(type1)
+         );
+    sites_pair_scores_[interaction_id2] = ps2;
   }
 }
 
@@ -251,15 +256,15 @@ Scoring::add_chain_restraint(const ParticlesTemp &particless,
   IMP_NEW(container::ExclusiveConsecutivePairContainer, xcpc,
           (particless, name + " consecutive pairs"));
   // add chain restraint
-  LinearWellPairScore* lwps =
-    new LinearWellPairScore( rest_length, get_backbone_k() );
-  base::Pointer<Restraint> cr =
+  IMP_NEW(LinearWellPairScore, lwps,
+          ( rest_length, get_backbone_k() ) );
+  IMP::base::Pointer<Restraint> cr =
     IMP::container::create_restraint
-    ( lwps, xcpc.get(), "chain restraint %1%" );
-  chain_scores_.push_back(lwps);
-  chain_restraints_.push_back(cr);
+    ( lwps.get(), xcpc.get(), "chain restraint %1%" );
+  chain_scores_.push_back( lwps );
+  chain_restraints_.push_back( cr );
 
-  return cr;
+  return chain_restraints_.back();
 }
 
 

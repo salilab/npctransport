@@ -35,6 +35,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"
+%include "IMP/npctransport/SitesGeometry.h"
 %include "IMP/npctransport/SitesPairScore.h"
 %include "IMP/npctransport/Scoring.h"
 %include "IMP/npctransport/SimulationData.h"
