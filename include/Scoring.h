@@ -150,9 +150,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   */
   container::PredicatePairsRestraint *get_predr() const;
 
-  /** get the number of interactions between two particles */
-  int get_number_of_interactions(Particle *a, Particle *b) const;
-
   // returns true if a bounding box restraint has been defined */
   bool get_has_bounding_box() const { return box_restraint_ != nullptr; }
 
