@@ -2,6 +2,7 @@
 from IMP.npctransport import *
 import IMP.base
 import IMP.test
+import IMP.core
 import sys
 import math
 #import read_nups
@@ -23,13 +24,13 @@ class Tests(IMP.test.TestCase):
         config = Configuration()
         IMP.npctransport.set_default_configuration(config)
         config.box_is_on.lower=1
-        config.box_side.lower=150
+        config.box_side.lower=125
         fgs= IMP.npctransport.add_fg_type(config,
                                           type_name="my_fg",
                                           number_of_beads=1,
                                           number=1,
                                           radius=fg_R,
-                                          interactions=7,
+                                          interactions=12,
                                           rest_length_factor = 1.5)
         coords = []
         pos=fgs.anchor_coordinates.add()
@@ -48,7 +49,7 @@ class Tests(IMP.test.TestCase):
                                      name0="my_fg",
                                      name1="my_kap",
                                      interaction_k=10,
-                                     interaction_range=10)
+                                     interaction_range=5)
 
         # nonspecifics= IMP.npctransport.add_float_type(config,
         #                                               number=1,
@@ -57,41 +58,53 @@ class Tests(IMP.test.TestCase):
         # dump to file
         f=open(cfg_file, "wb")
         f.write(config.SerializeToString())
-        print config
         f.close()
 
-    def _assert_anchors_in_place(self, sd):
-        '''
-        verify that fg anchors are still in same place as in the originally
-        specified coordinates coords
-        '''
-        fgs = sd.get_fg_chains( ) # atom.Hierarchies
-#        print " fgs ", fgs
-        # verify that anchors are in placed
-        self.assert_(len(fgs)==1)
-        fg=fgs[0]
-        anchor_c = IMP.core.XYZ( fg.get_child(0) ).get_coordinates()
-#        print "fg_sites", sd.get_sites(IMP.core.Typed(fg).get_type())
-        d2 = sum([(a-b)**2 for a,b in zip(anchor_c,fg_coords)])
-#        print "cur fg anchor / orig anchor / dist2", anchor_c, fg_coords, d2
-        self.assertEqual(d2, 0)
+    def find_close_sites(self, sd, p1, p2, distance_thresh=2.0):
+        """
+        return true if two sites are below distance_thresh from each other
+        between particles p1 and p2
+        """
+
+        sites1=sd.get_sites(IMP.core.Typed(p1).get_type())
+        sites2=sd.get_sites(IMP.core.Typed(p2).get_type())
+        rf1 = IMP.core.RigidBody(p1).get_reference_frame()
+        rf2 = IMP.core.RigidBody(p2).get_reference_frame()
+        for site1 in sites1:
+            site1_c = rf1.get_transformation_to().get_transformed(site1)
+            for site2 in sites2:
+                site2_c = rf2.get_transformation_to().get_transformed(site2)
+                D = IMP.algebra.get_distance(site1_c, site2_c)
+                if(D < distance_thresh):
+                    print "Close sites", site1_c, site2_c, "D", D
+                    return True
+        return False
+
+
 
     def _assert_kap_in_place(self, sd, really_assert=True):
+        fg_anchor = sd.get_fg_chains()[0].get_child(0)
+        kap = None
         r=sd.get_root()
-        for p in r.get_children():
-            if p.get_name()=="my_kap":
-                for kap in p.get_children():
-                    kap_c= IMP.core.XYZ(kap).get_coordinates()
-                    print "kap ", kap_c,
-#                    print "kap sites",
-#                    print sd.get_sites(IMP.core.Typed(kap).get_type())
-                    d2 = sum([(x-y)**2 for x,y in zip(kap_c,fg_coords)])
-#                    print d2
-                    print "d=", math.sqrt(d2)
-                    if really_assert:
-                        self.assertAlmostEqual(d2/100.0,
-                                               (fg_R+diffuser_R)**2 / 100,
-                                               0)
+        for rchild in r.get_children():
+            if rchild.get_name()=="my_kap":
+                kap = rchild.get_child(0)
+        assert(kap is not None)
+        # check if sphere coordinates are close
+        kap_c= IMP.core.XYZ(kap).get_coordinates()
+        anchor_c = IMP.core.XYZ( fg_anchor ).get_coordinates()
+        D = IMP.algebra.get_distance(kap_c, anchor_c)
+        if really_assert:
+            # assert that they're close and have close sites
+            self.assertAlmostEqual( D / 10.0,
+                                   (fg_R+diffuser_R) / 10.0,
+                                   0)
+            self.assert_( self.find_close_sites(sd, kap, fg_anchor) )
+            print "Kap coords", kap_c,
+            print "FG coords", anchor_c,
+            print "D", D
+
+
 
     def test_sites_from_simulation_data(self):
         '''
@@ -100,50 +113,51 @@ class Tests(IMP.test.TestCase):
         '''
 
         IMP.base.set_log_level(IMP.SILENT)
-        cfg_file = self.get_tmp_file_name("barak_config.pb")
-        assign_file = self.get_tmp_file_name("barak_assign.pb")
-        self._create_cfg_file_with_fg_anchors( cfg_file )
-        print "assigning parameter ranges from config"
-        num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
-        sd= IMP.npctransport.SimulationData(assign_file, False,
-                                            self.get_tmp_file_name("out.rmf"));
-        self._assert_anchors_in_place(sd)
-        # verify that anchors remain intact during optimization
-#        if IMP.build == "fast" or IMP.build == "release":
-        print "Check level ", IMP.base.get_check_level()
-        print "Usage and internal: ", IMP.base.USAGE_AND_INTERNAL
         if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
             print "SLOW MODE"
             fast = False
             short_init_factor=0.0001
             opt_cycles=100
             n_iter = 10
+            n_good_thresh=1
         else:
             print "FAST MODE"
             fast = True
             short_init_factor=0.1
-            opt_cycles=25000
-            n_iter = 100
+            opt_cycles=12500
+            n_iter = 200
+            n_good_thresh=3
+
+        # prepare run
+        cfg_file = self.get_tmp_file_name("barak_config.pb")
+        assign_file = self.get_tmp_file_name("barak_assign.pb")
+        self._create_cfg_file_with_fg_anchors( cfg_file )
+        print "assigning parameter ranges from config", cfg_file
+        num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
+        rmf_file = self.get_tmp_file_name("out.rmf");
+        print "RMF file", rmf_file
+        sd= IMP.npctransport.SimulationData(assign_file, False, rmf_file)
         self._assert_kap_in_place(sd, False)
+        # init and run
         IMP.npctransport.initialize_positions( sd, [], False,
                                                short_init_factor)
-        self._assert_anchors_in_place(sd)
-        self._assert_kap_in_place(sd, False)
-        print "total", sd.get_bd().get_scoring_function().evaluate(False),
-        print "predr", sd.get_scoring().get_predr().evaluate(False)
+        n_good=0
         for i in range(n_iter):
             sd.get_bd().optimize(opt_cycles)
-            print "total", sd.get_bd().get_scoring_function().evaluate(False),
-            print "predr", sd.get_scoring().get_predr().evaluate(False),
             try:
-                self._assert_anchors_in_place(sd)
                 self._assert_kap_in_place(sd, True)
+                self.assert_(sd.get_scoring().get_predr().evaluate(False) < -30.0)
+                n_good=n_good+1
             except:
                 continue
-            return True
+            if(n_good >= n_good_thresh):
+                print "total energy", sd.get_bd().get_scoring_function().evaluate(False),
+                print "predr", sd.get_scoring().get_predr().evaluate(False),
+                return True
         if fast:
-            self._assert_kap_in_place(sd, True)
-            self.assert_(sd.get_scoring().get_predr().evaluate(False) < -80.0)
+            print "Failed to glue particles after %d iterations of %d opt cycles" \
+                % (n_iter, opt_cycles)
+            self.assert_(n_good >= n_good_thresh)
         else:
             print "Debug mode - couldn't glue particles in such short run"
 
