@@ -284,7 +284,8 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
           << std::endl);
 
   Hierarchy root = sd.get_root();
-  Hierarchies chains = IMP::npctransport::get_fg_chains(root);
+  IMP::npctransport::get_fg_chains(root);// JUST TO TEST DEPRECATION - CAN REMOVE
+  Hierarchies chains = sd.get_fg_chains( );
   for (unsigned int k = 0; k < chains.size(); k++) {
     Hierarchy cur_chain(chains[k]);
     core::XYZ d(cur_chain.get_child(0));
@@ -319,7 +320,7 @@ void initialize_positions(SimulationData *sd,
     rss.push_back(scoring->get_slab_restraint());
   // pin first link of fgs, if not already pinned
   core::XYZs previously_unpinned;
-  atom::Hierarchies chains = get_fg_chains(sd->get_root());
+  atom::Hierarchies chains = sd->get_fg_chains();
   for (unsigned int i = 0; i < chains.size(); ++i) {
     if (core::XYZ(chains[i].get_child(0)).get_coordinates_are_optimized()) {
       previously_unpinned.push_back(core::XYZ(chains[i].get_child(0)));

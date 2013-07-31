@@ -14,6 +14,9 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+IMPNPCTRANSPORT_DEPRECATED_HEADER
+(2.1, "header is only left for backward comaptability with old inputs - types are now specified in protobuf")
+
 IMPNPCTRANSPORTEXPORT
 extern core::ParticleTypes type_of_fg;
 IMPNPCTRANSPORTEXPORT
@@ -37,6 +40,10 @@ inline IMPNPCTRANSPORTEXPORT unsigned int get_number_of_types_of_float() {
   return type_of_float.size();
 }
 
+/** \deprecated_at{2.1} Use the SimulationData::get_fg_chains() method
+    instead
+*/
+IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DECL(2.1)
 IMPNPCTRANSPORTEXPORT
 atom::Hierarchies get_fg_chains(atom::Hierarchy h);
 

@@ -162,6 +162,7 @@ void SimulationData::create_fgs
   // set type
   core:: ParticleType type(fg_data.type());
   if (fg_data.number().value() > 0) {
+    fg_types_.insert(type);
     fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
     chain_stats_.push_back(ChainStatisticsOptimizerStates());
     ParticlesTemp fg_particles;
@@ -209,6 +210,31 @@ void SimulationData::create_fgs
       ( type, fg_data.interaction_k_factor().value());
     set_diffusers_changed(true);
   } // if
+}
+
+atom::Hierarchies SimulationData::get_fg_chains(atom::Hierarchy root) const
+{
+  IMP_INTERNAL_CHECK(root, "root for SimulationData::get_fg_chains() is null");
+  // TODO: maybe FGs should just be marked by a decorator, and not identified by
+  //       type alone
+  atom::Hierarchies ret;
+  if (root.get_number_of_children() == 0) {
+    return ret;
+  }
+  // I. return root itself if the type of its first direct child
+  // is contained in [type_of_fg]
+  atom::Hierarchy c = root.get_child(0);
+  if (core::Typed::get_is_setup(c)) {
+    core::ParticleType t = core::Typed(c).get_type();
+    if (fg_types_.find( t ) != fg_types_.end() ) {
+      return atom::Hierarchies(1, root);
+    }
+  }
+  // II. If not returned yet, recurse on all of root's children
+  for (unsigned int i = 0; i < root.get_number_of_children(); ++i) {
+    ret += get_fg_chains(root.get_child(i));
+  }
+  return ret;
 }
 
 

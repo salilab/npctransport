@@ -34,6 +34,8 @@ core::ParticleTypes type_of_float(type_of_floata,
                                           sizeof(core::ParticleType));
 
 atom::Hierarchies get_fg_chains(atom::Hierarchy root) {
+  IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DEF
+    (2.1, "use SimulationData::get_fg_chains() instead")
   atom::Hierarchies ret;
   // I. return root itself if the type of its first direct child
   // is contained in [type_of_fg]

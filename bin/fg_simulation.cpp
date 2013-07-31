@@ -59,7 +59,7 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
   algebra::BoundingBox2D surface(lower_corner_XY, upper_corner_XY);
   // get fg
   atom::Hierarchy root = sd.get_root();
-  atom::Hierarchies chains = IMP::npctransport::get_fg_chains(root);
+  atom::Hierarchies chains = sd.get_fg_chains();
   // anchor fgs to surface,
   // for now using random non-overlapping points
   // create a set of random sites (for now)
@@ -103,7 +103,7 @@ void color_fgs(IMP::npctransport::SimulationData& sd) {
   using IMP::display::Colored;
 
   atom::Hierarchy root(sd.get_root());
-  atom::Hierarchies chains(get_fg_chains(root));
+  atom::Hierarchies chains(sd.get_fg_chains());
   unsigned int n_chains = chains.size();
   for (unsigned int i = 0; i < n_chains; i++) {
     display::Color color;
@@ -140,7 +140,7 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
 
   IMP::algebra::Cylinder3D cyl = sd.get_cylinder();
   Hierarchy root = sd.get_root();
-  Hierarchies chains = IMP::npctransport::get_fg_chains(root);
+  Hierarchies chains = sd.get_fg_chains();
   // compute the relative radius in which particles would be positioned
   // TODO: we assume here that particle radius is smaller
   //       than the cylinder radius - verify in runtime?
@@ -220,7 +220,7 @@ void print_fgs(IMP::npctransport::SimulationData& sd) {
   std::cout << "print_fgs() - Call # " << ++call_num << std::endl;
 
   Hierarchy root = sd.get_root();
-  Hierarchies chains = IMP::npctransport::get_fg_chains(root);
+  Hierarchies chains = sd.get_fg_chains();
   for (unsigned int k = 0; k < chains.size(); k++) {
     Hierarchy cur_chain(chains[k]);
     core::XYZ d(cur_chain.get_child(0));

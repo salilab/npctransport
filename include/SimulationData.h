@@ -21,10 +21,11 @@
 #include <IMP/core/pair_predicates.h>
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/core/Typed.h>
-#include <IMP/base/map.h>
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/rmf/SaveOptimizerState.h>
 #include <IMP/base/Pointer.h>
+#include <IMP/base/map.h>
+#include <IMP/base/set.h>
 #include "io.h"
 #include "BodyStatisticsOptimizerState.h"
 #include "ParticleTransportStatisticsOptimizerState.h"
@@ -103,6 +104,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   // the root of the model hierarchy
   base::Pointer<Particle> root_;
 
+  // fg types  - a list of all fg types that were
+  // added via create_fgs, so far
+  IMP::base::set<core::ParticleType> fg_types_;
+
   base::Pointer<display::Geometry> static_geom_;
 
   base::map<core::ParticleType, algebra::Vector3Ds> sites_;
@@ -160,8 +165,18 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
      @param fg_data data for fgs of this type in protobuf format as specified
                  in data/npctransport.proto
    */
-void create_fgs
-( const ::npctransport_proto::Assignment_FGAssignment &fg_data );
+  void create_fgs
+    ( const ::npctransport_proto::Assignment_FGAssignment &fg_data );
+
+  /**
+     retrieve fg chains from root
+
+     @param root the root under which to look for FGs
+
+     @return all the fg hierarchies under root, which match any fg type
+             that was added to this simulation previously
+  */
+  atom::Hierarchies get_fg_chains(atom::Hierarchy root) const;
 
   /**
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
@@ -237,6 +252,18 @@ void create_fgs
   double get_angular_d_factor(){
     return angular_d_factor_;
   }
+
+  /**
+     retrieve fg chain hierarchies
+
+     @return all the fg hierarchies in the simulation data object
+  */
+  atom::Hierarchies get_fg_chains() const
+    {
+      return get_fg_chains(get_root());
+    }
+
+
 
   /**
      returns the container of all diffusing particles that currently exist in

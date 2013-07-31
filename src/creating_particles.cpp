@@ -71,5 +71,4 @@ Particle *create_fg_chain
   return root;
 }
 
-
 IMPNPCTRANSPORT_END_NAMESPACE
