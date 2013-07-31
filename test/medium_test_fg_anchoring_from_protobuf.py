@@ -56,7 +56,7 @@ class Tests(IMP.test.TestCase):
         verify that fg anchors are still in same place as in the originally
         specified coordinates coords
         '''
-        fgs = IMP.npctransport.get_fg_chains( sd.get_root() ) # atom.Hierarchies
+        fgs = sd.get_fg_chains(  ) # atom.Hierarchies
         # verify that anchors are in placed
         for fg,c in zip(fgs,coords):
             fg_c = IMP.core.XYZ( fg.get_child(0) ).get_coordinates()
@@ -79,11 +79,13 @@ class Tests(IMP.test.TestCase):
                                             self.get_tmp_file_name("out.rmf"));
         self._assert_anchors_in_place(sd, coords)
         # verify that anchors remain intact during optimization
-        if IMP.build == "fast" or IMP.build == "release":
-            IMP.npctransport.initialize_positions(sd)
-            self._assert_anchors_in_place(sd, coords)
+        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+            short_init_factor=0.00001
+            print "short position initialization in non-fast mode"
         else:
-            print "skipping position initialization in non-fast mode"
+            short_init_factor=0.1
+        IMP.npctransport.initialize_positions(sd,[],False,short_init_factor)
+        self._assert_anchors_in_place(sd, coords)
         sd.get_bd().optimize(1000)
         self._assert_anchors_in_place(sd, coords)
 
