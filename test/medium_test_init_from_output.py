@@ -28,10 +28,16 @@ class Tests(IMP.test.TestCase):
         sd= IMP.npctransport.SimulationData(output, False,
                                             self.get_tmp_file_name("out0.rmf"));
         print "BEFORE INIT", time.ctime()
-        IMP.npctransport.initialize_positions(sd, [], False)
+        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+            short_init_factor=0.00001
+            opt_cycles = 2
+        else:
+            short_init_factor=0.01
+            opt_cycles = 10000
+        IMP.npctransport.initialize_positions(sd, [], False, short_init_factor)
         print "AFTER INIT", time.ctime()
         obd= sd.get_bd()
-        obd.optimize(2)
+        obd.optimize(opt_cycles)
         print "AFTER OPTIMIZE", time.ctime()
         timer= IMP.npctransport.timer();
         # # lame test
