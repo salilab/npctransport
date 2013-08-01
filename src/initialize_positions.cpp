@@ -96,6 +96,7 @@ void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
    with a soft sphere pair score ssps, and move step size scaling move_scaling
 
    @param ps - the particles
+   @param rs - restraints used for scoring the MC
    @param excluded - predicates for excluded volume restraints calc
    @param save - an optional saver to save optimization to file
    @param debug - if true, save is added as an optimizer state to the MC
@@ -103,9 +104,9 @@ void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
  */
 IMP::base::Pointer<core::MonteCarlo> create_mc(
     const ParticlesTemp &ps,
-    IMP::base::Pointer<core::IncrementalScoringFunction> isf,
-    IMP::base::Pointer<core::SoftSpherePairScore> ssps,
-    const PairPredicates &excluded, rmf::SaveOptimizerState *save, bool debug,
+    const RestraintsTemp& rs,
+    const PairPredicates excluded,
+    rmf::SaveOptimizerState *save, bool debug,
     unsigned int n_movers = 1) {
   IMP_ALWAYS_CHECK(n_movers > 0, "number of MC movers must be >0",
                    ValueException);
@@ -120,10 +121,15 @@ IMP::base::Pointer<core::MonteCarlo> create_mc(
     movers.push_back(create_serial_mover(ps));
   }
   mc->set_movers(movers);
-  // we are special casing the nbl term for montecarlo, but using all for CG
-  mc->set_incremental_scoring_function(isf);
+
+  // Scoring
+  IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));
+  IMP_NEW(core::SoftSpherePairScore, ssps, (10));
   // use special incremental support for the non-bonded part
   isf->add_close_pair_score(ssps, 0, ps, excluded);
+  // TODO (what does this mean?)
+  // we are special casing the nbl term for montecarlo, but using all for CG
+  mc->set_incremental_scoring_function(isf);
   return mc;
 }
 
@@ -132,6 +138,9 @@ IMP::base::Pointer<core::MonteCarlo> create_mc(
     in the passed list of restraints.
     (Note: optimize only particles that are flagged as 'optimized')
 
+    @param ps particles over which to optimize
+    @param rs restraints to be used in this optimization
+    @param excluded pairs to be excluded from optimization
     @param short_init_factor a factor between >0 and 1 for decreasing
                              the number of optimization cycles at each
                              round
@@ -156,11 +165,9 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
   Model *m = ps[0]->get_model();
   // double scale = core::XYZR(ps[0]).get_radius();
 
-  IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));
-  IMP_NEW(core::SoftSpherePairScore, ssps, (10));
   unsigned int n_movers = 1 + ps.size() / 600;  // movers applied in one MC step
   IMP::base::Pointer<core::MonteCarlo> mc =
-      create_mc(ps, isf, ssps, excluded, save, debug, n_movers);
+    create_mc(ps, rs, excluded, save, debug, n_movers);
 
   if (show_dependency_graph) {
     DependencyGraph dg = get_dependency_graph(ps[0]->get_model());
@@ -177,7 +184,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     boost::ptr_vector<LinearWellSetLength> lengths;
     double factor = .1 * i;
     double length_factor = .7 + .3 * factor;
-    // rescale radii
+    // rescale radii temporarily
     for (unsigned int j = 0; j < ps.size(); ++j) {
       attrs[j].reset(
           new ScopedSetFloatAttribute(ps[j], core::XYZR::get_radius_key(),
@@ -192,7 +199,8 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     std::cout << " energy before = "
               << local->get_scoring_function()->evaluate(false) << std::endl;
 
-    isf->set_moved_particles(isf->get_movable_indexes());
+    mc->get_incremental_scoring_function()->set_moved_particles
+      ( mc->get_incremental_scoring_function()->get_movable_indexes() );
     double desired_accept_rate =
       0.2;  // acceptance rate for which to tune move size (per mover)
     for (int j = 0; j < 5; ++j) {
@@ -313,9 +321,9 @@ void initialize_positions(SimulationData *sd,
     sd->get_rmf_sos_writer()->update();
   }
   base::Pointer<Scoring> scoring=sd->get_scoring();
-  RestraintsTemp rss = scoring->get_chain_restraints();
+  RestraintsTemp rss = scoring->get_all_chain_restraints();
   if (scoring->get_has_bounding_box())
-    rss.push_back(scoring->get_box_restraint());
+    rss.push_back(scoring->get_bounding_box_restraint());
   if (scoring->get_has_slab())
     rss.push_back(scoring->get_slab_restraint());
   // pin first link of fgs, if not already pinned
@@ -365,8 +373,8 @@ void initialize_positions(SimulationData *sd,
                  debug, short_init_factor);
   print_fgs(*sd);
   IMP_NEW(core::RestraintsScoringFunction, rsf,
-          (rss + RestraintsTemp(1,
-                                sd->get_scoring()->get_predr()),
+          (rss + RestraintsTemp
+           ( 1, sd->get_scoring()->get_predicates_pair_restraint() ),
            "all restaints"));
   IMP_LOG(WARNING, "Initial energy is " << rsf->evaluate(false) << std::endl);
   if (sd->get_rmf_sos_writer()) {

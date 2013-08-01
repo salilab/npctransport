@@ -23,6 +23,7 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/npctransport/creating_particles.h>
 #include <IMP/npctransport/io.h>
 #include <IMP/npctransport/typedefs.h>
+#include <IMP/npctransport/util.h>
 #include <IMP/algebra/vector_generators.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
@@ -212,6 +213,21 @@ void SimulationData::create_fgs
   } // if
 }
 
+/** returns true if particle type is of fg type
+    (that is, particle was added within ::create_fgs()
+*/
+bool SimulationData::get_is_fg(ParticleIndex pi) const
+{
+  Model* m = get_model();
+  if (core::Typed::get_is_setup(m,pi)) {
+    core::ParticleType t = core::Typed(m,pi).get_type();
+    if (fg_types_.find( t ) != fg_types_.end() ) {
+      return true;
+    }
+  }
+  return false;
+ }
+
 atom::Hierarchies SimulationData::get_fg_chains(atom::Hierarchy root) const
 {
   IMP_INTERNAL_CHECK(root, "root for SimulationData::get_fg_chains() is null");
@@ -223,12 +239,9 @@ atom::Hierarchies SimulationData::get_fg_chains(atom::Hierarchy root) const
   }
   // I. return root itself if the type of its first direct child
   // is contained in [type_of_fg]
-  atom::Hierarchy c = root.get_child(0);
-  if (core::Typed::get_is_setup(c)) {
-    core::ParticleType t = core::Typed(c).get_type();
-    if (fg_types_.find( t ) != fg_types_.end() ) {
+  ParticleIndex pi_child0 = root.get_child(0).get_particle_index();
+  if (get_is_fg(pi_child0)) {
       return atom::Hierarchies(1, root);
-    }
   }
   // II. If not returned yet, recurse on all of root's children
   for (unsigned int i = 0; i < root.get_number_of_children(); ++i) {
@@ -427,10 +440,13 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh) {
   IMP_LOG(TERSE, "Setting up dump" << std::endl);
   Scoring* s=get_scoring();
   add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
-  IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_predr()));
-  IMP::rmf::add_restraints(fh, s->get_chain_restraints());
+  IMP::rmf::add_restraints( fh, RestraintsTemp
+                            (1, s->get_predicates_pair_restraint() )
+                           );
+  IMP::rmf::add_restraints(fh, s->get_all_chain_restraints() );
   if (s->get_has_bounding_box()) {
-    IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_box_restraint()));
+    IMP::rmf::add_restraints
+      ( fh, RestraintsTemp(1, s->get_bounding_box_restraint()) );
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
     IMP::rmf::add_static_geometries(fh, display::Geometries(1, bbg));
   }
@@ -588,7 +604,7 @@ SimulationData::get_optimizable_diffusers()
        }
      }
      );
-  optimizable_diffusers_->set_particles(optimizable_diffusers);
+  optimizable_diffusers_->set_particles(get_diffusers()->get_particles());
   return optimizable_diffusers_;
 }
 
@@ -614,12 +630,13 @@ void SimulationData::write_geometry(std::string out) {
     w->add_geometry(g);
   }
   Scoring * s = get_scoring();
-  for (unsigned int i = 0; i < s->get_chain_restraints().size(); ++i) {
-    IMP_NEW(display::RestraintGeometry, rsg, (s->get_chain_restraints()[i]));
+  for (unsigned int i = 0; i < s->get_all_chain_restraints().size(); ++i) {
+    IMP_NEW(display::RestraintGeometry, rsg,
+            (s->get_all_chain_restraints()[i]));
     w->add_geometry(rsg);
   }
   if (s->get_has_bounding_box()) {
-    IMP_NEW(display::RestraintGeometry, rsg, (s->get_box_restraint()));
+    IMP_NEW(display::RestraintGeometry, rsg, (s->get_bounding_box_restraint()));
     w->add_geometry(rsg);
   }
   if (s->get_has_slab()) {
@@ -627,7 +644,8 @@ void SimulationData::write_geometry(std::string out) {
     w->add_geometry(slab_rsg);
   }
   {
-    IMP_NEW(display::RestraintGeometry, prsg, (s->get_predr()));
+    IMP_NEW(display::RestraintGeometry, prsg,
+            (s->get_predicates_pair_restraint()));
     w->add_geometry(prsg);
   }
   if (box_is_on_) {

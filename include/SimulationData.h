@@ -234,7 +234,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   Model *get_model();
 #ifndef SWIG
-  Model *get_model() const { return m_; }
+  Model * get_model() const { return m_; }
 #endif
 
   /** returns a scoring object that is updated with the current list of
@@ -252,6 +252,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   double get_angular_d_factor(){
     return angular_d_factor_;
   }
+
+  /** returns true if particle type is of fg type
+      (that is, particle was added within create_fgs()
+  */
+  bool get_is_fg(ParticleIndex pi) const;
 
   /**
      retrieve fg chain hierarchies

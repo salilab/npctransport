@@ -66,7 +66,7 @@ Particle *create_fg_chain
   double rlf = fg_data.rest_length_factor().value();
   double rest_length = 2 * radius * rlf;
   sd->get_scoring()->add_chain_restraint
-    ( particles, rest_length, name + "chain restraint" );
+    ( root, rest_length, name + "chain restraint" );
 
   return root;
 }

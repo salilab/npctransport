@@ -45,4 +45,21 @@ void configuration_txt2pb
   ofs_pb.close();
  }
 
+ParticlesTemp get_optimizable_particles
+(ParticlesTemp const& particles)
+{
+  ParticlesTemp optimizables;
+  for(unsigned int i = 0; i < particles.size(); i++)
+    {
+      Particle* p = particles[i];
+      if(core::XYZ::get_is_setup(p)) {
+        core::XYZ p_xyz(p);
+        if(p_xyz.get_coordinates_are_optimized()){
+          optimizables.push_back ( p );
+        }
+      }
+    }
+  return optimizables;
+}
+
 IMPNPCTRANSPORT_END_NAMESPACE

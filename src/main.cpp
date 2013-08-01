@@ -149,7 +149,8 @@ namespace {
       std::cout << header
                 << sd->get_bd()->get_scoring_function()->evaluate(false)
                 << " ; PredicatePairsRestraint score = "
-                << sd->get_scoring()->get_predr()->evaluate(false)
+                << sd->get_scoring()
+                    ->get_predicates_pair_restraint()->evaluate(false)
                 << std::endl;
     if (print_positions) {
       ParticlesTemp ps = sd->get_diffusers()->get_particles();

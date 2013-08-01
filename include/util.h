@@ -26,6 +26,10 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 void configuration_txt2pb
 (std::string config_txt, std::string config_pb);
 
+/** returns particles with optimizable coordinates from particles */
+ParticlesTemp get_optimizable_particles
+(ParticlesTemp const& particles);
+
 IMPNPCTRANSPORT_END_NAMESPACE
 
 
