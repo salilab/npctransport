@@ -49,7 +49,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore : public LinearInteractionPairScore {
   // (this switching may be made to improve running time efficiency)
   bool sites_first_;
 
-  base::OwnerPointer<algebra::NearestNeighbor3D> nn_;
+  base::PointerMember<algebra::NearestNeighbor3D> nn_;
 
  public:
   /**
