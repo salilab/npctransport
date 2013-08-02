@@ -71,6 +71,7 @@ SimulationData::SimulationData(std::string output_file, bool quick,
 }
 
 void SimulationData::initialize(std::string output_file, bool quick) {
+  m_ = new Model("NPC model %1%");
   ::npctransport_proto::Output pb_data_;
   output_file_name_ = output_file;
   std::ifstream file(output_file_name_.c_str(), std::ios::binary);
@@ -410,9 +411,7 @@ void SimulationData::add_interaction
 
 Model *SimulationData::get_model() {
   set_was_used(true);
-  if (!m_) {
-    m_ = new Model("NPC model %1%");
-  }
+  IMP_USAGE_CHECK(m_, "model not initialized in get_model()");
   return m_;
 }
 

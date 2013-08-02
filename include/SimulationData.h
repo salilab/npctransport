@@ -73,13 +73,13 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<double> maximum_number_of_minutes_;
 
   // the model on which the simulation is run
-  base::Pointer<Model> m_;
+  base::PointerMember<Model> m_;
 
   // The BrownianDynamic simulator
-  base::Pointer<atom::BrownianDynamics> bd_;
+  base::PointerMember<atom::BrownianDynamics> bd_;
 
   // The scoring function wrapper for the simulation
-  base::Pointer< IMP::npctransport::Scoring >
+  base::PointerMember< IMP::npctransport::Scoring >
     scoring_;
 
   // keeps track of whether the diffusers list has
@@ -93,22 +93,22 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   //       of efficiency
    bool obstacles_changed_;
 
-  base::Pointer
+  base::PointerMember
     <IMP::container::ListSingletonContainer> optimizable_diffusers_;
 
-   base::Pointer<container::ListSingletonContainer> diffusers_;
+   base::PointerMember<container::ListSingletonContainer> diffusers_;
 
   // a writer to an RMF (Rich Molecular Format) type file
-  base::Pointer<rmf::SaveOptimizerState> rmf_sos_writer_;
+  base::PointerMember<rmf::SaveOptimizerState> rmf_sos_writer_;
 
   // the root of the model hierarchy
-  base::Pointer<Particle> root_;
+  base::PointerMember<Particle> root_;
 
   // fg types  - a list of all fg types that were
   // added via create_fgs, so far
   IMP::base::set<core::ParticleType> fg_types_;
 
-  base::Pointer<display::Geometry> static_geom_;
+  base::PointerMember<display::Geometry> static_geom_;
 
   base::map<core::ParticleType, algebra::Vector3Ds> sites_;
 
@@ -234,7 +234,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   Model *get_model();
 #ifndef SWIG
-  Model * get_model() const { return m_; }
+  Model * get_model() const {
+    IMP_USAGE_CHECK(m_, "model not initialized in get_model()");
+    return m_;
+  }
 #endif
 
   /** returns a scoring object that is updated with the current list of

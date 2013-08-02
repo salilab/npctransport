@@ -166,8 +166,8 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
   // double scale = core::XYZR(ps[0]).get_radius();
 
   unsigned int n_movers = 1 + ps.size() / 600;  // movers applied in one MC step
-  IMP::base::Pointer<core::MonteCarlo> mc =
-    create_mc(ps, rs, excluded, save, debug, n_movers);
+  //  IMP::base::Pointer<core::MonteCarlo> mc =
+  //  create_mc(ps, rs, excluded, save, debug, n_movers);
 
   if (show_dependency_graph) {
     DependencyGraph dg = get_dependency_graph(ps[0]->get_model());
@@ -199,8 +199,8 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     std::cout << " energy before = "
               << local->get_scoring_function()->evaluate(false) << std::endl;
 
-    mc->get_incremental_scoring_function()->set_moved_particles
-      ( mc->get_incremental_scoring_function()->get_movable_indexes() );
+    //    mc->get_incremental_scoring_function()->set_moved_particles
+    //      ( mc->get_incremental_scoring_function()->get_movable_indexes() );
     double desired_accept_rate =
       0.2;  // acceptance rate for which to tune move size (per mover)
     for (int j = 0; j < 5; ++j) {
