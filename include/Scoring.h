@@ -77,22 +77,22 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   /***************** Cache only variables ************/
 
   // see get_close_diffusers_container()
-  base::PointerMember
+  base::OwnerPointer
     <IMP::PairContainer> close_diffusers_container_;
 
   // generates hash values ('predicates') for ordered types pairs
   // (e.g., pairs of ParticleTypes)
-  base::PointerMember
+  base::OwnerPointer
     <IMP::core::OrderedTypePairPredicate> otpp_;
 
-  base::PointerMember
+  base::OwnerPointer
     <IMP::core::RestraintsScoringFunction> scoring_function_;
 
   // contains all restraints between pairs of particle types
-  base::PointerMember
+  base::OwnerPointer
     <container::PredicatePairsRestraint> predr_;
 
-  typedef  IMP::base::map< int, base::PointerMember< IMP::PairScore > >
+  typedef  IMP::base::map< int, base::OwnerPointer< IMP::PairScore > >
     map_pair_type_to_pair_score;
   // scores between particle, mapped by their interaction id,
   // where interaction id is from OrderedTypePairPredicate otpp_
@@ -100,17 +100,17 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   map_pair_type_to_pair_score
     interaction_pair_scores_;
 
-  base::PointerMember
+  base::OwnerPointer
     <IMP::Restraint> box_restraint_;
 
-  base::PointerMember
+  base::OwnerPointer
     <IMP::Restraint> slab_restraint_;
 
   LinearWellPairScores chain_scores_;
 
   // a map from particle indexes of chain parents to corresponding
   // chain backbone restraints
-  typedef IMP::base::map< ParticleIndex, IMP::base::PointerMember<Restraint> >
+  typedef IMP::base::map< ParticleIndex, IMP::base::OwnerPointer<Restraint> >
     t_chain_restraints_map;
   t_chain_restraints_map chain_restraints_map_;
 
@@ -155,19 +155,20 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      4) the slab or bounding box restraints if relevant on all particles
         in 'particles'
 
+        @param extra_restraints ad-hoc restraints to be added to scoring function
         @param particles particles container on which to apply bounding volume
                          and pair constraints
         @param optimizable_particles interaction scores (both repulsive or attractive)
                                      are computed only for interactions that involve
-                                     these optimizable particles. If nullptr, will be
-                                     computed automatically from particles
+                                     these optimizable particles.
         @param is_attr_interactions_on if false, only repulsive interactions will be
                                        computed between pairs of particles
   */
   IMP::ScoringFunction*
     get_custom_scoring_function
-    ( container::ListSingletonContainer* particles,
-      container::ListSingletonContainer* optimizable_particles=nullptr,
+    ( const RestraintsTemp& extra_rastraints,
+      SingletonContainerAdaptor particles,
+      SingletonContainerAdaptor optimizable_particles,
       bool is_attr_interactions_on = true ) const;
 
   /** Update the scoring function that the list of particles,
@@ -308,16 +309,14 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
      @param particles a container For particles over which the return value works
      @param optimizable_particles A container for particles that are also optimizable.
-                                  If null, auto-create list of optimizables based from
-                                  particles
 
      @note TODO: right now will not return any consecutive particles - that's
                  erroneous (e.g., last particle of one chain and first particle
                  of next chain) though may be negligible in practice
   */
   IMP::PairContainer *create_close_diffusers_container
-    ( container::ListSingletonContainer* particles,
-      container::ListSingletonContainer* optimizable_particles = nullptr)
+    ( SingletonContainerAdaptor particles,
+      SingletonContainerAdaptor optimizable_particles)
     const;
 
   /**
@@ -347,7 +346,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      @return a newly created box restraint
   */
   Restraint* create_bounding_box_restraint
-    ( container::ListSingletonContainer* particles ) const;
+    ( SingletonContainerAdaptor particles ) const;
 
   /**
      Creates slab bounding volume restraint, based on the slab_thickness_
@@ -362,7 +361,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      @return a newly created slab restraint
    */
   Restraint* create_slab_restraint
-    ( container::ListSingletonContainer* particles ) const;
+    ( SingletonContainerAdaptor particles ) const;
 
 
   /************************************************************/
@@ -431,7 +430,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
               and pertain to particle in 'particles' list
   */
   Restraints get_chain_restraints_on
-    ( container::ListSingletonContainer* particles ) const;
+    ( SingletonContainerAdaptor particles ) const;
 
   /**
       @return all restraints on fg nup chains that were added by
@@ -490,6 +489,8 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
  public:
   IMP_OBJECT_METHODS(Scoring);
 };
+
+
 
 
 IMPNPCTRANSPORT_END_NAMESPACE

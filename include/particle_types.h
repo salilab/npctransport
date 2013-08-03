@@ -22,21 +22,35 @@ extern core::ParticleTypes type_of_fg;
 IMPNPCTRANSPORTEXPORT
 extern core::ParticleTypes type_of_float;
 
-inline IMPNPCTRANSPORTEXPORT core::ParticleType get_type_of_fg(
+inline
+IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DECL(2.1)
+ IMPNPCTRANSPORTEXPORT
+core::ParticleType get_type_of_fg(
     unsigned int index) {
+  IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DEF(2.1, "all in protobuf now");
   return type_of_fg[index];
 }
 
-inline IMPNPCTRANSPORTEXPORT unsigned int get_number_of_types_of_fg() {
+inline
+IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DECL(2.1)
+ IMPNPCTRANSPORTEXPORT
+unsigned int get_number_of_types_of_fg() {
+  IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DEF(2.1, "all in protobuf now");
   return type_of_fg.size();
 }
 
-inline IMPNPCTRANSPORTEXPORT core::ParticleType get_type_of_float(
+inline
+IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DECL(2.1)
+IMPNPCTRANSPORTEXPORT core::ParticleType get_type_of_float(
     unsigned int index) {
+  IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DEF(2.1, "all in protobuf now");
   return type_of_float[index];
 }
 
-inline IMPNPCTRANSPORTEXPORT unsigned int get_number_of_types_of_float() {
+inline
+IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DECL(2.1)
+IMPNPCTRANSPORTEXPORT unsigned int get_number_of_types_of_float() {
+  IMPNPCTRANSPORT_DEPRECATED_FUNCTION_DEF(2.1, "all in protobuf now");
   return type_of_float.size();
 }
 

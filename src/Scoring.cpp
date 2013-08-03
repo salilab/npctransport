@@ -104,26 +104,28 @@ Scoring::get_scoring_function(bool update)
 
 IMP::ScoringFunction*
 Scoring::get_custom_scoring_function
-( IMP::container::ListSingletonContainer* particles,
-  IMP::container::ListSingletonContainer* optimizable_particles,
+( const RestraintsTemp& extra_rastraints,
+  IMP::SingletonContainerAdaptor particles,
+  IMP::SingletonContainerAdaptor optimizable_particles,
   bool is_attr_interactions_on) const
 {
     // set up the restraints for the BD simulation:
-    RestraintsTemp rs =
-      get_chain_restraints_on( particles );
-    if (box_is_on_) {
-      rs.push_back( create_bounding_box_restraint( particles ) );
-    }
-    if (slab_is_on_) {
-      rs.push_back( create_slab_restraint( particles ) );
-    }
-    PairContainer* cpc = create_close_diffusers_container
-      ( particles, optimizable_particles );
-    rs.push_back( create_predicates_pair_restraint
-                 ( cpc, is_attr_interactions_on ) );
-    //  is_updating_particles_ = false; // everything is supposed to be updated now
-    //  IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
-    return new core::RestraintsScoringFunction(rs);
+  RestraintsTemp rs;
+  rs += extra_rastraints;
+  rs += get_chain_restraints_on( particles );
+  if (box_is_on_) {
+    rs.push_back( create_bounding_box_restraint( particles ) );
+  }
+  if (slab_is_on_) {
+    rs.push_back( create_slab_restraint( particles ) );
+  }
+  PairContainer* cpc = create_close_diffusers_container
+    ( particles, optimizable_particles );
+  rs.push_back( create_predicates_pair_restraint
+                ( cpc, is_attr_interactions_on ) );
+  //  is_updating_particles_ = false; // everything is supposed to be updated now
+  IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
+  return rsf.release();
 }
 
 
@@ -289,7 +291,7 @@ Scoring::add_chain_restraint(atom::Hierarchy chain_root,
 
 Restraints
 Scoring::get_chain_restraints_on
-( IMP::container::ListSingletonContainer* particles ) const
+( IMP::SingletonContainerAdaptor particles ) const
 {
   Restraints ret_rs;
   IMP_CONTAINER_FOREACH
@@ -322,22 +324,12 @@ Scoring::get_chain_restraints_on
 // optimizable particles
 IMP::PairContainer*
 Scoring::create_close_diffusers_container
-( container::ListSingletonContainer* particles,
-  container::ListSingletonContainer* optimizable_particles) const
+( SingletonContainerAdaptor particles,
+  SingletonContainerAdaptor optimizable_particles) const
 {
   using namespace container;
-    // create the cbpc and store it in close_diffusers_container_
-  base::Pointer<ListSingletonContainer>
-    actual_optimizables = optimizable_particles;
-  if(!actual_optimizables){
-    ParticlesTemp ops =
-      get_optimizable_particles( particles->get_particles() ) ;
-    actual_optimizables = new ListSingletonContainer(ops);
-  }
-  IMP_NEW( CloseBipartitePairContainer, cpc,
-           ( particles,
-             actual_optimizables,
-             get_range(), slack_) );
+  IMP_NEW(CloseBipartitePairContainer, cpc,
+          (particles, optimizable_particles, get_range(), slack_) );
   IMP_NEW( core::AllSamePairPredicate, aspp, () );
   cpc->add_pair_filter( aspp ); // only relevant for bipartite
   // IMP_NEW( container::ClosePairContainer, cpc,
@@ -386,7 +378,7 @@ container::PredicatePairsRestraint
    based on the box_size_, slab_height_, slab_radius_, etc. class variables
 */
 Restraint* Scoring::create_bounding_box_restraint
-( container::ListSingletonContainer* particles) const
+( SingletonContainerAdaptor particles) const
 {
   // Add bounding box restraint
   // TODO: what does backbone_spring_k_ has to do
@@ -396,19 +388,19 @@ Restraint* Scoring::create_bounding_box_restraint
           bbss, (hub.get(), get_sd()->get_box()));
   return
     container::create_restraint(bbss.get(),
-                                particles,
+                                particles.get(),
                                 "bounding box");
 }
 
 Restraint * Scoring::create_slab_restraint
-( container::ListSingletonContainer* particles)  const
+( SingletonContainerAdaptor particles)  const
 {
   // Add cylinder restraint
   IMP_NEW(SlabSingletonScore, slab_score,
           (slab_thickness_ /* h */, tunnel_radius_ /*r*/, excluded_volume_k_));
   return
     container::create_restraint(slab_score.get(),
-                                particles,
+                                particles.get(),
                                 "bounding slab");
 }
 

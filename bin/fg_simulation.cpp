@@ -186,7 +186,7 @@ IMP::ParticlesTemp get_kaps_and_craps(IMP::npctransport::SimulationData& sd) {
     IMP::core::ParticleType float_type =
         IMP::npctransport::get_type_of_float(i);
     std::cout << float_type << std::endl;
-    ret += sd.get_particles(float_type);
+    ret += sd.get_particles_of_type(float_type);
     std::cout << ret;
   }
   return ret;

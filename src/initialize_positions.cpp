@@ -9,12 +9,14 @@
 #include <IMP/npctransport/initialize_positions.h>
 #include <IMP/npctransport/randomize_particles.h>
 #include <IMP/npctransport/particle_types.h>
+#include <IMP/npctransport/util.h>
 #include <IMP/core/DistancePairScore.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/atom/BrownianDynamics.h>
 #include <IMP/base/Pointer.h>
 #include <IMP/base/exception.h>
 #include <IMP/base/object_macros.h>
+#include <IMP/base/RAII.h>
 #include <IMP/core/RestraintsScoringFunction.h>
 #include <IMP/core/ConjugateGradients.h>
 #include <IMP/core/MonteCarlo.h>
@@ -133,6 +135,234 @@ IMP::base::Pointer<core::MonteCarlo> create_mc(
   return mc;
 }
 
+
+
+
+/** An RAII class for rescaling the x0 length of a LinearWellPairScore
+    by some factor f (upon construction or using set()). Restores the
+    original value upon destruction
+*/
+class LinearWellSetLengthRAII : public base::RAII {
+
+  base::WeakPointer< LinearWellPairScore > ps_;
+  double orig_;
+  bool was_set_;
+
+ public:
+  IMP_RAII
+    ( LinearWellSetLengthRAII, (LinearWellPairScore *ps, double f),
+      { //Initialize
+        was_set_ = false;
+      },
+      { // Set
+        was_set_ = true;
+        ps_ = ps;
+        orig_ = ps_->get_x0();
+        ps_->set_x0(orig_ * f);
+      },
+      { // Reset
+        if(was_set_){
+          ps_->set_x0(orig_);
+        }
+      },
+      { // Show });
+      } );
+};
+
+
+
+/** An RAII class for temporarily changing the scoring function
+    of an optimizer
+*/
+class OptimizerSetTemporaryScoringFunctionRAII: public base::RAII {
+
+  base::OwnerPointer< IMP::ScoringFunction > orig_sf_;
+  base::OwnerPointer< IMP::Optimizer > o_;
+  bool was_set_;
+
+ public:
+  IMP_RAII
+    ( OptimizerSetTemporaryScoringFunctionRAII,
+      (Optimizer* o, ScoringFunctionAdaptor sfa),
+      { //Initialize
+        was_set_ = false;
+      },
+      { // Set
+        was_set_ = true;
+        o_ = o;
+        orig_sf_ = o_->get_scoring_function();
+        o_->set_scoring_function(sfa);
+      },
+      { // Reset
+        if(was_set_){
+          o_->set_scoring_function(orig_sf_);
+        }
+      },
+      { // Show
+      } );
+};
+
+/** An RAII class for temporarily changing the temperature
+    of a BrownianDynamics object
+*/
+  class BDSetTemporaryTemperatureRAII : public base::RAII {
+
+  double orig_temp_;
+    base::OwnerPointer
+    < IMP::atom::BrownianDynamics > bd_;
+  bool was_set_;
+
+ public:
+  IMP_RAII
+  ( BDSetTemporaryTemperatureRAII,
+    (atom::BrownianDynamics* bd, double temp),
+      { //Initialize
+        was_set_ = false;
+      },
+      { // Set
+        was_set_ = true;
+        bd_ = bd;
+        orig_temp_ = bd_->get_temperature();
+        bd_->set_temperature(temp);
+      },
+      { // Reset
+        if(was_set_){
+          bd_->set_temperature(orig_temp_);
+        }
+      },
+      { // Show
+      } );
+};
+
+/** An RAII class for temporarily setting the optimization stsate of particles
+*/
+class TemporarySetOptimizationStateRAII: public base::RAII {
+  bool orig_;
+  base::WeakPointer<IMP::Model> m_;
+  ParticleIndex pi_;
+  bool was_set_;
+
+ public:
+  IMP_RAII
+  ( TemporarySetOptimizationStateRAII,
+    (ParticleAdaptor pa, bool is_optimized),
+      { //Initialize
+        was_set_ = false;
+      },
+      { // Set
+        was_set_ = true;
+        m_ = pa.get_model();
+        pi_ = pa.get_particle_index();
+        IMP_ALWAYS_CHECK(core::XYZ::get_is_setup( m_, pi_ ),
+                         "p is not XYZ - can't set coordinates opt state",
+                         IMP::base::ValueException);
+        core::XYZ xyz( m_, pi_ );
+        orig_ = xyz.get_coordinates_are_optimized();
+        xyz.set_coordinates_are_optimized( is_optimized );
+      },
+      { // Reset
+        if(was_set_){
+          core::XYZ(m_, pi_).set_coordinates_are_optimized( orig_ );
+        }
+      },
+      { // Show
+      } );
+};
+
+
+
+
+/** Take a set of core::XYZR particles and relax them relative to a set of
+    restraints. Excluded volume is handle separately, so don't include it
+    in the passed list of restraints.
+    (Note: optimize only particles that are flagged as 'optimized')
+
+    @param ps particles over which to optimize
+    @param is_rest_length_scaling if true - gradually increase the size of
+                                  chains rest lengths during optimization
+    @param short_init_factor a factor between >0 and 1 for decreasing
+                             the number of optimization cycles at each
+                             round
+*/
+void optimize_balls(const ParticlesTemp &ps,
+                    bool is_rest_length_scaling,
+                    rmf::SaveOptimizerState *save,
+                    atom::BrownianDynamics *bd,
+                    LinearWellPairScores lwps,
+                    base::LogLevel ll, bool debug,
+                    double short_init_factor = 1.0) {
+  // make sure that errors and log messages are marked as coming from this
+  // function
+  IMP_FUNCTION_LOG;
+
+  base::SetLogState sls(ll);
+  IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.", ValueException);
+  IMP_ALWAYS_CHECK(bd, "bd optimizer unspecified", ValueException);
+  IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
+                   "short init factor should be in range (0,1]",
+                   ValueException);
+  Model *m = ps[0]->get_model();
+
+  std::cout << "Performing initial optimization" << std::endl;
+  // shrink each of the particles, relax the configuration, repeat
+  double bd_temperature_orig = bd->get_temperature();
+  for (int i = 0; i < 11; ++i) {
+    boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > attrs
+      ( new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()] );
+    boost::ptr_vector<LinearWellSetLengthRAII> lengths;
+    double factor = .1 * i;
+    double length_factor = is_rest_length_scaling ? (.7 + .3 * factor) : 1.0;
+    // rescale radii temporarily
+    for (unsigned int j = 0; j < ps.size(); ++j) {
+      attrs[j].reset(
+          new ScopedSetFloatAttribute(ps[j], core::XYZR::get_radius_key(),
+                                      core::XYZR(ps[j]).get_radius() * factor));
+    }
+    // rescale bond length temporarily
+    for (unsigned int j = 0; j < lwps.size(); ++j) {
+      lengths.push_back(new LinearWellSetLengthRAII(lwps[j], length_factor));
+    }
+    std::cout << "Optimizing with radii at " << factor << " of full"
+              << " and length factor " << length_factor;
+    std::cout << " energy before = "
+              << bd->get_scoring_function()->evaluate(false) << std::endl;
+
+    for (int k_simanneal = 0; k_simanneal < 5; ++k_simanneal)
+      {
+        double temperature =
+          (1.5 - (i + k_simanneal / 5.0) / 11.0) * bd_temperature_orig;
+        BDSetTemporaryTemperatureRAII bdstt(bd, temperature); // till end of scope
+        bool done = false;
+        IMP_OMP_PRAGMA(parallel num_threads(3)) {
+          IMP_OMP_PRAGMA(single) {
+          int n_bd_cycles = 1000 * (i / 2 + 2);
+          int n_bd_cycles_per_inner = 1000;
+          int n_inners = n_bd_cycles / n_bd_cycles_per_inner;
+          for (int k_inner = 0; k_inner < n_inners; k_inner++) {
+            int actual_n_bd_cycles_per_inner =
+              std::ceil(n_bd_cycles_per_inner * short_init_factor) ;
+            double e_bd = bd->optimize( actual_n_bd_cycles_per_inner );
+            IMP_LOG(PROGRESS, "Energy after bd is " << e_bd << " at " << i << ", "
+                    << k_simanneal << "," << k_inner << std::endl);
+          } // for k_inner
+          if (debug) {
+            std::ostringstream oss;
+            oss << "Init after " << i << " " << k_simanneal;
+            if (save) {
+              save->update_always(oss.str());
+            }
+          }
+          }
+        }
+        if (done) break;
+      }  // for k_simanneal
+} // for i
+  std::cout << "Energy after initialization is " <<
+    bd->get_scoring_function()->evaluate(false) << std::endl;
+}
+
+
+
 /** Take a set of core::XYZR particles and relax them relative to a set of
     restraints. Excluded volume is handle separately, so don't include it
     in the passed list of restraints.
@@ -145,7 +375,7 @@ IMP::base::Pointer<core::MonteCarlo> create_mc(
                              the number of optimization cycles at each
                              round
 */
-void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
+void OLD_optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
                     const PairPredicates excluded,
                     rmf::SaveOptimizerState *save,
                     atom::BrownianDynamics *local,
@@ -181,7 +411,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
   for (int i = 0; i < 11; ++i) {
     boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > attrs(
         new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()]);
-    boost::ptr_vector<LinearWellSetLength> lengths;
+    boost::ptr_vector<LinearWellSetLengthRAII> lengths;
     double factor = .1 * i;
     double length_factor = .7 + .3 * factor;
     // rescale radii temporarily
@@ -192,7 +422,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
     }
     // rescale bond length temporarily
     for (unsigned int j = 0; j < lwps.size(); ++j) {
-      lengths.push_back(new LinearWellSetLength(lwps[j], length_factor));
+      lengths.push_back(new LinearWellSetLengthRAII(lwps[j], length_factor));
     }
     std::cout << "Optimizing with radii at " << factor << " of full"
               << " and length factor " << length_factor;
@@ -211,7 +441,7 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
       IMP_OMP_PRAGMA(parallel num_threads(3)) {
         int timer = 1000;
         IMP_OMP_PRAGMA(single) {
-          int n_bd = 1000 * (i + 1);
+          int n_bd = 1000 * (i / 2 + 2);
           int n_bd_inner = 1000;
           int n_external = n_bd / n_bd_inner;
           int mc_opt_factor = 1 * (j + 1);  // 500
@@ -278,7 +508,14 @@ void optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
   } // for i
   local->set_temperature(bd_temperature_orig);
 }
-}
+
+
+
+
+
+} // namespace {}
+
+
 
 namespace {
 // print the first atoms of all the fgs in sd
@@ -305,8 +542,6 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
 }
 
 void initialize_positions(SimulationData *sd,
-                          //                          const ParticlePairsTemp
-                          // &extra_links,
                           const RestraintsTemp &extra_restraints,
                           bool debug,
                           double short_init_factor) {
@@ -314,37 +549,25 @@ void initialize_positions(SimulationData *sd,
   IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
                    "short init factor should be in range (0,1]",
                    ValueException);
-  //  print_fgs(*sd);
   randomize_particles(sd->get_diffusers()->get_particles(), sd->get_box());
-  //  print_fgs(*sd);
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
   }
-  base::Pointer<Scoring> scoring=sd->get_scoring();
-  RestraintsTemp rss = scoring->get_all_chain_restraints();
-  if (scoring->get_has_bounding_box())
-    rss.push_back(scoring->get_bounding_box_restraint());
-  if (scoring->get_has_slab())
-    rss.push_back(scoring->get_slab_restraint());
   // pin first link of fgs, if not already pinned
-  core::XYZs previously_unpinned;
+  boost::ptr_vector<TemporarySetOptimizationStateRAII> chain_pins;
   atom::Hierarchies chains = sd->get_fg_chains();
   for (unsigned int i = 0; i < chains.size(); ++i) {
-    if (core::XYZ(chains[i].get_child(0)).get_coordinates_are_optimized()) {
-      previously_unpinned.push_back(core::XYZ(chains[i].get_child(0)));
-      core::XYZ(chains[i].get_child(0)).set_coordinates_are_optimized(false);
-    }
+    chain_pins.push_back
+      ( new TemporarySetOptimizationStateRAII(chains[i].get_child(0), false) );
   }
-  //  print_fgs(*sd);
-  rss += extra_restraints;
-  // for (unsigned int i=0; i< extra_links.size(); ++i) {
-  //   double d= core::XYZR(extra_links[i][0]).get_radius()
-  //       +  core::XYZR(extra_links[i][1]).get_radius();
-  //   IMP_NEW(core::HarmonicDistancePairScore, link,
-  //           (d,sd->get_backbone_k(), "linker ps"));
-  //   base::Pointer<Restraint> r
-  //       = IMP::create_restraint(link.get(), extra_links[i]);
-  //   rss.push_back(r);
+  // core::XYZs previously_unpinned;
+  // atom::Hierarchies chains = sd->get_fg_chains();
+  // for (unsigned int i = 0; i < chains.size(); ++i) {
+
+  //   if (core::XYZ(chains[i].get_child(0)).get_coordinates_are_optimized()) {
+  //     previously_unpinned.push_back(core::XYZ(chains[i].get_child(0)));
+  //     core::XYZ(chains[i].get_child(0)).set_coordinates_are_optimized(false);
+  //   }
   // }
 
   int dump_interval = sd->get_rmf_dump_interval_frames();
@@ -357,34 +580,81 @@ void initialize_positions(SimulationData *sd,
       sd->get_rmf_sos_writer()->set_period(100);
     }
   }
-  // avoid consecutive particles, e.g. consecutive FG repeats
-  // NOTE/TODO: this is an error, since consecutive particles in
-  //            the model may not be so in the chain itself
-  PairPredicates excluded;
-  IMP_NEW( container::ExclusiveConsecutivePairFilter, ecpf, () );
-  excluded.push_back(ecpf);
+
+  // base::Pointer<Scoring> scoring=sd->get_scoring();
+  // RestraintsTemp rss;
+  // rss += extra_restraints;
+  // rss += scoring->get_all_chain_restraints();
+  // if (scoring->get_has_bounding_box())
+  //   rss.push_back(scoring->get_bounding_box_restraint());
+  // if (scoring->get_has_slab())
+  //   rss.push_back(scoring->get_slab_restraint());
+  // // avoid consecutive particles, e.g. consecutive FG repeats
+  // // NOTE/TODO: this is an error, since consecutive particles in
+  // //            the model may not be so in the chain itself
+  // PairPredicates excluded;
+  // IMP_NEW( container::ExclusiveConsecutivePairFilter, ecpf, () );
+  // excluded.push_back(ecpf);
+
+  // optimize each FG separately using a temporary custom scoring function
+  // (using RAII class OptimizerSetTemporaryScoringFunction)
+  typedef base::set<core::ParticleType> ParticleTypeSet;
+  ParticleTypeSet const& fg_types = sd->get_fg_types();
+  for(ParticleTypeSet::const_iterator ti = fg_types.begin();
+      ti != fg_types.end(); ti++)
+    {
+      atom::Hierarchies cur_fg_roots = sd->get_particles_of_type(*ti);
+      ParticlesTemp cur_particles = atom::get_leaves( cur_fg_roots );
+      IMP_LOG( PROGRESS, "optimizing " <<  cur_particles.size()
+               << " particles of type " << *ti );
+      ParticlesTemp cur_optimizable_particles =
+        get_optimizable_particles( cur_particles);
+      IMP_LOG( PROGRESS, cur_optimizable_particles.size()
+               << " of those are optimizable");
+      if( cur_particles.size() * cur_optimizable_particles.size() == 0){
+        IMP_LOG( PROGRESS, "No optimizable particles of type " << *ti );
+        continue; // noting to optimize if no (optimizable) particles
+      }
+      IMP_LOG( PROGRESS, "Optimizing particles of type " << *ti );
+      // switch local to sf till end of scope
+      base::Pointer<ScoringFunction> sf =
+        sd->get_scoring()->get_custom_scoring_function
+        ( extra_restraints,
+          cur_particles,
+          cur_optimizable_particles,
+          false /* no attr non-bonded potentials */);
+      OptimizerSetTemporaryScoringFunctionRAII
+        set_temporary_scoring_function( sd->get_bd(), sf );
+      optimize_balls(cur_particles,
+                     true /*scale rest length*/,
+                     sd->get_rmf_sos_writer(),
+                     sd->get_bd(),
+                     sd->get_scoring()->get_chain_scores(),
+                     base::PROGRESS,
+                     debug, short_init_factor);
+    }
+  // optimize everything now
   optimize_balls(sd->get_diffusers()->get_particles(),
-                 rss,
-                 excluded ,
+                 false /*scale rest length*/,
                  sd->get_rmf_sos_writer(),
                  sd->get_bd(),
                  sd->get_scoring()->get_chain_scores(),
                  base::PROGRESS,
-                 debug, short_init_factor);
+                 debug, short_init_factor / 10.0);
   print_fgs(*sd);
-  IMP_NEW(core::RestraintsScoringFunction, rsf,
-          (rss + RestraintsTemp
-           ( 1, sd->get_scoring()->get_predicates_pair_restraint() ),
-           "all restaints"));
-  IMP_LOG(WARNING, "Initial energy is " << rsf->evaluate(false) << std::endl);
+  // IMP_NEW(core::RestraintsScoringFunction, rsf,
+  //         (rss + RestraintsTemp
+  //          ( 1, sd->get_scoring()->get_predicates_pair_restraint() ),
+  //          "all restaints"));
+  // IMP_LOG(WARNING, "Initial energy is " << rsf->evaluate(false) << std::endl);
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->set_period(dump_interval);  // restore output rate
     sd->get_rmf_sos_writer()->update_always("done initializing");
   }
-  // unpin previously unpinned fgs (= allow optimization)
-  for (unsigned int i = 0; i < previously_unpinned.size(); ++i) {
-    previously_unpinned[i].set_coordinates_are_optimized(true);
-  }
+  // // unpin previously unpinned fgs (= allow optimization)
+  // for (unsigned int i = 0; i < previously_unpinned.size(); ++i) {
+  //   previously_unpinned[i].set_coordinates_are_optimized(true);
+  // }
   print_fgs(*sd);
 }
 

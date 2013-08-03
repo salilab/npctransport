@@ -37,7 +37,7 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   InteractionType interaction_type_;
 
   // maintains a list of nearby particle pairs in a bipartite graph
-  IMP::base::PointerMember<IMP::container::CloseBipartitePairContainer>
+  IMP::base::OwnerPointer<IMP::container::CloseBipartitePairContainer>
       close_bipartite_pair_container_;
 
   // avergae number of times all pairs of particles contacted each other

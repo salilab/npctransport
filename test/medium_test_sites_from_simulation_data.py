@@ -112,7 +112,7 @@ class Tests(IMP.test.TestCase):
         in the context of simualtion data optimization
         '''
 
-        IMP.base.set_log_level(IMP.SILENT)
+        IMP.base.set_log_level(IMP.PROGRESS)
         if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
             print "SLOW MODE"
             fast = False

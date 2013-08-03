@@ -73,13 +73,13 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<double> maximum_number_of_minutes_;
 
   // the model on which the simulation is run
-  base::PointerMember<Model> m_;
+  base::OwnerPointer<Model> m_;
 
   // The BrownianDynamic simulator
-  base::PointerMember<atom::BrownianDynamics> bd_;
+  base::OwnerPointer<atom::BrownianDynamics> bd_;
 
   // The scoring function wrapper for the simulation
-  base::PointerMember< IMP::npctransport::Scoring >
+  base::OwnerPointer< IMP::npctransport::Scoring >
     scoring_;
 
   // keeps track of whether the diffusers list has
@@ -93,22 +93,24 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   //       of efficiency
    bool obstacles_changed_;
 
-  base::PointerMember
+  base::OwnerPointer
     <IMP::container::ListSingletonContainer> optimizable_diffusers_;
 
-   base::PointerMember<container::ListSingletonContainer> diffusers_;
+   base::OwnerPointer<container::ListSingletonContainer> diffusers_;
 
   // a writer to an RMF (Rich Molecular Format) type file
-  base::PointerMember<rmf::SaveOptimizerState> rmf_sos_writer_;
+  base::OwnerPointer<rmf::SaveOptimizerState> rmf_sos_writer_;
 
   // the root of the model hierarchy
-  base::PointerMember<Particle> root_;
+  base::OwnerPointer<Particle> root_;
 
-  // fg types  - a list of all fg types that were
-  // added via create_fgs, so far
+  // fg types  - a list of all fg/floater/obstacle types that were
+  // added via create_fgs/floaters/obstacles(), so far
   IMP::base::set<core::ParticleType> fg_types_;
+  IMP::base::set<core::ParticleType> floater_types_;
+  IMP::base::set<core::ParticleType> obstacle_types_;
 
-  base::PointerMember<display::Geometry> static_geom_;
+  base::OwnerPointer<display::Geometry> static_geom_;
 
   base::map<core::ParticleType, algebra::Vector3Ds> sites_;
 
@@ -167,16 +169,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
    */
   void create_fgs
     ( const ::npctransport_proto::Assignment_FGAssignment &fg_data );
-
-  /**
-     retrieve fg chains from root
-
-     @param root the root under which to look for FGs
-
-     @return all the fg hierarchies under root, which match any fg type
-             that was added to this simulation previously
-  */
-  atom::Hierarchies get_fg_chains(atom::Hierarchy root) const;
 
   /**
      Adds the 'floaters' (free diffusing particles) to the model hierarchy,
@@ -251,15 +243,46 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   */
   atom::BrownianDynamics *get_bd();
 
+
   /** returns the simulation angular d factor */
   double get_angular_d_factor(){
     return angular_d_factor_;
   }
 
+
   /** returns true if particle type is of fg type
       (that is, particle was added within create_fgs()
   */
   bool get_is_fg(ParticleIndex pi) const;
+
+
+  /** returns true if particle type is of fg type
+      (that is, it is one of the types added via create_fgs())
+  */
+  bool get_is_fg_type(core::ParticleType pt) const{
+    return fg_types_.find(pt) != fg_types_.end();
+  }
+
+
+  /** return all the types of fgs that were added
+      via create_fgs() */
+  base::set<core::ParticleType> const& get_fg_types() const {
+    return fg_types_;
+  }
+
+
+  /** return all the types of floaters that were added
+      via create_floaters() */
+  base::set<core::ParticleType> const& get_floater_types() const {
+    return floater_types_;
+  }
+
+  /** return all the types of obstacles that were added
+      via create_obstacles() */
+  base::set<core::ParticleType> const&  get_obstacle_types() const {
+    return obstacle_types_;
+  }
+
 
   /**
      retrieve fg chain hierarchies
@@ -271,6 +294,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
       return get_fg_chains(get_root());
     }
 
+
+  /**
+     retrieve fg chains from root
+
+     @param root the root under which to look for FGs
+
+     @return all the fg hierarchies under root, which match any fg type
+             that was added to this simulation previously
+  */
+  atom::Hierarchies get_fg_chains(atom::Hierarchy root) const;
 
 
   /**
@@ -416,9 +449,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   /**
       Returns the list of particles in the simulation model
-      of type 'type', or empty list if not found
+      of type 'type', or empty list if not found.
+      The particles returned are all sets of direct children of the
+      main root (so the diffusing particles are their leaves)
   */
-  ParticlesTemp get_particles(core::ParticleType type) const {
+  ParticlesTemp get_particles_of_type(core::ParticleType type) const {
     base::map<core::ParticleType, ParticlesTemp>::const_iterator iter;
     iter = particles_.find(type);
     if (iter != particles_.end()) return iter->second;

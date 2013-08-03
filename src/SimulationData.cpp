@@ -214,43 +214,6 @@ void SimulationData::create_fgs
   } // if
 }
 
-/** returns true if particle type is of fg type
-    (that is, particle was added within ::create_fgs()
-*/
-bool SimulationData::get_is_fg(ParticleIndex pi) const
-{
-  Model* m = get_model();
-  if (core::Typed::get_is_setup(m,pi)) {
-    core::ParticleType t = core::Typed(m,pi).get_type();
-    if (fg_types_.find( t ) != fg_types_.end() ) {
-      return true;
-    }
-  }
-  return false;
- }
-
-atom::Hierarchies SimulationData::get_fg_chains(atom::Hierarchy root) const
-{
-  IMP_INTERNAL_CHECK(root, "root for SimulationData::get_fg_chains() is null");
-  // TODO: maybe FGs should just be marked by a decorator, and not identified by
-  //       type alone
-  atom::Hierarchies ret;
-  if (root.get_number_of_children() == 0) {
-    return ret;
-  }
-  // I. return root itself if the type of its first direct child
-  // is contained in [type_of_fg]
-  ParticleIndex pi_child0 = root.get_child(0).get_particle_index();
-  if (get_is_fg(pi_child0)) {
-      return atom::Hierarchies(1, root);
-  }
-  // II. If not returned yet, recurse on all of root's children
-  for (unsigned int i = 0; i < root.get_number_of_children(); ++i) {
-    ret += get_fg_chains(root.get_child(i));
-  }
-  return ret;
-}
-
 
 /**
    Adds the 'floaters' (free diffusing particles) to the model hierarchy,
@@ -263,44 +226,47 @@ void SimulationData::create_floaters(
   if (f_data.has_type()){
     type = core::ParticleType(f_data.type());
   }
-  if (f_data.number().value() > 0) {
-    // prepare statistics for this type of floaters:
-    float_stats_.push_back(BodyStatisticsOptimizerStates());
-    if (slab_is_on_) {  // if has tunnel, create a list of particle stats
-      float_transport_stats_.push_back(
-          ParticleTransportStatisticsOptimizerStates());
+  if (f_data.number().value() == 0) {
+    return;
+  }
+  floater_types_.insert(type);
+  // prepare statistics for this type of floaters:
+  float_stats_.push_back(BodyStatisticsOptimizerStates());
+  if (slab_is_on_) {  // if has tunnel, create a list of particle stats
+    float_transport_stats_.push_back(
+                                     ParticleTransportStatisticsOptimizerStates());
+  }
+  // create a sub hierarchy with this type of floaters:
+  atom::Hierarchy cur_root =
+    atom::Hierarchy::setup_particle(new Particle(get_model()));
+  IMP_LOG(WARNING,  "   type " << type.get_string() << std::endl);
+  cur_root->set_name(type.get_string());
+  atom::Hierarchy(get_root()).add_child(cur_root);
+  // populate hierarchy with particles:
+  ParticlesTemp cur_particles;
+  for (int j = 0; j < f_data.number().value(); ++j) {
+    double dc = f_data.d_factor().value();
+    Particle *cur_p =
+      create_particle(this, f_data.radius().value(),
+                      angular_d_factor_, dc,
+                      color, type);
+    cur_particles.push_back(cur_p);
+    cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
+    // add particle statistics:
+    IMP_NEW(BodyStatisticsOptimizerState, bsos, (cur_p));
+    bsos->set_period(statistics_interval_frames_);
+    float_stats_.back().push_back(bsos);
+    if (slab_is_on_) {  // only if has tunnel
+      IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
+              (cur_p, -0.5 * slab_thickness_,  // tunnel bottom
+               0.5 * slab_thickness_)          // tunnel top
+              );
+      ptsos->set_period(statistics_interval_frames_);
+      float_transport_stats_.back().push_back(ptsos);
     }
-    // create a sub hierarchy with this type of floaters:
-    atom::Hierarchy cur_root =
-        atom::Hierarchy::setup_particle(new Particle(get_model()));
-    IMP_LOG(WARNING,  "   type " << type.get_string() << std::endl);
-    cur_root->set_name(type.get_string());
-    atom::Hierarchy(get_root()).add_child(cur_root);
-    // populate hierarchy with particles:
-    ParticlesTemp cur_particles;
-    for (int j = 0; j < f_data.number().value(); ++j) {
-      double dc = f_data.d_factor().value();
-      Particle *cur_p =
-          create_particle(this, f_data.radius().value(),
-                          angular_d_factor_, dc,
-                          color, type);
-      cur_particles.push_back(cur_p);
-      cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
-      // add particle statistics:
-      IMP_NEW(BodyStatisticsOptimizerState, bsos, (cur_p));
-      bsos->set_period(statistics_interval_frames_);
-      float_stats_.back().push_back(bsos);
-      if (slab_is_on_) {  // only if has tunnel
-        IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
-                (cur_p, -0.5 * slab_thickness_,  // tunnel bottom
-                 0.5 * slab_thickness_)          // tunnel top
-                );
-        ptsos->set_period(statistics_interval_frames_);
-        float_transport_stats_.back().push_back(ptsos);
-      }
-    }
-    particles_[type] = cur_particles;
-    // add interaction sites to particles of this type:
+  }
+  particles_[type] = cur_particles;
+  // add interaction sites to particles of this type:
     if (f_data.interactions().value() > 0) {
       int nsites = f_data.interactions().value();
       IMP_LOG(WARNING, nsites << " sites added " << std::endl);
@@ -308,13 +274,13 @@ void SimulationData::create_floaters(
     }
     // add type-specific scoring scale factors
     get_scoring()->set_interaction_range_factor
-    ( type, f_data.interaction_range_factor().value());
+      ( type, f_data.interaction_range_factor().value());
     get_scoring()->set_interaction_k_factor
       ( type, f_data.interaction_k_factor().value());
 
     set_diffusers_changed(true);
-  }
 }
+
 
 /**
    Adds the 'obstacles' (possibly static e.g. nups that make the pore)
@@ -324,6 +290,10 @@ void SimulationData::create_obstacles
 ( const ::npctransport_proto::Assignment_ObstacleAssignment &o_data)
 {
   core::ParticleType type = core::ParticleType(o_data.type());
+  if(o_data.xyzs_size() == 0){
+    return;
+  }
+  obstacle_types_.insert(type);
   // create a sub hierarchy with this type of floaters:
   atom::Hierarchy cur_root =
     atom::Hierarchy::setup_particle(new Particle(get_model()));
@@ -414,6 +384,44 @@ Model *SimulationData::get_model() {
   IMP_USAGE_CHECK(m_, "model not initialized in get_model()");
   return m_;
 }
+
+/** returns true if particle type is of fg type
+    (that is, particle was added within ::create_fgs()
+*/
+bool SimulationData::get_is_fg(ParticleIndex pi) const
+{
+  Model* m = get_model();
+  if (core::Typed::get_is_setup(m,pi)) {
+    core::ParticleType t = core::Typed(m,pi).get_type();
+    if (fg_types_.find( t ) != fg_types_.end() ) {
+      return true;
+    }
+  }
+  return false;
+ }
+
+atom::Hierarchies SimulationData::get_fg_chains(atom::Hierarchy root) const
+{
+  IMP_INTERNAL_CHECK(root, "root for SimulationData::get_fg_chains() is null");
+  // TODO: maybe FGs should just be marked by a decorator, and not identified by
+  //       type alone
+  atom::Hierarchies ret;
+  if (root.get_number_of_children() == 0) {
+    return ret;
+  }
+  // I. return root itself if the type of its first direct child is fg
+  ParticleIndex pi_child0 = root.get_child(0).get_particle_index();
+  if (get_is_fg(pi_child0)) {
+      return atom::Hierarchies(1, root);
+  }
+  // II. If not returned yet, recurse on all of root's children
+  for (unsigned int i = 0; i < root.get_number_of_children(); ++i) {
+    ret += get_fg_chains(root.get_child(i));
+  }
+  return ret;
+}
+
+
 
 // Note and beware: this method assumes that the hierarchy in the RMF file
 // was constructed in the same way as the hierarchy within this SimulationData
@@ -775,34 +783,44 @@ void SimulationData::update_statistics(const boost::timer &timer,
   ParticlesTemp all;
   ParticlesTemps floaters;
   base::Vector<ParticlesTemps> fgs;
-  for (unsigned int i = 0; i < type_of_fg.size(); ++i) {
-    if (particles_.find(type_of_fg[i]) != particles_.end()) {
-      fgs.push_back(ParticlesTemps());
-      ParticlesTemp fgi_particles = particles_.find(type_of_fg[i])->second;
-      for (unsigned int j = 0; j < fgi_particles.size(); ++j) {
-        atom::Hierarchy h(fgi_particles[j]);
-        ParticlesTemp chain = get_as<ParticlesTemp>(atom::get_leaves(h));
-        all += chain;
-        fgs.back().push_back(chain);
-        IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i),
-                         "Not enough fgs: " << stats.fgs_size() << " vs "
-                                            << static_cast<int>(i),
-                         ValueException);
+  {
+    for ( IMP::base::set<core::ParticleType>::const_iterator
+            fg_type_iter = fg_types_.begin();
+          fg_type_iter != fg_types_.end();
+          fg_type_iter++ )
+      {
+        // TODO: this should all be fixed since fg types can be now completely random!
+        //       perhaps need to keep order in which they were added, or find other way
+        if (particles_.find(*fg_type_iter) != particles_.end())
+          {
+            fgs.push_back(ParticlesTemps());
+            ParticlesTemp fgi_particles =
+              particles_.find(*fg_type_iter)->second;
+            for (unsigned int j = 0; j < fgi_particles.size(); ++j) {
+              atom::Hierarchy h(fgi_particles[j]);
+              ParticlesTemp chain = get_as<ParticlesTemp>(atom::get_leaves(h));
+              all += chain;
+              fgs.back().push_back(chain);
+              /*              IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i),
+                               "Not enough fgs: " << stats.fgs_size() << " vs "
+                               << static_cast<int>(i),
+                               ValueException);*/
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
-        double volume = atom::get_volume(h);
-        double radius_of_gyration = atom::get_radius_of_gyration(chain);
+              double volume = atom::get_volume(h);
+              double radius_of_gyration = atom::get_radius_of_gyration(chain);
 #else
-        double volume = -1.;
-        double radius_of_gyration = -1.;
+              double volume = -1.;
+              double radius_of_gyration = -1.;
 #endif
-        UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), volume, volume);
-        double length =
-            core::get_distance(core::XYZ(chain[0]), core::XYZ(chain.back()));
-        UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), length, length);
-        UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), radius_of_gyration,
-                   radius_of_gyration);
+              //              UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), volume, volume);
+              double length =
+                core::get_distance(core::XYZ(chain[0]), core::XYZ(chain.back()));
+              //              UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), length, length);
+              //              UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), radius_of_gyration,
+              //                         radius_of_gyration);
+            }
+          }
       }
-    }
   }
   // correlation times and diffusion coefficient
   for (unsigned int i = 0; i < float_stats_.size(); ++i) {
