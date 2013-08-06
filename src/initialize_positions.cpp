@@ -176,8 +176,8 @@ class LinearWellSetLengthRAII : public base::RAII {
 */
 class OptimizerSetTemporaryScoringFunctionRAII: public base::RAII {
 
-  base::OwnerPointer< IMP::ScoringFunction > orig_sf_;
-  base::OwnerPointer< IMP::Optimizer > o_;
+  base::PointerMember< IMP::ScoringFunction > orig_sf_;
+  base::PointerMember< IMP::Optimizer > o_;
   bool was_set_;
 
  public:
@@ -208,7 +208,7 @@ class OptimizerSetTemporaryScoringFunctionRAII: public base::RAII {
   class BDSetTemporaryTemperatureRAII : public base::RAII {
 
   double orig_temp_;
-    base::OwnerPointer
+    base::PointerMember
     < IMP::atom::BrownianDynamics > bd_;
   bool was_set_;
 

@@ -73,13 +73,13 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<double> maximum_number_of_minutes_;
 
   // the model on which the simulation is run
-  base::OwnerPointer<Model> m_;
+  base::PointerMember<Model> m_;
 
   // The BrownianDynamic simulator
-  base::OwnerPointer<atom::BrownianDynamics> bd_;
+  base::PointerMember<atom::BrownianDynamics> bd_;
 
   // The scoring function wrapper for the simulation
-  base::OwnerPointer< IMP::npctransport::Scoring >
+  base::PointerMember< IMP::npctransport::Scoring >
     scoring_;
 
   // keeps track of whether the diffusers list has
@@ -93,16 +93,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   //       of efficiency
    bool obstacles_changed_;
 
-  base::OwnerPointer
+  base::PointerMember
     <IMP::container::ListSingletonContainer> optimizable_diffusers_;
 
-   base::OwnerPointer<container::ListSingletonContainer> diffusers_;
+   base::PointerMember<container::ListSingletonContainer> diffusers_;
 
   // a writer to an RMF (Rich Molecular Format) type file
-  base::OwnerPointer<rmf::SaveOptimizerState> rmf_sos_writer_;
+  base::PointerMember<rmf::SaveOptimizerState> rmf_sos_writer_;
 
   // the root of the model hierarchy
-  base::OwnerPointer<Particle> root_;
+  base::PointerMember<Particle> root_;
 
   // fg types  - a list of all fg/floater/obstacle types that were
   // added via create_fgs/floaters/obstacles(), so far
@@ -110,7 +110,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   IMP::base::set<core::ParticleType> floater_types_;
   IMP::base::set<core::ParticleType> obstacle_types_;
 
-  base::OwnerPointer<display::Geometry> static_geom_;
+  base::PointerMember<display::Geometry> static_geom_;
 
   base::map<core::ParticleType, algebra::Vector3Ds> sites_;
 

@@ -77,22 +77,22 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   /***************** Cache only variables ************/
 
   // see get_close_diffusers_container()
-  base::OwnerPointer
+  base::PointerMember
     <IMP::PairContainer> close_diffusers_container_;
 
   // generates hash values ('predicates') for ordered types pairs
   // (e.g., pairs of ParticleTypes)
-  base::OwnerPointer
+  base::PointerMember
     <IMP::core::OrderedTypePairPredicate> otpp_;
 
-  base::OwnerPointer
+  base::PointerMember
     <IMP::core::RestraintsScoringFunction> scoring_function_;
 
   // contains all restraints between pairs of particle types
-  base::OwnerPointer
+  base::PointerMember
     <container::PredicatePairsRestraint> predr_;
 
-  typedef  IMP::base::map< int, base::OwnerPointer< IMP::PairScore > >
+  typedef  IMP::base::map< int, base::PointerMember< IMP::PairScore > >
     map_pair_type_to_pair_score;
   // scores between particle, mapped by their interaction id,
   // where interaction id is from OrderedTypePairPredicate otpp_
@@ -100,17 +100,17 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   map_pair_type_to_pair_score
     interaction_pair_scores_;
 
-  base::OwnerPointer
+  base::PointerMember
     <IMP::Restraint> box_restraint_;
 
-  base::OwnerPointer
+  base::PointerMember
     <IMP::Restraint> slab_restraint_;
 
   LinearWellPairScores chain_scores_;
 
   // a map from particle indexes of chain parents to corresponding
   // chain backbone restraints
-  typedef IMP::base::map< ParticleIndex, IMP::base::OwnerPointer<Restraint> >
+  typedef IMP::base::map< ParticleIndex, IMP::base::PointerMember<Restraint> >
     t_chain_restraints_map;
   t_chain_restraints_map chain_restraints_map_;
 
