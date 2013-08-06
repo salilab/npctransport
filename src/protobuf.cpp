@@ -7,6 +7,7 @@
  */
 
 #include <IMP/npctransport/protobuf.h>
+#include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/automatic_parameters.h>
 #ifdef IMP_NPC_GOOGLE
 #pragma GCC diagnostic push
@@ -18,6 +19,7 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/message.h>
 #endif
+#include <IMP/SingletonContainer.h>
 #include <IMP/utility.h>
 #include <IMP/algebra/GridD.h>
 #include <IMP/atom/estimates.h>
@@ -329,7 +331,8 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
       // store default type if one does not exist
       if (! assignment.fgs(i).has_type() ||
           assignment.fgs(i).type() == "" ) {
-        std::cout << "Setting assignment fg " << i << " to type " << type_of_fg[i].get_string() << std::endl;
+        std::cout << "Setting assignment fg " << i << " to type "
+                  << type_of_fg[i].get_string() << std::endl;
         assignment.mutable_fgs(i)->set_type
           ( type_of_fg[i].get_string() );
       }
@@ -396,5 +399,78 @@ int get_number_of_work_units(std::string assignment_file) {
   int ret = assign_internal(ranges, 0, values, indexes, false);
   return ret;
 }
+
+void load_pb_conformation
+( const ::npctransport_proto::Conformation &conformation,
+  IMP::SingletonContainer *diffusers,
+  base::map<core::ParticleType, algebra::Vector3Ds> &sites)
+{
+  IMP_CONTAINER_FOREACH(IMP::SingletonContainer, diffusers, {
+      const ::npctransport_proto::Conformation_Particle &pcur =
+        conformation.particle(_2);
+      core::RigidBody rb(diffusers->get_model(), _1);
+      algebra::Vector3D translation(pcur.x(), pcur.y(), pcur.z());
+      algebra::Rotation3D rotation(
+                                   algebra::Vector4D(pcur.r(), pcur.i(), pcur.j(), pcur.k()));
+
+      algebra::Transformation3D tr(rotation, translation);
+      rb.set_reference_frame(algebra::ReferenceFrame3D(tr));
+    });
+  for (int i = 0; i < conformation.sites_size(); ++i) {
+    const ::npctransport_proto::Conformation::Sites &cur =
+      conformation.sites(i);
+    core::ParticleType pt(cur.name());
+    sites[pt].clear();
+    for (int j = 0; j < cur.coordinates_size(); ++j) {
+      const ::npctransport_proto::Conformation::Coordinates &coords =
+        cur.coordinates(j);
+      sites[pt]
+        .push_back(algebra::Vector3D(coords.x(), coords.y(), coords.z()));
+    }
+  }
+}
+
+void save_pb_conformation
+( IMP::SingletonContainer *diffusers,
+  const base::map<core::ParticleType, algebra::Vector3Ds> &sites,
+  ::npctransport_proto::Conformation *conformation )
+{
+  conformation->clear_sites();
+  conformation->clear_particle();
+  IMP_CONTAINER_FOREACH
+    (IMP::SingletonContainer, diffusers,
+     {
+       ::npctransport_proto::Conformation_Particle *pcur =
+         conformation->add_particle();
+       core::RigidBody rb(diffusers->get_model(), _1);
+       algebra::Transformation3D tr =
+         rb.get_reference_frame().get_transformation_to();
+       pcur->set_x(tr.get_translation()[0]);
+       pcur->set_y(tr.get_translation()[1]);
+       pcur->set_z(tr.get_translation()[2]);
+       pcur->set_r(tr.get_rotation().get_quaternion()[0]);
+       pcur->set_i(tr.get_rotation().get_quaternion()[1]);
+       pcur->set_j(tr.get_rotation().get_quaternion()[2]);
+       pcur->set_k(tr.get_rotation().get_quaternion()[3]);
+     });
+  typedef base::map<core::ParticleType, algebra::Vector3Ds> M;
+  for (M::const_iterator it = sites.begin(); it != sites.end(); it++)
+    {
+      ::npctransport_proto::Conformation::Sites *cur
+        = conformation->add_sites();
+      cur->set_name(it->first.get_string());
+      algebra::Vector3Ds coords = it->second;
+      for (algebra::Vector3Ds::const_iterator coord = coords.begin();
+           coord != coords.end(); coord++)
+        {
+          ::npctransport_proto::Conformation::Coordinates *out_coords =
+            cur->add_coordinates();
+          out_coords->set_x((*coord)[0]);
+          out_coords->set_y((*coord)[1]);
+          out_coords->set_z((*coord)[2]);
+        }
+    }
+}
+
 
 IMPNPCTRANSPORT_END_NAMESPACE

@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
         new IMP::npctransport::SimulationData(output, true);
 
     bool verbose = false;
-    unsigned int acceleration_factor = 20;
+    unsigned int acceleration_factor = 100;
     double short_init_factor = 1.0 / acceleration_factor;
     IMP::npctransport::initialize_positions(sd, IMP::RestraintsTemp(),
                                             verbose, short_init_factor);

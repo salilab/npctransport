@@ -256,6 +256,7 @@ inline double LinearWellPairScore::evaluate_index(
 
 IMP_OBJECTS(LinearWellPairScore, LinearWellPairScores);
 
+
 IMPNPCTRANSPORT_END_NAMESPACE
 
 #endif /* IMPNPCTRANSPORT_LINEAR_DISTANCE_PAIR_SCORES_H */

@@ -58,8 +58,7 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
                            sd.get_box().get_corner(1)[1]);
   algebra::BoundingBox2D surface(lower_corner_XY, upper_corner_XY);
   // get fg
-  atom::Hierarchy root = sd.get_root();
-  atom::Hierarchies chains = IMP::npctransport::get_fg_chains(root);
+  atom::Hierarchies chains = sd.get_fg_chains();
   // anchor fgs to surface,
   // for now using random non-overlapping points
   // create a set of random sites (for now)
@@ -102,8 +101,7 @@ void color_fgs(IMP::npctransport::SimulationData& sd) {
   using namespace IMP::npctransport;
   using IMP::display::Colored;
 
-  atom::Hierarchy root(sd.get_root());
-  atom::Hierarchies chains(get_fg_chains(root));
+  atom::Hierarchies chains(sd.get_fg_chains());
   unsigned int n_chains = chains.size();
   for (unsigned int i = 0; i < n_chains; i++) {
     display::Color color;
@@ -139,8 +137,7 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
   using atom::Hierarchies;
 
   IMP::algebra::Cylinder3D cyl = sd.get_cylinder();
-  Hierarchy root = sd.get_root();
-  Hierarchies chains = IMP::npctransport::get_fg_chains(root);
+  Hierarchies chains = sd.get_fg_chains();
   // compute the relative radius in which particles would be positioned
   // TODO: we assume here that particle radius is smaller
   //       than the cylinder radius - verify in runtime?
@@ -189,7 +186,7 @@ IMP::ParticlesTemp get_kaps_and_craps(IMP::npctransport::SimulationData& sd) {
     IMP::core::ParticleType float_type =
         IMP::npctransport::get_type_of_float(i);
     std::cout << float_type << std::endl;
-    ret += sd.get_particles(float_type);
+    ret += sd.get_particles_of_type(float_type);
     std::cout << ret;
   }
   return ret;
@@ -219,8 +216,7 @@ void print_fgs(IMP::npctransport::SimulationData& sd) {
   static int call_num = 0;
   std::cout << "print_fgs() - Call # " << ++call_num << std::endl;
 
-  Hierarchy root = sd.get_root();
-  Hierarchies chains = IMP::npctransport::get_fg_chains(root);
+  Hierarchies chains = sd.get_fg_chains();
   for (unsigned int k = 0; k < chains.size(); k++) {
     Hierarchy cur_chain(chains[k]);
     core::XYZ d(cur_chain.get_child(0));
@@ -268,7 +264,8 @@ int main(int argc, char* argv[]) {
     }
     color_fgs(*sd);
     Restraints initialization_restraints;
-    if (sd->get_has_slab()) {  // if has slab, exclude from channel initially
+    if (sd->get_scoring()->get_has_slab()) {
+      // if has slab, exclude from channel initially
       IMP::base::Pointer<IMP::Restraint> r =
           get_exclude_from_channel_restraint(*sd);
       initialization_restraints.push_back(r);

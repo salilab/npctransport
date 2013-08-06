@@ -26,35 +26,35 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
    @param D_factor diffusion factor
    @param c color for the particle
    @param type the type of the particle
-   @param name particle name
  */
 IMPNPCTRANSPORTEXPORT Particle *create_particle(
-    SimulationData *sd, double radius, double angular_D_factor, double D_factor,
-    display::Color c, core::ParticleType type, std::string name);
+    SimulationData *sd, double radius,
+    double angular_D_factor, double D_factor,
+    display::Color c, core::ParticleType type);
 
 /**
-   Create a chain particle hierarchy, associated with the model of sd
+   Create a chain particle hierarchy, associated with the model of sd,
+   with restraint bonding consecutive particles, according to the
+   parameters specified in fg_data.
 
-   @param[out] sd the simulation data whose model is associated with the
+   The rest length between two consecutive chain beads is
+   fg_data.radius() * 2.0 * fg_data.rest_length_factor() and the
+   spring constant is the simulation backbone_k parameter.
+
+   @param[in,out] sd the simulation data whose model is associated with the
                   new chain. A chain restraint is added to the simulation data
-                  itself, and the particle is added to the simulation data
+                  scoring object, and the particle is added to the simulation data
                   diffusers list.
-   @param n       number of particles in chain
-   @param radius  the radius of each particle
-   @param angular_D_factor   angular diffusion factor of chain particles
-   @param D_factor diffusion factor of chain particles
-   @param ps       pair score for consecutive chain residues? (TODO: need to verify)
-   @param c        color of chain particles
-   @param t        the type of the particles in the chain
-   @param name     name of the particle at the root of the chain hierarchy
+   @param[in] fg_data data about the FG chain
+   @param[in] c        color of chain particles
 
    @return chain particle (a particle that is the root of the chain hierarchy)
 
  */
-IMPNPCTRANSPORTEXPORT Particle *create_chain(
-    SimulationData *sd, int n, double radius, double angular_D_factor,
-    double D_factor, LinearWellPairScore *ps, display::Color c,
-    core::ParticleType t, std::string name);
+IMPNPCTRANSPORTEXPORT Particle *create_fg_chain(
+    SimulationData *sd,
+    const ::npctransport_proto::Assignment_FGAssignment &fg_data,
+    display::Color c);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

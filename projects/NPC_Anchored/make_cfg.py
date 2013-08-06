@@ -28,7 +28,7 @@ def get_basic_config():
     config.excluded_volume_k.lower=20
     config.nonspecific_range.lower=2
     config.nonspecific_k.lower=0.01
-    config.slack.lower = 8
+    config.slack.lower = 15
     config.number_of_trials=1
     config.dump_interval_ns=0.1
     config.simulation_time_ns=1000

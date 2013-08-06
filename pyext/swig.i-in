@@ -6,6 +6,7 @@ IMP_CLANG_PRAGMA(diagnostic ignored "-Wc++11-long-long")
 %}
 IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, Scoring, Scorings);
 IMP_SWIG_OBJECT(IMP::npctransport, SimulationData, SimulationDatas);
 IMP_SWIG_OBJECT(IMP::npctransport, SitesGeometry, SitesGeometries);
 IMP_SWIG_OBJECT(IMP::npctransport, TypedSitesGeometry, TypedSitesGeometries);
@@ -30,10 +31,13 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %apply unsigned int { boost::uint32_t }
 %apply unsigned long long { boost::uint64_t }
 
+%include "IMP_npctransport.Parameter.i"
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"
+%include "IMP/npctransport/SitesGeometry.h"
 %include "IMP/npctransport/SitesPairScore.h"
+%include "IMP/npctransport/Scoring.h"
 %include "IMP/npctransport/SimulationData.h"
 %include "IMP/npctransport/io.h"
 %include "IMP/npctransport/creating_particles.h"

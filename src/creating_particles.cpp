@@ -19,9 +19,9 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 Particle *create_particle(SimulationData *sd, double radius,
                           double angular_D_factor, double D_factor,
-                          display::Color c, core::ParticleType type,
-                          std::string name) {
+                          display::Color c, core::ParticleType type) {
   core::XYZR pc = core::XYZR::setup_particle(new Particle(sd->get_model()));
+  std::string name = type.get_string();
   pc->set_name(name);
   pc.set_radius(radius);
   pc.set_coordinates(algebra::get_zero_vector_d<3>());
@@ -40,51 +40,35 @@ Particle *create_particle(SimulationData *sd, double radius,
   return pc;
 }
 
-namespace {
-/** Restraint the passed particles to be connected in a chain. The distance
-    between consecutive particles is length_factor*the sum of the radii.
-    // TODO: this documentation seems obsolete?
-
-    Note, this assumes that all such chains will be disjoint and so you can
-    use the container::ExclusiveConsecutivePairFilter if you want to filter
-    out all pairs of particles connected by such chain restraints.
-
-    The restraint is not added to the model.
-*/
-inline Restraint *create_chain_restraint(const ParticlesTemp &ps,
-                                         LinearWellPairScore *pps,
-                                         std::string name) {
-  IMP_USAGE_CHECK(!ps.empty(), "No Particles passed.");
-
-  // Exclusive means that the particles will be in no other
-  // ConsecutivePairContainer
-  // this assumption accelerates certain computations
-  IMP_NEW(container::ExclusiveConsecutivePairContainer, cpc,
-          (ps, name + " consecutive pairs"));
-  base::Pointer<Restraint> r =
-      container::create_restraint(pps, cpc.get(), "chain restraint %1%");
-  // make sure it is not freed
-  return r.release();
-}
-}
-
-Particle *create_chain(SimulationData *sd, int n, double radius,
-                       double angular_D_factor, double D_factor,
-                       LinearWellPairScore *ps, display::Color c,
-                       core::ParticleType t, std::string name) {
-  ParticlesTemp ret;
-  for (int i = 0; i < n; ++i) {
-    ret.push_back(
-        create_particle(sd, radius, angular_D_factor, D_factor, c, t, name));
-  }
-  base::Pointer<Restraint> cr =
-      create_chain_restraint(ret, ps, name + "chain restraint");
-  sd->add_chain_restraint(cr);
+Particle *create_fg_chain
+( SimulationData *sd,
+  const ::npctransport_proto::Assignment_FGAssignment &fg_data,
+  display::Color c )
+{
+  // create particles
+ core::ParticleType type(fg_data.type());
+ int n = fg_data.number_of_beads().value();
+ double radius = fg_data.radius().value();
+ double D_factor = fg_data.d_factor().value();
+ double angular_D_factor = sd->get_angular_d_factor();
+ ParticlesTemp particles;
+ for (int i = 0; i < n; ++i) {
+   particles.push_back(
+        create_particle(sd, radius, angular_D_factor, D_factor, c, type));
+ }
+ // put in hierarchy
   atom::Hierarchy root =
-      atom::Hierarchy::setup_particle(new Particle(sd->get_model()), ret);
+    atom::Hierarchy::setup_particle( new Particle(sd->get_model() ),
+                                     particles );
+  std::string name = type.get_string();
   root->set_name(name);
+  // add chain backbone restraint
+  double rlf = fg_data.rest_length_factor().value();
+  double rest_length = 2 * radius * rlf;
+  sd->get_scoring()->add_chain_restraint
+    ( root, rest_length, name + "chain restraint" );
+
   return root;
 }
-
 
 IMPNPCTRANSPORT_END_NAMESPACE
