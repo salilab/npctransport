@@ -40,23 +40,30 @@ int main(int argc, char *argv[]) {
     IMP::npctransport::get_data_path("benchmark_initialize.txt");
 #endif
   IMP::base::AddStringFlag add_input("input", "Input file", &config_txt);
-  // preparation::
   try {
+    // preparation::
      IMP_NPC_PARSE_OPTIONS(argc, argv);
+     bool verbose = false;
+     unsigned int acceleration_factor = 5;
+     double short_init_factor = 1.0 / acceleration_factor;
      std::string config_pb = IMP::base::create_temporary_file_name
        ("benchmark_initalize.pb", ".pb");
      IMP::npctransport::configuration_txt2pb(config_txt, config_pb);
-     std::string output = IMP::base::create_temporary_file_name("output", ".pb");
+     std::string output =
+       IMP::base::create_temporary_file_name("output", ".pb");
+     /*     std::string rmf_file =
+            IMP::base::create_temporary_file_name("init", ".rmf");
+     std::cout << "Output: " << output << "  rmf-file: " << rmf_file
+               << std::endl;
+     */
 
+     // assign and run::
     int num = IMP::npctransport::assign_ranges(config_pb, output, 100, false,
                                                IMP::base::get_random_seed());
 
     IMP::base::Pointer<IMP::npctransport::SimulationData> sd =
-        new IMP::npctransport::SimulationData(output, true);
+      new IMP::npctransport::SimulationData(output, true); //, rmf_file);
 
-    bool verbose = false;
-    unsigned int acceleration_factor = 100;
-    double short_init_factor = 1.0 / acceleration_factor;
     IMP::npctransport::initialize_positions(sd, IMP::RestraintsTemp(),
                                             verbose, short_init_factor);
     std::cout << "Energy after benchmark initialization "

@@ -301,6 +301,9 @@ void optimize_balls(const ParticlesTemp &ps,
   IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
                    "short init factor should be in range (0,1]",
                    ValueException);
+  if(save)
+    std::cout << "BEGIN o_b(): Saver has been called so far " <<
+      save->get_number_of_updates() << std::endl;
   Model *m = ps[0]->get_model();
 
   std::cout << "Performing initial optimization" << std::endl;
@@ -309,7 +312,7 @@ void optimize_balls(const ParticlesTemp &ps,
   for (int i = 0; i < 11; ++i) {
     boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > attrs
       ( new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()] );
-    boost::ptr_vector<LinearWellSetLengthRAII> lengths;
+    boost::ptr_vector<LinearWellSetLengthRAII> set_temporary_lengths;
     double factor = .1 * i;
     double length_factor = is_rest_length_scaling ? (.7 + .3 * factor) : 1.0;
     // rescale radii temporarily
@@ -320,7 +323,8 @@ void optimize_balls(const ParticlesTemp &ps,
     }
     // rescale bond length temporarily
     for (unsigned int j = 0; j < lwps.size(); ++j) {
-      lengths.push_back(new LinearWellSetLengthRAII(lwps[j], length_factor));
+      set_temporary_lengths.push_back
+        ( new LinearWellSetLengthRAII(lwps[j], length_factor) );
     }
     std::cout << "Optimizing with radii at " << factor << " of full"
               << " and length factor " << length_factor;
@@ -331,34 +335,35 @@ void optimize_balls(const ParticlesTemp &ps,
       {
         double temperature =
           (1.5 - (i + k_simanneal / 5.0) / 11.0) * bd_temperature_orig;
-        BDSetTemporaryTemperatureRAII bdstt(bd, temperature); // till end of scope
+        BDSetTemporaryTemperatureRAII
+          bd_set_temporary_temperature(bd, temperature);
         bool done = false;
         IMP_OMP_PRAGMA(parallel num_threads(3)) {
           IMP_OMP_PRAGMA(single) {
-          int n_bd_cycles = 1000 * (i / 2 + 2);
-          int n_bd_cycles_per_inner = 1000;
-          int n_inners = n_bd_cycles / n_bd_cycles_per_inner;
-          for (int k_inner = 0; k_inner < n_inners; k_inner++) {
-            int actual_n_bd_cycles_per_inner =
-              std::ceil(n_bd_cycles_per_inner * short_init_factor) ;
-            double e_bd = bd->optimize( actual_n_bd_cycles_per_inner );
+            int n_bd_cycles = 30 * (i / 2 + 2) * std::sqrt(ps.size());
+            int actual_n_bd_cycles =
+              std::ceil(n_bd_cycles * short_init_factor) ;
+            double e_bd = bd->optimize( actual_n_bd_cycles );
             IMP_LOG(PROGRESS, "Energy after bd is " << e_bd << " at " << i << ", "
-                    << k_simanneal << "," << k_inner << std::endl);
-          } // for k_inner
-          if (debug) {
-            std::ostringstream oss;
-            oss << "Init after " << i << " " << k_simanneal;
-            if (save) {
-              save->update_always(oss.str());
+                    << k_simanneal << std::endl);
+            if (debug) {
+              std::ostringstream oss;
+              oss << "Init after " << i << " " << k_simanneal;
+              if (save) {
+                save->update_always(oss.str());
+              }
+              std::cout << "updating RMF " << oss.str() << std::endl;
             }
-          }
           }
         }
         if (done) break;
       }  // for k_simanneal
-} // for i
+  } // for i
   std::cout << "Energy after initialization is " <<
     bd->get_scoring_function()->evaluate(false) << std::endl;
+  if(save)
+    std::cout << "END o_b(): Saver has been called so far " <<
+      save->get_number_of_updates() << std::endl;
 }
 
 
@@ -576,8 +581,10 @@ void initialize_positions(SimulationData *sd,
     if (!debug) {
       sd->get_rmf_sos_writer()
           ->set_period(dump_interval * 100);  // reduce output rate:
+      std::cout << "init: sos writer set dump interval period " << dump_interval * 100 << std::endl;
     } else {
       sd->get_rmf_sos_writer()->set_period(100);
+      std::cout << "init: sos writer set dump interval period " << 100 << std::endl;
     }
   }
 
@@ -650,6 +657,7 @@ void initialize_positions(SimulationData *sd,
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->set_period(dump_interval);  // restore output rate
     sd->get_rmf_sos_writer()->update_always("done initializing");
+    std::cout << "init: sos writer set dump interval period " << dump_interval << std::endl;
   }
   // // unpin previously unpinned fgs (= allow optimization)
   // for (unsigned int i = 0; i < previously_unpinned.size(); ++i) {
