@@ -1,40 +1,45 @@
-message(STATUS "Setting up proto " "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.cpp")
+message(STATUS "Setting up proto " "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.cpp")
 
 # there is a #include 'npctransport.ph.h' in the cpp file
-add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
-                          "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h"
-                          "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.cpp"
+add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
+                          "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h"
+                          "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.cpp"
                           COMMAND protoc "--cpp_out=dllexport_decl=IMPNPCTRANSPORTEXPORT:."
-                          "-I${PROJECT_SOURCE_DIR}/modules/npctransport/data/"
-                          "${PROJECT_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
+                          "-I${CMAKE_SOURCE_DIR}/modules/npctransport/data/"
+                          "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
                           COMMAND mv npctransport.pb.cc npctransport.pb.cpp
                           # add config header to resolve export symbols
-                          COMMAND mv "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h" "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h.out"
-                          COMMAND echo "\"\#include\"" "\"<IMP/npctransport/npctransport_config.h>\"" > "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h"
-                          COMMAND cat "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h.out" >> "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h"
-                          COMMAND ln -s "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.h" "${PROJECT_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
-                          DEPENDS "${PROJECT_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
+                          COMMAND mv "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h" "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h.out"
+                          COMMAND echo "\"\#include\"" "\"<IMP/npctransport/npctransport_config.h>\"" > "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h"
+                          COMMAND cat "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h.out" >> "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h"
+                          COMMAND ln -s "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h" "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
+                          DEPENDS "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
                           COMMENT "Creating protoc stuff for npctransport"
-                          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/src/npctransport")
+                          WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/src/npctransport")
 
-add_custom_target(npctransport_proto ALL DEPENDS "${PROJECT_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h" )
+add_custom_target(IMP.npctransport-proto ALL DEPENDS
+                          "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
+                          "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h"
+                          "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.cpp")
+set_property(TARGET IMP.npctransport-proto PROPERTY FOLDER "IMP.npctransport")
 
-set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES "${PROJECT_BINARY_DIR}/src/npctransport/npctransport.pb.cpp" CACHE INTERNAL "" FORCE)
+set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.cpp" CACHE INTERNAL "" FORCE)
 
-set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_DEPENDENCIES npctransport_proto CACHE INTERNAL "" FORCE)
+set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_DEPENDENCIES "IMP.npctransport-proto" CACHE INTERNAL "" FORCE)
 
 
 # there is a #include 'npctransport.ph.h' in the cpp file
-add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py"
+add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py"
                           COMMAND protoc "--python_out=."
-                          "-I${PROJECT_SOURCE_DIR}/modules/npctransport/data/"
-                          "${PROJECT_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
-                          COMMAND mv npctransport_pb2.py "${PROJECT_BINARY_DIR}/lib/IMP/npctransport/"
+                          "-I${CMAKE_SOURCE_DIR}/modules/npctransport/data/"
+                          "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
+                          COMMAND mv npctransport_pb2.py "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/"
                           # add config header to resolve export symbols
-                          DEPENDS "${PROJECT_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
+                          DEPENDS "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
                           COMMENT "Creating python protoc stuff for npctransport"
-                          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/src/npctransport")
+                          WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/src/npctransport")
 
-add_custom_target(npctransport_python_proto ALL DEPENDS "${PROJECT_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py" )
+add_custom_target(IMP.npctransport-python_proto ALL DEPENDS "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py" )
+set_property(TARGET IMP.npctransport-python_proto PROPERTY FOLDER "IMP.npctransport")
 
-set(IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES npctransport_python_proto CACHE INTERNAL "" FORCE)
+set(IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES IMP.npctransport-python_proto CACHE INTERNAL "" FORCE)
