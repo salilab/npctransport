@@ -53,8 +53,8 @@ def cluster_MRC_file(input_fname,
     dmap=IMP.em.read_map(input_fname + "", IMP.em.MRCReaderWriter())
     dmap.get_header_writable().set_resolution(resolution)
     nvoxels = dmap.get_number_of_voxels()
-    print "Bounding box: %s" % IMP.em.get_bounding_box(dmap, 0.001)
-    print "Number of voxels: %d" % nvoxels
+#    print "Bounding box: %s" % IMP.em.get_bounding_box(dmap, 0.001)
+#    print "Number of voxels: %d" % nvoxels
     #  dmap_resample = dmap.
     sum_location = IMP.algebra.Vector3D(0,0,0)
     sum_value = 0.0
@@ -69,20 +69,20 @@ def cluster_MRC_file(input_fname,
             sum_value = sum_value + value
             if value > INTENSE_PIXEL_THRESH:
                 pos_voxels_locations.append( (location, value) )
-                print "Voxel %d location %s ; value %f" % (i, location, value)
+#                print "Voxel %d location %s ; value %f" % (i, location, value)
             # save all intense pixels in a list
             if(value > INTENSE_PIXEL_THRESH and intense_voxel is None):
                 intense_voxel = i
-                print "Intense Voxel %d location %s ; value %f" % (i, location, value)
+#                print "Intense Voxel %d location %s ; value %f" % (i, location, value)
             max_value = max( value, max_value )
     if(len(pos_voxels_locations) == 0):
 #        Print "ERROR: No intense voxels in file '" + input_fname + "' with max value", max_value,
-        print "Sum value: ", sum_value
+#        print "Sum value: ", sum_value
         raise IMP.ValueException("No intense voxels in file %s" % input_fname)
     mean_location = sum_location / sum_value
-    print "Mean location: %s" % mean_location, "Sum value: %.2f" % sum_value
+#    print "Mean location: %s" % mean_location, "Sum value: %.2f" % sum_value
     intense_voxel_location = dmap.get_location_by_voxel(intense_voxel) * 10.0 # from nm to angstroms
-    print "Intense voxel location: %s" % intense_voxel_location
+#    print "Intense voxel location: %s" % intense_voxel_location
     # generate some clusters of points using kmeans
     ncycles = 5000
 #    for i,voxel in enumerate(pos_voxels_locations):
@@ -94,7 +94,7 @@ def cluster_MRC_file(input_fname,
     centers = []
     for i in range(K):
         centers.append( kmeans.get_center(i) )
-        print "%d %s" % (i , centers[i] )
+#        print "%d %s" % (i , centers[i] )
     return (kmeans, centers, mean_location, pos_voxels_locations)
 
 
@@ -119,9 +119,9 @@ def main():
     for input_fname in options.input:
         re_search=re.search('([0-9]+)copies',input_fname)
         K=int(re_search.group(1))
-        print "K=%d" % K
+#        print "K=%d" % K
         #  for K in [8,16,24,32]: # number of clusters
-        print "COLOR VALUE ", color_value
+#        print "COLOR VALUE ", color_value
         try:
             (kmeans,centers,mean_location,pos_voxels_locations)=cluster_MRC_file(input_fname,K)
         except IMP.UsageException:
@@ -173,11 +173,11 @@ def main():
             #        h_centers.get_child( k ).add_child( hp ) # if uncommented, voxels are added to hierarchy
             SSD = SSD + voxel[1]*sum([(a-b)**2 for a,b in zip(voxel[0],centers[k])])
             n=n+voxel[1]
-        print "fname=%s, k=%d, Root Mean Square Deviation = %.4f" % (input_fname,K,math.sqrt(SSD/n))
+#        print "fname=%s, k=%d, Root Mean Square Deviation = %.4f" % (input_fname,K,math.sqrt(SSD/n))
         color_value = color_value + color_gap
 
-        print "Printing hierarchy"
-        show_hierarchy(h_root)
+#        print "Printing hierarchy"
+#        show_hierarchy(h_root)
 
         rmf= RMF.create_rmf_file(options.output[0])
         # IMP.rmf.add_hierarchy(rmf, h_intense_samples)
