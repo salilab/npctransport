@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     // preparation::
      IMP_NPC_PARSE_OPTIONS(argc, argv);
      bool verbose = false;
-     unsigned int acceleration_factor = 5;
+     unsigned int acceleration_factor = 30;
      double short_init_factor = 1.0 / acceleration_factor;
      std::string config_pb = IMP::base::create_temporary_file_name
        ("benchmark_initalize.pb", ".pb");
