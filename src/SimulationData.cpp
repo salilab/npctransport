@@ -523,13 +523,13 @@ void SimulationData::dump_geometry() {
     w->add_geometry(bbg);
   }
   if (slab_is_on_) {
-    IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
-    w->add_geometry(cyl_geom);
-    // IMP_NEW(SlabWireGeometry, slab_geometry,
-    //         (slab_height_ /* h */ ,
-    //          slab_radius_ /* r */,
-    //          slab_width_ /* w */) );
-    // w->add_geometry( slab_geometry );
+    //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
+    //w->add_geometry(cyl_geom);
+     IMP_NEW(SlabWireGeometry, slab_geometry,
+             (slab_thickness_ /* h */ ,
+              tunnel_radius_ /* r */,
+              box_side_ /* w */) );
+     w->add_geometry( slab_geometry );
   }
 }
 
@@ -676,11 +676,11 @@ void SimulationData::write_geometry(std::string out) {
     w->add_geometry(bbg);
   }
   if (slab_is_on_) {
-    // IMP_NEW(SlabWireGeometry, slab_geometry,
-    //         (1000 /* h */ , 100 /* r */, 300 /* w */) );
-    // w->add_geometry(slab_geometry);
-    IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
-    w->add_geometry(cyl_geom);
+    IMP_NEW(SlabWireGeometry, slab_geometry,
+            (slab_thickness_, tunnel_radius_, box_side_));
+    w->add_geometry(slab_geometry);
+    //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
+    //w->add_geometry(cyl_geom);
   }
 }
 
