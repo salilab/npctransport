@@ -197,7 +197,7 @@ add_obstacle(config, "MRCs/Sec13_16copies.mrc", k=16, R=21, origin=mean_loc)
 
 # add bounding volumes
 config.box_is_on.lower=1
-config.box_side.lower=max(max_z,max_x,max_y)*6 # 2000
+config.box_side.lower=max(max_z,max_x,max_y)*4 # 2000
 config.slab_is_on.lower=1
 config.tunnel_radius.lower=max_r - config.fgs[0].radius.lower # or also upper when there's steps?
 config.slab_thickness.lower=max_z - config.fgs[0].radius.lower  # or also upper when there's steps?

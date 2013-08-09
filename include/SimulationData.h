@@ -283,7 +283,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
     return obstacle_types_;
   }
 
-
   /**
      retrieve fg chain hierarchies
 
@@ -304,6 +303,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
              that was added to this simulation previously
   */
   atom::Hierarchies get_fg_chains(atom::Hierarchy root) const;
+
+
+  /** return all the obstacle particles */
+  ParticlesTemo get_obstacle_particles() const;
 
 
   /**

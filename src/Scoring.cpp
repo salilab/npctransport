@@ -104,14 +104,14 @@ Scoring::get_scoring_function(bool update)
 
 IMP::ScoringFunction*
 Scoring::get_custom_scoring_function
-( const RestraintsTemp& extra_rastraints,
+( const RestraintsTemp& extra_restraints,
   IMP::SingletonContainerAdaptor particles,
   IMP::SingletonContainerAdaptor optimizable_particles,
   bool is_attr_interactions_on) const
 {
     // set up the restraints for the BD simulation:
   RestraintsTemp rs;
-  rs += extra_rastraints;
+  rs += extra_restraints;
   rs += get_chain_restraints_on( particles );
   if (box_is_on_) {
     rs.push_back( create_bounding_box_restraint( particles ) );

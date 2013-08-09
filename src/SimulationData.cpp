@@ -421,6 +421,21 @@ atom::Hierarchies SimulationData::get_fg_chains(atom::Hierarchy root) const
   return ret;
 }
 
+/** return all the obstacle particles */
+ParticlesTemp SimulationData::get_obstacle_particles() const
+{
+  ParticlesTemp ret;
+  typedef base::set<core::ParticleType> ParticleTypeSet;
+  ParticleTypeSet const& o_types = sd->get_obstacle_types();
+  for(ParticleTypeSet::const_iterator
+        ti = o_types.begin(); ti != o_types.end(); ti++)
+    {
+      ret += atom::get_leaves( sd->get_particle_of_type(*ti) );
+    }
+  return ret;
+}
+
+
 
 
 // Note and beware: this method assumes that the hierarchy in the RMF file

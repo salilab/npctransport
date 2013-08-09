@@ -155,7 +155,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      4) the slab or bounding box restraints if relevant on all particles
         in 'particles'
 
-        @param extra_restraints ad-hoc restraints to be added to scoring function
+        @param extra_restraints  ad-hoc restraints to be added to scoring function
         @param particles particles container on which to apply bounding volume
                          and pair constraints
         @param optimizable_particles interaction scores (both repulsive or attractive)
@@ -166,7 +166,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   */
   IMP::ScoringFunction*
     get_custom_scoring_function
-    ( const RestraintsTemp& extra_rastraints,
+    ( const RestraintsTemp& extra_restraints,
       SingletonContainerAdaptor particles,
       SingletonContainerAdaptor optimizable_particles,
       bool is_attr_interactions_on = true ) const;
