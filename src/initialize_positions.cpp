@@ -367,157 +367,6 @@ void optimize_balls(const ParticlesTemp &ps,
 }
 
 
-
-/** Take a set of core::XYZR particles and relax them relative to a set of
-    restraints. Excluded volume is handle separately, so don't include it
-    in the passed list of restraints.
-    (Note: optimize only particles that are flagged as 'optimized')
-
-    @param ps particles over which to optimize
-    @param rs restraints to be used in this optimization
-    @param excluded pairs to be excluded from optimization
-    @param short_init_factor a factor between >0 and 1 for decreasing
-                             the number of optimization cycles at each
-                             round
-*/
-void OLD_optimize_balls(const ParticlesTemp &ps, const RestraintsTemp &rs,
-                    const PairPredicates excluded,
-                    rmf::SaveOptimizerState *save,
-                    atom::BrownianDynamics *local,
-                    LinearWellPairScores lwps,
-                    base::LogLevel ll, bool debug,
-                    double short_init_factor = 1.0) {
-  // make sure that errors and log messages are marked as coming from this
-  // function
-  IMP_FUNCTION_LOG;
-
-  base::SetLogState sls(ll);
-  IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.", ValueException);
-  IMP_ALWAYS_CHECK(local, "local optimizer unspecified", ValueException);
-  IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
-                   "short init factor should be in range (0,1]",
-                   ValueException);
-  Model *m = ps[0]->get_model();
-  // double scale = core::XYZR(ps[0]).get_radius();
-
-  unsigned int n_movers = 1 + ps.size() / 600;  // movers applied in one MC step
-  //  IMP::base::Pointer<core::MonteCarlo> mc =
-  //  create_mc(ps, rs, excluded, save, debug, n_movers);
-
-  if (show_dependency_graph) {
-    DependencyGraph dg = get_dependency_graph(ps[0]->get_model());
-    std::ofstream dgf("dependency_graph.dot");
-    show_as_graphviz(dg, dgf);
-  }
-
-  std::cout << "Performing initial optimization" << std::endl;
-  // shrink each of the particles, relax the configuration, repeat
-  double bd_temperature_orig = local->get_temperature();
-  for (int i = 0; i < 11; ++i) {
-    boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > attrs(
-        new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()]);
-    boost::ptr_vector<LinearWellSetLengthRAII> lengths;
-    double factor = .1 * i;
-    double length_factor = .7 + .3 * factor;
-    // rescale radii temporarily
-    for (unsigned int j = 0; j < ps.size(); ++j) {
-      attrs[j].reset(
-          new ScopedSetFloatAttribute(ps[j], core::XYZR::get_radius_key(),
-                                      core::XYZR(ps[j]).get_radius() * factor));
-    }
-    // rescale bond length temporarily
-    for (unsigned int j = 0; j < lwps.size(); ++j) {
-      lengths.push_back(new LinearWellSetLengthRAII(lwps[j], length_factor));
-    }
-    std::cout << "Optimizing with radii at " << factor << " of full"
-              << " and length factor " << length_factor;
-    std::cout << " energy before = "
-              << local->get_scoring_function()->evaluate(false) << std::endl;
-
-    //    mc->get_incremental_scoring_function()->set_moved_particles
-    //      ( mc->get_incremental_scoring_function()->get_movable_indexes() );
-    double desired_accept_rate =
-      0.2;  // acceptance rate for which to tune move size (per mover)
-    for (int j = 0; j < 5; ++j) {
-      local->set_temperature((1.5 - (i + j / 5.0) / 11.0) *
-                             bd_temperature_orig);
-      double kt = 100.0 / (3 * j + 1);
-      bool done = false;
-      IMP_OMP_PRAGMA(parallel num_threads(3)) {
-        int timer = 1000;
-        IMP_OMP_PRAGMA(single) {
-          int n_bd = 1000 * (i / 2 + 2);
-          int n_bd_inner = 1000;
-          int n_external = n_bd / n_bd_inner;
-          int mc_opt_factor = 1 * (j + 1);  // 500
-          int n_mc_all = ps.size() * mc_opt_factor / n_movers;
-          int n_mc_inner = n_mc_all / n_external;
-          for (int k = 0; k < n_external; k++) {
-            // mc->set_kt(kt);
-            // std::cout << "n_mc_inner = " << n_mc_inner<< std::endl;
-            // double e_mc = mc->optimize(n_mc_inner);
-            // unsigned int n_accepted =
-            //   mc->get_mover(0)->get_number_of_accepted();
-            // unsigned int n_proposed =
-            //   mc->get_mover(0)->get_number_of_proposed();
-            // double accept_rate = n_accepted / (n_proposed + 0.0) ;
-            // std::cout << "Energy is " << e_mc << " at " << i <<
-            //   ", " << j << "," << k << std::endl;
-            // std::cout << "For each of " << n_movers << " movers, accepted "
-            //           << n_accepted << " of " << n_proposed
-            //           << " = " << accept_rate  << std::endl;
-            // // scale move size to get 'desired_accept_rate' acceptance rate
-            // double move_rescale;
-            // if(accept_rate > desired_accept_rate) {
-            //   move_rescale = accept_rate / desired_accept_rate;
-            // } else {
-            //   move_rescale =
-            //     (accept_rate + 0.01*desired_accept_rate)
-            //     / (accept_rate + 0.1 *desired_accept_rate) ;
-            // }
-            // std::cout << "Rescaling move size and kt by " << move_rescale <<
-            // std::endl;
-            // rescale_move_size( mc, move_rescale);
-            // kt /= move_rescale;
-            double e_bd = local->optimize
-              ( std::ceil(n_bd_inner * short_init_factor) ) ;
-            IMP_LOG(PROGRESS, "Energy after bd is " << e_bd << " at " << i << ", "
-                    << j << "," << k << std::endl);
-            //            mc->get_mover(0)->reset_statistics();
-            if (--timer == 0) {/*exit(0);*/
-            }
-          }  // for k
-
-          //          double e= mc->optimize(!short_initialize ?
-          // ps.size()*(j+1)*500: 1000);
-          // std::cout << "Energy is " << e << " at " << i << ", " << j <<
-          // std::endl;
-          if (debug) {
-            std::ostringstream oss;
-            oss << "Init after " << i << " " << j;
-            if (save) {
-              save->update_always(oss.str());
-            }
-          }
-          // if (e < .000001) done=true; // TODO: replace stopping condition
-        }
-      }
-      if (done) break;
-    }  // for j
-    IMP_OMP_PRAGMA(parallel num_threads(3)) {
-      IMP_OMP_PRAGMA(single) {
-        double e = local->optimize(std::ceil(1000 * short_init_factor));
-        std::cout << "Energy after initialization is " << e << std::endl;
-      }
-    }
-  } // for i
-  local->set_temperature(bd_temperature_orig);
-}
-
-
-
-
-
 } // namespace {}
 
 
@@ -581,37 +430,26 @@ void initialize_positions(SimulationData *sd,
     if (!debug) {
       sd->get_rmf_sos_writer()
           ->set_period(dump_interval * 100);  // reduce output rate:
-      std::cout << "init: sos writer set dump interval period " << dump_interval * 100 << std::endl;
+      IMP_LOG(PROGRESS, "init: sos writer set dump interval period "
+              << dump_interval * 100 << std::endl);
     } else {
       sd->get_rmf_sos_writer()->set_period(100);
-      std::cout << "init: sos writer set dump interval period " << 100 << std::endl;
+      IMP_LOG(PROGRESS,  "init: sos writer set dump interval period "
+              << 100 << std::endl);
     }
   }
 
-  // base::Pointer<Scoring> scoring=sd->get_scoring();
-  // RestraintsTemp rss;
-  // rss += extra_restraints;
-  // rss += scoring->get_all_chain_restraints();
-  // if (scoring->get_has_bounding_box())
-  //   rss.push_back(scoring->get_bounding_box_restraint());
-  // if (scoring->get_has_slab())
-  //   rss.push_back(scoring->get_slab_restraint());
-  // // avoid consecutive particles, e.g. consecutive FG repeats
-  // // NOTE/TODO: this is an error, since consecutive particles in
-  // //            the model may not be so in the chain itself
-  // PairPredicates excluded;
-  // IMP_NEW( container::ExclusiveConsecutivePairFilter, ecpf, () );
-  // excluded.push_back(ecpf);
-
   // optimize each FG separately using a temporary custom scoring function
   // (using RAII class OptimizerSetTemporaryScoringFunction)
+  ParticlesTemp obstacles = sd->get_obstacle_particles();
   typedef base::set<core::ParticleType> ParticleTypeSet;
   ParticleTypeSet const& fg_types = sd->get_fg_types();
   for(ParticleTypeSet::const_iterator ti = fg_types.begin();
       ti != fg_types.end(); ti++)
     {
       atom::Hierarchies cur_fg_roots = sd->get_particles_of_type(*ti);
-      ParticlesTemp cur_particles = atom::get_leaves( cur_fg_roots );
+      ParticlesTemp cur_particles =
+        atom::get_leaves( cur_fg_roots ) + obstacles;
       IMP_LOG( PROGRESS, "optimizing " <<  cur_particles.size()
                << " particles of type " << *ti );
       ParticlesTemp cur_optimizable_particles =
@@ -657,12 +495,9 @@ void initialize_positions(SimulationData *sd,
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->set_period(dump_interval);  // restore output rate
     sd->get_rmf_sos_writer()->update_always("done initializing");
-    std::cout << "init: sos writer set dump interval period " << dump_interval << std::endl;
+    IMP_LOG(base::PROGRESS, "init: sos writer set dump interval period "
+            << dump_interval << std::endl);
   }
-  // // unpin previously unpinned fgs (= allow optimization)
-  // for (unsigned int i = 0; i < previously_unpinned.size(); ++i) {
-  //   previously_unpinned[i].set_coordinates_are_optimized(true);
-  // }
   print_fgs(*sd);
 }
 
