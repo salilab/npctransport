@@ -272,7 +272,7 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
                   bool show_steps, boost::uint64_t random_seed) {
   IMP_FUNCTION_LOG;
   std::fstream in(fname.c_str(), std::ios::in | std::ios::binary);
-  if (!in) {
+  if (!in) {\
     IMP_THROW("Could not open file " << fname, IOException);
   }
   ::npctransport_proto::Configuration input;
