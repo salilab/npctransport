@@ -15,7 +15,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState(
     Model* m, InteractionType interaction_type, const ParticlesTemp& particlesI,
     const ParticlesTemp& particlesII, double contact_range, double slack)
-    : core::PeriodicOptimizerState("BipartitePairsStatisticsOptimizerState%1%"),
+  : P(m, "BipartitePairsStatisticsOptimizerState%1%"),
       m_(m),
       updates_(0),
       interaction_type_(interaction_type),

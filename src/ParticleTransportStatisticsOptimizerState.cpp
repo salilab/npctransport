@@ -19,8 +19,7 @@ ParticleTransportStatisticsOptimizerState::
     ParticleTransportStatisticsOptimizerState(
         Particle *p, Float bottom_z, Float top_z,
         base::WeakPointer<IMP::atom::Simulator> owner)
-    : core::PeriodicOptimizerState(
-          "ParticleTransportStatisticsOptimizerState%1%"),
+      : P(p->get_model(), "ParticleTransportStatisticsOptimizerState%1%"),
       p_(p),
       bottom_z_(bottom_z),
       top_z_(top_z),

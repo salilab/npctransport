@@ -21,6 +21,9 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 /** Compute various statistics of a chain.*/
 class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
     : public core::PeriodicOptimizerState {
+ private:
+  typedef core::PeriodicOptimizerState P;
+
   // particles in the chain:
   ParticlesTemp ps_;
 

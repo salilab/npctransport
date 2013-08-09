@@ -15,7 +15,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 ChainStatisticsOptimizerState::ChainStatisticsOptimizerState(
     const ParticlesTemp& p)
-    : core::PeriodicOptimizerState("ChainStatisticsOptimizerState%1%"),
+  : P(p[0]->get_model(), "ChainStatisticsOptimizerState%1%"),
       ps_(p) {}
 void ChainStatisticsOptimizerState::reset() {
   positions_.clear();

@@ -25,6 +25,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
  */
 class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
     : public core::PeriodicOptimizerState {
+ private:
+  typedef core::PeriodicOptimizerState P;
   Particle *p_;             // the particle
   Float bottom_z_, top_z_;  // channel boundaries on z-axis
   base::WeakPointer<IMP::atom::Simulator> owner_;

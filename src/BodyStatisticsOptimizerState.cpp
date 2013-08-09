@@ -17,7 +17,7 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BodyStatisticsOptimizerState::BodyStatisticsOptimizerState(Particle* p)
-    : core::PeriodicOptimizerState("BodyStatisticsOptimizerState%1%"), p_(p) {}
+  : P(p->get_model(), "BodyStatisticsOptimizerState%1%"), p_(p) {}
 void BodyStatisticsOptimizerState::reset() {
   positions_.clear();
   core::PeriodicOptimizerState::reset();

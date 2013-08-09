@@ -304,7 +304,6 @@ void optimize_balls(const ParticlesTemp &ps,
   if(save)
     std::cout << "BEGIN o_b(): Saver has been called so far " <<
       save->get_number_of_updates() << std::endl;
-  Model *m = ps[0]->get_model();
 
   std::cout << "Performing initial optimization" << std::endl;
   // shrink each of the particles, relax the configuration, repeat
@@ -449,7 +448,8 @@ void initialize_positions(SimulationData *sd,
     {
       atom::Hierarchies cur_fg_roots = sd->get_particles_of_type(*ti);
       ParticlesTemp cur_particles =
-        atom::get_leaves( cur_fg_roots ) + obstacles;
+        atom::get_leaves( cur_fg_roots );
+      cur_particles += obstacles;
       IMP_LOG( PROGRESS, "optimizing " <<  cur_particles.size()
                << " particles of type " << *ti );
       ParticlesTemp cur_optimizable_particles =

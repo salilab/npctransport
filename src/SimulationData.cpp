@@ -426,11 +426,12 @@ ParticlesTemp SimulationData::get_obstacle_particles() const
 {
   ParticlesTemp ret;
   typedef base::set<core::ParticleType> ParticleTypeSet;
-  ParticleTypeSet const& o_types = sd->get_obstacle_types();
+  ParticleTypeSet const& o_types = get_obstacle_types();
   for(ParticleTypeSet::const_iterator
         ti = o_types.begin(); ti != o_types.end(); ti++)
     {
-      ret += atom::get_leaves( sd->get_particle_of_type(*ti) );
+      atom::Hierarchies hs = get_particles_of_type(*ti);
+      ret += ParticlesTemp( atom::get_leaves( hs ) );
     }
   return ret;
 }

@@ -306,7 +306,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
 
   /** return all the obstacle particles */
-  ParticlesTemo get_obstacle_particles() const;
+  ParticlesTemp get_obstacle_particles() const;
 
 
   /**

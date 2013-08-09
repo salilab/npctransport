@@ -26,6 +26,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
     : public core::PeriodicOptimizerState {
  private:
+  typedef core::PeriodicOptimizerState P;
+ private:
   // the model on which the simulation is run and to which all particles are
   // assumed to belong
   base::Pointer<Model> m_;

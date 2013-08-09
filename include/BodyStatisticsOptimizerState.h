@@ -23,6 +23,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 /** The correlation with at most the last 100 updates is tracked*/
 class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
     : public core::PeriodicOptimizerState {
+ private:
+  typedef core::PeriodicOptimizerState P;
   Particle *p_;
   std::deque<algebra::Transformation3D> positions_;
   Particle *get_particle() const { return p_; }
