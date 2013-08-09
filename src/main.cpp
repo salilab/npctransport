@@ -306,6 +306,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       std::cout << "Doing initial coordinates optimization..." << std::endl;
       initialize_positions(sd, init_restraints, verbose, short_init_factor);
       sd->get_bd()->set_current_time(0.0);
+      sd->reset_statistics_optimizer_states();
     }
     print_score_and_positions(sd, verbose, "Score right before BD = ");
     if (conformations_rmf_sos) {
