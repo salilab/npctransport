@@ -16,12 +16,18 @@
 #include <IMP/container/ListSingletonContainer.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-BodyStatisticsOptimizerState::BodyStatisticsOptimizerState(Particle* p)
-  : P(p->get_model(), "BodyStatisticsOptimizerState%1%"), p_(p) {}
+BodyStatisticsOptimizerState::BodyStatisticsOptimizerState
+( Particle* p, unsigned int periodicity)
+  : P(p->get_model(), "BodyStatisticsOptimizerState%1%"), p_(p)
+{
+  set_period(periodicity);
+}
+
 void BodyStatisticsOptimizerState::reset() {
   positions_.clear();
   core::PeriodicOptimizerState::reset();
 }
+
 double BodyStatisticsOptimizerState::get_dt() const {
   return dynamic_cast<atom::Simulator*>(get_optimizer())
       ->get_maximum_time_step();

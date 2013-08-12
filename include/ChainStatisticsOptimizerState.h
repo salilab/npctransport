@@ -33,7 +33,12 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
   double get_dt() const;
 
  public:
-  ChainStatisticsOptimizerState(const ParticlesTemp &p);
+  /**
+     @param ps the particles being wrapped
+     @param periodicity frame interval for statistics, equiv. to set_period(1)
+   */
+  ChainStatisticsOptimizerState(const ParticlesTemp &ps,
+                                unsigned int periodicity = 1);
 
   double get_correlation_time() const;
 

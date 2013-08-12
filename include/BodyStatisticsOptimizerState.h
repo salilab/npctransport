@@ -32,7 +32,11 @@ class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
   double get_dt() const;
 
  public:
-  BodyStatisticsOptimizerState(Particle *p);
+  /**
+     @param p the particle being wrapped
+     @param periodicity frame interval for statistics, equiv. to set_period(1)
+   */
+  BodyStatisticsOptimizerState(Particle *p, unsigned int periodicity=1);
   double get_correlation_time() const;
   double get_diffusion_coefficient() const;
   void reset();

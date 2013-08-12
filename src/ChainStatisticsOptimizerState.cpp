@@ -13,18 +13,24 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-ChainStatisticsOptimizerState::ChainStatisticsOptimizerState(
-    const ParticlesTemp& p)
-  : P(p[0]->get_model(), "ChainStatisticsOptimizerState%1%"),
-      ps_(p) {}
+ChainStatisticsOptimizerState::ChainStatisticsOptimizerState
+( const ParticlesTemp& ps, unsigned int periodicity)
+  : P(ps[0]->get_model(), "ChainStatisticsOptimizerState%1%"),
+    ps_(ps)
+{
+  set_period(periodicity);
+}
+
 void ChainStatisticsOptimizerState::reset() {
   positions_.clear();
   core::PeriodicOptimizerState::reset();
 }
+
 double ChainStatisticsOptimizerState::get_dt() const {
   return dynamic_cast<atom::Simulator*>(get_optimizer())
       ->get_maximum_time_step();
 }
+
 double ChainStatisticsOptimizerState::get_correlation_time() const {
   double sum = 0;
   int n = 0;
