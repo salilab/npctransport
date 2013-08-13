@@ -46,7 +46,7 @@ class Tests(IMP.test.TestCase):
         # rtf= rt.get_child(0)
         # rttf= IMP.npctransport.Transporting.setup_particle(rtf, False)
         print "updating stats"
-        sd.update_statistics(timer, 0);
+        sd.get_statistics().update(timer, 0);
         return sd
 
     def assert_transporting_equal(self, sd1, sd2):

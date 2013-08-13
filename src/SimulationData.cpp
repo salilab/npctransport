@@ -112,13 +112,13 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   for (int i = 0; i < pb_assignment.fgs_size(); ++i) {
     IMP_USAGE_CHECK( pb_assignment.fgs(i).has_type() &&
                      pb_assignment.fgs(i).type() != "",
-                     "FG should've been assigned had type thru protobuf.h");
+                     "FG should've been assigned a type thru protobuf.h");
     create_fgs(pb_assignment.fgs(i));
   }
   for (int i = 0; i < pb_assignment.floaters_size(); ++i) {
     IMP_USAGE_CHECK( pb_assignment.floaters(i).has_type() &&
                      pb_assignment.floaters(i).type() != "",
-                     "Floater should've been assigned type thru protobuf.h");
+                     "Floater should've been assigned a type thru protobuf.h");
     create_floaters(pb_assignment.floaters(i), type_of_float[i],
                     display::get_display_color(i));
   }

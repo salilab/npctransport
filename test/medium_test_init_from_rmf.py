@@ -27,7 +27,7 @@ class Tests(IMP.test.TestCase):
         # make sure final state is written
         sd.get_rmf_sos_writer().update_always()
         # make sure statistics with final rmf conformation is written
-        sd.update_statistics( timer )
+        sd.get_statistics().update( timer )
         print "who"
         return sd
 
