@@ -30,7 +30,8 @@ using namespace ::google::protobuf;
 #define UPDATE_MAX(name, path) max_##name = std::max(max_##name, path().value())
 
 double get_close_pairs_range(double max_range, double max_range_factor) {
-  return max_range * max_range_factor;
+// squared cause range factor is applied once for each interacting partner
+  return max_range * max_range_factor * max_range_factor;
 }
 
 double get_close_pairs_range(const ::npctransport_proto::Assignment& config) {
@@ -42,7 +43,7 @@ double get_close_pairs_range(const ::npctransport_proto::Assignment& config) {
   }
   for (int i = 0; i < config.floaters_size(); ++i) {
     UPDATE_MAX(range_factor, config.floaters(i).interaction_range_factor);
-  }
+  } // TODO: add obstacles?!
   for (int i = 0; i < config.interactions_size(); ++i) {
     if (config.interactions(i).has_interaction_range()) {
       UPDATE_MAX(range, config.interactions(i).interaction_range);

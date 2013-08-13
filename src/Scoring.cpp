@@ -328,7 +328,7 @@ Scoring::create_close_diffusers_container
   SingletonContainerAdaptor optimizable_particles) const
 {
   using namespace container;
-  IMP_NEW(CloseBipartitePairContainer, cpc,
+  IMP_NEW(CloseBipartitePairContainer, cpc, // so range + 2*slack is what we get
           (particles, optimizable_particles, get_range(), slack_) );
   IMP_NEW( core::AllSamePairPredicate, aspp, () );
   cpc->add_pair_filter( aspp ); // only relevant for bipartite

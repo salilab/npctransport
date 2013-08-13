@@ -21,6 +21,7 @@
 #include <IMP/npctransport.h>
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
+#include <IMP/base/enums.h>
 #include <IMP/base/Pointer.h>
 #include <IMP/Restraint.h>
 #include <IMP/SingletonScore.h>

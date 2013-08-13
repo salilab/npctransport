@@ -392,7 +392,7 @@ ParticlesTemp SimulationData::get_obstacle_particles() const
 // object. Use with great caution, otherwise unexpected results may arise
 void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
                                                    int frame) {
-  f.set_current_frame(f.get_number_of_frames() - 1);
+  f.set_current_frame( RMF::FrameID(f.get_number_of_frames() - 1) );
   // RMF::show_hierarchy_with_values(f.get_root_node());
   link_hierarchies_with_sites(f, get_root().get_children());
   if (frame == -1) {
