@@ -132,7 +132,7 @@ void Statistics::add_interaction_stats
         }
         );
   double stats_contact_range = 1.5;  // TODO: make a param
-  double stats_slack = 30; // TODO: make a param - this also affects results!!
+  double stats_slack = 10; // TODO: make a param - this also affects results!!
   IMP_LOG(PROGRESS,
           "Interaction " << type0.get_string() << ", " << type1.get_string()
           << "  sizes: " << set0.size() << ", " << set1.size()

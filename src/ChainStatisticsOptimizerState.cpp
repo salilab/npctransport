@@ -50,7 +50,7 @@ double ChainStatisticsOptimizerState::get_correlation_time() const {
       last = angle;
     }
   }
-  std::cout << n << " events" << std::endl;
+  IMP_LOG(base::VERBOSE, n << " correlation events" << std::endl);
 
   if (n == 0) {
     return std::numeric_limits<double>::infinity();
