@@ -8,12 +8,12 @@ import re
 # fetch params
 # Usage: <cmd> <outfile> [kaps_R=25.0]
 outfile = sys.argv[1]
-kaps_R = 15.0
+kaps_R = 30.0
 if(len(sys.argv) > 2):
     kaps_R = float(sys.argv[2])
 print "kaps_R = %.2f" % (kaps_R)
 obstacle_inflate_factor = 1.5
-fg_coarse_factor=2.0
+fg_coarse_factor=2.5
 
 def get_basic_config():
     config = Configuration()
@@ -203,10 +203,13 @@ config.tunnel_radius.lower=max_r - config.fgs[0].radius.lower # or also upper wh
 config.slab_thickness.lower=max_z - config.fgs[0].radius.lower  # or also upper when there's steps?
 
 # Add floaters
+n_kap_interactions_orig=12
+n_kap_interactions = int ( math.ceil ( n_kap_interactions_orig / fg_coarse_factor ) )
 kaps= IMP.npctransport.add_float_type(config,
                                      number=30,
                                      radius=kaps_R,
-                                     interactions=12)
+                                      interactions= n_kap_interactions)
+create_range(kaps,interaction_range_factor, lb=1, ub=10, steps = 20, base=1)
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics= IMP.npctransport.add_float_type(config,
                                               number=30,
@@ -230,8 +233,8 @@ for i,fg0 in enumerate(config.fgs):
         interactionFG_FG= IMP.npctransport.add_interaction(config,
                                                            name0= fg0.type,
                                                            name1= fg1.type,
-                                                           interaction_k= 3.5,
-                                                           interaction_range= 2)
+                                                           interaction_k= 2.5,
+                                                           interaction_range= 2
 
 # dump to file
 f=open(outfile, "wb")
