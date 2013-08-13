@@ -32,14 +32,14 @@ int main(int argc, char *argv[]) {
         IMP::base::create_temporary_file_name("output", ".pb");
     std::string output =
         IMP::base::create_temporary_file_name("output", ".rmf");
-    IMP::base::set_log_level(IMP::base::LogLevel(IMP::base::SILENT));
+    IMP::base::set_log_level(IMP::base::LogLevel(IMP::base::PROGRESS));
     int num = IMP::npctransport::assign_ranges(config, assignment, 0, true,
                                                IMP::base::get_random_seed());
     std::cout << "num ranges " << num << std::endl;
     IMP_NEW(IMP::npctransport::SimulationData, sd,
             (assignment, true /* quick */));
     sd->set_rmf_file_name(output);
-    sd->get_model()->set_log_level(IMP::base::SILENT);
+    sd->get_model()->set_log_level(IMP::base::PROGRESS);
     std::cout << "Files are " << assignment << " and " << output << std::endl;
     // simulate
     IMP::npctransport::do_main_loop(sd, IMP::RestraintsTemp());

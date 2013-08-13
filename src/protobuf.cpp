@@ -325,55 +325,38 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   if (!out) {
     IMP_THROW("Could not open file " << ofname, IOException);
   }
-  // add fg for statistical purposes + fill in types if needed
+
+  // Fill in types for fgs and floaters if needed
+  // TODO: this is just for backward support -
+  //       should be removed once deprecated
   {
-    for (int i = 0; i < assignment.fgs_size(); ++i) {
-      // store default type if one does not exist
-      if (! assignment.fgs(i).has_type() ||
-          assignment.fgs(i).type() == "" ) {
-        std::cout << "Setting assignment fg " << i << " to type "
-                  << type_of_fg[i].get_string() << std::endl;
-        assignment.mutable_fgs(i)->set_type
-          ( type_of_fg[i].get_string() );
-      }
-      if (assignment.fgs(i).number().value() != 0) {
-        statistics.add_fgs();
-        IMP_USAGE_CHECK(
-            statistics.fgs_size() ==
-                static_cast<int>(i + 1),
-            "Wrong size: " << statistics.fgs_size());
-        statistics.mutable_fgs(i)->set_type
-          ( assignment.fgs(i).type() );
-      }
-    }
-    // add floater for statistical purposes + fill in types if needed
-    for (int i = 0; i < assignment.floaters_size(); ++i) {
-      // store default type if one does not exist
-      if (! assignment.floaters(i).has_type() ||
-          assignment.floaters(i).type() == "" ) {
-        assignment.mutable_floaters(i)->set_type
-          ( type_of_float[i].get_string() );
-      }
-      if (assignment.floaters(i).number().value() != 0) {
-        statistics.add_floaters();
-        IMP_USAGE_CHECK(
-            statistics.floaters_size() ==
-            static_cast<int>(i + 1),
-            "Wrong size: "
-            << statistics.floaters_size());
-        statistics.mutable_floaters(i)->set_type
-          ( assignment.floaters(i).type() );
-      }
-    }
-    // add interaction statistics
-    for (int i = 0; i < assignment.interactions_size(); i++) {
-      if (assignment.interactions(i).is_on().value()) {
-        ::npctransport_proto::Statistics_InteractionStats* pOutStats_i =
-            statistics.add_interactions();
-        pOutStats_i->set_type0(assignment.interactions(i).type0());
-        pOutStats_i->set_type1(assignment.interactions(i).type1());
-      }
-    }
+    for (int i = 0; i < assignment.fgs_size(); ++i)
+      {
+        // store default type if one does not exist
+        bool has_type =  assignment.fgs(i).has_type();
+        if(has_type) {
+          has_type = ( assignment.fgs(i).type() != "" );
+        }
+        if(!has_type) {
+          IMP_LOG(PROGRESS,  "Setting assignment fg " << i << " to type "
+                  << type_of_fg[i].get_string() << std::endl );
+          assignment.mutable_fgs(i)->set_type
+            ( type_of_fg[i].get_string() );
+        }
+      } // for i
+    for (int i = 0; i < assignment.floaters_size(); ++i)
+      {
+        bool has_type = assignment.floaters(i).has_type();
+        if(has_type) {
+          has_type = (assignment.floaters(i).type() != "" );
+        }
+        if(! has_type){
+          IMP_LOG(PROGRESS,  "Setting assignment floater " << i << " to type "
+                  << type_of_fg[i].get_string() << std::endl );
+          assignment.mutable_floaters(i)->set_type
+            ( type_of_float[i].get_string() );
+        }
+      } // for i
   }
 
   bool written = output.SerializeToOstream(&out);

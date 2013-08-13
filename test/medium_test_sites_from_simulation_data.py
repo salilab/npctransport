@@ -131,6 +131,7 @@ class Tests(IMP.test.TestCase):
         # prepare run
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
+        pymol_file = self.get_tmp_file_name("sites.pym")
         self._create_cfg_file_with_fg_anchors( cfg_file )
         print "assigning parameter ranges from config", cfg_file
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
@@ -141,6 +142,7 @@ class Tests(IMP.test.TestCase):
         # init and run
         IMP.npctransport.initialize_positions( sd, [], False,
                                                short_init_factor)
+        sd.write_geometry(pymol_file)
         n_good=0
         for i in range(n_iter):
             sd.get_bd().optimize(opt_cycles)

@@ -7,6 +7,7 @@ IMP_CLANG_PRAGMA(diagnostic ignored "-Wc++11-long-long")
 IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, Scoring, Scorings);
+IMP_SWIG_OBJECT(IMP::npctransport, Statistics, StatisticsList);
 IMP_SWIG_OBJECT(IMP::npctransport, SimulationData, SimulationDatas);
 IMP_SWIG_OBJECT(IMP::npctransport, SitesGeometry, SitesGeometries);
 IMP_SWIG_OBJECT(IMP::npctransport, TypedSitesGeometry, TypedSitesGeometries);
@@ -38,6 +39,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %include "IMP/npctransport/SitesGeometry.h"
 %include "IMP/npctransport/SitesPairScore.h"
 %include "IMP/npctransport/Scoring.h"
+%include "IMP/npctransport/Statistics.h"
 %include "IMP/npctransport/SimulationData.h"
 %include "IMP/npctransport/io.h"
 %include "IMP/npctransport/creating_particles.h"

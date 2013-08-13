@@ -1,6 +1,6 @@
 /**
  *  \file npctransport/Scoring.h
- *  \brief description
+ *  \brief scoring associated with a SimulationData object
  *
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
@@ -28,19 +28,9 @@
 #include "Parameter.h"
 //#include "SimulationData.h"
 #include "SlabSingletonScore.h"
-
+#include "npctransport_proto.fwd.h"
 #include <boost/timer.hpp>
 #include <string>
-
-#ifndef SWIG
-namespace npctransport_proto {
-  class Assignment;
-  class Assignment_FGAssignment;
-  class Assignment_InteractionAssignment;
-  class Assignment_FloaterAssignment;
-  class Assignment_ObstacleAssignment;
-}
-#endif
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -68,6 +58,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
  private:
 
+  // the sim-data that uses this scoring object
   base::UncheckedWeakPointer<SimulationData> owner_sd_;
 
   // true if the list of particles in the owner_sd has changed
@@ -179,17 +170,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   //  }
 
 
-  /** return the SimulationData object that owns this ScoringFunction */
-  SimulationData* get_sd() {
-    return owner_sd_;
-  }
-
-#ifndef SWIG
-  /** return the SimulationData object that owns this ScoringFunction */
-  SimulationData const* get_sd() const{
-    return owner_sd_;
-  }
-#endif
   /**
      a pair container that was used to define interaction particles
      that will be used in the next call to get_scoring_function(false)
@@ -374,6 +354,19 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 #ifndef SWIG
   /** returns the model associated with the owned SimulationData */
   Model* get_model() const;
+#endif
+
+
+  /** return the SimulationData object that owns this ScoringFunction */
+  SimulationData* get_sd() {
+    return owner_sd_;
+  }
+
+#ifndef SWIG
+  /** return the SimulationData object that owns this ScoringFunction */
+  SimulationData const* get_sd() const{
+    return owner_sd_;
+  }
 #endif
 
   // returns true if a bounding box restraint is defined */

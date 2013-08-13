@@ -214,14 +214,19 @@ message Statistics {
     optional double avg_pct_bound_particles0=5;
     optional double avg_pct_bound_particles1=6;
   }
+  message EnergyByTime {
+    required double time_ns=1;
+    required double energy=2;
+  }
   repeated FGStats fgs=1;
   repeated FloatStats floaters=2;
-  repeated InteractionStats interactions=6;
   optional double energy_per_particle=3 [default=0];
   optional int32 number_of_frames=4 [default=0]; // number of frames for which statistics were gathered
-  optional double bd_simulation_time_ns=8 [default=0]; // number of ns in which BD simulation was running
   optional double seconds_per_iteration=5 [default=0]; // overall time in seconds for this statistics iteration
+  repeated InteractionStats interactions=6;
   optional int32 interrupted=7 [default=0];
+  optional double bd_simulation_time_ns=8 [default=0]; // number of ns in which BD simulation was running
+  repeated EnergyByTime energies_by_time=9;
 }
 
 message Conformation {

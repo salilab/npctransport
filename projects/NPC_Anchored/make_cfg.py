@@ -147,8 +147,8 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
 # ************** MAIN: *************
 IMP.set_log_level(IMP.base.SILENT)
 config= get_basic_config()
-config.dump_interval_ns=0.1
-config.simulation_time_ns=10
+config.dump_interval_ns=1
+config.simulation_time_ns=2500
 
 # Add FGs with anchors
 # (Stoicheometries from Alber et al. 2007b, Determining..., Fig. 3)

@@ -11,6 +11,7 @@
 #include "npctransport_config.h"
 #include <IMP/core/Typed.h>
 #include <utility>
+#include <iostream>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -18,6 +19,21 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 typedef std::pair<IMP::core::ParticleType, IMP::core::ParticleType>
     InteractionType;
 
+typedef IMP::base::set< core::ParticleType > ParticleTypeSet ;
+
 IMPNPCTRANSPORT_END_NAMESPACE
+
+#ifndef SWIG
+std::ostream& operator<<
+( std::ostream& o, IMP::npctransport::InteractionType const& it );
+
+std::ostream& operator<<
+( std::ostream& o, IMP::npctransport::InteractionType const& it )
+{
+  o << "(" << it.first << "," << it.second << ")";
+  return o;
+}
+#endif
+
 
 #endif /* IMPNPCTRANSPORT_TYPEDEFS_H */

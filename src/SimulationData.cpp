@@ -60,12 +60,12 @@ SimulationData::SimulationData(std::string output_file, bool quick,
   m_(nullptr),
   bd_(nullptr),
   scoring_(nullptr),
+  statistics_(nullptr),
   diffusers_changed_(false),
   obstacles_changed_(false),
   optimizable_diffusers_(nullptr),
   diffusers_(nullptr),
-  rmf_file_name_(rmf_file_name),
-  is_stats_reset_(false)
+  rmf_file_name_(rmf_file_name)
 {
   initialize(output_file, quick);
 }
@@ -73,11 +73,10 @@ SimulationData::SimulationData(std::string output_file, bool quick,
 void SimulationData::initialize(std::string output_file, bool quick) {
   m_ = new Model("NPC model %1%");
   ::npctransport_proto::Output pb_data_;
-  output_file_name_ = output_file;
-  std::ifstream file(output_file_name_.c_str(), std::ios::binary);
+  std::ifstream file(output_file.c_str(), std::ios::binary);
   bool read = pb_data_.ParseFromIstream(&file);
   if (!read) {
-    IMP_THROW("Unable to read data from protobuf" << output_file_name_,
+    IMP_THROW("Unable to read data from protobuf" << output_file,
               base::IOException);
   }
   pb_data_.mutable_statistics(); // create it if not there
@@ -94,8 +93,8 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   GET_ASSIGNMENT(angular_d_factor);
   GET_VALUE(range);
   GET_VALUE(statistics_interval_frames);
-  GET_VALUE(time_step);
   GET_ASSIGNMENT(statistics_fraction);
+  GET_VALUE(time_step);
   GET_VALUE(maximum_number_of_minutes);
   if (quick) {
     number_of_frames_ = 2;
@@ -103,6 +102,7 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   }
   // initialize scoring
   scoring_ = new Scoring(this, pb_assignment);
+  statistics_ = new Statistics(this, statistics_interval_frames_, output_file);
 
   // create particles hierarchy
   root_ = new Particle(get_model());
@@ -110,14 +110,15 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   atom::Hierarchy hr = atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
   for (int i = 0; i < pb_assignment.fgs_size(); ++i) {
-    if (!pb_assignment.fgs(i).has_type()) {
-      std::string type_i = type_of_fg[i].get_string();
-      pb_data_.mutable_assignment()->mutable_fgs(i)
-        ->set_type(type_i);
-    }
+    IMP_USAGE_CHECK( pb_assignment.fgs(i).has_type() &&
+                     pb_assignment.fgs(i).type() != "",
+                     "FG should've been assigned had type thru protobuf.h");
     create_fgs(pb_assignment.fgs(i));
   }
   for (int i = 0; i < pb_assignment.floaters_size(); ++i) {
+    IMP_USAGE_CHECK( pb_assignment.floaters(i).has_type() &&
+                     pb_assignment.floaters(i).type() != "",
+                     "Floater should've been assigned type thru protobuf.h");
     create_floaters(pb_assignment.floaters(i), type_of_float[i],
                     display::get_display_color(i));
   }
@@ -162,11 +163,15 @@ void SimulationData::create_fgs
 ( const ::npctransport_proto::Assignment_FGAssignment &fg_data)
 {
   // set type
+  IMP_USAGE_CHECK(fg_data.has_type(), "It is assumed that fg data has"
+                  "a type by now");
+  IMP_LOG(PROGRESS, "creating FG of type '" << fg_data.type() << "'");
   core:: ParticleType type(fg_data.type());
   if (fg_data.number().value() > 0) {
+    IMP_ALWAYS_CHECK( fg_types_.find(type) == fg_types_.end(),
+                      "Currently support only single insertion of each type,"
+                      " can be easily fixed in the future", base::ValueException);
     fg_types_.insert(type);
-    fgs_stats_.push_back(base::Vector<BodyStatisticsOptimizerStates>());
-    chain_stats_.push_back(ChainStatisticsOptimizerStates());
     ParticlesTemp fg_particles;
     IMP::Particle* p_fg_root = new IMP::Particle( get_model() );
     atom::Hierarchy fg_root = atom::Hierarchy::setup_particle(p_fg_root);
@@ -187,17 +192,7 @@ void SimulationData::create_fgs
         d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
         d.set_coordinates_are_optimized(false);
       }
-      // stats
-      chain_stats_.back().push_back
-        ( new ChainStatisticsOptimizerState(chain_beads) );
-      chain_stats_.back().back()->set_period(statistics_interval_frames_);
-      fgs_stats_.back().push_back(BodyStatisticsOptimizerStates());
-      for (unsigned int k = 0; k < chain_beads.size(); ++k) {
-        fgs_stats_.back().back()
-            .push_back( new BodyStatisticsOptimizerState(chain_beads[k]) );
-        fgs_stats_.back().back().back()
-            ->set_period(statistics_interval_frames_);
-      }
+      get_statistics()->add_fg_chain_stats( chain_beads ); // stats
     } // for j
     particles_[type] = fg_particles;
     // add sites for this type
@@ -229,13 +224,10 @@ void SimulationData::create_floaters(
   if (f_data.number().value() == 0) {
     return;
   }
+  IMP_ALWAYS_CHECK( floater_types_.find(type) == floater_types_.end(),
+                    "Currently support only single insertion of each type,"
+                    " can be fixed in the future", base::ValueException);
   floater_types_.insert(type);
-  // prepare statistics for this type of floaters:
-  float_stats_.push_back(BodyStatisticsOptimizerStates());
-  if (slab_is_on_) {  // if has tunnel, create a list of particle stats
-    float_transport_stats_.push_back(
-                                     ParticleTransportStatisticsOptimizerStates());
-  }
   // create a sub hierarchy with this type of floaters:
   atom::Hierarchy cur_root =
     atom::Hierarchy::setup_particle(new Particle(get_model()));
@@ -252,18 +244,7 @@ void SimulationData::create_floaters(
                       color, type);
     cur_particles.push_back(cur_p);
     cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
-    // add particle statistics:
-    IMP_NEW(BodyStatisticsOptimizerState, bsos, (cur_p));
-    bsos->set_period(statistics_interval_frames_);
-    float_stats_.back().push_back(bsos);
-    if (slab_is_on_) {  // only if has tunnel
-      IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
-              (cur_p, -0.5 * slab_thickness_,  // tunnel bottom
-               0.5 * slab_thickness_)          // tunnel top
-              );
-      ptsos->set_period(statistics_interval_frames_);
-      float_transport_stats_.back().push_back(ptsos);
-    }
+    get_statistics()->add_floater_stats(cur_p); // stats
   }
   particles_[type] = cur_particles;
   // add interaction sites to particles of this type:
@@ -343,40 +324,7 @@ void SimulationData::add_interaction
     return;
   }
   get_scoring()->add_interaction(idata);
-  // add statistics about this interaction to interactions_stats_
-  // between all diffusing particles
-  Particles set0, set1; // TODO: turn to a real set?!
-  IMP_CONTAINER_FOREACH // _1 is the particle index
-    ( SingletonContainer,
-      get_diffusers(),
-      {
-        if (IMP::core::Typed(get_model(), _1).get_type() == type0)
-          {
-            set0.push_back( get_model()->get_particle(_1) );
-          }
-        if (IMP::core::Typed(get_model(), _1).get_type() == type1)
-          {
-            set1.push_back( get_model()->get_particle(_1) );
-          }
-      }
-      );
-  double stats_contact_range = 1.5;  // TODO: make a param
-  double stats_slack = 30; // TODO: make a param - this is only efficiency of
-                           //       ClosePairContainer
-  IMP_LOG(PROGRESS,
-          "Interaction " << type0.get_string() << ", " << type1.get_string()
-          << "  sizes: " << set0.size() << ", " << set1.size()
-          << " statistics range: " << stats_contact_range
-          << std::endl);
-  if (set0.size() > 0 && set1.size() > 0) {
-    InteractionType interaction_type = std::make_pair(type0, type1);
-    IMP_NEW(BipartitePairsStatisticsOptimizerState, bpsos,
-            (get_model(), interaction_type, set0, set1,
-             stats_contact_range, stats_slack));
-    bpsos->set_period(statistics_interval_frames_);
-    interactions_stats_.push_back(bpsos);
-  }
-
+  get_statistics()->add_interaction_stats(type0, type1);
 }
 
 Model *SimulationData::get_model() {
@@ -545,43 +493,27 @@ Scoring * SimulationData::get_scoring()
   return scoring_;
 }
 
+Statistics * SimulationData::get_statistics()
+{
+  IMP_USAGE_CHECK(statistics_ != nullptr, "Null stats");
+  return statistics_;
+}
 
-atom::BrownianDynamics *SimulationData::get_bd() {
-  set_was_used(true);
-  if (!bd_) {
+
+atom::BrownianDynamics *SimulationData::get_bd(bool recreate) {
+  if (!bd_ || recreate) {
     bd_ = new atom::BrownianDynamics(m_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_ / 4);
     bd_->set_current_time(0.0);
+    bd_->set_scoring_function
+      ( get_scoring()->get_scoring_function() );
     //#ifdef _OPENMP
     if (dump_interval_frames_ > 0 && !get_rmf_file_name().empty()) {
       bd_->add_optimizer_state(get_rmf_sos_writer());
     }
     //#endif
-    bd_->set_scoring_function
-      ( get_scoring()->get_scoring_function() );
-    // add all kind of observers to the optimization:
-    for (unsigned int i = 0; i < fgs_stats_.size(); ++i) {
-      for (unsigned int j = 0; j < fgs_stats_[i].size(); ++j) {
-        bd_->add_optimizer_states(fgs_stats_[i][j]);
-      }
-    }
-    for (unsigned int i = 0; i < float_stats_.size(); ++i) {
-      bd_->add_optimizer_states(float_stats_[i]);
-    }
-    if (slab_is_on_) {
-      for (unsigned int i = 0; i < float_transport_stats_.size(); ++i) {
-        bd_->add_optimizer_states(float_transport_stats_[i]);
-        // associate each with this bd_, so it can update transport times
-        for (unsigned int j = 0; j < float_transport_stats_[i].size(); j++) {
-          float_transport_stats_[i][j]->set_owner(bd_);
-        }
-      }
-    }
-    for (unsigned int i = 0; i < chain_stats_.size(); ++i) {
-      bd_->add_optimizer_states(chain_stats_[i]);
-    }
-    bd_->add_optimizer_states(interactions_stats_);
+    get_statistics()->add_optimizer_states( bd_ );
   }
   return bd_;
 }
@@ -684,341 +616,6 @@ void SimulationData::write_geometry(std::string out) {
   }
 }
 
-// TODO: turn into a template inline in unamed space?
-/**
-   updates (message).field() with a weighted average of its current
-   value and new_value, giving weight n_old_frames, n_new_frames to each,
-   respectively.
-*/
-#define UPDATE_AVG(n_frames, n_new_frames, message, field, new_value)     \
-  (message).set_##field(static_cast<double>(n_frames *(message).field() + \
-                                            n_new_frames *new_value) /    \
-                        (n_frames + n_new_frames));
-
-// number of site-site interactions between a and b
-int SimulationData::get_number_of_interactions(Particle *a, Particle *b) const {
-  if (core::get_distance(core::XYZR(a), core::XYZR(b)) > range_) return 0;
-  const algebra::Vector3Ds &sa = sites_.find(core::Typed(a).get_type())->second;
-  const algebra::Vector3Ds &sb = sites_.find(core::Typed(b).get_type())->second;
-  int ct = 0;
-  for (unsigned int i = 0; i < sa.size(); ++i) {
-    for (unsigned int j = 0; j < sb.size(); ++j) {
-      if (algebra::get_distance(sa[i], sb[j]) < range_) {
-        ++ct;
-      }
-    }
-  }
-  return ct;
-}
-
-// see doc in .h file
-boost::tuple<double, double, double, double>
-SimulationData::get_interactions_and_interacting(
-    const ParticlesTemp &kaps, const base::Vector<ParticlesTemps> &fgs) const {
-  double interactions = 0, interacting = 0, bead_partners = 0,
-         chain_partners = 0;
-  for (unsigned int i = 0; i < kaps.size(); ++i) {
-    bool kap_found = false;
-    for (unsigned int j = 0; j < fgs.size(); ++j) {
-      for (unsigned int k = 0; k < fgs[j].size(); ++k) {
-        bool chain_found = false;
-        for (unsigned int l = 0; l < fgs[j][k].size(); ++l) {
-          int num = get_number_of_interactions(kaps[i], fgs[j][k][l]);
-          if (num > 0) {
-            interactions += num;
-            ++bead_partners;
-            if (!kap_found) ++interacting;
-            kap_found = true;
-            if (!chain_found) ++chain_partners;
-            chain_found = true;
-          }
-        }
-      }
-    }
-  }
-  return boost::make_tuple(interactions, interacting, bead_partners,
-                           chain_partners);
-}
-
-void SimulationData::reset_statistics_optimizer_states() {
-  is_stats_reset_ = true;  // indicate to update_statistics()
-  get_bd()->set_current_time(0.0);
-  for (unsigned int i = 0; i < fgs_stats_.size(); ++i) {
-    for (unsigned int j = 0; j < fgs_stats_[i].size(); ++j) {
-      for (unsigned int k = 0; k < fgs_stats_[i][j].size(); ++k) {
-        fgs_stats_[i][j][k]->reset();
-      }
-    }
-  }
-  for (unsigned int i = 0; i < float_stats_.size(); ++i) {
-    for (unsigned int j = 0; j < float_stats_[i].size(); ++j) {
-      float_stats_[i][j]->reset();
-    }
-  }
-  if (slab_is_on_) {
-    for (unsigned int i = 0; i < float_transport_stats_.size(); ++i) {
-      for (unsigned int j = 0; j < float_transport_stats_[i].size(); ++j) {
-        float_transport_stats_[i][j]->reset();
-      }
-    }
-  }
-  for (unsigned int i = 0; i < chain_stats_.size(); ++i) {
-    for (unsigned int j = 0; j < chain_stats_[i].size(); ++j) {
-      chain_stats_[i][j]->reset();
-    }
-  }
-  for (unsigned int i = 0; i < interactions_stats_.size(); ++i) {
-    interactions_stats_[i]->reset();
-  }
-}
-
-
-// @param nf_new number of new frames accounted for in this statistics update
-void SimulationData::update_statistics(const boost::timer &timer,
-                                       unsigned int nf_new) {
-  IMP_OBJECT_LOG;
-  ::npctransport_proto::Output output;
-
-  std::ifstream inf(output_file_name_.c_str(), std::ios::binary);
-  output.ParseFromIstream(&inf);
-  inf.close();
-  ::npctransport_proto::Statistics &stats = *output.mutable_statistics();
-
-  int nf = stats.number_of_frames();
-  if (is_stats_reset_) {  // restart statistics from scratch
-    // TODO: what's if multiple trials?
-    nf = 0;
-    is_stats_reset_ = false;
-    for (int i = 0; i < stats.floaters().size(); i++) {
-      (*stats.mutable_floaters(i)).clear_transport_time_points_ns();
-    }
-  }
-  std::cout << "Updating statistics file " << output_file_name_
-            << " that currently has " << nf << " frames, with " << nf_new
-            << " additional frames" << std::endl;
-  ParticlesTemp all;
-  ParticlesTemps floaters;
-  base::Vector<ParticlesTemps> fgs;
-  {
-    for ( IMP::base::set<core::ParticleType>::const_iterator
-            fg_type_iter = fg_types_.begin();
-          fg_type_iter != fg_types_.end();
-          fg_type_iter++ )
-      {
-        // TODO: this should all be fixed since fg types can be now completely random!
-        //       perhaps need to keep order in which they were added, or find other way
-        if (particles_.find(*fg_type_iter) != particles_.end())
-          {
-            fgs.push_back(ParticlesTemps());
-            ParticlesTemp fgi_particles =
-              particles_.find(*fg_type_iter)->second;
-            for (unsigned int j = 0; j < fgi_particles.size(); ++j) {
-              atom::Hierarchy h(fgi_particles[j]);
-              ParticlesTemp chain = get_as<ParticlesTemp>(atom::get_leaves(h));
-              all += chain;
-              fgs.back().push_back(chain);
-              /*              IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i),
-                               "Not enough fgs: " << stats.fgs_size() << " vs "
-                               << static_cast<int>(i),
-                               ValueException);*/
-#ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
-              double volume = atom::get_volume(h);
-              double radius_of_gyration = atom::get_radius_of_gyration(chain);
-#else
-              double volume = -1.;
-              double radius_of_gyration = -1.;
-#endif
-              //              UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), volume, volume);
-              double length =
-                core::get_distance(core::XYZ(chain[0]), core::XYZ(chain.back()));
-              //              UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), length, length);
-              //              UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), radius_of_gyration,
-              //                         radius_of_gyration);
-            }
-          }
-      }
-  }
-  // correlation times and diffusion coefficient
-  for (unsigned int i = 0; i < float_stats_.size(); ++i) {
-    for (unsigned int j = 0; j < float_stats_[i].size(); ++j) {
-      int cnf = (nf) * float_stats_[i].size() + j;
-      IMP_ALWAYS_CHECK(stats.floaters_size() > static_cast<int>(i),
-                       "Not enough floaters", ValueException);
-      UPDATE_AVG(cnf, nf_new,  // TODO: is nf_new correct? I think so
-                 *stats.mutable_floaters(i), diffusion_coefficient,
-                 float_stats_[i][j]->get_diffusion_coefficient());
-      UPDATE_AVG(cnf, nf_new,  // TODO: is nf_new correct? I think so
-                 *stats.mutable_floaters(i), correlation_time,
-                 float_stats_[i][j]->get_correlation_time());
-      float_stats_[i][j]->reset();
-    }
-  }
-  // update avg number of transports per particle for each type of floats:
-  if (slab_is_on_) {
-    for (unsigned int type_i = 0; type_i < float_transport_stats_.size();
-         ++type_i) {
-      unsigned int n_particles = float_transport_stats_[type_i].size();
-      // collect individual transport times in an ordered set,
-      // and add them to the statistics file:
-      std::set<double> times_i(
-          stats.floaters(type_i).transport_time_points_ns().begin(),
-          stats.floaters(type_i).transport_time_points_ns().end());
-      for (unsigned int j = 0; j < n_particles; ++j) {  // add new
-        Floats const &new_times_ij = float_transport_stats_[type_i][j]
-            ->get_transport_time_points_in_ns();
-        for (unsigned int k = 0; k < new_times_ij.size(); k++) {
-          times_i.insert(new_times_ij[k]);
-        }
-      }
-      (*stats.mutable_floaters(type_i)).clear_transport_time_points_ns();
-      for (std::set<double>::const_iterator it = times_i.begin();
-           it != times_i.end(); it++) {
-        (*stats.mutable_floaters(type_i)).add_transport_time_points_ns(*it);
-      }
-      // update avg too
-      double avg_n_transports_type_i = times_i.size() * 1.0 / n_particles;
-      (*stats.mutable_floaters(type_i))
-          .set_avg_n_transports(avg_n_transports_type_i);
-    }
-  }
-  for (unsigned int i = 0; i < fgs_stats_.size(); ++i) {
-    for (unsigned int j = 0; j < fgs_stats_[i].size(); ++j) {
-      for (unsigned int k = 0; k < fgs_stats_[i][j].size(); ++k) {
-        unsigned int n = fgs_stats_[i].size() * fgs_stats_[i][j].size();
-        unsigned int cnf = (nf) * n + j * fgs_stats_[i][j].size() + k;
-        ;
-        IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i),
-                         "Not enough fgs", ValueException);
-        UPDATE_AVG(cnf, nf_new, *stats.mutable_fgs(i),
-                   particle_correlation_time,
-                   fgs_stats_[i][j][k]->get_correlation_time());
-        UPDATE_AVG(cnf, nf_new, *stats.mutable_fgs(i),
-                   particle_diffusion_coefficient,
-                   fgs_stats_[i][j][k]->get_diffusion_coefficient());
-        fgs_stats_[i][j][k]->reset();
-      }
-    }
-  }
-  for (unsigned int i = 0; i < chain_stats_.size(); ++i) {
-    for (unsigned int j = 0; j < chain_stats_[i].size(); ++j) {
-      unsigned int n = chain_stats_[i].size();
-      unsigned int cnf = (nf) * n + j;
-      IMP_ALWAYS_CHECK(stats.fgs_size() > static_cast<int>(i), "Not enough fgs",
-                       ValueException);
-      /*UPDATE_AVG(cnf, nf_new,
-             *stats.mutable_fgs(i), chain_correlation_time,
-             chain_stats_[i][j]->get_correlation_time());*/
-      UPDATE_AVG(cnf, nf_new, *stats.mutable_fgs(i),
-                 chain_diffusion_coefficient,
-                 chain_stats_[i][j]->get_diffusion_coefficient());
-      Floats df = chain_stats_[i][j]->get_diffusion_coefficients();
-      UPDATE_AVG(cnf, nf_new, *stats.mutable_fgs(i),
-                 local_diffusion_coefficient,
-                 std::accumulate(df.begin(), df.end(), 0.0) / df.size());
-      chain_stats_[i][j]->reset();
-    }
-  }
-
-  for (unsigned int i = 0; i < type_of_float.size(); ++i) {
-    if (particles_.find(type_of_float[i]) != particles_.end()) {
-      floaters.push_back(particles_.find(type_of_float[i])->second);
-      all += floaters.back();
-      double interactions, interacting, bead_partners, chain_partners;
-      boost::tie(interactions, interacting, bead_partners, chain_partners) =
-          get_interactions_and_interacting(floaters.back(), fgs);
-      IMP_ALWAYS_CHECK(stats.floaters_size() > static_cast<int>(i),
-                       "Not enough fgs", ValueException);
-      UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i), interactions,
-                 interactions / floaters.back().size());
-      UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i), interacting,
-                 interacting / floaters.back().size());
-      UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i),
-                 interaction_partner_chains, chain_partners / interacting);
-      UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i),
-                 interaction_partner_beads, bead_partners / interacting);
-    }
-  }
-
-  // update statistics gathered on interaction rates
-  for (unsigned int i = 0; i < interactions_stats_.size(); i++) {
-    IMP_LOG(PROGRESS, "adding interaction statistics # " << i << std::endl);
-    IMP_ALWAYS_CHECK(stats.interactions_size() > static_cast<int>(i),
-                     "Not enough fgs", ValueException);
-    ::npctransport_proto::Statistics_InteractionStats *pOutStats_i =
-        stats.mutable_interactions(i);
-    base::Pointer<BipartitePairsStatisticsOptimizerState> pInStats_i =
-        interactions_stats_[i];
-    // verify correct interaction type is stored
-    InteractionType itype = pInStats_i->get_interaction_type();
-    std::string s_type0 = itype.first.get_string();
-    std::string s_type1 = itype.second.get_string();
-    if (std::string(pOutStats_i->type0()) != s_type0 ||
-        std::string(pOutStats_i->type1()) != s_type1) {
-      IMP_THROW("Incompatible interaction types in pOutStats_i ["
-                    << pOutStats_i->type0() << ", " << pOutStats_i->type1()
-                    << "] and pInStats_i " << s_type0 << ", " << s_type1 << "]"
-                    << std::endl,
-                IMP::base::ValueException);
-    }
-    // save the rest of the interactions info
-    Int n0 = pInStats_i->get_number_of_particles_1();
-    Int n1 = pInStats_i->get_number_of_particles_2();
-    Float avg_contacts_num = pInStats_i->get_average_number_of_contacts();
-
-    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_contacts_per_particle0,
-               avg_contacts_num / n0);
-    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_contacts_per_particle1,
-               avg_contacts_num / n1);
-    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_pct_bound_particles0,
-               pInStats_i->get_average_percentage_bound_particles_1());
-    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_pct_bound_particles1,
-               pInStats_i->get_average_percentage_bound_particles_2());
-    interactions_stats_[i]->reset();
-  }
-
-  {
-    double total_energy  = get_bd()->get_scoring_function()->evaluate(false);
-    UPDATE_AVG(nf, nf_new, stats, energy_per_particle,  // TODO: reset?
-               total_energy / all.size());
-  }
-
-  // Todo: define better what we want of timer
-  // UPDATE_AVG(nf, nf_new, stats, seconds_per_iteration, timer.elapsed());
-  stats.set_seconds_per_iteration(timer.elapsed());
-
-  stats.set_number_of_frames(nf + nf_new);
-  const double fs_in_ns = 1.0E+6;
-  stats.set_bd_simulation_time_ns(const_cast<SimulationData *>(this)
-                                      ->get_bd()->get_current_time() /
-                                  fs_in_ns);
-
-  ::npctransport_proto::Conformation *conformation =
-      output.mutable_conformation();
-  save_pb_conformation(get_diffusers(), sites_, conformation);
-
-  // save rmf too
-  {
-    std::string buf;
-    RMF::FileHandle fh = RMF::create_rmf_buffer(buf);
-    const_cast<SimulationData *>(this)->link_rmf_file_handle(fh);
-    IMP::rmf::save_frame(fh, 0);
-    output.set_rmf_conformation(buf);
-  }
-
-  // dump to file
-  std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
-  output.SerializeToOstream(&outf);
-}
-void SimulationData::set_interrupted(bool tf) {
-  ::npctransport_proto::Output output;
-  std::ifstream inf(output_file_name_.c_str(), std::ios::binary);
-  output.ParseFromIstream(&inf);
-  inf.close();
-  ::npctransport_proto::Statistics &stats = *output.mutable_statistics();
-  stats.set_interrupted(tf ? 1 : 0);
-  std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
-  stats.SerializeToOstream(&outf);
-}
 
 display::Geometry *SimulationData::get_static_geometry() {
   if (!static_geom_) {

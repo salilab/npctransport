@@ -2302,7 +2302,7 @@ statistics_interval_ns: 0.1
 excluded_volume_k {
   lower: 20.0
 }
-simulation_time_ns: 10.0
+simulation_time_ns: 1000.0
 statistics_fraction {
   lower: 1.0
 }
@@ -4166,4 +4166,3 @@ obstacles {
   }
   type: "Sec13_16copies"
 }
-

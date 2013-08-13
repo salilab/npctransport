@@ -27,29 +27,12 @@
 #include <IMP/base/map.h>
 #include <IMP/base/set.h>
 #include "io.h"
-#include "BodyStatisticsOptimizerState.h"
-#include "ParticleTransportStatisticsOptimizerState.h"
-#include "ChainStatisticsOptimizerState.h"
-#include "BipartitePairsStatisticsOptimizerState.h"
 #include "Parameter.h"
 #include "Scoring.h"
-
-#include <boost/timer.hpp>
+#include "Statistics.h"
+#include "npctransport_proto.fwd.h"
 #include <string>
 
-#ifdef SWIG
-namespace boost {
-struct timer {};
-}
-#endif
-#ifndef SWIG
-namespace npctransport_proto {
-class Assignment_FGAssignment;
-class Assignment_InteractionAssignment;
-class Assignment_FloaterAssignment;
-class Assignment_ObstacleAssignment;
-}
-#endif // SWIG
 
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -67,9 +50,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<int> dump_interval_frames_;
   Parameter<double> angular_d_factor_;
   Parameter<double> range_;
+  Parameter<double> statistics_fraction_;
   Parameter<int> statistics_interval_frames_;
   Parameter<double> time_step_;
-  Parameter<double> statistics_fraction_;
   Parameter<double> maximum_number_of_minutes_;
 
   // the model on which the simulation is run
@@ -81,6 +64,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   // The scoring function wrapper for the simulation
   base::PointerMember< IMP::npctransport::Scoring >
     scoring_;
+
+  // The statistics manger for this simulation
+  base::PointerMember< IMP::npctransport::Statistics >
+    statistics_;
 
   // keeps track of whether the diffusers list has
   // changed (can be invalid if particles added)
@@ -106,9 +93,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   // fg types  - a list of all fg/floater/obstacle types that were
   // added via create_fgs/floaters/obstacles(), so far
-  IMP::base::set<core::ParticleType> fg_types_;
-  IMP::base::set<core::ParticleType> floater_types_;
-  IMP::base::set<core::ParticleType> obstacle_types_;
+  //! a set of particle types
+  ParticleTypeSet fg_types_;
+  ParticleTypeSet floater_types_;
+  ParticleTypeSet obstacle_types_;
 
   base::PointerMember<display::Geometry> static_geom_;
 
@@ -120,45 +108,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   // e.g., particles_[ ParticleType("fg0") ]
   base::map<core::ParticleType, ParticlesTemp> particles_;
 
-  // the file to which simulation statistics are dumped:
-  std::string output_file_name_;
-
   // the RMF format file to which simulation output is dumped:
   std::string rmf_file_name_;
 
-  // statistics about all FG nups individual particles, for each FG type
-  base::Vector<base::Vector<BodyStatisticsOptimizerStates> > fgs_stats_;
-
-  // statistics about all Kaps and non-specific binders ("floats"),
-  // for each floats type
-  base::Vector<BodyStatisticsOptimizerStates> float_stats_;
-
-  // transport statistics about all Kaps and non-specific binders ("floats"),
-  // for each floats type
-  base::Vector<ParticleTransportStatisticsOptimizerStates>
-      float_transport_stats_;
-
-  // statistics about entire FG chains, for each FG type
-  base::Vector<ChainStatisticsOptimizerStates> chain_stats_;
-
-  // statistics of pairs of interactions for each interaction type
-  BipartitePairsStatisticsOptimizerStates interactions_stats_;
-
-  // true if statistics were recently reset, so that update_statistics
-  // should restart averaging from 0 frames
-  mutable bool is_stats_reset_;
 
  private:
-
-  // return a 4-tuple (1,2,3,4) with:
-  // 1 - total # of individual site-site interactions between the specified kaps
-  //     and fgs
-  // 2 - total # of bead pairs that make any site-site interaction
-  // 3 - total # of kaps that contact any FG
-  // 4 - sum of # of individual fg chains contacted by each kap
-  boost::tuple<double, double, double, double> get_interactions_and_interacting(
-      const ParticlesTemp &kaps, const base::Vector<ParticlesTemps> &fgs) const;
-
 
   /**
      Adds the FG Nup chains to the model hierarchy,
@@ -233,16 +187,24 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 #endif
 
   /** returns a scoring object that is updated with the current list of
-      diffusers and obstacles
+      diffusers and obstacles and associated with this sd
   */
  Scoring * get_scoring();
+
+  /** returns a Statistics object that is updated by this simulation data
+  */
+ Statistics* get_statistics();
 
 
   /** gets the Brownian Dynamics object that is capable of simulating
       this data
-  */
-  atom::BrownianDynamics *get_bd();
 
+      @param recreate if true, forces recreation of the bd object
+  */
+  atom::BrownianDynamics *get_bd(bool recreate = false);
+
+  /** returns the requested fraction of time for taking statistics */
+  double get_statistics_fraction() const { return statistics_fraction_; }
 
   /** returns the simulation angular d factor */
   double get_angular_d_factor(){
@@ -266,20 +228,20 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   /** return all the types of fgs that were added
       via create_fgs() */
-  base::set<core::ParticleType> const& get_fg_types() const {
+  ParticleTypeSet const& get_fg_types() const {
     return fg_types_;
   }
 
 
   /** return all the types of floaters that were added
       via create_floaters() */
-  base::set<core::ParticleType> const& get_floater_types() const {
+  ParticleTypeSet const& get_floater_types() const {
     return floater_types_;
   }
 
   /** return all the types of obstacles that were added
       via create_obstacles() */
-  base::set<core::ParticleType> const&  get_obstacle_types() const {
+  ParticleTypeSet const&  get_obstacle_types() const {
     return obstacle_types_;
   }
 
@@ -322,10 +284,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
    */
   container::ListSingletonContainer* get_optimizable_diffusers();
 
-
-  /** get the number of site-site interactions between two particles */
-  int get_number_of_interactions(Particle *a, Particle *b) const;
-
   /**
       Create n interaction sites spread around the surface of a ball of
       radius r, and associate these sites with all particles of type t0
@@ -350,6 +308,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
     sites_[t0] = sites;
   }
 
+  double get_range() const { return range_; }
+
   /**
       Returns the effective interaction range radius of a
       site on a floater */
@@ -357,8 +317,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   //       specific range of each interaction type, so range_ is more
   //       like an upper bound
   double get_site_radius(core::ParticleType) const { return range_ / 2; }
-
-  double get_statistics_fraction() const { return statistics_fraction_; }
 
   //! Return the maximum number of minutes the simulation can run
   /** Or 0 for no limit. */
@@ -384,6 +342,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   // get the cylinder in the slab for this simulation
   algebra::Cylinder3D get_cylinder() const;
+
+  bool get_has_slab() const { return slab_is_on_; }
 
   /**
    Open the specified RMF file, links it to the hierarchies of this object, and
@@ -441,8 +401,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
    */
   void reset_rmf();
 
-  void reset_statistics_optimizer_states();
-
   /**
      Write the geometry to the file path 'out'
   */
@@ -462,25 +420,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
     if (iter != particles_.end()) return iter->second;
     return ParticlesTemp();
   }
-
-  void set_interrupted(bool tf);
-
-  /**
-      opens / creates statistics protobuf file, and update it
-      with appropriate statistics, using statistics file
-      originally specified in the constructor.
-
-      @param timer the timer that was used to measure the time
-                   that has elapsed for statistics
-      @param nf_new the number of frames by which the statistics file
-                    should be advanced. This is used to weight the
-                    contribution of average statistics over time.
-
-      @note this method is not const cause it may invoke e.g., energy evaluation
-            though it does not substantially change anything in the state of the object
-   */
-  void update_statistics(const boost::timer &timer,
-                         unsigned int nf_new = 1);
 
   unsigned int get_number_of_frames() const { return number_of_frames_; }
 
@@ -527,9 +466,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
 };
 
-inline IMPNPCTRANSPORTEXPORT boost::timer create_boost_timer() {
-  return boost::timer();
-}
 
 inline WeakObjectKey get_simulation_data_key() {
   static WeakObjectKey simdata("simulation data");

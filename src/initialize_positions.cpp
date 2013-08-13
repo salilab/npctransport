@@ -454,7 +454,7 @@ void initialize_positions(SimulationData *sd,
                << " particles of type " << *ti ;
       ParticlesTemp cur_optimizable_particles =
         get_optimizable_particles( cur_particles);
-    std:cout << " ; " << cur_optimizable_particles.size()
+      std::cout << " ; " << cur_optimizable_particles.size()
              << " optimizable" << std::endl;
       if( cur_particles.size() * cur_optimizable_particles.size() == 0){
         IMP_LOG( WARNING, "No optimizable particles of type " << *ti );

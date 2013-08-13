@@ -17,6 +17,15 @@ IMP_GCC_PUSH_POP(diagnostic push)
 IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
 #include "third_party/npc/npctransport/data/npctransport.pb.h"
 IMP_GCC_PUSH_POP(diagnostic pop)
+#else
+#include <IMP/npctransport/internal/npctransport.pb.h>
+#endif
+
+#ifdef IMP_NPC_GOOGLE
+IMP_GCC_PUSH_POP(diagnostic push)
+IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
+#include "third_party/npc/npctransport/data/npctransport.pb.h"
+IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/npctransport/internal/google_main.h>
 using namespace proto2;
 #else
@@ -61,5 +70,83 @@ ParticlesTemp get_optimizable_particles
     }
   return optimizables;
 }
+
+
+// finds the index of s->fgs() whose type equals pt.get_string()
+// if it does not exist, add it to s
+// @param s the statistics message for searching the fg
+// @param pt the type of fg to look for
+unsigned int find_or_add_fg_of_type(::npctransport_proto::Statistics* s,
+                                    IMP::core::ParticleType pt)
+{
+  std::string type = pt.get_string();
+  // find fg with same type
+  unsigned int n = s->fgs_size();
+  for(unsigned int i=0 ; i < n ; i++){
+    if(s->fgs(i).type() == type){
+      return i;
+    }
+  }
+  // add new one if not found
+  ::npctransport_proto::Statistics_FGStats* sfgs = s->add_fgs();
+  sfgs->set_type( type );
+  IMP_USAGE_CHECK(s->fgs(n).type() == type,
+                  "bug - new floaters type should have been" << type);
+  return n;
+}
+
+// finds the index of s->floaters() whose type equals pt.get_string()
+// if it does not exist, add it to s
+// @param s the statistics message for searching t
+// @param pt the type to look for
+unsigned int find_or_add_floater_of_type(::npctransport_proto::Statistics* s,
+                                         IMP::core::ParticleType pt)
+{
+  std::string type = pt.get_string();
+  // find fg with same type
+  unsigned int n = s->floaters_size();
+  for(unsigned int i=0 ; i < n ; i++){
+    if(s->floaters(i).type() == type){
+      return i;
+    }
+  }
+  // add new one if not found
+  ::npctransport_proto::Statistics_FloatStats* sfs = s->add_floaters();
+  sfs->set_type( type );
+  IMP_USAGE_CHECK(s->floaters(n).type() == type,
+                  "bug - new type should have been" << type);
+  return n;
+}
+
+// finds the index of s->interactions() whose type0 and type1 particle
+// type equivalents are equale to it. If it does not exist, add it to s
+// @param s the statistics message for searching t
+// @param it the type to look for
+unsigned int find_or_add_interaction_of_type
+( ::npctransport_proto::Statistics* s, IMP::npctransport::InteractionType it)
+{
+  using namespace IMP;
+  unsigned int n = s->interactions_size();
+  for(unsigned int i=0 ; i < n ; i++){
+    core::ParticleType pt0( s->interactions(i).type0() );
+    core::ParticleType pt1( s->interactions(i).type1() );
+    if(npctransport::InteractionType(pt0, pt1) == it) {
+      return i;
+    }
+  }
+  // add new one if not found
+  ::npctransport_proto::Statistics_InteractionStats*
+      sis = s->add_interactions();
+  sis->set_type0( it.first.get_string() );
+  sis->set_type1( it.second.get_string() );
+  IMP_IF_CHECK(USAGE) {
+    core::ParticleType pt0( s->interactions(n).type0() );
+    core::ParticleType pt1( s->interactions(n).type1() );
+    IMP_USAGE_CHECK( npctransport::InteractionType(pt0, pt1) == it,
+                     "bug - new type should have been" << it );
+  }
+  return n;
+}
+
 
 IMPNPCTRANSPORT_END_NAMESPACE

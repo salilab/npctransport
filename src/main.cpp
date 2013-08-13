@@ -232,13 +232,13 @@ namespace {
       sd->get_bd()->optimize(cur_nframes);
       print_score_and_positions(sd);
       if (!silent_statistics) {
-        sd->update_statistics(timer, cur_nframes);
+        sd->get_statistics()->update(timer, cur_nframes);
       }
       std::cout << "Done" << std::endl;
       //});
       if (sd->get_maximum_number_of_minutes() > 0 &&
           total_time.elapsed() / 60 > sd->get_maximum_number_of_minutes()) {
-        sd->set_interrupted(true);
+        sd->get_statistics()->set_interrupted(true);
         std::cout << "Terminating..." << std::endl;
         return false;
       }
@@ -281,6 +281,7 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
 //  with ad-hoc init restratins init_restraints
 void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   using namespace IMP;
+  sd->set_was_used( true );
   const int max_frames_per_chunk = 50000;
   /** initial optimization and equilibration needed unless starting
       from another output file or rmf file */
@@ -306,7 +307,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       std::cout << "Doing initial coordinates optimization..." << std::endl;
       initialize_positions(sd, init_restraints, verbose, short_init_factor);
       sd->get_bd()->set_current_time(0.0);
-      sd->reset_statistics_optimizer_states();
+      sd->get_statistics()->reset_statistics_optimizer_states();
     }
     print_score_and_positions(sd, verbose, "Score right before BD = ");
     if (conformations_rmf_sos) {
