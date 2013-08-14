@@ -139,7 +139,7 @@ base::AddFloatFlag short_sim_adder
   "Run an abbreviated version of the simulation, which takes"
   " a fraction of a full simulation, in the range (0.0..1.0]"
   " [default=1.0]",
-  &short_init_factor);
+  &short_sim_factor);
 
 
 namespace {
