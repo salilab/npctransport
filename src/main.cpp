@@ -133,6 +133,14 @@ base::AddFloatFlag short_init_adder
   " a fraction of a full initialization, in the range (0.0..1.0]"
   " [default=1.0]",
   &short_init_factor);
+double short_sim_factor = 1.0;
+base::AddFloatFlag short_sim_adder
+( "short_sim_factor",
+  "Run an abbreviated version of the simulation, which takes"
+  " a fraction of a full simulation, in the range (0.0..1.0]"
+  " [default=1.0]",
+  &short_init_factor);
+
 
 namespace {
   /*********************************** internal functions
@@ -317,9 +325,11 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       if(i == 0)
       p.set("profiling.pprof");*/
     // sd->get_bd()->set_log_level(IMP::PROGRESS);
-    unsigned int nframes_run = (unsigned int)(sd->get_number_of_frames() *
+    unsigned int actual_nframes =
+      (unsigned int)std::ceil(sd->get_number_of_frames() * short_sim_factor);
+    unsigned int nframes_run = (unsigned int)(actual_nframes *
                                               sd->get_statistics_fraction());
-    unsigned int nframes_equilibrate = sd->get_number_of_frames() - nframes_run;
+    unsigned int nframes_equilibrate = actual_nframes - nframes_run;
     if (is_BD_equilibration) {
       std::cout << "Equilibrating for " << nframes_equilibrate << " frames..."
                 << std::endl;
