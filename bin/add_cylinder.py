@@ -5,26 +5,49 @@ import RMF
 import IMP.npctransport
 import sys
 
-def _add_nodes(node, cf, cdf, tf, types, radius, color):
+def has_depth_with_site(root, i):
+  """ returns true if node subtree thru first child is at least i
+      levels, including the root node itself, and the lead is a site """
+#  print root, i, len(root.get_children())
+  if (i==1) and root.get_name()=="site":
+    return True
+  c = root.get_children()
+  if len(c) == 0:
+    return False
+  return has_depth_with_site(c[0], i-1)
+
+
+def _add_nodes(node, cf, cdf, tf, types, radius, color, depth=0):
   children = node.get_children()
   ret = []
   #print "inspecting", node.get_name()
   if len(children)==0:
     return ret
+  #if has_depth_with_site(node, 3) and
   if tf.get_is(children[0]):
     if (tf.get(children[0]).get_type_name() in types):
       print "it is"
       for i in range(0, len(children) - 1):
-        c = node.add_child("cylinder", RMF.GEOMETRY)
-        cdf.get(c).set_rgb_color(color)
-        ret.append((c, children[i], children[i+1]))
-        print "adding for", ret[-1]
-        cf.get(c).set_radius(radius)
+        cyl = node.add_child("cylinder", RMF.GEOMETRY)
+        cdf.get(cyl).set_rgb_color(color)
+        ret.append((cyl, children[i], children[i+1]))
+        print "adding for", ret[-1], "depth", depth, "d3under?", has_depth_with_site(node, 3)
+        cf.get(cyl).set_radius(radius)
+        return ret # only one cylinder
+#      if(depth < 2):
   for c in children:
-    ret += _add_nodes(c, cf, cdf, tf, types, radius, color)
+    if(len(ret)>0):
+      return ret
+    ret += _add_nodes(c, cf, cdf, tf, types, radius, color, depth+1)
   return ret
 
 def _set_cylinder(cylinder_descriptor, cf, ipf):
+  """
+  draws a cylinder between two nodes with refframes
+  cylinder descriptor - tuple (cylinder_node, node1, node2)
+  cf - cylinder factory
+  ipf - refframe factory
+  """
   nh = cylinder_descriptor[0]
   ep0 = cylinder_descriptor[1]
   ep1 = cylinder_descriptor[2]
@@ -71,21 +94,34 @@ def main():
   cdf = RMF.ColoredFactory(fh)
   ipf = RMF.IntermediateParticleFactory(fh)
   fg_types = [IMP.npctransport.get_type_of_fg(i).get_string() for i in range(0, IMP.npctransport.get_number_of_types_of_fg())]
+  fg_types = fg_types + [ "Nup57_16copies_chimera",
+                          "Nup49_16copies",
+                          "Nsp1_16copies_1",
+                          "Nsp1_16copies_2",
+                          "Nup159_8copies",
+                          "Nup116_8copies_chimera",
+                          "Nup42_8copies_chimera",
+                          "Nup100_8copies_chimera",
+                          "Nup145N_8copies_1_chimera",
+                          "Nup145N_8copies_2_chimera",
+                          "Nup1_8copies",
+                          "Nup60_8copies"]
+  print fg_types
   float_types = [IMP.npctransport.get_type_of_float(i).get_string() for i in range(0, IMP.npctransport.get_number_of_types_of_float())]
   fh.set_current_frame(RMF.ALL_FRAMES)
 
-  if(IMP.base.get_bool_flag("recolor_fgs")):
-    _recolor(fh.get_root_node(), tf, cdf, fg_types, fg_color)
-  if(IMP.base.get_bool_flag("recolor_floats")):
-    _recolor(fh.get_root_node(), tf, cdf, float_types[0:1], kap_color)
-    _recolor(fh.get_root_node(), tf, cdf, float_types[1:], crap_color)
+#  if(IMP.base.get_bool_flag("recolor_fgs")):
+#    _recolor(fh.get_root_node(), tf, cdf, fg_types, fg_color)
+#  if(IMP.base.get_bool_flag("recolor_floats")):
+#    _recolor(fh.get_root_node(), tf, cdf, float_types[0:1], kap_color)
+#    _recolor(fh.get_root_node(), tf, cdf, float_types[1:], crap_color)
 
-  _resize_sites(fh.get_root_node(), bf, IMP.base.get_float_flag("site_radius"))
+#  _resize_sites(fh.get_root_node(), bf, IMP.base.get_float_flag("site_radius"))
 
   cylinders = _add_nodes(fh.get_root_node(), cf, cdf, tf, fg_types, radius, fg_color)
   for i in range(0, fh.get_number_of_frames()):
     print "frame", i
-    fh.set_current_frame(i)
+    fh.set_current_frame( RMF.FrameID(i) )
     for c in cylinders:
       _set_cylinder(c, cf, rff)
 
