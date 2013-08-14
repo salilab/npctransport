@@ -96,7 +96,7 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   GET_ASSIGNMENT(statistics_fraction);
   GET_VALUE(time_step);
   GET_VALUE(maximum_number_of_minutes);
-  GET_VALUE(fg_anchor_inflate_factor_);
+  GET_VALUE(fg_anchor_inflate_factor);
   if (quick) {
     number_of_frames_ = 2;
     number_of_trials_ = 1;
