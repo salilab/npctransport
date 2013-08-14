@@ -188,8 +188,9 @@ void SimulationData::create_fgs
       if (fg_data.anchor_coordinates_size() > j) {
         ::npctransport_proto::Assignment_XYZ xyz =
           fg_data.anchor_coordinates(j);
-        core::XYZ d(chain_beads[0]);
+        core::XYZR d(chain_beads[0]);
         d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
+        d.set_radius(d.get_radius() * fg_anchor_inflate_factor_); // inflate
         d.set_coordinates_are_optimized(false);
       }
       get_statistics()->add_fg_chain_stats( chain_beads ); // stats

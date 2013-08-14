@@ -46,6 +46,7 @@ def set_default_configuration(config):
     config.statistics_interval_ns=.001
     config.excluded_volume_k.lower=20
     config.statistics_fraction.lower=.5;
+    config.fg_anchor_inflate_factor=2;
 
 def add_fg_type(config, type_name, number_of_beads, number, radius,
                 interactions=1, rest_length_factor=1, d_factor=1,

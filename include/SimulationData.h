@@ -54,6 +54,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<int> statistics_interval_frames_;
   Parameter<double> time_step_;
   Parameter<double> maximum_number_of_minutes_;
+  Parameter<double> fg_anchor_inflate_factor_; // By how much to inflate static
+                                               // anchors of FG nups.
 
   // the model on which the simulation is run
   base::PointerMember<Model> m_;
