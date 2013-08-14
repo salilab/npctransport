@@ -1,8 +1,7 @@
 binary="fg_simulation"
-short_init_factor=0.1
-conformations=""
-extra_arguments=[]
-tasks=300000
+extra_arguments=["--short_init_factor=.1"]
+tasks=30
+#300000
 #tasks=2500
 iterations=10
 description=["""
