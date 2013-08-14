@@ -137,7 +137,7 @@ double short_sim_factor = 1.0;
 base::AddFloatFlag short_sim_adder
 ( "short_sim_factor",
   "Run an abbreviated version of the simulation, which takes"
-  " a fraction of a full simulation, in the range (0.0..1.0]"
+  " a fraction of a full simulation (or more if >1.0)"
   " [default=1.0]",
   &short_sim_factor);
 
