@@ -13,9 +13,10 @@ if(len(sys.argv) > 2):
     kaps_R = float(sys.argv[2])
 print "kaps_R = %.2f" % (kaps_R)
 obstacle_inflate_factor = 1.5
-fg_coarse_factor=2
+fg_coarse_factor=3 # 2
 k_fgfg=2.5
 k_fgkap=3.0
+rest_length_factor = 1.2 # 1
 
 def get_basic_config():
     config = Configuration()
@@ -30,8 +31,8 @@ def get_basic_config():
     config.time_step_factor.lower=3
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.excluded_volume_k.lower=20
-    config.nonspecific_range.lower=2
-    config.nonspecific_k.lower=0.01
+    config.nonspecific_range.lower=1
+    config.nonspecific_k.lower=1
     config.slack.lower = 7.5
     config.number_of_trials=1
     config.dump_interval_ns=0.1
@@ -39,7 +40,7 @@ def get_basic_config():
     config.angular_D_factor.lower=0.3 #increased dynamic viscosity relative to
                                       # water?
     config.statistics_interval_ns=0.1
-    config.fg_anchor_inflate_factor=1.5
+    config.fg_anchor_inflate_factor=3/fg_coarse_factor
     return config
 
 
@@ -96,7 +97,7 @@ def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None,
                                       number=len(centers),
                                       radius=6 * math.sqrt(coarse_factor),
                                       interactions= int(math.ceil(1 * coarse_factor)),
-                                      rest_length_factor = 1)
+                                      rest_length_factor = rest_length_factor)
     add_interactions_for_fg(type_name, k_fgkap)
     for center in centers:
         pos=fgs.anchor_coordinates.add()
