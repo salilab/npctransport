@@ -14,6 +14,8 @@ if(len(sys.argv) > 2):
 print "kaps_R = %.2f" % (kaps_R)
 obstacle_inflate_factor = 1.5
 fg_coarse_factor=2.5
+k_fgfg=2.5
+k_fgkap=3.0
 
 def get_basic_config():
     config = Configuration()
@@ -34,15 +36,10 @@ def get_basic_config():
     config.number_of_trials=1
     config.dump_interval_ns=0.1
     config.simulation_time_ns=1000
-    config.angular_D_factor.lower=0.3 #increased dynamic viscosity relative to water?
+    config.angular_D_factor.lower=0.3 #increased dynamic viscosity relative to
+                                      # water?
     config.statistics_interval_ns=0.1
-    ###
-    #simulation bounding volumes:
-    config.box_is_on.lower=1
-    config.box_side.lower=400
-    config.slab_is_on.lower=0
-    config.slab_thickness.lower=150
-    config.tunnel_radius.lower=75
+    config.fg_anchor_inflate_factor=1.5
     return config
 
 
@@ -68,12 +65,15 @@ def add_interactions_for_fg(fg_name,
                                        interaction_k=0,
                                        interaction_range=0)
 
-def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None, coarse_factor=fg_coarse_factor):
+def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None,
+                    coarse_factor=fg_coarse_factor):
     ''' Read mrc_filename, cluster to k clusters, and create k
-        fgs with nbeads beads, anchored at the clusters, normalized by
-        mean_loc.
+        fgs with nbeads/coarse_factor beads, anchored at the clusters,
+        normalized by mean_loc. An additional bead is used for the
+        anchor residue
 
-        @param coarse_factor - a factor by which to coarse grain beads (e.g. 3 beads : 1)
+        @param coarse_factor - a factor by which to coarse grain beads
+                               (e.g. 3 beads : 1)
 
         @note if origin==None, initiate it as a 3D coordinate that
         is the mean coordinate of the MRC file in mrc_filename.
@@ -89,14 +89,15 @@ def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None, coarse_factor=
     kmeans, centers, mean_loc, pos_voxels = read_nups.cluster_MRC_file(mrc_filename, k)
     if(origin is None):
         origin = mean_loc
+    coarse_nbeads = 1 + int(math.ceil(nbeads / coarse_factor)) # +1 for anchor
     fgs= IMP.npctransport.add_fg_type(config,
                                       type_name= type_name,
-                                      number_of_beads= int(math.ceil(nbeads / coarse_factor)),
+                                      number_of_beads= coarse_nbeads,
                                       number=len(centers),
                                       radius=6 * math.sqrt(coarse_factor),
                                       interactions= int(math.ceil(1 * coarse_factor)),
-                                      rest_length_factor = 1.5*coarse_factor)
-    add_interactions_for_fg(type_name, 3.0)
+                                      rest_length_factor = 1)
+    add_interactions_for_fg(type_name, k_fgkap)
     for center in centers:
         pos=fgs.anchor_coordinates.add()
         pos.x=center[0] - origin[0]
@@ -168,6 +169,9 @@ add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nbeads=44, or
 add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nbeads=44, origin=mean_loc)
 # Nuclear:
 add_fg_based_on(config, "MRCs/Nup1_8copies.mrc", k=8, nbeads=27, origin=mean_loc)
+###################### ACTIVE RANGE ##################
+create_range(config.fgs[-1].interaction_k_factor, lb=k_fgkap, ub=k_fgkap*4, steps=10, base=1)
+######################################################
 #add_fg_based_on(config, "MRCs/Nup59_16copies.mrc", k=16, nbeads=5, origin=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 265-394 ; Uniprot), which supposedly overlaps some of the FGs
 add_fg_based_on(config, "MRCs/Nup60_8copies.mrc", k=8, nbeads=11, origin=mean_loc) # nup60 is supposed to tether Nup2 (depending on Gsp1p-GTP (Ran) switch, for which Nup2 has a binding site 583-720 ; Denning, Rexach et al. JCB 2001) ; Nup2 also interacts with cargo 35-50 and RNA (RRM Nup35-type domain) - from Uniprot)
 #add_fg_based_on(config, "MRCs/Nup53_16copies_chimera.mrc", k=16, nbeads=4, origin=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 247-352 ; Uniprot), which supposedly overlaps some of the FGs ; and also a PSE1/Kap121 binding domain in a non-FG fashion, for which there might be a crystal structure (405-438 ; Uniprot)
@@ -200,7 +204,8 @@ config.box_is_on.lower=1
 config.box_side.lower=max(max_z,max_x,max_y)*4 # 2000
 config.slab_is_on.lower=1
 config.tunnel_radius.lower=max_r - config.fgs[0].radius.lower # or also upper when there's steps?
-config.slab_thickness.lower=max_z - config.fgs[0].radius.lower  # or also upper when there's steps?
+config.slab_thickness.lower=250 # yeast nuclear envelope - see http://books.google.com/books?id=GvxdK1mdqQwC&pg=PA278&lpg=PA278&dq=yeast+nuclear+envelope+dimensions+nanometer&source=bl&ots=tHQoLfXHI1&sig=nRgZmLYnKuiRNP8n6vhm3bapjpI&hl=en&sa=X&ei=VtwKUtvAAsTAyAHOmIDYBg&ved=0CHsQ6AEwCA#v=onepage&q=yeast%20nuclear%20envelope%20dimensions%20nanometer&f=false
+# config.slab_thickness.lower = max_z - config.fgs[0].radius.lower  # or also upper when there's steps?
 
 # Add floaters
 n_kap_interactions_orig=12
@@ -209,7 +214,9 @@ kaps= IMP.npctransport.add_float_type(config,
                                      number=30,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions)
-create_range(kaps,interaction_range_factor, lb=1, ub=10, steps = 20, base=1)
+############### ACTIVE RANGE #############
+create_range(kaps.interaction_range_factor, lb=1, ub=5, steps = 10, base=1)
+##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics= IMP.npctransport.add_float_type(config,
                                               number=30,
@@ -233,8 +240,8 @@ for i,fg0 in enumerate(config.fgs):
         interactionFG_FG= IMP.npctransport.add_interaction(config,
                                                            name0= fg0.type,
                                                            name1= fg1.type,
-                                                           interaction_k= 2.5,
-                                                           interaction_range= 2
+                                                           interaction_k= k_fgfg,
+                                                           interaction_range= 2)
 
 # dump to file
 f=open(outfile, "wb")
