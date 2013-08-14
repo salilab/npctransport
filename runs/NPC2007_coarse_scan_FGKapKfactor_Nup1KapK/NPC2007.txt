@@ -1012,12 +1012,12 @@ floaters {
   }
   interaction_k_factor {
     lower: 1.0
-  }
-  interaction_range_factor {
-    lower: 1.0
     upper: 5.0
     steps: 10
     base: 1.0
+  }
+  interaction_range_factor {
+    lower: 1.0
   }
 }
 floaters {
