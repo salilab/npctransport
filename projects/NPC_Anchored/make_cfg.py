@@ -13,7 +13,7 @@ if(len(sys.argv) > 2):
     kaps_R = float(sys.argv[2])
 print "kaps_R = %.2f" % (kaps_R)
 obstacle_inflate_factor = 1.5
-fg_coarse_factor=2.5
+fg_coarse_factor=2
 k_fgfg=2.5
 k_fgkap=3.0
 
@@ -148,7 +148,7 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
 # ************** MAIN: *************
 IMP.set_log_level(IMP.base.SILENT)
 config= get_basic_config()
-config.dump_interval_ns=1
+config.dump_interval_ns=10
 config.simulation_time_ns=2500
 
 # Add FGs with anchors
@@ -204,7 +204,7 @@ config.box_is_on.lower=1
 config.box_side.lower=max(max_z,max_x,max_y)*4 # 2000
 config.slab_is_on.lower=1
 config.tunnel_radius.lower=max_r - config.fgs[0].radius.lower # or also upper when there's steps?
-config.slab_thickness.lower=250 # yeast nuclear envelope - see http://books.google.com/books?id=GvxdK1mdqQwC&pg=PA278&lpg=PA278&dq=yeast+nuclear+envelope+dimensions+nanometer&source=bl&ots=tHQoLfXHI1&sig=nRgZmLYnKuiRNP8n6vhm3bapjpI&hl=en&sa=X&ei=VtwKUtvAAsTAyAHOmIDYBg&ved=0CHsQ6AEwCA#v=onepage&q=yeast%20nuclear%20envelope%20dimensions%20nanometer&f=false
+config.slab_thickness.lower=250.0 # yeast nuclear envelope - see http://books.google.com/books?id=GvxdK1mdqQwC&pg=PA278&lpg=PA278&dq=yeast+nuclear+envelope+dimensions+nanometer&source=bl&ots=tHQoLfXHI1&sig=nRgZmLYnKuiRNP8n6vhm3bapjpI&hl=en&sa=X&ei=VtwKUtvAAsTAyAHOmIDYBg&ved=0CHsQ6AEwCA#v=onepage&q=yeast%20nuclear%20envelope%20dimensions%20nanometer&f=false
 # config.slab_thickness.lower = max_z - config.fgs[0].radius.lower  # or also upper when there's steps?
 
 # Add floaters
