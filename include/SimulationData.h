@@ -56,6 +56,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<double> maximum_number_of_minutes_;
   Parameter<double> fg_anchor_inflate_factor_; // By how much to inflate static
                                                // anchors of FG nups.
+  Parameter<double> are_floaters_on_one_slab_side_;
 
   // the model on which the simulation is run
   base::PointerMember<Model> m_;
@@ -209,10 +210,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   double get_statistics_fraction() const { return statistics_fraction_; }
 
   /** returns the simulation angular d factor */
-  double get_angular_d_factor(){
-    return angular_d_factor_;
-  }
+  double get_angular_d_factor() const
+  { return angular_d_factor_; }
 
+  bool get_are_floaters_on_one_slab_side() const
+  { return are_floaters_on_one_slab_side_; }
 
   /** returns true if particle type is of fg type
       (that is, particle was added within create_fgs()

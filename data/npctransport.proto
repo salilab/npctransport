@@ -90,8 +90,8 @@ message Configuration {
   required FloatRange statistics_fraction=25;
   optional double maximum_number_of_minutes=26;
   optional double fg_anchor_inflate_factor=28 [default=2.0]; // by how much to inflate static anchors of fg chains
-  // n=28
-
+  optional int32 are_floaters_on_one_slab_side=29 [default=0]; // if true (<>0), all floaters are initially concentrated on one side
+  // n=29
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -183,7 +183,8 @@ message Assignment {
   optional double maximum_number_of_minutes=31;
   optional uint64 random_seed = 32; // random seed used to initialize this run
   optional double fg_anchor_inflate_factor=34 [default=2]; // by how much to inflate the anchor of FG nups (= structural nup)
-  // n=34
+  optional int32 are_floaters_on_one_slab_side=35 [default=0]; // if true (<>0), all floaters are initially concentrated on one side
+  // n=35
 }
 
 message Statistics {

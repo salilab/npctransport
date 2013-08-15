@@ -53,6 +53,13 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()
 #define GET_VALUE(name) name##_ = pb_assignment.name()
+#define GET_VALUE_DEF(name, default_value)          \
+  {                                             \
+  if(pb_assignment.has_##name() )               \
+    { name##_ = pb_assignment.name(); }         \
+  else                                          \
+    { name##_ = default_value; }                \
+  }
 
 SimulationData::SimulationData(std::string output_file, bool quick,
                                std::string rmf_file_name)
@@ -96,7 +103,8 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   GET_ASSIGNMENT(statistics_fraction);
   GET_VALUE(time_step);
   GET_VALUE(maximum_number_of_minutes);
-  GET_VALUE(fg_anchor_inflate_factor);
+  GET_VALUE_DEF(fg_anchor_inflate_factor, 1.0);
+  GET_VALUE_DEF(are_floaters_on_one_slab_side, false);
   if (quick) {
     number_of_frames_ = 2;
     number_of_trials_ = 1;
@@ -436,7 +444,7 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_sos_writer() {
     if (get_rmf_file_name().empty()) return nullptr;
     RMF::FileHandle fh = RMF::create_rmf_file(get_rmf_file_name());
     link_rmf_file_handle(fh);
-    IMP_NEW(rmf::SaveOptimizerState, los, (fh));
+    IMP_NEW(rmf::SaveOptimizerState, los, (get_model(), fh));
     std::cout << "Dump interval for RMF SaveOptimizerState set to "
               << dump_interval_frames_ << std::endl;
     los->set_period(dump_interval_frames_);
@@ -638,5 +646,6 @@ algebra::Cylinder3D SimulationData::get_cylinder() const {
 }
 #undef GET_ASSIGNMENT
 #undef GET_VALUE
+#undef GET_VALUE_DEF
 
 IMPNPCTRANSPORT_END_NAMESPACE

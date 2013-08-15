@@ -196,8 +196,10 @@ IMP::base::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
     IMP::npctransport::SimulationData& sd) {
   using namespace IMP;
 
-  double top = (sd.get_slab_thickness() / 2) * 1.3;  // *1.3 to get some slack
-  double bottom = -top;
+  bool both_sides = ! sd.get_are_floaters_on_one_slab_side();
+  double top = (sd.get_slab_thickness() / 2) * 1.5;  // *1.5 to get some slack
+  double LARGE = 10000000;
+  double bottom = both_sides ? -top : (-top * LARGE);
   double k = 40.0;
   IMP_NEW(IMP::npctransport::ExcludeZRangeSingletonScore, score,
           (bottom, top, k));
@@ -241,6 +243,7 @@ IMP::base::AddBoolFlag surface_adder("surface_anchoring",
                                      "anchor FG nups to bottom of cube",
                                      &surface_anchoring);
 }
+
 
 int main(int argc, char* argv[]) {
   using namespace IMP;
