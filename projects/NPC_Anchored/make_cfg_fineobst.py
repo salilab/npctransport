@@ -13,7 +13,7 @@ if(len(sys.argv) > 2):
     kaps_R = float(sys.argv[2])
 print "kaps_R = %.2f" % (kaps_R)
 obstacle_inflate_factor = 1.3
-fg_coarse_factor=2 # 2
+fg_coarse_factor=2 # 3
 k_fgfg=2.5
 k_fgkap=3.0
 rest_length_factor = 1.2 # 1
@@ -28,18 +28,18 @@ def get_basic_config():
     # create_range(config.backbone_k, .2, 1, 10
     config.backbone_k.lower=0.5
     #config.time_step_factor.lower=0.3
-    config.time_step_factor.lower=50
+    config.time_step_factor.lower=50 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.excluded_volume_k.lower=20
     config.nonspecific_range.lower=1
     config.nonspecific_k.lower=1
     config.slack.lower = 7.5
     config.number_of_trials=1
-    config.dump_interval_ns=0.1
-    config.simulation_time_ns=100
-    config.angular_D_factor.lower=1.0 #lower? increased dynamic viscosity relative to
+    config.dump_interval_ns=0.01
+    config.simulation_time_ns=1
+    config.angular_D_factor.lower=1.0 #lower to account for increased dynamic viscosity relative to
                                       # water?
-    config.statistics_interval_ns=0.1
+    config.statistics_interval_ns=0.5
     config.fg_anchor_inflate_factor=3/fg_coarse_factor
     return config
 
@@ -65,7 +65,6 @@ def add_interactions_for_fg(fg_name,
                                        name1="crap0",
                                        interaction_k=0,
                                        interaction_range=0)
-
 
 def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None,
                     coarse_factor=fg_coarse_factor):
@@ -124,7 +123,7 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
         @note if origin==None, initiate it as a 3D coordinate that
         is the mean coordinate of the MRC file in mrc_filename.
 
-         @return the mean location of the MRC file clusters
+        @return the mean location of the MRC file clusters
         '''
     # get type name as filename without folder and extension parts
     print mrc_filename
@@ -150,6 +149,8 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
 # ************** MAIN: *************
 IMP.set_log_level(IMP.base.SILENT)
 config= get_basic_config()
+config.dump_interval_ns=10
+config.simulation_time_ns=2500
 
 # Add FGs with anchors
 # (Stoicheometries from Alber et al. 2007b, Determining..., Fig. 3)
@@ -178,25 +179,27 @@ add_fg_based_on(config, "MRCs/Nup60_8copies.mrc", k=8, nbeads=11, origin=mean_lo
 
 # Add Structural nups as obstacles
 # (Alber et al. 2007b, Deteriming..., Figure 3)
-add_obstacle(config, "MRCs/Nup192_16copies.mrc", k=16, R=40, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup188_16copies.mrc", k=16, R=40, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16, R=40, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup157_16copies.mrc", k=16, R=40, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup133_16copies.mrc", k=16, R=30, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup120_16copies.mrc", k=16, R=30, origin=mean_loc)
-add_obstacle(config, "MRCs/Nic96_16copies_1.mrc", k=16, R=30, origin=mean_loc)
-add_obstacle(config, "MRCs/Nic96_16copies_2.mrc", k=16, R=30, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup85_16copies.mrc", k=16, R=30, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup84_16copies.mrc", k=16, R=30, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup82_8copies_1.mrc", k=8, R=35, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup82_8copies_2.mrc", k=8, R=35, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup145C_16copies.mrc", k=16, R=30, origin=mean_loc)
-add_obstacle(config, "MRCs/Ndc1_16copies.mrc", k=16, R=30, origin=mean_loc)
-add_obstacle(config, "MRCs/Gle1_8copies.mrc", k=8, R=30, origin=mean_loc)
+add_obstacle(config, "MRCs/Gle1_8copies.mrc", k=8*2, R=21, origin=mean_loc)
 add_obstacle(config, "MRCs/Gle2_16copies.mrc", k=16, R=23, origin=mean_loc)
-add_obstacle(config, "MRCs/Seh1_16copies.mrc", k=16, R=22, origin=mean_loc)
-add_obstacle(config, "MRCs/Pom34_16copies.mrc", k=16, R=20, origin=mean_loc)
+add_obstacle(config, "MRCs/Ndc1_16copies.mrc", k=16*2, R=22, origin=mean_loc)
+add_obstacle(config, "MRCs/Nic96_16copies_1.mrc", k=16*2, R=24, origin=mean_loc)
+add_obstacle(config, "MRCs/Nic96_16copies_2.mrc", k=16*2, R=24, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup120_16copies.mrc", k=16*2, R=26, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup133_16copies.mrc", k=16*2, R=27, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup145C_16copies.mrc", k=16*2, R=23, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup157_16copies.mrc", k=16*3, R=25, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16*2, R=29, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup188_16copies.mrc", k=16*2, R=30, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup192_16copies.mrc", k=16*2, R=30, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup53_16copies_chimera.mrc", k=16, R=32, origin=mean_loc) #### omit if include as FG
+add_obstacle(config, "MRCs/Nup59_16copies.mrc", k=16, R=32, origin=mean_loc) #### omit if include as FG
+add_obstacle(config, "MRCs/Nup82_8copies_1.mrc", k=8*2, R=23, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup82_8copies_2.mrc", k=8*2, R=23, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup84_16copies.mrc", k=16*3, R=20, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup85_16copies.mrc", k=16*3, R=20, origin=mean_loc)
+add_obstacle(config, "MRCs/Pom34_16copies.mrc", k=16*3, R=15, origin=mean_loc)
 add_obstacle(config, "MRCs/Sec13_16copies.mrc", k=16, R=21, origin=mean_loc)
+add_obstacle(config, "MRCs/Seh1_16copies.mrc", k=16, R=22, origin=mean_loc)
 
 # add bounding volumes
 config.box_is_on.lower=1
@@ -208,9 +211,9 @@ config.slab_thickness.lower=250.0 # yeast nuclear envelope - see http://books.go
 config.are_floaters_on_one_slab_side = 1 # all on top side
 
 # Add floaters
-#n_kap_interactions_orig=12
+n_kap_interactions_orig=12
+n_kap_interactions = n_kap_interactions_orig
 #n_kap_interactions = int ( math.ceil ( n_kap_interactions_orig / fg_coarse_factor ) )
-n_kap_interactions = 12
 kaps= IMP.npctransport.add_float_type(config,
                                      number=100,
                                      radius=kaps_R,

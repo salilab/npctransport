@@ -42,6 +42,74 @@ def show_hierarchy( h, prefix="" ):
     for child in h.get_children():
         show_hierarchy( child, prefix + "> " )
 
+def cluster_MRC_file_with_cache(mrc_filename, k):
+    cache = mrc_filename + ".cache"
+    centers = []
+    mean_loc = None
+    ok = False
+    try: # get from cache
+        CACHE=open(cache,"r")
+        begin=False
+        mrc=False
+        k_ok=False
+        should_end=False
+        i=0
+        for line in CACHE:
+            line=line.strip()
+            if(line=="BEGIN"):
+                begin=True
+                continue
+            if(line==mrc_filename):
+                mrc=True
+                continue
+            if(mrc):
+                mrc=False #reset
+                if k <> int(line):
+                    print "Wrong k", int(line)
+                    break
+                k_ok=True
+                continue
+            if(k_ok and i<k):
+                center = [float(x) for x in line.split()]
+                if len(center)<>3:
+                    print "Invalid center length", center
+                    break
+                centers.append(center)
+                i=i+1
+                continue
+            if(k_ok and i==k and not should_end):
+                mean_loc = [float(x) for x in line.split()]
+                if len(mean_loc)<>3:
+                    print "Invalid mean loc length", mean_loc
+                    break
+                should_end = True
+                continue
+            if(should_end and line=="END"):
+                ok=True
+                break
+    except:
+        pass
+    if(ok):
+        print "Read", k, "centers from cache", cache
+    if(not ok):
+        print "reading", k, "centers from file", mrc_filename
+        kmeans, centers, mean_loc, pos_voxels \
+            = cluster_MRC_file(mrc_filename, k)
+        CACHE = open(cache, "w")
+        print >>CACHE, "BEGIN"
+        print >>CACHE, mrc_filename
+        print >>CACHE, k
+        for pos in centers+[mean_loc]:
+            for x in pos:
+                print >>CACHE, x,
+            print >>CACHE
+        print >>CACHE, "END"
+        CACHE.close()
+    assert(len(centers)==k and len(mean_loc)==3)
+    return centers, mean_loc
+
+
+
 def cluster_MRC_file(input_fname,
                      K, # number of clusters
                      resolution=8.0,

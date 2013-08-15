@@ -442,22 +442,22 @@ void initialize_positions(SimulationData *sd,
   // (using RAII class OptimizerSetTemporaryScoringFunction)
   ParticlesTemp obstacles = sd->get_obstacle_particles();
   typedef base::set<core::ParticleType> ParticleTypeSet;
-  ParticleTypeSet const& fg_types = sd->get_fg_types();
-  for(ParticleTypeSet::const_iterator ti = fg_types.begin();
-      ti != fg_types.end(); ti++)
+  ParticleTypeSet const& types = sd->get_fg_types();
+  for(ParticleTypeSet::const_iterator
+        it = types.begin(); it != types.end(); it++)
     {
-      atom::Hierarchies cur_fg_roots = sd->get_particles_of_type(*ti);
+      atom::Hierarchies cur_fg_roots = sd->get_particles_of_type(*it);
       ParticlesTemp cur_particles =
         atom::get_leaves( cur_fg_roots );
       cur_particles += obstacles;
       std::cout << "Optimizing " <<  cur_particles.size()
-               << " particles of type " << *ti ;
+               << " particles of type " << *it ;
       ParticlesTemp cur_optimizable_particles =
         get_optimizable_particles( cur_particles);
       std::cout << " ; " << cur_optimizable_particles.size()
              << " optimizable" << std::endl;
       if( cur_particles.size() * cur_optimizable_particles.size() == 0){
-        IMP_LOG( WARNING, "No optimizable particles of type " << *ti );
+        IMP_LOG( WARNING, "No optimizable particles of type " << *it );
         continue; // noting to optimize if no (optimizable) particles
       }
       // switch local to sf till end of scope
