@@ -12,7 +12,7 @@ kaps_R = 30.0
 if(len(sys.argv) > 2):
     kaps_R = float(sys.argv[2])
 print "kaps_R = %.2f" % (kaps_R)
-obstacle_inflate_factor = 1.5
+obstacle_inflate_factor = 1.3
 fg_coarse_factor=3 # 2
 k_fgfg=2.5
 k_fgkap=3.0
@@ -182,7 +182,6 @@ add_fg_based_on(config, "MRCs/Nup60_8copies.mrc", k=8, nbeads=11, origin=mean_lo
 add_obstacle(config, "MRCs/Nup192_16copies.mrc", k=16, R=40, origin=mean_loc)
 add_obstacle(config, "MRCs/Nup188_16copies.mrc", k=16, R=40, origin=mean_loc)
 add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16, R=40, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16, R=40, origin=mean_loc)
 add_obstacle(config, "MRCs/Nup157_16copies.mrc", k=16, R=40, origin=mean_loc)
 add_obstacle(config, "MRCs/Nup133_16copies.mrc", k=16, R=30, origin=mean_loc)
 add_obstacle(config, "MRCs/Nup120_16copies.mrc", k=16, R=30, origin=mean_loc)
@@ -216,7 +215,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions)
 ############### ACTIVE RANGE #############
-create_range(kaps.interaction_range_factor, lb=1, ub=5, steps = 10, base=1)
+create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics= IMP.npctransport.add_float_type(config,
