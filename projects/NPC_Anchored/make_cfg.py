@@ -5,41 +5,44 @@ import math
 import read_nups
 import re
 
-# fetch params
-# Usage: <cmd> <outfile> [kaps_R=25.0]
-outfile = sys.argv[1]
+# defaults
 kaps_R = 30.0
-if(len(sys.argv) > 2):
-    kaps_R = float(sys.argv[2])
-print "kaps_R = %.2f" % (kaps_R)
-obstacle_inflate_factor = 1.3
-fg_coarse_factor=2 # 3
 k_fgfg=2.5
 k_fgkap=3.0
 rest_length_factor = 1.2 # 1
+obstacle_inflate_factor = 1.3
+fg_coarse_factor=2 # 3
+# fetch params from cmd-line
+if(len(sys.argv)<=1):
+    print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
+    exit(-1)
+outfile = sys.argv[1]
+if len(sys.argv) > 2:
+    kaps_R = float(sys.argv[2])
+print "kaps_R = %.2f" % (kaps_R)
+if len(sys.argv) > 3:
+    k_fgfg = float(sys.argv[3])
+print "k_fgfg = %.2f" %k_fgfg
 
 def get_basic_config():
     config = Configuration()
     IMP.npctransport.set_default_configuration(config)
     config.statistics_fraction.lower=1.0
-    #config.dump_interval=1
     config.interaction_k.lower=10
     config.interaction_range.lower=1
-    # create_range(config.backbone_k, .2, 1, 10
-    config.backbone_k.lower=0.5
-    #config.time_step_factor.lower=0.3
-    config.time_step_factor.lower=50 #### NOTE THIS ####
+    config.backbone_k.lower=0.25
+    config.time_step_factor.lower=100 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.excluded_volume_k.lower=20
     config.nonspecific_range.lower=1
     config.nonspecific_k.lower=1
     config.slack.lower = 7.5
     config.number_of_trials=1
-    config.dump_interval_ns=0.01
-    config.simulation_time_ns=1
+    config.dump_interval_ns=100
+    config.simulation_time_ns=10000
     config.angular_D_factor.lower=1.0 #lower to account for increased dynamic viscosity relative to
                                       # water?
-    config.statistics_interval_ns=0.5
+    config.statistics_interval_ns=1
     config.fg_anchor_inflate_factor=3/fg_coarse_factor
     return config
 
@@ -149,8 +152,34 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
 # ************** MAIN: *************
 IMP.set_log_level(IMP.base.SILENT)
 config= get_basic_config()
-config.dump_interval_ns=10
-config.simulation_time_ns=2500
+
+# Add floaters
+n_kap_interactions_orig=12
+n_kap_interactions = n_kap_interactions_orig
+#n_kap_interactions = int ( math.ceil ( n_kap_interactions_orig / fg_coarse_factor ) )
+kaps= IMP.npctransport.add_float_type(config,
+                                     number=100,
+                                     radius=kaps_R,
+                                      interactions= n_kap_interactions,
+                                      type_name="kap")
+############### ACTIVE RANGE #############
+create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
+##########################################
+#create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
+nonspecifics= IMP.npctransport.add_float_type(config,
+                                              number=100,
+                                              radius=kaps_R, #-1,
+                                              interactions=0,
+                                              type_name="crap0")
+#create_range(nonspecifics.radius, lb = 10, ub = 30, steps = 5, base = 1)
+# fg with kaps / craps
+#add_interactions_for_fg("fg0", 2.5, 7.5, k_kap_steps = 10, k_kap_base=1)
+#add_interactions_for_fg("fg1", 2.5, 7.5, k_kap_steps = 10, k_kap_base=1)
+
+# non-specific attraction
+config.nonspecific_range.lower= 1.5
+#create_range(config.nonspecific_k,lb=1.0,ub=2.0,steps = 3,base=1)
+
 
 # Add FGs with anchors
 # (Stoicheometries from Alber et al. 2007b, Determining..., Fig. 3)
@@ -170,9 +199,7 @@ add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nbeads=44, or
 add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nbeads=44, origin=mean_loc)
 # Nuclear:
 add_fg_based_on(config, "MRCs/Nup1_8copies.mrc", k=8, nbeads=27, origin=mean_loc)
-###################### ACTIVE RANGE ##################
-create_range(config.fgs[-1].interaction_k_factor, lb=k_fgkap, ub=k_fgkap*4, steps=10, base=1)
-######################################################
+#create_range(config.fgs[-1].interaction_k_factor, lb=k_fgkap, ub=k_fgkap*4, steps=10, base=1)
 #add_fg_based_on(config, "MRCs/Nup59_16copies.mrc", k=16, nbeads=5, origin=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 265-394 ; Uniprot), which supposedly overlaps some of the FGs
 add_fg_based_on(config, "MRCs/Nup60_8copies.mrc", k=8, nbeads=11, origin=mean_loc) # nup60 is supposed to tether Nup2 (depending on Gsp1p-GTP (Ran) switch, for which Nup2 has a binding site 583-720 ; Denning, Rexach et al. JCB 2001) ; Nup2 also interacts with cargo 35-50 and RNA (RRM Nup35-type domain) - from Uniprot)
 #add_fg_based_on(config, "MRCs/Nup53_16copies_chimera.mrc", k=16, nbeads=4, origin=mean_loc) # contains also RRM Nup35-type domain for RNA binding (res 247-352 ; Uniprot), which supposedly overlaps some of the FGs ; and also a PSE1/Kap121 binding domain in a non-FG fashion, for which there might be a crystal structure (405-438 ; Uniprot)
@@ -210,30 +237,6 @@ config.slab_thickness.lower=250.0 # yeast nuclear envelope - see http://books.go
 # config.slab_thickness.lower = max_z - config.fgs[0].radius.lower  # or also upper when there's steps?
 config.are_floaters_on_one_slab_side = 1 # all on top side
 
-# Add floaters
-n_kap_interactions_orig=12
-n_kap_interactions = n_kap_interactions_orig
-#n_kap_interactions = int ( math.ceil ( n_kap_interactions_orig / fg_coarse_factor ) )
-kaps= IMP.npctransport.add_float_type(config,
-                                     number=100,
-                                     radius=kaps_R,
-                                      interactions= n_kap_interactions)
-############### ACTIVE RANGE #############
-create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
-##########################################
-#create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
-nonspecifics= IMP.npctransport.add_float_type(config,
-                                              number=100,
-                                              radius=kaps_R, #-1,
-                                              interactions=0)
-#create_range(nonspecifics.radius, lb = 10, ub = 30, steps = 5, base = 1)
-# fg with kaps / craps
-#add_interactions_for_fg("fg0", 2.5, 7.5, k_kap_steps = 10, k_kap_base=1)
-#add_interactions_for_fg("fg1", 2.5, 7.5, k_kap_steps = 10, k_kap_base=1)
-
-# non-specific attraction
-config.nonspecific_range.lower= 1.5
-#create_range(config.nonspecific_k,lb=1.0,ub=2.0,steps = 3,base=1)
 
 #create_range(interactionFG_FG.interaction_k, lb = 2.5, ub = 7.5, steps = 10, base = 1)
 # internal FG-FG
