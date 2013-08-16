@@ -497,6 +497,19 @@ void SimulationData::reset_rmf() {
   }
 }
 
+//     temporarily suspend output to RMF file
+void SimulationData::switch_suspend_rmf(bool suspend)
+{
+  if(!rmf_sos_writer_)
+    return;
+  if(suspend){
+    get_bd(false)->remove_optimizer_state(rmf_sos_writer_);
+  } else {
+    get_bd(false)->add_optimizer_state(rmf_sos_writer_);
+  }
+}
+
+
 Scoring * SimulationData::get_scoring()
 {
   IMP_USAGE_CHECK(scoring_ != nullptr, "Null scoring");

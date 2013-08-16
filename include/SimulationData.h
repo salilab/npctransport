@@ -405,6 +405,17 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
    */
   void reset_rmf();
 
+
+  /*
+     temporarily suspend output to RMF file
+
+     @param suspend if true, suspend an existing rmf save optimizer state,
+            associated with the bd, otherwise restores an old one, if it
+            exists or was created.
+     @note the suspension will expire when calling get_bd(true)
+  */
+  void switch_suspend_rmf(bool suspend);
+
   /**
      Write the geometry to the file path 'out'
   */
