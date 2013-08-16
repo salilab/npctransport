@@ -131,8 +131,10 @@ void Statistics::add_interaction_stats
             { set1.push_back( get_model()->get_particle(_1) ); }
         }
         );
-  double stats_contact_range = 1.5;  // TODO: make a param
-  double stats_slack = 10; // TODO: make a param - this also affects results!!
+    // TODO: make params
+    double stats_contact_range = 2;// (dist + 2 * slack) for ClosePairContainers
+    double stats_slack=1;
+    double stats_dist = stats_contact_range - stats_slack * 2;
   IMP_LOG(PROGRESS,
           "Interaction " << type0.get_string() << ", " << type1.get_string()
           << "  sizes: " << set0.size() << ", " << set1.size()
@@ -142,7 +144,7 @@ void Statistics::add_interaction_stats
     {
       IMP_NEW(BipartitePairsStatisticsOptimizerState, bpsos,
               (get_model(), interaction_type, set0, set1,
-               stats_contact_range, stats_slack));
+               stats_dist, stats_slack));
       bpsos->set_period(statistics_interval_frames_);
       interaction_stats_map_[interaction_type] = bpsos;
     }
