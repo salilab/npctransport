@@ -8,13 +8,13 @@ import os
 
 # defaults
 kaps_R = 30.0
-k_fgfg=2.5
+k_fgfg=0.25
 range_fgfg=4.0
 k_fgkap=3.0
 range_fgkap=4.0
-rest_length_factor = 1.2 # 1
+rest_length_factor = 1.25 # 1
 obstacle_inflate_factor = 1.3
-fg_coarse_factor=4 # 3
+fg_coarse_factor=3.0 # 3
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
     print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
@@ -34,19 +34,19 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=0.25
-    config.time_step_factor.lower=2 #### NOTE THIS ####
+    config.time_step_factor.lower=1 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.excluded_volume_k.lower=2
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.1
     config.slack.lower = 7.5
     config.number_of_trials=1
-    config.dump_interval_ns=2.5
-    config.simulation_time_ns=2500
+    config.dump_interval_ns=0.2
+    config.simulation_time_ns=2000
     config.angular_D_factor.lower=0.05 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
     config.statistics_interval_ns=0.1
-    config.fg_anchor_inflate_factor=3/fg_coarse_factor
+    config.fg_anchor_inflate_factor=3.0/math.sqrt(fg_coarse_factor)
     return config
 
 
@@ -101,7 +101,7 @@ def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None,
                                       type_name= type_name,
                                       number_of_beads= coarse_nbeads,
                                       number=len(centers),
-                                      radius=6 * math.sqrt(coarse_factor),
+                                      radius=8 * math.sqrt(coarse_factor),
                                       interactions= int(math.ceil(1 * coarse_factor)),
                                       rest_length_factor = rest_length_factor)
     add_interactions_for_fg(type_name, k_fgkap)
