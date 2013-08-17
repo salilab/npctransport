@@ -4,14 +4,17 @@ import sys
 import math
 import read_nups
 import re
+import os
 
 # defaults
 kaps_R = 30.0
 k_fgfg=2.5
+range_fgfg=4.0
 k_fgkap=3.0
+range_fgkap=4.0
 rest_length_factor = 1.2 # 1
 obstacle_inflate_factor = 1.3
-fg_coarse_factor=2 # 3
+fg_coarse_factor=4 # 3
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
     print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
@@ -31,18 +34,18 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=0.25
-    config.time_step_factor.lower=100 #### NOTE THIS ####
+    config.time_step_factor.lower=2 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
-    config.excluded_volume_k.lower=20
-    config.nonspecific_range.lower=1
-    config.nonspecific_k.lower=1
+    config.excluded_volume_k.lower=2
+    config.nonspecific_range.lower=4
+    config.nonspecific_k.lower=0.1
     config.slack.lower = 7.5
     config.number_of_trials=1
-    config.dump_interval_ns=100
-    config.simulation_time_ns=10000
-    config.angular_D_factor.lower=1.0 #lower to account for increased dynamic viscosity relative to
-                                      # water?
-    config.statistics_interval_ns=1
+    config.dump_interval_ns=0.2
+    config.simulation_time_ns=2000
+    config.angular_D_factor.lower=0.05 #lower to account for increased dynamic viscosity
+                                      # in crowded environment and for coarse graining
+    config.statistics_interval_ns=0.1
     config.fg_anchor_inflate_factor=3/fg_coarse_factor
     return config
 
@@ -54,10 +57,10 @@ def add_interactions_for_fg(fg_name,
                             k_kap_steps = 1,
                             k_kap_base = 1):
     interactionFG_KAP= IMP.npctransport.add_interaction(config,
-                                     name0=fg_name,
-                                     name1="kap",
-                                     interaction_k=k_kap_lower,
-                                     interaction_range=2)
+                                                        name0=fg_name,
+                                                        name1="kap",
+                                                        interaction_k=k_kap_lower,
+                                                        interaction_range=range_fgkap)
     if(k_kap_steps > 1):
         create_range(interactionFG_KAP.interaction_k,
                      k_kap_lower, k_kap_upper,
@@ -154,9 +157,7 @@ IMP.set_log_level(IMP.base.SILENT)
 config= get_basic_config()
 
 # Add floaters
-n_kap_interactions_orig=12
-n_kap_interactions = n_kap_interactions_orig
-#n_kap_interactions = int ( math.ceil ( n_kap_interactions_orig / fg_coarse_factor ) )
+n_kap_interactions=12/3
 kaps= IMP.npctransport.add_float_type(config,
                                      number=100,
                                      radius=kaps_R,
@@ -177,7 +178,6 @@ nonspecifics= IMP.npctransport.add_float_type(config,
 #add_interactions_for_fg("fg1", 2.5, 7.5, k_kap_steps = 10, k_kap_base=1)
 
 # non-specific attraction
-config.nonspecific_range.lower= 1.5
 #create_range(config.nonspecific_k,lb=1.0,ub=2.0,steps = 3,base=1)
 
 
@@ -248,9 +248,13 @@ for i,fg0 in enumerate(config.fgs):
                                                            name0= fg0.type,
                                                            name1= fg1.type,
                                                            interaction_k= k_fgfg,
-                                                           interaction_range= 2)
+                                                           interaction_range= range_fgfg)
 
 # dump to file
 f=open(outfile, "wb")
 f.write(config.SerializeToString())
-print config
+# dump text
+outfile_txt = os.path.splitext(outfile)[0] + ".txt"
+f_txt = open(outfile_txt, "w")
+print >>f_txt, config
+f_txt.close()
