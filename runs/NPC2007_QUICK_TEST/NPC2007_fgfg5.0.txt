@@ -2293,7 +2293,7 @@ interactions {
     lower: 4.0
   }
 }
-dump_interval_ns: 0.2
+dump_interval_ns: 5
 nonspecific_range {
   lower: 4
 }
@@ -2307,7 +2307,7 @@ statistics_interval_ns: 0.1
 excluded_volume_k {
   lower: 2
 }
-simulation_time_ns: 2000
+simulation_time_ns: 5000
 statistics_fraction {
   lower: 1.0
 }
