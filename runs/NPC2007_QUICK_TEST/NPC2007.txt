@@ -1,14 +1,14 @@
 interaction_k {
-  lower: 10.0
+  lower: 10
 }
 interaction_range {
-  lower: 1.0
+  lower: 1
 }
 backbone_k {
   lower: 0.25
 }
 time_step_factor {
-  lower: 100.0
+  lower: 2
 }
 box_side {
   lower: 1229.69312292
@@ -20,7 +20,7 @@ slab_thickness {
   lower: 250.0
 }
 tunnel_radius {
-  lower: 301.611914125
+  lower: 298.097195499
 }
 slab_is_on {
   lower: 1
@@ -29,31 +29,31 @@ slack {
   lower: 7.5
 }
 number_of_trials: 1
-maximal_number_of_frames: 1000000000.0
+maximal_number_of_frames: 1000000000
 fgs {
   number_of_beads {
-    lower: 9
+    lower: 5
   }
   number {
     lower: 16
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: -253.635903339
@@ -139,28 +139,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 9
+    lower: 5
   }
   number {
     lower: 16
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: -104.238488178
@@ -246,28 +246,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 17
+    lower: 9
   }
   number {
     lower: 16
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: 33.430212994
@@ -353,28 +353,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 17
+    lower: 9
   }
   number {
     lower: 16
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: 253.94815733
@@ -460,28 +460,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 11
+    lower: 6
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: 277.30161192
@@ -527,28 +527,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 24
+    lower: 12
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: -105.124566059
@@ -594,28 +594,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 11
+    lower: 6
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: 174.206336041
@@ -661,28 +661,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 23
+    lower: 12
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: -225.78017519
@@ -728,28 +728,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 23
+    lower: 12
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: -298.446709613
@@ -795,28 +795,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 23
+    lower: 12
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: -219.684227924
@@ -862,28 +862,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 14
+    lower: 7
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: 157.370459576
@@ -929,28 +929,28 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 6
+    lower: 3
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 12.0
   }
   interactions {
-    lower: 2
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   anchor_coordinates {
     x: -243.274163227
@@ -1002,19 +1002,19 @@ floaters {
     lower: 30.0
   }
   interactions {
-    lower: 12
+    lower: 4
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
-    upper: 5.0
+    lower: 1
+    upper: 5
     steps: 10
-    base: 1.0
+    base: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "kap"
 }
@@ -1029,13 +1029,13 @@ floaters {
     lower: 0
   }
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "crap0"
 }
@@ -1049,7 +1049,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1069,7 +1069,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1089,7 +1089,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1109,7 +1109,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1129,7 +1129,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1149,7 +1149,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1169,7 +1169,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1189,7 +1189,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1209,7 +1209,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1229,7 +1229,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1249,7 +1249,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1269,7 +1269,7 @@ interactions {
     lower: 3.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1289,7 +1289,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1302,7 +1302,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1315,7 +1315,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1328,7 +1328,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1341,7 +1341,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1354,7 +1354,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1367,7 +1367,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1380,7 +1380,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1393,7 +1393,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1406,7 +1406,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1419,7 +1419,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1432,7 +1432,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1445,7 +1445,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1458,7 +1458,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1471,7 +1471,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1484,7 +1484,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1497,7 +1497,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1510,7 +1510,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1523,7 +1523,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1536,7 +1536,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1549,7 +1549,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1562,7 +1562,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1575,7 +1575,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1588,7 +1588,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1601,7 +1601,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1614,7 +1614,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1627,7 +1627,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1640,7 +1640,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1653,7 +1653,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1666,7 +1666,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1679,7 +1679,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1692,7 +1692,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1705,7 +1705,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1718,7 +1718,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1731,7 +1731,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1744,7 +1744,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1757,7 +1757,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1770,7 +1770,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1783,7 +1783,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1796,7 +1796,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1809,7 +1809,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1822,7 +1822,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1835,7 +1835,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1848,7 +1848,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1861,7 +1861,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1874,7 +1874,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1887,7 +1887,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1900,7 +1900,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1913,7 +1913,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1926,7 +1926,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1939,7 +1939,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1952,7 +1952,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1965,7 +1965,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1978,7 +1978,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -1991,7 +1991,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2004,7 +2004,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2017,7 +2017,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2030,7 +2030,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2043,7 +2043,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2056,7 +2056,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2069,7 +2069,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2082,7 +2082,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2095,7 +2095,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2108,7 +2108,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2121,7 +2121,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2134,7 +2134,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2147,7 +2147,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2160,7 +2160,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2173,7 +2173,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2186,7 +2186,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2199,7 +2199,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2212,7 +2212,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2225,7 +2225,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2238,7 +2238,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2251,7 +2251,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2264,7 +2264,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2277,7 +2277,7 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
 interactions {
@@ -2290,24 +2290,24 @@ interactions {
     lower: 2.5
   }
   interaction_range {
-    lower: 2.0
+    lower: 4.0
   }
 }
-dump_interval_ns: 100.0
+dump_interval_ns: 0.2
 nonspecific_range {
-  lower: 1.5
+  lower: 4
 }
 nonspecific_k {
-  lower: 1.0
+  lower: 0.1
 }
 angular_D_factor {
-  lower: 1.0
+  lower: 0.05
 }
-statistics_interval_ns: 1.0
+statistics_interval_ns: 0.1
 excluded_volume_k {
-  lower: 20.0
+  lower: 2
 }
-simulation_time_ns: 10000.0
+simulation_time_ns: 2000
 statistics_fraction {
   lower: 1.0
 }
@@ -2400,13 +2400,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Gle1_8copies"
 }
@@ -2499,13 +2499,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Gle2_16copies"
 }
@@ -2678,13 +2678,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Ndc1_16copies"
 }
@@ -2857,13 +2857,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nic96_16copies_1"
 }
@@ -3036,13 +3036,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nic96_16copies_2"
 }
@@ -3215,13 +3215,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup120_16copies"
 }
@@ -3394,13 +3394,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup133_16copies"
 }
@@ -3573,13 +3573,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup145C_16copies"
 }
@@ -3832,13 +3832,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup157_16copies"
 }
@@ -4011,13 +4011,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup170_16copies"
 }
@@ -4190,13 +4190,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup188_16copies"
 }
@@ -4369,13 +4369,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup192_16copies"
 }
@@ -4468,13 +4468,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup53_16copies_chimera"
 }
@@ -4567,13 +4567,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup59_16copies"
 }
@@ -4666,13 +4666,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup82_8copies_1"
 }
@@ -4765,13 +4765,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup82_8copies_2"
 }
@@ -5024,13 +5024,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup84_16copies"
 }
@@ -5283,13 +5283,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Nup85_16copies"
 }
@@ -5542,13 +5542,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Pom34_16copies"
 }
@@ -5641,13 +5641,13 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Sec13_16copies"
 }
@@ -5740,16 +5740,16 @@ obstacles {
   }
   is_static: 1
   d_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_k_factor {
-    lower: 1.0
+    lower: 1
   }
   interaction_range_factor {
-    lower: 1.0
+    lower: 1
   }
   type: "Seh1_16copies"
 }
-fg_anchor_inflate_factor: 1.0
+fg_anchor_inflate_factor: 0
 are_floaters_on_one_slab_side: 1
 
