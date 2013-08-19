@@ -9,7 +9,7 @@
 #ifndef IMPNPCTRANSPORT_AVRO2PB_READER_H
 #define IMPNPCTRANSPORT_AVRO2PB_READER_H
 
-#include <avro/ValidSchema.hh>
+#include <ValidSchema.hh>
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
 #include <IMP/base/value_macros.h>
@@ -19,7 +19,7 @@
 #ifndef SWIG
 IMP_GCC_PUSH_POP(diagnostic push)
 IMP_GCC_PRAGMA(diagnostic ignored "-Wextra")
-#include <avro/DataFile.hh>
+#include <DataFile.hh>
 IMP_GCC_PUSH_POP(diagnostic pop)
 #endif
 

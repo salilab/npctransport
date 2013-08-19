@@ -6,8 +6,11 @@
 # */
 
 #include <IMP/npctransport/util.h>
+#include <IMP/npctransport/typedefs.h>
 #include <IMP/base/check_macros.h>
 #include <IMP/base/exception.h>
+#include <IMP/core/XYZR.h>
+#include <IMP/core/Typed.h>
 #include <IMP/base_types.h>
 #include <cmath>
 #include <iostream>
@@ -42,6 +45,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 void configuration_txt2pb
 (std::string config_txt, std::string config_pb)
 {
+/*
   npctransport_proto::Configuration config;
   std::ifstream ifs_txt(config_txt.c_str());
   IMP_ALWAYS_CHECK(ifs_txt, "File " << config_txt << " not found",
@@ -51,7 +55,7 @@ void configuration_txt2pb
   ifs_txt.close();
   std::ofstream ofs_pb(config_pb.c_str());
   config.SerializeToOstream(&ofs_pb);
-  ofs_pb.close();
+  ofs_pb.close();*/
  }
 
 ParticlesTemp get_optimizable_particles

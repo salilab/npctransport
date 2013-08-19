@@ -8,7 +8,7 @@
 
 #include <IMP/npctransport/npctransport_config.h>
 #include <IMP/npctransport/Avro2PBReader.h>
-#include <avro/ValidSchema.hh>
+#include <ValidSchema.hh>
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
 #ifdef IMP_NPC_GOOGLE
@@ -20,7 +20,7 @@
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #endif
 
-#include <avro/DataFile.hh>
+#include <DataFile.hh>
 //#include <google/protobuf/text_format.h>
 #include <IMP/base/exception.h>
 #include <fstream>

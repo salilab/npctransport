@@ -5,6 +5,8 @@
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
+#include <IMP/npctransport/npctransport_config.h>
+#include <IMP/npctransport/SitesGeometry.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/generic.h>

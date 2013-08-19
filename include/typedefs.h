@@ -24,10 +24,10 @@ typedef IMP::base::set< core::ParticleType > ParticleTypeSet ;
 IMPNPCTRANSPORT_END_NAMESPACE
 
 #ifndef SWIG
-std::ostream& operator<<
+inline std::ostream& operator<<
 ( std::ostream& o, IMP::npctransport::InteractionType const& it );
 
-std::ostream& operator<<
+inline std::ostream& operator<<
 ( std::ostream& o, IMP::npctransport::InteractionType const& it )
 {
   o << "(" << it.first << "," << it.second << ")";

@@ -1,8 +1,8 @@
 #include <IMP/npctransport/npctransport_config.h>
 #include <IMP/npctransport/avro.h>
-#include <avro/ValidSchema.hh>
-#include <avro/Compiler.hh>
-#include <avro/Stream.hh>
+#include <ValidSchema.hh>
+#include <Compiler.hh>
+#include <Stream.hh>
 #include <IMP/base/file.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE

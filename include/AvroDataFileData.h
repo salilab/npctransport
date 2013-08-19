@@ -20,9 +20,9 @@
 #define INCLUDE_ACRODATAFILEDATA_H_2861103865__H_
 
 #include "boost/any.hpp"
-#include "avro/Specific.hh"
-#include "avro/Encoder.hh"
-#include "avro/Decoder.hh"
+#include "Specific.hh"
+#include "Encoder.hh"
+#include "Decoder.hh"
 
 namespace IMP_npctransport {
 struct wrapper {

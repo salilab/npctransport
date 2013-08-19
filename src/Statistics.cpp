@@ -26,6 +26,7 @@
 #include <IMP/core/XYZR.h>
 #include <IMP/core/generic.h>
 #include <IMP/display/LogOptimizerState.h>
+#include <IMP/rmf/frames.h>
 #include <numeric>
 #include <set>
 

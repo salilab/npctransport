@@ -18,6 +18,7 @@
 #include <IMP/container/SingletonsRestraint.h>
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/base/exception.h>
+#include <IMP/base/enums.h>
 #include <IMP/npctransport.h>
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
@@ -217,16 +218,16 @@ IMP::base::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
     using atom::Hierarchies;
 
     static int call_num = 0;
-    IMP_LOG(base::PROGRESS, "print_fgs() - Call # " << ++call_num << std::endl);
+    //IMP_LOG(base::PROGRESS, "print_fgs() - Call # " << ++call_num << std::endl);
 
     Hierarchies chains = sd.get_fg_chains();
     for (unsigned int k = 0; k < chains.size(); k++) {
       Hierarchy cur_chain(chains[k]);
       core::XYZ d(cur_chain.get_child(0));
-      IMP_LOG(base::PROGRESS, "d # " << k << " = " << d << std::endl);
+      /*IMP_LOG(base::PROGRESS, "d # " << k << " = " << d << std::endl);
       IMP_LOG(base::PROGRESS, "is optimizable = "
               << d.get_coordinates_are_optimized()
-              << std::endl);
+              << std::endl);*/
     }
   }
 
@@ -254,7 +255,7 @@ int main(int argc, char* argv[]) {
   try {
     IMP::base::Pointer<npctransport::SimulationData> sd =
         npctransport::startup(argc, argv);
-    print_fgs(*sd, base::PROGRESS);
+    //print_fgs(*sd, IMP::base::TERSE);
     if (surface_anchoring) {
       IMP_ALWAYS_CHECK(cylinder_nlayers == 0,
                        "surface anchoring and cylinder"
@@ -275,9 +276,9 @@ int main(int argc, char* argv[]) {
           get_exclude_from_channel_restraint(*sd);
       initialization_restraints.push_back(r);
     }
-    IMP_LOG(base::PROGRESS, initialization_restraints << std::endl);
+    //IMP_LOG(base::PROGRESS, initialization_restraints << std::endl);
     npctransport::do_main_loop(sd, initialization_restraints);
-    print_fgs(*sd, base::PROGRESS);
+    //print_fgs(*sd, base::TERSE);
   }
   catch (const IMP::base::Exception & e) {
     std::cerr << "Error: " << e.what() << std::endl;
