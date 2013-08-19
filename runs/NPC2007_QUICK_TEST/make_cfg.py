@@ -34,7 +34,7 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=0.25
-    config.time_step_factor.lower=1 #### NOTE THIS ####
+    config.time_step_factor.lower=0.5 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.excluded_volume_k.lower=2
     config.nonspecific_range.lower=4
@@ -101,7 +101,7 @@ def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None,
                                       type_name= type_name,
                                       number_of_beads= coarse_nbeads,
                                       number=len(centers),
-                                      radius=8 * math.sqrt(coarse_factor),
+                                      radius=7 * math.sqrt(coarse_factor),
                                       interactions= int(math.ceil(1 * coarse_factor)),
                                       rest_length_factor = rest_length_factor)
     add_interactions_for_fg(type_name, k_fgkap)
