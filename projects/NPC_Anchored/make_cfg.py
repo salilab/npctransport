@@ -34,14 +34,14 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=0.25
-    config.time_step_factor.lower=1 #### NOTE THIS ####
+    config.time_step_factor.lower=0.5 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.excluded_volume_k.lower=2
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.1
     config.slack.lower = 7.5
     config.number_of_trials=1
-    config.dump_interval_ns=0.2
+    config.dump_interval_ns=5
     config.simulation_time_ns=2000
     config.angular_D_factor.lower=0.05 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
