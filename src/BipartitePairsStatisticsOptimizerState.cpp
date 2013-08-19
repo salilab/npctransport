@@ -54,23 +54,12 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int) {
   unsigned int ncontacts = 0;
   IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
                         close_bipartite_pair_container_, {
-    bounds_I.push_back(_1[0]);
-    bounds_II.push_back(_1[1]);
-    ncontacts++;
-  });
+                          // _1 = ParticleIndexPair
+                          bounds_I.push_back(_1[0]);
+                          bounds_II.push_back(_1[1]);
+                          ncontacts++;
+                        });
   avg_ncontacts_ = update_average(avg_ncontacts_, ncontacts, updates_ + 1);
-  /**
-      Deprecated code just for reference till sure new code is good
-      ==============================================================
-      // unsigned int ncontacts =
-      //   close_bipartite_pair_container_->get_number_of_particle_pairs ();
-      // for(unsigned int i = 0 ; i < ncontacts ; i++) {
-      //   ParticlePair cur_pair =
-      //     close_bipartite_pair_container_->get_particle_pair (i);
-      //   bounds_I.push_back( cur_pair[0] );
-      //   bounds_II.push_back( cur_pair[1] );
-      // }
-      */
   std::sort(bounds_I.begin(), bounds_I.end());
   std::sort(bounds_II.begin(), bounds_II.end());
   bounds_I.erase(std::unique(bounds_I.begin(), bounds_I.end()), bounds_I.end());
@@ -82,14 +71,6 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int) {
       avg_pct_bound_particles_I_, pct_bound_particles_I, updates_ + 1);
   avg_pct_bound_particles_II_ = update_average(
       avg_pct_bound_particles_II_, pct_bound_particles_II, updates_ + 1);
-  // std::cout <<
-  //          "BipartitePairsStatisticsOptimizerState: "
-  //          "Interaction type " << interaction_type_.first.get_string()
-  //          << ", " << interaction_type_.second.get_string()
-  //          <<" avg_pct_bound_I,II " << avg_pct_bound_particles_I_
-  //          << ", " << avg_pct_bound_particles_II_
-  //          << " avg_ncontacts " << avg_ncontacts_
-  //           << " update # " << old_update_number + 1 << std::endl;
   ++updates_;
 }
 
