@@ -48,7 +48,7 @@ def get_basic_config():
     config.slack.lower = 7.5
     config.number_of_trials=1
     config.dump_interval_ns=5
-    config.simulation_time_ns=1500
+    config.simulation_time_ns=750
     config.angular_D_factor.lower=0.05 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
     ################## ACTIVE RANGE ####################

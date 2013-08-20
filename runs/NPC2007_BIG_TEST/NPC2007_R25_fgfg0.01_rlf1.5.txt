@@ -2313,7 +2313,7 @@ statistics_interval_ns: 0.1
 excluded_volume_k {
   lower: 2
 }
-simulation_time_ns: 1500
+simulation_time_ns: 750
 statistics_fraction {
   lower: 1.0
 }
