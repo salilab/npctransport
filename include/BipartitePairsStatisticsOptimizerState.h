@@ -47,7 +47,9 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   Float avg_ncontacts_;
 
   // average fraction of time that each partilce is in contact
+  Float pct_bound_particles_I_;
   Float avg_pct_bound_particles_I_;   // for particles in group I
+  Float pct_bound_particles_II_;
   Float avg_pct_bound_particles_II_;  // particles in group II
 
   // total number of particles in each group
@@ -104,6 +106,23 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   Float get_average_percentage_bound_particles_2() const {
     return avg_pct_bound_particles_II_;
   }
+
+  /**
+     returns the fraction of particles from group I
+     that are bound in each update round
+  */
+  Float get_percentage_bound_particles_1() const {
+    return pct_bound_particles_I_;
+  }
+
+  /**
+     returns the fraction of particles from group II
+     that are bound in each update round
+  */
+  Float get_percentage_bound_particles_2() const {
+    return pct_bound_particles_II_;
+  }
+
 
   /**
      return the total number of particles in the first group

@@ -65,12 +65,12 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int) {
   bounds_I.erase(std::unique(bounds_I.begin(), bounds_I.end()), bounds_I.end());
   bounds_II.erase(std::unique(bounds_II.begin(), bounds_II.end()),
                   bounds_II.end());
-  Float pct_bound_particles_I = bounds_I.size() * 1.0 / n_particles_I_;
-  Float pct_bound_particles_II = bounds_II.size() * 1.0 / n_particles_II_;
+  pct_bound_particles_I_ = bounds_I.size() * 1.0 / n_particles_I_;
+  pct_bound_particles_II_ = bounds_II.size() * 1.0 / n_particles_II_;
   avg_pct_bound_particles_I_ = update_average(
-      avg_pct_bound_particles_I_, pct_bound_particles_I, updates_ + 1);
+      avg_pct_bound_particles_I_, pct_bound_particles_I_, updates_ + 1);
   avg_pct_bound_particles_II_ = update_average(
-      avg_pct_bound_particles_II_, pct_bound_particles_II, updates_ + 1);
+      avg_pct_bound_particles_II_, pct_bound_particles_II_, updates_ + 1);
   ++updates_;
 }
 

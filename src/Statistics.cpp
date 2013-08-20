@@ -21,6 +21,7 @@
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/base/log.h>
+#include <IMP/base/flags.h>
 #include <IMP/core/pair_predicates.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/core/generic.h>
@@ -37,6 +38,11 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #endif
 
+bool no_save_rmf_to_output = false;
+IMP::base::AddBoolFlag  no_save_rmf_to_output_adder
+( "no_save_rmf_to_output",
+  "If true, save final rmf buffer to output file [default=false]",
+  &no_save_rmf_to_output);
 
 // TODO: turn into a template inline in unamed space?
 /**
@@ -228,6 +234,9 @@ void Statistics::update
             << " additional frames" << std::endl;
 
   // gather the statistics one by one
+  const double FS_IN_NS = 1.0E+6;
+  double sim_time_ns = const_cast<SimulationData *>( get_sd() )
+    ->get_bd()->get_current_time() / FS_IN_NS;
   ParticlesTemp all;
   base::Vector<ParticlesTemps> fgs;
 
@@ -242,6 +251,8 @@ void Statistics::update
                                      // can happen only if dynamic changes...
         fgs.push_back(ParticlesTemps());
         unsigned int i = find_or_add_fg_of_type( &stats, *it );
+        double avg_radius_of_gyration;
+        double avg_length;
         for (unsigned int j = 0; j < ps.size(); ++j)
           {
             atom::Hierarchy hj(ps[j]);
@@ -261,8 +272,15 @@ void Statistics::update
             UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), length, length);
             UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), radius_of_gyration,
                        radius_of_gyration);
-          } // for j
-      } // for it
+            avg_length += avg_length / ps.size();
+            avg_radius_of_gyration += radius_of_gyration / ps.size();
+          } // for j (fg chain)
+        npctransport_proto::Statistics_FGReactionCoords*
+          fgrc = stats.mutable_fgs(i)->add_reaction_coords();
+        fgrc->set_time_ns(sim_time_ns);
+        fgrc->set_length(avg_length);
+        fgrc->set_radius_of_gyration(avg_radius_of_gyration);
+      } // for it (fg type)
   }
 
   // FG body stats
@@ -391,6 +409,19 @@ void Statistics::update
                  interaction_partner_chains, chain_partners / interacting);
         UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i),
                    interaction_partner_beads, bead_partners / interacting);
+        npctransport_proto::Statistics_FloaterReactionCoords*
+          frc = stats.mutable_floaters(i)->add_reaction_coords();
+        frc->set_time_ns(sim_time_ns);
+        frc->set_interacting_sites(interactions);
+        frc->set_interacting_beads(bead_partners);
+        frc->set_interacting_fg_chains(chain_partners);
+        int n_z0, n_z1, n_z2, n_z3;
+        boost::tie(n_z0, n_z1, n_z2, n_z3) =
+          get_z_distribution(ps);
+        frc->set_n_z0(n_z0);
+        frc->set_n_z1(n_z1);
+        frc->set_n_z2(n_z2);
+        frc->set_n_z3(n_z3);
       } // for it
 
   // update statistics gathered on interaction rates
@@ -437,9 +468,6 @@ void Statistics::update
     // Todo: define better what we want of timer
     stats.set_seconds_per_iteration(timer.elapsed());
     stats.set_number_of_frames(nf + nf_new);
-    const double FS_IN_NS = 1.0E+6;
-    double sim_time_ns = const_cast<SimulationData *>( get_sd() )
-      ->get_bd()->get_current_time() / FS_IN_NS;
     stats.set_bd_simulation_time_ns( sim_time_ns );
     double total_energy  =
       get_sd()->get_bd()->get_scoring_function()->evaluate(false);
@@ -457,10 +485,10 @@ void Statistics::update
   //    save_pb_conformation(get_diffusers(), sites_, conformation);
 
   // save RMF for future restarts
-  {
+  if(!no_save_rmf_to_output){
     std::string buf;
     RMF::FileHandle fh = RMF::create_rmf_buffer(buf);
-    const_cast<SimulationData *>( get_sd() )->link_rmf_file_handle(fh);
+    const_cast<SimulationData *>( get_sd() )->link_rmf_file_handle(fh, false);
     rmf::save_frame(fh, 0);
     output.set_rmf_conformation(buf);
   }
@@ -587,6 +615,36 @@ Statistics::get_interactions_and_interacting(
   return boost::make_tuple(interactions, interacting, bead_partners,
                            chain_partners);
 }
+
+// distribution of particles along z axis
+boost::tuple<int, int, int, int>
+Statistics::get_z_distribution(const ParticlesTemp& ps) const{
+  int z0,z1,z2,z3;
+  double top=1.0; // arbitrary positive default
+  // priority II overrides default
+  if(get_sd()->get_has_bounding_box()){
+    top = get_sd()->get_box_size() / 4;
+  }
+  // priority I overrides II
+  if(get_sd()->get_has_slab()){
+    top = get_sd()->get_slab_thickness()/2;
+  }
+  for (unsigned int i = 0; i < ps.size(); i++) {
+    core::XYZ d(ps[i]);
+    double z = d.get_z();
+    if(z>top) {
+      z0++;
+    } else if (z>0) {
+      z1++;
+    } else if (z<-top) {
+      z2++;
+    } else {
+      z3++;
+    }
+  }
+  return boost::make_tuple(z0,z1,z2,z3);
+}
+
 
 
 

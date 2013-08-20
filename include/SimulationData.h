@@ -345,10 +345,14 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   // get the bounding box for this simulation
   algebra::BoundingBox3D get_box() const;
 
+  double get_box_size() const;
+
   // get the cylinder in the slab for this simulation
   algebra::Cylinder3D get_cylinder() const;
 
   bool get_has_slab() const { return slab_is_on_; }
+
+  bool get_has_bounding_box() const { return box_is_on_; }
 
   /**
    Open the specified RMF file, links it to the hierarchies of this object, and
@@ -380,11 +384,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
       so that writing frames into this handle will write
       the updated state of the simulation
 
+      @param is_restraints if true, save restraints to RMF
       @return a handle to the file
 
       \exception RMF::IOException IO error with RMF file handle
   */
-  void link_rmf_file_handle(RMF::FileHandle fh);
+  void link_rmf_file_handle(RMF::FileHandle fh, bool is_restraints = true);
 
   /**
      Returns the internal periodic SaveOptimizerState writer that

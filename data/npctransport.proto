@@ -190,6 +190,21 @@ message Assignment {
 }
 
 message Statistics {
+  message FGReactionCoords {
+    required double time_ns=1;
+    required double length=2;
+    optional double radius_of_gyration=3;
+  }
+  message FloaterReactionCoords {
+    required double time_ns=1;
+    required double interacting_sites=2;
+    required double interacting_beads=3;
+    required double interacting_fg_chains=4;
+    required int32 n_z0=5;
+    required int32 n_z1=6;
+    required int32 n_z2=7;
+    required int32 n_z3=8;
+  }
   message FGStats {
     optional double volume=1 [default=0];
     optional double length=2 [default=0];
@@ -200,6 +215,7 @@ message Statistics {
     optional double chain_correlation_time=7 [default=0];
     optional double local_diffusion_coefficient=8 [default=0];
     optional string type=9; // type name, e.g. "fg_nsp1"
+    repeated FGReactionCoords reaction_coords=10;
   }
   message FloatStats {
     optional double interactions=1 [default=0];
@@ -211,6 +227,7 @@ message Statistics {
     optional double avg_n_transports=7 [default=0]; // avg number of times a particle of this type has crossed the channel
     repeated double transport_time_points_ns=8; // records the time points of transports in simulation time (TODO: assuming single trial?)
     optional string type=9; // type name, e.g. "kap121"
+    repeated FloaterReactionCoords reaction_coords=10;
   }
   message InteractionStats {
     required string type0=1;

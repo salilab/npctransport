@@ -422,25 +422,32 @@ void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
   }
 }
 
-void SimulationData::link_rmf_file_handle(RMF::FileHandle fh) {
+void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
+                                          bool with_restraints) {
   // TODO: this should be updated if particles are updated / restraints are
   //       probably restraints linkage should be handled internally in
   //       Scoring.cpp (for better encapsulation
   IMP_LOG(TERSE, "Setting up dump" << std::endl);
   Scoring* s=get_scoring();
   add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
-  IMP::rmf::add_restraints( fh, RestraintsTemp
-                            (1, s->get_predicates_pair_restraint() )
-                           );
-  IMP::rmf::add_restraints(fh, s->get_all_chain_restraints() );
+  if(with_restraints) {
+    IMP::rmf::add_restraints( fh, RestraintsTemp
+                              (1, s->get_predicates_pair_restraint() )
+                              );
+    IMP::rmf::add_restraints(fh, s->get_all_chain_restraints() );
+  }
   if (s->get_has_bounding_box()) {
-    IMP::rmf::add_restraints
-      ( fh, RestraintsTemp(1, s->get_bounding_box_restraint()) );
+    if(with_restraints) {
+      IMP::rmf::add_restraints
+        ( fh, RestraintsTemp(1, s->get_bounding_box_restraint()) );
+    }
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
     IMP::rmf::add_static_geometries(fh, display::Geometries(1, bbg));
   }
   if (s->get_has_slab()) {
-    IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_slab_restraint()));
+    if(with_restraints) {
+      IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_slab_restraint()));
+    }
     IMP_NEW(SlabWireGeometry, slab_geometry,
             (slab_thickness_, tunnel_radius_, box_side_));
     IMP::rmf::add_static_geometries(fh, slab_geometry->get_components());
@@ -531,7 +538,7 @@ Statistics * SimulationData::get_statistics()
 }
 
 
-atom::BrownianDynamics *SimulationData::get_bd(bool recreate) {
+atom::BrownianDynamics *SimulationData::get_bd(bool recreate){
   if (!bd_ || recreate) {
     bd_ = new atom::BrownianDynamics(m_, "BD%1%", time_step_wave_factor_);
     bd_->set_maximum_time_step(time_step_);
@@ -657,10 +664,17 @@ display::Geometry *SimulationData::get_static_geometry() {
 }
 
 algebra::BoundingBox3D SimulationData::get_box() const {
+  IMP_USAGE_CHECK(get_has_bounding_box(), "no bounding box defined");
   return algebra::get_cube_d<3>(.5 * box_side_);
 }
 
+double SimulationData::get_box_size() const{
+  IMP_USAGE_CHECK(get_has_bounding_box(), "no bounding box defined");
+  return box_side_;
+}
+
 algebra::Cylinder3D SimulationData::get_cylinder() const {
+  IMP_USAGE_CHECK(get_has_slab(), "no slab defined - no cylinder");
   algebra::Vector3D pt(0, 0, slab_thickness_ / 2.0);
   algebra::Segment3D seg(pt, -pt);
   return algebra::Cylinder3D(seg, tunnel_radius_);

@@ -208,6 +208,25 @@ class IMPNPCTRANSPORTEXPORT Statistics : public base::Object {
   /** get the number of site-site interactions between two particles */
   int get_number_of_interactions(Particle *a, Particle *b) const;
 
+  /**
+     for particles ps, returns the distribution along the z axis, in regions
+     z0 = [top...) ;
+     z1 = [0..top) ;
+     z2 = [-top..top) ;
+     z3 = (...top)
+     with top being top of slab if slab exists,
+     or 25% of box size if box exists but not slab, or 1.0 otherwise.
+
+
+     @param ps the particles
+
+     @return a tuple <z0,z1,z2,z3> with counts of particles from ps
+             in z0, z1, z2 and z3 regions
+   */
+  boost::tuple<int, int, int, int>
+    get_z_distribution(const ParticlesTemp& ps) const;
+
+
  public:
   IMP_OBJECT_METHODS(Statistics);
 
