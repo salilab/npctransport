@@ -226,7 +226,7 @@ namespace {
   bool run_it(SimulationData *sd, unsigned int number_of_frames,
               boost::timer &timer, boost::timer &total_time,
               bool silent_statistics = false,
-              unsigned int max_frames_per_chunk = 50000) {
+              unsigned int max_frames_per_chunk = 100000) {
     // TODO: next line is a temporary hack - needed for some reason to
     // force the pair predicates to evaluate predicate pairs restraints
     sd->get_model()->update();
@@ -290,7 +290,7 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
 void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   using namespace IMP;
   sd->set_was_used( true );
-  const int max_frames_per_chunk = 50000;
+  const int max_frames_per_chunk = 100000;
   /** initial optimization and equilibration needed unless starting
       from another output file or rmf file */
   bool is_initial_optimization = restart.empty() && init_rmffile.empty();
