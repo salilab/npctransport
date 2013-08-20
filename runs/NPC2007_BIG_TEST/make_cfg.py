@@ -17,7 +17,7 @@ obstacle_inflate_factor = 1.3
 fg_coarse_factor=3.0 # 3
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
-    print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
+    print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f] [rest_length_factor]" % (kaps_R, k_fgfg,rest_length_factor)
     exit(-1)
 outfile = sys.argv[1]
 if len(sys.argv) > 2:
@@ -26,6 +26,9 @@ print "kaps_R = %.2f" % (kaps_R)
 if len(sys.argv) > 3:
     k_fgfg = float(sys.argv[3])
 print "k_fgfg = %.2f" %k_fgfg
+if len(sys.argv) > 4:
+    rest_length_factor = float(rest_length_factor)
+print "rest_length_factor = %.2f" %rest_length_factor
 
 def get_basic_config():
     config = Configuration()
@@ -35,16 +38,21 @@ def get_basic_config():
     config.interaction_range.lower=1
     config.backbone_k.lower=0.25
     config.time_step_factor.lower=0.5 #### NOTE THIS ####
-    #create_range(config.rest_length_factor, .5, 1, 10)
     config.excluded_volume_k.lower=2
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.1
+    ################## ACTIVE RANGE ####################
+    create_range(config.nonspecific_k, .1, 1, 5, 1)
+    ####################################################
     config.slack.lower = 7.5
     config.number_of_trials=1
     config.dump_interval_ns=5
-    config.simulation_time_ns=5000
+    config.simulation_time_ns=1500
     config.angular_D_factor.lower=0.05 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
+    ################## ACTIVE RANGE ####################
+    create_range(config.angular_D_factor, .05, .15, 3, 1)
+    ####################################################
     config.statistics_interval_ns=0.1
     config.fg_anchor_inflate_factor=3.0/math.sqrt(fg_coarse_factor)
     return config
@@ -164,7 +172,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
 ############### ACTIVE RANGE #############
-create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
+create_range(kaps.interaction_k_factor, lb=0.01, ub=5, steps = 10, base=1.33)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics= IMP.npctransport.add_float_type(config,
