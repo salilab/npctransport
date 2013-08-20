@@ -251,8 +251,9 @@ void Statistics::update
                                      // can happen only if dynamic changes...
         fgs.push_back(ParticlesTemps());
         unsigned int i = find_or_add_fg_of_type( &stats, *it );
-        double avg_radius_of_gyration;
-        double avg_length;
+        double avg_volume = 0.0;
+        double avg_radius_of_gyration = 0.0;
+        double avg_length = 0.0;
         for (unsigned int j = 0; j < ps.size(); ++j)
           {
             atom::Hierarchy hj(ps[j]);
@@ -272,14 +273,16 @@ void Statistics::update
             UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), length, length);
             UPDATE_AVG(nf, nf_new, *stats.mutable_fgs(i), radius_of_gyration,
                        radius_of_gyration);
-            avg_length += avg_length / ps.size();
+            avg_volume += volume / ps.size();
             avg_radius_of_gyration += radius_of_gyration / ps.size();
+            avg_length += length / ps.size();
           } // for j (fg chain)
         npctransport_proto::Statistics_FGReactionCoords*
           fgrc = stats.mutable_fgs(i)->add_reaction_coords();
         fgrc->set_time_ns(sim_time_ns);
-        fgrc->set_length(avg_length);
+        fgrc->set_volume(avg_volume);
         fgrc->set_radius_of_gyration(avg_radius_of_gyration);
+        fgrc->set_length(avg_length);
       } // for it (fg type)
   }
 
@@ -576,10 +579,16 @@ int Statistics::get_number_of_interactions(Particle *a, Particle *b) const {
     get_sd()->get_sites( Typed(a).get_type() );
   const algebra::Vector3Ds  &sb =
     get_sd()->get_sites( Typed(b).get_type() );
+  algebra::ReferenceFrame3D rfa = core::RigidBody(a).get_reference_frame();
+  algebra::ReferenceFrame3D rfb = core::RigidBody(b).get_reference_frame();
+  algebra::Transformation3D ta = rfa.get_transformation_to();
+  algebra::Transformation3D tb = rfb.get_transformation_to();
   int ct = 0; // TODO: shouldn't sites be transformed ?!
   for (unsigned int i = 0; i < sa.size(); ++i) {
+    algebra::Vector3D va = ta.get_transformed(sa[i]);
     for (unsigned int j = 0; j < sb.size(); ++j) {
-      if (algebra::get_distance(sa[i], sb[j]) < range) {
+      algebra::Vector3D vb = tb.get_transformed(sb[i]);
+      if (algebra::get_distance(va, vb) < range) {
         ++ct;
       }
     }
@@ -619,7 +628,7 @@ Statistics::get_interactions_and_interacting(
 // distribution of particles along z axis
 boost::tuple<int, int, int, int>
 Statistics::get_z_distribution(const ParticlesTemp& ps) const{
-  int z0,z1,z2,z3;
+  int zh[4] = {0.0, 0.0, 0.0, 0.0};
   double top=1.0; // arbitrary positive default
   // priority II overrides default
   if(get_sd()->get_has_bounding_box()){
@@ -633,16 +642,16 @@ Statistics::get_z_distribution(const ParticlesTemp& ps) const{
     core::XYZ d(ps[i]);
     double z = d.get_z();
     if(z>top) {
-      z0++;
+      zh[0]++;
     } else if (z>0) {
-      z1++;
+      zh[1]++;
     } else if (z<-top) {
-      z2++;
+      zh[2]++;
     } else {
-      z3++;
+      zh[3]++;
     }
   }
-  return boost::make_tuple(z0,z1,z2,z3);
+  return boost::make_tuple(zh[0],zh[1],zh[2],zh[3]);
 }
 
 
