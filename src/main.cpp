@@ -239,17 +239,20 @@ namespace {
                 << std::endl;
       sd->get_bd()->optimize(cur_nframes);
       print_score_and_positions(sd);
-      if (!silent_statistics) {
-        sd->get_statistics()->update(timer, cur_nframes);
-      }
-      std::cout << "Done" << std::endl;
       //});
       if (sd->get_maximum_number_of_minutes() > 0 &&
           total_time.elapsed() / 60 > sd->get_maximum_number_of_minutes()) {
         sd->get_statistics()->set_interrupted(true);
         std::cout << "Terminating..." << std::endl;
+        if (!silent_statistics) {
+          sd->get_statistics()->update(timer, cur_nframes);
+        }
         return false;
       }
+      if (!silent_statistics) {
+        sd->get_statistics()->update(timer, cur_nframes);
+      }
+      std::cout << "Done" << std::endl;
       number_of_frames -= cur_nframes;
     } while (number_of_frames > 0 && !first_only);
     return true;
@@ -355,7 +358,8 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
         conformations_rmf_sos->update_always(
             "Before running (post equilibration)");
       }
-      // now run the rest of the sim
+      // now start initial stats and run the rest of the sim
+      sd->get_statistics()->update(timer, 0);
       bool ok = run_it(sd, nframes_run, timer, total_time,
                        false /* silent stats */, max_frames_per_chunk);
       if (!ok) {

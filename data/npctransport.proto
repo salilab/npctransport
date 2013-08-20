@@ -193,7 +193,7 @@ message Statistics {
   message FGReactionCoords {
     required double time_ns=1;
     required double volume=2;
-    optional double radius_of_gyration=3;
+    required double radius_of_gyration=3;
     required double length=4;
   }
   message FloaterReactionCoords {
