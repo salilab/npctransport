@@ -52,6 +52,13 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()
+#define GET_ASSIGNMENT_DEF(name, default_value)          \
+  {                                             \
+  if(pb_assignment.has_##name() )               \
+    { name##_ = pb_assignment.name().value(); }  \
+  else                                          \
+    { name##_ = default_value; }                \
+  }
 #define GET_VALUE(name) name##_ = pb_assignment.name()
 #define GET_VALUE_DEF(name, default_value)          \
   {                                             \
@@ -102,6 +109,7 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   GET_VALUE(statistics_interval_frames);
   GET_ASSIGNMENT(statistics_fraction);
   GET_VALUE(time_step);
+  GET_ASSIGNMENT_DEF(time_step_wave_factor, 1.0);
   GET_VALUE(maximum_number_of_minutes);
   GET_VALUE_DEF(fg_anchor_inflate_factor, 1.0);
   GET_VALUE_DEF(are_floaters_on_one_slab_side, false);
@@ -525,7 +533,7 @@ Statistics * SimulationData::get_statistics()
 
 atom::BrownianDynamics *SimulationData::get_bd(bool recreate) {
   if (!bd_ || recreate) {
-    bd_ = new atom::BrownianDynamics(m_);
+    bd_ = new atom::BrownianDynamics(m_, "BD%1%", time_step_wave_factor_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_ / 4);
     bd_->set_current_time(0.0);
@@ -658,6 +666,7 @@ algebra::Cylinder3D SimulationData::get_cylinder() const {
   return algebra::Cylinder3D(seg, tunnel_radius_);
 }
 #undef GET_ASSIGNMENT
+#undef GET_ASSIGNMENT_DEF
 #undef GET_VALUE
 #undef GET_VALUE_DEF
 

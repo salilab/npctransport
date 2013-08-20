@@ -53,6 +53,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<double> statistics_fraction_;
   Parameter<int> statistics_interval_frames_;
   Parameter<double> time_step_;
+  Parameter<double> time_step_wave_factor_;
   Parameter<double> maximum_number_of_minutes_;
   Parameter<double> fg_anchor_inflate_factor_; // By how much to inflate static
                                                // anchors of FG nups.
