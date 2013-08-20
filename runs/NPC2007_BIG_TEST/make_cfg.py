@@ -37,7 +37,7 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=0.25
-    config.time_step_factor.lower=0.33 #### NOTE THIS ####
+    config.time_step_factor.lower=0.5 #### NOTE THIS ####
     config.time_step_wave_factor.lower=10.0 ### NOTE THIS ###
     config.excluded_volume_k.lower=2
     config.nonspecific_range.lower=4

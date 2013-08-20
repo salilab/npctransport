@@ -8,7 +8,7 @@ backbone_k {
   lower: 0.25
 }
 time_step_factor {
-  lower: 0.33
+  lower: 0.5
 }
 box_side {
   lower: 1229.69312292
