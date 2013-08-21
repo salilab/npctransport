@@ -85,7 +85,7 @@ IMP::base::AddStringFlag restart_adder
   " file)"
   " [default: %default]",
   &restart);
-std::string conformations = "conformations.rmf";
+std::string conformations = "";
 IMP::base::AddStringFlag conformations_adder
 ( "conformations", "RMF file for recording the conforomations along the "
   " simulation [default: %default]",
