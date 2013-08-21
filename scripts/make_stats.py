@@ -1,4 +1,4 @@
-#!/netapp/sali/barak/Runs/NPC_BD/Cyl2/tools/imppy.sh /usr/bin/python
+# #!/netapp/sali/barak/Runs/NPC_BD/Cyl2/tools/imppy.sh /usr/bin/python
 from IMP.npctransport import *
 import numpy
 import math
