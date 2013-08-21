@@ -628,7 +628,7 @@ Statistics::get_interactions_and_interacting(
 // distribution of particles along z axis
 boost::tuple<int, int, int, int>
 Statistics::get_z_distribution(const ParticlesTemp& ps) const{
-  int zh[4] = {0.0, 0.0, 0.0, 0.0};
+  int zh[4] = {0, 0, 0, 0};
   double top=1.0; // arbitrary positive default
   // priority II overrides default
   if(get_sd()->get_has_bounding_box()){
