@@ -53,9 +53,11 @@ int main(int argc, char *argv[]) {
     IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
     IMP_NPC_PARSE_OPTIONS(argc, argv);
 #ifdef IMP_NPC_GOOGLE
-    std::string input = "third_party/npc/npctransport/data/benchmark_full.pb";
+    std::string input = "third_party/npc/npctransport/data/"
+      "benchmark_full_restart.pb";
 #else
-    std::string input = IMP::npctransport::get_data_path("benchmark_full.pb");
+    std::string input = IMP::npctransport::get_data_path
+      ("benchmark_full_restart.pb");
 #endif
     std::string output = IMP::base::create_temporary_file_name("output", ".pb");
     {

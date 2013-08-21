@@ -86,16 +86,16 @@ SimulationData::SimulationData(std::string output_file, bool quick,
 
 void SimulationData::initialize(std::string output_file, bool quick) {
   m_ = new Model("NPC model %1%");
-  ::npctransport_proto::Output pb_data_;
+  ::npctransport_proto::Output pb_data;
   std::ifstream file(output_file.c_str(), std::ios::binary);
-  bool read = pb_data_.ParseFromIstream(&file);
+  bool read = pb_data.ParseFromIstream(&file);
   if (!read) {
     IMP_THROW("Unable to read data from protobuf" << output_file,
               base::IOException);
   }
-  pb_data_.mutable_statistics(); // create it if not there
+  pb_data.mutable_statistics(); // create it if not there
   const ::npctransport_proto::Assignment &
-      pb_assignment= pb_data_.assignment();
+      pb_assignment= pb_data.assignment();
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
   GET_ASSIGNMENT(slab_thickness);
@@ -126,19 +126,38 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   root_->add_attribute(get_simulation_data_key(), this);
   atom::Hierarchy hr = atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
-  for (int i = 0; i < pb_assignment.fgs_size(); ++i) {
-    IMP_USAGE_CHECK( pb_assignment.fgs(i).has_type() &&
-                     pb_assignment.fgs(i).type() != "",
-                     "FG should've been assigned a type thru protobuf.h");
-    create_fgs(pb_assignment.fgs(i));
-  }
-  for (int i = 0; i < pb_assignment.floaters_size(); ++i) {
-    IMP_USAGE_CHECK( pb_assignment.floaters(i).has_type() &&
-                     pb_assignment.floaters(i).type() != "",
-                     "Floater should've been assigned a type thru protobuf.h");
-    create_floaters(pb_assignment.floaters(i), type_of_float[i],
-                    display::get_display_color(i));
-  }
+  for (int i = 0; i < pb_assignment.fgs_size(); ++i)
+    {
+      // verify type first
+      if(!pb_assignment.fgs(i).has_type())
+        {
+          std::string name = type_of_fg[i].get_string();
+          pb_data.mutable_assignment()
+            ->mutable_fgs(i)->set_type( name );
+          std::cout << "WARNING: old or corrupt assignment file"
+                    << ", which lacks fg types, using " << name << std::endl;
+        }
+      IMP_USAGE_CHECK(pb_assignment.fgs(i).type() != "",
+                      "FG should've been assigned a valued type,"
+                      " possiblu thru protobuf.h");
+      create_fgs(pb_assignment.fgs(i));
+    }
+  for (int i = 0; i < pb_assignment.floaters_size(); ++i)
+    {
+      // verify type first
+      if(!pb_assignment.floaters(i).has_type())
+        {
+          std::string name = type_of_float[i].get_string();
+          pb_data.mutable_assignment()
+            ->mutable_floaters(i)->set_type( name );
+          std::cout << "WARNING: old or corrupt assignment file"
+                    << ", which lacks floater types, using " << name << std::endl;
+        }
+      IMP_USAGE_CHECK( pb_assignment.floaters(i).type() != "",
+                       "Floater should've been assigned a type thru protobuf.h");
+      create_floaters(pb_assignment.floaters(i), type_of_float[i],
+                      display::get_display_color(i));
+    }
   for (int i = 0; i < pb_assignment.obstacles_size(); ++i) {
     create_obstacles(pb_assignment.obstacles(i));
   }
@@ -152,20 +171,20 @@ void SimulationData::initialize(std::string output_file, bool quick) {
 
   // bounding box / slab constraints on diffusers
 
-  if (pb_data_.has_rmf_conformation()) {
+  if (pb_data.has_rmf_conformation()) {
     RMF::FileConstHandle fh =
-        RMF::open_rmf_buffer_read_only(pb_data_.rmf_conformation());
+        RMF::open_rmf_buffer_read_only(pb_data.rmf_conformation());
     initialize_positions_from_rmf(fh, 0);
     // load from output file
-  } else if (pb_data_.has_conformation()) {
-    std::cout << "Loading from output file " << std::endl ;
-    load_pb_conformation(pb_data_.conformation(), get_diffusers(), sites_);
+  } else if (pb_data.has_conformation()) {
+    std::cout << "Restarting from output file conformation" << std::endl ;
+    load_pb_conformation(pb_data.conformation(), get_diffusers(), sites_);
   }
-  if (pb_data_.has_statistics()) {
-    if (pb_data_.statistics().has_bd_simulation_time_ns()) {
+  if (pb_data.has_statistics()) {
+    if (pb_data.statistics().has_bd_simulation_time_ns()) {
       const double fs_in_ns = 1.0E+6;
       get_bd()->set_current_time
-        (pb_data_.statistics().bd_simulation_time_ns()
+        (pb_data.statistics().bd_simulation_time_ns()
          * fs_in_ns);
     }
   }

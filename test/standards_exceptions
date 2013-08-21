@@ -5,4 +5,4 @@
 spelling_exceptions=['avro','rmf','cpc','predr','optimizable']
 show_exceptions=['timer']
 value_object_exceptions=['timer']
-function_name_exceptions=['SimulationData.initialize_positions_from_rmf']
+function_name_exceptions=['SimulationData.initialize_positions_from_rmf','SimulationData.switch_suspend_rmf']
