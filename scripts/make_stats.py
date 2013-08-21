@@ -7,7 +7,7 @@ import re
 import numbers
 import os
 
-#KEY_CAPTIONS = None
+KEY_CAPTIONS = None
 
 def query_yes_no(question, default=None):
     """Ask a yes/no question via raw_input() and return their answer.
@@ -132,10 +132,12 @@ def augment_results(files, results = {}, max_entries = 1000):
         fgkap_K, fgfg_K = get_interaction_k( A.interactions )
         for f in A.floaters:
             if is_kap(f.type):
-                kap_k_factor = f.interaction_k_factor.value
-        KEY_CAPTIONS = "kap_k_factor fgfg_k"
-#       key=(fg_nbeads,kap_R,crap_R,fgkap_K,fgfg_K,nonspecific_K)
-        key = (kap_k_factor,fgfg_K)
+                kap_K_factor = f.interaction_k_factor.value
+        time_ns = round(S.bd_simulation_time_ns)
+        time_step_fs = round(A.time_step)
+        KEY_CAPTIONS = "kap_K_factor fgfg_K kap_R time_ns time_step_fs"
+#       KEY_CAPTIONS = "fg_nbeads kap_R crap_R fgkap_K fgfg_K nonspecific_K"
+        key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
         if(not key in results):
             results[key] = {"n":0,
                             "kap_times":[],
@@ -219,6 +221,9 @@ while(True):
     n_read=augment_results(files[i:i+k], results, max_entries = k)
     i=i+k
     n_total = n_total + n_read
+    if(n_total == 0):
+        print "NOTHING TO READ"
+        break
 #    print "========== n = %d =========" % n_total
     OUTPUT = open(output_file,"w")
     print_results(results, OUTPUT)
