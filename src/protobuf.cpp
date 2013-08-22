@@ -282,7 +282,7 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   }
   npctransport_proto::Output output;
   npctransport_proto::Assignment& assignment = *output.mutable_assignment();
-  npctransport_proto::Statistics& statistics = *output.mutable_statistics();
+  output.mutable_statistics(); // create if not there
   base::SetLogState sls(base::WARNING);
   Ranges ranges = get_ranges("all", &input, &assignment);
   /*for (unsigned int i=0; i< ranges.size(); ++i) {
@@ -394,8 +394,8 @@ void load_pb_conformation
         conformation.particle(_2);
       core::RigidBody rb(diffusers->get_model(), _1);
       algebra::Vector3D translation(pcur.x(), pcur.y(), pcur.z());
-      algebra::Rotation3D rotation(
-                                   algebra::Vector4D(pcur.r(), pcur.i(), pcur.j(), pcur.k()));
+      algebra::Rotation3D rotation
+        ( algebra::Vector4D(pcur.r(), pcur.i(), pcur.j(), pcur.k()) );
 
       algebra::Transformation3D tr(rotation, translation);
       rb.set_reference_frame(algebra::ReferenceFrame3D(tr));

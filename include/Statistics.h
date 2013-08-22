@@ -193,15 +193,23 @@ class IMPNPCTRANSPORTEXPORT Statistics : public base::Object {
 
  private:
 
+  //! updates pStats with all statistics related to fgs, averaged over
+  //! nf_new additional frames
+  void update_fg_stats( ::npctransport_proto::Statistics* pStats,
+                        unsigned int nf_new);
+
   // TODO: move to util.h, possibly internal
-  // return a 4-tuple (1,2,3,4) with:
+  // @param kaps a list of kap particles
+  // @param fg_roots a list of hierarchy particles that are the root of an
+  //                 fg chain (= all their children are fg typed particles)
+  // @return a 4-tuple (1,2,3,4) with:
   // 1 - total # of individual site-site interactions between the specified kaps
   //     and fgs
   // 2 - total # of bead pairs that make any site-site interaction
   // 3 - total # of kaps that contact any FG
   // 4 - sum of # of individual fg chains contacted by each kap
-  boost::tuple<double, double, double, double> get_interactions_and_interacting(
-      const ParticlesTemp &kaps, const base::Vector<ParticlesTemps> &fgs) const;
+  boost::tuple<double, double, double, double> get_interactions_and_interacting
+    ( const ParticlesTemp &kaps, const atom::Hierarchies &fgs) const;
 
 
   // TODO: move to util.h, possibly internal
