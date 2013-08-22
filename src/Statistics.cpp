@@ -214,7 +214,6 @@ void Statistics::update_fg_stats
   unsigned int nf_new,
   unsigned int zr_hist[4][3])
 {
-  std::cout << "Updating FG Stats" << std::endl;
   int nf = stats->number_of_frames();
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
     ->get_bd()->get_current_time() / FS_IN_NS;
@@ -225,7 +224,6 @@ void Statistics::update_fg_stats
           it = fgt.begin(); it != fgt.end(); it++ )
     {
       core::ParticleType type_i = *it;
-      std::cout << "Type " << type_i << std::endl;
       ParticlesTemp ps_i = get_sd()->get_particles_of_type( type_i );
       if(ps_i.size() == 0) continue; // TODO: add warning?
       // can happen only upon dynamic changes...
@@ -699,7 +697,6 @@ Statistics::get_z_distribution(const ParticlesTemp& ps) const{
 
 void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][3],
                                  ParticlesTemp& ps) const{
-  std::cout << "Filling in zr_hist" << std::endl;
   double top = get_z_distribution_top();
   double r_max = get_r_distribution_max();
   int zz, rr;
