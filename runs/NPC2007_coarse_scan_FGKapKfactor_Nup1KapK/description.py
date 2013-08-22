@@ -1,6 +1,6 @@
 binary="fg_simulation"
 extra_arguments=["--short_init_factor=.1"]
-tasks=30
+tasks=300000
 #300000
 #tasks=2500
 iterations=20

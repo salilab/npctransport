@@ -1,7 +1,7 @@
 #ifndef IMPNPCTRANSPORT_AVRO_H
 #define IMPNPCTRANSPORT_AVRO_H
 #include <IMP/npctransport/npctransport_config.h>
-#include <avro/ValidSchema.hh>
+#include <ValidSchema.hh>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 

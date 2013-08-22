@@ -42,4 +42,6 @@ add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/npctransport
 add_custom_target(IMP.npctransport-python_proto ALL DEPENDS "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py" )
 set_property(TARGET IMP.npctransport-python_proto PROPERTY FOLDER "IMP.npctransport")
 
+include_directories(${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal)
+
 set(IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES IMP.npctransport-python_proto CACHE INTERNAL "" FORCE)

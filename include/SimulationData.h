@@ -450,6 +450,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   double get_slab_thickness() const { return slab_thickness_; }
 
+  double get_tunnel_radius() const { return tunnel_radius_; }
+
   display::Geometry *get_static_geometry();
 
   int get_rmf_dump_interval_frames() const { return dump_interval_frames_; }

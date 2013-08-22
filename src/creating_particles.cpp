@@ -14,6 +14,8 @@
 #include <IMP/atom/Mass.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/atom/Diffusion.h>
+#include "npctransport.pb.h"
+
 //#include <IMP/example/creating_restraints.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE

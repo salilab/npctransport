@@ -7,7 +7,7 @@
 #include <IMP/npctransport/AvroDataFileData.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/base/check_macros.h>
-#include <avro/DataFile.hh>
+#include <DataFile.hh>
 #include <fstream>
 #include <iomanip>
 

@@ -12,6 +12,9 @@ Simulate an fg and a kap interacting
 
 #include "npctransport_config.h"
 #include <IMP/npctransport/npctransport_proto.fwd.h>
+#include <IMP/core/Typed.h>
+#include "typedefs.h"
+#include <IMP/base_types.h>
 #include <string>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE

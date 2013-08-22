@@ -6,7 +6,7 @@
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
-#include <avro/DataFile.hh>
+#include <DataFile.hh>
 #include <google/protobuf/text_format.h>
 #include <fstream>
 #include <iomanip>
