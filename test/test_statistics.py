@@ -142,12 +142,12 @@ class Tests(IMP.test.TestCase):
         os2.set_period(10)
         bd.add_optimizer_state(os2)
         IMP.set_log_level(IMP.SILENT)
-        bd.optimize(1000)
+        bd.optimize(5000)
         Dout= os.get_correlation_time()
         Dout2= os2.get_correlation_time()
         Din= dd.get_rotational_diffusion_coefficient()
         v=1.0/(2.0*Dout)
-        print Dout, Dout2, Din, v
+        print "Corr1, Corr2, rot_dif_coeff, v",  Dout, Dout2, Din, v
         self.assertAlmostEqual(Dout, Dout2, delta=.1*Dout)
         dfs= os.get_diffusion_coefficients()
         print dfs
