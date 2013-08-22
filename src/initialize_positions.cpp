@@ -39,7 +39,7 @@
 #include <IMP/base/raii_macros.h>
 #include <IMP/base/log.h>
 #include <IMP/base/flags.h>
-#include <IMP/example/optimizing.h>
+//#include <IMP/example/optimizing.h>
 #ifdef IMP_NPC_GOOGLE
 #include <IMP/npctransport/internal/google_main.h>
 #else
