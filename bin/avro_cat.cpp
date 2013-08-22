@@ -5,7 +5,7 @@
  */
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
-#include <avro/DataFile.hh>
+#include <DataFile.hh>
 #include <fstream>
 #include <iomanip>
 
