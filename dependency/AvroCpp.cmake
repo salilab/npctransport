@@ -56,10 +56,9 @@ if(DEFINED AVROCPP_INTERNAL)
 message(STATUS "Using internal AvroCPP")
 set(AVROCPP_BINARY_DIR ${CMAKE_BINARY_DIR}/src/dependency/AvroCpp CACHE INTERNAL "" FORCE)
 add_subdirectory("${CMAKE_SOURCE_DIR}/modules/npctransport/dependency/AvroCpp" "${AVROCPP_BINARY_DIR}")
-set(AVROCPP_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/modules/npctransport/dependency/AvroCpp/" CACHE INTERNAL "" FORCE)
+set(AVROCPP_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/modules/npctransport/dependency/AvroCpp/api" CACHE INTERNAL "" FORCE)
 set(AVROCPP_LIBRARIES avrocpp CACHE INTERNAL "" FORCE)
 file(WRITE "${CMAKE_BINARY_DIR}/data/build_info/AvroCpp" "ok=True
 includepath=\"${AVROCPP_INCLUDE_PATH}\"
 ")
 endif(DEFINED AVROCPP_INTERNAL)
-

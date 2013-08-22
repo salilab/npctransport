@@ -9,7 +9,6 @@
 #ifndef IMPNPCTRANSPORT_AVRO2PB_READER_H
 #define IMPNPCTRANSPORT_AVRO2PB_READER_H
 
-#include <ValidSchema.hh>
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
 #include <IMP/base/value_macros.h>
