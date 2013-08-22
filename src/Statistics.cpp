@@ -267,7 +267,7 @@ void Statistics::update_fg_stats
 
       // Average chain stats from optimizer state:
       {
-        IMP_USAGE_CHECK(chains_stats_map.find(type_i) != chains_stats_map.end(),
+        IMP_USAGE_CHECK(chains_stats_map_.find(type_i) != chains_stats_map_.end(),
                         "type missing from stats");
         ChainStatisticsOptimizerStates& cs_i =
           chains_stats_map_.find(type_i)->second;
