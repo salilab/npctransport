@@ -5,9 +5,9 @@ package npctransport_proto;
 message Configuration {
   message XYZ {
   // XYZ coordinates for a particle etc.
-    required float x=1;
-    required float y=2;
-    required float z=3;
+    required double x=1;
+    required double y=2;
+    required double z=3;
   };
   message IntRange {
     // a range from lower to upper with specified number of steps
@@ -19,10 +19,10 @@ message Configuration {
     // a range from lower to upper with specified number of steps
     // evenly-spaced on a logarithmic space with specified base.
     // if base == 1, standard uniform spacing is used
-    required float lower=1;
-    optional float upper=2;
+    required double lower=1;
+    optional double upper=2;
     optional int32 steps=3;
-    optional float base=4;
+    optional double base=4;
   };
   message FGConfiguration {
     required IntRange number_of_beads=1;
@@ -100,16 +100,16 @@ message Configuration {
 message Assignment {
   message XYZ {
   // XYZ coordinates for a particle etc.
-    required float x=1;
-    required float y=2;
-    required float z=3;
+    required double x=1;
+    required double y=2;
+    required double z=3;
   };
   message IntAssignment {
     required int32 value=1;
     optional int32 index=2;
   };
   message FloatAssignment {
-    required float value=1;
+    required double value=1;
     optional int32 index=2;
   };
   message FGAssignment {
@@ -194,16 +194,16 @@ message Statistics {
      repeated int32 ints=1;
   }
   message FGOrderParams {
-    required float time_ns=1;
-    required float volume=2;
-    required float radius_of_gyration=3;
-    required float length=4;
+    required double time_ns=1;
+    required double volume=2;
+    required double radius_of_gyration=3;
+    required double length=4;
   }
   message FloaterOrderParams {
-    required float time_ns=1;
-    required float interacting_sites=2;
-    required float interacting_beads=3;
-    required float interacting_fg_chains=4;
+    required double time_ns=1;
+    required double interacting_sites=2;
+    required double interacting_beads=3;
+    required double interacting_fg_chains=4;
     required int32 n_z0=5;
     required int32 n_z1=6;
     required int32 n_z2=7;
@@ -242,8 +242,8 @@ message Statistics {
     optional double avg_pct_bound_particles1=6;
   }
   message GlobalOrderParams {
-    required float time_ns=1;
-    required float energy=2;
+    required double time_ns=1;
+    required double energy=2;
     repeated Ints zr_hists=3;
   }
   repeated FGStats fgs=1;
