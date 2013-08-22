@@ -196,7 +196,11 @@ class IMPNPCTRANSPORTEXPORT Statistics : public base::Object {
   //! updates pStats with all statistics related to fgs, averaged over
   //! nf_new additional frames
   void update_fg_stats( ::npctransport_proto::Statistics* pStats,
-                        unsigned int nf_new);
+                        unsigned int nf_new,
+                        unsigned int zr_hist[4][3]);
+
+
+
 
   // TODO: move to util.h, possibly internal
   // @param kaps a list of kap particles
@@ -216,15 +220,16 @@ class IMPNPCTRANSPORTEXPORT Statistics : public base::Object {
   /** get the number of site-site interactions between two particles */
   int get_number_of_interactions(Particle *a, Particle *b) const;
 
+  //! @return the top of a z-axis bin for various stats
+  double get_z_distribution_top() const;
+
+  //! @return the radius of a outermost radial (x,y) bin for various stats
+  double get_r_distribution_max() const;
+
   /**
      for particles ps, returns the distribution along the z axis, in regions
-     z0 = [top...) ;
-     z1 = [0..top) ;
-     z2 = [-top..top) ;
-     z3 = (...top)
-     with top being top of slab if slab exists,
-     or 25% of box size if box exists but not slab, or 1.0 otherwise.
-
+     z0 = [top...) ;   z1 = [0..top) ;   z2 = [-top..top) ;   z3 = (...top)
+     with top being the return value of get_z_distribution_top()
 
      @param ps the particles
 
@@ -233,6 +238,17 @@ class IMPNPCTRANSPORTEXPORT Statistics : public base::Object {
    */
   boost::tuple<int, int, int, int>
     get_z_distribution(const ParticlesTemp& ps) const;
+
+  /** add the z-axis / (x,y)-radial distribution of particles ps
+      to zr_hist, a grid with z-axis bins on the first dimension and
+      radial bins on the second dimension.
+
+      @param zr_hist a grid on z / (x,y)-radial axis
+      @param ps the particles
+
+  */
+  void fill_in_zr_hist(unsigned int zr_hist[4][3],
+                       ParticlesTemp& ps) const;
 
 
  public:

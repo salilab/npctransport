@@ -190,13 +190,16 @@ message Assignment {
 }
 
 message Statistics {
-  message FGReactionCoords {
+  message Ints { // list of ints
+     repeated int32 ints=1;
+  }
+  message FGOrderParams {
     required double time_ns=1;
     required double volume=2;
     required double radius_of_gyration=3;
     required double length=4;
   }
-  message FloaterReactionCoords {
+  message FloaterOrderParams {
     required double time_ns=1;
     required double interacting_sites=2;
     required double interacting_beads=3;
@@ -205,6 +208,10 @@ message Statistics {
     required int32 n_z1=6;
     required int32 n_z2=7;
     required int32 n_z3=8;
+  }
+  message FGsZRHistogramOrderParams{
+    required double time_ns=1;
+
   }
   message FGStats {
     optional double volume=1 [default=0];
@@ -216,7 +223,7 @@ message Statistics {
     optional double chain_correlation_time=7 [default=0];
     optional double local_diffusion_coefficient=8 [default=0];
     optional string type=9; // type name, e.g. "fg_nsp1"
-    repeated FGReactionCoords reaction_coords=10;
+    repeated FGOrderParams order_params=10;
   }
   message FloatStats {
     optional double interactions=1 [default=0];
@@ -228,7 +235,7 @@ message Statistics {
     optional double avg_n_transports=7 [default=0]; // avg number of times a particle of this type has crossed the channel
     repeated double transport_time_points_ns=8; // records the time points of transports in simulation time (TODO: assuming single trial?)
     optional string type=9; // type name, e.g. "kap121"
-    repeated FloaterReactionCoords reaction_coords=10;
+    repeated FloaterOrderParams order_params=10;
   }
   message InteractionStats {
     required string type0=1;
@@ -238,9 +245,10 @@ message Statistics {
     optional double avg_pct_bound_particles0=5;
     optional double avg_pct_bound_particles1=6;
   }
-  message EnergyByTime {
+  message GlobalOrderParams {
     required double time_ns=1;
     required double energy=2;
+    repeated Ints zr_hists=3;
   }
   repeated FGStats fgs=1;
   repeated FloatStats floaters=2;
@@ -250,7 +258,7 @@ message Statistics {
   repeated InteractionStats interactions=6;
   optional int32 interrupted=7 [default=0];
   optional double bd_simulation_time_ns=8 [default=0]; // number of ns in which BD simulation was running
-  repeated EnergyByTime energies_by_time=9;
+  repeated GlobalOrderParams global_order_params=9;
 }
 
 message Conformation {

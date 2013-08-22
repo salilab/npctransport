@@ -210,10 +210,12 @@ OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
 }
 
 void Statistics::update_fg_stats
-( ::npctransport_proto::Statistics* pStats,
-  unsigned int nf_new)
+( ::npctransport_proto::Statistics* stats,
+  unsigned int nf_new,
+  unsigned int zr_hist[4][3])
 {
-  int nf = pStats->number_of_frames();
+  std::cout << "Updating FG Stats" << std::endl;
+  int nf = stats->number_of_frames();
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
     ->get_bd()->get_current_time() / FS_IN_NS;
 
@@ -222,11 +224,12 @@ void Statistics::update_fg_stats
   for ( ParticleTypeSet::const_iterator
           it = fgt.begin(); it != fgt.end(); it++ )
     {
-      core::ParticleType type_i = type_i;
+      core::ParticleType type_i = *it;
+      std::cout << "Type " << type_i << std::endl;
       ParticlesTemp ps_i = get_sd()->get_particles_of_type( type_i );
       if(ps_i.size() == 0) continue; // TODO: add warning?
       // can happen only upon dynamic changes...
-      unsigned int i = find_or_add_fg_of_type( pStats, type_i );
+      unsigned int i = find_or_add_fg_of_type( stats, type_i );
 
       // Chain stats from current snapshot:
       {
@@ -237,6 +240,7 @@ void Statistics::update_fg_stats
           {
             atom::Hierarchy hj(ps_i[j]);
             ParticlesTemp chainj = get_as<ParticlesTemp>(atom::get_leaves(hj));
+            fill_in_zr_hist(zr_hist, chainj);
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
             double volume = atom::get_volume(hj);
             double radius_of_gyration = atom::get_radius_of_gyration(chainj);
@@ -244,18 +248,18 @@ void Statistics::update_fg_stats
             double volume = -1.;
             double radius_of_gyration = -1.;
 #endif
-            UPDATE_AVG(nf, nf_new, *pStats->mutable_fgs(i), volume, volume);
+            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), volume, volume);
             double length =
               core::get_distance(core::XYZ(chainj[0]), core::XYZ(chainj.back()));
-            UPDATE_AVG(nf, nf_new, *pStats->mutable_fgs(i), length, length);
-            UPDATE_AVG(nf, nf_new, *pStats->mutable_fgs(i), radius_of_gyration,
+            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), length, length);
+            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), radius_of_gyration,
                        radius_of_gyration);
             avg_volume += volume / ps_i.size();
             avg_radius_of_gyration += radius_of_gyration / ps_i.size();
             avg_length += length / ps_i.size();
           } // for j (fg chain)
-        npctransport_proto::Statistics_FGReactionCoords*
-          fgrc = pStats->mutable_fgs(i)->add_reaction_coords();
+        npctransport_proto::Statistics_FGOrderParams*
+          fgrc = stats->mutable_fgs(i)->add_order_params();
         fgrc->set_time_ns(sim_time_ns);
         fgrc->set_volume(avg_volume);
         fgrc->set_radius_of_gyration(avg_radius_of_gyration);
@@ -272,13 +276,13 @@ void Statistics::update_fg_stats
           {
             unsigned int cnf = nf * cs_i.size() + j;
             UPDATE_AVG(cnf, nf_new,
-                       *pStats->mutable_fgs(i), chain_correlation_time,
+                       *stats->mutable_fgs(i), chain_correlation_time,
                        cs_i[j]->get_correlation_time());
-            UPDATE_AVG(cnf, nf_new, *pStats->mutable_fgs(i),
+            UPDATE_AVG(cnf, nf_new, *stats->mutable_fgs(i),
                        chain_diffusion_coefficient,
                        cs_i[j]->get_diffusion_coefficient());
             Floats df = cs_i[j]->get_diffusion_coefficients();
-            UPDATE_AVG(cnf, nf_new, *pStats->mutable_fgs(i),
+            UPDATE_AVG(cnf, nf_new, *stats->mutable_fgs(i),
                        local_diffusion_coefficient,
                        std::accumulate(df.begin(), df.end(), 0.0) / df.size());
             cs_i[j]->reset();
@@ -299,10 +303,10 @@ void Statistics::update_fg_stats
                 BodyStatisticsOptimizerState* fbs_ijk = fbs_ij[k];
                 unsigned int per_frame = fbs_i.size() * fbs_ij.size();
                 unsigned int cnf = (nf) * per_frame + j * fbs_ij.size() + k;
-                UPDATE_AVG(cnf, nf_new, *pStats->mutable_fgs(i),
+                UPDATE_AVG(cnf, nf_new, *stats->mutable_fgs(i),
                            particle_correlation_time,
                            fbs_ijk->get_correlation_time());
-                UPDATE_AVG(cnf, nf_new, *pStats->mutable_fgs(i),
+                UPDATE_AVG(cnf, nf_new, *stats->mutable_fgs(i),
                            particle_diffusion_coefficient,
                            fbs_ijk->get_diffusion_coefficient());
                 fbs_ijk->reset();
@@ -325,14 +329,14 @@ void Statistics::update
   std::ifstream inf(output_file_name_.c_str(), std::ios::binary);
   output.ParseFromIstream(&inf);
   inf.close();
-  ::npctransport_proto::Statistics &stats = *output.mutable_statistics();
-  int nf = stats.number_of_frames();
+  ::npctransport_proto::Statistics* stats = output.mutable_statistics();
+  int nf = stats->number_of_frames();
   if (is_stats_reset_) {  // stats was just reset
     // TODO: what's if multiple trials?
     nf = 0;
     is_stats_reset_ = false;
-    for (int i = 0; i < stats.floaters().size(); i++) {
-      (*stats.mutable_floaters(i)).clear_transport_time_points_ns();
+    for (int i = 0; i < stats->floaters().size(); i++) {
+      (*stats->mutable_floaters(i)).clear_transport_time_points_ns();
     }
   }
   std::cout << "Updating statistics file " << output_file_name_
@@ -344,24 +348,24 @@ void Statistics::update
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
     ->get_bd()->get_current_time() / FS_IN_NS;
 
-  update_fg_stats(&stats, nf_new);
-
+  unsigned int zr_hist[4][3]={{0},{0},{0},{0}};
+  update_fg_stats(stats, nf_new, zr_hist);
 
   // Floaters general body stats
   for (BodyStatisticsOSsMap::iterator
          it = floaters_stats_map_.begin() ;
        it != floaters_stats_map_.end(); it++)
     {
-      unsigned int i = find_or_add_floater_of_type( &stats, it->first );
+      unsigned int i = find_or_add_floater_of_type( stats, it->first );
       BodyStatisticsOptimizerStates& bsos = it->second;
       for (unsigned int j = 0; j < bsos.size(); j++)
         {
           int cnf = (nf) * bsos.size() + j; // each old frame is for size particles
           UPDATE_AVG(cnf, nf_new,  // TODO: is nf_new correct? I think so
-                     *stats.mutable_floaters(i), diffusion_coefficient,
+                     *stats->mutable_floaters(i), diffusion_coefficient,
                      bsos[j]->get_diffusion_coefficient());
           UPDATE_AVG(cnf, nf_new,  // TODO: is nf_new correct? I think so
-                     *stats.mutable_floaters(i), correlation_time,
+                     *stats->mutable_floaters(i), correlation_time,
                      bsos[j]->get_correlation_time());
           bsos[j]->reset();
         } // for j
@@ -373,12 +377,12 @@ void Statistics::update
            it1 = floaters_transport_stats_map_.begin();
          it1 != floaters_transport_stats_map_.end() ; it1++)
       {
-        unsigned int i = find_or_add_floater_of_type( &stats, it1->first );
+        unsigned int i = find_or_add_floater_of_type( stats, it1->first );
         ParticleTransportStatisticsOptimizerStates& pts_i = it1->second;
         // fetch old ones from stats msg, add new ones and rewrite all:
         std::set<double> times_i
-          ( stats.floaters(i).transport_time_points_ns().begin(),
-            stats.floaters(i).transport_time_points_ns().end() );
+          ( stats->floaters(i).transport_time_points_ns().begin(),
+            stats->floaters(i).transport_time_points_ns().end() );
         for (unsigned int j = 0; j < pts_i.size(); ++j)
           {
             Floats const &new_times_ij =
@@ -388,15 +392,15 @@ void Statistics::update
                 times_i.insert(new_times_ij[k]);
               } // for k
           } // for j
-        (*stats.mutable_floaters(i)).clear_transport_time_points_ns();
+        (*stats->mutable_floaters(i)).clear_transport_time_points_ns();
         for (std::set<double>::const_iterator it2 = times_i.begin();
              it2 != times_i.end(); it2++)
           {
-            (*stats.mutable_floaters(i)).add_transport_time_points_ns(*it2);
+            (*stats->mutable_floaters(i)).add_transport_time_points_ns(*it2);
           } // for it2
         // update avg too:
         double avg_n_transports_i = times_i.size() * 1.0 / pts_i.size();
-        (*stats.mutable_floaters(i)).set_avg_n_transports( avg_n_transports_i );
+        (*stats->mutable_floaters(i)).set_avg_n_transports( avg_n_transports_i );
       } // for it1
   }
 
@@ -410,21 +414,21 @@ void Statistics::update
         if(ps.size() == 0) // TODO: makes sense that this should happen?
           continue;
         floaters_list.push_back(ps);
-        unsigned int i = find_or_add_floater_of_type( &stats, *it );
+        unsigned int i = find_or_add_floater_of_type( stats, *it );
         double interactions, interacting, bead_partners, chain_partners;
         ParticlesTemp fgs = atom::get_leaves( get_sd()->get_fg_chains() );
         boost::tie(interactions, interacting, bead_partners, chain_partners) =
           get_interactions_and_interacting(ps, fgs);
-        UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i), interactions,
+        UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i), interactions,
                    interactions / ps.size());
-        UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i), interacting,
+        UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i), interacting,
                  interacting / ps.size());
-        UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i),
+        UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
                  interaction_partner_chains, chain_partners / interacting);
-        UPDATE_AVG(nf, nf_new, *stats.mutable_floaters(i),
+        UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
                    interaction_partner_beads, bead_partners / interacting);
-        npctransport_proto::Statistics_FloaterReactionCoords*
-          frc = stats.mutable_floaters(i)->add_reaction_coords();
+        npctransport_proto::Statistics_FloaterOrderParams*
+          frc = stats->mutable_floaters(i)->add_order_params();
         frc->set_time_ns(sim_time_ns);
         frc->set_interacting_sites(interactions);
         frc->set_interacting_beads(bead_partners);
@@ -445,10 +449,10 @@ void Statistics::update
     {
       IMP_LOG(PROGRESS, "adding interaction statistics "
               << it->first << std::endl);
-      unsigned int i = find_or_add_interaction_of_type( &stats, it->first );
+      unsigned int i = find_or_add_interaction_of_type( stats, it->first );
       BipartitePairsStatisticsOptimizerState* bps_i = it->second;
       ::npctransport_proto::Statistics_InteractionStats *pOutStats_i =
-          stats.mutable_interactions(i);
+          stats->mutable_interactions(i);
       // verify correct interaction type is stored
       InteractionType itype = bps_i->get_interaction_type();
       std::string s_type0 = itype.first.get_string();
@@ -477,23 +481,31 @@ void Statistics::update
     bps_i->reset();
   }
 
-  // MISC:
+  // GLOBALS:
   {
     // Todo: define better what we want of timer
-    stats.set_seconds_per_iteration(timer.elapsed());
-    stats.set_number_of_frames(nf + nf_new);
-    stats.set_bd_simulation_time_ns( sim_time_ns );
+    stats->set_seconds_per_iteration(timer.elapsed());
+    stats->set_number_of_frames(nf + nf_new);
+    stats->set_bd_simulation_time_ns( sim_time_ns );
     double total_energy  =
       get_sd()->get_bd()->get_scoring_function()->evaluate(false);
     double energy_per_diffuser =
-      total_energy / get_sd()->get_diffusers()->get_number_of_particles() ;
-    UPDATE_AVG(nf, nf_new, stats, energy_per_particle,  // TODO: reset?
+      total_energy / get_sd()->get_diffusers()->get_indexes().size();
+    UPDATE_AVG(nf, nf_new, (*stats), energy_per_particle,  // TODO: reset?
                // TODO: these are diffusing particles only
                energy_per_diffuser );
-    ::npctransport_proto::Statistics_EnergyByTime*
-        sebt = stats.add_energies_by_time();
-    sebt->set_time_ns(sim_time_ns);
-    sebt->set_energy(total_energy);
+    ::npctransport_proto::Statistics_GlobalOrderParams*
+        sgop = stats->add_global_order_params();
+    sgop->set_time_ns(sim_time_ns);
+    sgop->set_energy(total_energy);
+    for(int zz=0; zz < 4; zz++)
+      {
+        ::npctransport_proto::Statistics_Ints* sis=
+          sgop->add_zr_hists();
+        for(int rr=0; rr < 3; rr++){
+          sis->add_ints(zr_hist[zz][rr]);
+        }
+      }
   }
 
   // TODO: disable this for now
@@ -573,10 +585,10 @@ void Statistics::set_interrupted(bool tf) {
   std::ifstream inf(output_file_name_.c_str(), std::ios::binary);
   output.ParseFromIstream(&inf);
   inf.close();
-  ::npctransport_proto::Statistics &stats = *output.mutable_statistics();
-  stats.set_interrupted(tf ? 1 : 0);
+  ::npctransport_proto::Statistics* stats = output.mutable_statistics();
+  stats->set_interrupted(tf ? 1 : 0);
   std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
-  stats.SerializeToOstream(&outf);
+  stats->SerializeToOstream(&outf);
 }
 
 
@@ -640,19 +652,35 @@ Statistics::get_interactions_and_interacting
                            chain_partners);
 }
 
+double Statistics::get_z_distribution_top() const{
+  if(get_sd()->get_has_slab())
+    {
+      return  get_sd()->get_slab_thickness() / 2.0;
+    }
+  if(get_sd()->get_has_bounding_box())
+    {
+      return get_sd()->get_box_size() / 4.0;
+    }
+  return 1.0;
+}
+
+double Statistics::get_r_distribution_max() const{
+  if(get_sd()->get_has_slab())
+    {
+      return  get_sd()->get_tunnel_radius();
+    }
+  if(get_sd()->get_has_bounding_box())
+    {
+      return get_sd()->get_box_size() / 4.0; // diameter = 50% box edge
+    }
+  return 1.0;
+}
+
 // distribution of particles along z axis
 boost::tuple<int, int, int, int>
 Statistics::get_z_distribution(const ParticlesTemp& ps) const{
   int zh[4] = {0, 0, 0, 0};
-  double top=1.0; // arbitrary positive default
-  // priority II overrides default
-  if(get_sd()->get_has_bounding_box()){
-    top = get_sd()->get_box_size() / 4;
-  }
-  // priority I overrides II
-  if(get_sd()->get_has_slab()){
-    top = get_sd()->get_slab_thickness()/2;
-  }
+  double top = get_z_distribution_top();
   for (unsigned int i = 0; i < ps.size(); i++) {
     core::XYZ d(ps[i]);
     double z = d.get_z();
@@ -667,6 +695,36 @@ Statistics::get_z_distribution(const ParticlesTemp& ps) const{
     }
   }
   return boost::make_tuple(zh[0],zh[1],zh[2],zh[3]);
+}
+
+void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][3],
+                                 ParticlesTemp& ps) const{
+  std::cout << "Filling in zr_hist" << std::endl;
+  double top = get_z_distribution_top();
+  double r_max = get_r_distribution_max();
+  int zz, rr;
+  for(unsigned int i = 0; i < ps.size() ; i++){
+    core::XYZ d(ps[i]);
+    double z = d.get_z();
+    double r = std::sqrt( std::pow(d.get_x(),2) + std::pow(d.get_y(),2) );
+    if(z>top) {
+      zz=0;
+    } else if (z>0) {
+      zz=1;
+    } else if (z>-top) {
+      zz=2;
+    } else {
+      zz=3;
+    }
+    if(r < r_max / 2.0) {
+      rr=0;
+    } else if (r < r_max) {
+      rr=1;
+    } else {
+      rr=2;
+    }
+    zr_hist[zz][rr]++;
+  } // i (particles)
 }
 
 
