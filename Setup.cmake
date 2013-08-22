@@ -12,6 +12,7 @@ add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal
                           COMMAND mv "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h" "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h.out"
                           COMMAND echo "\"\#include\"" "\"<IMP/npctransport/npctransport_config.h>\"" > "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h"
                           COMMAND cat "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h.out" >> "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h"
+                          COMMAND rm -f "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
                           COMMAND ln -s "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h" "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
                           DEPENDS "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
                           COMMENT "Creating protoc stuff for npctransport"
