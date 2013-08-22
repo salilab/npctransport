@@ -224,10 +224,10 @@ IMP::base::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
     for (unsigned int k = 0; k < chains.size(); k++) {
       Hierarchy cur_chain(chains[k]);
       core::XYZ d(cur_chain.get_child(0));
-      /*IMP_LOG(base::PROGRESS, "d # " << k << " = " << d << std::endl);
-      IMP_LOG(base::PROGRESS, "is optimizable = "
+      IMP_LOG(ll, "d # " << k << " = " << d << std::endl);
+      IMP_LOG(ll, "is optimizable = "
               << d.get_coordinates_are_optimized()
-              << std::endl);*/
+              << std::endl);
     }
   }
 
