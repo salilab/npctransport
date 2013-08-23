@@ -29,7 +29,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class IMPNPCTRANSPORTEXPORT Avro2PBReader {
  private:
-  typedef avro::DataFileReader<IMP_npctransport::wrapper> t_avro_reader;
+  typedef IMP_NPCTRANSPORT_AVRO_NAMESPACE::DataFileReader<IMP_npctransport::wrapper> t_avro_reader;
 
  public:
   /** Initiates a reader that goes over all output

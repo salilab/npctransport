@@ -24,7 +24,7 @@ add_custom_target(IMP.npctransport-proto ALL DEPENDS
                           "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.cpp")
 set_property(TARGET IMP.npctransport-proto PROPERTY FOLDER "IMP.npctransport")
 
-set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.cpp" CACHE INTERNAL "" FORCE)
+list(APPEND IMP_NPCTRANSPORT_LIBRARY_EXTRA_SOURCES "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.cpp")
 
 set(IMP_NPCTRANSPORT_LIBRARY_EXTRA_DEPENDENCIES "IMP.npctransport-proto" CACHE INTERNAL "" FORCE)
 
@@ -44,5 +44,7 @@ add_custom_target(IMP.npctransport-python_proto ALL DEPENDS "${CMAKE_BINARY_DIR}
 set_property(TARGET IMP.npctransport-python_proto PROPERTY FOLDER "IMP.npctransport")
 
 include_directories(${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal)
+
+set(IMP_NPCTRANSPORT_CONFIG IMP_NPCTRANSPORT_AVRO_NAMESPACE=rmf_avro)
 
 set(IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES IMP.npctransport-python_proto CACHE INTERNAL "" FORCE)

@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
   }
   std::string out = argv[argc - 1];
 
-  avro::DataFileWriter<IMP_npctransport::wrapper> wr(
+  IMP_NPCTRANSPORT_AVRO_NAMESPACE::DataFileWriter<IMP_npctransport::wrapper> wr(
       out.c_str(), IMP::npctransport::get_avro_data_file_schema());
 
   for (int i = 0; i < argc - 2; ++i) {

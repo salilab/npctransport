@@ -30,16 +30,16 @@ struct wrapper {
   std::vector<uint8_t> value;
 };
 }
-namespace avro {
+namespace IMP_NPCTRANSPORT_AVRO_NAMESPACE {
 template <>
 struct codec_traits<IMP_npctransport::wrapper> {
   static void encode(Encoder& e, const IMP_npctransport::wrapper& v) {
-    avro::encode(e, v.key);
-    avro::encode(e, v.value);
+    IMP_NPCTRANSPORT_AVRO_NAMESPACE::encode(e, v.key);
+    IMP_NPCTRANSPORT_AVRO_NAMESPACE::encode(e, v.value);
   }
   static void decode(Decoder& d, IMP_npctransport::wrapper& v) {
-    avro::decode(d, v.key);
-    avro::decode(d, v.value);
+    IMP_NPCTRANSPORT_AVRO_NAMESPACE::decode(d, v.key);
+    IMP_NPCTRANSPORT_AVRO_NAMESPACE::decode(d, v.value);
   }
 };
 }

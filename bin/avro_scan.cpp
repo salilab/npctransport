@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
   }
   std::string out = argv[argc - 1];
 
-  avro::DataFileReader<IMP_npctransport::wrapper> rd(
+  IMP_NPCTRANSPORT_AVRO_NAMESPACE::DataFileReader<IMP_npctransport::wrapper> rd(
       out.c_str(), IMP::npctransport::get_avro_data_file_schema());
 
   IMP_npctransport::wrapper data;

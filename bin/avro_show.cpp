@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   std::string out = argv[argc - 1];
 
   for (int i = 1; i < argc; ++i) {
-    avro::DataFileReader<IMP_npctransport::wrapper> rd(
+    IMP_NPCTRANSPORT_AVRO_NAMESPACE::DataFileReader<IMP_npctransport::wrapper> rd(
         argv[i], IMP::npctransport::get_avro_data_file_schema());
     rd.readerSchema().toJson(std::cout);
     rd.dataSchema().toJson(std::cout);
