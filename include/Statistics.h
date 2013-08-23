@@ -203,17 +203,17 @@ class IMPNPCTRANSPORTEXPORT Statistics : public base::Object {
 
 
   // TODO: move to util.h, possibly internal
-  // @param kaps a list of kap particles
+  // @param floaters a list of floater particles
   // @param fg_roots a list of hierarchy particles that are the root of an
   //                 fg chain (= all their children are fg typed particles)
   // @return a 4-tuple (1,2,3,4) with:
-  // 1 - total # of individual site-site interactions between the specified kaps
-  //     and fgs
-  // 2 - total # of bead pairs that make any site-site interaction
-  // 3 - total # of kaps that contact any FG
-  // 4 - sum of # of individual fg chains contacted by each kap
+  // 1 - total # of individual site-site interactions between the specified
+  //     floaters and chains
+  // 2 - total # of floaters that site-interact with any specified chain
+  // 3 - total # of fg bead-floater pairs that site-interact
+  // 4 - sum of # of chain-floater that site-intercat
   boost::tuple<double, double, double, double> get_interactions_and_interacting
-    ( const ParticlesTemp &kaps, const atom::Hierarchies &fgs) const;
+    ( const ParticlesTemp &floaters, const atom::Hierarchies &chain_roots) const;
 
 
   // TODO: move to util.h, possibly internal

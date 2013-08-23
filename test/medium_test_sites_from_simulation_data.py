@@ -10,6 +10,8 @@ import math
 fg_R = 25
 diffuser_R = 25
 fg_coords = [25,25,25]
+kap_type = "my_kap"
+fg_type = "my_fg"
 
 class Tests(IMP.test.TestCase):
 
@@ -26,7 +28,7 @@ class Tests(IMP.test.TestCase):
         config.box_is_on.lower=1
         config.box_side.lower=125
         fgs= IMP.npctransport.add_fg_type(config,
-                                          type_name="my_fg",
+                                          type_name=fg_type,
                                           number_of_beads=1,
                                           number=1,
                                           radius=fg_R,
@@ -42,12 +44,12 @@ class Tests(IMP.test.TestCase):
                                               number=1,
                                               radius=diffuser_R,
                                               interactions=12,
-                                              type_name="my_kap",
+                                              type_name=kap_type,
                                               d_factor=3
                                               )
         interactionFG_KAP= IMP.npctransport.add_interaction(config,
-                                     name0="my_fg",
-                                     name1="my_kap",
+                                     name0=fg_type,
+                                     name1=kap_type,
                                      interaction_k=10,
                                      interaction_range=5)
 
@@ -87,7 +89,7 @@ class Tests(IMP.test.TestCase):
         kap = None
         r=sd.get_root()
         for rchild in r.get_children():
-            if rchild.get_name()=="my_kap":
+            if rchild.get_name()==kap_type:
                 kap = rchild.get_child(0)
         assert(kap is not None)
         # check if sphere coordinates are close
@@ -103,6 +105,18 @@ class Tests(IMP.test.TestCase):
             print "Kap coords", kap_c,
             print "FG coords", anchor_c,
             print "D", D
+
+    def is_stats_interact_(self, output_file):
+        ''' verify that stats order parametrs know about the interaction '''
+        f=open(output_file, "rb")
+        o=Output()
+        o.ParseFromString(f.read())
+        assert(o.statistics is not None)
+        for f in o.statistics.floaters:
+            if(f.type == kap_type):
+                if f.order_params[-1].site_interactions_per_floater > 0.0:
+                    return True
+        return False
 
 
 
@@ -133,7 +147,8 @@ class Tests(IMP.test.TestCase):
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         pymol_file = self.get_tmp_file_name("sites.pym")
         self._create_cfg_file_with_fg_anchors( cfg_file )
-        print "assigning parameter ranges from config", cfg_file
+        print "assigning parameter ranges from config", cfg_file,
+        print "to file", assign_file
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
         rmf_file = self.get_tmp_file_name("out.rmf");
         print "RMF file", rmf_file
@@ -144,13 +159,16 @@ class Tests(IMP.test.TestCase):
                                                short_init_factor)
         sd.write_geometry(pymol_file)
         n_good=0
+        timer= IMP.npctransport.timer();
         for i in range(n_iter):
             sd.get_bd().optimize(opt_cycles)
+            sd.get_statistics().update(timer,opt_cycles)
             try:
                 self._assert_kap_in_place(sd, True)
                 print "total energy", sd.get_bd().get_scoring_function().evaluate(False),
-                print "predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False),
+                print "predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False)
                 self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -50.0)
+                self.assert_(self.is_stats_interact_(assign_file))
                 n_good=n_good+1
             except:
                 continue

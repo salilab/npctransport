@@ -254,6 +254,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
      retrieve fg chain hierarchies
 
      @return all the fg hierarchies in the simulation data object
+             that stand for individual FG chains
   */
   atom::Hierarchies get_fg_chains() const
     {
@@ -313,6 +314,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
     sites_[t0] = sites;
   }
 
+  /** returns the maximal interaction range between particles */
   double get_range() const { return range_; }
 
   /**

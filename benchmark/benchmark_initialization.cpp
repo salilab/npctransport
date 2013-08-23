@@ -32,14 +32,6 @@
 
 
 int main(int argc, char *argv[]) {
-#ifdef IMP_NPC_GOOGLE
-  std::string config_txt =
-    "third_party/npc/npctransport/data/benchmark_initialize.txt";
-#else
-  std::string config_txt =
-    IMP::npctransport::get_data_path("benchmark_initialize.txt");
-#endif
-  IMP::base::AddStringFlag add_input("input", "Input file", &config_txt);
   try {
     // preparation::
      IMP_NPC_PARSE_OPTIONS(argc, argv);
@@ -48,7 +40,6 @@ int main(int argc, char *argv[]) {
      double short_init_factor = 1.0 / acceleration_factor;
      std::string config_pb = IMP::base::create_temporary_file_name
        ("benchmark_initalize.pb", ".pb");
-     IMP::npctransport::configuration_txt2pb(config_txt, config_pb);
      std::string output =
        IMP::base::create_temporary_file_name("output", ".pb");
      /*     std::string rmf_file =

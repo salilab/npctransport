@@ -51,10 +51,16 @@ IMP::base::AddBoolFlag  no_save_rmf_to_output_adder
    value and new_value, giving weight n_old_frames, n_new_frames to each,
    respectively.
 */
-#define UPDATE_AVG(n_frames, n_new_frames, message, field, new_value)     \
-  (message).set_##field(static_cast<double>(n_frames *(message).field() + \
-                                            n_new_frames *new_value) /    \
-                        (n_frames + n_new_frames));
+#define UPDATE_AVG(n_frames, n_new_frames, message, field, new_value)   \
+  if(n_new_frames>0) {                                                  \
+    if((message).has_##field()){                                        \
+      (message).set_##field(static_cast<double>(n_frames * (message).field() + \
+                                                n_new_frames *new_value) /     \
+                            (n_frames + n_new_frames));                 \
+    } else {                                                            \
+      (message).set_##field(new_value);                                 \
+    }                                                                   \
+  }
 
 const double FS_IN_NS = 1.0E+6;
 
@@ -107,7 +113,7 @@ void Statistics::add_floater_stats
   IMP_NEW(BodyStatisticsOptimizerState, bsos,
           (p, statistics_interval_frames_));
   floaters_stats_map_[type].push_back(bsos);
-  if (get_sd()->get_has_slab())
+  if (get_sd()->get_has_slab() )
     {  // only if has tunnel
       IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
               (p,
@@ -180,7 +186,7 @@ OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
     {
       ret += iter->second;
     } // for iter
-  if (get_sd()->get_has_slab())
+  if ( get_sd()->get_has_slab() )
     {
       for (ParticleTransportStatisticsOSsMap::iterator
              iter = floaters_transport_stats_map_.begin();
@@ -372,7 +378,7 @@ void Statistics::update
     } // for it
 
   // Floaters avg number of transports per particle
-  if (get_sd()->get_has_slab()){
+  if ( get_sd()->get_has_slab() ){
     for (ParticleTransportStatisticsOSsMap::iterator
            it1 = floaters_transport_stats_map_.begin();
          it1 != floaters_transport_stats_map_.end() ; it1++)
@@ -405,7 +411,6 @@ void Statistics::update
   }
 
   // FG-floaters interactions
-  ParticlesTemps floaters_list;
   ParticleTypeSet const &ft = get_sd()->get_floater_types();
   for ( ParticleTypeSet::const_iterator
           it = ft.begin(); it != ft.end(); it++ )
@@ -413,34 +418,47 @@ void Statistics::update
         ParticlesTemp ps = get_sd()->get_particles_of_type( *it );
         if(ps.size() == 0) // TODO: makes sense that this should happen?
           continue;
-        floaters_list.push_back(ps);
         unsigned int i = find_or_add_floater_of_type( stats, *it );
-        double interactions, interacting, bead_partners, chain_partners;
-        ParticlesTemp fgs = atom::get_leaves( get_sd()->get_fg_chains() );
-        boost::tie(interactions, interacting, bead_partners, chain_partners) =
-          get_interactions_and_interacting(ps, fgs);
-        UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i), interactions,
-                   interactions / ps.size());
-        UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i), interacting,
-                 interacting / ps.size());
-        UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
-                 interaction_partner_chains, chain_partners / interacting);
-        UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
-                   interaction_partner_beads, bead_partners / interacting);
+        double site_site_pairs, interacting_floaters,
+          bead_floater_pairs, chain_floater_pairs;
+        atom::Hierarchies fgs =  get_sd()->get_fg_chains() ;
+        boost::tie(site_site_pairs, interacting_floaters,
+                   bead_floater_pairs, chain_floater_pairs)
+          = get_interactions_and_interacting(ps, fgs);
+        // {
+        //   //TODO: delete - this now only goes as order param
+        //   //      keeping for a while for backward compat.
+        //   UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
+        //              site_interactions_per_floater, -1);
+        //   UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
+        //              interacting_fraction, -1);
+        //   UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
+        //              chains_per_interacting_floater, -1);
+        //   UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
+        //            beads_per_interacting_floater, -1);
+        // }
         npctransport_proto::Statistics_FloaterOrderParams*
           frc = stats->mutable_floaters(i)->add_order_params();
         frc->set_time_ns(sim_time_ns);
-        frc->set_interacting_sites(interactions);
-        frc->set_interacting_beads(bead_partners);
-        frc->set_interacting_fg_chains(chain_partners);
-        int n_z0, n_z1, n_z2, n_z3;
-        boost::tie(n_z0, n_z1, n_z2, n_z3) =
-          get_z_distribution(ps);
-        frc->set_n_z0(n_z0);
-        frc->set_n_z1(n_z1);
-        frc->set_n_z2(n_z2);
-        frc->set_n_z3(n_z3);
-      } // for it
+        frc->set_site_interactions_per_floater
+          (site_site_pairs / ps.size());
+        frc->set_interacting_fraction
+          (interacting_floaters / ps.size());
+        frc->set_beads_per_interacting_floater
+          (bead_floater_pairs / interacting_floaters);
+        frc->set_chains_per_interacting_floater
+          (chain_floater_pairs / interacting_floaters);
+        if(get_sd()->get_has_slab())
+          {
+            int n_z0, n_z1, n_z2, n_z3;
+            boost::tie(n_z0, n_z1, n_z2, n_z3) =
+              get_z_distribution(ps);
+            frc->set_n_z0(n_z0);
+            frc->set_n_z1(n_z1);
+            frc->set_n_z2(n_z2);
+            frc->set_n_z3(n_z3);
+          } // for it
+      }
 
   // update statistics gathered on interaction rates
   for (BipartitePairsStatisticsOSMap::iterator
@@ -498,14 +516,17 @@ void Statistics::update
         sgop = stats->add_global_order_params();
     sgop->set_time_ns(sim_time_ns);
     sgop->set_energy(total_energy);
-    for(int zz=0; zz < 4; zz++)
-      {
-        ::npctransport_proto::Statistics_Ints* sis=
-          sgop->add_zr_hists();
-        for(int rr=0; rr < 3; rr++){
-          sis->add_ints(zr_hist[zz][rr]);
+    if(get_sd()->get_has_slab()){
+      for(int zz=0; zz < 4; zz++)
+        {
+          ::npctransport_proto::Statistics_Ints* sis=
+            sgop->add_zr_hists();
+          for(int rr=0; rr < 3; rr++)
+            {
+              sis->add_ints(zr_hist[zz][rr]);
+            }
         }
-      }
+    }
   }
 
   // TODO: disable this for now
@@ -525,7 +546,7 @@ void Statistics::update
   // dump to file
   std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
   output.SerializeToOstream(&outf);
-}
+  }
 
 void Statistics::reset_statistics_optimizer_states()
 {
@@ -595,61 +616,69 @@ void Statistics::set_interrupted(bool tf) {
 
 /************ private utility methods ****************/
 
-// number of site-site interactions between a and b
-int Statistics::get_number_of_interactions(Particle *a, Particle *b) const {
+// number of site-site interactions between p1 and p2
+int Statistics::get_number_of_interactions(Particle *p1, Particle *p2) const {
   using namespace IMP::core;
   double range = get_sd()->get_range();
-  if ( get_distance(XYZR(a), XYZR(b)) > range )
+  // note this is sphere distance
+  if ( get_distance(XYZR(p1), XYZR(p2)) > range )
     return 0;
-  const algebra::Vector3Ds &sa =
-    get_sd()->get_sites( Typed(a).get_type() );
-  const algebra::Vector3Ds  &sb =
-    get_sd()->get_sites( Typed(b).get_type() );
-  algebra::ReferenceFrame3D rfa = core::RigidBody(a).get_reference_frame();
-  algebra::ReferenceFrame3D rfb = core::RigidBody(b).get_reference_frame();
-  algebra::Transformation3D ta = rfa.get_transformation_to();
-  algebra::Transformation3D tb = rfb.get_transformation_to();
-  int ct = 0; // TODO: shouldn't sites be transformed ?!
-  for (unsigned int i = 0; i < sa.size(); ++i) {
-    algebra::Vector3D va = ta.get_transformed(sa[i]);
-    for (unsigned int j = 0; j < sb.size(); ++j) {
-      algebra::Vector3D vb = tb.get_transformed(sb[i]);
-      if (algebra::get_distance(va, vb) < range) {
-        ++ct;
-      }
-    }
-  }
+  const algebra::Vector3Ds &sites1 =
+    get_sd()->get_sites( Typed(p1).get_type() );
+  const algebra::Vector3Ds  &sites2 =
+    get_sd()->get_sites( Typed(p2).get_type() );
+
+  int ct = 0;
+  for (unsigned int i1 = 0; i1 < sites1.size(); ++i1)
+    {
+      algebra::Vector3D v1 = get_global_from_local_v3(p1, sites1[i1]);
+      for (unsigned int i2 = 0; i2 < sites2.size(); ++i2)
+        {
+          algebra::Vector3D v2 = get_global_from_local_v3(p2, sites2[i2]);
+          // TODO: actual intercation range for two particle types?!
+          // std::cout << *p1 << "-" << i1 << "," << *p2 << "-" << i2
+          //           << " ; D= " << get_distance(v1,v2) << std::endl;
+          if (algebra::get_distance(v1, v2) < range)
+            {
+              ++ct;
+            }
+        } // for i2
+    } // for i1
   return ct;
 }
 
 // see doc in .h file
 boost::tuple<double, double, double, double>
 Statistics::get_interactions_and_interacting
-( const ParticlesTemp &kaps, const atom::Hierarchies &fg_roots) const
+( const ParticlesTemp &floaters, const atom::Hierarchies &chain_roots) const
 {
-  double interactions = 0, interacting = 0, bead_partners = 0,
-         chain_partners = 0;
-  for (unsigned int i = 0; i < kaps.size(); ++i) {
-    bool kap_found = false;
-    for (unsigned int j = 0; j < fg_roots.size(); ++j) {
+  double site_site_pairs = 0,   interacting_floaters = 0,
+    bead_floater_pairs = 0,     chain_floater_pairs = 0;
+  for (unsigned int i = 0; i < floaters.size(); ++i) {
+    bool floater_found = false;
+    for (unsigned int j = 0; j < chain_roots.size(); ++j) {
       bool chain_found = false;
-      unsigned int const N = fg_roots[j].get_number_of_children();
+      unsigned int const N = chain_roots[j].get_number_of_children();
       for (unsigned int k = 0; k < N; ++k) {
         int num = get_number_of_interactions
-          (kaps[i], fg_roots[j].get_child(k) );
+          (floaters[i], chain_roots[j].get_child(k) );
         if (num > 0) {
-          interactions += num;
-          ++bead_partners;
-          if (!kap_found) ++interacting;
-          kap_found = true;
-          if (!chain_found) ++chain_partners;
+          site_site_pairs += num;
+          ++bead_floater_pairs;
+          if (!floater_found) ++interacting_floaters;
+          floater_found = true;
+          if (!chain_found) ++chain_floater_pairs;
           chain_found = true;
         } // num > 0
       } // k (particle in chain)
-    }// j (fg chains)
-  }// i (kaps)
-  return boost::make_tuple(interactions, interacting, bead_partners,
-                           chain_partners);
+    }// j ( chains)
+  }// i (floaters)
+  // std::cout << "Return " << interactions << "," << interacting << ","
+  //           << bead_partners << "," << chain_partners << std::endl;
+  return boost::make_tuple(site_site_pairs,
+                           interacting_floaters,
+                           bead_floater_pairs,
+                           chain_floater_pairs);
 }
 
 double Statistics::get_z_distribution_top() const{
