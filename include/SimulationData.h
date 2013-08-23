@@ -385,7 +385,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
       hierarchy and constraints of this simulation data,
       so that writing frames into this handle will write
       the updated state of the simulation
-
+      @param fh
       @param is_restraints if true, save restraints to RMF
       @return a handle to the file
 
