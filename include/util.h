@@ -72,7 +72,7 @@ inline algebra::Vector3D get_global_from_local_v3( Particle* p,
 algebra::Vector3D get_global_from_local_v3( Particle* p,
                                               const algebra::Vector3D& local)
 {
-  IMP_USAGE_CHECK(core::RigidBody::particle_is_instance(p),
+  IMP_USAGE_CHECK(core::RigidBody::get_is_setup(p),
                   "Particle must be rigid body in order to use"
                     " its ref frame in get_global_from_local_v3");
   core::RigidBody rb(p);
