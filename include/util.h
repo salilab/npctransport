@@ -13,22 +13,16 @@ Simulate an fg and a kap interacting
 #include "npctransport_config.h"
 #include <IMP/npctransport/npctransport_proto.fwd.h>
 #include <IMP/core/Typed.h>
+#include <IMP/core/rigid_bodies.h>
+#include <IMP/algebra/Vector3D.h>
+#include <IMP/algebra/ReferenceFrame3D.h>
+#include <IMP/algebra/Transformation3D.h>
 #include "typedefs.h"
 #include <IMP/base_types.h>
 #include <string>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-/**
-   Converts protobuf configuration file config_txt (which is in pretty
-   protobuf textual output format) to binary protobuf format
-   (in file config_pb)
-
-   @param config_txt the input textual protobuf config file
-   @param config_pb the output binary protobuf file
- */
-void configuration_txt2pb
-(std::string config_txt, std::string config_pb);
 
 /** returns particles with optimizable coordinates from particles */
 ParticlesTemp get_optimizable_particles
@@ -63,6 +57,29 @@ unsigned int find_or_add_floater_of_type(::npctransport_proto::Statistics* s,
 unsigned int find_or_add_interaction_of_type
 ( ::npctransport_proto::Statistics* s,
   IMP::npctransport::InteractionType it);
+
+/**
+   @param p a rigid body particle
+   @param local the vector in local coordinates
+
+   @return the global coordinates of local based on the reference frame of the
+           rigid body p
+*/
+inline algebra::Vector3D get_global_from_local_v3( Particle* p,
+                                            const algebra::Vector3D& local);
+
+
+algebra::Vector3D get_global_from_local_v3( Particle* p,
+                                              const algebra::Vector3D& local)
+{
+  IMP_USAGE_CHECK(core::RigidBody::particle_is_instance(p),
+                  "Particle must be rigid body in order to use"
+                    " its ref frame in get_global_from_local_v3");
+  core::RigidBody rb(p);
+  algebra::ReferenceFrame3D rf = rb.get_reference_frame();
+  algebra::Transformation3D t = rf.get_transformation_to();
+  return t.get_transformed(local);
+}
 
 #endif  // SWIG
 
