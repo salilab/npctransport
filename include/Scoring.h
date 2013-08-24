@@ -29,8 +29,10 @@
 //#include "SimulationData.h"
 #include "SlabSingletonScore.h"
 #include "npctransport_proto.fwd.h"
+
 #include <boost/timer.hpp>
 #include <string>
+
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -84,11 +86,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
     <container::PredicatePairsRestraint> predr_;
 
   typedef  IMP::base::map< int, base::PointerMember< IMP::PairScore > >
-    map_pair_type_to_pair_score;
+    t_map_pair_type_to_pair_score;
   // scores between particle, mapped by their interaction id,
   // where interaction id is from OrderedTypePairPredicate otpp_
   // applied on each interacting particle type
-  map_pair_type_to_pair_score
+  t_map_pair_type_to_pair_score
     interaction_pair_scores_;
 
   base::PointerMember
@@ -377,11 +379,35 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   bool get_has_slab() const
   { return slab_is_on_; }
 
+  /** returns the spring constant between consecutive beads
+      in a chain of beads */
   double get_backbone_k() const { return backbone_k_; }
 
+  /** returns the constant force applied by overlapping spheres on each
+      other
+  */
   double get_excluded_volume_k() const { return excluded_volume_k_; }
 
+  /** returns the default interaction constant, which is used
+      only if interaction_k is not specified for a certain interaction */
   double get_interaction_k() const { return interaction_k_; }
+
+  /** @return maximal actual interaction range (normalized by
+      range factors) for a given interaction type, as set by
+      add_interaction(), over site-site and/or non-specific
+      interactions if applicable.  If not applicable, returns -1.0
+
+      @param t1,t2 the types of particles in this interaction
+      @param site_specific include site-site ranges
+      @param non_specific include non-specific sphere interaction ranges
+      @note if both site_specific and non_specific are true, takes a
+            maximum over both.
+  */
+  double get_interaction_range_for
+    (core::ParticleType t1, core::ParticleType t2,
+     bool site_specific = true,
+     bool non_specific = false) const;
+
 
   core::OrderedTypePairPredicate* get_ordered_type_pair_predicate()
   { return otpp_; }

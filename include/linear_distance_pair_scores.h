@@ -70,12 +70,19 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
   double k_;
 
  public:
+
   LinearSoftSpherePairScore(double k,
                             std::string name = "LinearSSPairScore%1%");
+
   virtual double evaluate_index(Model *m, const ParticleIndexPair &p,
                                 DerivativeAccumulator *da) const IMP_OVERRIDE;
+
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const;
+
+  //! returns the k for sphere-sphere repulsion
+  double get_k() const { return k_; }
+
   IMP_PAIR_SCORE_METHODS(LinearSoftSpherePairScore);
   IMP_OBJECT_METHODS(LinearSoftSpherePairScore);
   ;
@@ -124,7 +131,7 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
 #endif
 
  private:
-  double attr_range_,  // range of attraction between particles
+  double range_attr_,  // range of attraction between particles
       k_rep_,          // repulsion coeficcient
       k_attr_;         // attraction coefficient
 
@@ -132,7 +139,7 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   mutable EvaluationCache cache_;
 
  public:
-  LinearInteractionPairScore(double krep, double attr_range, double kattr,
+  LinearInteractionPairScore(double k_rep, double range_attr, double k_attr,
                              std::string name = "LinearIDPairScore%1%");
 
 #ifndef SWIG
@@ -181,6 +188,17 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   }
   ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis) const
       IMP_OVERRIDE;
+
+  //! returns the range for sphere-sphere attraction
+  double get_range_attraction() const { return range_attr_; }
+
+  //! returns the k for sphere-sphere attraction
+  double get_k_attraction() const { return k_attr_; }
+
+  //! returns the k for sphere-sphere repulsion
+  double get_k_repulsion() const { return k_rep_; }
+
+
   IMP_OBJECT_METHODS(LinearInteractionPairScore);
 };
 
@@ -198,8 +216,8 @@ inline double LinearInteractionPairScore::evaluate_index(
   x0 = m->get_sphere(pp[0]).get_radius() + m->get_sphere(pp[1]).get_radius();
   // Terminate immediately if very far, work with squares for speed
   // equivalent to [delta_length > x0 + attr_range]:
-  if (delta_length_2 > std::pow(x0 + attr_range_, 2)) return 0;
-  double offset = -attr_range_ * k_attr_;
+  if (delta_length_2 > std::pow(x0 + range_attr_, 2)) return 0;
+  double offset = -range_attr_ * k_attr_;
   double delta_length = std::sqrt(delta_length_2);
   if (delta_length > x0) {  // attractive regime
     return  // decreases with slope k_attr_ as spheres get closer

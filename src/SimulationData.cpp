@@ -550,12 +550,23 @@ Scoring * SimulationData::get_scoring()
   return scoring_;
 }
 
+Scoring const * SimulationData::get_scoring() const
+{
+  IMP_USAGE_CHECK(scoring_ != nullptr, "Null scoring");
+  return scoring_;
+}
+
 Statistics * SimulationData::get_statistics()
 {
   IMP_USAGE_CHECK(statistics_ != nullptr, "Null stats");
   return statistics_;
 }
 
+Statistics const * SimulationData::get_statistics() const
+{
+  IMP_USAGE_CHECK(statistics_ != nullptr, "Null stats");
+  return statistics_;
+}
 
 atom::BrownianDynamics *SimulationData::get_bd(bool recreate){
   if (!bd_ || recreate) {

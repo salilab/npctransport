@@ -38,6 +38,7 @@
 #include "typedefs.h"
 
 #include <boost/timer.hpp>
+#include "boost/tuple/tuple.hpp"
 #include <string>
 
 #ifdef SWIG

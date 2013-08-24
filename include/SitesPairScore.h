@@ -39,10 +39,11 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore : public LinearInteractionPairScore {
   typedef LinearInteractionPairScore P;
 
   // range and coefficient of site specific attraction:
-  double range_, k_;
+  double sites_range_, sites_k_;
 
-  algebra::Vector3Ds sites_,  // sites to be searched against nn_(nnsites_)
-      nnsites_;               // sites to be stored in nn_ (nearest neighbours)
+  algebra::Vector3Ds
+    sites_,  // sites to be searched against nn_(nnsites_)
+    nnsites_;               // sites to be stored in nn_ (nearest neighbours)
 
   // true if sites_ is associated with the first particle and nnsites_ with the
   // second particle, false otherwise
@@ -61,7 +62,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore : public LinearInteractionPairScore {
      a different reference frame (rigid body translation and rotation),
      which is applied to the sites list upon score evaluation.
 
-     @param range          range of site specific attraction
+     @param sites_range    range of site specific attraction
      @param k_attraction   site specific attraction coefficient
      @param range_nonspec_attraction range for non-specific attraction
                                      between particles that contain the sites
@@ -70,18 +71,30 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore : public LinearInteractionPairScore {
      @param sites0         list of sites on the first particle
      @param sites1         list of sites on the second particle
    */
-  SitesPairScore(double range, double k_attraction,
+  SitesPairScore(double sites_range, double k_attraction,
                  double range_nonspec_attraction, double k_nonspec_attraction,
                  double k_repulsion, const algebra::Vector3Ds &sites0,
                  const algebra::Vector3Ds &sites1);
 
+  /** evaluate the score for the pair of model particle indexes in p,
+      updating score derivatives to da
+  */
   virtual double evaluate_index(Model *m, const ParticleIndexPair &p,
                                 DerivativeAccumulator *da) const IMP_OVERRIDE;
+
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const;
+
   Restraints do_create_current_decomposition(Model *m,
-                                             const ParticleIndexPair &vt) const
-      IMP_OVERRIDE;
+                                             const ParticleIndexPair &vt)
+    const IMP_OVERRIDE;
+
+  //! return the range for site-site attraction
+  double get_sites_range() const { return sites_range_; }
+
+  //! return the k for site-site attraction
+  double get_sites_k() const { return sites_k_; }
+
   IMP_PAIR_SCORE_METHODS(SitesPairScore);
   IMP_OBJECT_METHODS(SitesPairScore);
   ;
@@ -173,10 +186,10 @@ class TemplateSitesPairScore : public TemplateBaseSitesPairScore {
    sites0 and sites1 on their surface, with specified interaction
    parameters.
 
-   @param rangea    range for specific attraction
-   @param ka       coefficient for specific attraction
-   @param rangena  range for non-specific attraction
-   @param kna      coefficient for non-specific attraction
+   @param rangesa  range for specific attraction
+   @param ksa      coefficient for specific attraction
+   @param rangensa range for non-specific attraction
+   @param knsa     coefficient for non-specific attraction
    @param kr       coefficient for repulsion between penetrating particles
    @param sites0   location of sites on particles from one side
    @param sites1   location of sites on particles from other side
@@ -186,7 +199,7 @@ class TemplateSitesPairScore : public TemplateBaseSitesPairScore {
 */
 IMPNPCTRANSPORTEXPORT
 IMP::PairScore* create_sites_pair_score
-( double rangea, double ka, double rangena, double kna,
+( double rangesa, double ksa, double rangensa, double knsa,
   double kr, const algebra::Vector3Ds &sites0,
   const algebra::Vector3Ds &sites1);
 

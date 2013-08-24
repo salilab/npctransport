@@ -28,10 +28,6 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
  private:
   typedef core::PeriodicOptimizerState P;
  private:
-  // the model on which the simulation is run and to which all particles are
-  // assumed to belong
-  base::Pointer<Model> m_;
-
   int updates_;
 
   // the types of particles involved in the interaction (type of group I and II)
@@ -41,6 +37,9 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   // maintains a list of nearby particle pairs in a bipartite graph
   IMP::base::PointerMember<IMP::container::CloseBipartitePairContainer>
       close_bipartite_pair_container_;
+
+  // range considered as contact (without slack of CloseBipartitePairContainer)
+  double range_;
 
   // avergae number of times all pairs of particles contacted each other
   // per update round
@@ -67,7 +66,8 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
                                  particlesI and II
      @param[in] particlesI    particles from one side of the interaction
      @param[in] particlesII    particles from other side of the interaction
-     @param[in] contact_range keep track of particle pairs within that range
+     @param[in] contact_range keep track of particle pairs whose sphere distances
+                              are in that range
      @param[in] slack         slack for updating close particles in appropriate
                               CloseBiparyiyrPairContainer, this affects only
                               performance - touch only if you know why

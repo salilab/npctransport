@@ -41,6 +41,21 @@ using namespace ::google::protobuf;
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+// Converts protobuf configuration file from txt to pb format
+void configuration_txt2pb
+(std::string config_txt, std::string config_pb)
+{
+  npctransport_proto::Configuration config;
+  std::ifstream ifs_txt(config_txt.c_str());
+  IMP_ALWAYS_CHECK(ifs_txt, "File " << config_txt << " not found",
+                   IMP::base::IOException);
+  io::IstreamInputStream isis_txt(&ifs_txt);
+  TextFormat::Parse(&isis_txt, &config);
+  ifs_txt.close();
+  std::ofstream ofs_pb(config_pb.c_str());
+  config.SerializeToOstream(&ofs_pb);
+  ofs_pb.close();
+}
 
 ParticlesTemp get_optimizable_particles
 (ParticlesTemp const& particles)

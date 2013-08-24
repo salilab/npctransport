@@ -199,6 +199,17 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   */
  Statistics* get_statistics();
 
+#ifndef SWIG
+  /** returns a scoring object that is updated with the current list of
+      diffusers and obstacles and associated with this sd
+  */
+ Scoring const* get_scoring() const;
+
+  /** returns a Statistics object that is updated by this simulation data
+  */
+ Statistics const* get_statistics() const;
+
+#endif
 
   /** gets the Brownian Dynamics object that is capable of simulating
       this data
@@ -385,9 +396,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
       hierarchy and constraints of this simulation data,
       so that writing frames into this handle will write
       the updated state of the simulation
-      @param fh
+
+      @param fh the handle to be linked
       @param is_restraints if true, save restraints to RMF
-      @return a handle to the file
 
       \exception RMF::IOException IO error with RMF file handle
   */

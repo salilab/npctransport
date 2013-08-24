@@ -35,15 +35,15 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
    @param sites0         list of sites on the first particle
    @param sites1         list of sites on the second particle
 */
-SitesPairScore::SitesPairScore(double range, double k_attraction,
+SitesPairScore::SitesPairScore(double sites_range, double k_attraction,
                                double range_nonspec_attraction,
                                double k_nonspec_attraction, double k_repulsion,
                                const algebra::Vector3Ds &sites0,
                                const algebra::Vector3Ds &sites1)
     : P(k_repulsion, range_nonspec_attraction, k_nonspec_attraction,
         "Sites %1%"),
-      range_(range),
-      k_(k_attraction) {
+      sites_range_(sites_range),
+      sites_k_(k_attraction) {
   // store the big set of sizes in nnsites_
   if (sites0.size() > sites1.size()) {
     sites_first_ = false;
@@ -82,9 +82,9 @@ inline double SitesPairScore::evaluate_index(Model *m,
   double particles_delta = std::sqrt(lips_cache.particles_delta_squared);
   double sum_radii = lips_cache.sum_particles_radii;
   double surface_delta = particles_delta - sum_radii;  // between balls surface
-  IMP_LOG(TERSE, "Surface_delta " << surface_delta << " ; range " << range_
+  IMP_LOG(TERSE, "Surface_delta " << surface_delta << " ; range " << sites_range_
                                   << std::endl);  // TODO: VERBOSE
-  if (surface_delta > range_) {
+  if (surface_delta > sites_range_) {
     IMP_LOG(TERSE, "Sites contribution is 0.0 and soft sphere is "
                        << soft << std::endl);  // TODO: VERBOSE
     return soft;  // can still contribute if non-specific range is longer
@@ -109,11 +109,11 @@ inline double SitesPairScore::evaluate_index(Model *m,
   for (unsigned int i = 0; i < sites_.size(); ++i) {
     // filter to evaluate only sites within range of attraction:
     algebra::Vector3D trp = relative.get_transformed(sites_[i]);
-    Ints nn = nn_->get_in_ball(trp, range_);
+    Ints nn = nn_->get_in_ball(trp, sites_range_);
     for (unsigned int j = 0; j < nn.size(); ++j) {
       // double d2=algebra::get_squared(range_);
       sum +=
-          internal::evaluate_one_site_2(k_, range_, rb0, rb1, tr0, tr1, itr0,
+          internal::evaluate_one_site_2(sites_k_, sites_range_, rb0, rb1, tr0, tr1, itr0,
                                         itr1, sites_[i], nnsites_[nn[j]], da);
     }
   }
@@ -161,17 +161,17 @@ Restraints SitesPairScore::do_create_current_decomposition(
 */
 
 /**
-   @param rangea   range of specific attraction
-   @param ka       coefficient for specific attraction
-   @param rangena  range for non-specific attraction
-   @param kna      coefficient for non-specific attraction
-   @param kr       coefficient for repulsion between penetrating particles
+   @param rangesa  range of specific attraction
+   @param ksa      coefficient for specific attraction
+   @param rangensa range for non-specific attraction
+   @param knsa      coefficient for non-specific attraction
+   @param kr      coefficient for repulsion between penetrating particles
    @param sites0   sites on side of first particle
    @param sites1   sites on side of other particle
 */
 IMP::PairScore* create_sites_pair_score
-( double rangea, double ka, double rangena,
-  double kna, double kr,
+( double rangesa, double ksa, double rangensa,
+  double knsa, double kr,
   const algebra::Vector3Ds &sites0,
   const algebra::Vector3Ds &sites1)
 {
@@ -179,7 +179,8 @@ IMP::PairScore* create_sites_pair_score
   if ((sites0.size() >= 4 && sites1.size() >= 4 &&
        (sites0.size() > .5 * sites1.size() ||
         sites1.size() > .5 * sites0.size()))) {
-    IMP_NEW(SitesPairScore, ps, (rangea, ka, rangena, kna, kr, sites0, sites1));
+    IMP_NEW(SitesPairScore, ps,
+            (rangesa, ksa, rangensa, knsa, kr, sites0, sites1));
     return ps.release();
   }
   // TODO: check if the approach of the next clause (originally
@@ -189,10 +190,12 @@ IMP::PairScore* create_sites_pair_score
   //  IMP_ADD_CASE(1,15)
   else if (sites0.size() == 1 && sites1.size() == 15) {
     typedef TemplateSitesPairScore<1, 15, true> TSPS;
-    IMP_NEW(TSPS, tsps, (rangea, ka, rangena, kna, kr, sites0, sites1));
+    IMP_NEW(TSPS, tsps, (rangesa, ksa, rangensa, knsa, kr,
+                         sites0, sites1));
     return tsps.release();
   } else {
-    IMP_NEW(SitesPairScore, ps, (rangea, ka, rangena, kna, kr, sites0, sites1));
+    IMP_NEW(SitesPairScore, ps, (rangesa, ksa, rangensa, knsa, kr,
+                                 sites0, sites1));
     return ps.release();
   }
 }

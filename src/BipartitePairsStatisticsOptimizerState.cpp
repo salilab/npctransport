@@ -12,11 +12,18 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+namespace {
+// update the average cur_avg of n-1 observation
+// with a new observation new_val
+inline Float update_average(Float old_avg, Float new_val, Float old_n) {
+  return (new_val + old_avg * old_n) / (old_n + 1);
+}
+}
+
 BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState(
     Model* m, InteractionType interaction_type, const ParticlesTemp& particlesI,
     const ParticlesTemp& particlesII, double contact_range, double slack)
   : P(m, "BipartitePairsStatisticsOptimizerState%1%"),
-      m_(m),
       updates_(0),
       interaction_type_(interaction_type),
       n_particles_I_(particlesI.size()),
@@ -24,7 +31,8 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState(
   reset();
   close_bipartite_pair_container_ =
       new IMP::container::CloseBipartitePairContainer(particlesI, particlesII,
-                                                      contact_range, slack);
+                                                     contact_range, slack);
+  range_ = contact_range;
   // TODO: do we want to add consecutive pair container for fg chains?
 }
 
@@ -33,13 +41,6 @@ void BipartitePairsStatisticsOptimizerState::reset() {
   avg_ncontacts_ = 0;
   avg_pct_bound_particles_I_ = 0.0;
   avg_pct_bound_particles_II_ = 0.0;
-}
-namespace {
-// update the average cur_avg of n-1 observation
-// with a new observation new_val
-inline Float update_average(Float old_avg, Float new_val, Float old_n) {
-  return (new_val + old_avg * old_n) / (old_n + 1);
-}
 }
 
 void BipartitePairsStatisticsOptimizerState::do_update(unsigned int) {
@@ -53,11 +54,20 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int) {
   ParticleIndexes bounds_II;
   unsigned int ncontacts = 0;
   IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
-                        close_bipartite_pair_container_, {
+                        close_bipartite_pair_container_,
+                        {
                           // _1 = ParticleIndexPair
-                          bounds_I.push_back(_1[0]);
-                          bounds_II.push_back(_1[1]);
-                          ncontacts++;
+                          Model * m = get_model();
+                          // filter out sphere pairs with distances in
+                          // slack region
+                          core::XYZR s0(m, _1[0]);
+                          core::XYZR s1(m, _1[1]);
+                          if(core::get_distance(s0, s1) < range_)
+                            {
+                              bounds_I.push_back(_1[0]);
+                              bounds_II.push_back(_1[1]);
+                              ncontacts++;
+                            }
                         });
   avg_ncontacts_ = update_average(avg_ncontacts_, ncontacts, updates_ + 1);
   std::sort(bounds_I.begin(), bounds_I.end());

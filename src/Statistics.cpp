@@ -27,8 +27,10 @@
 #include <IMP/core/generic.h>
 #include <IMP/display/LogOptimizerState.h>
 #include <IMP/rmf/frames.h>
+
 #include <numeric>
 #include <set>
+#include "boost/tuple/tuple.hpp"
 
 #ifdef IMP_NPC_GOOGLE
 IMP_GCC_PUSH_POP(diagnostic push)
@@ -146,23 +148,24 @@ void Statistics::add_interaction_stats
             { set1.push_back( get_model()->get_particle(_1) ); }
         }
         );
-    // TODO: make params
-    double stats_contact_range = 2;// (dist + 2 * slack) for ClosePairContainers
-    double stats_slack=1;
-    double stats_dist = stats_contact_range - stats_slack * 2;
-  IMP_LOG(PROGRESS,
-          "Interaction " << type0.get_string() << ", " << type1.get_string()
-          << "  sizes: " << set0.size() << ", " << set1.size()
-          << " statistics range: " << stats_contact_range
-          << std::endl);
-  if (set0.size() > 0 && set1.size() > 0)
-    {
-      IMP_NEW(BipartitePairsStatisticsOptimizerState, bpsos,
-              (get_model(), interaction_type, set0, set1,
-               stats_dist, stats_slack));
-      bpsos->set_period(statistics_interval_frames_);
-      interaction_stats_map_[interaction_type] = bpsos;
-    }
+    bool include_site_site = true;
+    bool include_non_specific = true;
+    double range =
+      get_sd()->get_scoring()->get_interaction_range_for
+      ( type0, type1, include_site_site, include_non_specific);
+    double slack=3.0; // TODO: param
+    IMP_LOG(PROGRESS,
+            "Interaction " << type0.get_string() << ", " << type1.get_string()
+            << "  sizes: " << set0.size() << ", " << set1.size()
+            << " statistics range: " << range << std::endl );
+    if (set0.size() > 0 && set1.size() > 0)
+      {
+        IMP_NEW(BipartitePairsStatisticsOptimizerState, bpsos,
+                (get_model(), interaction_type, set0, set1,
+                 range, slack));
+        bpsos->set_period(statistics_interval_frames_);
+        interaction_stats_map_[interaction_type] = bpsos;
+      }
 }
 
 // get all statistics periodic optimizer states in one list
@@ -619,14 +622,17 @@ void Statistics::set_interrupted(bool tf) {
 // number of site-site interactions between p1 and p2
 int Statistics::get_number_of_interactions(Particle *p1, Particle *p2) const {
   using namespace IMP::core;
-  double range = get_sd()->get_range();
-  // note this is sphere distance
-  if ( get_distance(XYZR(p1), XYZR(p2)) > range )
-    return 0;
-  const algebra::Vector3Ds &sites1 =
-    get_sd()->get_sites( Typed(p1).get_type() );
-  const algebra::Vector3Ds  &sites2 =
-    get_sd()->get_sites( Typed(p2).get_type() );
+  core::ParticleType type1 = Typed(p1).get_type();
+  core::ParticleType type2 = Typed(p2).get_type();
+  double range_site =
+    get_sd()->get_scoring()->get_interaction_range_for(type1, type2,
+                                                       true, // site
+                                                       false // non-spec
+                                                       );
+  if ( get_distance(XYZR(p1), XYZR(p2)) > range_site )
+    return 0; // filter on sphere distance
+  const algebra::Vector3Ds &sites1 = get_sd()->get_sites( type1 );
+  const algebra::Vector3Ds  &sites2 = get_sd()->get_sites( type2 );
 
   int ct = 0;
   for (unsigned int i1 = 0; i1 < sites1.size(); ++i1)
@@ -635,10 +641,7 @@ int Statistics::get_number_of_interactions(Particle *p1, Particle *p2) const {
       for (unsigned int i2 = 0; i2 < sites2.size(); ++i2)
         {
           algebra::Vector3D v2 = get_global_from_local_v3(p2, sites2[i2]);
-          // TODO: actual intercation range for two particle types?!
-          // std::cout << *p1 << "-" << i1 << "," << *p2 << "-" << i2
-          //           << " ; D= " << get_distance(v1,v2) << std::endl;
-          if (algebra::get_distance(v1, v2) < range)
+          if (algebra::get_distance(v1, v2) < range_site)
             {
               ++ct;
             }

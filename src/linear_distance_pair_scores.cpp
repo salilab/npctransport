@@ -16,11 +16,11 @@ ModelObjectsTemp LinearSoftSpherePairScore::do_get_inputs(
   return IMP::get_particles(m, pis);
 }
 
-LinearInteractionPairScore::LinearInteractionPairScore(double krep,
-                                                       double attr_range,
-                                                       double kattr,
+LinearInteractionPairScore::LinearInteractionPairScore(double k_rep,
+                                                       double range_attr,
+                                                       double k_attr,
                                                        std::string name)
-    : PairScore(name), attr_range_(attr_range), k_rep_(krep), k_attr_(kattr) {}
+    : PairScore(name), range_attr_(range_attr), k_rep_(k_rep), k_attr_(k_attr) {}
 
 ModelObjectsTemp LinearInteractionPairScore::do_get_inputs(
     Model *m, const ParticleIndexes &pis) const {

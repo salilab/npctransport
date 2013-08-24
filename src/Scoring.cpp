@@ -229,10 +229,10 @@ void Scoring::add_interaction
   // add the interaction restraint both for (t0,t1) and (t1,t0)  {
     // TODO: repulsion was also added in get_predr - do we double count here?
   {
-    core::ParticleTypes ts1;
-    ts1.push_back(type0);
-    ts1.push_back(type1);
-    int interaction_id1 = get_ordered_type_pair_predicate()->get_value(ts1);
+    core::ParticleTypes pts1;
+    pts1.push_back(type0);
+    pts1.push_back(type1);
+    int interaction_id1 = get_ordered_type_pair_predicate()->get_value(pts1);
     IMP::PairScore* ps1 = create_sites_pair_score
       ( interaction_range,                  // site-specific
         interaction_k, nonspecific_range_,  // non-specific = entire particle
@@ -240,13 +240,13 @@ void Scoring::add_interaction
         get_sd()->get_sites(type0),
         get_sd()->get_sites(type1)
         );
-    interaction_pair_scores_[interaction_id1] = ps1;
+   interaction_pair_scores_[interaction_id1] = ps1;
   }
   {
-    core::ParticleTypes ts2;
-    ts2.push_back(type1);
-    ts2.push_back(type0);
-    int interaction_id2 = get_ordered_type_pair_predicate()->get_value(ts2);
+    core::ParticleTypes pts2;
+    pts2.push_back(type1);
+    pts2.push_back(type0);
+    int interaction_id2 = get_ordered_type_pair_predicate()->get_value(pts2);
     IMP::PairScore* ps2 = create_sites_pair_score
       (  interaction_range,                  // site-specific
          interaction_k, nonspecific_range_,  // non-specific = entire particle
@@ -257,6 +257,41 @@ void Scoring::add_interaction
     interaction_pair_scores_[interaction_id2] = ps2;
   }
 }
+
+
+
+// returns max of site-site and non-specific interaction ranges
+// for interaction type it, if applicable
+double Scoring::get_interaction_range_for
+  ( core::ParticleType t1, core::ParticleType t2,
+     bool site_specific, bool non_specific) const
+{
+  // Get pair score
+  core::ParticleTypes pts;
+  pts.push_back(t1);  pts.push_back(t2);
+  int iid = const_cast<core::OrderedTypePairPredicate*>
+    (get_ordered_type_pair_predicate())->get_value(pts);
+  t_map_pair_type_to_pair_score::const_iterator iter =
+    interaction_pair_scores_.find(iid);
+  IMP_USAGE_CHECK(iter != interaction_pair_scores_.end(),
+                  "looking for a range for a non-existent interaction type");
+  IMP::PairScore const* ps = iter->second;
+  // Get ranges (assuming Sites or LinearInteraction pair scores)
+  double range_ss = -1.0; // site-specific
+  if(site_specific){
+    SitesPairScore const* sps =
+      dynamic_cast< SitesPairScore const* >( ps );
+    if(sps) range_ss = sps->get_sites_range();
+  }
+  double range_ns = -1.0; // non-specific
+  if(non_specific){
+    LinearInteractionPairScore const* lips =
+      dynamic_cast< LinearInteractionPairScore const* >( ps );
+    if(lips) range_ns = lips->get_range_attraction();
+  }
+  return std::max(range_ss, range_ns);
+}
+
 
 
 /** add a restraint on particles in an FG nup chain */
@@ -357,7 +392,7 @@ container::PredicatePairsRestraint
   predr->set_unknown_score(ssps.get());
   // add interaction scores with site-specific interactions
   if(is_attr_interactions_on) {
-    map_pair_type_to_pair_score::const_iterator iter;
+    t_map_pair_type_to_pair_score::const_iterator iter;
     for(iter = interaction_pair_scores_.begin();
         iter != interaction_pair_scores_.end();
         iter++)
