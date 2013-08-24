@@ -29,6 +29,16 @@
 #include <IMP/npctransport/internal/boost_main.h>
 #endif
 
+#ifdef IMP_NPC_GOOGLE
+std::string config_txt =
+  "third_party/npc/npctransport/data/benchmark_initialize.txt";
+#else
+std::string config_txt =
+  IMP::npctransport::get_data_path("benchmark_initialize.txt");
+#endif
+IMP::base::AddStringFlag add_input("input",
+                                   "Input text file that is "
+                                   "converted to a config file", &config_txt);
 
 
 int main(int argc, char *argv[]) {
@@ -49,8 +59,9 @@ int main(int argc, char *argv[]) {
      */
 
      // assign and run::
-    int num = IMP::npctransport::assign_ranges(config_pb, output, 100, false,
-                                               IMP::base::get_random_seed());
+     IMP::npctransport::configuration_txt2pb(config_txt, config_pb);
+     IMP::npctransport::assign_ranges(config_pb, output, 100, false,
+                                      IMP::base::get_random_seed());
 
     IMP::base::Pointer<IMP::npctransport::SimulationData> sd =
       new IMP::npctransport::SimulationData(output, true); //, rmf_file);

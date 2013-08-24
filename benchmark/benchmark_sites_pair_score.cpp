@@ -41,10 +41,10 @@ namespace {
 const double radius = 2;
 #if IMP_BUILD < IMP_FAST
 int number_of_particles = 5;
-int step_size = 8;
+  //int step_size = 8;
 #else
 int number_of_particles = 40;
-int step_size = 5;
+  //int step_size = 5;
 #endif
 
 void debug_print_location(std::string context, bool reset = false) {
