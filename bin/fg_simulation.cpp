@@ -217,9 +217,6 @@ IMP::base::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
     using atom::Hierarchy;
     using atom::Hierarchies;
 
-    static int call_num = 0;
-    //IMP_LOG(base::PROGRESS, "print_fgs() - Call # " << ++call_num << std::endl);
-
     Hierarchies chains = sd.get_fg_chains();
     for (unsigned int k = 0; k < chains.size(); k++) {
       Hierarchy cur_chain(chains[k]);
