@@ -11,7 +11,7 @@
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/protobuf.h>
-#include <IMP/npctransport/util.h>
+#include <IMP/npctransport/enums.h>
 #include <IMP/npctransport/io.h>
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/npctransport/util.h>
@@ -64,7 +64,6 @@ IMP::base::AddBoolFlag  no_save_rmf_to_output_adder
     }                                                                   \
   }
 
-const double FS_IN_NS = 1.0E+6;
 
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -353,7 +352,6 @@ void Statistics::update
             << " additional frames" << std::endl;
 
   // gather the statistics one by one
-  const double FS_IN_NS = 1.0E+6;
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
     ->get_bd()->get_current_time() / FS_IN_NS;
 
@@ -486,19 +484,45 @@ void Statistics::update
                     << std::endl,
                 base::ValueException);
     }
-    // save the rest of the interactions info
+    // some preparations
     Int n0 = bps_i->get_number_of_particles_1();
     Int n1 = bps_i->get_number_of_particles_2();
     Float avg_contacts_num = bps_i->get_average_number_of_contacts();
-
-    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_contacts_per_particle0,
-               avg_contacts_num / n0);
-    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_contacts_per_particle1,
-               avg_contacts_num / n1);
-    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_pct_bound_particles0,
-               bps_i->get_average_percentage_bound_particles_1());
-    UPDATE_AVG(nf, nf_new, *pOutStats_i, avg_pct_bound_particles1,
-               bps_i->get_average_percentage_bound_particles_2());
+    // save the rest of the interactions info
+    npctransport_proto::Statistics_InteractionOrderParams*
+      siop = pOutStats_i->add_order_params();
+    siop->set_time_ns(sim_time_ns);
+    siop->set_avg_off_per_contact_per_ns
+      ( bps_i->get_average_off_per_contact_per_ns() );
+    siop->set_avg_off_per_bound_i_per_ns
+      ( bps_i->get_average_off_per_bound_I_per_ns() );
+    siop->set_avg_off_per_bound_ii_per_ns
+      ( bps_i->get_average_off_per_bound_II_per_ns() );
+    siop->set_off_stats_period_ns
+      ( bps_i->get_off_stats_period_ns() );
+    siop->set_avg_on_per_missing_contact_per_ns
+      ( bps_i->get_average_on_per_missing_contact_per_ns() );
+    siop->set_on_stats_period_ns
+      ( bps_i->get_on_stats_period_ns() );
+    siop->set_avg_on_per_unbound_i_per_ns
+      ( bps_i->get_average_on_per_unbound_I_per_ns() );
+    siop->set_on_i_stats_period_ns
+      ( bps_i->get_on_I_stats_period_ns() );
+    siop->set_avg_on_per_unbound_ii_per_ns
+      ( bps_i->get_average_on_per_unbound_II_per_ns() );
+    siop->set_on_ii_stats_period_ns
+      ( bps_i->get_on_II_stats_period_ns() );
+    siop->set_avg_contacts_per_particle_i
+      ( avg_contacts_num / n0 );
+    siop->set_avg_contacts_per_particle_ii
+      ( avg_contacts_num / n1 );
+    siop->set_avg_fraction_bound_particles_i
+      ( bps_i->get_average_percentage_bound_particles_1());
+    siop->set_avg_fraction_bound_particles_ii
+      ( bps_i->get_average_percentage_bound_particles_2());
+    siop->set_misc_stats_period_ns
+      ( bps_i->get_misc_stats_period_ns() );
+    // reset till next udpate_statistics()
     bps_i->reset();
   }
 
@@ -554,7 +578,6 @@ void Statistics::update
 void Statistics::reset_statistics_optimizer_states()
 {
   is_stats_reset_ = true;  // indicate to update()
-  get_sd()->get_bd()->set_current_time(0.0);
 
   for (FGsBodyStatisticsOSsMap::iterator iter = fgs_bodies_stats_map_.begin();
        iter != fgs_bodies_stats_map_.end(); iter++)
@@ -596,11 +619,12 @@ void Statistics::reset_statistics_optimizer_states()
       } // for j
     } // for iter
 
+  double time_ns = get_sd()->get_bd()->get_current_time() / FS_IN_NS;
   for (BipartitePairsStatisticsOSMap::iterator
          iter = interaction_stats_map_.begin();
        iter != interaction_stats_map_.end(); iter++)
     {
-      iter->second->reset();
+      iter->second->reset( );
     }
 }
 

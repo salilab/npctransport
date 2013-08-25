@@ -25,7 +25,7 @@ class Parameter {
  Parameter(T t) : t_(t), init_(true) {}
 
   T get_value() const {
-  IMP_USAGE_CHECK(init_, "Not initialized");
+  IMP_USAGE_CHECK(init_, "npctransort::Parameter Not initialized");
   return t_;
   }
 

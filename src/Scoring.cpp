@@ -306,11 +306,9 @@ Scoring::add_chain_restraint(atom::Hierarchy chain_root,
                    IMP::base::ValueException );
 
   // Exclusive means that the particles will be in no other
-  // ConsecutivePairContainer
-  // this assumption accelerates certain computations
+  // ConsecutivePairContainer this assumption accelerates certain computations
   IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer, xcpc,
-          (chain_root.get_children(),
-           name + " consecutive pairs"));
+          (chain_root.get_children(), name + " consecutive pairs"));
   // add chain restraint
   IMP_NEW(LinearWellPairScore, lwps,
           ( rest_length, get_backbone_k() ) );

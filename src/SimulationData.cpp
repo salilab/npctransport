@@ -21,6 +21,7 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #endif
 #include <IMP/npctransport/creating_particles.h>
+#include <IMP/npctransport/enums.h>
 #include <IMP/npctransport/io.h>
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/npctransport/util.h>
@@ -113,6 +114,13 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   GET_VALUE(maximum_number_of_minutes);
   GET_VALUE_DEF(fg_anchor_inflate_factor, 1.0);
   GET_VALUE_DEF(are_floaters_on_one_slab_side, false);
+  initial_simulation_time_ns_ = 0.0; // default
+  if (pb_data.has_statistics()) {
+    if (pb_data.statistics().has_bd_simulation_time_ns()) {
+      initial_simulation_time_ns_ =
+        (pb_data.statistics().bd_simulation_time_ns() * FS_IN_NS);
+    }
+  }
   if (quick) {
     number_of_frames_ = 2;
     number_of_trials_ = 1;
@@ -169,25 +177,21 @@ void SimulationData::initialize(std::string output_file, bool quick) {
     add_interaction(interaction_i);
   }
 
-  // bounding box / slab constraints on diffusers
-
-  if (pb_data.has_rmf_conformation()) {
-    RMF::FileConstHandle fh =
+  // Load from RMF conformation (or conformation) if they exist in protobuf
+  if (pb_data.has_rmf_conformation())
+    {
+      std::cout << "Restarting from output file internal RMF conformation"
+                << std::endl ;
+      RMF::FileConstHandle fh =
         RMF::open_rmf_buffer_read_only(pb_data.rmf_conformation());
-    initialize_positions_from_rmf(fh, 0);
-    // load from output file
-  } else if (pb_data.has_conformation()) {
-    std::cout << "Restarting from output file conformation" << std::endl ;
-    load_pb_conformation(pb_data.conformation(), get_diffusers(), sites_);
-  }
-  if (pb_data.has_statistics()) {
-    if (pb_data.statistics().has_bd_simulation_time_ns()) {
-      const double fs_in_ns = 1.0E+6;
-      get_bd()->set_current_time
-        (pb_data.statistics().bd_simulation_time_ns()
-         * fs_in_ns);
+      initialize_positions_from_rmf(fh, 0);
+    } else if (pb_data.has_conformation())
+    {
+      std::cout << "Restarting from output file conformation" << std::endl ;
+      load_pb_conformation(pb_data.conformation(), get_diffusers(), sites_);
     }
-  }
+
+  get_bd()->set_current_time( initial_simulation_time_ns_ );
 }
 
 
@@ -202,7 +206,7 @@ void SimulationData::create_fgs
   IMP_USAGE_CHECK(fg_data.has_type(), "It is assumed that fg data has"
                   "a type by now");
   IMP_LOG(PROGRESS, "creating FG of type '" << fg_data.type() << "'");
-  core:: ParticleType type(fg_data.type());
+  core::ParticleType type(fg_data.type());
   if (fg_data.number().value() > 0) {
     IMP_ALWAYS_CHECK( fg_types_.find(type) == fg_types_.end(),
                       "Currently support only single insertion of each type,"

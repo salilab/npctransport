@@ -93,6 +93,63 @@ algebra::Vector3D get_global_from_local_v3( Particle* p,
 
 #endif  // SWIG
 
+#ifndef SWIG
+
+
+/**
+   return number of members lost and gained from old to cur
+
+   @note it is assumed that old and cur are sorted iteratable objects
+         (e.g. std::set) whose begin() and end() methods qualify as inputs
+         for std::set_difference
+*/
+template<class t_set>
+boost::tuple<unsigned int, unsigned int>
+  get_n_lost_and_gained(t_set old, t_set cur)
+{
+  t_set lost, gained;
+  std::set_difference(old.begin(), old.end(), cur.begin(), cur.end(),
+                      std::inserter(lost, lost.begin()) );
+  std::set_difference(cur.begin(), cur.end(), old.begin(), old.end(),
+                      std::inserter(gained, gained.begin()) );
+  return boost::make_tuple(lost.size(), gained.size());
+}
+#endif // SWIG
+
+//! Canonize such that v0>=v1 so order doesn't matter
+template<class t_value>
+std::pair<t_value, t_value>
+  make_unordered_pair(t_value v0, t_value v1)
+{
+  typedef std::pair<t_value, t_value> t_pair;
+  return (v0 >= v1) ? std::make_pair(v0,v1) : std::make_pair(v1,v0);
+}
+
+
+/** gets the maximal theoretical number of unordered pairs
+    between two sets of particles (note that the calculation
+    is not trivial since ps0 and ps1 may not be disjoint
+    and the pairs are unordered)
+*/
+unsigned int
+get_maximal_number_of_unordered_pairs(ParticlesTemp const& ps0,
+                                  ParticlesTemp const& ps1)
+{
+  std::set< std::pair<Particle*, Particle*> >
+    all_unordered_pairs; // TODO: calc not dynamic
+  for(unsigned int i = 0;  i < ps0.size(); i++)
+    {
+      for(unsigned int j = 0; j < ps1.size(); j++)
+        {
+          all_unordered_pairs.insert
+            ( make_unordered_pair( ps0[i].get(), ps1[j].get() ) );
+        }
+    }
+  return all_unordered_pairs.size();
+}
+
+
+
 IMPNPCTRANSPORT_END_NAMESPACE
 
 

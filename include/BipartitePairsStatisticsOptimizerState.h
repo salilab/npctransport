@@ -28,7 +28,19 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
  private:
   typedef core::PeriodicOptimizerState P;
  private:
-  int updates_;
+  bool is_reset_;
+
+  int n_updates_;
+  double time_ns_; // simulation time in ns
+  double stats_time_ns_; // time statistics were gathered for miscs
+  double off_stats_time_ns_; // time when off-rate calculations were gathered,
+                            // requiring presence of bounds
+  double on_stats_time_ns_; // time when on-rate calcualtions were gathered,
+                            // requiring presence of unbounds
+  double on_I_stats_time_ns_; // time when on-rate calcualtions were gathered
+                              // for particles I
+  double on_II_stats_time_ns_; // time when on-rate calcualtions were gathered
+                              // for particles II
 
   // the types of particles involved in the interaction (type of group I and II)
   // TODO: a bit ugly and ungeneral, we might have mixed types in principle
@@ -43,17 +55,32 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
 
   // avergae number of times all pairs of particles contacted each other
   // per update round
-  Float avg_ncontacts_;
+  double avg_ncontacts_;
 
-  // average fraction of time that each partilce is in contact
-  Float pct_bound_particles_I_;
-  Float avg_pct_bound_particles_I_;   // for particles in group I
-  Float pct_bound_particles_II_;
-  Float avg_pct_bound_particles_II_;  // particles in group II
+  // list of bound particles of each type + list of their contacts after
+  // last round of update
+  base::set<ParticleIndex> bounds_I_;
+  base::set<ParticleIndex> bounds_II_;
+  std::set<ParticleIndexPair> contacts_; // more efficient if ordered set
 
-  // total number of particles in each group
-  Int n_particles_I_;
-  Int n_particles_II_;
+  // Average since last reset:
+  double avg_pct_bound_particles_I_; // particles in group I
+  double avg_pct_bound_particles_II_;  // particles in group II
+  double avg_off_per_contact_per_ns_;
+  double avg_off_per_bound_I_per_ns_;
+  double avg_off_per_bound_II_per_ns_;
+  double avg_on_per_unbound_I_per_ns_;
+  double avg_on_per_unbound_II_per_ns_;
+  double avg_on_per_missing_contact_per_ns_;
+
+  // total number of all (bound) particles in each group after last udpate()
+  unsigned int n_particles_I_;
+  unsigned int n_particles_II_;
+  unsigned int n_bounds_I_;
+  unsigned int n_bounds_II_;
+
+  // theoretical number of possible (unordered) contacts between particles
+  unsigned int n_possible_contacts_;
 
  public:
 
@@ -89,13 +116,50 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
      returns the average number of all pairs of particles that
      touch each other per update
   */
-  Float get_average_number_of_contacts() const { return avg_ncontacts_; }
+  double get_average_number_of_contacts() const { return avg_ncontacts_; }
+
+  /** returns the average off rate per bound complex per nanosecond
+      since last reset()
+  */
+  double get_average_off_per_contact_per_ns() const
+  { return avg_off_per_contact_per_ns_; }
+
+  /** returns the average off rate per bound particles of type I
+      since last reset()
+  */
+  double get_average_off_per_bound_I_per_ns() const
+  { return avg_off_per_bound_I_per_ns_; }
+
+  /** returns the average off rate per bound particles of type II
+      since last reset()
+  */
+  double get_average_off_per_bound_II_per_ns() const
+  { return avg_off_per_bound_II_per_ns_; }
+
+  /** returns the average on rate per missing possible contact
+      (out of all theoretically possible contacts between particlesI
+      and particles II)
+  */
+  double get_average_on_per_missing_contact_per_ns() const
+  { return avg_on_per_missing_contact_per_ns_; }
+
+  /** returns the average on rate per unbound particles of type I
+      since last resetI()
+  */
+  double get_average_on_per_unbound_I_per_ns() const
+  { return avg_on_per_unbound_I_per_ns_; }
+
+  /** returns the average on rate per unbound particles of type II
+      since last resetII()
+  */
+  double get_average_on_per_unbound_II_per_ns() const
+  { return avg_on_per_unbound_II_per_ns_; }
 
   /**
      returns the average fraction of particles from group I
      that are bound in each update round
   */
-  Float get_average_percentage_bound_particles_1() const {
+  double get_average_percentage_bound_particles_1() const {
     return avg_pct_bound_particles_I_;
   }
 
@@ -103,24 +167,8 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
      returns the average fraction of particles from group II
      that are bound in each update round
   */
-  Float get_average_percentage_bound_particles_2() const {
+  double get_average_percentage_bound_particles_2() const {
     return avg_pct_bound_particles_II_;
-  }
-
-  /**
-     returns the fraction of particles from group I
-     that are bound in each update round
-  */
-  Float get_percentage_bound_particles_1() const {
-    return pct_bound_particles_I_;
-  }
-
-  /**
-     returns the fraction of particles from group II
-     that are bound in each update round
-  */
-  Float get_percentage_bound_particles_2() const {
-    return pct_bound_particles_II_;
   }
 
 
@@ -134,8 +182,47 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   */
   Int get_number_of_particles_2() { return n_particles_II_; }
 
-  void reset();
+
+  /** restart accumulation of all averages in the next time
+      that update() is called
+  */
+  void reset() { is_reset_ = true; }
+
+  double get_misc_stats_period_ns() const
+  { return stats_time_ns_; };
+
+  double get_off_stats_period_ns() const
+  { return off_stats_time_ns_; };
+
+  double get_on_stats_period_ns() const
+  { return on_stats_time_ns_; };
+
+  double get_on_I_stats_period_ns() const
+  { return on_I_stats_time_ns_; };
+
+  double get_on_II_stats_period_ns() const
+  { return on_II_stats_time_ns_; };
+
+
+ protected:
   virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+
+
+ private:
+  //! resets current and reference time to cur_time
+  //! at the beginning of update() if is_reset_ == true
+  void do_reset(double cur_time_ns);
+
+  /**
+     update fraction bound with n1 bound particles of type I;
+     and n2 bound particles of type II, assuming old_updates
+     for the old averag
+   */
+  void update_fraction_bound(unsigned int n1,
+                             unsigned int n2,
+                             unsigned int old_updates);
+
+ public:
   IMP_OBJECT_METHODS(BipartitePairsStatisticsOptimizerState);
 };
 IMP_OBJECTS(BipartitePairsStatisticsOptimizerState,

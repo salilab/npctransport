@@ -126,7 +126,6 @@ class Tests(IMP.test.TestCase):
         in the context of simualtion data optimization
         '''
 
-        IMP.base.set_log_level(IMP.PROGRESS)
         if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
             print "SLOW MODE"
             fast = False
@@ -155,11 +154,17 @@ class Tests(IMP.test.TestCase):
         sd= IMP.npctransport.SimulationData(assign_file, False, rmf_file)
         self._assert_kap_in_place(sd, False)
         # init and run
+        IMP.base.set_log_level(IMP.base.SILENT)
         IMP.npctransport.initialize_positions( sd, [], False,
                                                short_init_factor)
+        print
+        print
+        IMP.base.set_log_level(IMP.base.PROGRESS)
         sd.write_geometry(pymol_file)
         n_good=0
         timer= IMP.npctransport.timer();
+        sd.get_statistics().reset_statistics_optimizer_states()
+        sd.get_bd().set_current_time(0.0)
         for i in range(n_iter):
             sd.get_bd().optimize(opt_cycles)
             sd.get_statistics().update(timer,opt_cycles)

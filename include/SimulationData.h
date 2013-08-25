@@ -59,6 +59,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
                                                // anchors of FG nups.
   Parameter<double> are_floaters_on_one_slab_side_;
 
+ // time when simulation has started for this process
+  Parameter<double> initial_simulation_time_ns_;
+
   // the model on which the simulation is run
   base::PointerMember<Model> m_;
 
@@ -227,6 +230,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   bool get_are_floaters_on_one_slab_side() const
   { return are_floaters_on_one_slab_side_; }
+
+  double get_initial_simulation_time_ns() const
+  {return initial_simulation_time_ns_; }
 
   /** returns true if particle type is of fg type
       (that is, particle was added within create_fgs()

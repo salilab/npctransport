@@ -234,6 +234,25 @@ message Statistics {
     optional string type=9; // type name, e.g. "kap121"
     repeated FloaterOrderParams order_params=10;
   }
+  message InteractionOrderParams{
+    required float time_ns=1;
+    // all averages since last statistics udpate
+    optional float avg_off_per_contact_per_ns=2;
+    optional float avg_off_per_bound_i_per_ns=3;
+    optional float avg_off_per_bound_ii_per_ns=4;
+    optional float off_stats_period_ns=5;
+    optional float avg_on_per_missing_contact_per_ns=6;
+    optional float on_stats_period_ns=7;
+    optional float avg_on_per_unbound_i_per_ns=8;
+    optional float on_i_stats_period_ns=9;
+    optional float avg_on_per_unbound_ii_per_ns=10;
+    optional float on_ii_stats_period_ns=11;
+    optional float avg_contacts_per_particle_i=12;
+    optional float avg_contacts_per_particle_ii=13;
+    optional float avg_fraction_bound_particles_i=14;
+    optional float avg_fraction_bound_particles_ii=15;
+    optional float misc_stats_period_ns=16;
+  }
   message InteractionStats {
     required string type0=1;
     required string type1=2;
@@ -241,6 +260,7 @@ message Statistics {
     optional double avg_contacts_per_particle1=4;
     optional double avg_pct_bound_particles0=5;
     optional double avg_pct_bound_particles1=6;
+    repeated InteractionOrderParams order_params=7;
   }
   message GlobalOrderParams {
     required double time_ns=1;
