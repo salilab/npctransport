@@ -48,10 +48,10 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
    double contact_range, double slack
    )
   : P(m, "BipartitePairsStatisticsOptimizerState%1%"),
+    is_reset_(true),
     interaction_type_(interaction_type),
     n_particles_I_(particlesI.size()),
-    n_particles_II_(particlesII.size()),
-    is_reset_(true)
+    n_particles_II_(particlesII.size())
 {
   close_bipartite_pair_container_ =
     new IMP::container::CloseBipartitePairContainer
