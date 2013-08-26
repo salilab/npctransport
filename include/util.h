@@ -79,7 +79,7 @@ inline algebra::Vector3D get_global_from_local_v3( Particle* p,
                                             const algebra::Vector3D& local);
 
 
-algebra::Vector3D get_global_from_local_v3( Particle* p,
+inline algebra::Vector3D get_global_from_local_v3( Particle* p,
                                               const algebra::Vector3D& local)
 {
   IMP_USAGE_CHECK(core::RigidBody::get_is_setup(p),
@@ -104,7 +104,7 @@ algebra::Vector3D get_global_from_local_v3( Particle* p,
          for std::set_difference
 */
 template<class t_set>
-boost::tuple<unsigned int, unsigned int>
+inline boost::tuple<unsigned int, unsigned int>
   get_n_lost_and_gained(t_set old, t_set cur)
 {
   t_set lost, gained;
@@ -118,7 +118,7 @@ boost::tuple<unsigned int, unsigned int>
 
 //! Canonize such that v0>=v1 so order doesn't matter
 template<class t_value>
-std::pair<t_value, t_value>
+inline std::pair<t_value, t_value>
   make_unordered_pair(t_value v0, t_value v1)
 {
   typedef std::pair<t_value, t_value> t_pair;
@@ -131,7 +131,7 @@ std::pair<t_value, t_value>
     is not trivial since ps0 and ps1 may not be disjoint
     and the pairs are unordered)
 */
-unsigned int
+inline unsigned int
 get_maximal_number_of_unordered_pairs(ParticlesTemp const& ps0,
                                   ParticlesTemp const& ps1)
 {

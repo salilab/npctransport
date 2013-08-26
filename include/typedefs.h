@@ -22,7 +22,7 @@ typedef std::pair<IMP::core::ParticleType, IMP::core::ParticleType>
 #ifndef SWIG
 //! an interaction type canonized to (t0,t1) s.t. t0 >= t1,
 //! so order doesn't matter
-InteractionType make_unordered_interaction_type(IMP::core::ParticleType t0,
+inline InteractionType make_unordered_interaction_type(IMP::core::ParticleType t0,
                                                 IMP::core::ParticleType t1)
 {
   return (t0 >= t1) ? InteractionType(t0,t1) : InteractionType(t1,t0);
@@ -32,7 +32,7 @@ InteractionType make_unordered_interaction_type(IMP::core::ParticleType t0,
 
 //! ParticleIndexPair canonized to (pi0',pi1') s.t. pi0' >= pi1'
 //! so order doesn't matter
-IMP::ParticleIndexPair make_unordered_particle_index_pair
+inline IMP::ParticleIndexPair make_unordered_particle_index_pair
 (IMP::ParticleIndex pi0, IMP::ParticleIndex pi1)
 {
   return (pi0 >= pi1)
@@ -42,7 +42,7 @@ IMP::ParticleIndexPair make_unordered_particle_index_pair
 
 //! ParticleIndexPair canonized to (pi0',pi1') s.t. pi0' >= pi1'
 //! so order doesn't matter
-ParticleIndexPair make_unordered_particle_index_pair
+inline ParticleIndexPair make_unordered_particle_index_pair
 (ParticleIndexPair pip)
 {
   return make_unordered_particle_index_pair(pip[0], pip[1]);
