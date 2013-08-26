@@ -619,7 +619,7 @@ void Statistics::reset_statistics_optimizer_states()
       } // for j
     } // for iter
 
-  double time_ns = get_sd()->get_bd()->get_current_time() / FS_IN_NS;
+  //double time_ns = get_sd()->get_bd()->get_current_time() / FS_IN_NS;
   for (BipartitePairsStatisticsOSMap::iterator
          iter = interaction_stats_map_.begin();
        iter != interaction_stats_map_.end(); iter++)
