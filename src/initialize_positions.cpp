@@ -58,6 +58,7 @@ namespace {
 //! adds a BallMover for each optimized particle in ps
 //! with move size magnitude = particle_radius*2*scale_factor
 //! and wraps it in a SerialMover in random order
+/*
 core::MonteCarloMover *create_serial_mover(const ParticlesTemp &ps,
                                            double scale_factor = 1.0) {
   core::MonteCarloMovers movers;
@@ -72,8 +73,9 @@ core::MonteCarloMover *create_serial_mover(const ParticlesTemp &ps,
   IMP_NEW(core::SerialMover, sm, (get_as<core::MonteCarloMoversTemp>(movers)));
 
   return sm.release();
-}
+  }*/
 
+  /*
 //! rescale the size of the move in all BallMovers inside everal serial mover
 //! that is in the MonteCarlo obejct mc, by scale_factor
 void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
@@ -91,7 +93,8 @@ void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
       bm->set_radius(bm->get_radius() * scale_factor);
     }
   }
-}
+  } */
+
 
 /**
    create a Monte-Carlo object for partices ps, scored by isd,
@@ -104,7 +107,7 @@ void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
    @param debug - if true, save is added as an optimizer state to the MC
    @param n_movers - number of movrs to apply in each MC step
  */
-IMP::base::Pointer<core::MonteCarlo> create_mc(
+/*IMP::base::Pointer<core::MonteCarlo> create_mc(
     const ParticlesTemp &ps,
     const RestraintsTemp& rs,
     const PairPredicates excluded,
@@ -135,7 +138,7 @@ IMP::base::Pointer<core::MonteCarlo> create_mc(
   return mc;
 }
 
-
+*/
 
 
 /** An RAII class for rescaling the x0 length of a LinearWellPairScore
@@ -382,7 +385,6 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
           << std::endl);
 
   Hierarchy root = sd.get_root();
-  IMP::npctransport::get_fg_chains(root);// JUST TO TEST DEPRECATION - CAN REMOVE
   Hierarchies chains = sd.get_fg_chains( );
   for (unsigned int k = 0; k < chains.size(); k++) {
     Hierarchy cur_chain(chains[k]);
