@@ -1,5 +1,5 @@
 /**
-# * \file enums.h
+# * \file npctransport/enums.h
 # * \brief useful enums and contants
 
 #
