@@ -1,6 +1,6 @@
 configs=[]
 for i in range(6):
-    configs.append("conifg%d.pb" % (i+1))
+    configs.append("config%d.pb" % (i+1))
 print configs
 binary="fg_simulation"
 #extra_arguments=["--short_init_factor=.1"]
