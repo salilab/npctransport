@@ -97,13 +97,70 @@ def round_way_up(val, bin_size = 1000):
     ret = math.ceil(val / bin_size)  * bin_size
     return int(ret)
 
-def print_list_to_file(FILEH, the_list):
+def print_list_to_file(FILEH, the_list, format="%d"):
     '''print list to filehandle FILEH'''
     first=True
     for t in the_list:
         if not first: FILEH.write(",")
-        FILEH.write("%.1f" % t)
+        FILEH.write(format % t)
         first=False
+
+
+def get_interaction_stats(interactions, is_a, is_b):
+    '''
+    get the interaction statistics about interactions
+    between types a and b, with statistics from point of view of a
+
+    interatiocns - protobuf interaction statistics message
+    is_a - boolean function to test if a type is a
+    is_b - boolean function to test if a type is b
+
+    return (pct_bnd,on_per_a_per_ns, off_per_a_per_ns)
+    '''
+    pct_a=0.0
+    t=1E-10 # time
+    on_per_a=0.0
+    on_t=1E-10 # time for on
+    off_per_a=0.0
+    off_t=1E-10 # time for off
+    for i in interactions:
+        if is_a(i.type0) and is_b(i.type1):
+            for op in i.order_params:
+                # PCT BND
+                d_t = op.misc_stats_period_ns
+                pct_a = pct_a \
+                    + d_t *  op.avg_fraction_bound_particles_i
+                t = t + d_t
+                # ON
+                d_on_t = op.on_i_stats_period_ns
+                on_per_a = on_per_a \
+                    + d_on_t * op.avg_on_per_unbound_i_per_ns
+                on_t = on_t + d_on_t
+                # OFF
+                d_off_t = op.off_stats_period_ns
+                off_per_a = off_per_a \
+                    + d_off_t * op.avg_off_per_bound_i_per_ns
+                off_t = off_t + d_off_t
+        if is_a(i.type1) and is_b(i.type0):
+            for op in i.order_params:
+                # PCT BND
+                d_t = op.misc_stats_period_ns
+                pct_a = pct_a + \
+                    d_t * op.avg_fraction_bound_particles_ii
+                t = t + d_t
+                # ON
+                d_on_t = op.on_ii_stats_period_ns
+                on_per_a = on_per_a \
+                    + d_on_t * op.avg_on_per_unbound_ii_per_ns
+                on_t = on_t + d_on_t
+                # OFF
+                d_off_t = op.off_stats_period_ns
+                off_per_a = off_per_a \
+                    + d_off_t * op.avg_off_per_bound_ii_per_ns
+                off_t = off_t + d_off_t
+#    print t, on_t, off_t
+    return (pct_a / t, on_per_a / on_t, off_per_a / off_t)
+
 
 def augment_results(files, results = {}, max_entries = 1000):
     """
@@ -130,12 +187,13 @@ def augment_results(files, results = {}, max_entries = 1000):
         kap_R = A.floaters[0].radius.value
         crap_R = A.floaters[1].radius.value
         fgkap_K, fgfg_K = get_interaction_k( A.interactions )
+        nonspecific_K = A.nonspecific_k.value
         for f in A.floaters:
             if is_kap(f.type):
                 kap_K_factor = f.interaction_k_factor.value
         time_ns = round(S.bd_simulation_time_ns)
         time_step_fs = round(A.time_step)
-        KEY_CAPTIONS = "kap_K_factor fgfg_K kap_R time_ns time_step_fs"
+        KEY_CAPTIONS = "kap_K_factor fgfg_K kap_R nonspecific_K time_ns time_step_fs"
 #       KEY_CAPTIONS = "fg_nbeads kap_R crap_R fgkap_K fgfg_K nonspecific_K"
         key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
         if(not key in results):
@@ -161,22 +219,27 @@ def augment_results(files, results = {}, max_entries = 1000):
                     sys.stdout.write("%.1f," % t)
                 sys.stdout.write(" ");
         print
-        kap_pct=0.0
-        crap_pct=0.0
-        for i in S.interactions:
-            if is_kap_fg_interaction(i):
-                if(is_kap(i.type0)):
-                    kap_pct = kap_pct + i.avg_pct_bound_particles0
-                else:
-                    kap_pct = kap_pct + i.avg_pct_bound_particles1
-            if is_crap_fg_interaction(i):
-                if(is_crap(i.type0)):
-                    crap_pct = crap_pct + i.avg_pct_bound_particles0
-                else:
-                    crap_pct = crap_pct + i.avg_pct_bound_particles1
+        cyto_fgs = [
+            "Nup100_8copies_chimera",
+            #            "Nsp1_16copies_1",
+            #"Nup116_8copies_chimera"
+            ];
+        kap_pct, on_per_kap_per_ns, off_per_kap_per_ns= \
+            get_interaction_stats(S.interactions,
+                                  is_kap,
+                                  lambda x: x in cyto_fgs)
+        crap_pct, on_per_crap_per_ns, off_per_crap_per_ns = \
+            get_interaction_stats(S.interactions,
+                                  is_crap,
+                                  is_fg)
         results[key]["fg_length"].append(S.fgs[0].length)
         results[key]["kap_pct_bnd"].append(kap_pct)
         results[key]["crap_pct_bnd"].append(crap_pct)
+        results[key]["kap_on"] = on_per_kap_per_ns
+        results[key]["kap_off"] = off_per_kap_per_ns
+        results[key]["crap_on"] = on_per_crap_per_ns
+        results[key]["crap_off"] = off_per_crap_per_ns
+#        print key, results[key]
         n_entries_read += 1
     return n_entries_read
 
@@ -194,15 +257,19 @@ def print_results(results, FILE=sys.stdout):
         print >>FILE, "%.1f" % (sum(v["fg_length"]) / n),
         print >>FILE, "%.1f%%" % (100*sum(v["kap_pct_bnd"]) / n),
         print >>FILE, "%.1f%%" % (100*sum(v["crap_pct_bnd"]) / n),
+        print >>FILE, "%.3f" % (v["kap_on"]),
+        print >>FILE, "%.3f" % (v["kap_off"]),
+        print >>FILE, "%.3f" % (v["crap_on"]),
+        print >>FILE, "%.3f" % (v["crap_off"]),
         # print tranp histograms in bins
-        bin_size = 2500
+        bin_size = 5000
         right_edge=round_way_up( max(v["kap_times"]+v["crap_times"] +[bin_size]) , bin_size)
         bins=range(0,right_edge+bin_size,bin_size)
         h_kaps = numpy.histogram(v["kap_times"],bins)
         h_craps=numpy.histogram(v["crap_times"],bins)
         FILE.write(" ")
         print_list_to_file(FILE, h_kaps[0])
-        FILE.write(" ")
+        FILE.write("  ")
         print_list_to_file(FILE, h_craps[0])
         print >>FILE
 
