@@ -57,11 +57,32 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<double> maximum_number_of_minutes_;
   Parameter<double> fg_anchor_inflate_factor_; // By how much to inflate static
                                                // anchors of FG nups.
+  Parameter<int> is_exclude_floaters_from_slab_initially_;
   Parameter<double> are_floaters_on_one_slab_side_;
 
  // time when simulation has started for this process
   Parameter<double> initial_simulation_time_ns_;
 
+ public:
+  /** returns the maximal interaction range between particles */
+  double get_range() const { return range_; }
+
+  /** returns whether should exclude floaters from slab during initialization */
+  bool get_is_exclude_floaters_from_slab_initially()
+  {return is_exclude_floaters_from_slab_initially_; }
+
+  /** returns whether should exclude floaters from one slab side,
+      if excluded at all
+  */
+  bool get_are_floaters_on_one_slab_side()
+  {return are_floaters_on_one_slab_side_;}
+
+  /** returns the simulation angular d factor */
+  double get_angular_d_factor() const
+  { return angular_d_factor_; }
+
+
+ private:
   // the model on which the simulation is run
   base::PointerMember<Model> m_;
 
@@ -224,16 +245,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   /** returns the requested fraction of time for taking statistics */
   double get_statistics_fraction() const { return statistics_fraction_; }
 
-  /** returns the simulation angular d factor */
-  double get_angular_d_factor() const
-  { return angular_d_factor_; }
-
-  bool get_are_floaters_on_one_slab_side() const
-  { return are_floaters_on_one_slab_side_; }
-
-  double get_initial_simulation_time_ns() const
-  {return initial_simulation_time_ns_; }
-
   /** returns true if particle type is of fg type
       (that is, particle was added within create_fgs()
   */
@@ -307,6 +318,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
    */
   container::ListSingletonContainer* get_optimizable_diffusers();
 
+  /** get time from which simulation begins */
+  double get_initial_simulation_time_ns() const
+  {return initial_simulation_time_ns_; }
+
   /**
       Create n interaction sites spread around the surface of a ball of
       radius r, and associate these sites with all particles of type t0
@@ -330,9 +345,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   void set_sites(core::ParticleType t0, const algebra::Vector3Ds &sites) {
     sites_[t0] = sites;
   }
-
-  /** returns the maximal interaction range between particles */
-  double get_range() const { return range_; }
 
   /**
       Returns the effective interaction range radius of a

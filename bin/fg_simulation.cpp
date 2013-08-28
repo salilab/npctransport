@@ -179,17 +179,18 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
 
 /**    returns all kap / crap particles in SimulationData */
 IMP::ParticlesTemp get_kaps_and_craps(IMP::npctransport::SimulationData& sd) {
-  using namespace IMP;
+  using namespace IMP::npctransport;
 
-  ParticlesTemp ret;
-  unsigned int n = IMP::npctransport::get_number_of_types_of_float();
-  for (unsigned int i = 0; i < n; i++) {
-    IMP::core::ParticleType float_type =
-        IMP::npctransport::get_type_of_float(i);
-    std::cout << float_type << std::endl;
-    ret += sd.get_particles_of_type(float_type);
-    std::cout << ret;
-  }
+  IMP::ParticlesTemp ret;
+  ParticleTypeSet const &fts = sd.get_floater_types();
+  for (ParticleTypeSet::const_iterator it = fts.begin();
+       it != fts.end();
+       it++)
+    {
+      std::cout << *it << std::endl;
+      ret += sd.get_particles_of_type(*it);
+      std::cout << ret;
+    }
   return ret;
 }
 
@@ -267,7 +268,8 @@ int main(int argc, char* argv[]) {
     }
     color_fgs(*sd);
     Restraints initialization_restraints;
-    if (sd->get_scoring()->get_has_slab()) {
+    if (sd->get_scoring()->get_has_slab() &&
+        sd->get_is_exclude_floaters_from_slab_initially()) {
       // if has slab, exclude from channel initially
       IMP::base::Pointer<IMP::Restraint> r =
           get_exclude_from_channel_restraint(*sd);

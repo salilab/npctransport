@@ -10,6 +10,7 @@
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
 #include <IMP/npctransport/SlabSingletonScore.h>
+#include <IMP/npctransport/ZBiasSingletonScore.h>
 #ifdef IMP_NPC_GOOGLE
 IMP_GCC_PUSH_POP(diagnostic push)
 IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
@@ -94,6 +95,7 @@ Scoring::get_scoring_function(bool update)
     if (slab_is_on_) {
       rs.push_back(get_slab_restraint(update));
     }
+    rs += get_z_bias_restraints();
     rs.push_back(this->get_predicates_pair_restraint(update));
     //  is_updating_particles_ = false; // everything is supposed to be updated now
     //  IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
@@ -435,6 +437,36 @@ Restraint * Scoring::create_slab_restraint
     container::create_restraint(slab_score.get(),
                                 particles.get(),
                                 "bounding slab");
+}
+
+void Scoring::add_z_bias_restraint
+( SingletonContainerAdaptor ps, double k )
+{
+  z_bias_restraints_.push_back
+    ( create_z_bias_restraint( ps, k) );
+}
+
+void Scoring::add_z_bias_restraint(Particle* p, double k)
+{
+  ParticlesTemp ps(1, p);
+  add_z_bias_restraint(ps, k);
+}
+
+IMP::Restraints
+Scoring::get_z_bias_restraints()
+{
+  return z_bias_restraints_;
+}
+
+IMP::Restraint*
+Scoring::create_z_bias_restraint(SingletonContainerAdaptor ps, double k)
+const
+{
+  IMP_NEW(ZBiasSingletonScore, zbsc, (k) );
+  return
+    container::create_restraint(zbsc.get(),
+                                ps.get(),
+                                "z-bias potential");
 }
 
 

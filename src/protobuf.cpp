@@ -110,7 +110,8 @@ void set_value(const Reflection* r, Message* m, const FieldDescriptor* fd,
 // protobuf message <message> and contains a range of values
 // (those are indicated by having 'lower' and 'upper' fields).
 // In addition, writes all constant messages to out_message, including
-// messages with 'degenerate' ranges (only a lower bound)
+// messages with 'degenerate' ranges (only a lower bound).
+// Copying is by the field name (not its index!)
 //
 // @param name the name to be given to the range (range.name),
 //             only if it is a direct child of current message.

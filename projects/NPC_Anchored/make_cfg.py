@@ -36,6 +36,7 @@ def get_basic_config():
     config.backbone_k.lower=0.25
     config.time_step_factor.lower=0.5 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
+    config.time_step_wave_factor.lower=5 #### NOTE THIS ####
     config.excluded_volume_k.lower=2
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.1
@@ -47,6 +48,7 @@ def get_basic_config():
                                       # in crowded environment and for coarse graining
     config.statistics_interval_ns=0.1
     config.fg_anchor_inflate_factor=3.0/math.sqrt(fg_coarse_factor)
+    config.is_exclude_floaters_from_slab_initially=0
     return config
 
 
@@ -69,6 +71,11 @@ def add_interactions_for_fg(fg_name,
     interactionFG_CRAP= IMP.npctransport.add_interaction(config,
                                        name0=fg_name,
                                        name1="crap0",
+                                       interaction_k=0,
+                                       interaction_range=0)
+    interactionFG_CRAP= IMP.npctransport.add_interaction(config,
+                                       name0=fg_name,
+                                       name1="small_crap",
                                        interaction_k=0,
                                        interaction_range=0)
 
@@ -101,7 +108,7 @@ def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None,
                                       type_name= type_name,
                                       number_of_beads= coarse_nbeads,
                                       number=len(centers),
-                                      radius=8 * math.sqrt(coarse_factor),
+                                      radius=7 * math.sqrt(coarse_factor),
                                       interactions= int(math.ceil(1 * coarse_factor)),
                                       rest_length_factor = rest_length_factor)
     add_interactions_for_fg(type_name, k_fgkap)
@@ -163,15 +170,26 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
+kaps.k_z_bias.lower=0.005
+kaps.k_z_bias_fraction.lower=0.3
 ############### ACTIVE RANGE #############
 create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
-nonspecifics= IMP.npctransport.add_float_type(config,
+nonspecifics1= IMP.npctransport.add_float_type(config,
                                               number=100,
                                               radius=kaps_R, #-1,
                                               interactions=0,
                                               type_name="crap0")
+nonspecifics1.k_z_bias.lower=0.005
+nonspecifics1.k_z_bias_fraction.lower=0.3
+nonspecifics2= IMP.npctransport.add_float_type(config,
+                                              number=100,
+                                              radius=12.5, #-1,
+                                              interactions=0,
+                                              type_name="small_crap")
+nonspecifics2.k_z_bias.lower=0.005
+nonspecifics2.k_z_bias_fraction.lower=0.3
 #create_range(nonspecifics.radius, lb = 10, ub = 30, steps = 5, base = 1)
 # fg with kaps / craps
 #add_interactions_for_fg("fg0", 2.5, 7.5, k_kap_steps = 10, k_kap_base=1)

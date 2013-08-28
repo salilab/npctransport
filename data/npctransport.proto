@@ -44,6 +44,8 @@ message Configuration {
     required FloatRange interaction_k_factor=7;
     required FloatRange interaction_range_factor=8;
     optional string type=9; // type name, e.g. "kap121"
+    optional FloatRange k_z_bias=10; // if non-0, add a biasing constant force pulling to lower (k>0) or higher (k<0)
+    optional FloatRange k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
   };
   message ObstacleConfiguration {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
@@ -92,7 +94,8 @@ message Configuration {
   optional double fg_anchor_inflate_factor=28 [default=1.0]; // by how much to inflate static anchors of fg chains
   optional int32 are_floaters_on_one_slab_side=29 [default=0]; // if true (<>0), all floaters are initially concentrated on one side
   optional FloatRange time_step_wave_factor=30; // if >1.001, use a wave function for time step that allows going beyond formal maximal step in waves
-  // n=30
+  optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
+  // n=31
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -132,6 +135,8 @@ message Assignment {
     required FloatAssignment interaction_k_factor=5;
     required FloatAssignment interaction_range_factor=7;
     optional string type=8; // e.g., "kap121"
+    optional FloatAssignment k_z_bias=9; // if non-0, add a biasing constant force pulling to lower (k>0) or higher (k<0)
+    optional FloatAssignment k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
   };
   message ObstacleAssignment {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
@@ -186,7 +191,8 @@ message Assignment {
   optional double fg_anchor_inflate_factor=34 [default=1.0]; // by how much to inflate the anchor of FG nups (= structural nup)
   optional int32 are_floaters_on_one_slab_side=35 [default=0]; // if true (<>0), all floaters are initially concentrated on one side
   optional FloatAssignment time_step_wave_factor=36; // if >1.001, use a wave function for time step that allows going beyond formal maximal step in waves
-  // n=36
+  optional int32 is_exclude_floaters_from_slab_initially=37 [default = 1];
+  // n=37
 }
 
 message Statistics {

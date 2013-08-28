@@ -121,7 +121,6 @@ template<class t_value>
 inline std::pair<t_value, t_value>
   make_unordered_pair(t_value v0, t_value v1)
 {
-  typedef std::pair<t_value, t_value> t_pair;
   return (v0 >= v1) ? std::make_pair(v0,v1) : std::make_pair(v1,v0);
 }
 

@@ -114,6 +114,7 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   GET_VALUE(maximum_number_of_minutes);
   GET_VALUE_DEF(fg_anchor_inflate_factor, 1.0);
   GET_VALUE_DEF(are_floaters_on_one_slab_side, false);
+  GET_VALUE_DEF(is_exclude_floaters_from_slab_initially, false);
   initial_simulation_time_ns_ = 0.0; // default
   if (pb_data.has_statistics()) {
     if (pb_data.statistics().has_bd_simulation_time_ns()) {
@@ -277,30 +278,54 @@ void SimulationData::create_floaters(
   atom::Hierarchy(get_root()).add_child(cur_root);
   // populate hierarchy with particles:
   ParticlesTemp cur_particles;
-  for (int j = 0; j < f_data.number().value(); ++j) {
-    double dc = f_data.d_factor().value();
-    Particle *cur_p =
-      create_particle(this, f_data.radius().value(),
-                      angular_d_factor_, dc,
-                      color, type);
-    cur_particles.push_back(cur_p);
-    cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
+  for (int j = 0; j < f_data.number().value(); ++j)
+    {
+      double dc = f_data.d_factor().value();
+      Particle *cur_p =
+        create_particle(this, f_data.radius().value(),
+                        angular_d_factor_, dc,
+                        color, type);
+      cur_particles.push_back(cur_p);
+      cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
     get_statistics()->add_floater_stats(cur_p); // stats
-  }
+    }
   particles_[type] = cur_particles;
   // add interaction sites to particles of this type:
-    if (f_data.interactions().value() > 0) {
+  if (f_data.interactions().value() > 0)
+    {
       int nsites = f_data.interactions().value();
       IMP_LOG(WARNING, nsites << " sites added " << std::endl);
       set_sites(type, nsites, f_data.radius().value());
     }
-    // add type-specific scoring scale factors
-    get_scoring()->set_interaction_range_factor
-      ( type, f_data.interaction_range_factor().value());
-    get_scoring()->set_interaction_k_factor
+  // add type-specific scoring scale factors
+  get_scoring()->set_interaction_range_factor
+    ( type, f_data.interaction_range_factor().value());
+  get_scoring()->set_interaction_k_factor
       ( type, f_data.interaction_k_factor().value());
 
-    set_diffusers_changed(true);
+  // add z-biasing potential for particle with highest z*k (='energy')
+  if(f_data.has_k_z_bias()) if (f_data.k_z_bias().value() != 0)
+    {
+      double k = f_data.k_z_bias().value();
+      unsigned int n_bias = f_data.number().value();
+      if(f_data.has_k_z_bias_fraction()) {
+        double kzbf = f_data.k_z_bias_fraction().value();
+        if(kzbf <= 0.0 || kzbf > 1.0) kzbf = 1.0;
+        n_bias = (unsigned int)
+          std::ceil( kzbf * n_bias );
+      }
+      ParticlesTemp ps;
+      for (unsigned int i = 0; i < n_bias ; i++)
+        {
+          ps.push_back( cur_particles[i] );
+        }
+      std::cout << "Biasing " << n_bias << " floaters"
+                << " of type " << type
+                << std::endl;
+      get_scoring()->add_z_bias_restraint(ps, k);
+    }
+
+  set_diffusers_changed(true);
 }
 
 
@@ -458,6 +483,7 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
                               (1, s->get_predicates_pair_restraint() )
                               );
     IMP::rmf::add_restraints(fh, s->get_all_chain_restraints() );
+    IMP::rmf::add_restraints(fh, s->get_z_bias_restraints() );
   }
   if (s->get_has_bounding_box()) {
     if(with_restraints) {

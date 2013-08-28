@@ -308,7 +308,8 @@ void optimize_balls(const ParticlesTemp &ps,
     std::cout << "BEGIN o_b(): Saver has been called so far " <<
       save->get_number_of_updates() << std::endl;
 
-  std::cout << "Performing initial optimization" << std::endl;
+  IMP_LOG(PROGRESS, "optimize_balls for n_particles="
+          << ps.size() << std::endl);
   // shrink each of the particles, relax the configuration, repeat
   double bd_temperature_orig = bd->get_temperature();
   for (int i = 0; i < 11; ++i) {
@@ -328,10 +329,10 @@ void optimize_balls(const ParticlesTemp &ps,
       set_temporary_lengths.push_back
         ( new LinearWellSetLengthRAII(lwps[j], length_factor) );
     }
-    std::cout << "Optimizing with radii at " << factor << " of full"
-              << " and length factor " << length_factor;
-    std::cout << " energy before = "
-              << bd->get_scoring_function()->evaluate(false) << std::endl;
+    IMP_LOG(PROGRESS, "Optimizing with radii at " << factor << " of full"
+            << " and length factor " << length_factor << std::endl
+            << " energy before = "
+            << bd->get_scoring_function()->evaluate(false) << std::endl);
 
     for (int k_simanneal = 0; k_simanneal < 5; ++k_simanneal)
       {
@@ -361,8 +362,8 @@ void optimize_balls(const ParticlesTemp &ps,
         if (done) break;
       }  // for k_simanneal
   } // for i
-  std::cout << "Energy after initialization is " <<
-    bd->get_scoring_function()->evaluate(false) << std::endl;
+  IMP_LOG(PROGRESS, "Energy after optimize_balls() is " <<
+          bd->get_scoring_function()->evaluate(false) << std::endl);
   if(save)
     std::cout << "END o_b(): Saver has been called so far " <<
       save->get_number_of_updates() << std::endl;
@@ -468,7 +469,7 @@ void initialize_positions(SimulationData *sd,
         ( extra_restraints,
           cur_particles,
           cur_optimizable_particles,
-          false /* no attr non-bonded potentials */);
+          false /* no non-bonded attr potentials yet */);
       OptimizerSetTemporaryScoringFunctionRAII
         set_temporary_scoring_function( sd->get_bd(), sf );
       optimize_balls(cur_particles,
@@ -479,14 +480,33 @@ void initialize_positions(SimulationData *sd,
                      base::PROGRESS,
                      debug, short_init_factor);
     }
-  // optimize everything now
-  optimize_balls(sd->get_diffusers()->get_particles(),
-                 false /*scale rest length*/,
-                 sd->get_rmf_sos_writer(),
-                 sd->get_bd(),
-                 sd->get_scoring()->get_chain_scores(),
-                 base::PROGRESS,
-                 debug, short_init_factor / 10.0);
+  {
+    // optimize everything now
+    ParticlesTemp particles = sd->get_diffusers()->get_particles();
+    ParticlesTemp optimizable_particles =
+      get_optimizable_particles( particles );
+    base::Pointer<ScoringFunction> sf =
+      sd->get_scoring()->get_custom_scoring_function
+      ( extra_restraints,
+        particles,
+        optimizable_particles ,
+        true /* no non-bonded attr potential yet */ );
+    OptimizerSetTemporaryScoringFunctionRAII
+      set_temporary_scoring_function( sd->get_bd(), sf );
+    optimize_balls(sd->get_diffusers()->get_particles(),
+                   false /*scale rest length*/,
+                   sd->get_rmf_sos_writer(),
+                   sd->get_bd(),
+                   sd->get_scoring()->get_chain_scores(),
+                   base::PROGRESS,
+                   debug, short_init_factor);
+    std::cout <<  "Custom energy after initialization is "
+              << sd->get_bd()->get_scoring_function()->evaluate(false)
+              << std::endl;
+  }
+  std::cout <<  "Simulation energy after initialization is " <<
+          sd->get_bd()->get_scoring_function()->evaluate(false)
+          << std::endl;
   print_fgs(*sd);
   // IMP_NEW(core::RestraintsScoringFunction, rsf,
   //         (rss + RestraintsTemp
