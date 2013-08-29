@@ -1,0 +1,159 @@
+interaction_k {
+  lower: 10.0
+}
+interaction_range {
+  lower: 1.0
+}
+backbone_k {
+  lower: 1.0
+}
+time_step_factor {
+  lower: 3.0
+}
+box_side {
+  lower: 400.0
+}
+box_is_on {
+  lower: 1
+}
+slab_thickness {
+  lower: 150.0
+}
+tunnel_radius {
+  lower: 90.0
+}
+slab_is_on {
+  lower: 1
+}
+slack {
+  lower: 8.0
+}
+number_of_trials: 1
+maximal_number_of_frames: 1000000000.0
+fgs {
+  number_of_beads {
+    lower: 12
+  }
+  number {
+    lower: 32
+  }
+  radius {
+    lower: 6.0
+  }
+  interactions {
+    lower: 1
+  }
+  rest_length_factor {
+    lower: 1.5
+  }
+  d_factor {
+    lower: 1.0
+  }
+  interaction_k_factor {
+    lower: 1.0
+  }
+  interaction_range_factor {
+    lower: 1.0
+  }
+}
+floaters {
+  number {
+    lower: 15
+  }
+  radius {
+    lower: 25.0
+  }
+  interactions {
+    lower: 12
+  }
+  d_factor {
+    lower: 1.0
+  }
+  interaction_k_factor {
+    lower: 1.0
+  }
+  interaction_range_factor {
+    lower: 1.0
+  }
+}
+floaters {
+  number {
+    lower: 15
+  }
+  radius {
+    lower: 25.0
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1.0
+  }
+  interaction_k_factor {
+    lower: 1.0
+  }
+  interaction_range_factor {
+    lower: 1.0
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+    upper: 7.5
+    steps: 10
+    base: 1.0
+  }
+  interaction_range {
+    lower: 2.0
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "fg0"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+    upper: 7.5
+    steps: 10
+    base: 1.0
+  }
+  interaction_range {
+    lower: 2.0
+  }
+}
+dump_interval_ns: 250.0
+nonspecific_range {
+  lower: 1.0
+}
+nonspecific_k {
+  lower: 1.0
+  upper: 2.0
+  steps: 3
+  base: 1.0
+}
+angular_D_factor {
+  lower: 0.3
+}
+statistics_interval_ns: 0.1
+excluded_volume_k {
+  lower: 20.0
+}
+simulation_time_ns: 2500.0
+statistics_fraction {
+  lower: 1.0
+}
+
