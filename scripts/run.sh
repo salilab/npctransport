@@ -1,5 +1,5 @@
 #!/usr/bin/tcsh
-echo OUTFOLDER=Tmp
+set OUTFOLDER=Tmp
 set cfg=$1
 set ext=$2
 set sif=$3
@@ -14,5 +14,7 @@ if(! -d $OUTFOLDER) then
     echo $OUTFOLDER already exists as file, choose a diffrent name
     exit -1
 endif
+echo npc_fg_simulation --configuration $cfg --conformations Tmp/movie_$ext.rmf --short_init_factor $sif \
+    --output Tmp/out_$ext.pb --final_conformations Tmp/final_$ext.rmf $4 $5 $6 $7
 npc_fg_simulation --configuration $cfg --conformations Tmp/movie_$ext.rmf --short_init_factor $sif \
-    --output Tmp/out_$ext.pb --final_conformations Tmp/final_$ext.rmf $3 $4 $5 $6 $7
+    --output Tmp/out_$ext.pb --final_conformations Tmp/final_$ext.rmf $4 $5 $6 $7

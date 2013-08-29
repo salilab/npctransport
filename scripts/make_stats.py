@@ -183,16 +183,20 @@ def augment_results(files, results = {}, max_entries = 1000):
             continue
         A = o.assignment
         S = o.statistics
-        fg_nbeads = A.fgs[0].number_of_beads.value
-        kap_R = A.floaters[0].radius.value
-        crap_R = A.floaters[1].radius.value
-        fgkap_K, fgfg_K = get_interaction_k( A.interactions )
-        nonspecific_K = A.nonspecific_k.value
-        for f in A.floaters:
-            if is_kap(f.type):
-                kap_K_factor = f.interaction_k_factor.value
-        time_ns = round(S.bd_simulation_time_ns)
-        time_step_fs = round(A.time_step)
+        try:
+            fg_nbeads = A.fgs[0].number_of_beads.value
+            kap_R = A.floaters[0].radius.value
+            crap_R = A.floaters[1].radius.value
+            fgkap_K, fgfg_K = get_interaction_k( A.interactions )
+            nonspecific_K = A.nonspecific_k.value
+            for f in A.floaters:
+                if is_kap(f.type):
+                    kap_K_factor = f.interaction_k_factor.value
+            time_ns = round(S.bd_simulation_time_ns)
+            time_step_fs = round(A.time_step)
+        except:
+            print >> sys.stderr, 'Unexpected error: file %s' % file_name, sys.exc_info()
+            continue
         KEY_CAPTIONS = "kap_K_factor fgfg_K kap_R nonspecific_K time_ns time_step_fs"
 #       KEY_CAPTIONS = "fg_nbeads kap_R crap_R fgkap_K fgfg_K nonspecific_K"
         key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
