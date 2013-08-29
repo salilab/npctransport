@@ -482,7 +482,8 @@ void initialize_positions(SimulationData *sd,
     }
   {
     // optimize everything now
-    ParticlesTemp particles = sd->get_diffusers()->get_particles();
+    ParticlesTemp particles =
+      obstacles + sd->get_diffusers()->get_particles();
     ParticlesTemp optimizable_particles =
       get_optimizable_particles( particles );
     base::Pointer<ScoringFunction> sf =
