@@ -15,7 +15,8 @@ range_fgkap=4.0
 rest_length_factor = 1.25 # 1
 obstacle_inflate_factor = 1.3
 fg_coarse_factor=3.0 # 3
-z_bias = 0.1
+z_bias = 0.025
+z_bias_frac = 0.5
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
     print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
@@ -173,7 +174,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
 kaps.k_z_bias.lower=z_bias
-kaps.k_z_bias_fraction.lower=0.5
+kaps.k_z_bias_fraction.lower=z_bias_frac
 ############### ACTIVE RANGE #############
 create_range(kaps.interaction_k_factor, lb=0.1, ub=5, steps = 5, base=2)
 ##########################################
@@ -184,14 +185,14 @@ nonspecifics1= IMP.npctransport.add_float_type(config,
                                               interactions=0,
                                               type_name="crap0")
 nonspecifics1.k_z_bias.lower=z_bias
-nonspecifics1.k_z_bias_fraction.lower=0.5
+nonspecifics1.k_z_bias_fraction.lower=z_bias_frac
 nonspecifics2= IMP.npctransport.add_float_type(config,
                                               number=100,
                                               radius=12.5, #-1,
                                               interactions=0,
                                               type_name="small_crap")
 nonspecifics2.k_z_bias.lower=z_bias
-nonspecifics2.k_z_bias_fraction.lower=0.55
+nonspecifics2.k_z_bias_fraction.lower=z_bias_frac
 #create_range(nonspecifics.radius, lb = 10, ub = 30, steps = 5, base = 1)
 # fg with kaps / craps
 #add_interactions_for_fg("fg0", 2.5, 7.5, k_kap_steps = 10, k_kap_base=1)

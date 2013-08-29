@@ -1010,7 +1010,7 @@ floaters {
   interaction_k_factor {
     lower: 0.1
     upper: 5
-    steps: 10
+    steps: 5
     base: 2
   }
   interaction_range_factor {
@@ -1018,10 +1018,10 @@ floaters {
   }
   type: "kap"
   k_z_bias {
-    lower: 0.05
+    lower: 0.025
   }
   k_z_bias_fraction {
-    lower: 0.25
+    lower: 0.5
   }
 }
 floaters {
@@ -1045,10 +1045,10 @@ floaters {
   }
   type: "crap0"
   k_z_bias {
-    lower: 0.005
+    lower: 0.025
   }
   k_z_bias_fraction {
-    lower: 0.3
+    lower: 0.5
   }
 }
 floaters {
@@ -1072,10 +1072,10 @@ floaters {
   }
   type: "small_crap"
   k_z_bias {
-    lower: 0.005
+    lower: 0.025
   }
   k_z_bias_fraction {
-    lower: 0.3
+    lower: 0.5
   }
 }
 interactions {
@@ -2416,7 +2416,7 @@ interactions {
     lower: 4.0
   }
 }
-dump_interval_ns: 5
+dump_interval_ns: 50
 nonspecific_range {
   lower: 4
 }
@@ -2428,7 +2428,7 @@ angular_D_factor {
 }
 statistics_interval_ns: 0.1
 excluded_volume_k {
-  lower: 2
+  lower: 1
 }
 simulation_time_ns: 5000
 statistics_fraction {
