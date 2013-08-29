@@ -7,7 +7,7 @@ import re
 import os
 
 # defaults
-kaps_R = 25.0
+kaps_R = 20.0
 k_fgfg=0.25
 range_fgfg=4.0
 k_fgkap=3.0
@@ -39,11 +39,11 @@ def get_basic_config():
     config.time_step_wave_factor.lower=10 #### NOTE THIS ####
     config.excluded_volume_k.lower=2
     config.nonspecific_range.lower=4
-    config.nonspecific_k.lower=0.1
+    config.nonspecific_k.lower=0.25
     config.slack.lower = 7.5
     config.number_of_trials=1
     config.dump_interval_ns=5
-    config.simulation_time_ns=2000
+    config.simulation_time_ns=5000
     config.angular_D_factor.lower=0.05 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
     config.statistics_interval_ns=0.1
@@ -174,7 +174,7 @@ kaps= IMP.npctransport.add_float_type(config,
 kaps.k_z_bias.lower=0.05
 kaps.k_z_bias_fraction.lower=0.25
 ############### ACTIVE RANGE #############
-create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
+create_range(kaps.interaction_k_factor, lb=0.1, ub=5, steps = 10, base=2)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics1= IMP.npctransport.add_float_type(config,
