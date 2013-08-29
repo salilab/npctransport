@@ -30,6 +30,33 @@ slack {
 }
 number_of_trials: 1
 maximal_number_of_frames: 1000000000
+fgs {
+  number_of_beads {
+    lower: 2
+  }
+  number {
+    lower: 1
+  }
+  radius {
+    lower: 12.124355653
+  }
+  interactions {
+    lower: 3
+  }
+  rest_length_factor {
+    lower: 1.25
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "fg"
+}
 floaters {
   number {
     lower: 11
@@ -58,6 +85,60 @@ floaters {
   }
   k_z_bias_fraction {
     lower: 0.3
+  }
+}
+floaters {
+  number {
+    lower: 2
+  }
+  radius {
+    lower: 30.0
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "crap0"
+}
+interactions {
+  type0: "fg"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 4.0
+  }
+}
+interactions {
+  type0: "fg"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg"
+  type1: "fg"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 0.25
+  }
+  interaction_range {
+    lower: 4.0
   }
 }
 dump_interval_ns: 5

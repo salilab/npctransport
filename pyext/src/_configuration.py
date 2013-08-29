@@ -48,6 +48,7 @@ def set_default_configuration(config):
     config.statistics_fraction.lower=.5;
     config.fg_anchor_inflate_factor=1.0
     config.are_floaters_on_one_slab_side=0; # false
+    config.is_exclude_floaters_from_slab_initially=1; # true
 
 def add_fg_type(config, type_name, number_of_beads, number, radius,
                 interactions=1, rest_length_factor=1, d_factor=1,

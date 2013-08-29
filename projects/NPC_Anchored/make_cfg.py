@@ -48,7 +48,8 @@ def get_basic_config():
                                       # in crowded environment and for coarse graining
     config.statistics_interval_ns=0.1
     config.fg_anchor_inflate_factor=3.0/math.sqrt(fg_coarse_factor)
-    config.is_exclude_floaters_from_slab_initially=0
+    config.is_exclude_floaters_from_slab_initially=1
+    config.are_floaters_on_one_slab_side = 1 # all on top side
     return config
 
 
@@ -170,7 +171,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
-kaps.k_z_bias.lower=0.005
+kaps.k_z_bias.lower=0.05
 kaps.k_z_bias_fraction.lower=0.25
 ############### ACTIVE RANGE #############
 create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
@@ -253,7 +254,6 @@ config.slab_is_on.lower=1
 config.tunnel_radius.lower=max_r - config.fgs[0].radius.lower # or also upper when there's steps?
 config.slab_thickness.lower=250.0 # yeast nuclear envelope - see http://books.google.com/books?id=GvxdK1mdqQwC&pg=PA278&lpg=PA278&dq=yeast+nuclear+envelope+dimensions+nanometer&source=bl&ots=tHQoLfXHI1&sig=nRgZmLYnKuiRNP8n6vhm3bapjpI&hl=en&sa=X&ei=VtwKUtvAAsTAyAHOmIDYBg&ved=0CHsQ6AEwCA#v=onepage&q=yeast%20nuclear%20envelope%20dimensions%20nanometer&f=false
 # config.slab_thickness.lower = max_z - config.fgs[0].radius.lower  # or also upper when there's steps?
-config.are_floaters_on_one_slab_side = 1 # all on top side
 
 
 #create_range(interactionFG_FG.interaction_k, lb = 2.5, ub = 7.5, steps = 10, base = 1)

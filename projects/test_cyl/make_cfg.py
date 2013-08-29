@@ -73,7 +73,7 @@ def add_interactions_for_fg(fg_name,
                                        interaction_k=0,
                                        interaction_range=0)
 
-def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None,
+def add_fg_based_on(config, type_name, k, nbeads, origin=None,
                     coarse_factor=fg_coarse_factor):
     ''' Read mrc_filename, cluster to k clusters, and create k
         fgs with nbeads/coarse_factor beads, anchored at the clusters,
@@ -90,13 +90,6 @@ def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None,
         @return the mean location of the MRC file
         '''
     global max_r, max_x, max_y, max_z
-    # get type name as filename without folder and extension parts
-    type_search= re.search("([^/]*?)(?:[.].*)*$", mrc_filename)
-    type_name = type_search.groups(0)[0]
-    # cluster anchors from MRC file
-#    centers, mean_loc = read_nups.cluster_MRC_file_with_cache(mrc_filename, k)
- #   if(origin is None):
-  #      origin = mean_loc
     coarse_nbeads = 1 + int(math.ceil(nbeads / coarse_factor)) # +1 for anchor
     fgs= IMP.npctransport.add_fg_type(config,
                                       type_name= type_name,
@@ -158,11 +151,11 @@ kaps.k_z_bias_fraction.lower=0.3
 create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
-#nonspecifics= IMP.npctransport.add_float_type(config,
-#                                              number=2,
-#                                              radius=kaps_R, #-1,
-#                                              interactions=0,
-#                                              type_name="crap0")
+nonspecifics= IMP.npctransport.add_float_type(config,
+                                              number=2,
+                                              radius=kaps_R, #-1,
+                                              interactions=0,
+                                              type_name="crap0")
 
 #create_range(nonspecifics.radius, lb = 10, ub = 30, steps = 5, base = 1)
 # fg with kaps / craps
@@ -175,7 +168,7 @@ create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
 
 # Add FGs with anchors
 # (Stoicheometries from Alber et al. 2007b, Determining..., Fig. 3)
-#add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=1, nbeads=3)
+add_fg_based_on(config, "fg", k=1, nbeads=3)
 # add bounding volumes
 config.box_is_on.lower=1
 config.box_side.lower=300
