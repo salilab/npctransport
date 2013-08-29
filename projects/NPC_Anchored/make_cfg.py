@@ -15,6 +15,7 @@ range_fgkap=4.0
 rest_length_factor = 1.25 # 1
 obstacle_inflate_factor = 1.3
 fg_coarse_factor=3.0 # 3
+z_bias = 0.1
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
     print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
@@ -37,12 +38,12 @@ def get_basic_config():
     config.time_step_factor.lower=0.5 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=10 #### NOTE THIS ####
-    config.excluded_volume_k.lower=2
+    config.excluded_volume_k.lower=1
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.25
     config.slack.lower = 7.5
     config.number_of_trials=1
-    config.dump_interval_ns=5
+    config.dump_interval_ns=50
     config.simulation_time_ns=5000
     config.angular_D_factor.lower=0.05 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
@@ -171,10 +172,10 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
-kaps.k_z_bias.lower=0.05
-kaps.k_z_bias_fraction.lower=0.25
+kaps.k_z_bias.lower=z_bias
+kaps.k_z_bias_fraction.lower=0.5
 ############### ACTIVE RANGE #############
-create_range(kaps.interaction_k_factor, lb=0.1, ub=5, steps = 10, base=2)
+create_range(kaps.interaction_k_factor, lb=0.1, ub=5, steps = 5, base=2)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics1= IMP.npctransport.add_float_type(config,
@@ -182,15 +183,15 @@ nonspecifics1= IMP.npctransport.add_float_type(config,
                                               radius=kaps_R, #-1,
                                               interactions=0,
                                               type_name="crap0")
-nonspecifics1.k_z_bias.lower=0.005
-nonspecifics1.k_z_bias_fraction.lower=0.3
+nonspecifics1.k_z_bias.lower=z_bias
+nonspecifics1.k_z_bias_fraction.lower=0.5
 nonspecifics2= IMP.npctransport.add_float_type(config,
                                               number=100,
                                               radius=12.5, #-1,
                                               interactions=0,
                                               type_name="small_crap")
-nonspecifics2.k_z_bias.lower=0.005
-nonspecifics2.k_z_bias_fraction.lower=0.3
+nonspecifics2.k_z_bias.lower=z_bias
+nonspecifics2.k_z_bias_fraction.lower=0.55
 #create_range(nonspecifics.radius, lb = 10, ub = 30, steps = 5, base = 1)
 # fg with kaps / craps
 #add_interactions_for_fg("fg0", 2.5, 7.5, k_kap_steps = 10, k_kap_base=1)
