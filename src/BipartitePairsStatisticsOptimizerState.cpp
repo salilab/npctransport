@@ -62,6 +62,7 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
     get_maximal_number_of_unordered_pairs(particlesI, particlesII);
 
   // TODO: do we want to add consecutive pair filter for fg chains?
+  reset(); // make sure all counters are 0
 }
 
 void BipartitePairsStatisticsOptimizerState::reset() {
