@@ -155,11 +155,12 @@ class Tests(IMP.test.TestCase):
         self._assert_kap_in_place(sd, False)
         # init and run
         IMP.base.set_log_level(IMP.base.SILENT)
+        sd.get_bd().set_log_level(IMP.base.SILENT)
         IMP.npctransport.initialize_positions( sd, [], False,
                                                short_init_factor)
         print
         print
-        IMP.base.set_log_level(IMP.base.PROGRESS)
+#        IMP.base.set_log_level(IMP.base.PROGRESS)
         sd.write_geometry(pymol_file)
         n_good=0
         timer= IMP.npctransport.timer();
