@@ -186,7 +186,7 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   /** restart accumulation of all averages in the next time
       that update() is called
   */
-  void reset() { is_reset_ = true; }
+  void reset();
 
   double get_misc_stats_period_ns() const
   { return stats_time_ns_; };
@@ -209,9 +209,6 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
 
 
  private:
-  //! resets current and reference time to cur_time
-  //! at the beginning of update() if is_reset_ == true
-  void do_reset(double cur_time_ns);
 
   /**
      update fraction bound with n1 bound particles of type I;

@@ -64,10 +64,12 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
   // TODO: do we want to add consecutive pair filter for fg chains?
 }
 
-void BipartitePairsStatisticsOptimizerState::do_reset(double cur_time_ns) {
-  IMP_LOG(PROGRESS, "Reseting bpsos with time " << cur_time_ns);
+void BipartitePairsStatisticsOptimizerState::reset() {
+  // note - time_ns will be updated in real time,
+  // but just in case, set it to 0 for now
+  is_reset_ = true; // indicate, for next round of update
+  time_ns_ = 0;
   n_updates_ = 0;
-  time_ns_ = cur_time_ns;
   stats_time_ns_ = 0;
   off_stats_time_ns_ = 0.0;
   on_stats_time_ns_ = 0.0;
@@ -85,8 +87,9 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
   IMP_USAGE_CHECK( simulator, "Optimizer must be a simulator in order to use "
                    "BipartitePairsStatisticsOptimizerState, for time stats" );
   double cur_time_ns = simulator->get_current_time() / FS_IN_NS;
-  if(is_reset_){
-    do_reset(cur_time_ns);
+  if(is_reset_ == true){
+    IMP_LOG(PROGRESS, "Starting bpsos with simulation time " << cur_time_ns);
+    time_ns_ = cur_time_ns;
     is_reset_ = false;
   }
   double elapsed_time_ns = cur_time_ns - time_ns_;
