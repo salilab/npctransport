@@ -618,7 +618,8 @@ atom::BrownianDynamics *SimulationData::get_bd(bool recreate){
 
 container::ListSingletonContainer *
 SimulationData::get_diffusers(){
-  // TODO: obstacles ?
+  // TODO: obstacles ? need to get them out but then fix everything dependent
+  //       on them (e.g. initialize_positions?)
   bool new_diffusers = !diffusers_ || diffusers_changed_ || obstacles_changed_;
   if (!diffusers_) {
     diffusers_ = new container::ListSingletonContainer(m_);

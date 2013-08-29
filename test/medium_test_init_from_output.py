@@ -20,7 +20,7 @@ class Tests(IMP.test.TestCase):
 
         return - the resulting simulation data object
         """
-        IMP.set_log_level( IMP.SILENT );
+        IMP.base.set_log_level( IMP.base.SILENT );
         print "assigning parameter ranges from config"
         num=assign_ranges( config, output,
                           0, True, 10 );
@@ -34,6 +34,7 @@ class Tests(IMP.test.TestCase):
         else:
             short_init_factor=0.01
             opt_cycles = 10000
+        sd.get_bd().set_log_level( IMP.base.SILENT )
         IMP.npctransport.initialize_positions(sd, [], False, short_init_factor)
         print "AFTER INIT", time.ctime()
         obd= sd.get_bd()
@@ -102,7 +103,7 @@ class Tests(IMP.test.TestCase):
     def test_init_from_output(self):
         """ Testing whether positions are loaded properly from output file """
         # random generator initialization
-        IMP.set_log_level(IMP.SILENT)
+        IMP.base.set_log_level(IMP.base.SILENT)
         config= self.get_tmp_file_name( "simple_cfg.pb") ;
         test_util.make_simple_cfg( config, is_slab_on = True, n_particles_factor = 1.5)
         rt_output= self.get_tmp_file_name("round_trip_output.pb")

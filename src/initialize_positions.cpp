@@ -401,6 +401,7 @@ void initialize_positions(SimulationData *sd,
                           const RestraintsTemp &extra_restraints,
                           bool debug,
                           double short_init_factor) {
+  IMP_FUNCTION_LOG;
   sd->set_was_used(true);
   IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
                    "short init factor should be in range (0,1]",
@@ -483,7 +484,7 @@ void initialize_positions(SimulationData *sd,
   {
     // optimize everything now
     ParticlesTemp particles =
-      obstacles + sd->get_diffusers()->get_particles();
+      sd->get_diffusers()->get_particles(); // that should include obstacles
     ParticlesTemp optimizable_particles =
       get_optimizable_particles( particles );
     base::Pointer<ScoringFunction> sf =
