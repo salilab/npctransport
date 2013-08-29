@@ -7,7 +7,7 @@ import re
 import os
 
 # defaults
-kaps_R = 30.0
+kaps_R = 25.0
 k_fgfg=0.25
 range_fgfg=4.0
 k_fgkap=3.0
@@ -36,7 +36,7 @@ def get_basic_config():
     config.backbone_k.lower=0.25
     config.time_step_factor.lower=0.5 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
-    config.time_step_wave_factor.lower=5 #### NOTE THIS ####
+    config.time_step_wave_factor.lower=10 #### NOTE THIS ####
     config.excluded_volume_k.lower=2
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.1
@@ -118,7 +118,7 @@ def add_fg_based_on(config, mrc_filename, k, nbeads, origin=None,
         pos.y=center[1] - origin[1]
         pos.z=center[2] - origin[2]
         r = math.sqrt(pos.x**2 + pos.y**2)
-        print mrc_filename, "z=", pos.z, "r=", r
+#        print mrc_filename, "z=", pos.z, "r=", r
         max_r = max(max_r, r)
         max_x = max(max_x, abs(pos.x))
         max_y = max(max_y, abs(pos.y))
@@ -139,7 +139,7 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
         @return the mean location of the MRC file clusters
         '''
     # get type name as filename without folder and extension parts
-    print mrc_filename
+#    print mrc_filename
     type_search= re.search("([^/]*?)(?:[.].*)*$", mrc_filename)
     type_name = type_search.groups(0)[0]
     # cluster anchors from MRC file
@@ -154,7 +154,7 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
         pos.y=center[1] - origin[1]
         pos.z=center[2] - origin[2]
         r = math.sqrt(pos.x**2 + pos.y**2)
-        print "OBSTACLE", mrc_filename, "z=", pos.z, "r=", r, "R=", R
+#        print "OBSTACLE", mrc_filename, "z=", pos.z, "r=", r, "R=", R
     return mean_loc
 
 
@@ -171,7 +171,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
 kaps.k_z_bias.lower=0.005
-kaps.k_z_bias_fraction.lower=0.3
+kaps.k_z_bias_fraction.lower=0.25
 ############### ACTIVE RANGE #############
 create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
 ##########################################

@@ -89,10 +89,8 @@ def cluster_MRC_file_with_cache(mrc_filename, k):
                 break
     except:
         pass
-    if(ok):
-        print "Read", k, "centers from cache", cache
     if(not ok):
-        print "reading", k, "centers from file", mrc_filename
+        print "No cache found - reading", k, "centers from file", mrc_filename
         kmeans, centers, mean_loc, pos_voxels \
             = cluster_MRC_file(mrc_filename, k)
         CACHE = open(cache, "w")
@@ -105,6 +103,9 @@ def cluster_MRC_file_with_cache(mrc_filename, k):
             print >>CACHE
         print >>CACHE, "END"
         CACHE.close()
+    else:
+        pass
+#        print "Read", k, "centers from cache", cache
     assert(len(centers)==k and len(mean_loc)==3)
     return centers, mean_loc
 
