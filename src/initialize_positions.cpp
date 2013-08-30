@@ -160,12 +160,12 @@ class LinearWellSetLengthRAII : public base::RAII {
       { // Set
         was_set_ = true;
         ps_ = ps;
-        orig_ = ps_->get_x0();
-        ps_->set_x0(orig_ * f);
+        orig_ = ps_->get_rest_length_factor();
+        ps_->set_rest_length_factor(orig_ * f);
       },
       { // Reset
         if(was_set_){
-          ps_->set_x0(orig_);
+          ps_->set_rest_length_factor(orig_);
         }
       },
       { // Show });
@@ -343,7 +343,8 @@ void optimize_balls(const ParticlesTemp &ps,
         bool done = false;
         IMP_OMP_PRAGMA(parallel num_threads(3)) {
           IMP_OMP_PRAGMA(single) {
-            int n_bd_cycles = 30 * (i / 2 + 2) * std::sqrt(ps.size());
+            int n_bd_cycles =
+              std::ceil(30 * (i / 2 + 2) * std::sqrt((double)ps.size()));
             int actual_n_bd_cycles =
               std::ceil(n_bd_cycles * short_init_factor) ;
             double e_bd = bd->optimize( actual_n_bd_cycles );
@@ -474,7 +475,7 @@ void initialize_positions(SimulationData *sd,
       OptimizerSetTemporaryScoringFunctionRAII
         set_temporary_scoring_function( sd->get_bd(), sf );
       optimize_balls(cur_particles,
-                     true /*scale rest length*/,
+                     false /*is_scale_rest_length*/,
                      sd->get_rmf_sos_writer(),
                      sd->get_bd(),
                      sd->get_scoring()->get_chain_scores(),

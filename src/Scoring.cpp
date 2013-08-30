@@ -299,13 +299,14 @@ double Scoring::get_interaction_range_for
 /** add a restraint on particles in an FG nup chain */
 Restraint*
 Scoring::add_chain_restraint(atom::Hierarchy chain_root,
-                             double rest_length,
+                             double rest_length_factor,
                              std::string name)
 {
   IMP_ALWAYS_CHECK( chain_root.get_number_of_children() > 0,
                     "No Particles passed.", IMP::base::ValueException );
-  IMP_ALWAYS_CHECK( rest_length > 0, "negative rest length invalid",
-                   IMP::base::ValueException );
+  IMP_ALWAYS_CHECK( rest_length_factor > 0,
+                    "negative rest length factor is not valid",
+                    IMP::base::ValueException );
 
   // Exclusive means that the particles will be in no other
   // ConsecutivePairContainer this assumption accelerates certain computations
@@ -313,7 +314,7 @@ Scoring::add_chain_restraint(atom::Hierarchy chain_root,
           (chain_root.get_children(), name + " consecutive pairs"));
   // add chain restraint
   IMP_NEW(LinearWellPairScore, lwps,
-          ( rest_length, get_backbone_k() ) );
+          ( rest_length_factor, get_backbone_k() ) );
   IMP::base::Pointer<Restraint> cr =
     IMP::container::create_restraint
     ( lwps.get(), xcpc.get(), "chain restraint %1%" );

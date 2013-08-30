@@ -439,13 +439,14 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
       pairs of particles connected by such chain restraints.
 
       @param chain_root the root of the chain whose particles are restrained
-      @param rest_length the rest length of consecutive chain beads
+      @param rest_length_factor the rest length factor of consecutive chain
+                                beads relative to their sum of radii
       @param name the name of the chain (to be used for naming the restraint
 
       @return pointer to the newly created restraint
   */
   Restraint* add_chain_restraint(IMP::atom::Hierarchy chain_root,
-                                 double rest_length,
+                                 double rest_length_factor,
                                  std::string name);
 
 

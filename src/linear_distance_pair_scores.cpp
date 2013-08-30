@@ -27,8 +27,10 @@ ModelObjectsTemp LinearInteractionPairScore::do_get_inputs(
   return IMP::get_particles(m, pis);
 }
 
-LinearWellPairScore::LinearWellPairScore(double x0, double k, std::string name)
-    : PairScore(name), x0_(x0), k_(k) {}
+LinearWellPairScore::LinearWellPairScore(double rest_length_factor,
+                                         double k, std::string name)
+    : PairScore(name), rest_length_factor_(rest_length_factor), k_(k)
+{}
 
 ModelObjectsTemp LinearWellPairScore::do_get_inputs(
     Model *m, const ParticleIndexes &pis) const {

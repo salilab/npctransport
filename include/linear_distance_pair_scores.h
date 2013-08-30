@@ -237,14 +237,25 @@ inline double LinearInteractionPairScore::evaluate_index(
 */
 class IMPNPCTRANSPORTEXPORT LinearWellPairScore : public PairScore {
  private:
-  double x0_, k_;
+  double rest_length_factor_, k_;
 
  public:
-  LinearWellPairScore(double x0, double k,
+  /**
+     a linear well pair potential that keeps two particles around
+     a resting distance relative to their radii
+
+     @param rest_length_factor the resting distance between particles
+                               relative to their sum of radii
+     @param k the force constant (attractive if beyond or repulsive
+              if below rest length)
+     @param name the name of the score
+   */
+  LinearWellPairScore(double rest_length_factor, double k,
                       std::string name = "LinearIDPairScore%1%");
 
-  void set_x0(double x0) { x0_ = x0; }
-  double get_x0() const { return x0_; }
+  void set_rest_length_factor(double rest_length_factor)
+  { rest_length_factor_ = rest_length_factor; }
+  double get_rest_length_factor() const { return rest_length_factor_; }
   double evaluate_index(Model *m, const ParticleIndexPair &p,
                         DerivativeAccumulator *da) const IMP_OVERRIDE;
   ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis) const;
@@ -258,16 +269,17 @@ inline double LinearWellPairScore::evaluate_index(
     Model *m, const ParticleIndexPair &pp, DerivativeAccumulator *da) const {
   IMP_OBJECT_LOG;
 
-  // Associate intermediate variables with cache_, for further reuse:
-  algebra::Vector3D delta =
-      m->get_sphere(pp[0]).get_center() - m->get_sphere(pp[1]).get_center();
+  algebra::Sphere3D s0 = m->get_sphere(pp[0]);
+  algebra::Sphere3D s1 = m->get_sphere(pp[1]);
+  double x0 = (s0.get_radius() + s1.get_radius()) * rest_length_factor_;
+  algebra::Vector3D delta = s0.get_center() - s1.get_center();
   double delta_length_2 = delta.get_squared_magnitude();
-  double delta_length = (1.0) / (1.0 / std::sqrt(delta_length_2));
-  if (delta_length > x0_) {  // attractive regime
-    return  // decreases with slope k_attr_ as spheres get closer
-        do_evaluate_index(m, pp, da, delta, delta_length, x0_, k_);
-  } else {  // repulsive regime, may be negative for small penetration
-    return do_evaluate_index(m, pp, da, delta, delta_length, x0_, -k_);
+  double delta_length = std::sqrt(delta_length_2);
+  if (delta_length > x0) {  // attractive regime
+    return  // k_ > 0 = get spheres closer
+        do_evaluate_index(m, pp, da, delta, delta_length, x0, k_);
+  } else {  // -k_ < 0 = keep spheres apart
+    return do_evaluate_index(m, pp, da, delta, delta_length, x0, -k_);
   }
 }
 #endif

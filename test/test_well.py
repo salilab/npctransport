@@ -31,7 +31,9 @@ class ConeTests(IMP.test.TestCase):
         m.set_log_level(IMP.SILENT)
         ds= [self._create_particle(m) for i in range(0,2)]
         ds[1].set_coordinates(IMP.algebra.Vector3D(0,2*radius,0))
-        ps= IMP.npctransport.LinearWellPairScore(2*radius, 20)
+        rest_length_factor = 1.0
+        k = 20
+        ps= IMP.npctransport.LinearWellPairScore(rest_length_factor, k)
         r= IMP.core.PairRestraint(ps, ds)
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_maximum_time_step(100)
