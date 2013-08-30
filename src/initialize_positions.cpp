@@ -447,13 +447,13 @@ void initialize_positions(SimulationData *sd,
   ParticlesTemp obstacles = sd->get_obstacle_particles();
   typedef base::set<core::ParticleType> ParticleTypeSet;
   ParticleTypeSet const& types = sd->get_fg_types();
+  ParticlesTemp cur_particles = obstacles;
   for(ParticleTypeSet::const_iterator
         it = types.begin(); it != types.end(); it++)
     {
       atom::Hierarchies cur_fg_roots = sd->get_particles_of_type(*it);
-      ParticlesTemp cur_particles =
-        atom::get_leaves( cur_fg_roots );
-      cur_particles += obstacles;
+      ParticlesTemp cur_fg_beads = atom::get_leaves( cur_fg_roots );
+      cur_particles += cur_fg_beads;
       std::cout << "Optimizing " <<  cur_particles.size()
                << " particles of type " << *it ;
       ParticlesTemp cur_optimizable_particles =
@@ -492,7 +492,7 @@ void initialize_positions(SimulationData *sd,
       ( extra_restraints,
         particles,
         optimizable_particles ,
-        true /* no non-bonded attr potential yet */ );
+        false /* no non-bonded attr potential yet */ );
     OptimizerSetTemporaryScoringFunctionRAII
       set_temporary_scoring_function( sd->get_bd(), sf );
     optimize_balls(sd->get_diffusers()->get_particles(),
