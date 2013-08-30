@@ -83,7 +83,13 @@ def get_interaction_k(ints):
            fg_k= i.interaction_k.value
        if(kap_k <> None and fg_k <> None):
            return kap_k, fg_k
-    raise ValueException("no fg-kap or fg-fg interactions found")
+    raise ValueError("no fg-kap or fg-fg interactions found")
+
+def get_k_factor(l, type):
+    for x in l:
+        if(x.type==type):
+            return l.interaction_k_factor
+    raise ValueError("type", type, "not found in list", l)
 
 
 def round_way_up(val, bin_size = 1000):
@@ -161,7 +167,6 @@ def get_interaction_stats(interactions, is_a, is_b):
 #    print t, on_t, off_t
     return (pct_a / t, on_per_a / on_t, off_per_a / off_t)
 
-
 def augment_results(files, results = {}, max_entries = 1000):
     """
     read up to max_entries entries from avro reader and augment them
@@ -187,18 +192,19 @@ def augment_results(files, results = {}, max_entries = 1000):
             fg_nbeads = A.fgs[0].number_of_beads.value
             kap_R = A.floaters[0].radius.value
             crap_R = A.floaters[1].radius.value
-            fgkap_K, fgfg_K = get_interaction_k( A.interactions )
-            nonspecific_K = A.nonspecific_k.value
+            fgkap_k, fgfg_k = get_interaction_k( A.interactions )
+            nonspecific_k = A.nonspecific_k.value
             for f in A.floaters:
                 if is_kap(f.type):
-                    kap_K_factor = f.interaction_k_factor.value
+                    kap_k_factor = f.interaction_k_factor.value
             time_ns = round(S.bd_simulation_time_ns)
             time_step_fs = round(A.time_step)
+            nup1_k_factor = get_k_factor( A.fgs, "Nup1_8copies" )
         except:
             print >> sys.stderr, 'Unexpected error: file %s' % file_name, sys.exc_info()
             continue
-        KEY_CAPTIONS = "kap_K_factor fgfg_K kap_R nonspecific_K time_ns time_step_fs"
-#       KEY_CAPTIONS = "fg_nbeads kap_R crap_R fgkap_K fgfg_K nonspecific_K"
+        KEY_CAPTIONS = "kap_k_factor fgfg_k kap_R nonspecific_k time_ns time_step_fs nup1_k_factor"
+#       KEY_CAPTIONS = "fg_nbeads kap_R crap_R fgkap_k fgfg_k nonspecific_k nup1_k_factor"
         key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
         if(not key in results):
             results[key] = {"n":0,
@@ -248,7 +254,7 @@ def augment_results(files, results = {}, max_entries = 1000):
     return n_entries_read
 
 def print_results(results, FILE=sys.stdout):
-    print >>FILE, KEY_CAPTIONS, "n transp_kaps tranp_craps fg_length kap_pct_bnd crap_pct_bnd kap_transp_hist crap_transp_hist"
+    print >>FILE, KEY_CAPTIONS, "n transp_kaps tranp_craps fg_length kap_pct_bnd crap_pct_bnd kap_on kap_off crap_on crap_off kap_transp_hist crap_transp_hist"
     for k, v in results.iteritems():
         for value in  k:
             print >>FILE, "%.2f" % (value),
