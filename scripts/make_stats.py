@@ -214,6 +214,7 @@ def augment_results(files, results = {}, max_entries = 1000):
             results[key] = {"n":0,
                             "kap_times":[],
                             "crap_times":[],
+                            "small_crap_times":[],
                             "fg_length":[],
                             "kap_pct_bnd":[],
                             "crap_pct_bnd":[]}
@@ -229,8 +230,12 @@ def augment_results(files, results = {}, max_entries = 1000):
             if is_crap(a.type):
                 print "INERT ",
                 for t in a.transport_time_points_ns:
-                    results[key]["crap_times"].append(t)
-                    sys.stdout.write("%.1f," % t)
+                    if(re.search("small", a.type)):
+                        results[key]["small_crap_times"].append(t)
+                        sys.stdout.write("%.1f*," % t)
+                    else:
+                        results[key]["crap_times"].append(t)
+                        sys.stdout.write("%.1f," % t)
                 sys.stdout.write(" ");
         print
         cyto_fgs = [
@@ -277,14 +282,17 @@ def print_results(results, FILE=sys.stdout):
         print >>FILE, "%.3f" % (v["crap_off"]),
         # print tranp histograms in bins
         bin_size = 5000
-        right_edge=round_way_up( max(v["kap_times"]+v["crap_times"] +[bin_size]) , bin_size)
+        right_edge=round_way_up( max(v["kap_times"]+v["crap_times"] + v["small_crap_times"] +[bin_size]) , bin_size)
         bins=range(0,right_edge+bin_size,bin_size)
         h_kaps = numpy.histogram(v["kap_times"],bins)
         h_craps=numpy.histogram(v["crap_times"],bins)
+        h_small_craps=numpy.histogram(v["small_crap_times"],bins)
         FILE.write(" ")
         print_list_to_file(FILE, h_kaps[0])
         FILE.write("  ")
         print_list_to_file(FILE, h_craps[0])
+        FILE.write("  ")
+        print_list_to_file(FILE, h_small_craps[0])
         print >>FILE
 
 def get_files_in(files_and_folders):
