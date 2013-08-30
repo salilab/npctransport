@@ -462,7 +462,7 @@ IMP::Restraint*
 Scoring::create_z_bias_restraint(SingletonContainerAdaptor ps, double k)
 const
 {
-  IMP_NEW(ZBiasSingletonScore, zbsc, (k) );
+  IMP_NEW(ZBiasSingletonScore, zbsc, (k, get_sd()->get_tunnel_radius()) );
   return
     container::create_restraint(zbsc.get(),
                                 ps.get(),
