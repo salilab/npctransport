@@ -75,25 +75,38 @@ def try_number(x):
         pass
     return x # give up
 
-def main():
-    if(len(sys.argv) <= 2):
-        usage_and_exit()
-    F=open(sys.argv[1],'r')
+def read_and_sort_columns(file_name, sort_captions):
+    '''
+    read data from white-space separated txt table file_name
+    and sort by sort_captions (first is primary key, second is secondary,
+    etc.)
+
+    @note requires python 2.2 or newer
+    '''
+    if sys.hexversion < 0x02020000:
+        raise ValueError("read_and_sort_columns requires Python 2.2 or newer")
+    F=open(file_name,'r')
     # Get sort captions ids
     header=F.readline()
-    ids = get_column_id(header, sys.argv[2:])
+    ids = get_column_id(header, sort_captions)
     all_data=[]
     for line in F:
         all_data.append(line.split())
-    # Sort incrementally:
-    # (python 2.2+ is sort-stable so this works)
+    # Sort incrementally: (python 2.2+ is sort-stable)
     ids.reverse() # from secondary to primary
     for id in ids:
         all_data.sort(key = lambda data : try_number(data[id]) )
-    # Print
-    print header.strip()
+    return (header.strip(), all_data)
+
+
+def main():
+    if(len(sys.argv) <= 2):
+        usage_and_exit()
+    header, all_data  = read_and_sort_columns(sys.argv[1], sys.argv[2:])
+    print header
     for data in all_data:
         print " ".join(data)
+
 
 if (__name__ == "__main__"):
     main()

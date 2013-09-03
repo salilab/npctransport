@@ -192,7 +192,9 @@ message Assignment {
   optional int32 are_floaters_on_one_slab_side=35 [default=0]; // if true (<>0), all floaters are initially concentrated on one side
   optional FloatAssignment time_step_wave_factor=36; // if >1.001, use a wave function for time step that allows going beyond formal maximal step in waves
   optional int32 is_exclude_floaters_from_slab_initially=37 [default = 1];
-  // n=37
+  repeated string imp_module_version=38; // repeated - once for each restart
+  repeated string npc_module_version=39; // repeated - once for each restart
+  // n=39
 }
 
 message Statistics {
