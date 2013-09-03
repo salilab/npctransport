@@ -12,9 +12,6 @@
 #include <IMP/base/flags.h>
 #include <boost/scoped_array.hpp>
 
-typedef int Int64Arg;
-typedef unsigned int UInt64Arg;
-
 inline void parse_argv_argc(int argc, char** argv) {
   IMP::Strings gargs =
       IMP::base::setup_from_argv_allowing_unknown(argc, argv, "something npc");

@@ -7,25 +7,16 @@
  */
 
 #include <IMP/npctransport/automatic_parameters.h>
-#ifdef IMP_NPC_GOOGLE
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
+#include "npctransport.pb.h"
 #pragma GCC diagnostic pop
-#else
-#include <IMP/npctransport/internal/npctransport.pb.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/message.h>
-#endif
+
 #include <IMP/atom/estimates.h>
 #include <IMP/base/exception.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-#ifdef IMP_NPC_GOOGLE
-using namespace proto2;
-#else
-using namespace ::google::protobuf;
-#endif
+using namespace IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE;
 #define UPDATE_MIN(name, path) min_##name = std::min(min_##name, path().value())
 #define UPDATE_MAX(name, path) max_##name = std::max(max_##name, path().value())
 
