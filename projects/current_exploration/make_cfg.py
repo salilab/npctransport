@@ -16,7 +16,7 @@ print "kaps_R = %.2f" % (kaps_R)
 obstacle_inflate_factor = 1.5
 fg_coarse_factor=3 # 2
 k_fgfg=2.5
-k_fgkap=5.0
+k_fgkap=3.0
 rest_length_factor = 1.2 # 1
 
 def get_basic_config():
@@ -29,8 +29,8 @@ def get_basic_config():
     # create_range(config.backbone_k, .2, 1, 10
     config.backbone_k.lower=1
     #config.time_step_factor.lower=0.3
-    config.time_step_factor.lower=3
-#    config.time_step_wave_factor.lower=10 #### NOTE THIS ####
+    config.time_step_factor.lower=1
+#    config.time_step_wave_factor.lower=10
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.excluded_volume_k.lower=20
     config.nonspecific_range.lower=1
@@ -221,7 +221,9 @@ n_kap_interactions = int ( math.ceil ( n_kap_interactions_orig / fg_coarse_facto
 kaps= IMP.npctransport.add_float_type(config,
                                      number=30,
                                      radius=kaps_R,
-                                      interactions= n_kap_interactions)
+                                      interactions= n_kap_interactions,
+                                      interaction_k_factor=5.0)
+#kaps.interaction_k_factor = 5.0
 kaps.k_z_bias.lower=0.05
 kaps.k_z_bias_fraction.lower=1.0
 #create_range(kaps.interaction_range_factor, lb=1, ub=5, steps = 10, base=1)

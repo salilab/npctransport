@@ -1008,7 +1008,7 @@ floaters {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 3
   }
   interaction_range_factor {
     lower: 1
@@ -4181,4 +4181,3 @@ obstacles {
 fg_anchor_inflate_factor: 1
 are_floaters_on_one_slab_side: 1
 is_exclude_floaters_from_slab_initially: 1
-
