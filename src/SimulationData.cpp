@@ -195,8 +195,11 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   get_bd()->set_current_time( initial_simulation_time_ns_ );
   pb_data.mutable_assignment()->add_imp_module_version
     ( IMP::get_module_version() );
-  pb_data.mutable_assignment()->add_npctransport_module_version
+  pb_data.mutable_assignment()->add_npc_module_version
     ( IMP::npctransport::get_module_version() );
+  std::ofstream outf(output_file.c_str(), std::ios::binary);
+  pb_data.SerializeToOstream(&outf);
+
 }
 
 
