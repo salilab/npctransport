@@ -6,7 +6,8 @@ import sys
 import re
 import numbers
 import os
-
+import glob
+import traceback
 KEY_CAPTIONS = None
 
 def query_yes_no(question, default=None):
@@ -88,7 +89,7 @@ def get_interaction_k(ints):
 def get_k_factor(l, type):
     for x in l:
         if(x.type==type):
-            return l.interaction_k_factor
+            return x.interaction_k_factor.value
     raise ValueError("type", type, "not found in list", l)
 
 
@@ -178,6 +179,7 @@ def augment_results(files, results = {}, max_entries = 1000):
     o = Output()
     n_entries_read = 0
     for file_name in files:
+        print file_name
         #  print a.is_valid()
         try:
             FILE=open(file_name,"rb")
@@ -201,7 +203,9 @@ def augment_results(files, results = {}, max_entries = 1000):
             time_step_fs = round(A.time_step)
             nup1_k_factor = get_k_factor( A.fgs, "Nup1_8copies" )
         except:
-            print >> sys.stderr, 'Unexpected error: file %s' % file_name, sys.exc_info()
+            type,msg,tb = sys.exc_info()
+            print >> sys.stderr, 'Unexpected error in file %s - %s %s' % (file_name, type, msg)
+            traceback.print_tb(tb)
             continue
         KEY_CAPTIONS = "kap_k_factor fgfg_k kap_R nonspecific_k time_ns time_step_fs nup1_k_factor"
 #       KEY_CAPTIONS = "fg_nbeads kap_R crap_R fgkap_k fgfg_k nonspecific_k nup1_k_factor"
@@ -283,10 +287,20 @@ def print_results(results, FILE=sys.stdout):
         print_list_to_file(FILE, h_craps[0])
         print >>FILE
 
+def get_files_in(files_and_folders):
+    files=[]
+    for f in files_and_folders:
+        if(os.path.isdir(f)):
+            files += glob.glob(f + "/*.pb")
+        else:
+            files.append(f)
+    return files
+
+
 #################################
 if __name__ != "__main__": exit()
 output_file = sys.argv[1]
-files=(sys.argv[2:])
+files=get_files_in(sys.argv[2:])
 if(os.path.exists(output_file)):
     if not query_yes_no("%s already exists - overwrite?" % output_file, None):
         exit(-1)
@@ -299,11 +313,11 @@ while(True):
     i=i+k
     n_total = n_total + n_read
     if(n_total == 0):
-        print "NOTHING TO READ"
-        break
-#    print "========== n = %d =========" % n_total
-    OUTPUT = open(output_file,"w")
-    print_results(results, OUTPUT)
-    del OUTPUT
-    if(n_read == 0):
+        print "NOTHING TO READ in last batch"
+    else:
+        #    print "========== n = %d =========" % n_total
+        OUTPUT = open(output_file,"w")
+        print_results(results, OUTPUT)
+        del OUTPUT
+    if(i+k > len(files)):
         break
