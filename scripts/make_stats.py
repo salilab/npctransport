@@ -207,7 +207,7 @@ def augment_results(files, results = {}, max_entries = 1000):
             print >> sys.stderr, 'Unexpected error in file %s - %s %s' % (file_name, type, msg)
             traceback.print_tb(tb)
             continue
-        KEY_CAPTIONS = "kap_k_factor fgfg_k kap_R nonspecific_k time_ns time_step_fs nup1_k_factor"
+        KEY_CAPTIONS = "kap_k_factor fgfg_k kap_R nonspecific_k time_step_fs nup1_k_factor" #time_ns
 #       KEY_CAPTIONS = "fg_nbeads kap_R crap_R fgkap_k fgfg_k nonspecific_k nup1_k_factor"
         key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
         if(not key in results):
@@ -217,7 +217,8 @@ def augment_results(files, results = {}, max_entries = 1000):
                             "small_crap_times":[],
                             "fg_length":[],
                             "kap_pct_bnd":[],
-                            "crap_pct_bnd":[]}
+                            "crap_pct_bnd":[],
+                            "representative_file": file_name}
         print file_name,
         results[key]["n"] = results[key]["n"] + 1
         for a in S.floaters:
@@ -263,7 +264,7 @@ def augment_results(files, results = {}, max_entries = 1000):
     return n_entries_read
 
 def print_results(results, FILE=sys.stdout):
-    print >>FILE, KEY_CAPTIONS, "n transp_kaps tranp_craps fg_length kap_pct_bnd crap_pct_bnd kap_on kap_off crap_on crap_off kap_transp_hist crap_transp_hist"
+    print >>FILE, KEY_CAPTIONS, "n transp_kaps transp_craps fg_length kap_pct_bnd crap_pct_bnd kap_on kap_off crap_on crap_off kap_transp_hist crap_transp_hist representative_file"
     for k, v in results.iteritems():
         for value in  k:
             print >>FILE, "%.2f" % (value),
@@ -293,11 +294,16 @@ def print_results(results, FILE=sys.stdout):
         print_list_to_file(FILE, h_craps[0])
         FILE.write("  ")
         print_list_to_file(FILE, h_small_craps[0])
+        FILE.write("  ")
+        print >>FILE, v["representative_file"],
         print >>FILE
 
 def get_files_in(files_and_folders):
     files=[]
     for f in files_and_folders:
+        if(not os.path.exists(f)):
+            print "WARNING: input path", path, "does not exist"
+            continue
         if(os.path.isdir(f)):
             files += glob.glob(f + "/*.pb")
         else:
@@ -309,6 +315,7 @@ def get_files_in(files_and_folders):
 if __name__ != "__main__": exit()
 output_file = sys.argv[1]
 files=get_files_in(sys.argv[2:])
+print "Parsing %d files" % len(files)
 if(os.path.exists(output_file)):
     if not query_yes_no("%s already exists - overwrite?" % output_file, None):
         exit(-1)

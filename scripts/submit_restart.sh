@@ -12,8 +12,8 @@
 if($#argv < 1) then
     echo "Missing params running $0 $argv"
     echo
-    echo "Usage: $0 restart_file [sim_time_factor] [out_folder_name]"
-    echo "\n\t restart_file - file to start from"
+    echo "Usage: qsub $0 restart_file [sim_time_factor] [out_folder_name]"
+    echo "\n\t restart_file - file to start from, or path to folder with restart files"
     echo   "\t sim_time_factor - by how long to extend or shorten the simulation (default 1.0)"
     echo   "\t out_folder_name - note this is a relative location. By default,"
     echo   "\t                   it is the last relative part of the rmf_folder"
