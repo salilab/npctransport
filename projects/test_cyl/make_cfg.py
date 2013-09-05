@@ -13,7 +13,7 @@ k_fgkap=3.0
 range_fgkap=4.0
 rest_length_factor = 1.25 # 1
 obstacle_inflate_factor = 1.3
-fg_coarse_factor=3.0 # 3
+fg_coarse_factor=1.0 # 3
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
     print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
@@ -41,8 +41,8 @@ def get_basic_config():
     config.nonspecific_k.lower=0.1
     config.slack.lower = 7.5
     config.number_of_trials=1
-    config.dump_interval_ns=5
-    config.simulation_time_ns=5000
+    config.dump_interval_ns=50
+    config.simulation_time_ns=50
     config.angular_D_factor.lower=0.05 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
     config.statistics_interval_ns=0.1
@@ -141,7 +141,7 @@ config= get_basic_config()
 # Add floaters
 n_kap_interactions=12/3
 kaps= IMP.npctransport.add_float_type(config,
-                                     number=11,
+                                     number=1,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
@@ -152,7 +152,7 @@ create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics= IMP.npctransport.add_float_type(config,
-                                              number=2,
+                                              number=1,
                                               radius=kaps_R, #-1,
                                               interactions=0,
                                               type_name="crap0")
@@ -168,7 +168,7 @@ nonspecifics= IMP.npctransport.add_float_type(config,
 
 # Add FGs with anchors
 # (Stoicheometries from Alber et al. 2007b, Determining..., Fig. 3)
-add_fg_based_on(config, "fg", k=1, nbeads=3)
+add_fg_based_on(config, "fg", k=1, nbeads=2)
 # add bounding volumes
 config.box_is_on.lower=1
 config.box_side.lower=300
