@@ -325,14 +325,14 @@ i=0
 k=10
 while(True):
     n_read=augment_results(files[i:i+k], results, max_entries = k)
-    i=i+k
     n_total = n_total + n_read
-    if(n_total == 0):
+    if(n_read == 0):
         print "NOTHING TO READ in last batch"
     else:
         #    print "========== n = %d =========" % n_total
         OUTPUT = open(output_file,"w")
         print_results(results, OUTPUT)
         del OUTPUT
-    if(i+k > len(files)):
+    i=i+k
+    if i > len(files):
         break
