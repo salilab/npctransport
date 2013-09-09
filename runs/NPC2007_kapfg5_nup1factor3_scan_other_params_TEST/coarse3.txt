@@ -23,7 +23,7 @@ slab_thickness {
   lower: 250.0
 }
 tunnel_radius {
-  lower: 301.611914125
+  lower: 299.704890654
 }
 slab_is_on {
   lower: 1
@@ -35,16 +35,16 @@ number_of_trials: 1
 maximal_number_of_frames: 1000000000
 fgs {
   number_of_beads {
-    lower: 9
+    lower: 7
   }
   number {
     lower: 16
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -142,16 +142,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 10
+    lower: 7
   }
   number {
     lower: 16
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -249,16 +249,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 18
+    lower: 12
   }
   number {
     lower: 16
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -356,16 +356,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 18
+    lower: 12
   }
   number {
     lower: 16
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -463,16 +463,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 11
+    lower: 8
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -530,16 +530,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 24
+    lower: 17
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -597,16 +597,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 12
+    lower: 8
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -664,16 +664,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 23
+    lower: 16
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -731,16 +731,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 23
+    lower: 16
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -798,16 +798,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 23
+    lower: 16
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -865,16 +865,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 15
+    lower: 10
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -935,16 +935,16 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 7
+    lower: 5
   }
   number {
     lower: 8
   }
   radius {
-    lower: 8.48528137424
+    lower: 10.3923048454
   }
   interactions {
-    lower: 2
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -2310,7 +2310,7 @@ statistics_interval_ns: 0.1
 excluded_volume_k {
   lower: 20
 }
-simulation_time_ns: 500
+simulation_time_ns: 250
 statistics_fraction {
   lower: 1.0
 }
@@ -5753,7 +5753,7 @@ obstacles {
   }
   type: "Seh1_16copies"
 }
-fg_anchor_inflate_factor: 1.5
+fg_anchor_inflate_factor: 1.0
 are_floaters_on_one_slab_side: 0
 time_step_wave_factor {
   lower: 1
