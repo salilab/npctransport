@@ -66,7 +66,7 @@ endif
 set NEWCFG = $OUTFOLDER/$cfg_file
 set NEWCFG_txt = $OUTFOLDER/$cfg_id.txt
 cp $cfg_full $NEWCFG
-$IMP/setup_environment.sh python $NPCBIN/show_conifg.py $cfg_full > $NEWCFG_txt
+$IMP/setup_environment.sh python $NPCBIN/show_config.py $cfg_full > $NEWCFG_txt
 
 # Run:
 cd $MYTMP
