@@ -43,7 +43,7 @@ def get_basic_config():
     config.slack.lower = 10
     config.number_of_trials=1
     config.dump_interval_ns=50
-    config.simulation_time_ns=375
+    config.simulation_time_ns=500
 #    config.angular_D_factor.lower=0.3 #increased dynamic viscosity relative to
 #                                      # water?
     config.angular_D_factor.lower= 0.3
