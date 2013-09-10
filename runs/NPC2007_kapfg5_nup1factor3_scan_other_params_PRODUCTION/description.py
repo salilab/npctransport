@@ -6,9 +6,9 @@ extra_arguments=["--short_init_factor=.1"]
 distinct_work_units = 120
 tasks_per_distinct = 1000
 tasks=tasks_per_distinct * distinct_work_units* len(configs)
-iterations=20
+iterations=30
 description=["""
-20x500s (=10 microsec) iterations of transport in coarse grained
+30x375s (=10 microsec) iterations of transport in coarse grained
 NPC2007 model (FG motifs per bead = 2-3)
 scanning mainly various time-step params and some others - mainly for run stability
 """]
