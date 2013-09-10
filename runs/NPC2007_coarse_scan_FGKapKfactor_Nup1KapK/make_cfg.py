@@ -14,7 +14,7 @@ if(len(sys.argv) > 2):
     kaps_R = float(sys.argv[2])
 print "kaps_R = %.2f" % (kaps_R)
 obstacle_inflate_factor = 1.5
-fg_coarse_factor=3 # 2
+fg_coarse_factor=3.0 # 2
 k_fgfg=2.5
 k_fgkap=3.0
 rest_length_factor = 1.2 # 1
@@ -29,19 +29,19 @@ def get_basic_config():
     # create_range(config.backbone_k, .2, 1, 10
     config.backbone_k.lower=1
     #config.time_step_factor.lower=0.3
-    config.time_step_factor.lower=3
+    config.time_step_factor.lower=1 # 3 was original - but due to changes in revision, 1 is relevant
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.excluded_volume_k.lower=20
     config.nonspecific_range.lower=1
     config.nonspecific_k.lower=1
     config.slack.lower = 10
     config.number_of_trials=1
-    config.dump_interval_ns=0.1
-    config.simulation_time_ns=1000
+    config.dump_interval_ns=25
+    config.simulation_time_ns=5000
     config.angular_D_factor.lower=0.3 #increased dynamic viscosity relative to
                                       # water?
     config.statistics_interval_ns=0.1
-    config.fg_anchor_inflate_factor=3/fg_coarse_factor
+    config.fg_anchor_inflate_factor=3.0/fg_coarse_factor
     return config
 
 
@@ -154,8 +154,6 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
 # ************** MAIN: *************
 IMP.set_log_level(IMP.base.SILENT)
 config= get_basic_config()
-config.dump_interval_ns=10
-config.simulation_time_ns=2500
 
 # Add FGs with anchors
 # (Stoicheometries from Alber et al. 2007b, Determining..., Fig. 3)
