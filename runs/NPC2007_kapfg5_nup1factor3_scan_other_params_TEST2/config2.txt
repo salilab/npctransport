@@ -1,0 +1,5765 @@
+interaction_k {
+  lower: 10
+}
+interaction_range {
+  lower: 1
+}
+backbone_k {
+  lower: 1
+}
+time_step_factor {
+  lower: 0.3
+  upper: 3.0
+  steps: 5
+  base: 2
+}
+box_side {
+  lower: 1229.69312292
+}
+box_is_on {
+  lower: 1
+}
+slab_thickness {
+  lower: 250.0
+}
+tunnel_radius {
+  lower: 301.611914125
+}
+slab_is_on {
+  lower: 1
+}
+slack {
+  lower: 10
+}
+number_of_trials: 1
+maximal_number_of_frames: 1000000000
+fgs {
+  number_of_beads {
+    lower: 9
+  }
+  number {
+    lower: 16
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: -253.635903339
+    y: -108.652437223
+    z: 40.413360105
+  }
+  anchor_coordinates {
+    x: 100.799780865
+    y: 256.774534212
+    z: 40.282866941
+  }
+  anchor_coordinates {
+    x: -257.875710468
+    y: -97.231782926
+    z: -41.488220706
+  }
+  anchor_coordinates {
+    x: 255.23721983
+    y: -106.730104459
+    z: 0.015624509
+  }
+  anchor_coordinates {
+    x: 108.93277647
+    y: -254.99774362
+    z: 40.745818601
+  }
+  anchor_coordinates {
+    x: 97.443457623
+    y: -258.933916105
+    z: -41.488220706
+  }
+  anchor_coordinates {
+    x: -92.992516498
+    y: 262.419858919
+    z: 40.670684324
+  }
+  anchor_coordinates {
+    x: -96.647698383
+    y: 258.054990755
+    z: -41.515991702
+  }
+  anchor_coordinates {
+    x: -250.769570331
+    y: 113.003660189
+    z: -39.706024661
+  }
+  anchor_coordinates {
+    x: -98.388054828
+    y: -258.296846403
+    z: 40.650420652
+  }
+  anchor_coordinates {
+    x: 114.061865826
+    y: 250.981199251
+    z: -39.706024661
+  }
+  anchor_coordinates {
+    x: -112.792046528
+    y: -251.827775968
+    z: -39.706024661
+  }
+  anchor_coordinates {
+    x: 259.290808697
+    y: 96.512205111
+    z: -41.663239016
+  }
+  anchor_coordinates {
+    x: 253.634924908
+    y: 109.076719271
+    z: 40.388335691
+  }
+  anchor_coordinates {
+    x: -126.067193012
+    y: 243.300107943
+    z: 39.469207273
+  }
+  anchor_coordinates {
+    x: -257.238640766
+    y: 98.599729525
+    z: 40.650420652
+  }
+  type: "Nup57_16copies_chimera"
+}
+fgs {
+  number_of_beads {
+    lower: 10
+  }
+  number {
+    lower: 16
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: -104.238488178
+    y: -255.676439298
+    z: 49.598479734
+  }
+  anchor_coordinates {
+    x: -253.066369037
+    y: 110.161130892
+    z: -49.237610354
+  }
+  anchor_coordinates {
+    x: -117.442009906
+    y: 248.935667025
+    z: 49.916594968
+  }
+  anchor_coordinates {
+    x: -254.749688129
+    y: -105.423280729
+    z: 49.40371655
+  }
+  anchor_coordinates {
+    x: -254.618233661
+    y: 104.450132357
+    z: 49.598479734
+  }
+  anchor_coordinates {
+    x: 106.945288678
+    y: 255.128416048
+    z: 2.719390378
+  }
+  anchor_coordinates {
+    x: -99.628228168
+    y: 258.787229525
+    z: -51.395843997
+  }
+  anchor_coordinates {
+    x: 253.273840924
+    y: -112.645509733
+    z: -49.794983401
+  }
+  anchor_coordinates {
+    x: -257.886208515
+    y: -102.324678434
+    z: -50.845428957
+  }
+  anchor_coordinates {
+    x: -107.5595331
+    y: -255.145509733
+    z: -49.378296389
+  }
+  anchor_coordinates {
+    x: -91.288140278
+    y: 260.986997591
+    z: 48.890899167
+  }
+  anchor_coordinates {
+    x: 258.799475689
+    y: 100.526060091
+    z: -51.540741457
+  }
+  anchor_coordinates {
+    x: 255.888098736
+    y: -105.296693815
+    z: 49.598479734
+  }
+  anchor_coordinates {
+    x: 256.834937115
+    y: 104.443357455
+    z: 49.588347898
+  }
+  anchor_coordinates {
+    x: 100.568274517
+    y: -259.823274625
+    z: -51.211639895
+  }
+  anchor_coordinates {
+    x: 105.634924908
+    y: -255.807893766
+    z: 49.40371655
+  }
+  type: "Nup49_16copies"
+}
+fgs {
+  number_of_beads {
+    lower: 18
+  }
+  number {
+    lower: 16
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: 33.430212994
+    y: -207.627992643
+    z: 117.229278074
+  }
+  anchor_coordinates {
+    x: 172.907629986
+    y: -115.505922331
+    z: 114.705718503
+  }
+  anchor_coordinates {
+    x: 115.284033795
+    y: -177.967134489
+    z: -115.299347415
+  }
+  anchor_coordinates {
+    x: 65.634924908
+    y: 199.338621126
+    z: -113.068787112
+  }
+  anchor_coordinates {
+    x: -69.04592226
+    y: 195.853330599
+    z: 115.639434324
+  }
+  anchor_coordinates {
+    x: -194.48555849
+    y: -70.36303903
+    z: 115.270293699
+  }
+  anchor_coordinates {
+    x: -102.293633442
+    y: 177.43383597
+    z: -116.425934329
+  }
+  anchor_coordinates {
+    x: 96.898108502
+    y: 184.155637728
+    z: 116.89364575
+  }
+  anchor_coordinates {
+    x: -30.565087299
+    y: -207.823274625
+    z: -114.511627688
+  }
+  anchor_coordinates {
+    x: -167.222222309
+    y: -123.51852609
+    z: -114.338623538
+  }
+  anchor_coordinates {
+    x: -184.365075092
+    y: 94.141965853
+    z: 115.223113523
+  }
+  anchor_coordinates {
+    x: -203.714653949
+    y: 28.885679232
+    z: -117.325470461
+  }
+  anchor_coordinates {
+    x: 193.003333111
+    y: 76.576719271
+    z: -115.843231692
+  }
+  anchor_coordinates {
+    x: -110.760430317
+    y: -176.00467111
+    z: 116.532561765
+  }
+  anchor_coordinates {
+    x: 198.337622662
+    y: 61.874021517
+    z: 114.608184324
+  }
+  anchor_coordinates {
+    x: 197.429785748
+    y: -66.448915495
+    z: -115.339844241
+  }
+  type: "Nsp1_16copies_1"
+}
+fgs {
+  number_of_beads {
+    lower: 18
+  }
+  number {
+    lower: 16
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: 253.94815733
+    y: 96.98638724
+    z: 79.848601804
+  }
+  anchor_coordinates {
+    x: -251.478478412
+    y: 99.318967806
+    z: -79.438446536
+  }
+  anchor_coordinates {
+    x: -99.652428608
+    y: -251.975008024
+    z: -77.970245852
+  }
+  anchor_coordinates {
+    x: 250.689856549
+    y: 103.69756888
+    z: -78.288574709
+  }
+  anchor_coordinates {
+    x: -94.738915424
+    y: 253.642148959
+    z: 76.377166257
+  }
+  anchor_coordinates {
+    x: 253.066138287
+    y: -99.276491178
+    z: -78.973114504
+  }
+  anchor_coordinates {
+    x: -248.476189594
+    y: 108.132261263
+    z: 80.566131101
+  }
+  anchor_coordinates {
+    x: 110.30161192
+    y: 246.957700716
+    z: 77.55026196
+  }
+  anchor_coordinates {
+    x: 250.458472271
+    y: -110.011507047
+    z: 82.200103269
+  }
+  anchor_coordinates {
+    x: 102.830054303
+    y: 250.796201693
+    z: -76.431152834
+  }
+  anchor_coordinates {
+    x: 105.101599713
+    y: -249.423280729
+    z: -77.878296389
+  }
+  anchor_coordinates {
+    x: -249.132515888
+    y: -102.74887277
+    z: -78.23489429
+  }
+  anchor_coordinates {
+    x: -100.49715517
+    y: 251.180479037
+    z: -78.230499758
+  }
+  anchor_coordinates {
+    x: -252.365075092
+    y: -98.356599821
+    z: 79.188384519
+  }
+  anchor_coordinates {
+    x: -112.920617084
+    y: -244.867723478
+    z: 78.232818113
+  }
+  anchor_coordinates {
+    x: 96.30161192
+    y: -253.994707121
+    z: 82.02645825
+  }
+  type: "Nsp1_16copies_2"
+}
+fgs {
+  number_of_beads {
+    lower: 11
+  }
+  number {
+    lower: 8
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: 277.30161192
+    y: -79.968721403
+    z: 138.652007566
+  }
+  anchor_coordinates {
+    x: 141.474341412
+    y: -250.678758634
+    z: 139.459868894
+  }
+  anchor_coordinates {
+    x: -248.421013813
+    y: -142.066652311
+    z: 139.263885007
+  }
+  anchor_coordinates {
+    x: -139.620537738
+    y: 249.978208529
+    z: 139.021941648
+  }
+  anchor_coordinates {
+    x: -274.940621357
+    y: 79.756589876
+    z: 138.385467039
+  }
+  anchor_coordinates {
+    x: 250.562476178
+    y: 140.446287142
+    z: 139.06375073
+  }
+  anchor_coordinates {
+    x: -79.544945697
+    y: -275.998826994
+    z: 138.385467039
+  }
+  anchor_coordinates {
+    x: 80.086951275
+    y: 274.576719271
+    z: 137.733550535
+  }
+  type: "Nup159_8copies"
+}
+fgs {
+  number_of_beads {
+    lower: 24
+  }
+  number {
+    lower: 8
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: -105.124566059
+    y: -236.182771696
+    z: 83.395965085
+  }
+  anchor_coordinates {
+    x: -240.694176654
+    y: 86.222288119
+    z: 96.307342039
+  }
+  anchor_coordinates {
+    x: -228.223351459
+    y: -117.391786588
+    z: 91.166289793
+  }
+  anchor_coordinates {
+    x: 80.330603619
+    y: 244.750608431
+    z: 102.788360105
+  }
+  anchor_coordinates {
+    x: 254.224646588
+    y: -57.602754606
+    z: 120.942229734
+  }
+  anchor_coordinates {
+    x: 91.771277447
+    y: -242.014192594
+    z: 131.152007566
+  }
+  anchor_coordinates {
+    x: 229.334937115
+    y: 118.476743685
+    z: 109.988372312
+  }
+  anchor_coordinates {
+    x: -116.507927875
+    y: 228.250181185
+    z: 104.686309324
+  }
+  type: "Nup116_8copies_chimera"
+}
+fgs {
+  number_of_beads {
+    lower: 12
+  }
+  number {
+    lower: 8
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: 174.206336041
+    y: 151.719602572
+    z: 127.645476804
+  }
+  anchor_coordinates {
+    x: -150.302575092
+    y: 174.889219271
+    z: 127.913360105
+  }
+  anchor_coordinates {
+    x: -17.608330707
+    y: -231.63949777
+    z: 128.572173582
+  }
+  anchor_coordinates {
+    x: -176.615075092
+    y: -146.673280729
+    z: 129.788360105
+  }
+  anchor_coordinates {
+    x: -230.581292133
+    y: 17.819944369
+    z: 128.572173582
+  }
+  anchor_coordinates {
+    x: 231.851111431
+    y: -18.666536344
+    z: 128.572173582
+  }
+  anchor_coordinates {
+    x: 152.907629986
+    y: -173.302064909
+    z: 128.424712644
+  }
+  anchor_coordinates {
+    x: 18.878150006
+    y: 230.792905794
+    z: 128.572173582
+  }
+  type: "Nup42_8copies_chimera"
+}
+fgs {
+  number_of_beads {
+    lower: 23
+  }
+  number {
+    lower: 8
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: -225.78017519
+    y: 27.972959505
+    z: 98.656280027
+  }
+  anchor_coordinates {
+    x: 180.319617291
+    y: 143.765928255
+    z: 97.851409421
+  }
+  anchor_coordinates {
+    x: 144.634924908
+    y: -180.059633268
+    z: 97.970183835
+  }
+  anchor_coordinates {
+    x: -143.554253559
+    y: 179.261411654
+    z: 97.851409421
+  }
+  anchor_coordinates {
+    x: -180.899743061
+    y: -141.957948698
+    z: 98.451751218
+  }
+  anchor_coordinates {
+    x: -26.048241596
+    y: -227.601503385
+    z: 99.045806394
+  }
+  anchor_coordinates {
+    x: 27.089453717
+    y: 225.849424349
+    z: 98.242888914
+  }
+  anchor_coordinates {
+    x: 227.813147564
+    y: -27.106447233
+    z: 99.045806394
+  }
+  type: "Nup100_8copies_chimera"
+}
+fgs {
+  number_of_beads {
+    lower: 23
+  }
+  number {
+    lower: 8
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: -298.446709613
+    y: 14.576719271
+    z: -140.517761721
+  }
+  anchor_coordinates {
+    x: -14.365075092
+    y: -299.50491525
+    z: -140.517761721
+  }
+  anchor_coordinates {
+    x: 15.634924908
+    y: 298.658323275
+    z: -140.517761721
+  }
+  anchor_coordinates {
+    x: 200.634924908
+    y: -223.51852609
+    z: -140.211639895
+  }
+  anchor_coordinates {
+    x: 225.634924908
+    y: 199.257566439
+    z: -139.892487063
+  }
+  anchor_coordinates {
+    x: -197.865075092
+    y: 222.076719271
+    z: -140.211639895
+  }
+  anchor_coordinates {
+    x: 299.716528912
+    y: -15.423280729
+    z: -140.517761721
+  }
+  anchor_coordinates {
+    x: -221.121819477
+    y: -199.207063688
+    z: -138.995422854
+  }
+  type: "Nup145N_8copies_1_chimera"
+}
+fgs {
+  number_of_beads {
+    lower: 23
+  }
+  number {
+    lower: 8
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: -219.684227924
+    y: 134.576719271
+    z: -40.530792727
+  }
+  anchor_coordinates {
+    x: 220.634924908
+    y: -135.423280729
+    z: -40.211639895
+  }
+  anchor_coordinates {
+    x: -249.941994648
+    y: -63.692506803
+    z: -41.365479006
+  }
+  anchor_coordinates {
+    x: 251.939246197
+    y: 60.011472689
+    z: -42.820343508
+  }
+  anchor_coordinates {
+    x: 60.34079649
+    y: -251.109560026
+    z: -41.68222095
+  }
+  anchor_coordinates {
+    x: -134.365075092
+    y: -220.423280729
+    z: -40.211639895
+  }
+  anchor_coordinates {
+    x: -60.142846088
+    y: 250.576719271
+    z: -42.544983401
+  }
+  anchor_coordinates {
+    x: 135.634924908
+    y: 219.895872103
+    z: -40.530792727
+  }
+  type: "Nup145N_8copies_2_chimera"
+}
+fgs {
+  number_of_beads {
+    lower: 15
+  }
+  number {
+    lower: 8
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1.0
+    upper: 3.0
+    steps: 2
+    base: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: 157.370459576
+    y: 152.593259798
+    z: -120.335602297
+  }
+  anchor_coordinates {
+    x: -150.181389789
+    y: 159.576719271
+    z: -118.783081545
+  }
+  anchor_coordinates {
+    x: -153.765068988
+    y: -155.023286833
+    z: -117.511627688
+  }
+  anchor_coordinates {
+    x: 10.301581402
+    y: 219.660032259
+    z: -119.211639895
+  }
+  anchor_coordinates {
+    x: 156.806067486
+    y: -157.405275358
+    z: -119.535950198
+  }
+  anchor_coordinates {
+    x: -3.52538393
+    y: -221.148469938
+    z: -119.868134036
+  }
+  anchor_coordinates {
+    x: -221.965081196
+    y: 3.310056673
+    z: -120.74496509
+  }
+  anchor_coordinates {
+    x: 221.433264752
+    y: -9.28882028
+    z: -119.329285159
+  }
+  type: "Nup1_8copies"
+}
+fgs {
+  number_of_beads {
+    lower: 7
+  }
+  number {
+    lower: 8
+  }
+  radius {
+    lower: 8.48528137424
+  }
+  interactions {
+    lower: 2
+  }
+  rest_length_factor {
+    lower: 1.2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  anchor_coordinates {
+    x: -243.274163227
+    y: 184.576719271
+    z: -129.575287356
+  }
+  anchor_coordinates {
+    x: 244.54404356
+    y: -185.423280729
+    z: -129.575287356
+  }
+  anchor_coordinates {
+    x: -39.365075092
+    y: 305.266355501
+    z: -130.728882327
+  }
+  anchor_coordinates {
+    x: 187.942603131
+    y: 243.807493197
+    z: -130.596252932
+  }
+  anchor_coordinates {
+    x: -304.546898822
+    y: -40.696016325
+    z: -129.938904299
+  }
+  anchor_coordinates {
+    x: 305.816748638
+    y: 39.849424349
+    z: -129.938904299
+  }
+  anchor_coordinates {
+    x: -186.784417133
+    y: -245.584566129
+    z: -131.179382815
+  }
+  anchor_coordinates {
+    x: 40.634924908
+    y: -307.423280729
+    z: -129.611633791
+  }
+  type: "Nup60_8copies"
+}
+floaters {
+  number {
+    lower: 30
+  }
+  radius {
+    lower: 30.0
+  }
+  interactions {
+    lower: 4
+    upper: 12
+    steps: 2
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 3.0
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+}
+floaters {
+  number {
+    lower: 30
+  }
+  radius {
+    lower: 30.0
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup116_8copies_chimera"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup116_8copies_chimera"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup42_8copies_chimera"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup42_8copies_chimera"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup100_8copies_chimera"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup100_8copies_chimera"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_1_chimera"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_1_chimera"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_2_chimera"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_2_chimera"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup1_8copies"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup1_8copies"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup60_8copies"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 3.0
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup60_8copies"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup57_16copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup49_16copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nsp1_16copies_1"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nsp1_16copies_2"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup159_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup116_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup42_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup100_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup145N_8copies_1_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup57_16copies_chimera"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nup49_16copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nsp1_16copies_1"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nsp1_16copies_2"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nup159_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nup116_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nup42_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nup100_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nup145N_8copies_1_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup49_16copies"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nsp1_16copies_1"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nsp1_16copies_2"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nup159_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nup116_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nup42_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nup100_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nup145N_8copies_1_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_1"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "Nsp1_16copies_2"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "Nup159_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "Nup116_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "Nup42_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "Nup100_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "Nup145N_8copies_1_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nsp1_16copies_2"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "Nup159_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "Nup116_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "Nup42_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "Nup100_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "Nup145N_8copies_1_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup159_8copies"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup116_8copies_chimera"
+  type1: "Nup116_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup116_8copies_chimera"
+  type1: "Nup42_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup116_8copies_chimera"
+  type1: "Nup100_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup116_8copies_chimera"
+  type1: "Nup145N_8copies_1_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup116_8copies_chimera"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup116_8copies_chimera"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup116_8copies_chimera"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup42_8copies_chimera"
+  type1: "Nup42_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup42_8copies_chimera"
+  type1: "Nup100_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup42_8copies_chimera"
+  type1: "Nup145N_8copies_1_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup42_8copies_chimera"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup42_8copies_chimera"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup42_8copies_chimera"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup100_8copies_chimera"
+  type1: "Nup100_8copies_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup100_8copies_chimera"
+  type1: "Nup145N_8copies_1_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup100_8copies_chimera"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup100_8copies_chimera"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup100_8copies_chimera"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_1_chimera"
+  type1: "Nup145N_8copies_1_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_1_chimera"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_1_chimera"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_1_chimera"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_2_chimera"
+  type1: "Nup145N_8copies_2_chimera"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_2_chimera"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup145N_8copies_2_chimera"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup1_8copies"
+  type1: "Nup1_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup1_8copies"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "Nup60_8copies"
+  type1: "Nup60_8copies"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 2.5
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+dump_interval_ns: 50
+nonspecific_range {
+  lower: 1.5
+}
+nonspecific_k {
+  lower: 1
+}
+angular_D_factor {
+  lower: 0.3
+}
+statistics_interval_ns: 0.1
+excluded_volume_k {
+  lower: 20
+}
+simulation_time_ns: 1000
+statistics_fraction {
+  lower: 1.0
+}
+obstacles {
+  xyzs {
+    x: -21.762322406
+    y: -230.902742399
+    z: 144.651397214
+  }
+  xyzs {
+    x: 121.09470274
+    y: 179.806577669
+    z: 117.317107664
+  }
+  xyzs {
+    x: -42.921227436
+    y: 210.886899935
+    z: 117.462127195
+  }
+  xyzs {
+    x: -210.518914203
+    y: -43.884828581
+    z: 117.425750242
+  }
+  xyzs {
+    x: 44.651343365
+    y: -211.762086881
+    z: 118.449553953
+  }
+  xyzs {
+    x: 229.603186627
+    y: -20.978822721
+    z: 142.248687253
+  }
+  xyzs {
+    x: -179.655785541
+    y: 119.692991244
+    z: 117.579070554
+  }
+  xyzs {
+    x: 180.020911236
+    y: 150.015317904
+    z: 144.963775144
+  }
+  xyzs {
+    x: 148.17459776
+    y: -181.137575163
+    z: 144.947112546
+  }
+  xyzs {
+    x: 180.925635357
+    y: -120.539552702
+    z: 117.579070554
+  }
+  xyzs {
+    x: 212.055396099
+    y: 43.894895541
+    z: 118.197478757
+  }
+  xyzs {
+    x: 20.889136334
+    y: 229.492002474
+    z: 142.584990964
+  }
+  xyzs {
+    x: -118.327324848
+    y: -180.517610563
+    z: 116.549346433
+  }
+  xyzs {
+    x: -175.262505512
+    y: -151.448915495
+    z: 143.249907957
+  }
+  xyzs {
+    x: -147.177575092
+    y: 180.357969271
+    z: 144.788360105
+  }
+  xyzs {
+    x: -228.698418598
+    y: 20.576719271
+    z: 143.121673093
+  }
+  radius {
+    lower: 31.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Gle1_8copies"
+}
+obstacles {
+  xyzs {
+    x: -112.272057514
+    y: -220.713991178
+    z: -89.10699512
+  }
+  xyzs {
+    x: 107.063513775
+    y: 223.80291556
+    z: -90.152130618
+  }
+  xyzs {
+    x: -227.398797016
+    y: -101.771608366
+    z: 90.01309155
+  }
+  xyzs {
+    x: 224.132056256
+    y: -109.931947721
+    z: -89.720306887
+  }
+  xyzs {
+    x: -234.604607563
+    y: -81.231660856
+    z: -89.223602786
+  }
+  xyzs {
+    x: 84.711035748
+    y: 234.359312044
+    z: 89.679656492
+  }
+  xyzs {
+    x: 236.640845318
+    y: -74.713228239
+    z: 89.344573484
+  }
+  xyzs {
+    x: -234.67595766
+    y: 83.125913607
+    z: 89.762481199
+  }
+  xyzs {
+    x: -222.717339496
+    y: 109.40624808
+    z: -89.30255176
+  }
+  xyzs {
+    x: 101.758521099
+    y: -230.030031217
+    z: 90.293975339
+  }
+  xyzs {
+    x: -71.878899555
+    y: -236.694002165
+    z: 89.760711179
+  }
+  xyzs {
+    x: -95.370659809
+    y: 232.006895052
+    z: 89.090056882
+  }
+  xyzs {
+    x: -72.482720356
+    y: 236.753171908
+    z: -90.388123049
+  }
+  xyzs {
+    x: 236.092078228
+    y: 92.405271517
+    z: 90.274077878
+  }
+  xyzs {
+    x: 82.617163678
+    y: -235.719148649
+    z: -89.41281177
+  }
+  xyzs {
+    x: 237.006323834
+    y: 76.062437044
+    z: -90.125916018
+  }
+  radius {
+    lower: 34.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Gle2_16copies"
+}
+obstacles {
+  xyzs {
+    x: 66.349219342
+    y: 410.648130404
+    z: 3.359801755
+  }
+  xyzs {
+    x: 409.671607037
+    y: -78.267305387
+    z: -9.064850344
+  }
+  xyzs {
+    x: -409.135720234
+    y: -71.111360563
+    z: 9.008544431
+  }
+  xyzs {
+    x: -384.859581928
+    y: -137.566133512
+    z: 33.414763914
+  }
+  xyzs {
+    x: 333.685767193
+    y: -248.728364958
+    z: -0.465881838
+  }
+  xyzs {
+    x: 368.424414654
+    y: -182.002229704
+    z: 31.998870359
+  }
+  xyzs {
+    x: -179.389946918
+    y: -369.801393522
+    z: 29.962493406
+  }
+  xyzs {
+    x: 232.266516705
+    y: -344.791704191
+    z: -6.895843997
+  }
+  xyzs {
+    x: 137.955359478
+    y: -385.975763334
+    z: 33.407134519
+  }
+  xyzs {
+    x: 103.221106549
+    y: 402.277891146
+    z: -26.016235842
+  }
+  xyzs {
+    x: -114.839531879
+    y: -395.897729887
+    z: -23.605804934
+  }
+  xyzs {
+    x: 371.070837994
+    y: 179.653623568
+    z: -31.109070315
+  }
+  xyzs {
+    x: 181.212805767
+    y: 367.94354056
+    z: 31.974273191
+  }
+  xyzs {
+    x: -179.339440326
+    y: 369.961362826
+    z: -31.314209475
+  }
+  xyzs {
+    x: -407.550919513
+    y: 79.620969759
+    z: -10.786865725
+  }
+  xyzs {
+    x: -68.919518451
+    y: 409.626218783
+    z: 11.91708325
+  }
+  xyzs {
+    x: 330.834937115
+    y: 249.856748568
+    z: 3.74835156
+  }
+  xyzs {
+    x: 176.259924908
+    y: -372.411912931
+    z: -31.575287356
+  }
+  xyzs {
+    x: -384.597634296
+    y: 141.553464876
+    z: -33.409302249
+  }
+  xyzs {
+    x: 270.351904888
+    y: -313.913850797
+    z: 8.561950193
+  }
+  xyzs {
+    x: -249.227456073
+    y: 329.163877474
+    z: 0.109466062
+  }
+  xyzs {
+    x: 250.710669537
+    y: 330.410032259
+    z: 0.091399656
+  }
+  xyzs {
+    x: -250.445076923
+    y: -330.943285001
+    z: 0.148345457
+  }
+  xyzs {
+    x: 393.861365338
+    y: 117.482358919
+    z: 28.826079832
+  }
+  xyzs {
+    x: 386.472937603
+    y: -141.009859098
+    z: -33.200470461
+  }
+  xyzs {
+    x: -332.007348041
+    y: 247.910032259
+    z: 0.885924802
+  }
+  xyzs {
+    x: -369.415581684
+    y: -178.756624235
+    z: -30.868195071
+  }
+  xyzs {
+    x: -367.734642963
+    y: 179.902830111
+    z: 31.799224363
+  }
+  xyzs {
+    x: -136.44158266
+    y: 385.396421419
+    z: 33.149016843
+  }
+  xyzs {
+    x: 147.509924908
+    y: 382.354490267
+    z: -34.864410891
+  }
+  xyzs {
+    x: -330.925072651
+    y: -248.14328195
+    z: 1.428374753
+  }
+  xyzs {
+    x: 76.012305279
+    y: -410.045923246
+    z: 9.411010251
+  }
+  radius {
+    lower: 33.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Ndc1_16copies"
+}
+obstacles {
+  xyzs {
+    x: 40.130347271
+    y: -263.221452726
+    z: 149.467254148
+  }
+  xyzs {
+    x: 176.768286724
+    y: 190.443357455
+    z: 139.388335691
+  }
+  xyzs {
+    x: 255.185462017
+    y: -13.400819791
+    z: -130.717255129
+  }
+  xyzs {
+    x: 18.968237896
+    y: 258.476072298
+    z: -141.31225635
+  }
+  xyzs {
+    x: -67.648644428
+    y: -249.45312692
+    z: -142.301178469
+  }
+  xyzs {
+    x: -18.879357319
+    y: -259.76613046
+    z: -140.583069338
+  }
+  xyzs {
+    x: -174.497521381
+    y: -191.847108854
+    z: 140.285064207
+  }
+  xyzs {
+    x: -189.433556537
+    y: 175.809568392
+    z: 138.555510984
+  }
+  xyzs {
+    x: 191.221106549
+    y: -176.319826139
+    z: 139.546966062
+  }
+  xyzs {
+    x: 67.412695904
+    y: 248.798948275
+    z: -144.470886721
+  }
+  xyzs {
+    x: 152.838843365
+    y: -208.581178678
+    z: -141.823486819
+  }
+  xyzs {
+    x: -258.877266864
+    y: 18.96697806
+    z: -141.431152834
+  }
+  xyzs {
+    x: -40.999688129
+    y: 263.038267123
+    z: 148.538360105
+  }
+  xyzs {
+    x: -220.198418598
+    y: 137.52544974
+    z: 144.596038328
+  }
+  xyzs {
+    x: 255.843237896
+    y: 36.729490267
+    z: 142.913360105
+  }
+  xyzs {
+    x: 208.691382428
+    y: 151.952146517
+    z: -142.354492678
+  }
+  xyzs {
+    x: -173.412682514
+    y: 191.651548373
+    z: -140.245666995
+  }
+  xyzs {
+    x: -248.393853168
+    y: 67.166624056
+    z: -142.765594973
+  }
+  xyzs {
+    x: 221.267859478
+    y: -138.397951139
+    z: 144.598479734
+  }
+  xyzs {
+    x: 249.271277447
+    y: -69.390230192
+    z: -142.814941897
+  }
+  xyzs {
+    x: -192.111565571
+    y: -173.381013883
+    z: -139.929962649
+  }
+  xyzs {
+    x: 264.920630474
+    y: -30.423280729
+    z: -155.806885256
+  }
+  xyzs {
+    x: -135.431756
+    y: -221.423280729
+    z: 145.3216853
+  }
+  xyzs {
+    x: -258.904076557
+    y: -13.082857145
+    z: 140.745818601
+  }
+  xyzs {
+    x: -221.706841449
+    y: -134.094179167
+    z: -143.059753909
+  }
+  xyzs {
+    x: 6.544013043
+    y: -256.433382047
+    z: 137.919646726
+  }
+  xyzs {
+    x: 137.622107525
+    y: 220.217771517
+    z: 143.955047117
+  }
+  xyzs {
+    x: -6.981896381
+    y: 255.604734408
+    z: 138.713592039
+  }
+  xyzs {
+    x: 71.956763287
+    y: -245.308336271
+    z: 140.880340085
+  }
+  xyzs {
+    x: -71.067193012
+    y: 244.257566439
+    z: 137.97982739
+  }
+  xyzs {
+    x: -250.302575092
+    y: -60.610780729
+    z: 143.288360105
+  }
+  xyzs {
+    x: -133.495507221
+    y: 221.346921908
+    z: -143.845184817
+  }
+  radius {
+    lower: 36.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nic96_16copies_1"
+}
+obstacles {
+  xyzs {
+    x: -128.392846088
+    y: 329.576719271
+    z: 84.649444089
+  }
+  xyzs {
+    x: 337.101599713
+    y: -137.489961637
+    z: 84.855010496
+  }
+  xyzs {
+    x: 328.845923443
+    y: 143.751035677
+    z: -85.670349612
+  }
+  xyzs {
+    x: 296.358618756
+    y: 148.260923373
+    z: 89.9857478
+  }
+  xyzs {
+    x: -134.185448627
+    y: -336.740648283
+    z: 85.027862058
+  }
+  xyzs {
+    x: 137.267554303
+    y: 336.617551791
+    z: 84.652312742
+  }
+  xyzs {
+    x: 107.48923399
+    y: -308.535860075
+    z: -87.3970647
+  }
+  xyzs {
+    x: -311.653206806
+    y: 144.339414583
+    z: -86.194702639
+  }
+  xyzs {
+    x: -299.313530903
+    y: 114.164365755
+    z: 89.015166746
+  }
+  xyzs {
+    x: 305.108618756
+    y: 105.015317904
+    z: -91.17654468
+  }
+  xyzs {
+    x: 131.634924908
+    y: -340.197481168
+    z: -84.953583254
+  }
+  xyzs {
+    x: 121.811377545
+    y: -328.070344938
+    z: 84.396209226
+  }
+  xyzs {
+    x: 136.259924908
+    y: 330.340635287
+    z: -85.003296389
+  }
+  xyzs {
+    x: 333.221106549
+    y: 133.059507357
+    z: 84.650420652
+  }
+  xyzs {
+    x: -332.561791401
+    y: 142.855405794
+    z: 85.608062253
+  }
+  xyzs {
+    x: -330.365075092
+    y: -141.893861784
+    z: 85.25894116
+  }
+  xyzs {
+    x: 309.824133892
+    y: -107.180025114
+    z: 89.045135007
+  }
+  xyzs {
+    x: 145.634924908
+    y: -288.851854337
+    z: 91.455047117
+  }
+  xyzs {
+    x: 159.634924908
+    y: -328.312166227
+    z: 85.899444089
+  }
+  xyzs {
+    x: 299.17661192
+    y: -160.214937223
+    z: -87.711639895
+  }
+  xyzs {
+    x: -101.423912983
+    y: 312.419858919
+    z: -88.544983401
+  }
+  xyzs {
+    x: -104.916802387
+    y: -308.250871671
+    z: 91.064239011
+  }
+  xyzs {
+    x: 153.870215435
+    y: 294.642087923
+    z: -89.656097903
+  }
+  xyzs {
+    x: -323.198403339
+    y: -118.689943327
+    z: -85.811645999
+  }
+  xyzs {
+    x: -145.371788959
+    y: -312.570924772
+    z: -86.453247561
+  }
+  xyzs {
+    x: -153.232995014
+    y: 298.476072298
+    z: 88.24746655
+  }
+  xyzs {
+    x: 345.86221983
+    y: 105.258543001
+    z: -84.416199221
+  }
+  xyzs {
+    x: 107.579382916
+    y: 308.743406283
+    z: 87.982818113
+  }
+  xyzs {
+    x: -290.64244936
+    y: -139.218904508
+    z: 90.116851316
+  }
+  xyzs {
+    x: 326.927466412
+    y: -131.341646208
+    z: -85.075592532
+  }
+  xyzs {
+    x: -333.64218996
+    y: 98.673093783
+    z: 87.800384031
+  }
+  xyzs {
+    x: -135.234642963
+    y: 335.135740267
+    z: -84.466309084
+  }
+  radius {
+    lower: 36.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nic96_16copies_2"
+}
+obstacles {
+  xyzs {
+    x: 4.238287945
+    y: -363.244508756
+    z: -127.166962161
+  }
+  xyzs {
+    x: 254.945288678
+    y: 259.289365755
+    z: -128.774872317
+  }
+  xyzs {
+    x: 270.99491026
+    y: 241.456724154
+    z: 125.988372312
+  }
+  xyzs {
+    x: -2.148858051
+    y: 362.955076205
+    z: -129.049469485
+  }
+  xyzs {
+    x: -263.941796283
+    y: -250.132280363
+    z: 128.333343015
+  }
+  xyzs {
+    x: -48.121697406
+    y: -357.275133146
+    z: -123.359802737
+  }
+  xyzs {
+    x: 363.951270123
+    y: 0.801206576
+    z: -128.98715259
+  }
+  xyzs {
+    x: 245.871130963
+    y: 271.505857455
+    z: 126.914336667
+  }
+  xyzs {
+    x: 249.769019146
+    y: -266.596467985
+    z: 128.252044187
+  }
+  xyzs {
+    x: -288.540902118
+    y: -217.401308073
+    z: -123.34350635
+  }
+  xyzs {
+    x: 217.612952252
+    y: -289.599107755
+    z: -123.34350635
+  }
+  xyzs {
+    x: -218.997857074
+    y: -287.005205167
+    z: 124.562346921
+  }
+  xyzs {
+    x: -362.752175312
+    y: -3.380281461
+    z: -127.684753909
+  }
+  xyzs {
+    x: 50.634924908
+    y: 355.89855765
+    z: -124.234619631
+  }
+  xyzs {
+    x: -254.586068134
+    y: -260.395662321
+    z: -126.813843264
+  }
+  xyzs {
+    x: -52.657769184
+    y: 354.983213412
+    z: 126.495696531
+  }
+  xyzs {
+    x: 285.845435162
+    y: -221.475923551
+    z: 124.051543699
+  }
+  xyzs {
+    x: -215.644158344
+    y: 289.751157748
+    z: -124.048859133
+  }
+  xyzs {
+    x: 12.459235211
+    y: 360.725339876
+    z: 131.882964597
+  }
+  xyzs {
+    x: -258.301247577
+    y: 255.108640658
+    z: -126.435059084
+  }
+  xyzs {
+    x: 360.811072369
+    y: 17.910032259
+    z: 125.547149167
+  }
+  xyzs {
+    x: -356.473504047
+    y: -47.652193083
+    z: 123.101592527
+  }
+  xyzs {
+    x: 46.496985455
+    y: -358.239366544
+    z: 123.98373364
+  }
+  xyzs {
+    x: -7.038872699
+    y: -362.802965177
+    z: 128.31777905
+  }
+  xyzs {
+    x: 356.30161192
+    y: -52.514192594
+    z: -123.999512209
+  }
+  xyzs {
+    x: -361.790810566
+    y: 5.467802035
+    z: 127.36263989
+  }
+  xyzs {
+    x: -18.127465229
+    y: 363.487607943
+    z: 112.313140378
+  }
+  xyzs {
+    x: 260.241675396
+    y: -255.423280729
+    z: -127.065582766
+  }
+  xyzs {
+    x: -356.067208271
+    y: 48.991636263
+    z: -123.243561282
+  }
+  xyzs {
+    x: -267.168313007
+    y: 242.17779349
+    z: 125.489165769
+  }
+  xyzs {
+    x: 211.1904669
+    y: 290.645078646
+    z: 121.882354246
+  }
+  xyzs {
+    x: 289.912390728
+    y: 216.657651888
+    z: -123.997772707
+  }
+  radius {
+    lower: 39.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup120_16copies"
+}
+obstacles {
+  xyzs {
+    x: -192.734185199
+    y: -330.315980924
+    z: -141.048553957
+  }
+  xyzs {
+    x: -357.627114277
+    y: 140.619504916
+    z: -138.099335207
+  }
+  xyzs {
+    x: -100.37404726
+    y: -369.324632658
+    z: 140.976714597
+  }
+  xyzs {
+    x: -351.515618305
+    y: -155.638338102
+    z: -138.222382083
+  }
+  xyzs {
+    x: -188.720635395
+    y: 331.998960482
+    z: 140.832793699
+  }
+  xyzs {
+    x: -370.079354267
+    y: -94.441133512
+    z: -141.595581545
+  }
+  xyzs {
+    x: 371.597388287
+    y: 91.900632845
+    z: -141.737457766
+  }
+  xyzs {
+    x: -362.004830341
+    y: -130.578554167
+    z: 138.390838132
+  }
+  xyzs {
+    x: 138.297644635
+    y: 359.783811556
+    z: -138.170227541
+  }
+  xyzs {
+    x: -131.427208881
+    y: 361.299863802
+    z: 137.952178464
+  }
+  xyzs {
+    x: 329.246008892
+    y: -195.886232389
+    z: -141.461639895
+  }
+  xyzs {
+    x: 349.291663189
+    y: 155.770750033
+    z: 140.758513914
+  }
+  xyzs {
+    x: 93.417700787
+    y: -371.667619718
+    z: -141.863220706
+  }
+  xyzs {
+    x: -327.345849018
+    y: 196.019041048
+    z: -141.702026858
+  }
+  xyzs {
+    x: 361.715979596
+    y: -124.274629606
+    z: 139.788360105
+  }
+  xyzs {
+    x: 346.59079649
+    y: -169.835054411
+    z: 138.832488523
+  }
+  xyzs {
+    x: 369.140051861
+    y: 119.318967806
+    z: 136.850188718
+  }
+  xyzs {
+    x: -160.832451801
+    y: -348.847200407
+    z: 139.081817136
+  }
+  xyzs {
+    x: -136.69637392
+    y: -360.822053922
+    z: -138.033722415
+  }
+  xyzs {
+    x: -155.547875385
+    y: 350.598203646
+    z: -138.652496829
+  }
+  xyzs {
+    x: -359.155205707
+    y: 127.687803255
+    z: 140.02291821
+  }
+  xyzs {
+    x: 134.337622662
+    y: -360.774629606
+    z: 139.220794187
+  }
+  xyzs {
+    x: 329.167883892
+    y: 196.55279349
+    z: 140.716521726
+  }
+  xyzs {
+    x: 359.489661236
+    y: -140.004274381
+    z: -138.395996584
+  }
+  xyzs {
+    x: 127.389319439
+    y: 360.040403353
+    z: 139.57534741
+  }
+  xyzs {
+    x: 374.718237896
+    y: -87.506624235
+    z: 142.038360105
+  }
+  xyzs {
+    x: -332.307457904
+    y: -187.892427458
+    z: 141.701934324
+  }
+  xyzs {
+    x: 191.539710064
+    y: -332.042329801
+    z: 140.931243406
+  }
+  xyzs {
+    x: 194.595984478
+    y: 329.122190462
+    z: -141.878296389
+  }
+  xyzs {
+    x: 154.687537213
+    y: -352.475908292
+    z: -138.527435793
+  }
+  xyzs {
+    x: 352.030859967
+    y: 153.510740267
+    z: -139.018738284
+  }
+  xyzs {
+    x: -93.25396059
+    y: 369.687803255
+    z: -141.833862795
+  }
+  radius {
+    lower: 40.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup133_16copies"
+}
+obstacles {
+  xyzs {
+    x: 116.084387799
+    y: -354.074968351
+    z: 122.541167722
+  }
+  xyzs {
+    x: -334.215828876
+    y: -158.259096159
+    z: -117.450439944
+  }
+  xyzs {
+    x: 339.937232037
+    y: -145.307008756
+    z: 118.741851316
+  }
+  xyzs {
+    x: -350.232842426
+    y: -120.216676725
+    z: -119.674438967
+  }
+  xyzs {
+    x: -118.297661762
+    y: 358.846372591
+    z: 112.204070554
+  }
+  xyzs {
+    x: 141.175452252
+    y: -345.288148893
+    z: 108.031585203
+  }
+  xyzs {
+    x: -349.195580463
+    y: 123.475034701
+    z: 119.110381589
+  }
+  xyzs {
+    x: 126.186133404
+    y: 348.120054232
+    z: 118.252898679
+  }
+  xyzs {
+    x: 332.351355572
+    y: 155.621519076
+    z: 119.639129148
+  }
+  xyzs {
+    x: -139.561913471
+    y: 342.175168978
+    z: -118.754944338
+  }
+  xyzs {
+    x: 331.069678326
+    y: -160.133424772
+    z: -119.414551272
+  }
+  xyzs {
+    x: 342.81748106
+    y: 139.854490267
+    z: -118.902130618
+  }
+  xyzs {
+    x: -340.098412494
+    y: 170.043394076
+    z: 114.788360105
+  }
+  xyzs {
+    x: -124.8301935
+    y: -347.903902067
+    z: 119.672088132
+  }
+  xyzs {
+    x: 124.194922467
+    y: 351.376707064
+    z: -118.011627688
+  }
+  xyzs {
+    x: -350.423470478
+    y: -121.262697233
+    z: 118.073028074
+  }
+  xyzs {
+    x: -159.998864154
+    y: -331.972581876
+    z: -118.803192629
+  }
+  xyzs {
+    x: -161.31243227
+    y: 331.524106966
+    z: 116.788360105
+  }
+  xyzs {
+    x: 164.274939556
+    y: 330.896726595
+    z: 117.588347898
+  }
+  xyzs {
+    x: 160.634924908
+    y: 329.498594271
+    z: -120.289764895
+  }
+  xyzs {
+    x: -319.588952045
+    y: 151.442380892
+    z: 121.20626782
+  }
+  xyzs {
+    x: -329.843331318
+    y: -158.2928486
+    z: 120.962249265
+  }
+  xyzs {
+    x: -329.599450092
+    y: 160.826719271
+    z: -119.586639895
+  }
+  xyzs {
+    x: 353.702124615
+    y: 119.198545443
+    z: 117.813567625
+  }
+  xyzs {
+    x: -163.492058735
+    y: -332.169313444
+    z: 117.883574949
+  }
+  xyzs {
+    x: -129.73821352
+    y: 335.173704134
+    z: 128.37045239
+  }
+  xyzs {
+    x: -122.070000629
+    y: -351.980653776
+    z: -117.342773928
+  }
+  xyzs {
+    x: 161.569006939
+    y: -326.741960539
+    z: 125.118010984
+  }
+  xyzs {
+    x: 353.072913189
+    y: -123.439821256
+    z: -118.021545901
+  }
+  xyzs {
+    x: -350.113106708
+    y: 124.419248568
+    z: -117.258881106
+  }
+  xyzs {
+    x: 155.867468853
+    y: -331.237230314
+    z: -118.079864993
+  }
+  xyzs {
+    x: 124.384924908
+    y: -354.798280729
+    z: -119.039764895
+  }
+  radius {
+    lower: 34.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup145C_16copies"
+}
+obstacles {
+  xyzs {
+    x: -242.024651508
+    y: 262.555418001
+    z: -65.530792727
+  }
+  xyzs {
+    x: -352.321282367
+    y: -20.459779752
+    z: 60.335784421
+  }
+  xyzs {
+    x: -31.047997455
+    y: -349.472063078
+    z: 56.544463621
+  }
+  xyzs {
+    x: -347.595162372
+    y: -25.688753141
+    z: -53.131989016
+  }
+  xyzs {
+    x: -226.112633686
+    y: -266.054353727
+    z: -52.638824954
+  }
+  xyzs {
+    x: -3.974450092
+    y: -347.142030729
+    z: -67.867889895
+  }
+  xyzs {
+    x: 352.082312603
+    y: -37.396974577
+    z: 60.117278562
+  }
+  xyzs {
+    x: 33.601050396
+    y: 344.407224642
+    z: -46.906555666
+  }
+  xyzs {
+    x: 17.466956158
+    y: 339.538572298
+    z: 33.87234448
+  }
+  xyzs {
+    x: -350.183251362
+    y: 35.606992709
+    z: 58.061065183
+  }
+  xyzs {
+    x: 221.462744732
+    y: 268.35156058
+    z: -50.973236575
+  }
+  xyzs {
+    x: -38.622490863
+    y: 352.299497591
+    z: -60.657196536
+  }
+  xyzs {
+    x: -21.288140278
+    y: 346.115171419
+    z: 52.835723386
+  }
+  xyzs {
+    x: 349.966162701
+    y: 19.417478548
+    z: 59.055877195
+  }
+  xyzs {
+    x: -334.523812275
+    y: -1.772493375
+    z: 33.915374265
+  }
+  xyzs {
+    x: -258.75396059
+    y: 229.410032259
+    z: 51.121673093
+  }
+  xyzs {
+    x: 255.988928814
+    y: 250.594419466
+    z: -69.813416018
+  }
+  xyzs {
+    x: 256.175452252
+    y: -232.810670866
+    z: 48.34689282
+  }
+  xyzs {
+    x: 34.642554303
+    y: 353.889707552
+    z: 66.315093503
+  }
+  xyzs {
+    x: -231.263237934
+    y: -256.626985563
+    z: 48.538360105
+  }
+  xyzs {
+    x: 230.675574322
+    y: 259.698667513
+    z: 61.211150632
+  }
+  xyzs {
+    x: -226.605065326
+    y: 270.976743685
+    z: 68.868377195
+  }
+  xyzs {
+    x: -245.476189594
+    y: 241.798948275
+    z: -21.183868899
+  }
+  xyzs {
+    x: -24.696190815
+    y: -345.158372892
+    z: -38.655334963
+  }
+  xyzs {
+    x: 342.457373638
+    y: 2.146818148
+    z: -29.884521975
+  }
+  xyzs {
+    x: 16.556006451
+    y: -345.335557951
+    z: 48.121673093
+  }
+  xyzs {
+    x: 338.610144635
+    y: -4.514192594
+    z: 30.738799558
+  }
+  xyzs {
+    x: -222.781731586
+    y: 258.826719271
+    z: 35.621673093
+  }
+  xyzs {
+    x: 3.109686871
+    y: 352.455503451
+    z: -70.36315967
+  }
+  xyzs {
+    x: 348.455420513
+    y: 35.516904818
+    z: -57.262909426
+  }
+  xyzs {
+    x: -267.135033588
+    y: -223.967866911
+    z: 55.023101316
+  }
+  xyzs {
+    x: 238.890723248
+    y: 253.181394564
+    z: 29.439544187
+  }
+  xyzs {
+    x: 33.026221295
+    y: -350.205888761
+    z: -50.553253665
+  }
+  xyzs {
+    x: 268.600012799
+    y: -225.830263151
+    z: -54.746521487
+  }
+  xyzs {
+    x: 234.040747662
+    y: -263.249361051
+    z: -65.066711916
+  }
+  xyzs {
+    x: 357.31912901
+    y: -1.212739958
+    z: -71.001099124
+  }
+  xyzs {
+    x: -345.465554218
+    y: 22.758543001
+    z: -50.235565676
+  }
+  xyzs {
+    x: -270.78482912
+    y: 232.354490267
+    z: -70.643738284
+  }
+  xyzs {
+    x: 255.738013287
+    y: 217.669492709
+    z: 39.324431882
+  }
+  xyzs {
+    x: -216.792260151
+    y: 261.081602083
+    z: -45.599976077
+  }
+  xyzs {
+    x: -263.587304096
+    y: 215.576719271
+    z: -45.767181887
+  }
+  xyzs {
+    x: 342.089453717
+    y: -32.877840055
+    z: -51.029816165
+  }
+  xyzs {
+    x: 277.222205181
+    y: 226.481504427
+    z: 66.137542234
+  }
+  xyzs {
+    x: -8.400170307
+    y: 338.699522005
+    z: -32.755493655
+  }
+  xyzs {
+    x: 223.597022076
+    y: -270.494371427
+    z: 56.067962156
+  }
+  xyzs {
+    x: 231.833289166
+    y: -251.208406461
+    z: -29.343872561
+  }
+  xyzs {
+    x: 256.73923399
+    y: 225.865049349
+    z: -41.530670657
+  }
+  xyzs {
+    x: -258.683251362
+    y: -230.650545133
+    z: -49.984375491
+  }
+  radius {
+    lower: 37.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup157_16copies"
+}
+obstacles {
+  xyzs {
+    x: -99.815880756
+    y: 317.158689486
+    z: 28.886748777
+  }
+  xyzs {
+    x: -108.432244281
+    y: -314.751634611
+    z: -31.405670657
+  }
+  xyzs {
+    x: -285.689278583
+    y: -167.889040006
+    z: 30.267791257
+  }
+  xyzs {
+    x: 289.624426861
+    y: 161.899534212
+    z: 3.213561521
+  }
+  xyzs {
+    x: 147.342261334
+    y: -297.577745451
+    z: -28.666931643
+  }
+  xyzs {
+    x: 101.320410748
+    y: -317.560380949
+    z: 29.465789304
+  }
+  xyzs {
+    x: 294.608130474
+    y: -156.673280729
+    z: 30.859771238
+  }
+  xyzs {
+    x: 85.831030865
+    y: 321.713987337
+    z: 21.298186765
+  }
+  xyzs {
+    x: -169.119164447
+    y: -286.215623869
+    z: -3.599609866
+  }
+  xyzs {
+    x: -311.07314394
+    y: 119.297239291
+    z: 28.080291257
+  }
+  xyzs {
+    x: -296.348885517
+    y: -147.609529508
+    z: -28.612457766
+  }
+  xyzs {
+    x: -289.160393696
+    y: 163.641050326
+    z: 29.934539304
+  }
+  xyzs {
+    x: -323.79769228
+    y: 74.293027865
+    z: 29.043670164
+  }
+  xyzs {
+    x: 153.667700787
+    y: 295.150510775
+    z: 30.812957273
+  }
+  xyzs {
+    x: 116.32315733
+    y: 311.378355013
+    z: -31.203552737
+  }
+  xyzs {
+    x: -165.09468935
+    y: 287.237668978
+    z: 28.393523679
+  }
+  xyzs {
+    x: 281.24893858
+    y: -179.867738737
+    z: -29.539124026
+  }
+  xyzs {
+    x: 81.441382428
+    y: -323.34955026
+    z: -29.451263918
+  }
+  xyzs {
+    x: -144.878899555
+    y: 297.304014193
+    z: -29.519928469
+  }
+  xyzs {
+    x: 321.47562315
+    y: -88.786104215
+    z: 30.053863035
+  }
+  xyzs {
+    x: -315.977974872
+    y: -102.923280729
+    z: 29.143218503
+  }
+  xyzs {
+    x: 322.088843365
+    y: -91.735322965
+    z: -31.807373538
+  }
+  xyzs {
+    x: -322.086007099
+    y: -81.00467111
+    z: -29.583740725
+  }
+  xyzs {
+    x: 167.173377056
+    y: -287.685716642
+    z: 29.584746824
+  }
+  xyzs {
+    x: 304.843970318
+    y: -133.67187692
+    z: -25.946106448
+  }
+  xyzs {
+    x: -77.860222797
+    y: 323.411680209
+    z: -30.405823245
+  }
+  xyzs {
+    x: -99.016228656
+    y: -317.516298307
+    z: 30.768401609
+  }
+  xyzs {
+    x: 176.468237896
+    y: 281.764219271
+    z: -29.742889895
+  }
+  xyzs {
+    x: 316.944434185
+    y: 103.783079134
+    z: 30.978850828
+  }
+  xyzs {
+    x: -314.821511249
+    y: 105.406614291
+    z: -30.854797854
+  }
+  xyzs {
+    x: 320.223975201
+    y: 91.015073763
+    z: -30.965057864
+  }
+  xyzs {
+    x: -284.052575092
+    y: 171.005308138
+    z: -29.899139895
+  }
+  radius {
+    lower: 43.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup170_16copies"
+}
+obstacles {
+  xyzs {
+    x: 18.926672955
+    y: -256.495607389
+    z: 60.723540769
+  }
+  xyzs {
+    x: -143.606774311
+    y: -178.930391325
+    z: 57.726775632
+  }
+  xyzs {
+    x: -230.462639789
+    y: 9.768369662
+    z: -57.058319583
+  }
+  xyzs {
+    x: 140.605689068
+    y: -186.768312467
+    z: -56.20578052
+  }
+  xyzs {
+    x: -31.282372455
+    y: 255.403806673
+    z: 57.006377683
+  }
+  xyzs {
+    x: -230.306023578
+    y: -6.530305875
+    z: 56.411956296
+  }
+  xyzs {
+    x: 178.889380474
+    y: -162.58304025
+    z: -56.572601809
+  }
+  xyzs {
+    x: -9.420006733
+    y: -229.159547819
+    z: 43.249907957
+  }
+  xyzs {
+    x: -11.55461977
+    y: -232.220674528
+    z: -56.453461184
+  }
+  xyzs {
+    x: 167.21793272
+    y: 159.711851107
+    z: -57.837128176
+  }
+  xyzs {
+    x: 179.307227154
+    y: 213.446775423
+    z: 58.065215574
+  }
+  xyzs {
+    x: 142.525183697
+    y: 179.088926302
+    z: 56.9834895
+  }
+  xyzs {
+    x: 36.059607525
+    y: 258.128843294
+    z: -58.45489551
+  }
+  xyzs {
+    x: -274.542855243
+    y: -21.156618131
+    z: 58.388335691
+  }
+  xyzs {
+    x: 184.785254498
+    y: 160.589780794
+    z: 56.7491145
+  }
+  xyzs {
+    x: -185.151360492
+    y: 167.681577669
+    z: 57.147246824
+  }
+  xyzs {
+    x: 9.368842144
+    y: 245.177549349
+    z: 56.762603269
+  }
+  xyzs {
+    x: -21.965081196
+    y: -277.673280729
+    z: -57.511627688
+  }
+  xyzs {
+    x: 167.079810162
+    y: -159.757875456
+    z: 57.297881589
+  }
+  xyzs {
+    x: -184.675408344
+    y: -191.423280729
+    z: 57.926299558
+  }
+  xyzs {
+    x: 209.011023541
+    y: -178.842073454
+    z: 57.779815183
+  }
+  xyzs {
+    x: 211.77225401
+    y: 171.529539095
+    z: -58.516357913
+  }
+  xyzs {
+    x: 180.891333599
+    y: -217.346345915
+    z: -59.186005129
+  }
+  xyzs {
+    x: -210.818078022
+    y: -168.500215543
+    z: -57.647522463
+  }
+  xyzs {
+    x: 266.30161192
+    y: 25.524106966
+    z: 57.139251218
+  }
+  xyzs {
+    x: 250.625037213
+    y: -16.611391081
+    z: -57.409668459
+  }
+  xyzs {
+    x: -3.873284321
+    y: 240.27343558
+    z: -56.48211719
+  }
+  xyzs {
+    x: -173.740075092
+    y: 212.845945345
+    z: -58.817413821
+  }
+  xyzs {
+    x: -158.482720356
+    y: 168.936582552
+    z: -57.045563235
+  }
+  xyzs {
+    x: -165.315636615
+    y: -163.636201872
+    z: -56.732544436
+  }
+  xyzs {
+    x: -274.227456073
+    y: 23.659299837
+    z: -57.872192874
+  }
+  xyzs {
+    x: 232.31735899
+    y: -4.901948942
+    z: 57.063262449
+  }
+  radius {
+    lower: 45.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup188_16copies"
+}
+obstacles {
+  xyzs {
+    x: -292.090706806
+    y: -148.997285856
+    z: 41.106048093
+  }
+  xyzs {
+    x: 318.528113385
+    y: 73.95538138
+    z: -40.182526125
+  }
+  xyzs {
+    x: -321.894951801
+    y: 51.389463412
+    z: 38.015471921
+  }
+  xyzs {
+    x: -146.711235981
+    y: 293.499814974
+    z: 41.019134031
+  }
+  xyzs {
+    x: 267.987891217
+    y: -186.537843717
+    z: -41.89895679
+  }
+  xyzs {
+    x: 194.068640728
+    y: 261.685178744
+    z: -39.830109133
+  }
+  xyzs {
+    x: 51.85440733
+    y: 322.300291048
+    z: 38.528167234
+  }
+  xyzs {
+    x: 163.683691998
+    y: -283.878572477
+    z: 43.758574949
+  }
+  xyzs {
+    x: -104.493828754
+    y: -311.861055387
+    z: 39.723968015
+  }
+  xyzs {
+    x: -292.797509174
+    y: 146.576719271
+    z: -46.779205813
+  }
+  xyzs {
+    x: -259.080986957
+    y: 197.474424349
+    z: -47.42755176
+  }
+  xyzs {
+    x: 149.51090147
+    y: 291.630979525
+    z: -41.258148684
+  }
+  xyzs {
+    x: 113.73709776
+    y: -307.905031217
+    z: -9.664185061
+  }
+  xyzs {
+    x: -311.357262592
+    y: -101.360780729
+    z: -40.641327395
+  }
+  xyzs {
+    x: -310.816689472
+    y: 102.681577669
+    z: 40.998015867
+  }
+  xyzs {
+    x: -191.224572162
+    y: 262.841184603
+    z: 37.722259031
+  }
+  xyzs {
+    x: 263.752051373
+    y: 191.731504427
+    z: 37.675384031
+  }
+  xyzs {
+    x: -52.984490375
+    y: -322.512834562
+    z: 39.601775632
+  }
+  xyzs {
+    x: -150.050560932
+    y: -291.391023649
+    z: -42.308411135
+  }
+  xyzs {
+    x: -100.396813373
+    y: 311.521177279
+    z: -40.925934329
+  }
+  xyzs {
+    x: -322.859276752
+    y: -49.091249479
+    z: -39.22708179
+  }
+  xyzs {
+    x: 44.565161724
+    y: -323.609331144
+    z: -35.862793459
+  }
+  xyzs {
+    x: 206.526038189
+    y: -253.740114225
+    z: 30.134917722
+  }
+  xyzs {
+    x: -48.205376606
+    y: 323.169858919
+    z: -39.470184817
+  }
+  xyzs {
+    x: 297.040320416
+    y: -141.909761442
+    z: -30.400818362
+  }
+  xyzs {
+    x: -274.916253071
+    y: 173.474363314
+    z: -20.251007571
+  }
+  xyzs {
+    x: 91.174170513
+    y: -317.6781788
+    z: -52.613586916
+  }
+  xyzs {
+    x: 318.222937603
+    y: -76.065095915
+    z: 40.419829832
+  }
+  xyzs {
+    x: -262.009514789
+    y: -193.601045622
+    z: 38.121673093
+  }
+  xyzs {
+    x: -193.217522602
+    y: -262.554430021
+    z: -36.973938479
+  }
+  xyzs {
+    x: 294.342139263
+    y: 147.16229056
+    z: 41.024077878
+  }
+  xyzs {
+    x: 103.164343853
+    y: 311.321836459
+    z: 40.200103269
+  }
+  radius {
+    lower: 45.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup192_16copies"
+}
+obstacles {
+  xyzs {
+    x: -76.067193012
+    y: 349.151182162
+    z: 72.022429929
+  }
+  xyzs {
+    x: 202.526831646
+    y: -297.990846647
+    z: -71.022461428
+  }
+  xyzs {
+    x: -193.740075092
+    y: -300.923280729
+    z: 73.163360105
+  }
+  xyzs {
+    x: -300.457024555
+    y: 193.082456576
+    z: 72.719390378
+  }
+  xyzs {
+    x: -294.865075092
+    y: -204.548280729
+    z: -71.336639895
+  }
+  xyzs {
+    x: -349.052575092
+    y: 79.472532259
+    z: -71.461639895
+  }
+  xyzs {
+    x: -197.082451801
+    y: 298.598447787
+    z: -71.189911379
+  }
+  xyzs {
+    x: -75.944024067
+    y: -350.686433805
+    z: -71.001099124
+  }
+  xyzs {
+    x: 77.799902935
+    y: -350.474824918
+    z: 72.107940183
+  }
+  xyzs {
+    x: 301.504492779
+    y: -196.075441374
+    z: 72.397063718
+  }
+  xyzs {
+    x: 350.86221983
+    y: 72.985837923
+    z: 71.833831296
+  }
+  xyzs {
+    x: 191.884924908
+    y: 302.190366732
+    z: 72.174712644
+  }
+  xyzs {
+    x: -347.600365619
+    y: -82.089937223
+    z: 71.847197996
+  }
+  xyzs {
+    x: 349.968237896
+    y: -83.534395231
+    z: -72.544983401
+  }
+  xyzs {
+    x: 306.266516705
+    y: 188.260923373
+    z: -72.580048098
+  }
+  xyzs {
+    x: 83.746008892
+    y: 348.910032259
+    z: -72.544983401
+  }
+  radius {
+    lower: 48.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup53_16copies_chimera"
+}
+obstacles {
+  xyzs {
+    x: 100.978430767
+    y: 349.462217318
+    z: 83.719634519
+  }
+  xyzs {
+    x: -108.70330141
+    y: 346.488462435
+    z: -81.535156741
+  }
+  xyzs {
+    x: -325.491829853
+    y: -161.972566618
+    z: 84.154571043
+  }
+  xyzs {
+    x: -347.051644306
+    y: -106.02029611
+    z: -81.181793704
+  }
+  xyzs {
+    x: 167.290076275
+    y: 322.576719271
+    z: -82.177155032
+  }
+  xyzs {
+    x: -170.079369526
+    y: -322.702196134
+    z: -80.109589114
+  }
+  xyzs {
+    x: -163.554253559
+    y: 323.495664583
+    z: 81.882964597
+  }
+  xyzs {
+    x: 351.954932232
+    y: 94.816709505
+    z: -85.691650881
+  }
+  xyzs {
+    x: -321.207177143
+    y: 167.405637728
+    z: -81.264282717
+  }
+  xyzs {
+    x: 347.121436138
+    y: -110.896242155
+    z: 82.355926023
+  }
+  xyzs {
+    x: 163.0654669
+    y: -325.909395231
+    z: 83.677276121
+  }
+  xyzs {
+    x: -347.925683002
+    y: 101.622190462
+    z: 84.106536375
+  }
+  xyzs {
+    x: 327.30161192
+    y: 159.507261263
+    z: 82.913360105
+  }
+  xyzs {
+    x: -113.846550922
+    y: -345.126985563
+    z: 83.158721433
+  }
+  xyzs {
+    x: 108.944800396
+    y: -348.028917326
+    z: -81.056702151
+  }
+  xyzs {
+    x: 323.06912901
+    y: -167.725923551
+    z: -80.869537844
+  }
+  radius {
+    lower: 48.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup59_16copies"
+}
+obstacles {
+  xyzs {
+    x: 127.446509381
+    y: -237.089937223
+    z: 134.860808835
+  }
+  xyzs {
+    x: -77.917717914
+    y: -256.01538278
+    z: 134.525176511
+  }
+  xyzs {
+    x: 239.820960064
+    y: -137.516298307
+    z: 132.927886472
+  }
+  xyzs {
+    x: 263.60239317
+    y: 77.503538119
+    z: 133.812774167
+  }
+  xyzs {
+    x: 80.817420025
+    y: -262.503572477
+    z: 133.985442625
+  }
+  xyzs {
+    x: 131.721900006
+    y: 237.794126498
+    z: 133.049224363
+  }
+  xyzs {
+    x: -128.095238666
+    y: -241.137575163
+    z: 133.835967527
+  }
+  xyzs {
+    x: -236.019738178
+    y: -125.207460417
+    z: 134.716399656
+  }
+  xyzs {
+    x: 238.607886334
+    y: 123.901060091
+    z: 134.518096433
+  }
+  xyzs {
+    x: 248.2764044
+    y: -100.234590543
+    z: 135.826079832
+  }
+  xyzs {
+    x: -256.055214863
+    y: 76.618955599
+    z: 134.506682859
+  }
+  xyzs {
+    x: -239.472985248
+    y: 126.303342806
+    z: 133.709197507
+  }
+  xyzs {
+    x: 82.137976666
+    y: 256.171812044
+    z: 134.849700437
+  }
+  xyzs {
+    x: 262.261450787
+    y: -67.471467985
+    z: 133.944976316
+  }
+  xyzs {
+    x: -102.15920351
+    y: 249.20904349
+    z: 134.420684324
+  }
+  xyzs {
+    x: -262.560570697
+    y: -80.235322965
+    z: 134.111663328
+  }
+  radius {
+    lower: 34.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup82_8copies_1"
+}
+obstacles {
+  xyzs {
+    x: -50.302575092
+    y: -262.688905729
+    z: 134.944610105
+  }
+  xyzs {
+    x: 53.042334576
+    y: 260.798948275
+    z: 133.751311765
+  }
+  xyzs {
+    x: 248.001318951
+    y: -98.018709196
+    z: 130.360869871
+  }
+  xyzs {
+    x: -259.49665163
+    y: 54.116209017
+    z: 134.130462156
+  }
+  xyzs {
+    x: -147.574028949
+    y: 221.964780794
+    z: 134.863006101
+  }
+  xyzs {
+    x: -104.603173237
+    y: 245.132261263
+    z: 130.02645825
+  }
+  xyzs {
+    x: 244.692908306
+    y: 105.011472689
+    z: 130.44052075
+  }
+  xyzs {
+    x: 105.920630474
+    y: -244.994707121
+    z: 131.359771238
+  }
+  xyzs {
+    x: 149.953101178
+    y: -222.999025358
+    z: 134.636870847
+  }
+  xyzs {
+    x: -242.089226703
+    y: -106.595705045
+    z: 131.064239011
+  }
+  xyzs {
+    x: -245.574746113
+    y: 99.899290072
+    z: 128.659331785
+  }
+  xyzs {
+    x: 223.210669537
+    y: 148.894895541
+    z: 134.636870847
+  }
+  xyzs {
+    x: 261.998572369
+    y: -52.317232145
+    z: 134.636870847
+  }
+  xyzs {
+    x: -221.660149555
+    y: -151.160982145
+    z: 134.87033032
+  }
+  xyzs {
+    x: 98.449744244
+    y: 246.724851595
+    z: 128.788360105
+  }
+  xyzs {
+    x: -95.718468647
+    y: -247.227785124
+    z: 132.231963621
+  }
+  radius {
+    lower: 34.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup82_8copies_2"
+}
+obstacles {
+  xyzs {
+    x: -317.960579853
+    y: -99.805299772
+    z: -144.98690845
+  }
+  xyzs {
+    x: -147.976189594
+    y: 299.854490267
+    z: 140.066131101
+  }
+  xyzs {
+    x: -280.927575092
+    y: 176.035032259
+    z: 148.538360105
+  }
+  xyzs {
+    x: 137.954932232
+    y: 307.13671683
+    z: -147.771637454
+  }
+  xyzs {
+    x: -118.531731586
+    y: 316.838621126
+    z: 149.90737866
+  }
+  xyzs {
+    x: -182.142846088
+    y: 291.021177279
+    z: 150.343902097
+  }
+  xyzs {
+    x: -292.656533222
+    y: 161.360654818
+    z: -148.628723635
+  }
+  xyzs {
+    x: -275.165078144
+    y: -185.023286833
+    z: -145.411652102
+  }
+  xyzs {
+    x: 270.025183697
+    y: 190.430356966
+    z: -148.382385745
+  }
+  xyzs {
+    x: 175.539710064
+    y: 284.195737826
+    z: -150.354492678
+  }
+  xyzs {
+    x: -127.00508974
+    y: 307.616697298
+    z: -148.011627688
+  }
+  xyzs {
+    x: 282.952002545
+    y: -174.93548776
+    z: 149.422515378
+  }
+  xyzs {
+    x: 327.675757428
+    y: 52.331846224
+    z: 148.869964109
+  }
+  xyzs {
+    x: 186.94638731
+    y: 274.90460013
+    z: 147.083465085
+  }
+  xyzs {
+    x: -58.865075092
+    y: 327.076719271
+    z: 146.788360105
+  }
+  xyzs {
+    x: 323.770545025
+    y: -88.982606901
+    z: -149.448914065
+  }
+  xyzs {
+    x: 315.449744244
+    y: 123.280393587
+    z: 147.843902097
+  }
+  xyzs {
+    x: -316.830834369
+    y: 101.65435599
+    z: 148.989287839
+  }
+  xyzs {
+    x: -129.730919819
+    y: -306.236284269
+    z: 148.202971921
+  }
+  xyzs {
+    x: 294.227881451
+    y: -160.347902311
+    z: -148.628723635
+  }
+  xyzs {
+    x: 328.134924908
+    y: 77.805906283
+    z: -150.524139895
+  }
+  xyzs {
+    x: 58.30161192
+    y: -326.589952482
+    z: 147.788360105
+  }
+  xyzs {
+    x: 78.611121197
+    y: 323.981504427
+    z: -149.497345461
+  }
+  xyzs {
+    x: -295.49715517
+    y: -155.281770719
+    z: 149.45815991
+  }
+  xyzs {
+    x: -168.391930561
+    y: -288.913209928
+    z: -147.560638918
+  }
+  xyzs {
+    x: -123.73442934
+    y: -314.342195524
+    z: -148.995422854
+  }
+  xyzs {
+    x: 125.009924908
+    y: -314.709001554
+    z: 147.824065671
+  }
+  xyzs {
+    x: 289.970618267
+    y: 164.436887728
+    z: 149.473662839
+  }
+  xyzs {
+    x: 102.92661192
+    y: -319.694108976
+    z: -145.107483401
+  }
+  xyzs {
+    x: 302.509924908
+    y: 144.889219271
+    z: -150.211639895
+  }
+  xyzs {
+    x: 135.859656353
+    y: -303.850252165
+    z: -149.031860842
+  }
+  xyzs {
+    x: 128.457495709
+    y: 307.399290072
+    z: 147.530303464
+  }
+  xyzs {
+    x: 85.634924908
+    y: 324.484983431
+    z: 147.724151121
+  }
+  xyzs {
+    x: 311.998572369
+    y: 111.142393099
+    z: -145.817688479
+  }
+  xyzs {
+    x: 71.39762022
+    y: -328.474123014
+    z: -150.974365725
+  }
+  xyzs {
+    x: 191.424414654
+    y: -271.739076627
+    z: -145.474792971
+  }
+  xyzs {
+    x: -328.2936487
+    y: -70.780427946
+    z: -151.640198245
+  }
+  xyzs {
+    x: 166.138525982
+    y: -289.452058805
+    z: 149.536590085
+  }
+  xyzs {
+    x: -158.740075092
+    y: 279.785032259
+    z: 158.121673093
+  }
+  xyzs {
+    x: -191.031731586
+    y: -272.089952482
+    z: 150.082488523
+  }
+  xyzs {
+    x: 319.15341856
+    y: -103.201051725
+    z: 148.955047117
+  }
+  xyzs {
+    x: -322.908761005
+    y: -78.821352018
+    z: 148.186431394
+  }
+  xyzs {
+    x: -184.014183979
+    y: 274.75213431
+    z: -149.422180666
+  }
+  xyzs {
+    x: -87.134301166
+    y: -323.654054655
+    z: 150.480681882
+  }
+  xyzs {
+    x: -321.005074482
+    y: 91.296689974
+    z: -149.531647219
+  }
+  xyzs {
+    x: -62.365075092
+    y: -327.968736662
+    z: -148.30255176
+  }
+  xyzs {
+    x: -305.37517641
+    y: -134.009126676
+    z: -148.847992434
+  }
+  xyzs {
+    x: -81.660149555
+    y: 324.248838412
+    z: -149.473938479
+  }
+  radius {
+    lower: 30.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup84_16copies"
+}
+obstacles {
+  xyzs {
+    x: 241.019568463
+    y: 245.016294466
+    z: 171.381743894
+  }
+  xyzs {
+    x: -21.776848774
+    y: -396.011514677
+    z: -152.623413577
+  }
+  xyzs {
+    x: 10.009924908
+    y: 350.951719271
+    z: 168.413360105
+  }
+  xyzs {
+    x: 271.259924908
+    y: 267.701719271
+    z: -162.399139895
+  }
+  xyzs {
+    x: -360.274163227
+    y: -19.059633268
+    z: -166.575287356
+  }
+  xyzs {
+    x: -384.518921833
+    y: 29.269041048
+    z: -159.057800784
+  }
+  xyzs {
+    x: -263.126137714
+    y: 240.063474642
+    z: -166.539062991
+  }
+  xyzs {
+    x: 251.461035748
+    y: 291.53326224
+    z: 158.005767332
+  }
+  xyzs {
+    x: 273.613623638
+    y: -232.444551481
+    z: 170.426665769
+  }
+  xyzs {
+    x: -37.240075092
+    y: -362.798280729
+    z: -169.461639895
+  }
+  xyzs {
+    x: -10.8095331
+    y: 348.947080599
+    z: -170.174591555
+  }
+  xyzs {
+    x: -257.137352924
+    y: 295.467832552
+    z: -155.112640872
+  }
+  xyzs {
+    x: -237.071831684
+    y: 258.48650931
+    z: 168.773345457
+  }
+  xyzs {
+    x: 303.349219342
+    y: 248.148130404
+    z: -153.925934329
+  }
+  xyzs {
+    x: -338.617943744
+    y: 11.358335482
+    z: -172.223145022
+  }
+  xyzs {
+    x: -228.365075092
+    y: 267.465635287
+    z: -171.544983401
+  }
+  xyzs {
+    x: 233.946631451
+    y: 260.810483919
+    z: -169.237610354
+  }
+  xyzs {
+    x: -294.119179706
+    y: -252.554430021
+    z: -157.342773928
+  }
+  xyzs {
+    x: -21.230736713
+    y: 384.352842318
+    z: 158.295806394
+  }
+  xyzs {
+    x: 242.868994732
+    y: -306.699876798
+    z: -153.935059084
+  }
+  xyzs {
+    x: 341.445715924
+    y: 9.036191927
+    z: 170.193755613
+  }
+  xyzs {
+    x: -242.698418598
+    y: -269.798280729
+    z: -165.628296389
+  }
+  xyzs {
+    x: 379.88779356
+    y: 31.473264681
+    z: 161.799834714
+  }
+  xyzs {
+    x: 349.634924908
+    y: -22.160127653
+    z: -171.001099124
+  }
+  xyzs {
+    x: 227.213843365
+    y: -257.879426969
+    z: -168.369537844
+  }
+  xyzs {
+    x: 19.781287213
+    y: -346.276933683
+    z: 171.617644773
+  }
+  xyzs {
+    x: 352.509924908
+    y: 19.368406283
+    z: -169.482483401
+  }
+  xyzs {
+    x: 388.749671002
+    y: 1.625913607
+    z: 155.935882078
+  }
+  xyzs {
+    x: 289.140051861
+    y: -265.217088712
+    z: 154.582183347
+  }
+  xyzs {
+    x: 242.746008892
+    y: -279.645509733
+    z: -175.211639895
+  }
+  xyzs {
+    x: 390.277808209
+    y: -27.208986295
+    z: -157.086639895
+  }
+  xyzs {
+    x: 274.370581646
+    y: 246.415769564
+    z: 164.098723875
+  }
+  xyzs {
+    x: 265.31912901
+    y: -237.739076627
+    z: -167.737946047
+  }
+  xyzs {
+    x: -260.603600483
+    y: -288.450807584
+    z: 156.072783933
+  }
+  xyzs {
+    x: -379.491654377
+    y: -24.094179167
+    z: 160.611175046
+  }
+  xyzs {
+    x: 24.572974224
+    y: -388.60912515
+    z: 157.708709226
+  }
+  xyzs {
+    x: 8.429053326
+    y: -351.746812833
+    z: -168.446930422
+  }
+  xyzs {
+    x: 270.30161192
+    y: -284.423280729
+    z: -154.044983401
+  }
+  xyzs {
+    x: 28.611121197
+    y: 376.243406283
+    z: -162.294983401
+  }
+  xyzs {
+    x: -348.548089008
+    y: 13.26952933
+    z: 168.971343503
+  }
+  xyzs {
+    x: 266.622595806
+    y: 227.292783724
+    z: -171.631378665
+  }
+  xyzs {
+    x: 234.986792584
+    y: -263.47883798
+    z: 168.492034421
+  }
+  xyzs {
+    x: -231.682152729
+    y: -262.618410124
+    z: 171.495696531
+  }
+  xyzs {
+    x: -283.619729023
+    y: 250.166807162
+    z: 160.564727293
+  }
+  xyzs {
+    x: -21.245812397
+    y: -357.441621793
+    z: 166.347991453
+  }
+  xyzs {
+    x: -255.876702289
+    y: -232.051179899
+    z: -170.909302249
+  }
+  xyzs {
+    x: -267.191155414
+    y: -234.445009245
+    z: 167.723113523
+  }
+  xyzs {
+    x: 355.36826231
+    y: -27.023286833
+    z: 169.455047117
+  }
+  radius {
+    lower: 30.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Nup85_16copies"
+}
+obstacles {
+  xyzs {
+    x: 194.80161192
+    y: 364.993406283
+    z: -34.794983401
+  }
+  xyzs {
+    x: -204.781731586
+    y: 356.660032259
+    z: 38.538360105
+  }
+  xyzs {
+    x: -340.809517841
+    y: 226.132261263
+    z: -31.878296389
+  }
+  xyzs {
+    x: -339.052575092
+    y: -224.173280729
+    z: 30.725860105
+  }
+  xyzs {
+    x: -380.365075092
+    y: -152.534395231
+    z: -32.544983401
+  }
+  xyzs {
+    x: -374.037209491
+    y: -168.210176481
+    z: 34.296538816
+  }
+  xyzs {
+    x: -222.672753315
+    y: -342.961748136
+    z: -30.442413821
+  }
+  xyzs {
+    x: -398.740075092
+    y: 91.035032259
+    z: 31.038360105
+  }
+  xyzs {
+    x: 400.634924908
+    y: -92.423280729
+    z: 30.988372312
+  }
+  xyzs {
+    x: 81.592383404
+    y: -402.87008859
+    z: -31.594604983
+  }
+  xyzs {
+    x: 145.396826763
+    y: 383.267209994
+    z: 33.359771238
+  }
+  xyzs {
+    x: 353.195899029
+    y: -207.130586637
+    z: -29.357971682
+  }
+  xyzs {
+    x: 370.144751568
+    y: -182.678194059
+    z: -31.878296389
+  }
+  xyzs {
+    x: 401.884924908
+    y: 83.862424837
+    z: -31.461639895
+  }
+  xyzs {
+    x: 145.834937115
+    y: -385.023279203
+    z: -32.611633791
+  }
+  xyzs {
+    x: -185.615075092
+    y: -366.985780729
+    z: -31.461639895
+  }
+  xyzs {
+    x: -222.243859272
+    y: 337.606992709
+    z: 29.333831296
+  }
+  xyzs {
+    x: -180.816674213
+    y: 374.576719271
+    z: 37.691558347
+  }
+  xyzs {
+    x: 345.823584576
+    y: 217.972959505
+    z: 30.071380125
+  }
+  xyzs {
+    x: 393.705115338
+    y: 118.611814486
+    z: -32.580048098
+  }
+  xyzs {
+    x: 382.822424908
+    y: -150.110780729
+    z: -30.211639895
+  }
+  xyzs {
+    x: -358.854866962
+    y: -199.50491525
+    z: 31.523040281
+  }
+  xyzs {
+    x: -390.7936487
+    y: 127.612424837
+    z: 32.109771238
+  }
+  xyzs {
+    x: 165.843237896
+    y: 372.493406283
+    z: -32.711639895
+  }
+  xyzs {
+    x: 167.063513775
+    y: -375.780420316
+    z: 34.788360105
+  }
+  xyzs {
+    x: 392.750281353
+    y: -127.730958952
+    z: 31.134490476
+  }
+  xyzs {
+    x: 338.492041607
+    y: -232.851839079
+    z: -32.354492678
+  }
+  xyzs {
+    x: 378.425635357
+    y: -151.702363981
+    z: 35.02090405
+  }
+  xyzs {
+    x: -380.317452411
+    y: 155.291013705
+    z: -30.211639895
+  }
+  xyzs {
+    x: 384.472144146
+    y: 148.065061556
+    z: -34.746521487
+  }
+  xyzs {
+    x: -399.941994648
+    y: -82.730958952
+    z: -31.365479006
+  }
+  xyzs {
+    x: -88.392846088
+    y: 399.715635287
+    z: -31.461639895
+  }
+  xyzs {
+    x: -192.883599262
+    y: 358.650815951
+    z: 20.343902097
+  }
+  xyzs {
+    x: -98.222222309
+    y: -400.280420316
+    z: 31.216948972
+  }
+  xyzs {
+    x: 367.144385357
+    y: 188.91631888
+    z: 32.524199949
+  }
+  xyzs {
+    x: 112.427405377
+    y: -395.045923246
+    z: -30.117310061
+  }
+  xyzs {
+    x: -143.615075092
+    y: -382.673280729
+    z: 33.788360105
+  }
+  xyzs {
+    x: -362.177575092
+    y: 192.701719271
+    z: -31.461639895
+  }
+  xyzs {
+    x: -132.391381244
+    y: 389.182004916
+    z: -33.501099124
+  }
+  xyzs {
+    x: -148.698418598
+    y: -383.756616605
+    z: -30.211639895
+  }
+  xyzs {
+    x: 377.777808209
+    y: 161.243406283
+    z: 34.074065671
+  }
+  xyzs {
+    x: 224.056006451
+    y: -342.528551115
+    z: 30.577849851
+  }
+  xyzs {
+    x: 97.822424908
+    y: 398.326719271
+    z: 30.413360105
+  }
+  xyzs {
+    x: 220.741309185
+    y: 343.512876498
+    z: -29.679718508
+  }
+  xyzs {
+    x: -375.428902607
+    y: 156.917173373
+    z: 33.298980222
+  }
+  xyzs {
+    x: -156.129784565
+    y: 377.223752962
+    z: 32.435393796
+  }
+  xyzs {
+    x: -394.910531025
+    y: -118.150545133
+    z: -31.029816165
+  }
+  xyzs {
+    x: 197.173377056
+    y: -361.384813322
+    z: 30.749907957
+  }
+  radius {
+    lower: 22.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Pom34_16copies"
+}
+obstacles {
+  xyzs {
+    x: 335.442603131
+    y: -76.000215543
+    z: -160.596252932
+  }
+  xyzs {
+    x: 188.314673443
+    y: -286.469026579
+    z: -159.721436038
+  }
+  xyzs {
+    x: -78.153893451
+    y: -334.429491056
+    z: -160.677490725
+  }
+  xyzs {
+    x: -178.8095331
+    y: 290.132261263
+    z: -160.933868899
+  }
+  xyzs {
+    x: 285.975073834
+    y: -191.341646208
+    z: 160.638701902
+  }
+  xyzs {
+    x: -68.158165912
+    y: 335.611204134
+    z: 159.903289304
+  }
+  xyzs {
+    x: 71.501563092
+    y: 334.376707064
+    z: -161.478302493
+  }
+  xyzs {
+    x: 288.561743756
+    y: 183.784055697
+    z: -160.638458743
+  }
+  xyzs {
+    x: 71.386572857
+    y: -336.0768757
+    z: 161.520415769
+  }
+  xyzs {
+    x: -334.559884052
+    y: 75.096189486
+    z: -160.211639895
+  }
+  xyzs {
+    x: 335.392493267
+    y: 67.788816439
+    z: 160.788360105
+  }
+  xyzs {
+    x: -288.783684711
+    y: -185.190736784
+    z: -159.397675051
+  }
+  xyzs {
+    x: 188.586707135
+    y: 286.263486849
+    z: 159.908843503
+  }
+  xyzs {
+    x: -335.653420429
+    y: -65.730043424
+    z: 160.432525144
+  }
+  xyzs {
+    x: -187.927575092
+    y: -287.173280729
+    z: 160.350860105
+  }
+  xyzs {
+    x: -284.799859028
+    y: 189.607786166
+    z: 160.502654539
+  }
+  radius {
+    lower: 31.5
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Sec13_16copies"
+}
+obstacles {
+  xyzs {
+    x: 20.059180279
+    y: 343.728208529
+    z: -126.544983401
+  }
+  xyzs {
+    x: -254.365075092
+    y: 231.689390169
+    z: 125.563018308
+  }
+  xyzs {
+    x: 344.558997174
+    y: 14.703306185
+    z: 126.370635496
+  }
+  xyzs {
+    x: 257.103430767
+    y: 230.590696322
+    z: -126.050812258
+  }
+  xyzs {
+    x: 16.499121685
+    y: -344.682542814
+    z: 126.578460203
+  }
+  xyzs {
+    x: -343.868187885
+    y: 19.235105501
+    z: -126.081207766
+  }
+  xyzs {
+    x: -255.833611469
+    y: -231.43725778
+    z: -125.491364016
+  }
+  xyzs {
+    x: -232.173302631
+    y: -254.053422941
+    z: 126.226714597
+  }
+  xyzs {
+    x: 231.648901959
+    y: -256.891817106
+    z: -126.050812258
+  }
+  xyzs {
+    x: -16.183251362
+    y: 344.252073275
+    z: 125.04812573
+  }
+  xyzs {
+    x: 344.947424908
+    y: -20.485780729
+    z: -126.711639895
+  }
+  xyzs {
+    x: 254.148413678
+    y: -233.531373991
+    z: 125.93698071
+  }
+  xyzs {
+    x: -231.457268696
+    y: 255.285947787
+    z: -125.779022707
+  }
+  xyzs {
+    x: -19.182152729
+    y: -344.996446623
+    z: -125.333588137
+  }
+  xyzs {
+    x: 232.563513775
+    y: 255.648130404
+    z: 125.074065671
+  }
+  xyzs {
+    x: -343.490075092
+    y: -15.173280729
+    z: 126.288360105
+  }
+  radius {
+    lower: 33.0
+  }
+  interactions {
+    lower: 0
+  }
+  is_static: 1
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "Seh1_16copies"
+}
+fg_anchor_inflate_factor: 1.5
+are_floaters_on_one_slab_side: 0
+time_step_wave_factor {
+  lower: 1
+  upper: 15.0
+  steps: 3
+  base: 1
+}
+is_exclude_floaters_from_slab_initially: 1
+
