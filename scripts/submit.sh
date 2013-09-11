@@ -47,7 +47,7 @@ else
     set WORK_UNIT=$i
 endif
 set i=$SGE_TASK_ID
-echo "Cfg file $cfg_file  ;  Work id $i"
+echo "Cfg file $cfg_file  ;  Work id $WORK_UNIT"
 echo "Output folder $OUTFOLDER"
 
 # Outfolder:
