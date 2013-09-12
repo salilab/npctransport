@@ -35,7 +35,7 @@ number_of_trials: 1
 maximal_number_of_frames: 1000000000
 fgs {
   number_of_beads {
-    lower: 4
+    lower: 5
   }
   number {
     lower: 16
@@ -44,7 +44,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
@@ -53,7 +53,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 0.8
   }
   interaction_range_factor {
     lower: 1
@@ -142,7 +142,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 4
+    lower: 5
   }
   number {
     lower: 16
@@ -151,7 +151,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
@@ -160,7 +160,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 0.85
   }
   interaction_range_factor {
     lower: 1
@@ -249,7 +249,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 10
+    lower: 11
   }
   number {
     lower: 16
@@ -258,7 +258,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -267,7 +267,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 1.0
   }
   interaction_range_factor {
     lower: 1
@@ -356,7 +356,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 10
+    lower: 11
   }
   number {
     lower: 16
@@ -365,7 +365,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -374,7 +374,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 1.0
   }
   interaction_range_factor {
     lower: 1
@@ -463,7 +463,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 6
+    lower: 7
   }
   number {
     lower: 8
@@ -472,7 +472,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
@@ -481,7 +481,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 0.821428571429
   }
   interaction_range_factor {
     lower: 1
@@ -530,7 +530,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 12
+    lower: 13
   }
   number {
     lower: 8
@@ -539,7 +539,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
@@ -548,7 +548,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 0.884615384615
   }
   interaction_range_factor {
     lower: 1
@@ -597,7 +597,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 7
+    lower: 8
   }
   number {
     lower: 8
@@ -606,7 +606,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -615,7 +615,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 0.875
   }
   interaction_range_factor {
     lower: 1
@@ -664,7 +664,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 10
+    lower: 11
   }
   number {
     lower: 8
@@ -673,7 +673,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 4
   }
   rest_length_factor {
     lower: 1.2
@@ -682,7 +682,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 1.0
   }
   interaction_range_factor {
     lower: 1
@@ -731,7 +731,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 4
+    lower: 5
   }
   number {
     lower: 8
@@ -740,7 +740,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -749,7 +749,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 0.733333333333
   }
   interaction_range_factor {
     lower: 1
@@ -798,7 +798,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 4
+    lower: 5
   }
   number {
     lower: 8
@@ -807,7 +807,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 3
   }
   rest_length_factor {
     lower: 1.2
@@ -816,7 +816,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 0.733333333333
   }
   interaction_range_factor {
     lower: 1
@@ -865,7 +865,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 12
+    lower: 13
   }
   number {
     lower: 8
@@ -874,7 +874,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 2
   }
   rest_length_factor {
     lower: 1.2
@@ -935,7 +935,7 @@ fgs {
 }
 fgs {
   number_of_beads {
-    lower: 5
+    lower: 6
   }
   number {
     lower: 8
@@ -944,7 +944,7 @@ fgs {
     lower: 12.124355653
   }
   interactions {
-    lower: 1
+    lower: 2
   }
   rest_length_factor {
     lower: 1.2
@@ -953,7 +953,7 @@ fgs {
     lower: 1
   }
   interaction_k_factor {
-    lower: 1
+    lower: 0.833333333333
   }
   interaction_range_factor {
     lower: 1
@@ -2310,7 +2310,7 @@ statistics_interval_ns: 0.1
 excluded_volume_k {
   lower: 20
 }
-simulation_time_ns: 375
+simulation_time_ns: 400
 statistics_fraction {
   lower: 1.0
 }

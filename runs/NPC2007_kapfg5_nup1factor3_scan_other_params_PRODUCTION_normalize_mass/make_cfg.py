@@ -43,7 +43,7 @@ def get_basic_config():
     config.slack.lower = 10
     config.number_of_trials=1
     config.dump_interval_ns=50
-    config.simulation_time_ns=375
+    config.simulation_time_ns=400
 #    config.angular_D_factor.lower=0.3 #increased dynamic viscosity relative to
 #                                      # water?
     config.angular_D_factor.lower= 0.3
@@ -108,18 +108,22 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
         origin = mean_loc
     RES_PER_BEAD_RAW = 20
     RADIUS_RAW = 7.0
+    ANCHOR_BEADS=1
     res_per_bead = RES_PER_BEAD_RAW * coarse_factor
     radius = RADIUS_RAW * math.sqrt(coarse_factor)
-    nbeads = int( math.ceil( float(nres+0.0) / res_per_bead) )
-    nsites = int( math.ceil( nbeads / (nfgs + 0.0) ) )
+    nbeads = int( math.ceil( float(nres) / res_per_bead) ) + ANCHOR_BEADS
+    nfgs_per_bead_float =  nfgs / float(nbeads)
+    nfgs_per_bead_int = int(math.ceil(nfgs_per_bead_float))
+    interaction_k_factor = nfgs_per_bead_float / nfgs_per_bead_int # compensate for rounding
     coarse_nbeads = 1 + int(math.ceil(nbeads / coarse_factor)) # +1 for anchor
     fgs= IMP.npctransport.add_fg_type(config,
                                       type_name= type_name,
                                       number_of_beads= nbeads,
                                       number=k,
                                       radius=radius,
-                                      interactions=nsites,
-                                      rest_length_factor = rest_length_factor)
+                                      interactions=nfgs_per_bead_int,
+                                      rest_length_factor = rest_length_factor,
+                                      interaction_k_factor = interaction_k_factor)
     add_interactions_for_fg(type_name, k_fgkap)
     for center in centers:
         pos=fgs.anchor_coordinates.add()
