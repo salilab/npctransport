@@ -14,7 +14,7 @@ if(len(sys.argv) > 2):
     kaps_R = float(sys.argv[2])
 print "kaps_R = %.2f" % (kaps_R)
 obstacle_inflate_factor = 1.5
-fg_coarse_factor=3.0 # 2
+fg_coarse_factor=3 # 2
 k_fgfg=2.5
 k_fgkap=3.0
 rest_length_factor = 1.2 # 1
