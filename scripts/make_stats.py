@@ -87,10 +87,12 @@ def get_interaction_k(ints):
     raise ValueError("no fg-kap or fg-fg interactions found")
 
 def get_k_factor(l, type):
+    """ return -1 if type not found """
     for x in l:
         if(x.type==type):
             return x.interaction_k_factor.value
-    raise ValueError("type", type, "not found in list", l)
+    return -1
+#    raise ValueError("type", type, "not found in list", l)
 
 
 def round_way_up(val, bin_size = 1000):
@@ -180,8 +182,11 @@ def augment_results(pb_msg, results = {}):
     A = pb_msg.assignment
     S = pb_msg.statistics
     fg_nbeads = A.fgs[0].number_of_beads.value
-    kap_R = A.floaters[0].radius.value
-    crap_R = A.floaters[1].radius.value
+    for f in A.floaters:
+        if is_kap(f.type):
+            kap_R = f.radius.value
+        if is_crap(f.type):
+            crap_R = f.radius.value
     fgkap_k, fgfg_k = get_interaction_k( A.interactions )
     nonspecific_k = A.nonspecific_k.value
     for f in A.floaters:
@@ -208,28 +213,30 @@ def augment_results(pb_msg, results = {}):
                     }
     print work_unit,
     results[key]["n"] = results[key]["n"] + 1
-    for a in S.floaters:
-        if is_kap(a.type):
-            print "KAP ",
-            for t in a.transport_time_points_ns:
-                results[key]["kap_times"].append(t)
-                sys.stdout.write("%.1f," % t)
-            sys.stdout.write(" ");
-        if is_crap(a.type):
-            print "INERT ",
-            for t in a.transport_time_points_ns:
-                if(re.search("small", a.type)):
-                    results[key]["small_crap_times"].append(t)
-                    sys.stdout.write("%.1f*," % t)
-                else:
-                    results[key]["crap_times"].append(t)
+    if(A.slab_is_on.value):
+        for a in S.floaters:
+            if is_kap(a.type):
+                print "KAP ",
+                for t in a.transport_time_points_ns:
+                    results[key]["kap_times"].append(t)
                     sys.stdout.write("%.1f," % t)
-            sys.stdout.write(" ");
+                sys.stdout.write(" ");
+            if is_crap(a.type):
+                print "INERT ",
+                for t in a.transport_time_points_ns:
+                    if(re.search("small", a.type)):
+                        results[key]["small_crap_times"].append(t)
+                        sys.stdout.write("%.1f*," % t)
+                    else:
+                        results[key]["crap_times"].append(t)
+                        sys.stdout.write("%.1f," % t)
+                sys.stdout.write(" ");
     print
     cyto_fgs = [
+        "fg",
         "Nup100_8copies_chimera",
-        #            "Nsp1_16copies_1",
-        #"Nup116_8copies_chimera"
+        "Nsp1_16copies_1",
+        "Nup116_8copies_chimera"
     ];
     kap_pct, on_per_kap_per_ns, off_per_kap_per_ns= \
         get_interaction_stats(S.interactions,
@@ -257,10 +264,12 @@ def print_results(results, file_name):
             print >>FILE, "%.2f" % (value),
         n=v["n"]
         print >>FILE, n,
-        v["kap_times"].sort()
-        v["crap_times"].sort()
-        print >>FILE, "%.2f" % (len(v["kap_times"]) * 1.0 / n),
-        print >>FILE, "%.2f" % (len(v["crap_times"]) * 1.0 / n),
+        if "kap_times" in v:
+            v["kap_times"].sort()
+            print >>FILE, "%.2f" % (len(v["kap_times"]) * 1.0 / n),
+        if "crap_times" in v:
+            v["crap_times"].sort()
+            print >>FILE, "%.2f" % (len(v["crap_times"]) * 1.0 / n),
         print >>FILE, "%.1f" % (sum(v["fg_length"]) / n),
         print >>FILE, "%.1f%%" % (100*sum(v["kap_pct_bnd"]) / n),
         print >>FILE, "%.1f%%" % (100*sum(v["crap_pct_bnd"]) / n),
@@ -270,17 +279,18 @@ def print_results(results, file_name):
         print >>FILE, "%.3f" % (v["crap_off"]),
         # print tranp histograms in bins
         bin_size = 5000
-        right_edge=round_way_up( max(v["kap_times"]+v["crap_times"] + v["small_crap_times"] +[bin_size]) , bin_size)
-        bins=range(0,right_edge+bin_size,bin_size)
-        h_kaps = numpy.histogram(v["kap_times"],bins)
-        h_craps=numpy.histogram(v["crap_times"],bins)
-        h_small_craps=numpy.histogram(v["small_crap_times"],bins)
-        FILE.write(" ")
-        print_list_to_file(FILE, h_kaps[0])
-        FILE.write("  ")
-        print_list_to_file(FILE, h_craps[0])
-        FILE.write("  ")
-        print_list_to_file(FILE, h_small_craps[0])
+        if "kap_times" in v and "crap_times" in v:
+            right_edge=round_way_up( max(v["kap_times"]+v["crap_times"] + v["small_crap_times"] +[bin_size]) , bin_size)
+            bins=range(0,right_edge+bin_size,bin_size)
+            h_kaps = numpy.histogram(v["kap_times"],bins)
+            FILE.write(" ")
+            print_list_to_file(FILE, h_kaps[0])
+            h_craps=numpy.histogram(v["crap_times"],bins)
+            FILE.write("  ")
+            print_list_to_file(FILE, h_craps[0])
+            h_small_craps=numpy.histogram(v["small_crap_times"],bins)
+            FILE.write("  ")
+            print_list_to_file(FILE, h_small_craps[0])
         FILE.write("  ")
         print >>FILE, v["representative_work_unit"],
         print >>FILE
