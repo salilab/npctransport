@@ -78,12 +78,12 @@ def get_interaction_k(ints):
     kap_k = None
     fg_k = None
     for i in ints:
-       if is_kap_fg_interaction(i) and kap_k is None:
-           kap_k= i.interaction_k.value
-       if is_fg(i.type0) and is_fg(i.type1) and fg_k is None:
-           fg_k= i.interaction_k.value
-       if(kap_k <> None and fg_k <> None):
-           return kap_k, fg_k
+        if is_kap_fg_interaction(i) and kap_k is None:
+            kap_k= i.interaction_k.value
+        if is_fg(i.type0) and is_fg(i.type1) and fg_k is None:
+            fg_k= i.interaction_k.value
+        if(kap_k <> None and fg_k <> None):
+            return kap_k, fg_k
     raise ValueError("no fg-kap or fg-fg interactions found")
 
 def get_k_factor(l, type):
@@ -168,103 +168,90 @@ def get_interaction_stats(interactions, is_a, is_b):
 #    print t, on_t, off_t
     return (pct_a / t, on_per_a / on_t, off_per_a / off_t)
 
-def augment_results(files, results = {}, max_entries = 1000):
+def augment_results(pb_msg, results = {}):
     """
-    read up to max_entries entries from avro reader and augment them
+    read the protobuf message pb_msg and augment
     into the results dictionary
 
-    returns the number of entries actually read
+    returns true if message processed succesfully
     """
     global KEY_CAPTIONS
-    o = Output()
-    n_entries_read = 0
-    for file_name in files:
-        print file_name
-        #  print a.is_valid()
-        try:
-            FILE=open(file_name,"rb")
-            o.ParseFromString(FILE.read())
-        except KeyboardInterrupt: exit(-1)
-        except:
-            print >> sys.stderr, 'Unexpected error: file %s' % file_name, sys.exc_info()
-            continue
-        A = o.assignment
-        S = o.statistics
-        try:
-            fg_nbeads = A.fgs[0].number_of_beads.value
-            kap_R = A.floaters[0].radius.value
-            crap_R = A.floaters[1].radius.value
-            fgkap_k, fgfg_k = get_interaction_k( A.interactions )
-            nonspecific_k = A.nonspecific_k.value
-            for f in A.floaters:
-                if is_kap(f.type):
-                    kap_k_factor = f.interaction_k_factor.value
-            time_ns = round(S.bd_simulation_time_ns)
-            time_step_fs = round(A.time_step)
-            nup1_k_factor = get_k_factor( A.fgs, "Nup1_8copies" )
-        except:
-            type,msg,tb = sys.exc_info()
-            print >> sys.stderr, 'Unexpected error in file %s - %s %s' % (file_name, type, msg)
-            traceback.print_tb(tb)
-            continue
-        KEY_CAPTIONS = "kap_k_factor fgfg_k kap_R nonspecific_k time_step_fs nup1_k_factor" #time_ns
-#       KEY_CAPTIONS = "fg_nbeads kap_R crap_R fgkap_k fgfg_k nonspecific_k nup1_k_factor"
-        key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
-        if(not key in results):
-            results[key] = {"n":0,
-                            "kap_times":[],
-                            "crap_times":[],
-                            "small_crap_times":[],
-                            "fg_length":[],
-                            "kap_pct_bnd":[],
-                            "crap_pct_bnd":[],
-                            "representative_file": file_name}
-        print file_name,
-        results[key]["n"] = results[key]["n"] + 1
-        for a in S.floaters:
-            if is_kap(a.type):
-                print "KAP ",
-                for t in a.transport_time_points_ns:
-                    results[key]["kap_times"].append(t)
+    #  print a.is_valid()
+    A = pb_msg.assignment
+    S = pb_msg.statistics
+    fg_nbeads = A.fgs[0].number_of_beads.value
+    kap_R = A.floaters[0].radius.value
+    crap_R = A.floaters[1].radius.value
+    fgkap_k, fgfg_k = get_interaction_k( A.interactions )
+    nonspecific_k = A.nonspecific_k.value
+    for f in A.floaters:
+        if is_kap(f.type):
+            kap_k_factor = f.interaction_k_factor.value
+    time_ns = round(S.bd_simulation_time_ns)
+    time_step_fs = round(A.time_step)
+    time_step_wave_factor = round(A.time_step_wave_factor.value)
+    nup1_k_factor = get_k_factor( A.fgs, "Nup1_8copies" )
+    rest_length_factor = A.fgs[0].rest_length_factor.value
+    angular_D_factor = A.angular_D_factor.value
+    work_unit = A.work_unit
+    KEY_CAPTIONS = "kap_k_factor fgfg_k rest_length_factor kap_R nonspecific_k angular_D_factor time_step_fs time_step_wave_factor nup1_k_factor time_ns"
+    key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
+    if(not key in results):
+        results[key] = {"n":0,
+                        "kap_times":[],
+                        "crap_times":[],
+                        "small_crap_times":[],
+                        "fg_length":[],
+                        "kap_pct_bnd":[],
+                        "crap_pct_bnd":[],
+                        "representative_work_unit": work_unit
+                    }
+    print work_unit,
+    results[key]["n"] = results[key]["n"] + 1
+    for a in S.floaters:
+        if is_kap(a.type):
+            print "KAP ",
+            for t in a.transport_time_points_ns:
+                results[key]["kap_times"].append(t)
+                sys.stdout.write("%.1f," % t)
+            sys.stdout.write(" ");
+        if is_crap(a.type):
+            print "INERT ",
+            for t in a.transport_time_points_ns:
+                if(re.search("small", a.type)):
+                    results[key]["small_crap_times"].append(t)
+                    sys.stdout.write("%.1f*," % t)
+                else:
+                    results[key]["crap_times"].append(t)
                     sys.stdout.write("%.1f," % t)
-                sys.stdout.write(" ");
-            if is_crap(a.type):
-                print "INERT ",
-                for t in a.transport_time_points_ns:
-                    if(re.search("small", a.type)):
-                        results[key]["small_crap_times"].append(t)
-                        sys.stdout.write("%.1f*," % t)
-                    else:
-                        results[key]["crap_times"].append(t)
-                        sys.stdout.write("%.1f," % t)
-                sys.stdout.write(" ");
-        print
-        cyto_fgs = [
-            "Nup100_8copies_chimera",
-            #            "Nsp1_16copies_1",
-            #"Nup116_8copies_chimera"
-            ];
-        kap_pct, on_per_kap_per_ns, off_per_kap_per_ns= \
-            get_interaction_stats(S.interactions,
-                                  is_kap,
-                                  lambda x: x in cyto_fgs)
-        crap_pct, on_per_crap_per_ns, off_per_crap_per_ns = \
-            get_interaction_stats(S.interactions,
-                                  is_crap,
-                                  is_fg)
-        results[key]["fg_length"].append(S.fgs[0].length)
-        results[key]["kap_pct_bnd"].append(kap_pct)
-        results[key]["crap_pct_bnd"].append(crap_pct)
-        results[key]["kap_on"] = on_per_kap_per_ns
-        results[key]["kap_off"] = off_per_kap_per_ns
-        results[key]["crap_on"] = on_per_crap_per_ns
-        results[key]["crap_off"] = off_per_crap_per_ns
-#        print key, results[key]
-        n_entries_read += 1
-    return n_entries_read
+            sys.stdout.write(" ");
+    print
+    cyto_fgs = [
+        "Nup100_8copies_chimera",
+        #            "Nsp1_16copies_1",
+        #"Nup116_8copies_chimera"
+    ];
+    kap_pct, on_per_kap_per_ns, off_per_kap_per_ns= \
+        get_interaction_stats(S.interactions,
+                              is_kap,
+                              lambda x: x in cyto_fgs)
+    crap_pct, on_per_crap_per_ns, off_per_crap_per_ns = \
+        get_interaction_stats(S.interactions,
+                              is_crap,
+                              is_fg)
+    results[key]["fg_length"].append(S.fgs[0].length)
+    results[key]["kap_pct_bnd"].append(kap_pct)
+    results[key]["crap_pct_bnd"].append(crap_pct)
+    results[key]["kap_on"] = on_per_kap_per_ns
+    results[key]["kap_off"] = off_per_kap_per_ns
+    results[key]["crap_on"] = on_per_crap_per_ns
+    results[key]["crap_off"] = off_per_crap_per_ns
+    #        print key, results[key]
 
-def print_results(results, FILE=sys.stdout):
-    print >>FILE, KEY_CAPTIONS, "n transp_kaps transp_craps fg_length kap_pct_bnd crap_pct_bnd kap_on kap_off crap_on crap_off kap_transp_hist crap_transp_hist representative_file"
+
+def print_results(results, file_name):
+    FILE = open(file_name, "w")
+    print >>FILE, KEY_CAPTIONS, "n transp_kaps transp_craps fg_length kap_pct_bnd crap_pct_bnd kap_on kap_off crap_on crap_off kap_transp_hist crap_transp_hist representative_work_unit"
     for k, v in results.iteritems():
         for value in  k:
             print >>FILE, "%.2f" % (value),
@@ -295,44 +282,100 @@ def print_results(results, FILE=sys.stdout):
         FILE.write("  ")
         print_list_to_file(FILE, h_small_craps[0])
         FILE.write("  ")
-        print >>FILE, v["representative_file"],
+        print >>FILE, v["representative_work_unit"],
         print >>FILE
 
-def get_files_in(files_and_folders):
-    files=[]
-    for f in files_and_folders:
-        if(not os.path.exists(f)):
+def get_file_paths_generator(files_and_folders):
+    """
+    return a generator that iterates over:
+    1) all the files that are not folders in files_and_folders
+    2) all the inner *.pb files for every folder in files_and_folders
+    """
+    for path in files_and_folders:
+        if(not os.path.exists(path)):
             print "WARNING: input path", path, "does not exist"
             continue
-        if(os.path.isdir(f)):
-            files += glob.glob(f + "/*.pb")
+        if(os.path.isdir(path)):
+            print "DIR PATH", path
+            pb_paths = glob.glob(path + "/*.pb")
+            for pb_path in pb_paths:
+                print "PB_PATH", pb_path
+                yield pb_path
         else:
-            files.append(f)
-    return files
+            print "FILE_PATH", path
+            yield path
+
+def get_pb_messages_generator(files_and_folders):
+    """
+    return a generator that iterates over all pb output messages in:
+    1) all the non-avro and avro files in files_and_folders
+    2) all the inner *.pb for every folder in files_and_folders
+
+    The generator returns a sequence of tuples (message, tag)
+    with message the protobuf message, and the tag is the file name
+    where the message is stored, with an internal id for avro files
+    """
+    o = Output()
+    for file_path in get_file_paths_generator(files_and_folders):
+        prefix,ext=os.path.splitext(file_path)
+        if ext==".pb":
+            try:
+                FILE=open(file_path,"rb")
+                o.ParseFromString(FILE.read())
+                yield o, file_path
+            except KeyboardInterrupt: exit(-1)
+            except:
+                print >> sys.stderr, 'Unexpected error: file %s' % file_name, sys.exc_info()
+                continue
+        else: # assume avro
+            avro_reader=Avro2PBReader([file_path])
+            i=0
+            while(avro_reader.get_is_valid()):
+                #  print a.is_valid()
+                try:
+                    i=i+1
+                    s = avro_reader.read_next()
+                    if(s == ""): break; # invalid output = the end
+                    o.ParseFromString(s)
+                    yield o, file_path + "." + str(i)
+                except KeyboardInterrupt: exit(-1)
+                except:
+                    print >> sys.stderr, 'Unexpected error: file %s' % avro_reader.get_cur_file_name(), sys.exc_info()
+                    print "CONTINUING"
+                    continue
+
+
+
+
 
 
 #################################
+'''
+Read pb or avro files in list of files and folders sys.arv[2:],
+make stats on them, and write them to sys.argb[1]
+'''
 if __name__ != "__main__": exit()
 output_file = sys.argv[1]
-files=get_files_in(sys.argv[2:])
-print "Parsing %d files" % len(files)
+files_and_folders = sys.argv[2:]
+print "Parsing %d files and folders" % len(files_and_folders)
 if(os.path.exists(output_file)):
     if not query_yes_no("%s already exists - overwrite?" % output_file, None):
         exit(-1)
 results = {}
 n_total = 0
-i=0
-k=10
-while(True):
-    n_read=augment_results(files[i:i+k], results, max_entries = k)
-    n_total = n_total + n_read
-    if(n_read == 0):
-        print "NOTHING TO READ in last batch"
-    else:
-        #    print "========== n = %d =========" % n_total
-        OUTPUT = open(output_file,"w")
-        print_results(results, OUTPUT)
-        del OUTPUT
-    i=i+k
-    if i > len(files):
-        break
+k_flush=10
+for pb_message, tag in get_pb_messages_generator(files_and_folders):
+    try:
+        augment_results(pb_message, results)
+        n_total = n_total + 1
+        if(n_total % k_flush == 0):
+            print "========== n = %d =========" % n_total
+            print_results(results, output_file)
+            pass
+    except:
+        type,msg,tb = sys.exc_info()
+        print >> sys.stderr, 'Unexpected error in message tag %s - %s %s' \
+            % (tag, type, msg)
+        traceback.print_tb(tb)
+# FINAL OUTPUT
+print_results(results, output_file)
