@@ -219,7 +219,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions)
 ############### ACTIVE RANGE #############
-create_range(kaps.interaction_range_factor, lb=1, ub=5, steps = 10, base=1)
+create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 10, base=1)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics= IMP.npctransport.add_float_type(config,
