@@ -21,7 +21,7 @@ if(len(sys.argv) > 3):
 if(len(sys.argv) > 4):
     Nup1_kap_factor= float(sys.argv[4])
 if(len(sys.argv) > 5):
-    k_fg_fg= float(sys.argv[5])
+    k_fgfg= float(sys.argv[5])
 obstacle_inflate_factor = 1.5
 k_fgkap=3.0
 rest_length_factor = 1.2 # 1
