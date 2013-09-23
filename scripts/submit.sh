@@ -71,6 +71,7 @@ $IMP/setup_environment.sh python $NPCBIN/show_config.py $cfg_full > $NEWCFG_txt
 # Run:
 cd $MYTMP
 echo "Temporary run folder $MYTMP"
+sleep $i
 $IMP/setup_environment.sh $NPCBIN/fg_simulation --configuration $OUTFOLDER/$cfg_file --output $MYTMP/out$i.pb --conformations $MYTMP/movie$i.rmf --final_conformations $MYTMP/final$i.rmf --work_unit $WORK_UNIT --random_seed $seed --short_init_factor 0.2 --short_sim_factor $SIM_TIME_FACTOR
 set err=$status
 if($err) then
