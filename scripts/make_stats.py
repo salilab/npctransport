@@ -181,10 +181,12 @@ def augment_results(pb_msg, results = {}):
     #  print a.is_valid()
     A = pb_msg.assignment
     S = pb_msg.statistics
-    fg_nbeads = A.fgs[0].number_of_beads.value
+    fg0_nbeads = A.fgs[0].number_of_beads.value
+    fg0_R = A.fgs[0].radius.value
     for f in A.floaters:
         if is_kap(f.type):
             kap_R = f.radius.value
+            kap_interactions = f.interactions.value
         if is_crap(f.type):
             crap_R = f.radius.value
     fgkap_k, fgfg_k = get_interaction_k( A.interactions )
@@ -199,7 +201,9 @@ def augment_results(pb_msg, results = {}):
     rest_length_factor = A.fgs[0].rest_length_factor.value
     angular_D_factor = A.angular_D_factor.value
     work_unit = A.work_unit
-    KEY_CAPTIONS = "kap_k_factor fgfg_k rest_length_factor kap_R nonspecific_k angular_D_factor time_step_fs time_step_wave_factor nup1_k_factor time_ns"
+    KEY_CAPTIONS = "kap_k_factor fgfg_k rest_length_factor kap_R nonspecific_k " \
+                   "angular_D_factor time_step_fs time_step_wave_factor " \
+                   + "nup1_k_factor time_ns fg0_R kap_interactions"
     key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
     if(not key in results):
         results[key] = {"n":0,
@@ -373,7 +377,7 @@ if(os.path.exists(output_file)):
         exit(-1)
 results = {}
 n_total = 0
-k_flush=10
+k_flush=2000
 for pb_message, tag in get_pb_messages_generator(files_and_folders):
     try:
         augment_results(pb_message, results)
