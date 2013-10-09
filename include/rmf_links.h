@@ -25,21 +25,31 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   RMF::IntKey is_last_entry_from_top_key_;
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
+  base::map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
 
  protected:
-  virtual void do_add_link_recursive(Particle *root, Particle *o,
-                                     RMF::NodeConstHandle node) IMP_OVERRIDE;
+  virtual void do_link_particle(kernel::Model *m, kernel::ParticleIndex root,
+                                kernel::ParticleIndex cur,
+                                RMF::NodeConstHandle node) IMP_OVERRIDE;
 
-  /** load the values of a single particle from nh to o.  In addition
-      to calling parent rmf::HierarchLoadLink::do_load_node(), also
+  virtual void do_setup_particle(kernel::Model* m, kernel::ParticleIndex root,
+                                 kernel::ParticleIndex cur,
+                                 RMF::NodeConstHandle node) IMP_OVERRIDE {
+    IMP_NOT_IMPLEMENTED;
+  }
+
+  /** load the values of a hierarchy. also
       loads dynamic Transporting decorator transport directionality
       information if needed (which is used in
       ParticleTransportStatisticsOptimizerState)
   */
-  void do_load_node(RMF::NodeConstHandle nh, Particle *o);
+  virtual void do_load_hierarchy(RMF::NodeConstHandle root_node,
+                                 kernel::Model *m,
+                                 kernel::ParticleIndex pi) IMP_OVERRIDE;
 
  public:
-  HierarchyWithSitesLoadLink(RMF::FileConstHandle fh, Model *m);
+  HierarchyWithSitesLoadLink(RMF::FileConstHandle fh);
+  static const char *get_name() {return "npctransport load";}
 };
 
 class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
@@ -52,21 +62,21 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
 
+  base::map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
+
   std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const;
   // for testing without sd
   base::map<core::ParticleType, std::pair<double, algebra::Vector3Ds> > sites_;
 
  protected:
-  virtual void do_add_recursive(Particle *root, Particle *p,
-                                RMF::NodeHandle cur) IMP_OVERRIDE;
+  virtual void do_setup_node(kernel::Model *m, kernel::ParticleIndex root,
+                           kernel::ParticleIndex cur,
+                           RMF::NodeHandle cur_node) IMP_OVERRIDE;
 
-  /** save the values of a single particle from o to n.  In addition
-      to calling parent rmf::HierarchSaveLink::do_save_node(), also
-      saves dynamic Transporting decorator transport directionality
-      information if exists (which is being used in
-      ParticleTransportStatisticsOptimizerState)
+  /** save the values of a hierarchy
   */
-  virtual void do_save_node(Particle *p, RMF::NodeHandle n);
+  virtual void do_save_hierarchy(kernel::Model *m, kernel::ParticleIndex root,
+                                 RMF::NodeHandle root_node) IMP_OVERRIDE;
 
  public:
   HierarchyWithSitesSaveLink(RMF::FileHandle fh);
@@ -74,6 +84,7 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
   void add_sites(core::ParticleType t, double range, algebra::Vector3Ds sites) {
     sites_[t] = std::make_pair(range, sites);
   }
+  static const char *get_name() {return "npctransport save";}
 };
 
 // for testing
@@ -94,7 +105,6 @@ IMPNPCTRANSPORTEXPORT void add_sites(RMF::FileHandle fh, core::ParticleType t,
  */
 IMP_DECLARE_LINKERS(HierarchyWithSites,
                     hierarchy_with_sites, hierarchies_with_sites,
-                    atom::Hierarchy,atom::Hierarchies,
                     atom::Hierarchy,atom::Hierarchies,
                     (RMF::FileConstHandle fh, Model *m),
                     See IMP::rmf::link_hierarchies() for more details.
