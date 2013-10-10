@@ -7,7 +7,7 @@
 #$ -N npc_default
 #$ -l arch=linux-x64,mem_free=0.75G
 #$ -l h_rt=240:00:00
-#$ -t 1-500
+#$ -t 1-750
 
 if($#argv < 1) then
     echo "Usage: $0 <cfg_file> <sim_time_factor> [out_folder_name] [work_unit]"

@@ -7,7 +7,7 @@
 #$ -N npc_default_restart
 #$ -l arch=linux-x64,mem_free=0.75G
 #$ -l h_rt=240:00:00
-#$ -t 1-500
+#$ -t 1-750
 
 if($#argv < 1) then
     echo "Missing params running $0 $argv"
@@ -53,18 +53,25 @@ if(-d $RESTART) then
 else
     set RESTARTFILE = $RESTART
 endif
-if(! -e $RESTARTFILE) then
-    echo Restart file $RESTARTFILE does not exist
-    exit -1
-endif
-echo "Restart file $RESTARTFILE"
+set trials=0
+set max_trials=200
+while (! -e $RESTARTFILE)
+    if($trials >= $max_trials) then
+      echo QUITTING - cannot find restart file
+      exit -1
+    endif
+    echo Restart file $RESTARTFILE does not exist, waiting for $trials seconds
+    sleep $trials
+    @ trials++
+end
+echo "Restart file found c$RESTARTFILE"
 echo "Output folder $OUTFOLDER"
 
 if(! -e $OUT) mkdir $OUT
 cd $OUT
 if(! -e $OUTFOLDER) mkdir ${OUTFOLDER}
-if(-e $OUTFOLDER/final$i.rmf) then
-    echo Aborting: $OUTFOLDER/final$i.rmf exists
+if(-e $OUTFOLDER/out$i.rmf) then
+    echo Aborting: $OUTFOLDER/out$i.rmf exists
     exit -1
 endif
 if(! -e $OUTFOLDER/TIMESTAMP) then
@@ -73,6 +80,7 @@ endif
 # Run:
 cd $MYTMP
 echo "Temporary run folder $MYTMP"
+sleep $i
 $IMP/setup_environment.sh $NPCBIN/fg_simulation --output $MYTMP/out$i.pb --conformations $MYTMP/movie$i.rmf --final_conformations $MYTMP/final$i.rmf --work_unit $i --random_seed $seed --restart $RESTARTFILE --short_sim_factor $SIM_TIME_FACTOR
 set err=$status
 if($err) then
