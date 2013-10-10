@@ -105,7 +105,7 @@ IMPNPCTRANSPORTEXPORT void add_sites(RMF::FileHandle fh, core::ParticleType t,
  */
 IMP_DECLARE_LINKERS(HierarchyWithSites,
                     hierarchy_with_sites, hierarchies_with_sites,
-                    atom::Hierarchy,atom::Hierarchies,
+                    atom::Hierarchy, atom::Hierarchies,
                     (RMF::FileConstHandle fh, Model *m),
                     See IMP::rmf::link_hierarchies() for more details.
                     The only difference is the addition of particle sites
