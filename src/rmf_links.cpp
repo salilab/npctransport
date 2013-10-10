@@ -13,6 +13,7 @@
 #include <IMP/base/check_macros.h>
 #include <IMP/base/exception.h>
 #include <IMP/base/log.h>
+#include <boost/foreach.hpp>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
@@ -26,7 +27,7 @@ HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
 void HierarchyWithSitesLoadLink::do_load_hierarchy(
     RMF::NodeConstHandle root_node, kernel::Model *m,
     kernel::ParticleIndex root) {
-  BOOST_FOREACH(ParticleIndex pi, particles_.find(root)->second) {
+  BOOST_FOREACH(kernel::ParticleIndex pi, particles_.find(root)->second) {
     // load particle transport directionality if needed
     RMF::NodeConstHandle nh = rmf::get_node_from_association(
         root_node.get_file(), m->get_particle(pi));
