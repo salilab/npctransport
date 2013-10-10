@@ -27,6 +27,17 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 ParticlesTemp get_optimizable_particles
 (ParticlesTemp const& particles);
 
+/**
+   Converts protobuf configuration file config_txt (which is in pretty
+   protobuf textual output format) to binary protobuf format
+   (in file config_pb)
+
+   @param config_txt the input textual protobuf config file
+   @param config_pb the output binary protobuf file
+*/
+void configuration_txt2pb
+(std::string config_txt, std::string config_pb);
+
 
 #ifndef SWIG
 

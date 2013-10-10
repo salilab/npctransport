@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
      */
 
      // assign and run::
+     IMP::npctransport::configuration_txt2pb(config_txt, config_pb);
      IMP::npctransport::assign_ranges(config_pb, output, 100, false,
                                       IMP::base::get_random_seed());
 

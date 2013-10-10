@@ -203,7 +203,7 @@ def augment_results(pb_msg, results = {}):
     work_unit = A.work_unit
     KEY_CAPTIONS = "kap_k_factor fgfg_k rest_length_factor kap_R nonspecific_k " \
                    "angular_D_factor time_step_fs time_step_wave_factor " \
-                   + "nup1_k_factor time_ns fg0_R kap_interactions"
+                   + "nup1_k_factor fg0_R kap_interactions" # time_ns
     key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
     if(not key in results):
         results[key] = {"n":0,
@@ -262,7 +262,7 @@ def augment_results(pb_msg, results = {}):
 
 def print_results(results, file_name):
     FILE = open(file_name, "w")
-    print >>FILE, KEY_CAPTIONS, "n transp_kaps transp_craps fg_length kap_pct_bnd crap_pct_bnd kap_on kap_off crap_on crap_off kap_transp_hist crap_transp_hist representative_work_unit"
+    print >>FILE, KEY_CAPTIONS, "n transp_kaps transp_craps fg_length kap_pct_bnd crap_pct_bnd kap_on kap_off crap_on crap_off kap_transp_hist crap_transp_hist small_transp_hist representative_work_unit"
     for k, v in results.iteritems():
         for value in  k:
             print >>FILE, "%.2f" % (value),
@@ -339,7 +339,7 @@ def get_pb_messages_generator(files_and_folders):
                 yield o, file_path
             except KeyboardInterrupt: exit(-1)
             except:
-                print >> sys.stderr, 'Unexpected error: file %s' % file_name, sys.exc_info()
+                print >> sys.stderr, 'Unexpected error: file %s' % file_path, sys.exc_info()
                 continue
         else: # assume avro
             avro_reader=Avro2PBReader([file_path])

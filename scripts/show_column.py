@@ -83,12 +83,16 @@ def main():
     F=open(sys.argv[1],'r')
     header=F.readline()
     ids = get_column_id(header, sys.argv[2:])
+    is_wildcard = '*' in sys.argv[2:]
     for id in ids: print header.split()[id],
     print
     for line in F:
         data = line.split()
         for id in ids:
             print (data[id]),
+        if is_wildcard:
+            excess = range(max(ids)+1, len(data))
+            for e in excess: print data[e],
         print
 
 if (__name__ == "__main__"):

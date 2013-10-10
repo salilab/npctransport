@@ -14,10 +14,13 @@
 #include <IMP/base_types.h>
 #include <cmath>
 #include <iostream>
+#include <string>
 
 IMP_GCC_PUSH_POP(diagnostic push)
 IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
 #include "npctransport.pb.h"
+#include <google/protobuf/text_format.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 IMP_GCC_PUSH_POP(diagnostic pop)
 
 #ifdef IMP_NPC_GOOGLE
@@ -28,6 +31,23 @@ IMP_GCC_PUSH_POP(diagnostic pop)
 using namespace IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE;
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
+
+// Converts protobuf configuration file from txt to pb format
+void configuration_txt2pb
+(std::string config_txt, std::string config_pb)
+{
+  npctransport_proto::Configuration config;
+  std::ifstream ifs_txt(config_txt.c_str());
+  IMP_ALWAYS_CHECK(ifs_txt, "File " << config_txt << " not found",
+                   IMP::base::IOException);
+  io::IstreamInputStream isis_txt(&ifs_txt);
+  google::protobuf::TextFormat::Parse(&isis_txt, &config);
+  ifs_txt.close();
+  std::ofstream ofs_pb(config_pb.c_str());
+  config.SerializeToOstream(&ofs_pb);
+  ofs_pb.close();
+}
+
 
 ParticlesTemp get_optimizable_particles
 (ParticlesTemp const& particles)
