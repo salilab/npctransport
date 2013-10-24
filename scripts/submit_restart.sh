@@ -54,10 +54,10 @@ else
     set RESTARTFILE = $RESTART
 endif
 set trials=0
-set max_trials=200
-while (! -e $RESTARTFILE)
+set max_trials=300
+while (! -e $RESTARTFILE && -e $RESTART/tmp$i.pb)
     if($trials >= $max_trials) then
-      echo QUITTING - cannot find restart file
+      echo QUITTING - cannot find restart file after $trials trials
       exit -1
     endif
     echo Restart file $RESTARTFILE does not exist, waiting for $trials seconds
@@ -70,8 +70,12 @@ echo "Output folder $OUTFOLDER"
 if(! -e $OUT) mkdir $OUT
 cd $OUT
 if(! -e $OUTFOLDER) mkdir ${OUTFOLDER}
-if(-e $OUTFOLDER/out$i.rmf) then
+if(-e $OUTFOLDER/out$i.pb) then
     echo Aborting: $OUTFOLDER/out$i.rmf exists
+    exit -1
+endif
+if(-e $OUTFOLDER/tmp$i) then
+    echo job $i is already in progress - clean $OUTFOLDER/tmp$i if you want to restart it
     exit -1
 endif
 if(! -e $OUTFOLDER/TIMESTAMP) then
@@ -80,13 +84,19 @@ endif
 # Run:
 cd $MYTMP
 echo "Temporary run folder $MYTMP"
+touch $OUTFOLDER/tmp$i
 sleep $i
 $IMP/setup_environment.sh $NPCBIN/fg_simulation --output $MYTMP/out$i.pb --conformations $MYTMP/movie$i.rmf --final_conformations $MYTMP/final$i.rmf --work_unit $i --random_seed $seed --restart $RESTARTFILE --short_sim_factor $SIM_TIME_FACTOR
 set err=$status
 if($err) then
     echo Error during run of fg_simulation - status code $err
+    # Clean and exit
+    rmdir $MYTMP
+    rm $OUTFOLDER/tmp$i
     exit $err
 endif
 echo "Moving final output files from $MYTMP to $OUTFOLDER"
 mv $MYTMP/* $OUTFOLDER
+# Cleaning
 rmdir $MYTMP
+rm $OUTFOLDER/tmp$i

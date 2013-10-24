@@ -13,7 +13,7 @@ if($#argv < 1) then
     echo "Usage: $0 <cfg_file> <sim_time_factor> [out_folder_name] [work_unit]"
     echo   "\t sim_time_factor - by how long to extend or shorten the simulation (default 1.0)"
     echo "\n\t out_folder_name - either a relative or absolute location"
-    echo "\n\t work_unit - the work_unit to send [the default is the task numeer]
+    echo "\n\t work_unit - the work_unit to send [the default is the task numeer]"
     exit -1
 endif
 echo Running \"$0 $argv\"
@@ -72,12 +72,18 @@ $IMP/setup_environment.sh python $NPCBIN/show_config.py $cfg_full > $NEWCFG_txt
 cd $MYTMP
 echo "Temporary run folder $MYTMP"
 sleep $i
+touch $OUTFOLDER/tmp$i
 $IMP/setup_environment.sh $NPCBIN/fg_simulation --configuration $OUTFOLDER/$cfg_file --output $MYTMP/out$i.pb --conformations $MYTMP/movie$i.rmf --final_conformations $MYTMP/final$i.rmf --work_unit $WORK_UNIT --random_seed $seed --short_init_factor 0.2 --short_sim_factor $SIM_TIME_FACTOR
 set err=$status
 if($err) then
     echo Error during run of fg_simulation - status code $err
+    # Clean and exit
+    rmdir $MYTMP
+    rm $OUTFOLDER/tmp$i
     exit $err
 endif
 echo "Moving final output files from $MYTMP to $OUTFOLDER"
 mv $MYTMP/* $OUTFOLDER
+# Cleaning
 rmdir $MYTMP
+rm $OUTFOLDER/tmp$i
