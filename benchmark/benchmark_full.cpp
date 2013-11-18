@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
       std::ofstream outf(output.c_str(), std::ios::binary);
       prev_output.SerializeToOstream(&outf);
     }
-    IMP::set_log_level(IMP::base::PROGRESS);
+    IMP::base::set_log_level(IMP::base::PROGRESS);
     sd = new IMP::npctransport::SimulationData(output, false);
 
     sd->get_model()->update();
