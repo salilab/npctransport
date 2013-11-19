@@ -71,7 +71,7 @@ if(! -e $OUT) mkdir $OUT
 cd $OUT
 if(! -e $OUTFOLDER) mkdir ${OUTFOLDER}
 if(-e $OUTFOLDER/out$i.pb) then
-    echo Aborting: $OUTFOLDER/out$i.rmf exists
+    echo Aborting: $OUTFOLDER/out$i.pb exists
     exit -1
 endif
 if(-e $OUTFOLDER/tmp$i) then

@@ -115,7 +115,7 @@ def print_list_to_file(FILEH, the_list, format="%d"):
         first=False
 
 
-def get_interaction_stats(interactions, is_a, is_b):
+def get_interaction_stats(interactions, is_a, is_b): #, is_sum_a=True):
     '''
     get the interaction statistics about interactions
     between types a and b, with statistics from point of view of a
@@ -123,52 +123,67 @@ def get_interaction_stats(interactions, is_a, is_b):
     interatiocns - protobuf interaction statistics message
     is_a - boolean function to test if a type is a
     is_b - boolean function to test if a type is b
+#    is_sum_a - if true, sum over all interactions that involve a, o/w avg
 
     return (pct_bnd,on_per_a_per_ns, off_per_a_per_ns)
     '''
-    pct_a=0.0
-    t=1E-10 # time
-    on_per_a=0.0
-    on_t=1E-10 # time for on
-    off_per_a=0.0
-    off_t=1E-10 # time for off
+    class istats:
+        def __init__(self):
+            self.pct_a = 0
+            self.t=1E-10 # time
+            self.on_per_a=0.0
+            self.on_t=1E-10 # time for on
+            self.off_per_a=0.0
+            self.off_t=1E-10 # time for off
+    itypes2stats={}
     for i in interactions:
         if is_a(i.type0) and is_b(i.type1):
+            key=(i.type0, i.type1)
+            if key not in itypes2stats:
+                itypes2stats[key]=istats()
+            s=itypes2stats[key]
             for op in i.order_params:
                 # PCT BND
                 d_t = op.misc_stats_period_ns
-                pct_a = pct_a \
+                s.pct_a = s.pct_a \
                     + d_t *  op.avg_fraction_bound_particles_i
-                t = t + d_t
+                s.t = s.t + d_t
                 # ON
                 d_on_t = op.on_i_stats_period_ns
-                on_per_a = on_per_a \
+                s.on_per_a = s.on_per_a \
                     + d_on_t * op.avg_on_per_unbound_i_per_ns
-                on_t = on_t + d_on_t
+                s.on_t = s.on_t + d_on_t
                 # OFF
                 d_off_t = op.off_stats_period_ns
-                off_per_a = off_per_a \
+                s.off_per_a = s.off_per_a \
                     + d_off_t * op.avg_off_per_bound_i_per_ns
-                off_t = off_t + d_off_t
+                s.off_t = s.off_t + d_off_t
         if is_a(i.type1) and is_b(i.type0):
+            key=(i.type0, i.type1)
+            if key not in itypes2stats:
+                itypes2stats[key]=istats()
+            s=itypes2stats[key]
             for op in i.order_params:
                 # PCT BND
                 d_t = op.misc_stats_period_ns
-                pct_a = pct_a + \
+                s.pct_a = s.pct_a + \
                     d_t * op.avg_fraction_bound_particles_ii
-                t = t + d_t
+                s.t = s.t + d_t
                 # ON
                 d_on_t = op.on_ii_stats_period_ns
-                on_per_a = on_per_a \
+                s.on_per_a = s.on_per_a \
                     + d_on_t * op.avg_on_per_unbound_ii_per_ns
-                on_t = on_t + d_on_t
+                s.on_t = s.on_t + d_on_t
                 # OFF
                 d_off_t = op.off_stats_period_ns
-                off_per_a = off_per_a \
+                s.off_per_a = s.off_per_a \
                     + d_off_t * op.avg_off_per_bound_ii_per_ns
-                off_t = off_t + d_off_t
+                s.off_t = s.off_t + d_off_t
 #    print t, on_t, off_t
-    return (pct_a / t, on_per_a / on_t, off_per_a / off_t)
+    pct_a_per_t = sum(s.pct_a / s.t for s in itypes2stats.itervalues())
+    on_per_a_per_t = sum(s.on_per_a / s.on_t for s in itypes2stats.itervalues())
+    off_per_a_per_t = sum(s.off_per_a / s.off_t for s in itypes2stats.itervalues())
+    return (pct_a_per_t, on_per_a_per_t, off_per_a_per_t)
 
 def augment_results(pb_msg, results = {}):
     """
@@ -203,7 +218,7 @@ def augment_results(pb_msg, results = {}):
     work_unit = A.work_unit
     KEY_CAPTIONS = "kap_k_factor fgfg_k rest_length_factor kap_R nonspecific_k " \
                    "angular_D_factor time_step_fs time_step_wave_factor " \
-                   + "nup1_k_factor fg0_R kap_interactions" # time_ns
+                   + "nup1_k_factor fg0_R kap_interactions time_ns"
     key = tuple ( [ eval(k) for k in KEY_CAPTIONS.split() ] )
     if(not key in results):
         results[key] = {"n":0,
@@ -245,7 +260,8 @@ def augment_results(pb_msg, results = {}):
     kap_pct, on_per_kap_per_ns, off_per_kap_per_ns= \
         get_interaction_stats(S.interactions,
                               is_kap,
-                              lambda x: x in cyto_fgs)
+                              is_fg)
+                          #    lambda x: x in #cyto_fgs)
     crap_pct, on_per_crap_per_ns, off_per_crap_per_ns = \
         get_interaction_stats(S.interactions,
                               is_crap,
@@ -377,7 +393,7 @@ if(os.path.exists(output_file)):
         exit(-1)
 results = {}
 n_total = 0
-k_flush=2000
+k_flush=10
 for pb_message, tag in get_pb_messages_generator(files_and_folders):
     try:
         augment_results(pb_message, results)
