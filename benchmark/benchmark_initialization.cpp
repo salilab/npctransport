@@ -23,19 +23,11 @@
 #include <numeric>
 #include <iostream>
 
-#ifdef IMP_NPC_GOOGLE
-#include <IMP/npctransport/internal/google_main.h>
-#else
 #include <IMP/npctransport/internal/boost_main.h>
-#endif
 
-#ifdef IMP_NPC_GOOGLE
-std::string config_txt =
-  "third_party/npc/npctransport/data/benchmark_initialize.txt";
-#else
 std::string config_txt =
   IMP::npctransport::get_data_path("benchmark_initialize.txt");
-#endif
+
 IMP::base::AddStringFlag add_input("input",
                                    "Input text file that is "
                                    "converted to a config file", &config_txt);

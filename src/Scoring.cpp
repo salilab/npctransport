@@ -11,14 +11,7 @@
 #include <IMP/npctransport/SitesPairScore.h>
 #include <IMP/npctransport/SlabSingletonScore.h>
 #include <IMP/npctransport/ZBiasSingletonScore.h>
-#ifdef IMP_NPC_GOOGLE
-IMP_GCC_PUSH_POP(diagnostic push)
-IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-IMP_GCC_PUSH_POP(diagnostic pop)
-#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
-#endif
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/npctransport/util.h>
 #include <IMP/base_types.h>

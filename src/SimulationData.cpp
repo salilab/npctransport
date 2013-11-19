@@ -12,14 +12,7 @@
 #include <IMP/npctransport/SlabSingletonScore.h>
 #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/protobuf.h>
-#ifdef IMP_NPC_GOOGLE
-IMP_GCC_PUSH_POP(diagnostic push)
-IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-IMP_GCC_PUSH_POP(diagnostic pop)
-#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
-#endif
 #include <IMP/npctransport/creating_particles.h>
 #include <IMP/npctransport/enums.h>
 #include <IMP/npctransport/io.h>

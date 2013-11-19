@@ -30,16 +30,8 @@
 #include <IMP/container.h>
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/base/random.h>
-#ifdef IMP_NPC_GOOGLE
-IMP_GCC_PUSH_POP(diagnostic push)
-IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-IMP_GCC_PUSH_POP(diagnostic pop)
-#include <IMP/npctransport/internal/google_main.h>
-#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/internal/boost_main.h>
-#endif
 #include <IMP/npctransport.h>
 //#include <IMP/benchmark/Profiler.h>
 

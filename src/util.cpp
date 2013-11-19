@@ -23,11 +23,7 @@ IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 IMP_GCC_PUSH_POP(diagnostic pop)
 
-#ifdef IMP_NPC_GOOGLE
-#include <IMP/npctransport/internal/google_main.h>
-#else
 #include <IMP/npctransport/internal/boost_main.h>
-#endif
 using namespace IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE;
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE

@@ -29,11 +29,7 @@
 #include <numeric>
 #include <cmath>
 #include <iostream>
-#ifdef IMP_NPC_GOOGLE  // TODO: replace with a unified include
-#include <IMP/npctransport/internal/google_main.h>
-#else
 #include <IMP/npctransport/internal/boost_main.h>
-#endif
 
 // use the example code for now to work bugs out of it
 //#include <IMP/example/creating_restraints.h>

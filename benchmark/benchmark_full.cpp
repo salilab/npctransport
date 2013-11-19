@@ -32,21 +32,10 @@
 #include <cmath>
 #include <iostream>
 #include <IMP/npctransport/protobuf.h>
-#ifdef IMP_NPC_GOOGLE  // TODO: replace with a unified include
-#include <IMP/npctransport/internal/google_main.h>
-#else
 #include <IMP/npctransport/internal/boost_main.h>
-#endif
-#ifdef IMP_NPC_GOOGLE
-IMP_GCC_PUSH_POP(diagnostic push)
-IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-IMP_GCC_PUSH_POP(diagnostic pop)
-#include <IMP/npctransport/internal/google_main.h>
-#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/internal/boost_main.h>
-#endif
+
 
 int main(int argc, char *argv[]) {
   try {

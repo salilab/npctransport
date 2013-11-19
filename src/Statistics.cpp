@@ -32,14 +32,7 @@
 #include <set>
 #include "boost/tuple/tuple.hpp"
 
-#ifdef IMP_NPC_GOOGLE
-IMP_GCC_PUSH_POP(diagnostic push)
-IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-IMP_GCC_PUSH_POP(diagnostic pop)
-#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
-#endif
 
 bool no_save_rmf_to_output = false;
 IMP::base::AddBoolFlag  no_save_rmf_to_output_adder

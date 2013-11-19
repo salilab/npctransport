@@ -40,11 +40,7 @@
 #include <IMP/base/log.h>
 #include <IMP/base/flags.h>
 //#include <IMP/example/optimizing.h>
-#ifdef IMP_NPC_GOOGLE
-#include <IMP/npctransport/internal/google_main.h>
-#else
 #include <IMP/npctransport/internal/boost_main.h>
-#endif
 #include <cmath>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE

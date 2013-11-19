@@ -9,16 +9,9 @@
 #include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/automatic_parameters.h>
-#ifdef IMP_NPC_GOOGLE
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-#pragma GCC diagnostic pop
-#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/message.h>
-#endif
 #include <IMP/SingletonContainer.h>
 #include <IMP/utility.h>
 #include <IMP/algebra/GridD.h>
@@ -31,11 +24,7 @@
 #include <iostream>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-#ifdef IMP_NPC_GOOGLE
-using namespace proto2;
-#else
 using namespace ::google::protobuf;
-#endif
 namespace {
 void show_ranges(std::string name, const Message* message) {
   const Reflection* r(message->GetReflection());
