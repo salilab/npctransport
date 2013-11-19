@@ -183,8 +183,9 @@ void SimulationData::initialize(std::string output_file, bool quick) {
     {
       std::cout << "Restarting from output file internal RMF conformation"
                 << std::endl ;
+      RMF::BufferConstHandle buffer(pb_data.rmf_conformation());
       RMF::FileConstHandle fh =
-        RMF::open_rmf_buffer_read_only(pb_data.rmf_conformation());
+        RMF::open_rmf_buffer_read_only(buffer);
       initialize_positions_from_rmf(fh, 0);
     } else if (pb_data.has_conformation())
     {
