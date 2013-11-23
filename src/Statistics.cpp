@@ -557,9 +557,11 @@ void Statistics::update
   // save RMF for future restarts
   if(!no_save_rmf_to_output){
     RMF::BufferHandle buf;
-    RMF::FileHandle fh = RMF::create_rmf_buffer(buf);
-    const_cast<SimulationData *>( get_sd() )->link_rmf_file_handle(fh, false);
-    rmf::save_frame(fh, 0);
+    {
+      RMF::FileHandle fh = RMF::create_rmf_buffer(buf);
+      const_cast<SimulationData*>(get_sd())->link_rmf_file_handle(fh, false);
+      rmf::save_frame(fh, 0);
+    }
     output.set_rmf_conformation(buf.get_string());
   }
 
