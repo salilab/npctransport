@@ -82,16 +82,16 @@ class Tests(IMP.test.TestCase):
         e3 = sd.get_bd().get_scoring_function().evaluate(False)
         print "*** After initializing positions from RMF file " + output_rmf1
         print "Energy %.2f" % e3
-        self.assertEqual(e1, e3)
-        self.assertNotEqual(e1, e2)
+        self.assertAlmostEqual(e1, e3, delta=0.00001)
+        self.assertNotAlmostEqual(e1, e2, delta=0.00001)
         coordsIII = self._get_diffusers_coords( sd )
         # make sure that all coordinates were restored and as sanity
         # check control, also that the second simulation is different than
         # the first one:
         for i in range( len( coordsI ) ):
             for j in range(3):
-                self.assertEqual(coordsI[i][j], coordsIII[i][j])
-                self.assertNotEqual(coordsI[i][j], coordsII[i][j])
+                self.assertAlmostEqual(coordsI[i][j], coordsIII[i][j], delta=0.00001)
+                self.assertNotAlmostEqual(coordsI[i][j], coordsII[i][j], delta=0.00001)
 
         # Simulate more to scramble stuff
         sd.get_bd().optimize( 1000 )
@@ -109,13 +109,13 @@ class Tests(IMP.test.TestCase):
         e5 = sd.get_bd().get_scoring_function().evaluate(False)
         print "*** After initializing positions from RMF file " + output_rmf1
         print "Energy %.2f" % e5
-        self.assertEqual(e1, e5)
-        self.assertNotEqual(e1, e4)
+        self.assertAlmostEqual(e1, e5, delta=0.00001)
+        self.assertNotAlmostEqual(e1, e4, delta=0.00001)
         coordsV = self._get_diffusers_coords( sd )
         for i in range( len( coordsI ) ):
             for j in range(3):
-                self.assertEqual(coordsI[i][j], coordsV[i][j])
-                self.assertNotEqual(coordsI[i][j], coordsIV[i][j])
+                self.assertAlmostEqual(coordsI[i][j], coordsV[i][j], delta=0.00001)
+                self.assertNotAlmostEqual(coordsI[i][j], coordsIV[i][j], delta=0.00001)
         print "almost end"
 
 if __name__ == '__main__':

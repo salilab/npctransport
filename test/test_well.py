@@ -44,7 +44,7 @@ class ConeTests(IMP.test.TestCase):
         # perhaps worth switching anyway?
         IMP.rmf.add_hierarchies(f, ds)
         IMP.rmf.add_restraints(f, [r])
-        w= IMP.rmf.SaveOptimizerState(f)
+        w= IMP.rmf.SaveOptimizerState(m, f)
         w.set_period(100) # set this to one only for debugging
         bd.add_optimizer_state(w)
         bd.optimize(1000)
