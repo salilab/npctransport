@@ -104,8 +104,9 @@ class Tests(IMP.test.TestCase):
         f=open(output_pb1, "rb")
         config= IMP.npctransport.Output()
         config.ParseFromString(f.read())
-        fl= RMF.open_rmf_buffer_read_only( config.rmf_conformation )
-        sd.initialize_positions_from_rmf( fl )
+        bch = RMF.BufferConstHandle( config.rmf_conformation )
+        fch= RMF.open_rmf_buffer_read_only( bch )
+        sd.initialize_positions_from_rmf( fch )
         e5 = sd.get_bd().get_scoring_function().evaluate(False)
         print "*** After initializing positions from RMF file " + output_rmf1
         print "Energy %.2f" % e5
