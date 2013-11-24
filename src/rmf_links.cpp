@@ -75,7 +75,7 @@ void HierarchyWithSitesLoadLink::do_link_particle(kernel::Model *m,
     RMF::NodeConstHandles children = node.get_children();
     for (unsigned int i = 0; i < children.size(); ++i) {
       if (children[i].get_type() == RMF::GEOMETRY && bf_.get_is(children[i])) {
-        RMF::BallConst b = bf_.get(children[i]);
+        RMF::decorator::BallConst b = bf_.get(children[i]);
         RMF::Vector3 cs = b.get_coordinates();
         sites.push_back(algebra::Vector3D(cs.begin(), cs.end()));
       }
@@ -125,7 +125,7 @@ void HierarchyWithSitesSaveLink::do_setup_node(kernel::Model *m,
       color[2] = 0;
       cf_.get(ch).set_rgb_color(color);
 
-      RMF::Ball b = bf_.get(ch);
+      RMF::decorator::Ball b = bf_.get(ch);
       b.set_radius(sites.first);
       algebra::Vector3D local = sites.second[i];
       b.set_coordinates(

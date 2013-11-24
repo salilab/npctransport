@@ -20,7 +20,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
     : public rmf::HierarchyLoadLink {
   base::WeakPointer<SimulationData> sd_;
-  RMF::BallConstFactory bf_;
+  RMF::decorator::BallConstFactory bf_;
   // Transporting decorator related keys:
   RMF::IntKey is_last_entry_from_top_key_;
   RMF::IntKey n_entries_bottom_key_;
@@ -55,8 +55,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
 class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
     : public rmf::HierarchySaveLink {
   base::WeakPointer<SimulationData> sd_;
-  RMF::BallFactory bf_;
-  RMF::ColoredFactory cf_;
+  RMF::decorator::BallFactory bf_;
+  RMF::decorator::ColoredFactory cf_;
   // Transporting decorator related keys:
   RMF::IntKey is_last_entry_from_top_key_;
   RMF::IntKey n_entries_bottom_key_;
