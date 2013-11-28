@@ -8,12 +8,14 @@
 #include <IMP/npctransport/main.h>
 #include <IMP/npctransport/npctransport_config.h>
 #include <IMP/npctransport/particle_types.h>
-#include <IMP/algebra.h>
-#include <IMP/core.h>
+//#include <IMP/core.h>
 #include <IMP/atom.h>
+#include <IMP/algebra/Vector2D.h>
+#include <IMP/algebra/Vector3D.h>
+#include <IMP/algebra/BoundingBoxD.h>
 #include <IMP/display.h>
 #include <IMP/rmf.h>
-#include <IMP.h>
+//#include <IMP.h>
 #include <RMF/utility.h>
 #include <IMP/container/SingletonsRestraint.h>
 #include <IMP/base/CreateLogContext.h>
@@ -23,6 +25,7 @@
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
 #include <IMP/base/Pointer.h>
+#include <IMP/base/statistics.h>
 #include <IMP/Restraint.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/core/Typed.h>
@@ -278,6 +281,7 @@ int main(int argc, char* argv[]) {
     //IMP_LOG(base::PROGRESS, initialization_restraints << std::endl);
     npctransport::do_main_loop(sd, initialization_restraints);
     //print_fgs(*sd, base::TERSE);
+    IMP::base::show_timings(std::cout);
   }
   catch (const IMP::base::Exception & e) {
     std::cerr << "Error: " << e.what() << std::endl;
