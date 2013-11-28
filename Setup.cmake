@@ -45,6 +45,6 @@ set_property(TARGET IMP.npctransport-python_proto PROPERTY FOLDER "IMP.npctransp
 
 include_directories(${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal)
 
-set(IMP_NPCTRANSPORT_CONFIG "IMP_NPCTRANSPORT_AVRO_NAMESPACE=rmf_avro:IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE=google\\:\\:protobuf")
+set(IMP_NPCTRANSPORT_CONFIG "IMP_NPCTRANSPORT_AVRO_NAMESPACE=internal_avro:IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE=google\\:\\:protobuf")
 
 set(IMP_NPCTRANSPORT_PYTHON_EXTRA_DEPENDENCIES IMP.npctransport-python_proto CACHE INTERNAL "" FORCE)

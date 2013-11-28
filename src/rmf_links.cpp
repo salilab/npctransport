@@ -19,9 +19,11 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
     : rmf::HierarchyLoadLink(fh), bf_(fh) {
   RMF::Category npc_cat = fh.get_category("npc");
-  is_last_entry_from_top_key_ = fh.get_int_key(npc_cat, "last entry from top");
-  n_entries_bottom_key_ = fh.get_int_key(npc_cat, "n entries bottom");
-  n_entries_top_key_ = fh.get_int_key(npc_cat, "n entries top");
+  is_last_entry_from_top_key_ =
+      fh.get_key<RMF::IntTraits>(npc_cat, "last entry from top");
+  n_entries_bottom_key_ =
+      fh.get_key<RMF::IntTraits>(npc_cat, "n entries bottom");
+  n_entries_top_key_ = fh.get_key<RMF::IntTraits>(npc_cat, "n entries top");
 }
 
 void HierarchyWithSitesLoadLink::do_load_hierarchy(
@@ -73,8 +75,8 @@ void HierarchyWithSitesLoadLink::do_link_particle(kernel::Model *m,
     RMF::NodeConstHandles children = node.get_children();
     for (unsigned int i = 0; i < children.size(); ++i) {
       if (children[i].get_type() == RMF::GEOMETRY && bf_.get_is(children[i])) {
-        RMF::BallConst b = bf_.get(children[i]);
-        RMF::Floats cs = b.get_coordinates();
+        RMF::decorator::BallConst b = bf_.get(children[i]);
+        RMF::Vector3 cs = b.get_coordinates();
         sites.push_back(algebra::Vector3D(cs.begin(), cs.end()));
       }
     }
@@ -85,9 +87,11 @@ void HierarchyWithSitesLoadLink::do_link_particle(kernel::Model *m,
 HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh)
     : rmf::HierarchySaveLink(fh), bf_(fh), cf_(fh) {
   RMF::Category npc_cat = fh.get_category("npc");
-  is_last_entry_from_top_key_ = fh.get_int_key(npc_cat, "last entry from top");
-  n_entries_bottom_key_ = fh.get_int_key(npc_cat, "n entries bottom");
-  n_entries_top_key_ = fh.get_int_key(npc_cat, "n entries top");
+  is_last_entry_from_top_key_ =
+    fh.get_key<RMF::IntTraits>(npc_cat, "last entry from top");
+  n_entries_bottom_key_ =
+      fh.get_key<RMF::IntTraits>(npc_cat, "n entries bottom");
+  n_entries_top_key_ = fh.get_key<RMF::IntTraits>(npc_cat, "n entries top");
 }
 
 std::pair<double, algebra::Vector3Ds> HierarchyWithSitesSaveLink::get_sites(
@@ -121,7 +125,7 @@ void HierarchyWithSitesSaveLink::do_setup_node(kernel::Model *m,
       color[2] = 0;
       cf_.get(ch).set_rgb_color(color);
 
-      RMF::Ball b = bf_.get(ch);
+      RMF::decorator::Ball b = bf_.get(ch);
       b.set_radius(sites.first);
       algebra::Vector3D local = sites.second[i];
       b.set_coordinates(

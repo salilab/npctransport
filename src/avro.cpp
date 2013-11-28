@@ -9,7 +9,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 IMP_NPCTRANSPORT_AVRO_NAMESPACE::ValidSchema get_avro_data_file_schema() {
   std::string path = get_data_path("AvroDataFileData.json");
-  std::auto_ptr<IMP_NPCTRANSPORT_AVRO_NAMESPACE::InputStream> is = IMP_NPCTRANSPORT_AVRO_NAMESPACE::fileInputStream(path.c_str());
+  boost::shared_ptr<IMP_NPCTRANSPORT_AVRO_NAMESPACE::InputStream> is =
+      IMP_NPCTRANSPORT_AVRO_NAMESPACE::fileInputStream(path.c_str());
   return IMP_NPCTRANSPORT_AVRO_NAMESPACE::compileJsonSchemaFromStream(*is);
 }
 

@@ -27,7 +27,7 @@ class Tests(IMP.test.TestCase):
         ds[1].set_coordinates(IMP.algebra.Vector3D(2*radius,0,0))
         types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
         for d in zip(types, ds):
-          IMP.core.Typed.setup_particle(d[1], d[0])
+            IMP.core.Typed.setup_particle(d[1], d[0])
         sites=([IMP.algebra.Vector3D(radius, 0,0)], [IMP.algebra.Vector3D(-radius, 0,0)])
         ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
                                             nonspec_k, soft_sphere_k, sites[0], sites[1])
@@ -38,9 +38,9 @@ class Tests(IMP.test.TestCase):
         bd.set_maximum_time_step(dt)
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue.rmf"))
         for d in zip(types, sites):
-          IMP.npctransport.add_sites(f, d[0], .5*radius, d[1])
+            IMP.npctransport.add_sites(f, d[0], .5*radius, d[1])
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
-        sos= IMP.rmf.SaveOptimizerState(f)
+        sos= IMP.rmf.SaveOptimizerState(m, f)
         bd.add_optimizer_state(sos)
         sos.set_period(1000)
         bd.optimize(1000)
@@ -65,26 +65,26 @@ class Tests(IMP.test.TestCase):
         ds[2].set_coordinates(IMP.algebra.Vector3D(0,0,2*radius))
         types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
         for d in zip(types, ds):
-          IMP.core.Typed.setup_particle(d[1], d[0])
+            IMP.core.Typed.setup_particle(d[1], d[0])
         sites=([IMP.algebra.Vector3D(radius, 0,0),
                 IMP.algebra.Vector3D(0, 0,radius)], [IMP.algebra.Vector3D(-radius, 0,0)],
                [IMP.algebra.Vector3D(0, 0,-radius)])
         rs=[]
         for p in [(0,1), (1,2), (0,2)]:
-          ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
-                                              nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
+            ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
+                                                nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
 #          ps.set_log_level(IMP.VERBOSE)
-          r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
-          rs.append(r)
+            r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
+            rs.append(r)
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_scoring_function(rs)
         bd.set_maximum_time_step(dt)
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue2.rmf"))
         for d in zip(types, sites):
-          IMP.npctransport.add_sites(f, d[0], .5*radius, d[1])
+            IMP.npctransport.add_sites(f, d[0], .5*radius, d[1])
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
-        sos= IMP.rmf.SaveOptimizerState(f)
+        sos= IMP.rmf.SaveOptimizerState(m, f)
         sos.set_period(1000)
         bd.add_optimizer_state(sos)
         bd.optimize(nsteps)
@@ -103,20 +103,20 @@ class Tests(IMP.test.TestCase):
                [IMP.algebra.Vector3D(radius, 0, 0), IMP.algebra.Vector3D(0, 0,-radius)],
                [IMP.algebra.Vector3D(-radius, 0,0), IMP.algebra.Vector3D(0, 0,-radius)])
         if f:
-          for d in zip(ds, sites):
-            IMP.npctransport.add_sites(f, IMP.core.Typed(d[0]).get_type(),
-                                       .5*radius, d[1])
+            for d in zip(ds, sites):
+                IMP.npctransport.add_sites(f, IMP.core.Typed(d[0]).get_type(),
+                                           .5*radius, d[1])
         rs=[]
         for p in [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)]:
-          ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
-                                              nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
+            ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
+                                                nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
 #          ps.set_log_level(IMP.VERBOSE)
-          r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
-          rs.append(r)
-          r.evaluate(False)
-          d=r.create_current_decomposition()
-          if d:
-            d.set_was_used(False)
+            r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
+            rs.append(r)
+            r.evaluate(False)
+            d=r.create_current_decomposition()
+            if d:
+                d.set_was_used(False)
         return rs
     def _test_three(self, site_range, site_k, nonspec_range, nonspec_k,
                   soft_sphere_k, dt):
@@ -129,7 +129,7 @@ class Tests(IMP.test.TestCase):
         ds[3].set_coordinates(IMP.algebra.Vector3D(2*radius,0,2*radius))
         types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
         for d in zip(types, ds):
-          IMP.core.Typed.setup_particle(d[1], d[0])
+            IMP.core.Typed.setup_particle(d[1], d[0])
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue3.rmf"))
         rs= self._create_restraint_three(m, ds,  site_range, site_k, nonspec_range, nonspec_k,
                                           soft_sphere_k, f)
@@ -138,7 +138,7 @@ class Tests(IMP.test.TestCase):
         bd.set_maximum_time_step(dt)
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
-        sos= IMP.rmf.SaveOptimizerState(f)
+        sos= IMP.rmf.SaveOptimizerState(m, f)
         sos.set_period(1000)
         bd.add_optimizer_state(sos)
         print "optimizin"

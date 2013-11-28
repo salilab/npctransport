@@ -12,14 +12,7 @@
 #include <IMP/npctransport/SlabSingletonScore.h>
 #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/protobuf.h>
-#ifdef IMP_NPC_GOOGLE
-IMP_GCC_PUSH_POP(diagnostic push)
-IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-IMP_GCC_PUSH_POP(diagnostic pop)
-#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
-#endif
 #include <IMP/npctransport/creating_particles.h>
 #include <IMP/npctransport/enums.h>
 #include <IMP/npctransport/io.h>
@@ -183,8 +176,9 @@ void SimulationData::initialize(std::string output_file, bool quick) {
     {
       std::cout << "Restarting from output file internal RMF conformation"
                 << std::endl ;
+      RMF::BufferConstHandle buffer(pb_data.rmf_conformation());
       RMF::FileConstHandle fh =
-        RMF::open_rmf_buffer_read_only(pb_data.rmf_conformation());
+        RMF::open_rmf_buffer_read_only(buffer);
       initialize_positions_from_rmf(fh, 0);
     } else if (pb_data.has_conformation())
     {

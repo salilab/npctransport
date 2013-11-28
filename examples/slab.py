@@ -35,7 +35,7 @@ sgs= sg.get_components()
 IMP.rmf.add_static_geometries(rmf, [bbg]+sgs)
 IMP.rmf.add_restraints(rmf, [bbr, r])
 
-os= IMP.rmf.SaveOptimizerState(rmf)
+os= IMP.rmf.SaveOptimizerState(m, rmf)
 
 bd=IMP.atom.BrownianDynamics(m)
 bd.set_scoring_function([bbr, r])

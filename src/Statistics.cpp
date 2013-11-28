@@ -32,14 +32,7 @@
 #include <set>
 #include "boost/tuple/tuple.hpp"
 
-#ifdef IMP_NPC_GOOGLE
-IMP_GCC_PUSH_POP(diagnostic push)
-IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
-#include "third_party/npc/npctransport/data/npctransport.pb.h"
-IMP_GCC_PUSH_POP(diagnostic pop)
-#else
 #include <IMP/npctransport/internal/npctransport.pb.h>
-#endif
 
 bool no_save_rmf_to_output = false;
 IMP::base::AddBoolFlag  no_save_rmf_to_output_adder
@@ -563,11 +556,13 @@ void Statistics::update
 
   // save RMF for future restarts
   if(!no_save_rmf_to_output){
-    std::string buf;
-    RMF::FileHandle fh = RMF::create_rmf_buffer(buf);
-    const_cast<SimulationData *>( get_sd() )->link_rmf_file_handle(fh, false);
-    rmf::save_frame(fh, 0);
-    output.set_rmf_conformation(buf);
+    RMF::BufferHandle buf;
+    {
+      RMF::FileHandle fh = RMF::create_rmf_buffer(buf);
+      const_cast<SimulationData*>(get_sd())->link_rmf_file_handle(fh, false);
+      rmf::save_frame(fh, 0);
+    }
+    output.set_rmf_conformation(buf.get_string());
   }
 
   // dump to file
