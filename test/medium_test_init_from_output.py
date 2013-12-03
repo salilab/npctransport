@@ -54,23 +54,23 @@ class Tests(IMP.test.TestCase):
         """ assert that sd1 and sd2 have identical Transporting statistics """
         for d1, d2 in zip(sd1.get_diffusers().get_particles(),
                          sd2.get_diffusers().get_particles()):
-           if( not IMP.npctransport.Transporting.particle_is_instance(d1) ):
-               continue
-           if( not IMP.npctransport.Transporting.particle_is_instance(d2) ):
-               continue
-           t1 = IMP.npctransport.Transporting( d1 )
-           t2 = IMP.npctransport.Transporting( d2 )
-           print "Diffuser particles: "
-           print d1, d2
-           print "Comparing transport statistics: ", t1, t2
-           self.assert_(t1.get_is_last_entry_from_top()
-                        == t2.get_is_last_entry_from_top() )
-           self.assertAlmostEqual(t1.get_last_tracked_z(),
-                        t2.get_last_tracked_z(), delta=.00001 )
-           self.assert_(t1.get_n_entries_bottom()
-                        == t2.get_n_entries_bottom() );
-           self.assert_(t1.get_n_entries_top()
-                        == t2.get_n_entries_top() );
+            if( not IMP.npctransport.Transporting.particle_is_instance(d1) ):
+                continue
+            if( not IMP.npctransport.Transporting.particle_is_instance(d2) ):
+                continue
+            t1 = IMP.npctransport.Transporting( d1 )
+            t2 = IMP.npctransport.Transporting( d2 )
+            print "Diffuser particles: "
+            print d1, d2
+            print "Comparing transport statistics: ", t1, t2
+            self.assert_(t1.get_is_last_entry_from_top()
+                         == t2.get_is_last_entry_from_top() )
+            self.assertAlmostEqual(t1.get_last_tracked_z(),
+                         t2.get_last_tracked_z(), delta=.00001 )
+            self.assert_(t1.get_n_entries_bottom()
+                         == t2.get_n_entries_bottom() );
+            self.assert_(t1.get_n_entries_top()
+                         == t2.get_n_entries_top() );
 
     def assert_almost_equal_sds(self, sd1, sd2):
         """
@@ -117,6 +117,26 @@ class Tests(IMP.test.TestCase):
         self.assert_almost_equal_sds(sd, sdp)
 #        print "updating stats at end"
 #        sd.update_statistics(timer, 0);
+
+    def test_init_from_old_output1(self):
+        """ Testing whether positions are loaded properly from output file """
+        # random generator initialization
+        IMP.base.set_log_level(IMP.base.SILENT)
+        rt_output= IMP.npctransport.get_data_path( "out149.pb")
+        out1 = self.get_tmp_file_name("out1.rmf")
+        print "RT Output: ", rt_output
+        print "reloading from output file ", rt_output
+        sd1= IMP.npctransport.SimulationData(rt_output,
+                                             False,
+                                             out1)
+        sdp= IMP.npctransport.SimulationData(out1,
+                                             False,
+                                             self.get_tmp_file_name("out2.rmf"))
+        print "After reload", time.ctime()
+        self.assert_almost_equal_sds(sd1, sd2)
+#        print "updating stats at end"
+#        sd.update_statistics(timer, 0);
+
 
 if __name__ == '__main__':
     IMP.test.main()
