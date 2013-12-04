@@ -134,7 +134,7 @@ class Tests(IMP.test.TestCase):
 #        sd.update_statistics(timer, 0);
 
     def test_init_from_old_output1(self):
-        """ Testing whether positions are loaded properly from output file """
+        """ Testing whether an old output file is loaded properly """
         # random generator initialization
         # RMF.set_log_level("trace")
         IMP.base.set_log_level(IMP.base.SILENT)
