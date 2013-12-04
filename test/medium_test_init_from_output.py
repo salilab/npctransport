@@ -145,7 +145,6 @@ class Tests(IMP.test.TestCase):
         sd1 = IMP.npctransport.SimulationData(rt_output,
                                               False,
                                               out1)
-        del sd1
         sdp = IMP.npctransport.SimulationData(out1,
                                               False,
                                               self.get_tmp_file_name("out2.rmf"))
