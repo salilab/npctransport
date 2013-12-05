@@ -135,23 +135,62 @@ class Tests(IMP.test.TestCase):
 
     def test_init_from_old_output1(self):
         """ Testing whether an old output file is loaded properly """
+        expected_sites = [ (3.67394e-15, 0, -30),
+                           (17.2447, -0.377296, -24.5455),
+                           (-1.55764, -23.0892, -19.0909),
+                           (-19.7675, 17.9804, -13.6364),
+                           (28.589, -3.96571, -8.18182),
+                           (-28.2097, -9.8375, -2.72727),
+                           (20.6227, 21.6163, 2.72727),
+                           (-4.64461, -28.4866, 8.18182),
+                           (-17.9874, 19.7612, 13.6364),
+                           (17.8043, 14.7833, 19.0909),
+                           (13.5084, 10.7259, 24.5455),
+                           (0, 0, 30) ]
+        expected_time =  12500039289
+        expected_particles=[ [-253.636, -108.652, 40.4134, 1, 0, 0, 0], #trans + quaternion
+                             [-236.08, -127.91, 27.47, 0.23, 0.33, -0.84, -0.36] ]
+
         # random generator initialization
         # RMF.set_log_level("trace")
         IMP.base.set_log_level(IMP.base.SILENT)
         rt_output = self.get_input_file_name("out149.pb")
-        out1 = self.get_tmp_file_name("out1.rmf")
+        out_rmf = self.get_tmp_file_name("movie.rmf")
         print "RT Output: ", rt_output
         print "reloading from output file ", rt_output
-        sd1 = IMP.npctransport.SimulationData(rt_output,
-                                              False,
-                                              out1)
-        sdp = IMP.npctransport.SimulationData(out1,
-                                              False,
-                                              self.get_tmp_file_name("out2.rmf"))
-        print "After reload", time.ctime()
-        self.assert_almost_equal_sds(sd1, sd2)
-#        print "updating stats at end"
-#        sd.update_statistics(timer, 0);
+        sd = IMP.npctransport.SimulationData(rt_output,
+                                             False,
+                                             out_rmf)
+        for i,p in enumerate(sd.get_diffusers().get_particles()):
+            if( i >= len(expected_particles) ):
+                break
+            pc= [x for x in IMP.core.XYZ(p).get_coordinates()]
+            pq = [x  for x in IMP.core.RigidBody(p
+               ).get_reference_frame(
+               ).get_transformation_to(
+               ).get_rotation(
+               ).get_quaternion() ]
+            for x,y in zip(pc+pq, expected_particles[i]):
+                self.assertAlmostEqual(x,y, delta=0.1)
+#            if(not IMP.npctransport.Transporting.particle_is_instance(p)):
+#                continue
+#            pt = IMP.npctransport.Transporting(p)
+#            print "T: ", pt.get_is_last_entry_from_top(),
+#            print pt.get_last_tracked_z(),
+#            print pt.get_n_entries_bottom(),
+#            print pt.get_n_entries_top(),
+#            print
+        sites = sd.get_sites(IMP.core.ParticleType("kap"))
+        for i,s in enumerate(sites):
+            self.assertAlmostEqual(
+                ( s - expected_sites[i]).get_magnitude(),
+                0, delta=.01 )
+        # check timers
+        t = sd.get_bd().get_current_time()
+        self.assertAlmostEqual(t, expected_time, delta=1)
+
+
+
 
 
 if __name__ == '__main__':
