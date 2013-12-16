@@ -33,10 +33,12 @@ struct wrapper {
 namespace IMP_NPCTRANSPORT_AVRO_NAMESPACE {
 template <>
 struct codec_traits<IMP_npctransport::wrapper> {
+  template <class Encoder>
   static void encode(Encoder& e, const IMP_npctransport::wrapper& v) {
     IMP_NPCTRANSPORT_AVRO_NAMESPACE::encode(e, v.key);
     IMP_NPCTRANSPORT_AVRO_NAMESPACE::encode(e, v.value);
   }
+  template <class Decoder>
   static void decode(Decoder& d, IMP_npctransport::wrapper& v) {
     IMP_NPCTRANSPORT_AVRO_NAMESPACE::decode(d, v.key);
     IMP_NPCTRANSPORT_AVRO_NAMESPACE::decode(d, v.value);
