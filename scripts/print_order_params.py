@@ -74,11 +74,20 @@ def get_pb_messages_generator(files_and_folders):
 
 
 def dump_results(gop_table, n):
-    OUT = open("TMP","w")
+    OUT = open("OP.txt","w")
+    is_first = True
+    tags = []
     for t in sorted(gop_table.iterkeys()):
+        if is_first:
+            print >>OUT,"t",
+            for tag in sorted(gop_table[t].iterkeys()):
+                print >>OUT,tag,
+                tags.append(tag)
+            print >>OUT
+            is_first=False
         print >>OUT, "%10.0f" % t,
-        for x in gop_table[t]:
-            print >>OUT, "%8.2f  " % ((x+0.0)/n),
+        for tag in tags:
+            print >>OUT, "%8.2f  " % ((gop_table[t][tag]+0.0)/n),
         print >>OUT
 
 #################################
@@ -99,26 +108,35 @@ for pb_message, tag in get_pb_messages_generator(files_and_folders):
         if t==t_old:
             continue # skip to prevent double count
         if t not in gop_table:
-            gop_table[t] = [0] * 17
+            gop_table[t] = { "kap_interacting_fraction":0.0,
+                             "kaps_channel":0,
+                             "inerts_channel":0,
+                             "fg_length":0.0,
+                             "fg_rg":0.0}
         for i in range(12):
-            gop_table[t][i] += gop.zr_hists[i/3].ints[i%3]
+            i1 = i/3
+            i2 = i%3
+            tag = "zr_hists%d_%d" % (i1,i2)
+            if not tag in gop_table[t]:
+                gop_table[t][tag] = 0.0
+            gop_table[t][tag] += gop.zr_hists[i1].ints[i2]
         t_old = t
     for fop in s.floaters[0].order_params:
         t = fop.time_ns
         assert t in gop_table
-        gop_table[t][12] += fop.interacting_fraction
-        gop_table[t][14] += fop.n_z1 + fop.n_z2
+        gop_table[t]["kap_interacting_fraction"] += fop.interacting_fraction
+        gop_table[t]["kaps_channel"] += fop.n_z1 + fop.n_z2
     for fop in s.floaters[1].order_params:
         t = fop.time_ns
-        gop_table[t][15] += fop.n_z1 + fop.n_z2
+        gop_table[t]["inerts_channel"] += fop.n_z1 + fop.n_z2
     for fg in s.fgs:
         for fgop in fg.order_params:
             t = fgop.time_ns
             assert t in gop_table
-            gop_table[t][13] += fgop.length / len(s.fgs)
-            gop_table[t][16] += fgop.radius_of_gyration / len(s.fgs)
+            gop_table[t]["fg_length"] += fgop.length / len(s.fgs)
+            gop_table[t]["fg_rg"] += fgop.radius_of_gyration / len(s.fgs)
     n=n+1
-    if ( n % 10 == 0):
+    if ( n % 5 == 0):
         print "====== %d ======" % n
         dump_results(gop_table, n)
 print
