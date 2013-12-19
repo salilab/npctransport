@@ -189,6 +189,20 @@ class Tests(IMP.test.TestCase):
         t = sd.get_bd().get_current_time()
         self.assertAlmostEqual(t, expected_time, delta=1)
 
+    def test_init_from_old_output_more_recent(self):
+        """
+        Testing whether a more recent output file (Dec 2013) is loaded
+        at all
+        """
+        IMP.base.set_log_level(IMP.base.SILENT)
+        rt_output = self.get_input_file_name("out_more_recent.pb")
+        out_rmf = self.get_tmp_file_name("movie.rmf")
+        print "RT Output: ", rt_output
+        print "reloading from output file ", rt_output
+        sd = IMP.npctransport.SimulationData(rt_output,
+                                             False,
+                                             out_rmf)
+        sd.optimize(1000)
 
 
 
