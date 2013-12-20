@@ -178,33 +178,44 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   /** Initializes the simulation based on the specified assignment file
 
-      @param assignments_file the file with the current assignment, which
-                              is also to be used for progress and statistics
-                              output
+      @param prev_output_file protobuf file with the current assignment, and
+                              possibly previous progress and statistics info
+     @param[in] new_output_file new protobuf file for subsequent output and
+                                statistics.
+                                If it is "", then prev_output_file is being
+                                rewritten.
       @param quick whether to perform a quick simulation with a small number
                    of iterations
   */
-  void initialize(std::string assignments_file, bool quick);
+  void initialize(std::string prev_output_file,
+                  std::string new_output_file,
+                  bool quick);
 
  public:
   /**
-     @param[out] output_file name of protobuf file that encapsulates the
-     assignment
-     data for initializing the simulation params and the output statistics file.
-     The output file is assumed to already exist at this point and contain the
-     assignment.
-     If it contains an rmf_conformation or conformation field, it will be used
-     to initialize particle positions,
-     in that priority.
-     @param[out] quick if true, perform a very short simulation,
+     @param[in] prev_output_file name of protobuf file that encapsulates the
+                                  assignment data for initializing the
+                                  simulation params and the output
+                                  statistics file.  The output file is
+                                  assumed to already exist at this
+                                  point and contain the assignment.
+                                  If it contains an rmf_conformation
+                                  or conformation field, it will be
+                                  used to initialize particle
+                                  positions, in that priority.
+     @param[in] quick if true, perform a very short simulation,
                        typically for calibration or for initial testing
      @param[out] rmf_file_name RMF file to which simulation trajectory
                                is recorded (if empty, no RMF file is created
-     upon construction)
+                               upon construction)
                                \see set_rmf_file_name()
+     @param[in] new_output_file new protobuf file for subsequent output and statistics
+                                If it is "", then prev_output_file is being rewritten
+                                (= default).
    */
-  SimulationData(std::string output_file, bool quick,
-                 std::string rmf_file_name = std::string());
+  SimulationData(std::string prevoutput_file, bool quick,
+                 std::string rmf_file_name = std::string(),
+                 std::string new_output_file = "");
 
   Model *get_model();
 #ifndef SWIG

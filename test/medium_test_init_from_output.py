@@ -154,13 +154,15 @@ class Tests(IMP.test.TestCase):
         # random generator initialization
         # RMF.set_log_level("trace")
         IMP.base.set_log_level(IMP.base.SILENT)
-        rt_output = self.get_input_file_name("out149.pb")
+        rt_prev_output = self.get_input_file_name("out149.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")
-        print "RT Output: ", rt_output
-        print "reloading from output file ", rt_output
-        sd = IMP.npctransport.SimulationData(rt_output,
+        rt_new_output = self.get_tmp_file_name("out.pb")
+        print "reloading from output file ", rt_prev_output
+        print "New Output: ", rt_new_output
+        sd = IMP.npctransport.SimulationData(rt_prev_output,
                                              False,
-                                             out_rmf)
+                                             out_rmf,
+                                             rt_new_output)
         for i,p in enumerate(sd.get_diffusers().get_particles()):
             if( i >= len(expected_particles) ):
                 break
@@ -195,14 +197,16 @@ class Tests(IMP.test.TestCase):
         at all
         """
         IMP.base.set_log_level(IMP.base.SILENT)
-        rt_output = self.get_input_file_name("out_more_recent.pb")
+        rt_prev_output = self.get_input_file_name("out_more_recent.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")
-        print "RT Output: ", rt_output
-        print "reloading from output file ", rt_output
-        sd = IMP.npctransport.SimulationData(rt_output,
+        rt_new_output = self.get_tmp_file_name("out.pb")
+        print "reloading from output file ", rt_prev_output
+        print "New Output: ", rt_new_output
+        sd = IMP.npctransport.SimulationData(rt_prev_output,
                                              False,
-                                             out_rmf)
-        sd.optimize(1000)
+                                             out_rmf,
+                                             rt_new_output)
+        sd.get_bd().optimize(10)
 
 
 

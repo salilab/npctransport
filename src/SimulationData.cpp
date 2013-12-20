@@ -62,8 +62,9 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
     { name##_ = default_value; }                \
   }
 
-SimulationData::SimulationData(std::string output_file, bool quick,
-                               std::string rmf_file_name)
+SimulationData::SimulationData(std::string prev_output_file, bool quick,
+                               std::string rmf_file_name,
+                               std::string new_output_file)
 : Object("SimulationData%1%"),
   m_(nullptr),
   bd_(nullptr),
@@ -75,16 +76,21 @@ SimulationData::SimulationData(std::string output_file, bool quick,
   diffusers_(nullptr),
   rmf_file_name_(rmf_file_name)
 {
-  initialize(output_file, quick);
+  if(new_output_file=="") {
+    new_output_file = prev_output_file;
+  }
+  initialize(prev_output_file, new_output_file, quick);
 }
 
-void SimulationData::initialize(std::string output_file, bool quick) {
+void SimulationData::initialize(std::string prev_output_file,
+                                std::string new_output_file,
+                                bool quick) {
   m_ = new Model("NPC model %1%");
   ::npctransport_proto::Output pb_data;
-  std::ifstream file(output_file.c_str(), std::ios::binary);
+  std::ifstream file(prev_output_file.c_str(), std::ios::binary);
   bool read = pb_data.ParseFromIstream(&file);
   if (!read) {
-    IMP_THROW("Unable to read data from protobuf" << output_file,
+    IMP_THROW("Unable to read data from protobuf" << prev_output_file,
               base::IOException);
   }
   pb_data.mutable_statistics(); // create it if not there
@@ -121,7 +127,9 @@ void SimulationData::initialize(std::string output_file, bool quick) {
   }
   // initialize scoring
   scoring_ = new Scoring(this, pb_assignment);
-  statistics_ = new Statistics(this, statistics_interval_frames_, output_file);
+  statistics_ = new Statistics(this,
+                               statistics_interval_frames_,
+                               new_output_file);
 
   // create particles hierarchy
   root_ = new Particle(get_model());
@@ -191,9 +199,8 @@ void SimulationData::initialize(std::string output_file, bool quick) {
     ( IMP::get_module_version() );
   pb_data.mutable_assignment()->add_npc_module_version
     ( IMP::npctransport::get_module_version() );
-  std::ofstream outf(output_file.c_str(), std::ios::binary);
+  std::ofstream outf(new_output_file.c_str(), std::ios::binary);
   pb_data.SerializeToOstream(&outf);
-
 }
 
 
