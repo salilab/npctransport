@@ -31,11 +31,11 @@ class Tests(IMP.test.TestCase):
         os= IMP.npctransport.BodyStatisticsOptimizerState(p)
         os.set_period(10)
         bd.add_optimizer_state(os)
-        bd.optimize(1000)
+        bd.optimize(100000)
         Dout= os.get_diffusion_coefficient()
         Din= IMP.atom.RigidBodyDiffusion(p).get_diffusion_coefficient()
         print Dout, Din
-        self.assertAlmostEqual(Dout, Din, delta=.4*Dout)
+        self.assertAlmostEqual(Dout, Din, delta=.15*Dout)
     def test_rot(self):
         """Check rigid body correlation time"""
         if IMP.build!= "fast":
