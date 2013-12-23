@@ -22,6 +22,12 @@ class Tests(IMP.test.TestCase):
 
     def test_repulsion(self):
         """Check diffusion coefficient estimation"""
+        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+            n_cycles = 1000
+            delta_factor = 0.5
+        else:
+            n_cycles=500000
+            delta_factor = 0.1
         m= IMP.Model()
         p= self._create_diffusing_particle(m)
         IMP.core.XYZR(p).set_coordinates_are_optimized(True)
@@ -31,11 +37,12 @@ class Tests(IMP.test.TestCase):
         os= IMP.npctransport.BodyStatisticsOptimizerState(p)
         os.set_period(10)
         bd.add_optimizer_state(os)
-        bd.optimize(100000)
+        bd.optimize(n_cycles)
         Dout= os.get_diffusion_coefficient()
         Din= IMP.atom.RigidBodyDiffusion(p).get_diffusion_coefficient()
         print Dout, Din
-        self.assertAlmostEqual(Dout, Din, delta=.15*Dout)
+        self.assertAlmostEqual(Dout, Din,
+                               delta=delta_factor*Din)
     def test_rot(self):
         """Check rigid body correlation time"""
         if IMP.build!= "fast":
