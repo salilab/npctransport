@@ -134,7 +134,7 @@ class Tests(IMP.test.TestCase):
             d.set_coordinates(v)
             rb.add_member(pc)
         # to make sure coordinates get updated
-        cr= IMP.kernel._ConstRestraint(0, rb.get_members())
+        cr= IMP.kernel._ConstRestraint(0, rb.get_rigid_members())
         m.add_restraint(cr)
         dd= IMP.atom.RigidBodyDiffusion.setup_particle(p)
         nD=10.0*dd.get_rotational_diffusion_coefficient()
@@ -142,7 +142,7 @@ class Tests(IMP.test.TestCase):
         dt=10000
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_maximum_time_step(dt)
-        os= IMP.npctransport.ChainStatisticsOptimizerState(rb.get_members())
+        os= IMP.npctransport.ChainStatisticsOptimizerState(rb.get_rigid_members())
         os.set_period(10)
         bd.add_optimizer_state(os)
         os2= IMP.npctransport.BodyStatisticsOptimizerState(p)
