@@ -22,10 +22,13 @@ class Tests(IMP.test.TestCase):
 
     def test_repulsion(self):
         """Check diffusion coefficient estimation"""
+        print "TEST_REPULSION"
         if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+            print "INTERNAL"
             n_cycles = 1000
             delta_factor = 0.5
         else:
+            print "NORMAL"
             n_cycles=500000
             delta_factor = 0.1
         m= IMP.Model()
@@ -37,6 +40,8 @@ class Tests(IMP.test.TestCase):
         os= IMP.npctransport.BodyStatisticsOptimizerState(p)
         os.set_period(10)
         bd.add_optimizer_state(os)
+        IMP.set_log_level(IMP.SILENT)
+        bd.set_log_level(IMP.SILENT)
         bd.optimize(n_cycles)
         Dout= os.get_diffusion_coefficient()
         Din= IMP.atom.RigidBodyDiffusion(p).get_diffusion_coefficient()
@@ -45,6 +50,7 @@ class Tests(IMP.test.TestCase):
                                delta=delta_factor*Din)
     def test_rot(self):
         """Check rigid body correlation time"""
+        print "TEST_ROT"
         if IMP.build!= "fast":
           self.skipTest("Only run in fast mode")
         m= IMP.Model()
@@ -63,6 +69,7 @@ class Tests(IMP.test.TestCase):
         os.set_period(num_steps/1000)
         bd.add_optimizer_state(os)
         IMP.set_log_level(IMP.SILENT)
+        bd.set_log_level(IMP.SILENT)
         bd.optimize(num_steps)
         cor_out= os.get_correlation_time()
         Din= dd.get_rotational_diffusion_coefficient()
@@ -86,6 +93,7 @@ class Tests(IMP.test.TestCase):
         return (magnet_restraint, p_magnet_rb)
     def test_transport_stats(self):
         """Check particle transport stats"""
+        print "TEST_TRANSPORT_STATS"
         print "\nTesting particle transport statistics:"
         if IMP.build!= "fast":
           self.skipTest("Only run in fast mode")
@@ -108,6 +116,7 @@ class Tests(IMP.test.TestCase):
         os.set_period( num_steps / 1000 )
         bd.add_optimizer_state( os )
         IMP.set_log_level(IMP.SILENT)
+
         print "Before optimization z = %.2f" % p_rb.get_coordinates()[2]
         bd.optimize( num_steps )
         print "After 1st optimization z = %.2f" % p_rb.get_coordinates()[2]
@@ -119,6 +128,7 @@ class Tests(IMP.test.TestCase):
         self.assertEqual(n,2)
     def test_rot_nrb(self):
         """Check hidden rigid body correlation time"""
+        print "TEST_ROT_NRB"
         m= IMP.Model()
         p= IMP.Particle(m, "rb")
         d=IMP.core.XYZR.setup_particle(p)
@@ -149,6 +159,7 @@ class Tests(IMP.test.TestCase):
         os2.set_period(10)
         bd.add_optimizer_state(os2)
         IMP.set_log_level(IMP.SILENT)
+        bd.set_log_level(IMP.SILENT)
         bd.optimize(5000)
         Dout= os.get_correlation_time()
         Dout2= os2.get_correlation_time()

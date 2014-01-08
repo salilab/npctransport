@@ -114,6 +114,7 @@ class Tests(IMP.test.TestCase):
 
     def test_init_from_output(self):
         """ Testing whether positions are loaded properly from output file """
+        print "TEST_INIT_FROM_OUTPUT"
         # random generator initialization
         IMP.base.set_log_level(IMP.base.SILENT)
         config = self.get_tmp_file_name("simple_cfg.pb")
@@ -135,6 +136,7 @@ class Tests(IMP.test.TestCase):
 
     def test_init_from_old_output1(self):
         """ Testing whether an old output file is loaded properly """
+        print "TEST_INIT_FROM_OLD_OUTPUT1"
         expected_sites = [ (3.67394e-15, 0, -30),
                            (17.2447, -0.377296, -24.5455),
                            (-1.55764, -23.0892, -19.0909),
@@ -196,6 +198,7 @@ class Tests(IMP.test.TestCase):
         Testing whether a more recent output file (Dec 2013) is loaded
         at all
         """
+        print "TEST_INIT_FROM_OLD_OUTPUT_MORE_RECENT"
         IMP.base.set_log_level(IMP.base.SILENT)
         rt_prev_output = self.get_input_file_name("out_more_recent.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")
@@ -206,7 +209,7 @@ class Tests(IMP.test.TestCase):
                                              False,
                                              out_rmf,
                                              rt_new_output)
-        sd.get_bd().optimize(10)
+#        sd.get_bd().optimize(1)
 
 
 

@@ -213,7 +213,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
                                 If it is "", then prev_output_file is being rewritten
                                 (= default).
    */
-  SimulationData(std::string prevoutput_file, bool quick,
+  SimulationData(std::string prev_output_file, bool quick,
                  std::string rmf_file_name = std::string(),
                  std::string new_output_file = "");
 
