@@ -41,7 +41,7 @@ SitesPairScore::SitesPairScore(double sites_range, double k_attraction,
                                const algebra::Vector3Ds &sites0,
                                const algebra::Vector3Ds &sites1)
     : P(k_repulsion, range_nonspec_attraction, k_nonspec_attraction,
-        "Sites %1%"),
+        "SitesPairScore %1%"),
       sites_range_(sites_range),
       sites_k_(k_attraction) {
   // store the big set of sizes in nnsites_

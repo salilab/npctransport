@@ -301,19 +301,25 @@ Scoring::add_chain_restraint(atom::Hierarchy chain_root,
                     "negative rest length factor is not valid",
                     IMP::base::ValueException );
 
+
   // Exclusive means that the particles will be in no other
   // ConsecutivePairContainer this assumption accelerates certain computations
   IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer, xcpc,
-          (chain_root.get_children(), name + " consecutive pairs"));
+          (chain_root.get_children(), "%1% " + name + " consecutive pairs"));
   // add chain restraint
   IMP_NEW(LinearWellPairScore, lwps,
           ( rest_length_factor, get_backbone_k() ) );
   IMP::base::Pointer<Restraint> cr =
     IMP::container::create_restraint
-    ( lwps.get(), xcpc.get(), "chain restraint %1%" );
+    ( lwps.get(), xcpc.get(),  "%1% " + name  );
   chain_scores_.push_back( lwps );
   ParticleIndex pi_chain_root = chain_root.get_particle_index();
   chain_restraints_map_[pi_chain_root] = cr;
+  std::cout << "Added restraint on chain | " << name
+            << " | nchildren | " << chain_root.get_number_of_children()
+            << " | rest_name | " << cr->get_name()
+            << " | consec_pc_name | " << xcpc->get_name()
+            << std::endl;
   return cr;
 }
 
