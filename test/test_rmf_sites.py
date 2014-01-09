@@ -26,7 +26,8 @@ class ConeTests(IMP.test.TestCase):
      IMP.npctransport.assign_ranges(config_name, assignments_name,
                                     0, False, seed)
      rmf_name=self.get_tmp_file_name("rmf_sites.rmf")
-     sd= IMP.npctransport.SimulationData(assignments_name, True, rmf_name)
+     sd= IMP.npctransport.SimulationData(assignments_name, True)
+     sd.set_rmf_file(rmf_name, False)
      wr= sd.get_rmf_sos_writer()
      wr.update_always()
      del wr

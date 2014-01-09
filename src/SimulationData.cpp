@@ -74,7 +74,8 @@ SimulationData::SimulationData(std::string prev_output_file, bool quick,
   obstacles_changed_(false),
   optimizable_diffusers_(nullptr),
   diffusers_(nullptr),
-  rmf_file_name_(rmf_file_name)
+  rmf_file_name_(rmf_file_name),
+  is_save_restraints_to_rmf_(true)
 {
   if(new_output_file=="") {
     new_output_file = prev_output_file;
@@ -515,7 +516,7 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_sos_writer() {
   if (!rmf_sos_writer_) {
     if (get_rmf_file_name().empty()) return nullptr;
     RMF::FileHandle fh = RMF::create_rmf_file(get_rmf_file_name());
-    link_rmf_file_handle(fh);
+    link_rmf_file_handle(fh, is_save_restraints_to_rmf_);
     IMP_NEW(rmf::SaveOptimizerState, los, (get_model(), fh));
     std::cout << "Dump interval for RMF SaveOptimizerState set to "
               << dump_interval_frames_ << std::endl;
@@ -525,13 +526,23 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_sos_writer() {
   return rmf_sos_writer_;
 }
 
-void SimulationData::set_rmf_file_name(const std::string &new_name) {
-  if (get_rmf_file_name() == new_name) return;  // nothing to do
+void SimulationData::set_rmf_file(const std::string &new_name,
+                                  bool is_save_restraints_to_rmf)
+{
+  if (get_rmf_file_name() == new_name &&
+      is_save_restraints_to_rmf_ == is_save_restraints_to_rmf)
+    {  // nothing to do
+      return ;
+    }
+  // Delete old one
   if (rmf_sos_writer_ && bd_) {
     bd_->remove_optimizer_state(rmf_sos_writer_);
     rmf_sos_writer_ = nullptr;
   }
+  // Update vars
   rmf_file_name_ = new_name;
+  is_save_restraints_to_rmf_ = is_save_restraints_to_rmf;
+  // Construct new
   if (bd_) {
     bd_->add_optimizer_state(get_rmf_sos_writer());
   }

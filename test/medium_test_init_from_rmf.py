@@ -11,13 +11,14 @@ class Tests(IMP.test.TestCase):
 
     def _make_and_run_simulation(self, output_pb_file, output_rmf_file, seed):
         IMP.base.random_number_generator.seed( seed )
-        config= IMP.npctransport.get_data_path( "quick2.pb" );
+        config= IMP.npctransport.get_data_path( "quick2.pb" )
         IMP.set_log_level( IMP.SILENT );
         print "assigning parameter ranges"
         num=assign_ranges( config, output_pb_file,
                           0, True, seed );
         print "num ranges %d" % num
-        sd = SimulationData( output_pb_file, False, output_rmf_file );
+        sd = SimulationData( output_pb_file, False )
+        sd.set_rmf_file(output_rmf_file, False)
         sd.get_model().set_log_level( IMP.SILENT );
         print "Files are " + output_pb_file + \
               " and " + output_rmf_file

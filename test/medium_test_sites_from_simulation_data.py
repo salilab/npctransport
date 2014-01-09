@@ -151,7 +151,8 @@ class Tests(IMP.test.TestCase):
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
         rmf_file = self.get_tmp_file_name("out.rmf");
         print "RMF file", rmf_file
-        sd= IMP.npctransport.SimulationData(assign_file, False, rmf_file)
+        sd= IMP.npctransport.SimulationData(assign_file, False)
+        sd.set_rmf_file(rmf_file, False)
         self._assert_kap_in_place(sd, False)
         # init and run
         IMP.base.set_log_level(IMP.base.SILENT)

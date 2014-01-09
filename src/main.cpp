@@ -132,6 +132,12 @@ base::AddFloatFlag short_sim_adder
   " a fraction of a full simulation (or more if >1.0)"
   " [default=1.0]",
   &short_sim_factor);
+bool no_save_restraints_to_rmf = false;
+IMP::base::AddBoolFlag no_save_restraints_to_rmf_adder
+( "no_save_restraints_to_rmf",
+  "whether not to save restraints to rmf conformations and final rms,"
+  " if either is applicable",
+  &no_save_restraints_to_rmf);
 
 
 namespace {
@@ -267,7 +273,8 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   write_output_based_on_flags(IMP::base::get_random_seed());
   sd = new IMP::npctransport::SimulationData(output, IMP::base::run_quick_test);
   if (!conformations.empty()) {
-    sd->set_rmf_file_name(conformations);
+    sd->set_rmf_file(conformations,
+                     !no_save_restraints_to_rmf);
   }
   if (!init_rmffile.empty()) {
     sd->initialize_positions_from_rmf(
@@ -297,7 +304,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   RMF::FileHandle final_rmf_fh;
   if (!final_conformations.empty()) {
     final_rmf_fh = RMF::create_rmf_file(final_conformations);
-    sd->link_rmf_file_handle(final_rmf_fh);
+    sd->link_rmf_file_handle(final_rmf_fh, !no_save_restraints_to_rmf);
   }
   boost::timer total_time;
   for (unsigned int i = 0; i < sd->get_number_of_trials(); ++i) {

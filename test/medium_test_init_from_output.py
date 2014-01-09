@@ -27,8 +27,8 @@ class Tests(IMP.test.TestCase):
         num = assign_ranges(config, output,
                             0, True, 10)
 #        IMP.set_log_level(IMP.TERSE)
-        sd = IMP.npctransport.SimulationData(output, False,
-                                             self.get_tmp_file_name("out0.rmf"))
+        sd = IMP.npctransport.SimulationData(output, False)
+        sd.set_rmf_file( self.get_tmp_file_name("out0.rmf"), False )
         print "BEFORE INIT", time.ctime()
         if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
             short_init_factor = 0.00001
@@ -127,8 +127,8 @@ class Tests(IMP.test.TestCase):
         sd = self.run_from_config(config, rt_output)
 
         print "reloading from output file ", rt_output
-        sdp = IMP.npctransport.SimulationData(rt_output, False,
-                                              self.get_tmp_file_name("out1.rmf"))
+        sdp = IMP.npctransport.SimulationData(rt_output, False)
+        sd.set_rmf_file( self.get_tmp_file_name("out1.rmf"), False )
         print "After reload", time.ctime()
         self.assert_almost_equal_sds(sd, sdp)
 #        print "updating stats at end"
@@ -165,6 +165,7 @@ class Tests(IMP.test.TestCase):
                                              False,
                                              out_rmf,
                                              rt_new_output)
+        sd.set_rmf_file(out_rmf, False)
         for i,p in enumerate(sd.get_diffusers().get_particles()):
             if( i >= len(expected_particles) ):
                 break
@@ -209,6 +210,7 @@ class Tests(IMP.test.TestCase):
                                              False,
                                              out_rmf,
                                              rt_new_output)
+        sd.set_rmf_file(out_rmf, False)
 #        sd.get_bd().optimize(1)
 
 

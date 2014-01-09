@@ -139,6 +139,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   // the RMF format file to which simulation output is dumped:
   std::string rmf_file_name_;
 
+  // whether to save restraints to rmf when
+  // calling get_rmf_sos_writer()
+  bool is_save_restraints_to_rmf_;
 
  private:
 
@@ -208,7 +211,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
      @param[out] rmf_file_name RMF file to which simulation trajectory
                                is recorded (if empty, no RMF file is created
                                upon construction)
-                               \see set_rmf_file_name()
+                               \see set_rmf_file()
      @param[in] new_output_file new protobuf file for subsequent output and statistics
                                 If it is "", then prev_output_file is being rewritten
                                 (= default).
@@ -502,14 +505,19 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   /**
      resets the name of the RMF file that records the simulation.  If
-     the new name is different than the old one, then the previous RMF
+     an old one exists from a previous call, then the previous RMF
      writer is invalidated by this action (closed and flushed).  If
-     the Brownian Dynamics object was already initialized, a new
+     the Brownian Dynamics object has already been initialized, a new
      writer with the new name is added as an optimizer state to it
      instead of the existing one.
      TODO: make sure the old writer is indeed closed and flushed
+
+     @param new_name the new name of the rmf file
+     @param is_save_restraints_to_rmf whether to save restraints to this
+                                      rmf file
   */
-  void set_rmf_file_name(const std::string &new_name);
+  void set_rmf_file(const std::string &new_name,
+                    bool is_save_restraints_to_rmf = true);
 
   IMP_OBJECT_METHODS(SimulationData);
  private:
