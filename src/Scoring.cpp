@@ -365,8 +365,9 @@ Scoring::create_close_diffusers_container
 ( SingletonContainerAdaptor particles,
   SingletonContainerAdaptor optimizable_particles) const
 {
-  particles.set_name("CreateCloseDiffusersContainerParticlesInput%1%");
-  optimizable_particles.set_name(
+  particles.set_name_if_default(
+      "CreateCloseDiffusersContainerParticlesInput%1%");
+  optimizable_particles.set_name_if_default(
       "CreateCloseDiffusersContainerOptimizableParticlesInput%1%");
   using namespace container;
   IMP_NEW(CloseBipartitePairContainer, cpc, // so range + 2*slack is what we get
