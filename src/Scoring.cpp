@@ -104,6 +104,8 @@ Scoring::get_custom_scoring_function
   IMP::SingletonContainerAdaptor optimizable_particles,
   bool is_attr_interactions_on) const
 {
+  particles.set_name_if_default("NPCGetCustomScoringFunctionParticlesInput%1%");
+  particles.set_name_if_default("NPCGetCustomScoringFunctionOptimiedParticlesInput%1%");
     // set up the restraints for the BD simulation:
   RestraintsTemp rs;
   rs += extra_restraints;
@@ -329,6 +331,7 @@ Scoring::get_chain_restraints_on
 ( IMP::SingletonContainerAdaptor particles ) const
 {
   Restraints ret_rs;
+  particles.set_name_if_default("GetChainRestraintsOnInput%1%");
   IMP_CONTAINER_FOREACH
     ( container::ListSingletonContainer,
       particles,
@@ -362,6 +365,9 @@ Scoring::create_close_diffusers_container
 ( SingletonContainerAdaptor particles,
   SingletonContainerAdaptor optimizable_particles) const
 {
+  particles.set_name("CreateCloseDiffusersContainerParticlesInput%1%");
+  optimizable_particles.set_name(
+      "CreateCloseDiffusersContainerOptimizableParticlesInput%1%");
   using namespace container;
   IMP_NEW(CloseBipartitePairContainer, cpc, // so range + 2*slack is what we get
           (particles, optimizable_particles, get_range(), slack_) );
@@ -415,6 +421,7 @@ container::PredicatePairsRestraint
 Restraint* Scoring::create_bounding_box_restraint
 ( SingletonContainerAdaptor particles) const
 {
+  particles.set_name_if_default("CreateBoundingBoxRestraintInput%1%");
   // Add bounding box restraint
   // TODO: what does backbone_spring_k_ has to do
   //       with bounding box constraint?
@@ -430,6 +437,7 @@ Restraint* Scoring::create_bounding_box_restraint
 Restraint * Scoring::create_slab_restraint
 ( SingletonContainerAdaptor particles)  const
 {
+  particles.set_name_if_default("CreateStabRestraintInput%1%");
   // Add cylinder restraint
   IMP_NEW(SlabSingletonScore, slab_score,
           (slab_thickness_ /* h */, tunnel_radius_ /*r*/, excluded_volume_k_));
@@ -442,6 +450,7 @@ Restraint * Scoring::create_slab_restraint
 void Scoring::add_z_bias_restraint
 ( SingletonContainerAdaptor ps, double k )
 {
+  ps.set_name_if_default("AddZBiasRestraintInput%1%");
   z_bias_restraints_.push_back
     ( create_z_bias_restraint( ps, k) );
 }
@@ -462,6 +471,7 @@ IMP::Restraint*
 Scoring::create_z_bias_restraint(SingletonContainerAdaptor ps, double k)
 const
 {
+  ps.set_name_if_default("CreateZBiasRestraintKInput%1%");
   IMP_NEW(ZBiasSingletonScore, zbsc, (k, get_sd()->get_tunnel_radius()) );
   return
     container::create_restraint(zbsc.get(),
