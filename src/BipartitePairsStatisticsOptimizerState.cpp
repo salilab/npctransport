@@ -109,7 +109,7 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
           << std::endl);
 
   // Update the lists of bound particles and their interactions
-  close_bipartite_pair_container_->before_evaluate(); // refresh
+  close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh
   base::set<ParticleIndex> cur_bounds_I;
   base::set<ParticleIndex> cur_bounds_II;
   std::set<ParticleIndexPair> cur_contacts; // more efficient if ordered set
