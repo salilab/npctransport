@@ -326,12 +326,13 @@ Scoring::add_chain_restraint(atom::Hierarchy chain_root,
 }
 
 
-Restraints
+IMP::Restraints
 Scoring::get_chain_restraints_on
 ( IMP::SingletonContainerAdaptor particles ) const
 {
-  Restraints ret_rs;
   particles.set_name_if_default("GetChainRestraintsOnInput%1%");
+  IMP::Restraints ret_rs;
+  std::set<ParticleIndex> roots_added;
   IMP_CONTAINER_FOREACH
     ( container::ListSingletonContainer,
       particles,
@@ -341,15 +342,18 @@ Scoring::get_chain_restraints_on
                           "all particles in list must be hierarchy compatible");
           atom::Hierarchy h=atom::Hierarchy(get_model(), _1);
           ParticleIndex pi_dad = h.get_parent().get_particle_index();
-          if( chain_restraints_map_.find(pi_dad) !=
-              chain_restraints_map_.end() )
+          if( chain_restraints_map_.find(pi_dad) != chain_restraints_map_.end()
+              && roots_added.find(pi_dad) == roots_added.end()
+              )
             {
-              ret_rs.push_back
-                ( chain_restraints_map_.find(pi_dad)->second );
+              roots_added.insert(pi_dad); // mark to prevent duplicates
+              Restraint* r =
+                chain_restraints_map_.find(pi_dad)->second.get();
+              ret_rs.push_back( r );
             }
         }
       }
-      );
+      ); // IMP_CONTAINER_FOREACH
   return ret_rs;
 }
 
