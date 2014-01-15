@@ -85,7 +85,8 @@ endif
 cd $MYTMP
 echo "Temporary run folder $MYTMP"
 touch $OUTFOLDER/tmp$i
-sleep $i
+@ sleep_time = $seed % 1800
+sleep $sleep_time
 $IMP/setup_environment.sh $NPCBIN/fg_simulation --output $MYTMP/out$i.pb --conformations $MYTMP/movie$i.rmf --final_conformations $MYTMP/final$i.rmf --work_unit $i --random_seed $seed --restart $RESTARTFILE --short_sim_factor $SIM_TIME_FACTOR
 set err=$status
 if($err) then
