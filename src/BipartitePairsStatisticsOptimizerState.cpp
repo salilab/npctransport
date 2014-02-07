@@ -12,6 +12,7 @@
 #include <IMP/container/ClosePairContainer.h>
 #include <IMP/atom/Simulator.h>
 #include <IMP/pair_macros.h>
+#include <boost/unordered_set.hpp>
 
 #include <algorithm>
 #include <iterator>
@@ -110,8 +111,8 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
 
   // Update the lists of bound particles and their interactions
   close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh
-  base::set<ParticleIndex> cur_bounds_I;
-  base::set<ParticleIndex> cur_bounds_II;
+  boost::unordered_set<ParticleIndex> cur_bounds_I;
+  boost::unordered_set<ParticleIndex> cur_bounds_II;
   std::set<ParticleIndexPair> cur_contacts; // more efficient if ordered set
   IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
                         close_bipartite_pair_container_,
