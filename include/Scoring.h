@@ -15,7 +15,7 @@
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/base/Pointer.h>
 #include <IMP/base/WeakPointer.h>
-#include <IMP/base/map.h>
+#include <boost/unordered_map.hpp>
 #include <IMP/container/CloseBipartitePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
 #include <IMP/container/PairContainerSet.h>
@@ -55,8 +55,8 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   Parameter<double> excluded_volume_k_;
   Parameter<double> range_;
   // Per type scaling factors for the interaction parameters
-  base::map<core::ParticleType, double> interaction_range_factors_;
-  base::map<core::ParticleType, double> interaction_k_factors_;
+  boost::unordered_map<core::ParticleType, double> interaction_range_factors_;
+  boost::unordered_map<core::ParticleType, double> interaction_k_factors_;
 
  private:
 
@@ -85,7 +85,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   base::PointerMember
     <container::PredicatePairsRestraint> predr_;
 
-  typedef  IMP::base::map< int, base::PointerMember< IMP::PairScore > >
+  typedef  boost::unordered_map< int, base::PointerMember< IMP::PairScore > >
     t_map_pair_type_to_pair_score;
   // scores between particle, mapped by their interaction id,
   // where interaction id is from OrderedTypePairPredicate otpp_
@@ -103,13 +103,13 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
   // a map from particle indexes of chain parents to corresponding
   // chain backbone restraints
-  typedef base::map< ParticleIndex, IMP::base::PointerMember<Restraint> >
+  typedef boost::unordered_map< ParticleIndex, IMP::base::PointerMember<Restraint> >
     t_chain_restraints_map;
   t_chain_restraints_map chain_restraints_map_;
 
   // particles to be z-biased on call to get_z_bias_restraints()
   // with key being the k value of each particle subset
-  typedef base::map<double, ParticlesTemp> t_z_bias_particles_map;
+  typedef boost::unordered_map<double, ParticlesTemp> t_z_bias_particles_map;
   t_z_bias_particles_map z_bias_particles_map_;
 
   // restraints for z-biasing particles (plural for different k force constants)

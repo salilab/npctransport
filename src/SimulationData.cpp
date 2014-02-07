@@ -552,7 +552,7 @@ void SimulationData::dump_geometry() {
   IMP_OBJECT_LOG;
   base::Pointer<display::Writer> w = display::create_writer("dump.pym");
   IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
-  for (base::map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
+  for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
            sites_.begin();
        it != sites_.end(); ++it) {
     g->set_sites(it->first, it->second);
@@ -695,7 +695,7 @@ void SimulationData::write_geometry(std::string out) {
   base::Pointer<display::Writer> w = display::create_writer(out);
   {
     IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
-    for (base::map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
+    for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
              sites_.begin();
          it != sites_.end(); ++it) {
       g->set_sites(it->first, it->second);

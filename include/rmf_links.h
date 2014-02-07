@@ -12,7 +12,7 @@
 #include "SimulationData.h"
 #include <IMP/rmf/atom_links.h>
 #include <IMP/rmf/link_macros.h>
-#include <IMP/base/map.h>
+#include <boost/unordered_map.hpp>
 #include <IMP/base/WeakPointer.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -25,7 +25,7 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   RMF::IntKey is_last_entry_from_top_key_;
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
-  base::map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
+  boost::unordered_map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
 
  protected:
   virtual void do_link_particle(kernel::Model *m, kernel::ParticleIndex root,
@@ -62,11 +62,11 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
 
-  base::map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
+  boost::unordered_map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
 
   std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const;
   // for testing without sd
-  base::map<core::ParticleType, std::pair<double, algebra::Vector3Ds> > sites_;
+  boost::unordered_map<core::ParticleType, std::pair<double, algebra::Vector3Ds> > sites_;
 
  protected:
   virtual void do_setup_node(kernel::Model *m, kernel::ParticleIndex root,

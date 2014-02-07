@@ -377,7 +377,7 @@ int get_number_of_work_units(std::string assignment_file) {
 void load_pb_conformation
 ( const ::npctransport_proto::Conformation &conformation,
   IMP::SingletonContainer *diffusers,
-  base::map<core::ParticleType, algebra::Vector3Ds> &sites)
+  boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites)
 {
   IMP_CONTAINER_FOREACH(IMP::SingletonContainer, diffusers, {
       const ::npctransport_proto::Conformation_Particle &pcur =
@@ -406,7 +406,7 @@ void load_pb_conformation
 
 void save_pb_conformation
 ( IMP::SingletonContainer *diffusers,
-  const base::map<core::ParticleType, algebra::Vector3Ds> &sites,
+  const boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites,
   ::npctransport_proto::Conformation *conformation )
 {
   conformation->clear_sites();
@@ -427,7 +427,7 @@ void save_pb_conformation
        pcur->set_j(tr.get_rotation().get_quaternion()[2]);
        pcur->set_k(tr.get_rotation().get_quaternion()[3]);
      });
-  typedef base::map<core::ParticleType, algebra::Vector3Ds> M;
+  typedef boost::unordered_map<core::ParticleType, algebra::Vector3Ds> M;
   for (M::const_iterator it = sites.begin(); it != sites.end(); it++)
     {
       ::npctransport_proto::Conformation::Sites *cur

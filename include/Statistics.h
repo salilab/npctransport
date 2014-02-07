@@ -26,8 +26,8 @@
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/rmf/SaveOptimizerState.h>
 #include <IMP/base/Pointer.h>
-#include <IMP/base/map.h>
-#include <IMP/base/set.h>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 #include "io.h"
 #include "BodyStatisticsOptimizerState.h"
 #include "ParticleTransportStatisticsOptimizerState.h"
@@ -65,28 +65,28 @@ class IMPNPCTRANSPORTEXPORT Statistics : public base::Object {
   // statistics about all fgs, per particle, per chain, per particle type
   typedef std::vector< BodyStatisticsOptimizerStates >
     FGsBodyStatisticsOSs;
-  typedef base::map<core::ParticleType, FGsBodyStatisticsOSs>
+  typedef boost::unordered_map<core::ParticleType, FGsBodyStatisticsOSs>
     FGsBodyStatisticsOSsMap;
   FGsBodyStatisticsOSsMap fgs_bodies_stats_map_;
 
   // statistics about all floaters (kaps etc.), per particle type
-  typedef base::map<core::ParticleType, BodyStatisticsOptimizerStates>
+  typedef boost::unordered_map<core::ParticleType, BodyStatisticsOptimizerStates>
     BodyStatisticsOSsMap;
   BodyStatisticsOSsMap floaters_stats_map_;
 
   // transport statistics about all floaters (kaps etc.) per particle type
-  typedef base::map< core::ParticleType,
+  typedef boost::unordered_map< core::ParticleType,
     ParticleTransportStatisticsOptimizerStates>
     ParticleTransportStatisticsOSsMap;
   ParticleTransportStatisticsOSsMap floaters_transport_stats_map_;
 
   // statistics about entire FG chains, for each FG type
-  typedef base::map<core::ParticleType, ChainStatisticsOptimizerStates>
+  typedef boost::unordered_map<core::ParticleType, ChainStatisticsOptimizerStates>
     ChainStatisticsOSsMap;
   ChainStatisticsOSsMap chains_stats_map_;
 
   // statistics of pairs of interactions for each interaction type
-  typedef base::map< npctransport::InteractionType,
+  typedef boost::unordered_map< npctransport::InteractionType,
     base::PointerMember<BipartitePairsStatisticsOptimizerState> >
     BipartitePairsStatisticsOSMap;
   BipartitePairsStatisticsOSMap interaction_stats_map_;

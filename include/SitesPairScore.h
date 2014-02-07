@@ -21,7 +21,7 @@
 #include <IMP/algebra/vector_search.h>
 #include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/atom/estimates.h>
-#include <IMP/base/set.h>
+#include <boost/unordered_set.hpp>
 #include "internal/sites.h"
 
 #include <boost/array.hpp>

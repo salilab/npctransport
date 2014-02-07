@@ -24,8 +24,8 @@
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/rmf/SaveOptimizerState.h>
 #include <IMP/base/Pointer.h>
-#include <IMP/base/map.h>
-#include <IMP/base/set.h>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 #include "io.h"
 #include "Parameter.h"
 #include "Scoring.h"
@@ -128,13 +128,13 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   base::PointerMember<display::Geometry> static_geom_;
 
-  base::map<core::ParticleType, algebra::Vector3Ds> sites_;
+  boost::unordered_map<core::ParticleType, algebra::Vector3Ds> sites_;
 
-  base::map<core::ParticleType, double> ranges_;
+  boost::unordered_map<core::ParticleType, double> ranges_;
 
   // the list of particles for each particle type
   // e.g., particles_[ ParticleType("fg0") ]
-  base::map<core::ParticleType, ParticlesTemp> particles_;
+  boost::unordered_map<core::ParticleType, ParticlesTemp> particles_;
 
   // the RMF format file to which simulation output is dumped:
   std::string rmf_file_name_;
@@ -481,7 +481,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
       main root (so the diffusing particles are their leaves)
   */
   ParticlesTemp get_particles_of_type(core::ParticleType type) const {
-    base::map<core::ParticleType, ParticlesTemp>::const_iterator iter;
+    boost::unordered_map<core::ParticleType, ParticlesTemp>::const_iterator iter;
     iter = particles_.find(type);
     if (iter != particles_.end()) return iter->second;
     return ParticlesTemp();

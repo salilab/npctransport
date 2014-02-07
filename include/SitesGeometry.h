@@ -16,7 +16,7 @@
 #include <IMP/generic.h>
 #include <IMP/algebra/vector_search.h>
 #include <IMP/atom/estimates.h>
-#include <IMP/base/set.h>
+#include <boost/unordered_set.hpp>
 #include "internal/sites.h"
 
 #include <boost/array.hpp>
@@ -38,7 +38,7 @@ class IMPNPCTRANSPORTEXPORT SitesGeometry : public core::XYZRGeometry {
 /** Show the sites. */
 class IMPNPCTRANSPORTEXPORT TypedSitesGeometry
     : public display::SingletonsGeometry {
-  base::map<core::ParticleType, algebra::Vector3Ds> sites_;
+  boost::unordered_map<core::ParticleType, algebra::Vector3Ds> sites_;
 
  public:
   TypedSitesGeometry(SingletonContainer *sc)
