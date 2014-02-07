@@ -125,8 +125,7 @@ void HierarchyWithSitesSaveLink::do_setup_node(kernel::Model *m,
       RMF::decorator::Ball b = bf_.get(ch);
       b.set_radius(sites.first);
       algebra::Vector3D local = sites.second[i];
-      b.set_coordinates(
-          RMF::Floats(local.coordinates_begin(), local.coordinates_end()));
+      b.set_coordinates(RMF::Vector3(local));
     }
   }
 }

@@ -15,6 +15,7 @@
 #include <IMP/core/PeriodicOptimizerState.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
 #include <IMP/npctransport/typedefs.h>
+#include <boost/unordered_set.hpp>
 #include <deque>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -59,8 +60,8 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
 
   // list of bound particles of each type + list of their contacts after
   // last round of update
-  base::set<ParticleIndex> bounds_I_;
-  base::set<ParticleIndex> bounds_II_;
+  boost::unordered_set<ParticleIndex> bounds_I_;
+  boost::unordered_set<ParticleIndex> bounds_II_;
   std::set<ParticleIndexPair> contacts_; // more efficient if ordered set
 
   // Average since last reset:

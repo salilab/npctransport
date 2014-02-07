@@ -442,7 +442,7 @@ void initialize_positions(SimulationData *sd,
   // optimize each FG separately using a temporary custom scoring function
   // (using RAII class OptimizerSetTemporaryScoringFunction)
   ParticlesTemp obstacles = sd->get_obstacle_particles();
-  typedef base::set<core::ParticleType> ParticleTypeSet;
+  typedef boost::unordered_set<core::ParticleType> ParticleTypeSet;
   ParticleTypeSet const& types = sd->get_fg_types();
   ParticlesTemp cur_particles = obstacles;
   for(ParticleTypeSet::const_iterator

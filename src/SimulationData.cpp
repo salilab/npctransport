@@ -448,7 +448,7 @@ atom::Hierarchies SimulationData::get_fg_chains(atom::Hierarchy root) const
 ParticlesTemp SimulationData::get_obstacle_particles() const
 {
   ParticlesTemp ret;
-  typedef base::set<core::ParticleType> ParticleTypeSet;
+  typedef boost::unordered_set<core::ParticleType> ParticleTypeSet;
   ParticleTypeSet const& o_types = get_obstacle_types();
   for(ParticleTypeSet::const_iterator
         ti = o_types.begin(); ti != o_types.end(); ti++)
