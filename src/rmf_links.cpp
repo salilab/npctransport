@@ -119,10 +119,7 @@ void HierarchyWithSitesSaveLink::do_setup_node(kernel::Model *m,
     std::pair<double, algebra::Vector3Ds> sites = get_sites(type);
     for (unsigned int i = 0; i < sites.second.size(); ++i) {
       RMF::NodeHandle ch = cur_node.add_child("site", RMF::GEOMETRY);
-      RMF::Floats color(3);
-      color[0] = 1;
-      color[1] = 0;
-      color[2] = 0;
+      RMF::Vector3 color(1,0,0);
       cf_.get(ch).set_rgb_color(color);
 
       RMF::decorator::Ball b = bf_.get(ch);
