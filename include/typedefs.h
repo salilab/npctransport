@@ -10,6 +10,7 @@
 
 #include "npctransport_config.h"
 #include <IMP/core/Typed.h>
+#include <boost/unordered_set.hpp>
 #include <utility>
 #include <iostream>
 
@@ -48,9 +49,7 @@ inline ParticleIndexPair make_unordered_particle_index_pair
   return make_unordered_particle_index_pair(pip[0], pip[1]);
 }
 
-
-
-typedef IMP::base::set< core::ParticleType > ParticleTypeSet ;
+typedef boost::unordered_set<core::ParticleType> ParticleTypeSet;
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
