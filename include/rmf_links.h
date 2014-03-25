@@ -25,6 +25,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   RMF::IntKey is_last_entry_from_top_key_;
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
+  // optimization data:
+  RMF::IntKey coordinates_are_optimized_key_;
   boost::unordered_map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
 
  protected:
@@ -61,6 +63,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
   RMF::IntKey is_last_entry_from_top_key_;
   RMF::IntKey n_entries_bottom_key_;
   RMF::IntKey n_entries_top_key_;
+  // optimization data:
+  RMF::IntKey coordinates_are_optimized_key_;
 
   boost::unordered_map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
 

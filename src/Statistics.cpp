@@ -398,25 +398,26 @@ void Statistics::update
           {
             (*stats->mutable_floaters(i)).add_transport_time_points_ns(*it2);
           } // for it2
-        // update avg too:
-        double avg_n_transports_i = times_i.size() * 1.0 / pts_i.size();
-        (*stats->mutable_floaters(i)).set_avg_n_transports( avg_n_transports_i );
-      } // for it1
-  }
+         // update avg too:
+         double avg_n_transports_i = times_i.size() * 1.0 / pts_i.size();
+         (*stats->mutable_floaters(i)).set_avg_n_transports( avg_n_transports_i );
+       } // for it1
+   }
 
-  // FG-floaters interactions
-  ParticleTypeSet const &ft = get_sd()->get_floater_types();
-  for ( ParticleTypeSet::const_iterator
-          it = ft.begin(); it != ft.end(); it++ )
-      {
-        ParticlesTemp ps = get_sd()->get_particles_of_type( *it );
-        if(ps.size() == 0) // TODO: makes sense that this should happen?
-          continue;
-        unsigned int i = find_or_add_floater_of_type( stats, *it );
-        double site_site_pairs, interacting_floaters,
-          bead_floater_pairs, chain_floater_pairs;
-        atom::Hierarchies fgs =  get_sd()->get_fg_chains() ;
-        boost::tie(site_site_pairs, interacting_floaters,
+   // FG-floaters interactions
+   ParticleTypeSet const &ft = get_sd()->get_floater_types();
+   for ( ParticleTypeSet::const_iterator
+           it = ft.begin(); it != ft.end(); it++ )
+       {
+         std::cout<< "GATHERING STATS for type " << *it << std::endl;
+         ParticlesTemp ps = get_sd()->get_particles_of_type( *it );
+         if(ps.size() == 0) // TODO: makes sense that this should happen?
+           continue;
+         unsigned int i = find_or_add_floater_of_type( stats, *it );
+         double site_site_pairs, interacting_floaters,
+           bead_floater_pairs, chain_floater_pairs;
+         atom::Hierarchies fgs =  get_sd()->get_fg_chains() ;
+         boost::tie(site_site_pairs, interacting_floaters,
                    bead_floater_pairs, chain_floater_pairs)
           = get_interactions_and_interacting(ps, fgs);
         // {
@@ -685,6 +686,8 @@ Statistics::get_interactions_and_interacting
         int num = get_number_of_interactions
           (floaters[i], chain_roots[j].get_child(k) );
         if (num > 0) {
+          std::cout << "Found " << num << " site-site interactions between floater " << i <<
+            " and bead " << j << "." << k << std::endl;
           site_site_pairs += num;
           ++bead_floater_pairs;
           if (!floater_found) ++interacting_floaters;

@@ -24,6 +24,9 @@ HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
   n_entries_bottom_key_ =
       fh.get_key<RMF::IntTraits>(npc_cat, "n entries bottom");
   n_entries_top_key_ = fh.get_key<RMF::IntTraits>(npc_cat, "n entries top");
+  RMF::Category imp_cat = fh.get_category("imp");
+  coordinates_are_optimized_key_ =
+    fh.get_key<RMF::IntTraits>(imp_cat,"coordinates_are_optimized");
 }
 
 void HierarchyWithSitesLoadLink::do_load_hierarchy(
@@ -33,6 +36,7 @@ void HierarchyWithSitesLoadLink::do_load_hierarchy(
     // load particle transport directionality if needed
     RMF::NodeConstHandle nh = rmf::get_node_from_association(
         root_node.get_file(), m->get_particle(pi));
+    // TRANSPORTING attributes:
     if (nh.get_has_value(is_last_entry_from_top_key_)) {
       IMP_ALWAYS_CHECK(Transporting::get_is_setup(m, pi),
                        "is_last_entry_from_top is relevant only for particles"
@@ -59,6 +63,16 @@ void HierarchyWithSitesLoadLink::do_load_hierarchy(
               << "; n_entries_bottom " << nh.get_value(n_entries_bottom_key_)
               << "; n_entries_top " << nh.get_value(n_entries_top_key_)
               << " - for particle " << m->get_particle_name(pi) << std::endl);
+    }
+    // IS OPTIMIZED attribute:
+    if (nh.get_has_value(coordinates_are_optimized_key_)) {
+      IMP_ALWAYS_CHECK(core::XYZ::get_is_setup(m, pi),
+                       "coordinates are optimized are only valid"
+                       " for XYZ decorated particles",
+                       IMP::base::ValueException);
+      core::XYZ xyz(m, pi);
+      xyz.set_coordinates_are_optimized
+        ( nh.get_static_value( coordinates_are_optimized_key_ ) );
     }
   }
 }
@@ -92,6 +106,9 @@ HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh)
   n_entries_bottom_key_ =
       fh.get_key<RMF::IntTraits>(npc_cat, "n entries bottom");
   n_entries_top_key_ = fh.get_key<RMF::IntTraits>(npc_cat, "n entries top");
+  RMF::Category imp_cat = fh.get_category("imp");
+  coordinates_are_optimized_key_ =
+    fh.get_key<RMF::IntTraits>(imp_cat,"coordinates_are_optimized");
 }
 
 std::pair<double, algebra::Vector3Ds> HierarchyWithSitesSaveLink::get_sites(
@@ -141,6 +158,11 @@ void HierarchyWithSitesSaveLink::do_save_hierarchy(kernel::Model *m,
       n.set_value(is_last_entry_from_top_key_, t.get_is_last_entry_from_top());
       n.set_value(n_entries_bottom_key_, t.get_n_entries_bottom());
       n.set_value(n_entries_top_key_, t.get_n_entries_top());
+    }
+    if (core::XYZ::get_is_setup(m, p)) {
+      core::XYZ xyz(m, p);
+      n.set_static_value(coordinates_are_optimized_key_,
+                         xyz.get_coordinates_are_optimized());
     }
   }
 }
