@@ -510,7 +510,8 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
   /**
       create a z bias restraint pulling along z-axis for the particles
-      in ps
+      in ps. If a slab is present, the force acts only within tunnel radius
+      distance from its central axis.
 
       @param ps the particles container
       @param k force constant for biasing ps

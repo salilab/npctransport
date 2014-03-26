@@ -37,6 +37,7 @@
 #include <IMP/core/XYZ.h>
 
 #include <numeric>
+#include <limits>
 #include <set>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -477,7 +478,12 @@ Scoring::create_z_bias_restraint(SingletonContainerAdaptor ps, double k)
 const
 {
   ps.set_name_if_default("CreateZBiasRestraintKInput%1%");
-  IMP_NEW(ZBiasSingletonScore, zbsc, (k, get_sd()->get_tunnel_radius()) );
+  // restrict restraint to be over tunnel if applicable
+  double R = std::numeric_limits<double>::max();
+  if (get_sd()->get_has_slab()) {
+    R = get_sd()->get_tunnel_radius();
+  }
+  IMP_NEW(ZBiasSingletonScore, zbsc, (k, R) );
   return
     container::create_restraint(zbsc.get(),
                                 ps.get(),
