@@ -1,0 +1,190 @@
+interaction_k {
+  lower: 10
+}
+interaction_range {
+  lower: 1
+}
+backbone_k {
+  lower: 2.5
+}
+time_step_factor {
+  lower: 10.0
+}
+box_side {
+  lower: 1000
+}
+box_is_on {
+  lower: 1
+}
+slab_thickness {
+  lower: 30
+}
+tunnel_radius {
+  lower: 30
+}
+slab_is_on {
+  lower: 0
+}
+slack {
+  lower: 7.5
+}
+number_of_trials: 1
+maximal_number_of_frames: 1000000000
+fgs {
+  number_of_beads {
+    lower: 7
+  }
+  number {
+    lower: 100
+  }
+  radius {
+    lower: 7.0
+  }
+  interactions {
+    lower: 1
+  }
+  rest_length_factor {
+    lower: 1.25
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "FGS"
+}
+floaters {
+  number {
+    lower: 10
+  }
+  radius {
+    lower: 35.0
+  }
+  interactions {
+    lower: 12
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 0.1
+    upper: 5
+    steps: 5
+    base: 2
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "kap"
+}
+floaters {
+  number {
+    lower: 1
+  }
+  radius {
+    lower: 35.0
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "crap0"
+}
+floaters {
+  number {
+    lower: 1
+  }
+  radius {
+    lower: 35.0
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "small_crap"
+}
+interactions {
+  type0: "FGS"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 5.0
+  }
+  interaction_range {
+    lower: 10.0
+  }
+}
+interactions {
+  type0: "FGS"
+  type1: "crap0"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "FGS"
+  type1: "small_crap"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "FGS"
+  type1: "FGS"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 0.1
+  }
+  interaction_range {
+    lower: 10.0
+  }
+}
+dump_interval_ns: 50
+nonspecific_range {
+  lower: 4
+}
+nonspecific_k {
+  lower: 0.025
+}
+angular_D_factor {
+  lower: 0.1
+}
+statistics_interval_ns: 0.1
+excluded_volume_k {
+  lower: 0.1
+}
+simulation_time_ns: 5000
+statistics_fraction {
+  lower: 1.0
+}
+fg_anchor_inflate_factor: 1.0
+are_floaters_on_one_slab_side: 1
+time_step_wave_factor {
+  lower: 10
+}
+is_exclude_floaters_from_slab_initially: 1
+
