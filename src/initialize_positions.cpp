@@ -301,8 +301,8 @@ void optimize_balls(const ParticlesTemp &ps,
                    "short init factor should be in range (0,1]",
                    ValueException);
   if(save)
-    std::cout << "BEGIN o_b(): Saver has been called so far " <<
-      save->get_number_of_updates() << std::endl;
+    IMP_LOG(VERBOSE, "BEGIN o_b(): Saver has been called so far " <<
+      save->get_number_of_updates() << std::endl);
 
   IMP_LOG(PROGRESS, "optimize_balls for n_particles="
           << ps.size() << std::endl);
@@ -352,7 +352,7 @@ void optimize_balls(const ParticlesTemp &ps,
               if (save) {
                 save->update_always(oss.str());
               }
-              std::cout << "updating RMF " << oss.str() << std::endl;
+              IMP_LOG(VERBOSE, "updating RMF " << oss.str() << std::endl);
             }
           }
         }
@@ -362,8 +362,8 @@ void optimize_balls(const ParticlesTemp &ps,
   IMP_LOG(PROGRESS, "Energy after optimize_balls() is " <<
           bd->get_scoring_function()->evaluate(false) << std::endl);
   if(save)
-    std::cout << "END o_b(): Saver has been called so far " <<
-      save->get_number_of_updates() << std::endl;
+    IMP_LOG(VERBOSE, "END o_b(): Saver has been called so far " <<
+      save->get_number_of_updates() << std::endl);
 }
 
 
@@ -451,12 +451,12 @@ void initialize_positions(SimulationData *sd,
       atom::Hierarchies cur_fg_roots = sd->get_particles_of_type(*it);
       ParticlesTemp cur_fg_beads = atom::get_leaves( cur_fg_roots );
       cur_particles += cur_fg_beads;
-      std::cout << "Optimizing " <<  cur_particles.size()
-               << " particles of type " << *it ;
+      IMP_LOG(VERBOSE, "Optimizing " <<  cur_particles.size()
+               << " particles of type " << *it);
       ParticlesTemp cur_optimizable_particles =
         get_optimizable_particles( cur_particles);
-      std::cout << " ; " << cur_optimizable_particles.size()
-             << " optimizable" << std::endl;
+      IMP_LOG(VERBOSE, " ; " << cur_optimizable_particles.size()
+             << " optimizable" << std::endl);
       if( cur_particles.size() * cur_optimizable_particles.size() == 0){
         IMP_LOG( WARNING, "No optimizable particles of type " << *it );
         continue; // noting to optimize if no (optimizable) particles
@@ -499,13 +499,13 @@ void initialize_positions(SimulationData *sd,
                    sd->get_scoring()->get_chain_scores(),
                    base::PROGRESS,
                    debug, short_init_factor);
-    std::cout <<  "Custom energy after initialization is "
+    IMP_LOG(VERBOSE, "Custom energy after initialization is "
               << sd->get_bd()->get_scoring_function()->evaluate(false)
-              << std::endl;
+              << std::endl);
   }
-  std::cout <<  "Simulation energy after initialization is " <<
+  IMP_LOG(VERBOSE, "Simulation energy after initialization is " <<
           sd->get_bd()->get_scoring_function()->evaluate(false)
-          << std::endl;
+          << std::endl);
   print_fgs(*sd);
   // IMP_NEW(core::RestraintsScoringFunction, rsf,
   //         (rss + RestraintsTemp

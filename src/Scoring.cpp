@@ -318,11 +318,11 @@ Scoring::add_chain_restraint(atom::Hierarchy chain_root,
   chain_scores_.push_back( lwps );
   ParticleIndex pi_chain_root = chain_root.get_particle_index();
   chain_restraints_map_[pi_chain_root] = cr;
-  std::cout << "Added restraint on chain | " << name
+  IMP_LOG(VERBOSE, "Added restraint on chain | " << name
             << " | nchildren | " << chain_root.get_number_of_children()
             << " | rest_name | " << cr->get_name()
             << " | consec_pc_name | " << xcpc->get_name()
-            << std::endl;
+            << std::endl);
   return cr;
 }
 
