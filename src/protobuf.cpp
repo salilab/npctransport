@@ -249,7 +249,7 @@ int assign_internal(const Ranges& r, int work_unit, Floats& values,
   unsigned int nv = std::distance(g.all_indexes_begin(), g.all_indexes_end());
   std::advance(it, work_unit % nv);
   IMP::algebra::VectorKD center = g.get_center(*it);
-  values = Floats(center.coordinates_begin(), center.coordinates_end());
+  values = Floats(center.begin(), center.end());
   indexes.resize(values.size());
   // it-> returns a copy
   copy(*it, indexes.begin());

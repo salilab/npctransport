@@ -12,7 +12,7 @@
 #include <IMP/Particle.h>
 #include <IMP/algebra/Transformation3D.h>
 #include <IMP/OptimizerState.h>
-#include <IMP/optimizer_state_macros.h>
+//#include <IMP/optimizer_state_macros.h>
 #include <IMP/core/PeriodicOptimizerState.h>
 #include <IMP/npctransport/typedefs.h>
 #include <deque>

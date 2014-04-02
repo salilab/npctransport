@@ -11,7 +11,7 @@
 #include "npctransport_config.h"
 #include <IMP/Particle.h>
 #include <IMP/OptimizerState.h>
-#include <IMP/optimizer_state_macros.h>
+//#include <IMP/optimizer_state_macros.h>
 #include <IMP/core/PeriodicOptimizerState.h>
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/atom/Simulator.h>
