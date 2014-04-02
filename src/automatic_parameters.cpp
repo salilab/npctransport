@@ -117,9 +117,9 @@ int get_dump_interval_in_frames(const ::npctransport_proto::Assignment& config,
   const double fs_in_ns = 1000000;
   double ret = config.dump_interval_ns() * fs_in_ns / time_step;
   if (ret == 0) ret = 1;  // make sure at least every frame
-  std::cout << "dump interval = " << std::ceil(ret) << " frames, "
+  IMP_LOG(VERBOSE, "dump interval = " << std::ceil(ret) << " frames, "
             << config.dump_interval_ns() << " ns, time step " << time_step
-            << std::endl;
+            << std::endl);
   ;
   return std::ceil(ret);
 }
@@ -129,9 +129,10 @@ int get_statistics_interval_in_frames(
   const double fs_in_ns = 1000000;
   double ret = config.statistics_interval_ns() * fs_in_ns / time_step;
   if (ret == 0) ret = 1;  // make sure at least every frame
-  std::cout << "stats interval = " << std::ceil(ret) << " frames, originally "
+  IMP_LOG(VERBOSE, "stats interval = " << std::ceil(ret)
+            << " frames, originally "
             << config.statistics_interval_ns() << " ns, time step " << time_step
-            << std::endl;
+            << std::endl);
   ;
   return std::ceil(ret);
 }

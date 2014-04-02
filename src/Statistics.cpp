@@ -340,9 +340,9 @@ void Statistics::update
       (*stats->mutable_floaters(i)).clear_transport_time_points_ns();
     }
   }
-  std::cout << "Updating statistics file " << output_file_name_
+  IMP_LOG(VERBOSE, "Updating statistics file " << output_file_name_
             << " that currently has " << nf << " frames, with " << nf_new
-            << " additional frames" << std::endl;
+            << " additional frames" << std::endl);
 
   // gather the statistics one by one
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
@@ -409,7 +409,7 @@ void Statistics::update
    for ( ParticleTypeSet::const_iterator
            it = ft.begin(); it != ft.end(); it++ )
        {
-         std::cout<< "GATHERING STATS for type " << *it << std::endl;
+         IMP_LOG(VERBOSE, "GATHERING STATS for type " << *it << std::endl);
          ParticlesTemp ps = get_sd()->get_particles_of_type( *it );
          if(ps.size() == 0) // TODO: makes sense that this should happen?
            continue;
@@ -686,8 +686,9 @@ Statistics::get_interactions_and_interacting
         int num = get_number_of_interactions
           (floaters[i], chain_roots[j].get_child(k) );
         if (num > 0) {
-          std::cout << "Found " << num << " site-site interactions between floater " << i <<
-            " and bead " << j << "." << k << std::endl;
+          IMP_LOG(VERBOSE, "Found " << num
+            << " site-site interactions between floater " << i <<
+            " and bead " << j << "." << k << std::endl);
           site_site_pairs += num;
           ++bead_floater_pairs;
           if (!floater_found) ++interacting_floaters;

@@ -145,8 +145,8 @@ void SimulationData::initialize(std::string prev_output_file,
           std::string name = type_of_fg[i].get_string();
           pb_data.mutable_assignment()
             ->mutable_fgs(i)->set_type( name );
-          std::cout << "WARNING: old or corrupt assignment file"
-                    << ", which lacks fg types, using " << name << std::endl;
+          IMP_LOG(WARNING, "old or corrupt assignment file"
+                    << ", which lacks fg types, using " << name << std::endl);
         }
       IMP_USAGE_CHECK(pb_assignment.fgs(i).type() != "",
                       "FG should've been assigned a valued type,"
@@ -161,8 +161,8 @@ void SimulationData::initialize(std::string prev_output_file,
           std::string name = type_of_float[i].get_string();
           pb_data.mutable_assignment()
             ->mutable_floaters(i)->set_type( name );
-          std::cout << "WARNING: old or corrupt assignment file"
-                    << ", which lacks floater types, using " << name << std::endl;
+          IMP_LOG(WARNING, "old or corrupt assignment file"
+                 << ", which lacks floater types, using " << name << std::endl);
         }
       IMP_USAGE_CHECK( pb_assignment.floaters(i).type() != "",
                        "Floater should've been assigned a type thru protobuf.h");
@@ -183,15 +183,15 @@ void SimulationData::initialize(std::string prev_output_file,
   // Load from RMF conformation (or conformation) if they exist in protobuf
   if (pb_data.has_rmf_conformation())
     {
-      std::cout << "Restarting from output file internal RMF conformation"
-                << std::endl ;
+      IMP_LOG(VERBOSE, "Restarting from output file internal RMF conformation"
+                << std::endl);
       RMF::BufferConstHandle buffer(pb_data.rmf_conformation());
       RMF::FileConstHandle fh =
         RMF::open_rmf_buffer_read_only(buffer);
       initialize_positions_from_rmf(fh, 0);
     } else if (pb_data.has_conformation())
     {
-      std::cout << "Restarting from output file conformation" << std::endl ;
+      IMP_LOG(VERBOSE, "Restarting from output file conformation" << std::endl);
       load_pb_conformation(pb_data.conformation(), get_diffusers(), sites_);
     }
 
@@ -328,9 +328,9 @@ void SimulationData::create_floaters(
         {
           ps.push_back( cur_particles[i] );
         }
-      std::cout << "Biasing " << n_bias << " floaters"
+      IMP_LOG(VERBOSE, "Biasing " << n_bias << " floaters"
                 << " of type " << type
-                << std::endl;
+                << std::endl);
       get_scoring()->add_z_bias_restraint(ps, k);
     }
 
@@ -471,8 +471,8 @@ void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
   // RMF::show_hierarchy_with_values(f.get_root_node());
   link_hierarchies_with_sites(f, get_root().get_children());
   if (frame == -1) {
-    std::cout << "Loading from last frame of RMF file with "
-              << f.get_number_of_frames() << " frames" << std::endl;
+    IMP_LOG(VERBOSE, "Loading from last frame of RMF file with "
+              << f.get_number_of_frames() << " frames" << std::endl);
     IMP::rmf::load_frame(f, f.get_number_of_frames() - 1);
   } else {
     IMP::rmf::load_frame(f, frame);
@@ -518,8 +518,8 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_sos_writer() {
     RMF::FileHandle fh = RMF::create_rmf_file(get_rmf_file_name());
     link_rmf_file_handle(fh, is_save_restraints_to_rmf_);
     IMP_NEW(rmf::SaveOptimizerState, los, (get_model(), fh));
-    std::cout << "Dump interval for RMF SaveOptimizerState set to "
-              << dump_interval_frames_ << std::endl;
+    IMP_LOG(VERBOSE, "Dump interval for RMF SaveOptimizerState set to "
+              << dump_interval_frames_ << std::endl);
     los->set_period(dump_interval_frames_);
     rmf_sos_writer_ = los;
   }

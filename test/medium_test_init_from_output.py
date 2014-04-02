@@ -56,9 +56,9 @@ class Tests(IMP.test.TestCase):
         """ assert that sd1 and sd2 have identical Transporting statistics """
         for d1, d2 in zip(sd1.get_diffusers().get_particles(),
                           sd2.get_diffusers().get_particles()):
-            if(not IMP.npctransport.Transporting.particle_is_instance(d1)):
+            if(not IMP.npctransport.Transporting.get_is_setup(d1)):
                 continue
-            if(not IMP.npctransport.Transporting.particle_is_instance(d2)):
+            if(not IMP.npctransport.Transporting.get_is_setup(d2)):
                 continue
             t1 = IMP.npctransport.Transporting(d1)
             t2 = IMP.npctransport.Transporting(d2)
@@ -177,7 +177,7 @@ class Tests(IMP.test.TestCase):
                ).get_quaternion() ]
             for x,y in zip(pc+pq, expected_particles[i]):
                 self.assertAlmostEqual(x,y, delta=0.1)
-#            if(not IMP.npctransport.Transporting.particle_is_instance(p)):
+#            if(not IMP.npctransport.Transporting.get_is_setup(p)):
 #                continue
 #            pt = IMP.npctransport.Transporting(p)
 #            print "T: ", pt.get_is_last_entry_from_top(),
