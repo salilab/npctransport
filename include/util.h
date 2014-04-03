@@ -35,7 +35,7 @@ ParticlesTemp get_optimizable_particles
    @param config_txt the input textual protobuf config file
    @param config_pb the output binary protobuf file
 */
-void configuration_txt2pb
+IMPNPCTRANSPORTEXPORT void configuration_txt2pb
 (std::string config_txt, std::string config_pb);
 
 
