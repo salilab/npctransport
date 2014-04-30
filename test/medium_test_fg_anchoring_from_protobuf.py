@@ -75,8 +75,8 @@ class Tests(IMP.test.TestCase):
         coords = self._create_cfg_file_with_fg_anchors( cfg_file )
         print "assigning parameter ranges from config"
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
-        sd= IMP.npctransport.SimulationData(assign_file, False,
-                                            self.get_tmp_file_name("out.rmf"));
+        sd= IMP.npctransport.SimulationData(assign_file, False, "")
+#                                            self.get_tmp_file_name("out.rmf"));
         self._assert_anchors_in_place(sd, coords)
         # verify that anchors remain intact during optimization
         if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
