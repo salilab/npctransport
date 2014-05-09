@@ -256,6 +256,11 @@ void test_ranges() {
 }
 
 int main(int, char **) {
+  if(IMP::base::get_check_level() >= IMP::base::USAGE){
+    std::cout << "Skipping test because check level is greater or equal USAGE"
+              << std::endl;
+    return 0;
+  }
   test_ranges<1, 1, false>();
   test_ranges<1, 1, true>();
   test_ranges<4, 1, false>();

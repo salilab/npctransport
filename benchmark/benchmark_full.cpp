@@ -61,7 +61,11 @@ int main(int argc, char *argv[]) {
 
     sd->get_model()->update();
     double timev, score = 0;
-    IMP_TIME(score += sd->get_bd()->optimize(1000), timev);
+    if(IMP::base::get_check_level() >= IMP::base::USAGE) {
+      IMP_TIME(score += sd->get_bd()->optimize(10), timev);
+    } else {
+      IMP_TIME(score += sd->get_bd()->optimize(1000), timev);
+    }
 #ifdef _OMP
     std::string algo = "openmp";
 #else
