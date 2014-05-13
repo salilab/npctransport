@@ -39,9 +39,6 @@ int main(int argc, char *argv[]) {
      IMP_NPC_PARSE_OPTIONS(argc, argv);
      bool verbose = false;
      unsigned int acceleration_factor = 100;
-    if(IMP::base::get_check_level() >= IMP::base::USAGE) {
-      acceleration_factor = 6000;
-    }
     double short_init_factor = 1.0 / acceleration_factor;
     std::string config_pb = IMP::base::create_temporary_file_name
       ("benchmark_initalize.pb", ".pb");
@@ -61,6 +58,11 @@ int main(int argc, char *argv[]) {
     IMP::base::Pointer<IMP::npctransport::SimulationData> sd =
       new IMP::npctransport::SimulationData(output, true); //, rmf_file);
 
+    if(IMP::base::get_check_level() >= IMP::base::USAGE) {
+      std::cout << "skipping actual call to initialize_positions"
+                << " when check level is larger than USAGE" << std::endl;
+      return 0;
+    }
     IMP::npctransport::initialize_positions(sd, IMP::RestraintsTemp(),
                                             verbose, short_init_factor);
     std::cout << "Energy after benchmark initialization "

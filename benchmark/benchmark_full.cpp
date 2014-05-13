@@ -56,13 +56,13 @@ int main(int argc, char *argv[]) {
       std::ofstream outf(output.c_str(), std::ios::binary);
       prev_output.SerializeToOstream(&outf);
     }
-    IMP::base::set_log_level(IMP::base::PROGRESS);
+    IMP::base::set_log_level(IMP::base::SILENT);
     sd = new IMP::npctransport::SimulationData(output, false);
 
     sd->get_model()->update();
     double timev, score = 0;
     if(IMP::base::get_check_level() >= IMP::base::USAGE) {
-      IMP_TIME(score += sd->get_bd()->optimize(10), timev);
+      IMP_TIME(score += sd->get_bd()->optimize(1), timev);
     } else {
       IMP_TIME(score += sd->get_bd()->optimize(1000), timev);
     }
