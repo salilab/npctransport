@@ -372,7 +372,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
     if (!final_conformations.empty()) {
       std::cout << "Printing last frame to " << final_conformations
                 << std::endl;
-      IMP::rmf::save_frame(final_rmf_fh, final_rmf_fh.get_number_of_frames());
+      IMP::rmf::save_frame(final_rmf_fh);
     }
   }
   std::cout << "Entire run finished" << std::endl;

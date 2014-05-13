@@ -561,7 +561,7 @@ void Statistics::update
     {
       RMF::FileHandle fh = RMF::create_rmf_buffer(buf);
       const_cast<SimulationData*>(get_sd())->link_rmf_file_handle(fh, false);
-      rmf::save_frame(fh, 0);
+      rmf::save_frame(fh);
     }
     output.set_rmf_conformation(buf.get_string());
   }
