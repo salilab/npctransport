@@ -382,6 +382,9 @@ Scoring::create_close_diffusers_container
   // IMP_NEW( container::ClosePairContainer, cpc,
   //            particles,
   //            get_range(), slack_) );
+  // TODO: this is actually problematic cause applies not only
+  //       within chains (which it should) but also between chain terminii
+  //       or consecutive particles
   IMP_NEW( ExclusiveConsecutivePairFilter, ecpf, () );
   cpc->add_pair_filter( ecpf );
   return cpc.release();
