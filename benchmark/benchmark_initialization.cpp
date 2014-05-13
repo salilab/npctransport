@@ -17,6 +17,7 @@
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
 #include <IMP/base/Pointer.h>
+#include <IMP/base/flags.h>
 #include <IMP/Restraint.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/core/Typed.h>
@@ -58,7 +59,8 @@ int main(int argc, char *argv[]) {
     IMP::base::Pointer<IMP::npctransport::SimulationData> sd =
       new IMP::npctransport::SimulationData(output, true); //, rmf_file);
 
-    if(IMP::base::get_check_level() >= IMP::base::USAGE) {
+    if(IMP::base::get_check_level() >= IMP::base::USAGE ||
+       IMP::base::quick_test) {
       std::cout << "skipping actual call to initialize_positions"
                 << " when check level is larger than USAGE" << std::endl;
       return 0;

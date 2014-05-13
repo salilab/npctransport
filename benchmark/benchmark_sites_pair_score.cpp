@@ -20,6 +20,7 @@
 #include <IMP/core/BallMover.h>
 #include <IMP/core/SphereDistancePairScore.h>
 #include <IMP/base/log_macros.h>
+#include <IMP/base/flags.h>
 #include <IMP/Model.h>
 #include <IMP/Particle.h>
 #include <IMP/base/Pointer.h>
@@ -256,7 +257,8 @@ void test_ranges() {
 }
 
 int main(int, char **) {
-  if(IMP::base::get_check_level() >= IMP::base::USAGE){
+  if(IMP::base::get_check_level() >= IMP::base::USAGE
+     || IMP::base::quick_test){
     std::cout << "Skipping test because check level is greater or equal USAGE"
               << std::endl;
     return 0;

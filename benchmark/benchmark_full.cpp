@@ -22,6 +22,7 @@
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
 #include <IMP/base/enums.h>
+#include <IMP/base/flags.h>
 #include <IMP/base/Pointer.h>
 #include <IMP/Restraint.h>
 #include <IMP/SingletonScore.h>
@@ -61,7 +62,8 @@ int main(int argc, char *argv[]) {
 
     sd->get_model()->update();
     double timev, score = 0;
-    if(IMP::base::get_check_level() >= IMP::base::USAGE) {
+    if(IMP::base::get_check_level() >= IMP::base::USAGE
+       || IMB::base::quick_test) {
       IMP_TIME(score += sd->get_bd()->optimize(1), timev);
     } else {
       IMP_TIME(score += sd->get_bd()->optimize(1000), timev);
