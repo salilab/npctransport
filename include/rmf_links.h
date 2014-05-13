@@ -38,6 +38,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
                                  kernel::ParticleIndex cur,
                                  RMF::NodeConstHandle node) IMP_OVERRIDE {
     IMP_NOT_IMPLEMENTED;
+    IMP_UNUSED(m);     IMP_UNUSED(root);
+    IMP_UNUSED(cur);    IMP_UNUSED(node);
   }
 
   /** load the values of a hierarchy. also

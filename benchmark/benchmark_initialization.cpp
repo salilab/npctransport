@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
       new IMP::npctransport::SimulationData(output, true); //, rmf_file);
 
     if(IMP::base::get_check_level() >= IMP::base::USAGE ||
-       IMP::base::quick_test) {
+       IMP::base::get_is_quick_test) {
       std::cout << "skipping actual call to initialize_positions"
                 << " when check level is larger than USAGE" << std::endl;
       return 0;
