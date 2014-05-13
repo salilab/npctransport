@@ -234,7 +234,8 @@ int assign_internal(const Ranges& r, int work_unit, Floats& values,
                                                IMP::algebra::VectorKD(ub)),
                    factors, steps, true));
   if (show_steps) {
-    Grid::ExtendedIndex ei(Ints(g.get_dimension(), 0));
+    Ints dzeros(g.get_dimension(), 0);
+    Grid::ExtendedIndex ei(dzeros.begin(), dzeros.end());
     for (unsigned int i = 0; i < g.get_dimension(); ++i) {
       std::cout << r[i].name << ": ";
       for (unsigned int j = 0; j < g.get_number_of_voxels(i); ++j) {

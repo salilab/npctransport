@@ -462,7 +462,7 @@ ParticlesTemp SimulationData::get_obstacle_particles() const
 
 
 
-// Note and beware: this method assumes that the hierarchy in the RMF file
+// Behold and beware: this method assumes that the hierarchy in the RMF file
 // was constructed in the same way as the hierarchy within this SimulationData
 // object. Use with great caution, otherwise unexpected results may arise
 void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
@@ -473,10 +473,9 @@ void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
   if (frame == -1) {
     IMP_LOG(VERBOSE, "Loading from last frame of RMF file with "
               << f.get_number_of_frames() << " frames" << std::endl);
-    IMP::rmf::load_frame(f, f.get_number_of_frames() - 1);
-  } else {
-    IMP::rmf::load_frame(f, frame);
+    frame = f.get_number_of_frames() - 1;
   }
+  IMP::rmf::load_frame(f, RMF::FrameID(frame) );
 }
 
 void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
