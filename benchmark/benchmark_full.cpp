@@ -10,8 +10,6 @@
 #include <IMP/npctransport/particle_types.h>
 #include <IMP/algebra.h>
 #include <IMP/core.h>
-#include <IMP/atom.h>
-#include <IMP/display.h>
 #include <IMP/rmf.h>
 #include <IMP.h>
 #include <RMF/utility.h>
