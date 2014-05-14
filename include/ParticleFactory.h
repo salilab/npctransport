@@ -13,6 +13,7 @@
 #include <IMP/base/WeakPointer.h>
 #include <IMP/core/Typed.h>
 #include <IMP/display/Color.h>
+
 #include <string>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE

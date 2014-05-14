@@ -1,0 +1,5 @@
+Random seed is 657241583
+Restart simulation from output2B.pb
+[libprotobuf ERROR google/protobuf/message_lite.cc:123] Can't parse message of type "npctransport_proto.Output" because it is missing required fields: assignment, statistics
+Error: Couldn't read restart file output2B.pb
+
