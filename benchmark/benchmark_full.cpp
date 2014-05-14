@@ -62,8 +62,8 @@ int main(int argc, char *argv[]) {
 
     sd->get_model()->update();
     double timev, score = 0;
-    if(IMP::base::get_check_level() >= IMP::base::USAGE
-       || IMP::base::get_is_quick_test) {
+    if(IMP::base::get_check_level() >= IMP::base::USAGE ) {
+       //       || IMP::base::get_is_quick_test) {
       IMP_TIME(score += sd->get_bd()->optimize(1), timev);
     } else {
       IMP_TIME(score += sd->get_bd()->optimize(1000), timev);
