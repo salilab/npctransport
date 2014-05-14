@@ -16,21 +16,6 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-/**
-   create a particle associated with the model of sd, with the given params
-
-   @param sd the simulation data whose model is associated with the new particle
-             - the particle is also saved to the sd diffusers list
-   @param radius particle radius (A)
-   @param angular_D_factor angular diffusion factor
-   @param D_factor diffusion factor
-   @param c color for the particle
-   @param type the type of the particle
- */
-IMPNPCTRANSPORTEXPORT Particle *create_particle(
-    SimulationData *sd, double radius,
-    double angular_D_factor, double D_factor,
-    display::Color c, core::ParticleType type);
 
 /**
    Create a chain particle hierarchy, associated with the model of sd,
