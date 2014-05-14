@@ -286,17 +286,17 @@ void SimulationData::create_floaters(
   cur_root->set_name(type.get_string());
   atom::Hierarchy(get_root()).add_child(cur_root);
   // populate hierarchy with particles:
+  ParticleFactory pf(this, f_data.radius().value(),
+                     f_data.d_factor().value(),
+                     angular_d_factor_,
+                     color, type);
   ParticlesTemp cur_particles;
   for (int j = 0; j < f_data.number().value(); ++j)
     {
-      double dc = f_data.d_factor().value();
-      Particle *cur_p =
-        create_particle(this, f_data.radius().value(),
-                        angular_d_factor_, dc,
-                        color, type);
-      cur_particles.push_back(cur_p);
+      Particle *cur_p = pf.create();
+      cur_particles.push_back( cur_p );
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
-    get_statistics()->add_floater_stats(cur_p); // stats
+      get_statistics()->add_floater_stats(cur_p); // stats
     }
   particles_[type] = cur_particles;
   // add interaction sites to particles of this type:
@@ -357,13 +357,13 @@ void SimulationData::create_obstacles
   cur_root->set_name(type.get_string());
   atom::Hierarchy(get_root()).add_child(cur_root);
   // populate hierarchy with particles:
+  ParticleFactory pf(this, o_data.radius().value(),
+                     o_data.d_factor().value(),
+                     angular_d_factor_,
+                     display::Color(.3, .6, .6), type);
   ParticlesTemp cur_particles;
   for (int j = 0; j < o_data.xyzs_size(); ++j) {
-      double dc = o_data.d_factor().value();
-      Particle *cur_p =
-        create_particle(this, o_data.radius().value(),
-                        angular_d_factor_, dc,
-                        display::Color(.3, .6, .6), type);
+      Particle *cur_p = pf.create();
       cur_particles.push_back( cur_p );
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
       ::npctransport_proto::Assignment_XYZ xyz = o_data.xyzs(j);
