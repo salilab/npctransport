@@ -14,18 +14,27 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+/** a hierarchy of centroids to represent a polymer chain with
+    centroids in the non-leaf nodes, singleton particles in the
+    leaves, and TAMD images attached to the centroids by spring
+
+    p - root of hierarchy
+    centroids - the list of centroids in tree(p)
+    images - corresponding TAMD images for each centroid in centroids
+    R - corresponding springs that attch each TAMD image to each centroid
+*/
 struct TAMD_chain {
 public:
-  IMP::Particle* p;
+  IMP::Particle* root;
   IMP::Particles centroids;
   IMP::Particles images;
   IMP::Restraints R;
 public:
-TAMD_chain(IMP::Particle* pp,
+TAMD_chain(IMP::Particle* rroot,
            IMP::Particles ccentroids,
            IMP::Particles iimages,
            IMP::Restraints RR):
-  p(pp), centroids(ccentroids), images(iimages), R(RR)
+  root(rroot), centroids(ccentroids), images(iimages), R(RR)
   {}
 };
 
@@ -59,7 +68,6 @@ TAMD_chain(IMP::Particle* pp,
   each d centroids in a lower level, with a real centroid and
   restrained centroid realization
 
-  @param m       Model
   @param pf      A factory for producing singleton particles
                  (the leaves of the chain)
   @param nlevels Number of tamd levels in the hierarchy. If 0 then return a
@@ -77,15 +85,20 @@ TAMD_chain(IMP::Particle* pp,
 */
 //boost::tuple<IMP::Particle*, IMP::Particles, IMP::Particles, IMP::Restraints>
 TAMD_chain
-create_tamd_chain( Model* m,
-                   ParticleFactory pf,
+create_tamd_chain( ParticleFactory pf,
                    unsigned int nlevels,
                    unsigned int d,
                    std::vector<double> T_factors,
                     std::vector<double> F_factors,
                    std::vector<double> Ks );
 
-// def _get_ordered_leaves(self, h):
+
+/**
+    get leave particles by certain order that is guaranteed to cluster
+    leave particles with a common ancestor together, for hierarchy h
+*/
+Particles get_ordered_tamd_leaves(core::Hierarchy root);
+
 
 
 

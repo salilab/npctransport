@@ -19,6 +19,7 @@
 #include <IMP/display/Colored.h>
 
 #include <boost/tuple/tuple.hpp>
+#include <cmath>
 #include <cstdio>
 #include <sstream>
 
@@ -37,22 +38,27 @@ Particle *create_tamd_fg_chain
   double D_factor = fg_data.d_factor().value();
   double angular_D_factor = sd->get_angular_d_factor();
   ParticleFactory pf(sd, radius, D_factor, angular_D_factor, c, type);
-  ParticlesTemp particles;
-  for (int i = 0; i < n; ++i) {
-    particles.push_back( pf.create() );
+  int d = 2; // outdegree in TAMD hierarchy, TODO: parametrize
+  int n_levels = ceil(log(n)/log(d)); // log_d{n}
+  std::vector<double> T_factors(n_levels); // temperature scaling
+  std::vector<double> F_factors(n_levels); // friction scaling
+  std::vector<double> Ks(n_levels); // TAMD spring constant
+  for(int i=0; i < n_levels; i++) { // i ~ increasing depth from root
+    int level = n_levels - i; // level above leaves
+    T_factors[i] = 3 * pow(2,level-1);
+    F_factors[i] = 15 * pow(3,level-1);
+    Ks[i] = 10;
   }
-  // put in hierarchy
-  atom::Hierarchy root =
-    atom::Hierarchy::setup_particle( new Particle(sd->get_model() ),
-                                     particles );
-  std::string name = type.get_string();
-  root->set_name(name);
+  TAMD_chain tc = create_tamd_chain(pf, n, d,
+                                    T_factors, F_factors, Ks);
+
   // add chain backbone restraint
   double rlf = fg_data.rest_length_factor().value();
+  Particles L = get_ordered_tamd_leaves( core::Hierarchy(tc.root) );
   sd->get_scoring()->add_chain_restraint
-    ( root, rlf, name + "chain restraint" );
+    ( L, rlf, type.get_string() + "chain restraint" );
 
-  return root;
+  return tc.root;
 }
 
 namespace {
@@ -95,9 +101,8 @@ Particle* create_tamd_image( Particle* p_ref,
   @param m       Model
   @param pf      A factory for producing singleton particles
                  (the leaves of the chain)
-  @param nlevels Number of tamd levels in the hierarchy. If 0 then return a
-                 singleton particle.
-  @param d       The out degree of each non-leaf node (# of children)
+  @param n       Number of particles in chain (=leaves). If 1, return singleton.
+  @param d       maximal out degree of each non-leaf node (# of children)
   @param T_factors A list of length nlevels with temeprature at each level
                  from top to bottom
   @param G_factors A list of length nlevels with friction factor (G for gamma)
@@ -110,9 +115,8 @@ Particle* create_tamd_image( Particle* p_ref,
 */
 //boost::tuple<IMP::Particle*, IMP::Particles, IMP::Particles, IMP::Restraints>
 TAMD_chain
-create_tamd_chain( Model* m,
-                   ParticleFactory pf,
-                   unsigned int nlevels,
+create_tamd_chain( ParticleFactory pf,
+                   unsigned int n,
                    unsigned int d,
                    std::vector<double> T_factors,
                     std::vector<double> F_factors,
@@ -123,7 +127,10 @@ create_tamd_chain( Model* m,
   IMP::Particles images;
   IMP::Restraints R;
 
-  if (nlevels==0)
+  Model* m=pf.get_model();
+  int nlevels = ceil(log2(n));
+
+  if (n==1)
     {
       // Create and return a singleton leaf:
       Particle* p =  pf.create("leaf %1%");
@@ -135,23 +142,26 @@ create_tamd_chain( Model* m,
 
   // Build <d> children recursively:
   {
+    // factors and n particles in each child chain
     std::vector<double> T_factors1(T_factors.begin()+1, T_factors.end());
     std::vector<double> F_factors1(F_factors.begin()+1, F_factors.end());
     std::vector<double> Ks1(Ks.begin()+1, Ks.end());
-    for (unsigned int i = 0; i < d; i++) {
-      TAMD_chain tc = create_tamd_chain(m, pf, nlevels - 1, d,
+    int per_child_base = n / d;
+    int n_left = n;
+    while(n_left > 0){
+      int n_excess = n_left % d;
+      int per_child = per_child_base + (n_excess > 0 ? 1 : 0);
+      TAMD_chain child = create_tamd_chain(pf, per_child, d,
                                         T_factors, F_factors1, Ks1);
+      n_left -= child.centroids.size();
       // Accumulate all results
-      children.push_back( tc.p );
-      std::copy ( tc.centroids.begin(),
-                  tc.centroids.end(),
-                  back_inserter(centroids) );
-      std::copy ( tc.images.begin(),
-                  tc.images.end(),
-                  back_inserter(images) );
-      std::copy ( tc.R.begin(),
-                  tc.R.end(),
-                  back_inserter(R) );
+      children.push_back( child.root );
+      centroids.insert( centroids.end(),
+                       child.centroids.begin(), child.centroids.end());
+      images.insert ( images.end(),
+                      child.images.begin(), child.images.end() );
+      R.insert( R.end(),
+                child.R.begin(), child.R.end());
     }
   }
 
@@ -195,17 +205,23 @@ create_tamd_chain( Model* m,
   return TAMD_chain(pc,centroids, images, R);
 }
 
-    // def _get_ordered_leaves(self, h):
-    //     '''
-    //     get leave particles by certain order that is guaranteed to cluster
-    //     leave particles with a common ancestor together, for hierarchy h
-    //     '''
-    //     if(h.get_number_of_children() == 0):
-    //         return [h.get_particle()]
-    //     leaves = []
-    //     for child in h.get_children():
-    //         leaves = leaves + self._get_ordered_leaves(child)
-    //     return leaves
+/**
+   get leave particles by certain order that is guaranteed to cluster
+   leave particles with a common ancestor together, for hierarchy h
+*/
+Particles get_ordered_tamd_leaves(core::Hierarchy root) {
+  int n = root.get_number_of_children();
+  if(n == 0){
+    return Particles(1, root.get_particle());
+  }
+  Particles leaves;
+  for(int i = 0 ; i < n; i++) {
+    Particles sub_leaves = get_ordered_tamd_leaves(root.get_child(i));
+    leaves.insert(leaves.end(),
+                  sub_leaves.begin(), sub_leaves.end());
+  }
+  return leaves;
+}
 
 
 IMPNPCTRANSPORT_END_NAMESPACE
