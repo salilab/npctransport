@@ -77,7 +77,11 @@ class ParticleFactory {
      @param name - name of particle. If empty, the return value of
      this->type_.get_string() is used
   */
-  Particle* create(std::string name="");
+  IMP::Particle* create(std::string name="");
+
+  Model* get_model() {
+    return sd_->get_model();
+  }
 };
 
 

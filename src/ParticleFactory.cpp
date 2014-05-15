@@ -25,7 +25,7 @@ ParticleFactory::create(std::string name) {
   if(name==""){
     name = type_.get_string();
   }
-  Particle* p = new Particle(sd_->get_model(), name);
+  Particle* p = new Particle(get_model(), name);
   core::XYZR p_xyzr= core::XYZR::setup_particle(p);
   p_xyzr.set_radius(radius_);
   p_xyzr.set_coordinates(algebra::get_zero_vector_d<3>());

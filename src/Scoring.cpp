@@ -294,21 +294,20 @@ double Scoring::get_interaction_range_for
 
 /** add a restraint on particles in an FG nup chain */
 Restraint*
-Scoring::add_chain_restraint(atom::Hierarchy chain_root,
+Scoring::add_chain_restraint(Particles P,
                              double rest_length_factor,
                              std::string name)
 {
-  IMP_ALWAYS_CHECK( chain_root.get_number_of_children() > 0,
+  IMP_ALWAYS_CHECK( P.size() > 0,
                     "No Particles passed.", IMP::base::ValueException );
   IMP_ALWAYS_CHECK( rest_length_factor > 0,
-                    "negative rest length factor is not valid",
+                    "non-positive rest length factor is not valid",
                     IMP::base::ValueException );
-
 
   // Exclusive means that the particles will be in no other
   // ConsecutivePairContainer this assumption accelerates certain computations
   IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer, xcpc,
-          (chain_root.get_children(), "%1% " + name + " consecutive pairs"));
+          (P, "%1% " + name + " consecutive pairs"));
   // add chain restraint
   IMP_NEW(LinearWellPairScore, lwps,
           ( rest_length_factor, get_backbone_k() ) );
@@ -316,46 +315,48 @@ Scoring::add_chain_restraint(atom::Hierarchy chain_root,
     IMP::container::create_restraint
     ( lwps.get(), xcpc.get(),  "%1% " + name  );
   chain_scores_.push_back( lwps );
-  ParticleIndex pi_chain_root = chain_root.get_particle_index();
-  chain_restraints_map_[pi_chain_root] = cr;
-  IMP_LOG(VERBOSE, "Added restraint on chain | " << name
-            << " | nchildren | " << chain_root.get_number_of_children()
-            << " | rest_name | " << cr->get_name()
-            << " | consec_pc_name | " << xcpc->get_name()
-            << std::endl);
+  // save restraint and chain ids to appropriate maps
+  ParticleIndex id = P[0]->get_index();
+  chain_restraints_map_[id] = cr;
+  for(unsigned int i = 0; i < P.size(); i++){
+    ParticleIndex pi = P[i]->get_index();
+    chain_ids_map_[pi] = id;
+  }
+
   return cr;
 }
 
 
 IMP::Restraints
 Scoring::get_chain_restraints_on
-( IMP::SingletonContainerAdaptor particles ) const
+( IMP::SingletonContainerAdaptor P ) const
 {
-  particles.set_name_if_default("GetChainRestraintsOnInput%1%");
-  IMP::Restraints ret_rs;
-  std::set<ParticleIndex> roots_added;
+  P.set_name_if_default("GetChainRestraintsOnInput%1%");
+  IMP::Restraints R;
+  std::set<ParticleIndex> ids_added;
   IMP_CONTAINER_FOREACH
     ( container::ListSingletonContainer,
-      particles,
+      P,
       {
-        if(get_sd()->get_is_fg(_1)){
-          IMP_USAGE_CHECK(atom::Hierarchy::get_is_setup(get_model(), _1),
-                          "all particles in list must be hierarchy compatible");
-          atom::Hierarchy h=atom::Hierarchy(get_model(), _1);
-          ParticleIndex pi_dad = h.get_parent().get_particle_index();
-          if( chain_restraints_map_.find(pi_dad) != chain_restraints_map_.end()
-              && roots_added.find(pi_dad) == roots_added.end()
-              )
+        if(get_sd()->get_is_fg(_1) &&
+           chain_ids_map_.find(_1) != chain_ids_map_.end()){
+          ParticleIndex id = chain_ids_map_.find(_1)->second;
+          IMP_USAGE_CHECK(chain_restraints_map_.find(id) !=
+                          chain_restraints_map_.end(),
+                          "For some reason a particle appears in chain_ids_map_"
+                          << " but its id is missing from chain_restraints_map_");
+          if( ids_added.find(id) == ids_added.end() )
             {
-              roots_added.insert(pi_dad); // mark to prevent duplicates
+              // mark to prevent duplicates:
+              ids_added.insert(id);
               Restraint* r =
-                chain_restraints_map_.find(pi_dad)->second.get();
-              ret_rs.push_back( r );
+                chain_restraints_map_.find(id)->second.get();
+              R.push_back( r );
             }
         }
       }
       ); // IMP_CONTAINER_FOREACH
-  return ret_rs;
+  return R;
 }
 
 

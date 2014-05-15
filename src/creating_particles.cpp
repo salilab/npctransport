@@ -46,7 +46,7 @@ Particle *create_fg_chain
  // add chain backbone restraint
  double rlf = fg_data.rest_length_factor().value();
  sd->get_scoring()->add_chain_restraint
-   ( root, rlf, name + "chain restraint" );
+   ( particles, rlf, name + "chain restraint" );
 
   return root;
 }

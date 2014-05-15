@@ -101,11 +101,18 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
   LinearWellPairScores chain_scores_;
 
-  // a map from particle indexes of chain parents to corresponding
-  // chain backbone restraints
-  typedef boost::unordered_map< ParticleIndex, IMP::base::PointerMember<Restraint> >
+  // a map from particle indexes of chain identifiers to corresponding
+  // chain backbone restraints (see chain_ids_map)
+  typedef boost::unordered_map
+    < ParticleIndex, IMP::base::PointerMember<Restraint> >
     t_chain_restraints_map;
   t_chain_restraints_map chain_restraints_map_;
+  // a map from particle indexes of particles to a particle index of a
+  // representative particle that identifies the chain
+  // (see chain_restraints_map)
+  typedef boost::unordered_map< ParticleIndex, ParticleIndex >
+    t_chain_ids_map;
+  t_chain_ids_map chain_ids_map_;
 
   // particles to be z-biased on call to get_z_bias_restraints()
   // with key being the k value of each particle subset
@@ -438,14 +445,14 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
       container::ExclusiveConsecutivePairFilter to filter out all
       pairs of particles connected by such chain restraints.
 
-      @param chain_root the root of the chain whose particles are restrained
+      @param P the chain particles in consecutive order
       @param rest_length_factor the rest length factor of consecutive chain
                                 beads relative to their sum of radii
       @param name the name of the chain (to be used for naming the restraint
 
       @return pointer to the newly created restraint
   */
-  Restraint* add_chain_restraint(IMP::atom::Hierarchy chain_root,
+  Restraint* add_chain_restraint(Particles P,
                                  double rest_length_factor,
                                  std::string name);
 
