@@ -7,7 +7,7 @@
 
 #include <IMP/npctransport/main.h>
 #include <IMP/npctransport/npctransport_config.h>
-#include <IMP/npctransport/particle_types.h>
+#include <IMP/npctransport/creating_tamd_particles.h>
 //#include <IMP/core.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/algebra/Vector2D.h>
@@ -59,14 +59,15 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
                            sd.get_box().get_corner(1)[1]);
   algebra::BoundingBox2D surface(lower_corner_XY, upper_corner_XY);
   // get fg
-  atom::Hierarchies chains = sd.get_fg_chains();
+  atom::Hierarchies chains_roots = sd.get_fg_chain_roots();
   // anchor fgs to surface,
   // for now using random non-overlapping points
   // create a set of random sites (for now)
-  double r = core::XYZR(chains[0].get_child(0)).get_radius();
+  IMP::Pointer<Chain> first_chain = get_chain(chain_roots[0]);
+  double r = core::XYZR(first_chain->beads[0]).get_radius();
   Vector2Ds sites;
-  std::cout << IMP::Showable(sites) << std::endl;
-  while (sites.size() < chains.size()) {
+  std::cout << IMP::base::Showable(sites) << std::endl;
+  while (sites.size() < chains_roots.size()) {
     Vector2D cur = get_random_vector_in(surface);
     bool bad = false;
     for (unsigned int i = 0; i < sites.size(); ++i) {
@@ -83,8 +84,8 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
   }
   // anchor each fg chain to a site
   for (unsigned int i = 0; i < chains.size(); ++i) {
-    atom::Hierarchy r(chains[i]);
-    core::XYZ d(r.get_child(0));
+   Pointer<Chain> chain = get_chain((chains_roots[i]));
+    core::XYZ d(chain->beads[0]);
     d.set_coordinates(
         Vector3D(sites[i][0], sites[i][1], sd.get_box().get_corner(0)[2]));
     d.set_coordinates_are_optimized(false);
@@ -114,7 +115,7 @@ void color_fgs(IMP::npctransport::SimulationData& sd) {
       color = display::get_jet_color(f);
     }
     // apply color
-    atom::Hierarchies children = chains[i].get_children();
+    atom::Hierarchies children = chains[i].get_all_descendants();
     for (unsigned int j = 0; j < children.size(); j++) {
       if (Colored::get_is_setup(children[j])) {
         Colored(children[j]).set_color(color);
@@ -138,11 +139,12 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
   using atom::Hierarchies;
 
   IMP::algebra::Cylinder3D cyl = sd.get_cylinder();
-  Hierarchies chains = sd.get_fg_chains();
+  Hierarchies chains = sd.get_fg_chain_roots();
   // compute the relative radius in which particles would be positioned
   // TODO: we assume here that particle radius is smaller
   //       than the cylinder radius - verify in runtime?
-  double particle_radius = IMP::core::XYZR(chains[0].get_child(0)).get_radius();
+  Particles chain_beads = get_chain(chains[0])->beads;
+  double particle_radius = IMP::core::XYZR(chain_beads[0]).get_radius();
   // compute fraction of particle from full cylinder radius
   double relative_r = (cyl.get_radius() - particle_radius) / cyl.get_radius();
   // compute vertical poisition along central axis, and inter-layer distance
@@ -168,8 +170,8 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
       double angle = k * angle_increments;
       algebra::Vector3D new_anchor =
           cyl.get_inner_point_at(relative_h, relative_r, angle);
-      Hierarchy cur_chain(chains[chain_num]);
-      core::XYZ d(cur_chain.get_child(0));
+      IMP::Pointer<Chain> cur_chain = get_chain(chains[chain_num]);
+      core::XYZ d(cur_chain->beads[0]);
       d.set_coordinates(new_anchor);
       d.set_coordinates_are_optimized(false);
       std::cout << "d = " << d << std::endl;
@@ -188,7 +190,7 @@ IMP::ParticlesTemp get_kaps_and_craps(IMP::npctransport::SimulationData& sd) {
        it++)
     {
       std::cout << *it << std::endl;
-      ret += sd.get_particles_of_type(*it);
+      ret += sd.get_root_of_type(*it).get_children();
       std::cout << ret;
     }
   return ret;
@@ -218,10 +220,10 @@ IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
     using atom::Hierarchy;
     using atom::Hierarchies;
 
-    Hierarchies chains = sd.get_fg_chains();
+    Hierarchies chains = sd.get_fg_chain_roots();
     for (unsigned int k = 0; k < chains.size(); k++) {
-      Hierarchy cur_chain(chains[k]);
-      core::XYZ d(cur_chain.get_child(0));
+      Pointer<Chain> cur_chain = get_chain(chains[k]);
+      core::XYZ d(cur_chain->beads[0]);
       IMP_LOG(ll, "d # " << k << " = " << d << std::endl);
       IMP_LOG(ll, "is optimizable = "
               << d.get_coordinates_are_optimized()

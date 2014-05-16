@@ -132,10 +132,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   boost::unordered_map<core::ParticleType, double> ranges_;
 
-  // the list of particles for each particle type
-  // e.g., particles_[ ParticleType("fg0") ]
-  boost::unordered_map<core::ParticleType, ParticlesTemp> particles_;
-
   // the RMF format file to which simulation output is dumped:
   std::string rmf_file_name_;
 
@@ -298,21 +294,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
      @return all the fg hierarchies in the simulation data object
              that stand for individual FG chains
   */
-  atom::Hierarchies get_fg_chains() const
+  atom::Hierarchies get_fg_chain_roots() const
     {
-      return get_fg_chains(get_root());
+      atom::Hierarchies ret;
+      Hierarchy type_roots = get_root().get_children();
+      for(unsigned int i =0 ; i < type_roots.size(); i++) {
+        if(get_is_fg( core::Typed(type_roots[i]) )
+           ret += type_roots[i].get_children();
+      }
+      return ret;
     }
-
-
-  /**
-     retrieve fg chains from root
-
-     @param root the root under which to look for FGs
-
-     @return all the fg hierarchies under root, which match any fg type
-             that was added to this simulation previously
-  */
-  atom::Hierarchies get_fg_chains(atom::Hierarchy root) const;
 
 
   /** return all the obstacle particles */
@@ -475,16 +466,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   void dump_geometry();
 
   /**
-      Returns the list of particles in the simulation model
-      of type 'type', or empty list if not found.
-      The particles returned are all sets of direct children of the
-      main root (so the diffusing particles are their leaves)
+      Returns the root of all chains of type 'type'
   */
-  ParticlesTemp get_particles_of_type(core::ParticleType type) const {
-    boost::unordered_map<core::ParticleType, ParticlesTemp>::const_iterator iter;
-    iter = particles_.find(type);
-    if (iter != particles_.end()) return iter->second;
-    return ParticlesTemp();
+  Hierarchy get_root_of_type(core::ParticleType type) const {
+    Hieararchies H = get_root()->get_children();
+    for(unsigned int i = 0; i < H.size(); i++) {
+      if(core::Types(H[i]).get_type() == type) {
+        return H[i];
+      }
+      IMP_THROW("particle type " << type << " not found",
+                base::ValueException);
   }
 
   unsigned int get_number_of_frames() const { return number_of_frames_; }

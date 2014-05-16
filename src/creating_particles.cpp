@@ -21,7 +21,7 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-Particle *create_fg_chain
+Particle *create_fg_chain_old
 ( SimulationData *sd,
   const ::npctransport_proto::Assignment_FGAssignment &fg_data,
   display::Color c )
