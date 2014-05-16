@@ -383,10 +383,10 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
           << std::endl);
 
   Hierarchy root = sd.get_root();
-  Hierarchies chains = sd.get_fg_chains( );
+  Hierarchies chains = sd.get_fg_chain_roots( );
   for (unsigned int k = 0; k < chains.size(); k++) {
-    Hierarchy cur_chain(chains[k]);
-    core::XYZ d(cur_chain.get_child(0));
+    Particles cur_chain_beads( chains[k].get_leaves() );
+    core::XYZ d(cur_chain_beads[0]);
     IMP_LOG(PROGRESS, "d # " << k << " = " << d << std::endl);
     IMP_LOG(PROGRESS, "is optimizable = " << d.get_coordinates_are_optimized()
             << std::endl);
@@ -409,10 +409,12 @@ void initialize_positions(SimulationData *sd,
   }
   // pin first link of fgs, if not already pinned
   boost::ptr_vector<TemporarySetOptimizationStateRAII> chain_pins;
-  atom::Hierarchies chains = sd->get_fg_chains();
+  atom::Hierarchies chains = sd->get_fg_chain_roots();
   for (unsigned int i = 0; i < chains.size(); ++i) {
+    Pointer<Chain> chain = get_chain(chains[i]);
     chain_pins.push_back
-      ( new TemporarySetOptimizationStateRAII(chains[i].get_child(0), false) );
+      ( new TemporarySetOptimizationStateRAII
+        (chain->beads[0], false) );
   }
   // core::XYZs previously_unpinned;
   // atom::Hierarchies chains = sd->get_fg_chains();
@@ -448,8 +450,8 @@ void initialize_positions(SimulationData *sd,
   for(ParticleTypeSet::const_iterator
         it = types.begin(); it != types.end(); it++)
     {
-      atom::Hierarchies cur_fg_roots = sd->get_particles_of_type(*it);
-      ParticlesTemp cur_fg_beads = atom::get_leaves( cur_fg_roots );
+      atom::Hierarchy cur_fg_root =  sd->get_root_of_type(*it);
+      ParticlesTemp cur_fg_beads = atom::get_leaves( cur_fg_root );
       cur_particles += cur_fg_beads;
       IMP_LOG(VERBOSE, "Optimizing " <<  cur_particles.size()
                << " particles of type " << *it);

@@ -9,7 +9,7 @@
 
 #include <IMP/npctransport/Statistics.h>
 #include <IMP/npctransport/SimulationData.h>
-#include <IMP/npctransport/particle_types.h>
+#include <IMP/npctransport/creating_tamd_particles.h>
 #include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/enums.h>
 #include <IMP/npctransport/io.h>
@@ -226,8 +226,10 @@ void Statistics::update_fg_stats
           it = fgt.begin(); it != fgt.end(); it++ )
     {
       core::ParticleType type_i = *it;
-      ParticlesTemp ps_i = get_sd()->get_particles_of_type( type_i );
-      if(ps_i.size() == 0) continue; // TODO: add warning?
+      Hierarchy root_i = get_sd()->get_root_of_type( type_i );
+      ParticlesTemp chains_i = root_i->get_children();
+      if(chains_i.size() == 0)
+        continue; // TODO: add warning?
       // can happen only upon dynamic changes...
       unsigned int i = find_or_add_fg_of_type( stats, type_i );
 
@@ -236,27 +238,30 @@ void Statistics::update_fg_stats
         double avg_volume = 0.0;
         double avg_radius_of_gyration = 0.0;
         double avg_length = 0.0;
-        for (unsigned int j = 0; j < ps_i.size(); ++j)
+        for (unsigned int j = 0; j < chains_i.size(); ++j)
           {
-            atom::Hierarchy hj(ps_i[j]);
-            ParticlesTemp chainj = get_as<ParticlesTemp>(atom::get_leaves(hj));
-            fill_in_zr_hist(zr_hist, chainj);
+            ParticlesTemp chain_ij =
+              get_as<ParticlesTemp>(atom::get_leaves(chains_i[j]));
+            fill_in_zr_hist(zr_hist, chain_ij);
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
-            double volume = atom::get_volume(hj);
-            double radius_of_gyration = atom::get_radius_of_gyration(chainj);
+            double volume_ij =
+              atom::get_volume(hj);
+            double radius_of_gyration_ij =
+              atom::get_radius_of_gyration(chain_ij);
 #else
-            double volume = -1.;
-            double radius_of_gyration = -1.;
+            double volume_ij = -1.;
+            double radius_of_gyration_ij = -1.;
 #endif
             UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), volume, volume);
-            double length =
-              core::get_distance(core::XYZ(chainj[0]), core::XYZ(chainj.back()));
+            double length_ij =
+              core::get_distance(core::XYZ(chain_ij[0]),
+                                 core::XYZ(chain_ij.back()));
             UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), length, length);
             UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), radius_of_gyration,
                        radius_of_gyration);
-            avg_volume += volume / ps_i.size();
-            avg_radius_of_gyration += radius_of_gyration / ps_i.size();
-            avg_length += length / ps_i.size();
+            avg_volume += volume_ij / chains_i.size();
+            avg_radius_of_gyration += radius_of_gyration_ij / chains_i.size();
+            avg_length += length_ij / chains_i.size();
           } // for j (fg chain)
         npctransport_proto::Statistics_FGOrderParams*
           fgrc = stats->mutable_fgs(i)->add_order_params();
@@ -410,16 +415,18 @@ void Statistics::update
            it = ft.begin(); it != ft.end(); it++ )
        {
          IMP_LOG(VERBOSE, "GATHERING STATS for type " << *it << std::endl);
-         ParticlesTemp ps = get_sd()->get_particles_of_type( *it );
+         ParticlesTemp ps = get_sd()->get_root_of_type( *it ).get_children();
          if(ps.size() == 0) // TODO: makes sense that this should happen?
            continue;
          unsigned int i = find_or_add_floater_of_type( stats, *it );
          double site_site_pairs, interacting_floaters,
            bead_floater_pairs, chain_floater_pairs;
-         atom::Hierarchies fgs =  get_sd()->get_fg_chains() ;
-         boost::tie(site_site_pairs, interacting_floaters,
-                   bead_floater_pairs, chain_floater_pairs)
-          = get_interactions_and_interacting(ps, fgs);
+         atom::Hierarchies fg_chain_roots =  get_sd()->get_fg_chain_roots() ;
+         boost::tie(site_site_pairs,
+                    interacting_floaters,
+                    bead_floater_pairs,
+                    chain_floater_pairs)
+           = get_interactions_and_interacting(ps, fg_chain_roots);
         // {
         //   //TODO: delete - this now only goes as order param
         //   //      keeping for a while for backward compat.
@@ -681,10 +688,11 @@ Statistics::get_interactions_and_interacting
     bool floater_found = false;
     for (unsigned int j = 0; j < chain_roots.size(); ++j) {
       bool chain_found = false;
-      unsigned int const N = chain_roots[j].get_number_of_children();
-      for (unsigned int k = 0; k < N; ++k) {
+      Chain* cur_chain = npctransport::get_chain(chain_roots[j]);
+      Particles const& chain_particles = cur_chain->beads;
+      for (unsigned int k = 0; k < chain_particles.size(); ++k) {
         int num = get_number_of_interactions
-          (floaters[i], chain_roots[j].get_child(k) );
+          (floaters[i], chain_particles[k] );
         if (num > 0) {
           IMP_LOG(VERBOSE, "Found " << num
             << " site-site interactions between floater " << i <<
