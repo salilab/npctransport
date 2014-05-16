@@ -13,7 +13,7 @@
 #include <IMP/atom/CenterOfMass.h>
 #include <IMP/atom/Mass.h>
 #include <IMP/atom/TAMDParticle.h>
-#include <IMP/base/Pointer.h>
+#include <IMP/Pointer.h>
 #include <IMP/core/ChildrenRefiner.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/core/XYZR.h>
