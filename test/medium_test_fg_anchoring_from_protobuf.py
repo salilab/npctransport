@@ -56,7 +56,7 @@ class Tests(IMP.test.TestCase):
         verify that fg anchors are still in same place as in the originally
         specified coordinates coords
         '''
-        fgs = sd.get_fg_chains(  ) # atom.Hierarchies
+        fgs = sd.get_fg_chain_roots(  ) # atom.Hierarchies
         # verify that anchors are in placed
         for fg,c in zip(fgs,coords):
             fg_c = IMP.core.XYZ( fg.get_child(0) ).get_coordinates()

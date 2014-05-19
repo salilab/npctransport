@@ -49,7 +49,7 @@ def make_simple_cfg(outfile, is_slab_on = True, n_particles_factor = 1):
         """
         interactionFG_KAP= IMP.npctransport.add_interaction(config,
                                                             name0=fg_name,
-                                                            name1="kap",
+                                                            name1="kap0",
                                                             interaction_k=k_kap_lower,
                                                             interaction_range=2)
         if(k_kap_steps > 1):
@@ -58,7 +58,7 @@ def make_simple_cfg(outfile, is_slab_on = True, n_particles_factor = 1):
                          steps = k_kap_steps)
         interactionFG_CRAP= IMP.npctransport.add_interaction(config,
                                                              name0=fg_name,
-                                                             name1="crap0",
+                                                             name1="inert0",
                                                              interaction_k=0,
                                                              interaction_range=0)
 
@@ -79,16 +79,18 @@ def make_simple_cfg(outfile, is_slab_on = True, n_particles_factor = 1):
                                  interactions=1,
                                  rest_length_factor = 1.5)
     kap= IMP.npctransport.add_float_type(config,
+                                         type_name="kap0",
                                          number=int(math.ceil(1 * n_particles_factor)),
                                          radius=20,
                                          interactions=12)
     nonspecifics= IMP.npctransport.add_float_type(config,
+                                                  type_name="inert0",
                                                   number=int(math.ceil(1 * n_particles_factor)),
                                                   radius=20,
                                                   interactions=0)
     obstacle_xyzs = [[10.0,30.0,0.0], [-10.0,30.0,0.0]]
     obstacle= IMP.npctransport.add_obstacle_type(config,
-                                                 type_name="my_obstacle",
+                                                 type_name="my_obstacle0",
                                                  R=20,
                                                  xyzs = obstacle_xyzs)
     ###########

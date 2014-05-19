@@ -5,17 +5,52 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#ifndef IMPNPCTRANSPORT_INTERNAL_CREATING_TAMD_PARTICLES_H
-#define IMPNPCTRANSPORT_INTERNAL_CREATING_TAMD_PARTICLES_H
+#ifndef IMPNPCTRANSPORT_INTERNAL_TAMD_CHAIN_H
+#define IMPNPCTRANSPORT_INTERNAL_TAMD_CHAIN_H
 
-#include "npctransport_config.h"
+#include "../npctransport_config.h"
 #include <IMP/npctransport/ParticleFactory.h>
-#include <IMP/npctransport/internal/creating_tamd_particles.h>
+#include <IMP/npctransport/FGChain.h>
 #include <IMP/atom/Hierarchy.h>
 #include <string>
 #include <vector>
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
+
+/** a hierarchy of centroids to represent a polymer chain with
+    centroids in the non-leaf nodes, singleton particles in the
+    leaves, and TAMD images attached to the centroids by spring
+
+    root - root of hierarchy
+    beads - fine chain particles
+    centroids - the list of centroids in tree(p)
+    images - corresponding TAMD images for each centroid in centroids
+    R - corresponding springs that attch each TAMD image to each centroid
+*/
+struct TAMDChain : public npctransport::FGChain{
+  typedef npctransport::FGChain P;
+ public:
+  IMP::Particles centroids;
+  IMP::Particles images;
+  IMP::Restraints R;
+ public:
+  TAMDChain(std::string name = "tamd_chain %1%")
+    : P(name)
+    {}
+
+ TAMDChain(IMP::Particle* rroot,
+            IMP::Particles fbeads,
+            IMP::Particles ccentroids,
+            IMP::Particles iimages,
+            IMP::Restraints RR,
+            std::string name="tamd_chain %1%")
+   : P(rroot, fbeads, name),
+    centroids(ccentroids),
+    images(iimages),
+    R(RR)
+    { }
+};
+
 
 /**
    Create a TAMD hierarchy of nlevels depth with a core for
@@ -36,7 +71,7 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 
    @return a tuple with <root particle, centroids, images, restraints>
 */
-TAMD_chain
+TAMDChain*
 create_tamd_chain( ParticleFactory pf,
                    unsigned int nlevels,
                    unsigned int d,
@@ -62,4 +97,4 @@ Particle* create_tamd_image( Particle* p_ref,
 IMPNPCTRANSPORT_END_INTERNAL_NAMESPACE
 
 
-#endif /* IMPNPCTRANSPORT_INTERNAL_CREATING_TAMD_PARTICLES */
+#endif /* IMPNPCTRANSPORT_INTERNAL_TAMD_CHAIN_H */

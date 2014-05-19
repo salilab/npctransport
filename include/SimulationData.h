@@ -157,13 +157,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
      @param f_data data for floater in protobuf format as specified
                  in data/npctransport.proto
-     @param default_type for backward compatibility only, a default type
-                         of particle if one is not specified in data.type
      @param color a color for all floaters of this type
    */
   void create_floaters(
       const ::npctransport_proto::Assignment_FloaterAssignment &f_data,
-      core::ParticleType default_type, display::Color color);
+      display::Color color);
 
   /**
      Adds the 'obstacles' (possibly static e.g. nups that make the pore)
@@ -294,16 +292,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
      @return all the fg hierarchies in the simulation data object
              that stand for individual FG chains
   */
-  atom::Hierarchies get_fg_chain_roots() const
-    {
-      atom::Hierarchies ret;
-      Hierarchy type_roots = get_root().get_children();
-      for(unsigned int i =0 ; i < type_roots.size(); i++) {
-        if(get_is_fg( core::Typed(type_roots[i]) )
-           ret += type_roots[i].get_children();
-      }
-      return ret;
-    }
+  atom::Hierarchies get_fg_chain_roots() const;
+
+  /** \deprecated_at{2.2}, use get_fg_chain_roots() instead */
+  IMPCORE_DEPRECATED_METHOD_DECL(2.2)
+  atom::Hierarchies get_fg_chains() const
+    { return get_fg_chain_roots(); }
 
 
   /** return all the obstacle particles */
@@ -468,15 +462,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   /**
       Returns the root of all chains of type 'type'
   */
-  Hierarchy get_root_of_type(core::ParticleType type) const {
-    Hieararchies H = get_root()->get_children();
-    for(unsigned int i = 0; i < H.size(); i++) {
-      if(core::Types(H[i]).get_type() == type) {
-        return H[i];
-      }
-      IMP_THROW("particle type " << type << " not found",
-                base::ValueException);
-  }
+  atom::Hierarchy get_root_of_type(core::ParticleType type) const;
 
   unsigned int get_number_of_frames() const { return number_of_frames_; }
 

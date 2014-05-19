@@ -34,12 +34,10 @@ class Tests(IMP.test.TestCase):
                                           radius=fg_R,
                                           interactions=12,
                                           rest_length_factor = 1.5)
-        coords = []
         pos=fgs.anchor_coordinates.add()
-        c = fg_coords
-        pos.x=c[0]
-        pos.y=c[1]
-        pos.z=c[2]
+        pos.x=fg_coords[0]
+        pos.y=fg_coords[1]
+        pos.z=fg_coords[2]
         kaps= IMP.npctransport.add_float_type(config,
                                               number=1,
                                               radius=diffuser_R,
@@ -85,7 +83,7 @@ class Tests(IMP.test.TestCase):
 
 
     def _assert_kap_in_place(self, sd, really_assert=True):
-        fg_anchor = sd.get_fg_chains()[0].get_child(0)
+        fg_anchor = sd.get_fg_chain_roots()[0].get_child(0)
         kap = None
         r=sd.get_root()
         for rchild in r.get_children():
