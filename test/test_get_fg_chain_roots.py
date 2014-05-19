@@ -51,9 +51,9 @@ class Tests(IMP.test.TestCase):
         f.close()
 
 
-    def test_get_fg_chains(self):
+    def test_get_fg_chain_roots(self):
         '''
-        Test that SimulationData.get_fg_chains() works correctly
+        Test that SimulationData.get_fg_chain_roots() works correctly
         '''
 
         IMP.base.set_log_level(IMP.SILENT)
@@ -62,10 +62,11 @@ class Tests(IMP.test.TestCase):
         coords = self._create_cfg_file_with_fgs(cfg_file)
         print("assigning parameter ranges from config")
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 )
+        print "Loading SimData"
         sd= IMP.npctransport.SimulationData(assign_file, False)
         sd.set_rmf_file( self.get_tmp_file_name("out.rmf") )
-        fgs = sd.get_fg_chains( ) # atom.Hierarchies
-        print(" fgs ", fgs)
+        fgs = sd.get_fg_chain_roots( ) # atom.Hierarchies
+        print " fgs ", fgs
         ones = 0
         twos = 0
         for fg in fgs:

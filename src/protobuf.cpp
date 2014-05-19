@@ -7,7 +7,6 @@
  */
 
 #include <IMP/npctransport/protobuf.h>
-#include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/automatic_parameters.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <google/protobuf/descriptor.h>
@@ -329,12 +328,8 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
         if(has_type) {
           has_type = ( assignment.fgs(i).type() != "" );
         }
-        if(!has_type) {
-          IMP_LOG(PROGRESS,  "Setting assignment fg " << i << " to type "
-                  << type_of_fg[i].get_string() << std::endl );
-          assignment.mutable_fgs(i)->set_type
-            ( type_of_fg[i].get_string() );
-        }
+        IMP_ALWAYS_CHECK(has_type, "fg " << i << " lacking type",
+                         base::ValueException);
       } // for i
     for (int i = 0; i < assignment.floaters_size(); ++i)
       {
@@ -342,12 +337,8 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
         if(has_type) {
           has_type = (assignment.floaters(i).type() != "" );
         }
-        if(! has_type){
-          IMP_LOG(PROGRESS,  "Setting assignment floater " << i << " to type "
-                  << type_of_fg[i].get_string() << std::endl );
-          assignment.mutable_floaters(i)->set_type
-            ( type_of_float[i].get_string() );
-        }
+        IMP_ALWAYS_CHECK(has_type, "floater " << i << " lacking type",
+                         base::ValueException);
       } // for i
   }
 

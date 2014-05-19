@@ -249,7 +249,7 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
 
   */
   void fill_in_zr_hist(unsigned int zr_hist[4][3],
-                       ParticlesTemp& ps) const;
+                       Particles& ps) const;
 
 
  public:

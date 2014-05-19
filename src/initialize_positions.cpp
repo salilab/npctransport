@@ -8,7 +8,6 @@
 
 #include <IMP/npctransport/initialize_positions.h>
 #include <IMP/npctransport/randomize_particles.h>
-#include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/util.h>
 #include <IMP/core/DistancePairScore.h>
 #include <IMP/core/XYZR.h>
@@ -385,8 +384,8 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
   Hierarchy root = sd.get_root();
   Hierarchies chains = sd.get_fg_chain_roots( );
   for (unsigned int k = 0; k < chains.size(); k++) {
-    Particles cur_chain_beads( chains[k].get_leaves() );
-    core::XYZ d(cur_chain_beads[0]);
+    base::Pointer<FGChain> cur_chain = get_fg_chain(chains[k]);
+    core::XYZ d(cur_chain->beads[0]);
     IMP_LOG(PROGRESS, "d # " << k << " = " << d << std::endl);
     IMP_LOG(PROGRESS, "is optimizable = " << d.get_coordinates_are_optimized()
             << std::endl);
@@ -411,7 +410,7 @@ void initialize_positions(SimulationData *sd,
   boost::ptr_vector<TemporarySetOptimizationStateRAII> chain_pins;
   atom::Hierarchies chains = sd->get_fg_chain_roots();
   for (unsigned int i = 0; i < chains.size(); ++i) {
-    Pointer<Chain> chain = get_chain(chains[i]);
+    base::Pointer<FGChain> chain = get_fg_chain(chains[i]);
     chain_pins.push_back
       ( new TemporarySetOptimizationStateRAII
         (chain->beads[0], false) );
