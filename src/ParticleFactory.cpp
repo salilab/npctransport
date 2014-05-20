@@ -20,7 +20,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
    create a particle associated with the model of sd, with params
    as specified in factory class
  */
-IMPNPCTRANSPORTEXPORT Particle*
+Particle*
 ParticleFactory::create(std::string name) {
   if(name==""){
     name = type_.get_string();
