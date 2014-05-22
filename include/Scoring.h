@@ -122,6 +122,9 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   // restraints for z-biasing particles (plural for different k force constants)
   IMP::Restraints z_bias_restraints_;
 
+  // custom restraints that are added to the scoring function
+  IMP::Restraints custom_restraints_;
+
 
  public:
   /**
@@ -525,6 +528,18 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   */
   IMP::Restraint* create_z_bias_restraint(SingletonContainerAdaptor ps,
                                           double k) const;
+
+  void add_custom_restraint(IMP::Restraint* r)
+  { custom_restraints_.push_back(r); }
+
+  void add_custom_restraints(IMP::Restraints R)
+  { custom_restraints_ += R; }
+
+  void clear_custom_restraints()
+  { custom_restraints_.clear(); }
+
+  IMP::Restraints get_custom_restraints() const
+    { return custom_restraints_; }
 
   /**
      returns a reference to the collection of score functions for FG backbones

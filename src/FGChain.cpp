@@ -27,9 +27,40 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-#ifndef SWIG
+namespace {
+
+  void add_chain_and_restraints_to_sd
+    (FGChain const* chain,
+     SimulationData* sd,
+     atom::Hierarchy parent,
+     const ::npctransport_proto::Assignment_FGAssignment &fg_data)
+  {
+    parent.add_child(atom::Hierarchy(chain->root));
+
+    // add chain backbone restraint
+    double rlf = fg_data.rest_length_factor().value();
+    core::ParticleType type(fg_data.type());
+    sd->get_scoring()->add_chain_restraint
+      ( chain->beads, rlf, type.get_string() + "chain restraint" );
+
+    if(fg_data.is_tamd()) {
+      // add tamd restraints and image particles
+      internal::TAMDChain const* tamd_chain =
+        dynamic_cast<internal::TAMDChain const*>(chain);
+      IMP_USAGE_CHECK(tamd_chain, "chain is not TAMDChain*");
+      for(unsigned int k = 0; k < tamd_chain->images.size(); k++) {
+        atom::Hierarchy h_k( tamd_chain->images[k]);
+        sd->get_root().add_child( h_k );
+      }
+      sd->get_scoring()->add_custom_restraints(tamd_chain->R);
+    }
+  }
+
+} // anonymous namespace
+
 FGChain* create_fg_chain
 ( SimulationData *sd,
+  atom::Hierarchy parent,
   const ::npctransport_proto::Assignment_FGAssignment &fg_data,
   display::Color c )
 {
@@ -42,7 +73,8 @@ FGChain* create_fg_chain
   double radius = fg_data.radius().value();
   double D_factor = fg_data.d_factor().value();
   double angular_D_factor = sd->get_angular_d_factor();
-  ParticleFactory pf(sd, radius, D_factor, angular_D_factor, c, type);
+  IMP_NEW( ParticleFactory, pf,
+           (sd, radius, D_factor, angular_D_factor, c, type) );
 
   // create TAMD or non-TAMD particles P, within hierarchy of root:
   Particles P; Particle* root;
@@ -58,12 +90,12 @@ FGChain* create_fg_chain
       F_factors[i] = 15 * pow(3,level-1);
       Ks[i] = 10;
     }
-    ret_chain =
+    ret_chain=
       internal::create_tamd_chain(pf, n, d, T_factors, F_factors, Ks);
   } else {
     Particles P;
     for (int i = 0; i < n; ++i) {
-      P.push_back( pf.create() );
+      P.push_back( pf->create() );
     }
     root = atom::Hierarchy::setup_particle
       ( new Particle( sd->get_model() ), P );
@@ -71,14 +103,12 @@ FGChain* create_fg_chain
     ret_chain = new FGChain(root, P);
   }
 
-  // add chain backbone restraint
-  double rlf = fg_data.rest_length_factor().value();
-  sd->get_scoring()->add_chain_restraint
-    ( ret_chain->beads, rlf, type.get_string() + "chain restraint" );
+  // add chain beads, restraints, anchors
+  // TODO: put in a different method for clarity
+  add_chain_and_restraints_to_sd(ret_chain, sd, parent, fg_data);
 
   return ret_chain.release();
 }
-#endif
 
 // gets a chain structure from a root of an FG nup
 // (by adding its ordered leaves)

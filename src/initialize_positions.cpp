@@ -8,9 +8,11 @@
 
 #include <IMP/npctransport/initialize_positions.h>
 #include <IMP/npctransport/randomize_particles.h>
+#include <IMP/npctransport/internal/initialize_positions_RAIIs.h>
 #include <IMP/npctransport/util.h>
-#include <IMP/core/DistancePairScore.h>
-#include <IMP/core/XYZR.h>
+#include <IMP/scoped.h>
+#include <IMP/Restraint.h>
+#include <IMP/ScoringFunction.h>
 #include <IMP/atom/BrownianDynamics.h>
 #include <IMP/Pointer.h>
 #include <IMP/exception.h>
@@ -20,53 +22,41 @@
 #include <IMP/core/ConjugateGradients.h>
 #include <IMP/core/MonteCarlo.h>
 #include <IMP/core/SerialMover.h>
-#include <IMP/core/BallMover.h>
-#include <IMP/container/ClosePairContainer.h>
-#include <IMP/container/ConsecutivePairContainer.h>
-#include <IMP/core/rigid_bodies.h>
-#include <IMP/core/SphereDistancePairScore.h>
-#include <IMP/log_macros.h>
+#include <IMP/flags.h>
 #include <IMP/log.h>
+#include <IMP/log_macros.h>
+//#include <IMP/base/internal/graph_utility.h>
+//#include <IMP/core/RestraintsScoringFunction.h>
+#include <IMP/core/BallMover.h>
+#include <IMP/core/Hierarchy.h>
+#include <IMP/core/rigid_bodies.h>
+#include <IMP/core/XYZR.h>
 #include <IMP/container/ListSingletonContainer.h>
+#include <IMP/container/generic.h>
+//#include <IMP/internal/graph_utility.h>
+#include <IMP/npctransport/SimulationData.h>
+#include <IMP/npctransport/internal/boost_main.h>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <IMP/scoped.h>
-#include <IMP/PairPredicate.h>
-#include <IMP/container/generic.h>
-#include <IMP/internal/graph_utility.h>
-#include <IMP/npctransport/SimulationData.h>
-#include <IMP/raii_macros.h>
-#include <IMP/log.h>
-#include <IMP/flags.h>
-//#include <IMP/example/optimizing.h>
-#include <IMP/npctransport/internal/boost_main.h>
 #include <cmath>
+#include <vector>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-bool show_dependency_graph = false;
-base::AddBoolFlag show_dep_adder("show_dependency_graph",
-                                 "Show the dependency graph",
-                                 &show_dependency_graph);
+// bool show_dependency_graph = false;
+// base::AddBoolFlag show_dep_adder("show_dependency_graph",
+//                                  "Show the dependency graph",
+//                                  &show_dependency_graph);
 
 namespace {
 
-//! adds a BallMover for each optimized particle in ps
-//! with move size magnitude = particle_radius*2*scale_factor
-//! and wraps it in a SerialMover in random order
-/*
-core::MonteCarloMover *create_serial_mover(const ParticlesTemp &ps,
-                                           double scale_factor = 1.0) {
-  core::MonteCarloMovers movers;
-  for (unsigned int i = 0; i < ps.size(); ++i) {
-    core::XYZR d = core::XYZR(ps[i]);
-    double scale = d.get_radius() * 2.0 * scale_factor;
-    if (d.get_coordinates_are_optimized()) {
-      movers.push_back(new core::BallMover(ParticlesTemp(1, ps[i]), scale));
-    }
+  // returns true if XYZ and TAMDParticle decorated
+  bool is_xyz_tamd(IMP::Particle* p)
+  {
+    return IMP::atom::TAMDParticle::get_is_setup(p) &&
+      IMP::core::XYZ::get_is_setup(p);
   }
-  std::random_shuffle(movers.begin(), movers.end());
-  IMP_NEW(core::SerialMover, sm, (get_as<core::MonteCarloMoversTemp>(movers)));
 
+<<<<<<< HEAD
   return sm.release();
   }*/
 
@@ -269,6 +259,19 @@ class TemporarySetOptimizationStateRAII: public base::RAII {
 
 
 
+=======
+  // update the coordinates of all TAMD particles from their
+  // reference particles
+  void update_tamd_particles_coords_from_refs(atom::Hierarchy root)
+  {
+    Particles ps;
+    IMP::core::gather( root, is_xyz_tamd, std::back_inserter(ps));
+    for(unsigned int i=0; i < ps.size(); i++) {
+      IMP::atom::TAMDParticle t(ps[i]);
+      t.update_coordinates_from_ref();
+    }
+  }
+>>>>>>> make TAMD work by fixing various bugs...
 
 /** Take a set of core::XYZR particles and relax them relative to a set of
     restraints. Excluded volume is handle separately, so don't include it
@@ -294,11 +297,15 @@ void optimize_balls(const ParticlesTemp &ps,
   IMP_FUNCTION_LOG;
 
   base::SetLogState sls(ll);
-  IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.", ValueException);
-  IMP_ALWAYS_CHECK(bd, "bd optimizer unspecified", ValueException);
-  IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
-                   "short init factor should be in range (0,1]",
-                   ValueException);
+  {
+    IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.",
+                     IMP::base::ValueException);
+    IMP_ALWAYS_CHECK(bd, "bd optimizer unspecified",
+                     IMP::base::ValueException);
+    IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
+                     "short init factor should be in range (0,1]",
+                     IMP::base::ValueException);
+  }
   if(save)
     IMP_LOG(VERBOSE, "BEGIN o_b(): Saver has been called so far " <<
       save->get_number_of_updates() << std::endl);
@@ -310,7 +317,8 @@ void optimize_balls(const ParticlesTemp &ps,
   for (int i = 0; i < 11; ++i) {
     boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > attrs
       ( new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()] );
-    boost::ptr_vector<LinearWellSetLengthRAII> set_temporary_lengths;
+    boost::ptr_vector<IMP::npctransport::internal::LinearWellSetLengthRAII>
+      set_temporary_lengths;
     double factor = .1 * i;
     double length_factor = is_rest_length_scaling ? (.7 + .3 * factor) : 1.0;
     // rescale radii temporarily
@@ -322,7 +330,8 @@ void optimize_balls(const ParticlesTemp &ps,
     // rescale bond length temporarily
     for (unsigned int j = 0; j < lwps.size(); ++j) {
       set_temporary_lengths.push_back
-        ( new LinearWellSetLengthRAII(lwps[j], length_factor) );
+        ( new IMP::npctransport::internal::LinearWellSetLengthRAII
+          (lwps[j], length_factor) );
     }
     IMP_LOG(PROGRESS, "Optimizing with radii at " << factor << " of full"
             << " and length factor " << length_factor << std::endl
@@ -333,7 +342,7 @@ void optimize_balls(const ParticlesTemp &ps,
       {
         double temperature =
           (1.5 - (i + k_simanneal / 5.0) / 11.0) * bd_temperature_orig;
-        BDSetTemporaryTemperatureRAII
+        IMP::npctransport::internal::BDSetTemporaryTemperatureRAII
           bd_set_temporary_temperature(bd, temperature);
         bool done = false;
         IMP_OMP_PRAGMA(parallel num_threads(3)) {
@@ -366,11 +375,6 @@ void optimize_balls(const ParticlesTemp &ps,
 }
 
 
-} // namespace {}
-
-
-
-namespace {
 // print the first atoms of all the fgs in sd
 void print_fgs(IMP::npctransport::SimulationData &sd) {
   using namespace IMP;
@@ -391,7 +395,9 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
             << std::endl);
   }
 }
-}
+
+} // namespace {}
+
 
 void initialize_positions(SimulationData *sd,
                           const RestraintsTemp &extra_restraints,
@@ -401,29 +407,21 @@ void initialize_positions(SimulationData *sd,
   sd->set_was_used(true);
   IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
                    "short init factor should be in range (0,1]",
-                   ValueException);
+                   IMP::base::ValueException);
   randomize_particles(sd->get_diffusers()->get_particles(), sd->get_box());
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
   }
   // pin first link of fgs, if not already pinned
-  boost::ptr_vector<TemporarySetOptimizationStateRAII> chain_pins;
+  boost::ptr_vector<
+    IMP::npctransport::internal::TemporarySetOptimizationStateRAII> chain_pins;
   atom::Hierarchies chains = sd->get_fg_chain_roots();
   for (unsigned int i = 0; i < chains.size(); ++i) {
     base::Pointer<FGChain> chain = get_fg_chain(chains[i]);
     chain_pins.push_back
-      ( new TemporarySetOptimizationStateRAII
+      ( new IMP::npctransport::internal::TemporarySetOptimizationStateRAII
         (chain->beads[0], false) );
   }
-  // core::XYZs previously_unpinned;
-  // atom::Hierarchies chains = sd->get_fg_chains();
-  // for (unsigned int i = 0; i < chains.size(); ++i) {
-
-  //   if (core::XYZ(chains[i].get_child(0)).get_coordinates_are_optimized()) {
-  //     previously_unpinned.push_back(core::XYZ(chains[i].get_child(0)));
-  //     core::XYZ(chains[i].get_child(0)).set_coordinates_are_optimized(false);
-  //   }
-  // }
 
   int dump_interval = sd->get_rmf_dump_interval_frames();
   if (sd->get_rmf_sos_writer()) {
@@ -469,8 +467,9 @@ void initialize_positions(SimulationData *sd,
           cur_particles,
           cur_optimizable_particles,
           false /* no non-bonded attr potentials yet */);
-      OptimizerSetTemporaryScoringFunctionRAII
+      IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
         set_temporary_scoring_function( sd->get_bd(), sf );
+      update_tamd_particles_coords_from_refs( sd->get_root() );
       optimize_balls(cur_particles,
                      false /*is_scale_rest_length*/,
                      sd->get_rmf_sos_writer(),
@@ -491,8 +490,9 @@ void initialize_positions(SimulationData *sd,
         particles,
         optimizable_particles ,
         false /* no non-bonded attr potential yet */ );
-    OptimizerSetTemporaryScoringFunctionRAII
+    IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
       set_temporary_scoring_function( sd->get_bd(), sf );
+    update_tamd_particles_coords_from_refs( sd->get_root() );
     optimize_balls(sd->get_diffusers()->get_particles(),
                    false /*scale rest length*/,
                    sd->get_rmf_sos_writer(),

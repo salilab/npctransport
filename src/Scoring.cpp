@@ -90,9 +90,9 @@ Scoring::get_scoring_function(bool update)
       rs.push_back(get_slab_restraint(update));
     }
     rs += get_z_bias_restraints();
+    rs += get_custom_restraints();
     rs.push_back(this->get_predicates_pair_restraint(update));
-    //  is_updating_particles_ = false; // everything is supposed to be updated now
-    //  IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
+
     scoring_function_  = new core::RestraintsScoringFunction(rs);
   }
   return scoring_function_;
@@ -117,11 +117,11 @@ Scoring::get_custom_scoring_function
   if (slab_is_on_) {
     rs.push_back( create_slab_restraint( particles ) );
   }
+  rs += get_custom_restraints(); // TODO: this is problematic cause not restricted to particles - need to decide
   PairContainer* cpc = create_close_diffusers_container
     ( particles, optimizable_particles );
   rs.push_back( create_predicates_pair_restraint
                 ( cpc, is_attr_interactions_on ) );
-  //  is_updating_particles_ = false; // everything is supposed to be updated now
   IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
   return rsf.release();
 }

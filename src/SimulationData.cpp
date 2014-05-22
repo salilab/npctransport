@@ -208,49 +208,55 @@ void SimulationData::initialize(std::string prev_output_file,
 void SimulationData::create_fgs
 ( const ::npctransport_proto::Assignment_FGAssignment &fg_data)
 {
-  if (fg_data.number().value() > 0) {
-    IMP_ALWAYS_CHECK(fg_data.has_type(), "fg type missing in fg_data",
-                     base::ValueException)
+  // Save type:
+  IMP_ALWAYS_CHECK(fg_data.has_type(), "fg type missing in fg_data",
+                   base::ValueException)
     core::ParticleType fg_type(fg_data.type());
-    IMP_ALWAYS_CHECK( fg_types_.find(fg_type) == fg_types_.end(),
-                      "Currently support only single insertion of each type,"
-                      " can be fixed if needed in the future",
-                      base::ValueException);
-    fg_types_.insert(fg_type);
-    // Make main root:
-    atom::Hierarchy chains_root =
-      atom::Hierarchy::setup_particle(new IMP::Particle( get_model() ) );
-    core::Typed::setup_particle(chains_root, fg_type);
-    chains_root->set_name( fg_type.get_string() ); //+ " root" );
-    get_root().add_child(chains_root);
-    // Add n chains
-    for (int j = 0; j < fg_data.number().value(); ++j) {
-      base::Pointer<FGChain> chain= create_fg_chain
-        (this, fg_data, display::Color(.3, .3, .3));
-      chains_root.add_child(atom::Hierarchy(chain->root));
-      // set chain anchors if specified
-      if (fg_data.anchor_coordinates_size() > j) {
-        ::npctransport_proto::Assignment_XYZ xyz =
-          fg_data.anchor_coordinates(j);
-        core::XYZR d(chain->beads[0]);
-        d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
-        d.set_radius(d.get_radius() * fg_anchor_inflate_factor_); // inflate
-        d.set_coordinates_are_optimized(false);
-      }
-      get_statistics()->add_fg_chain_stats( chain->beads ); // stats
-    } // for j
-    // add sites for this type
-    if (fg_data.interactions().value() > 0) {
-      int nsites = fg_data.interactions().value();
-      set_sites(fg_type, nsites, fg_data.radius().value());
+  IMP_ALWAYS_CHECK( fg_types_.find(fg_type) == fg_types_.end(),
+                    "Currently support only single insertion of each type,"
+                    " can be fixed if needed in the future",
+                    base::ValueException);
+  fg_types_.insert(fg_type);
+
+  // Make main root:
+  atom::Hierarchy chains_root =
+    atom::Hierarchy::setup_particle(new IMP::Particle( get_model() ) );
+  core::Typed::setup_particle(chains_root, fg_type);
+  chains_root->set_name( fg_type.get_string() ); //+ " root" );
+  get_root().add_child(chains_root);
+
+  // Add n chains:
+  for (int j = 0; j < fg_data.number().value(); ++j) {
+    base::Pointer<FGChain> chain= create_fg_chain
+      (this, chains_root, fg_data, display::Color(.3, .3, .3));
+    // set chain j anchors by fg_data if specified
+    if (fg_data.anchor_coordinates_size() > j) {
+      ::npctransport_proto::Assignment_XYZ xyz =
+        fg_data.anchor_coordinates(j);
+      core::XYZR d(chain->beads[0]);
+      d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
+      d.set_radius(d.get_radius() * fg_anchor_inflate_factor_); // inflate
+      d.set_coordinates_are_optimized(false);
     }
-    // add general scoring scale factors
-    get_scoring()->set_interaction_range_factor
+    // add stats on chain
+    get_statistics()->add_fg_chain_stats( chain->beads );
+  } // for j
+
+
+  // Add sites for this type:
+  if (fg_data.interactions().value() > 0) {
+    int nsites = fg_data.interactions().value();
+    set_sites(fg_type, nsites, fg_data.radius().value());
+  }
+
+  // Add general scoring scale factors information to scoring:
+  get_scoring()->set_interaction_range_factor
     ( fg_type, fg_data.interaction_range_factor().value());
-    get_scoring()->set_interaction_k_factor
-      ( fg_type, fg_data.interaction_k_factor().value());
-    set_diffusers_changed(true);
-  } // if
+  get_scoring()->set_interaction_k_factor
+    ( fg_type, fg_data.interaction_k_factor().value());
+
+  // Bookkeeping:
+  set_diffusers_changed(true);
 }
 
 
@@ -278,13 +284,14 @@ void SimulationData::create_floaters
   cur_root->set_name(type.get_string());
   get_root().add_child(cur_root);
   // Populate floaters under root:
-  ParticleFactory pf(this, f_data.radius().value(),
-                     f_data.d_factor().value(),
-                     angular_d_factor_,
-                     color, type);
+  IMP_NEW(ParticleFactory, pf,
+          (this, f_data.radius().value(),
+           f_data.d_factor().value(),
+           angular_d_factor_,
+           color, type) );
   for (int j = 0; j < f_data.number().value(); ++j)
     {
-      Particle *cur_p = pf.create();
+      Particle *cur_p = pf->create();
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
       get_statistics()->add_floater_stats(cur_p); // stats
     }
@@ -347,12 +354,13 @@ void SimulationData::create_obstacles
   cur_root->set_name(type.get_string());
   get_root().add_child(cur_root);
   // Populate hierarchy with obstacles:
-  ParticleFactory pf(this, o_data.radius().value(),
-                     o_data.d_factor().value(),
-                     angular_d_factor_,
-                     display::Color(.3, .6, .6), type);
+  IMP_NEW(ParticleFactory, pf,
+          ( this, o_data.radius().value(),
+            o_data.d_factor().value(),
+            angular_d_factor_,
+            display::Color(.3, .6, .6), type) );
   for (int j = 0; j < o_data.xyzs_size(); ++j) {
-      Particle *cur_p = pf.create();
+      Particle *cur_p = pf->create();
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
       ::npctransport_proto::Assignment_XYZ xyz = o_data.xyzs(j);
       core::XYZ p_xyz(cur_p);
@@ -477,6 +485,7 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
                               );
     IMP::rmf::add_restraints(fh, s->get_all_chain_restraints() );
     IMP::rmf::add_restraints(fh, s->get_z_bias_restraints() );
+    IMP::rmf::add_restraints(fh, s->get_custom_restraints() );
   }
   if (s->get_has_bounding_box()) {
     if(with_restraints) {
