@@ -26,29 +26,35 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
     centroids - the list of centroids in tree(p)
     images - corresponding TAMD images for each centroid in centroids
     R - corresponding springs that attch each TAMD image to each centroid
+    springs - springs stored in R (in same order)
 */
-struct TAMDChain : public npctransport::FGChain{
+class TAMDChain : public npctransport::FGChain{
   typedef npctransport::FGChain P;
  public:
   IMP::Particles centroids;
   IMP::Particles images;
   IMP::Restraints R;
+  core::HarmonicDistancePairScores springs;
  public:
   TAMDChain(std::string name = "tamd_chain %1%")
     : P(name)
     {}
 
  TAMDChain(IMP::Particle* rroot,
-            IMP::Particles fbeads,
-            IMP::Particles ccentroids,
-            IMP::Particles iimages,
-            IMP::Restraints RR,
-            std::string name="tamd_chain %1%")
+           IMP::Particles fbeads,
+           IMP::Particles ccentroids,
+           IMP::Particles iimages,
+           IMP::Restraints RR,
+           IMP::core::HarmonicDistancePairScores ssprings,
+           std::string name="tamd_chain %1%")
    : P(rroot, fbeads, name),
     centroids(ccentroids),
     images(iimages),
-    R(RR)
+    R(RR),
+    springs(ssprings)
     { }
+
+  IMP_OBJECT_METHODS(TAMDChain);
 };
 
 
@@ -72,7 +78,7 @@ struct TAMDChain : public npctransport::FGChain{
    @return a tuple with <root particle, centroids, images, restraints>
 */
 TAMDChain*
-create_tamd_chain( ParticleFactory pf,
+create_tamd_chain( ParticleFactory* pf,
                    unsigned int nlevels,
                    unsigned int d,
                    std::vector<double> T_factors,
