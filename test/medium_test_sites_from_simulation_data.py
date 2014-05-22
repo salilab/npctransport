@@ -83,7 +83,12 @@ class Tests(IMP.test.TestCase):
 
 
     def _assert_kap_in_place(self, sd, really_assert=True):
-        fg_anchor = sd.get_fg_chain_roots()[0].get_child(0)
+        first_chain = IMP.npctransport.get_fg_chain(sd.get_fg_chain_roots()[0])
+        print first_chain
+        print vars(first_chain)
+        print "WHOOO"
+        fg_anchor = first_chain.get_bead(0)
+        print fg_anchor
         kap = None
         r=sd.get_root()
         for rchild in r.get_children():

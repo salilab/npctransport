@@ -19,7 +19,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 
-class ParticleFactory {
+class IMPNPCTRANSPORTEXPORT ParticleFactory : public IMP::base::Object {
  public:
   /** The simulation data whose model is associated with new particle
   */
@@ -53,14 +53,18 @@ class ParticleFactory {
                             auto-calculated from radius*D_factor)
     @param color color for new particles
     @param type the type of new particles
+    @param name object name
    */
  ParticleFactory(SimulationData* sd,
                  double radius,
                  double D_factor,
                  double angular_D_factor,
                  display::Color color,
-                 core::ParticleType type)
-   : sd_(sd),
+                 core::ParticleType type,
+                 std::string name = "Particle factory %1%")
+   :
+  IMP::base::Object(name),
+    sd_(sd),
     radius_(radius),
     D_factor_(D_factor),
     angular_D_factor_(angular_D_factor),
@@ -82,6 +86,8 @@ class ParticleFactory {
   Model* get_model() {
     return sd_->get_model();
   }
+
+  IMP_OBJECT_METHODS(ParticleFactory);
 };
 
 

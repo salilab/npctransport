@@ -10,6 +10,7 @@
 
 #include "npctransport_config.h"
 #include "SimulationData.h"
+#include <IMP/atom/Hierarchy.h>
 #include <IMP/base/Object.h>
 #include <IMP/base/nullptr.h>
 #include <IMP/display/Color.h>
@@ -22,7 +23,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
     root - root of hierarchy
     beads - fine chain particles
 */
-struct FGChain : IMP::base::Object {
+class IMPNPCTRANSPORTEXPORT FGChain : public IMP::base::Object {
 public:
   IMP::Particle* root;
   IMP::Particles beads;
@@ -39,12 +40,28 @@ public:
     root(rroot),
     beads(bbeads)
     { }
+
+  Particle* get_root() const
+  { return root; }
+
+#ifndef SWIG
+  IMP::Particles get_beads() const
+    { return beads; }
+#endif
+
+  IMP::Particle* get_bead(unsigned int i) const
+    { return beads[i]; }
+
+  unsigned int get_number_of_beads() const
+  { return beads.size(); }
+
+  IMP_OBJECT_METHODS(FGChain);
 };
 
 
 /**
    Create a chain particle hierarchy, associated with the model of sd,
-   with restraint bonding consecutive particles, according to the
+   with restraint bonding consecutive particles added to sd, according to the
    parameters specified in fg_data.
 
    Notes:
@@ -57,12 +74,14 @@ public:
    spring constant is the simulation backbone_k parameter.
 
    If fg_data.is_tamd() is true, created a TAMD hierarchy, otherwise
-   a simple parent + beads structure
+   a simple parent + beads structure. In the TAMD case, the custom restraint
+   are added to sd->get_scoring() and the tamd images are added to sd->root()
 
    @param[in,out] sd the simulation data whose model is associated with the
                   new chain. A chain restraint is added to the simulation data
                   scoring object, and the particle is added to the simulation data
                   diffusers list.
+   @param parent parent hierarchy to which chain is added
    @param[in] fg_data data about the FG chain
    @param[in] c        color of chain particles
 
@@ -71,6 +90,7 @@ public:
  */
 FGChain* create_fg_chain
 ( SimulationData *sd,
+  IMP::atom::Hierarchy parent,
   const ::npctransport_proto::Assignment_FGAssignment &fg_data,
   display::Color c );
 
