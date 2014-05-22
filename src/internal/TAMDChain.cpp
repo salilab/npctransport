@@ -26,7 +26,7 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 
 
 TAMDChain*
-create_tamd_chain( ParticleFactory pf,
+create_tamd_chain( ParticleFactory* pf,
                    unsigned int n,
                    unsigned int d,
                    std::vector<double> T_factors,
@@ -35,14 +35,18 @@ create_tamd_chain( ParticleFactory pf,
 {
   base::Pointer<TAMDChain> ret_chain = new TAMDChain();
   Particles children; // direct children of uppermost centroid
-  Model* m=pf.get_model();
+  Model* m=pf->get_model();
   int nlevels = ceil(log2(n));
 
   if (n==1)
     {
       // Create and return a singleton leaf:
-      ret_chain->root = pf.create("leaf %1%");
+      ret_chain->root = pf->create("leaf %1%");
       ret_chain->beads = Particles(1, ret_chain->root);
+      for(unsigned int i=0 ; i < ret_chain->beads.size(); i++){
+        std::cout << "n = " << n << " Bead # " << i << " - "
+                  << ret_chain->beads[i] << std::endl;
+      }
       return ret_chain.release();
     }
 
@@ -52,42 +56,51 @@ create_tamd_chain( ParticleFactory pf,
     std::vector<double> T_factors1(T_factors.begin()+1, T_factors.end());
     std::vector<double> F_factors1(F_factors.begin()+1, F_factors.end());
     std::vector<double> Ks1(Ks.begin()+1, Ks.end());
-    int per_child_base = n / d;
+    int n1_base = n / d; // per child
+    int n_excess = n % d;
     int n_left = n;
     while(n_left > 0){
-      int n_excess = n_left % d;
-      int per_child = per_child_base + (n_excess > 0 ? 1 : 0);
+      int n1 = n1_base + (n_excess-- > 0 ? 1 : 0);
       base::Pointer<TAMDChain> child =
-        create_tamd_chain(pf, per_child, d, T_factors, F_factors1, Ks1);
-      n_left -= child->centroids.size();
+        create_tamd_chain(pf, n1, d, T_factors, F_factors1, Ks1);
+      n_left -= n1;
       // Accumulate all results
       children.push_back( child->root );
+      ret_chain->beads += child->beads;
       ret_chain->centroids += child->centroids;
       ret_chain->images += child->images;
       ret_chain->R += child->R;
+      std::cout << "Created chain with " << n1 << " beads, "
+                << n_left << " left" << std::endl;
     }
+  }
+  for(unsigned int i=0 ; i < ret_chain->beads.size(); i++){
+        std::cout << "n = " << n << " Bead # " << i << " - "
+                  << ret_chain->beads[i] << std::endl;
   }
 
   // Build centroid of <d> children and store in ret_chain
   {
     std::ostringstream oss;  oss << "centroid " << nlevels;
     Particle* pc =  new Particle( m, oss.str() );
-    core::Typed::setup_particle(ret_chain->root, pf.type_);
+    core::Typed::setup_particle(pc, pf->type_);
     core::XYZR pc_xyzr = core::XYZR::setup_particle(pc);
     pc_xyzr.set_radius(2); // TODO: something smarter?
     pc_xyzr.set_coordinates_are_optimized(true); // TODO: is needed or dangerous
                                                  // - for BD to evaluate it?
     atom::Diffusion pc_Diffusion = atom::Diffusion::setup_particle(pc);
-    core::Hierarchy pc_h = core::Hierarchy::setup_particle(pc);
+    atom::Hierarchy pc_h = atom::Hierarchy::setup_particle(pc);
     for(unsigned int i = 0; i < children.size(); i++) {
-      pc_h.add_child( IMP::core::Hierarchy(children[i]) );
+      IMP_LOG_PROGRESS("Adding " << i << "children to pi" <<
+                       pc->get_index() << std::endl);
+      pc_h.add_child( atom::Hierarchy(children[i]) );
     }
-    base::Pointer<core::ChildrenRefiner> refiner =
-      new core::ChildrenRefiner( core::Hierarchy::get_default_traits() );
-    atom::CenterOfMass::setup_particle(pc, refiner.get());
-    m->update(); // update now center of mass from children
+    // base::Pointer<core::ChildrenRefiner> refiner =
+    //  new core::ChildrenRefiner( atom::Hierarchy::get_default_traits() );
+    //    atom::CenterOfMass::setup_particle(pc, refiner.get());
+    atom::CenterOfMass::setup_particle(pc, children);
     ret_chain->root = pc;
-    ret_chain->beads = atom::get_leaves(ret_chain->root);
+    //    ret_chain->beads = atom::get_leaves(ret_chain->root);
     ret_chain->centroids.push_back( pc );
   }
 
@@ -103,6 +116,7 @@ create_tamd_chain( ParticleFactory pf,
       new core::HarmonicDistancePairScore(0, Ks[0]);
     ret_chain->R.push_back( new core::PairRestraint
                  ( spring, ParticlePair(ret_chain->root, image), oss.str() ) );
+    ret_chain->springs.push_back( spring );
   }
 
   return ret_chain.release();
@@ -130,11 +144,11 @@ Particle* create_tamd_image( Particle* p_ref,
   p_ret_xyzr.set_coordinates( p_ref_xyzr.get_coordinates() );
   p_ret_xyzr.set_radius( p_ref_xyzr.get_radius() );
   p_ret_xyzr.set_coordinates_are_optimized( true );
-  IMP::core::Hierarchy::setup_particle( p_ret );
+  IMP::atom::Hierarchy::setup_particle( p_ret );
   IMP::atom::Diffusion::setup_particle( p_ret ); // diffusion coefficient?!
-  IMP::atom::TAMDParticle::setup_particle( p_ret, T_factor, F_factor);
   IMP::atom::Mass::setup_particle( p_ret, atom::Mass(p_ref).get_mass() );
   core::Typed::setup_particle( p_ret, core::Typed(p_ref).get_type() );
+  IMP::atom::TAMDParticle::setup_particle( p_ret, p_ref, T_factor, F_factor);
   return p_ret;
 }
 
