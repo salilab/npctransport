@@ -162,7 +162,6 @@ FGChain* create_fg_chain
 
   return ret_chain.release();
 }
-#endif
 
 
 // gets a chain structure from a root of an FG nup
