@@ -13,6 +13,7 @@
 #include <IMP/atom/TAMDParticle.h>
 #include <IMP/base/Pointer.h>
 #include <IMP/core/ChildrenRefiner.h>
+#include <IMP/core/PairRestraint.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/display/Colored.h>
@@ -24,6 +25,34 @@
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 
+/********************* TAMDChain methods ****************/
+
+Restraints TAMDChain::get_chain_restraints()
+{
+  Restraints ret = tamd_restraints_;
+  ret += FGChain::get_chain_restraints();
+  return ret;
+}
+
+
+/************************* declarations ****************/
+/**
+   Create a TAMD image of centroid particle p
+
+   @param p_ref reference particle to be tied by spring
+   @param name particle name
+   @param T_factor temeprature factor
+   @param F_factor friction factor
+
+   @return TAMD image particle
+*/
+Particle* create_tamd_image( Particle* p_ref,
+                             std::string name,
+                             double T_factor,
+                             double F_factor);
+
+
+/************* utility methods implementation ***************/
 
 TAMDChain*
 create_tamd_chain( ParticleFactory* pf,
@@ -41,12 +70,7 @@ create_tamd_chain( ParticleFactory* pf,
   if (n==1)
     {
       // Create and return a singleton leaf:
-      ret_chain->root = pf->create("leaf %1%");
-      ret_chain->beads = Particles(1, ret_chain->root);
-      for(unsigned int i=0 ; i < ret_chain->beads.size(); i++){
-        std::cout << "n = " << n << " Bead # " << i << " - "
-                  << ret_chain->beads[i] << std::endl;
-      }
+      ret_chain->set_root( pf->create("leaf %1%") );
       return ret_chain.release();
     }
 
@@ -65,18 +89,17 @@ create_tamd_chain( ParticleFactory* pf,
         create_tamd_chain(pf, n1, d, T_factors, F_factors1, Ks1);
       n_left -= n1;
       // Accumulate all results
-      children.push_back( child->root );
-      ret_chain->beads += child->beads;
+      children.push_back( child->get_root() );
       ret_chain->centroids += child->centroids;
       ret_chain->images += child->images;
-      ret_chain->R += child->R;
+      ret_chain->tamd_restraints_ += child->tamd_restraints_;
       std::cout << "Created chain with " << n1 << " beads, "
                 << n_left << " left" << std::endl;
     }
   }
-  for(unsigned int i=0 ; i < ret_chain->beads.size(); i++){
+  for(unsigned int i=0 ; i < ret_chain->get_number_of_beads(); i++){
         std::cout << "n = " << n << " Bead # " << i << " - "
-                  << ret_chain->beads[i] << std::endl;
+                  << ret_chain->get_bead(i) << std::endl;
   }
 
   // Build centroid of <d> children and store in ret_chain
@@ -99,30 +122,32 @@ create_tamd_chain( ParticleFactory* pf,
     //  new core::ChildrenRefiner( atom::Hierarchy::get_default_traits() );
     //    atom::CenterOfMass::setup_particle(pc, refiner.get());
     atom::CenterOfMass::setup_particle(pc, children);
-    ret_chain->root = pc;
-    //    ret_chain->beads = atom::get_leaves(ret_chain->root);
+    ret_chain->set_root( pc );
     ret_chain->centroids.push_back( pc );
   }
 
   // Build TAMD image of centroid + spring restraint
   {
     std::ostringstream oss;  oss << "TAMD " << nlevels << ".%1%";
-    Particle* image = create_tamd_image(  ret_chain->root,
+    Particle* image = create_tamd_image(  ret_chain->get_root(),
                                           oss.str(),
                                           T_factors[0],
                                           F_factors[0]);
     ret_chain->images.push_back(image);
     base::Pointer<core::HarmonicDistancePairScore> spring=
       new core::HarmonicDistancePairScore(0, Ks[0]);
-    ret_chain->R.push_back( new core::PairRestraint
-                 ( spring, ParticlePair(ret_chain->root, image), oss.str() ) );
-    ret_chain->springs.push_back( spring );
+    ret_chain->tamd_restraints_.push_back
+      ( new core::PairRestraint( spring,
+                                 ParticlePair(ret_chain->get_root(), image),
+                                 oss.str() ) );
+    ret_chain->tamd_springs_.push_back( spring );
   }
 
   return ret_chain.release();
 }
 
 
+/********************** internal utility functions U**************/
 
 /**
    Create a TAMD image of centroid particle p
