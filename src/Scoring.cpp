@@ -6,6 +6,7 @@
  *
  */
 
+#include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/Scoring.h>
 
 #include <IMP/npctransport/FGChain.h>

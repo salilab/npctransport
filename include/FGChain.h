@@ -196,6 +196,8 @@ IMP_OBJECTS(FGChain, FGChains);
 
 /******************  utility methods ***************/
 
+  /******************  utility methods ***************/
+
 /**
    Create a chain particle hierarchy, associated with the model of sd,
    with restraint bonding consecutive particles added to sd, according to the
