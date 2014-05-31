@@ -8,6 +8,7 @@
 
 #include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/internal/TAMDChain.h>
+#include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/atom/CenterOfMass.h>
@@ -27,36 +28,52 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+/***************** FGChain methods ************/
+
+//!  create the bonds restraint for the chain beads
+void FGChain::update_bonds_restraint() {
+  // IMP_ALWAYS_CHECK( beads.size() > 0,
+  //                   "No beads in chain.", IMP::base::ValueException );
+  IMP_ALWAYS_CHECK( rest_length_factor_ > 0.0,
+                    "non-positive rest length factor is not valid",
+                    IMP::base::ValueException );
+
+  std::string name = core::Typed(get_root())->get_string();
+  IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer, xcpc,
+          (this->get_beads(), "%1% " + name + " consecutive pairs"));
+  bonds_score_ = new LinearWellPairScore
+    ( rest_length_factor_, backbone_k_ );
+  bonds_restraint_ = container::create_restraint
+    ( bonds_score_.get(), xcpc.get(),  "%1% " + name  );
+}
+
+
+/******************  internal utility methods ***************/
+
 namespace {
 
-  void add_chain_and_restraints_to_sd
+  void add_chain_to_sd
     (FGChain const* chain,
      SimulationData* sd,
      atom::Hierarchy parent,
      const ::npctransport_proto::Assignment_FGAssignment &fg_data)
   {
-    parent.add_child(atom::Hierarchy(chain->root));
-
-    // add chain backbone restraint
-    double rlf = fg_data.rest_length_factor().value();
-    core::ParticleType type(fg_data.type());
-    sd->get_scoring()->add_chain_restraint
-      ( chain->beads, rlf, type.get_string() + "chain restraint" );
-
+    parent.add_child( chain->get_root() );
     if(fg_data.is_tamd()) {
-      // add tamd restraints and image particles
       internal::TAMDChain const* tamd_chain =
         dynamic_cast<internal::TAMDChain const*>(chain);
-      IMP_USAGE_CHECK(tamd_chain, "chain is not TAMDChain*");
+      IMP_USAGE_CHECK(tamd_chain, "chain is expected to be TAMD chain*");
       for(unsigned int k = 0; k < tamd_chain->images.size(); k++) {
         atom::Hierarchy h_k( tamd_chain->images[k]);
         sd->get_root().add_child( h_k );
       }
-      sd->get_scoring()->add_custom_restraints(tamd_chain->R);
     }
   }
 
 } // anonymous namespace
+
+
+/******************  utility methods ***************/
 
 FGChain* create_fg_chain
 ( SimulationData *sd,
@@ -100,25 +117,39 @@ FGChain* create_fg_chain
     root = atom::Hierarchy::setup_particle
       ( new Particle( sd->get_model() ), P );
     root->set_name( type.get_string() );
-    ret_chain = new FGChain(root, P);
+    ret_chain = new FGChain(root);
   }
 
-  // add chain beads, restraints, anchors
-  // TODO: put in a different method for clarity
-  add_chain_and_restraints_to_sd(ret_chain, sd, parent, fg_data);
+  // add chain beads, etc. to sd under parent
+  add_chain_to_sd(ret_chain, sd, parent, fg_data);
+
+  // add scoring info
+  ret_chain->set_rest_length_factor( fg_data.rest_length_factor().value() );
+  ret_chain->set_backbone_k( sd->get_scoring()->get_default_backbone_k() );
+  sd->get_scoring()->add_chain_restraints
+    ( ret_chain );
 
   return ret_chain.release();
 }
 
+
+
 // gets a chain structure from a root of an FG nup
 // (by adding its ordered leaves)
 FGChain* get_fg_chain(atom::Hierarchy root){
-  Particle* proot = root.get_particle();
-  Particles beads = atom::get_leaves(root);
-  IMP_NEW(FGChain, ret,
-          (proot, beads) );
+  IMP_NEW(FGChain, ret, ( root.get_particle() ) );
   return ret.release();
 }
+
+
+FGChain* get_fg_chain(Particle* p_root)
+{
+  IMP_USAGE_CHECK(atom::Hierarchy::get_is_setup(p_root),
+                  "p_root must be of type hierarchy");
+  return get_fg_chain(atom::Hierarchy(p_root));
+};
+
+
 
 
 IMPNPCTRANSPORT_END_NAMESPACE

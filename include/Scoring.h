@@ -37,6 +37,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class SimulationData;
+class FGChain;
 
 class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 {
@@ -103,16 +104,16 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
   // a map from particle indexes of chain identifiers to corresponding
   // chain backbone restraints (see chain_ids_map)
+  typedef boost::unordered_set
+    < base::UncheckedWeakPointer<FGChain> > FGChainsSet;
+  FGChainsSet chains_set_;
+  // a map from particle indexes of chain beads to the chain objects that they
+  // represent (TODO: probably can be obliterated by adding appropriate
+  // decorators)
   typedef boost::unordered_map
-    < ParticleIndex, IMP::base::PointerMember<Restraint> >
-    t_chain_restraints_map;
-  t_chain_restraints_map chain_restraints_map_;
-  // a map from particle indexes of particles to a particle index of a
-  // representative particle that identifies the chain
-  // (see chain_restraints_map)
-  typedef boost::unordered_map< ParticleIndex, ParticleIndex >
-    t_chain_ids_map;
-  t_chain_ids_map chain_ids_map_;
+    < ParticleIndex, base::UncheckedWeakPointer<FGChain> >
+    t_particle_index_to_fg_chain_map;
+  t_particle_index_to_fg_chain_map bead_to_chain_map_;
 
   // particles to be z-biased on call to get_z_bias_restraints()
   // with key being the k value of each particle subset
@@ -140,7 +141,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
   /**
      returns a scoring function for the NPC simulation, based on:
-     1) the chain restraints added by add_chain_restraint()
+     1) the chain restraints added by add_chain_restraints()
      2) default repulsive interactions on particles in get_diffusers()
      3) attractive interactions that depend on pair types, as added by
         add_interaction()
@@ -160,7 +161,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
   /**
      returns a custom scoring function for the NPC simulation, based on:
-     1) the chain restraints added by add_chain_restraint()
+     1) the chain restraints added by add_chain_restraints()
         that overlap with 'particles'
      2) default repulsive interactions between particles in particles
         nad optimizable particles
@@ -400,9 +401,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   bool get_has_slab() const
   { return slab_is_on_; }
 
-  /** returns the spring constant between consecutive beads
-      in a chain of beads */
-  double get_backbone_k() const { return backbone_k_; }
+  /** returns the default spring constant between consecutive beads
+      in a chain of beads - this is used for chains whose k
+      is non-positive
+  */
+  double get_default_backbone_k() const { return backbone_k_; }
 
   /** returns the constant force applied by overlapping spheres on each
       other
@@ -438,55 +441,46 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   { return otpp_; }
 #endif
 
-  /** create an fg chain restraint on consecutive chain particles
-      and store it in the internal list of chain restraint, which
-      will be used in future calls to get_scoring_function(true) or
-      create_scoring_function()
+  /** add FG chain to this scoring object, using the
+      chain->get_chain_restraints() method to retrieve the restraints
+      upon a call to get_scoring_function() or create_scoring_function(),
+      etc.
+
+      @param chain an FG chain associated with internal scoring
+
+      @return pointer to the newly created restraint
+
+      @note if the chain->get_backbone_k() is non-positive, it is reset to
+            this->get_default_backbone_k()
 
       @note this method assumes that all such chains will be disjoint
       and so it is later possible to use
       container::ExclusiveConsecutivePairFilter to filter out all
       pairs of particles connected by such chain restraints.
-
-      @param P the chain particles in consecutive order
-      @param rest_length_factor the rest length factor of consecutive chain
-                                beads relative to their sum of radii
-      @param name the name of the chain (to be used for naming the restraint
-
-      @return pointer to the newly created restraint
   */
-  Restraint* add_chain_restraint(Particles P,
-                                 double rest_length_factor,
-                                 std::string name);
+  void add_chain_restraints(FGChain* chain);
 
 
   /**
-      returns all restraints on fg nup chains that were added by
-      add_chain_restraint() so far and pertain to particles in 'particles'
+      returns restraints on all fg nup chains that were added by
+      add_chain_restraints() so far and contain any bead in 'beads'.
+      The restraints are updated directly from the original chain objects
+      chain->get_chain_restraints() object.
 
-      @param particles a list of diffusing particles, such that every returned restraint
-                       must pertain to a particle in the list
+      @param beads a least of chain fine beads over which restraints are
+                   collected
 
-      @return pointers to all chain restraints that have been added so far
-              and pertain to particle in 'particles' list
+      @return a list of all chain restraints that have been added so far
+              and contain beads in 'beads'
   */
   Restraints get_chain_restraints_on
-    ( SingletonContainerAdaptor particles ) const;
+    ( SingletonContainerAdaptor bead_particles ) const;
 
   /**
-      @return all restraints on fg nup chains that were added by
-      add_chain_restraint() so far
+      @return all restraints of fg nup chains that were added by
+      add_chain_restraints() so far
   */
-  Restraints get_all_chain_restraints() const {
-    Restraints rs;
-    std::transform( chain_restraints_map_.begin(),
-                    chain_restraints_map_.end(),
-                    std::back_inserter(rs),
-                    boost::bind
-                    ( &t_chain_restraints_map::value_type::second, _1)
-                  );
-    return rs;
-  }
+  Restraints get_all_chain_restraints() const;
 
   /**
      adds a biasing potential for particles ps towards z, to the restraints

@@ -7,6 +7,7 @@
  */
 
 #include <IMP/npctransport/initialize_positions.h>
+#include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/randomize_particles.h>
 #include <IMP/npctransport/internal/initialize_positions_RAIIs.h>
 #include <IMP/npctransport/util.h>
@@ -179,7 +180,7 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
   Hierarchies chains = sd.get_fg_chain_roots( );
   for (unsigned int k = 0; k < chains.size(); k++) {
     base::Pointer<FGChain> cur_chain = get_fg_chain(chains[k]);
-    core::XYZ d(cur_chain->beads[0]);
+    core::XYZ d(cur_chain->get_bead(0));
     IMP_LOG(PROGRESS, "d # " << k << " = " << d << std::endl);
     IMP_LOG(PROGRESS, "is optimizable = " << d.get_coordinates_are_optimized()
             << std::endl);
@@ -210,7 +211,7 @@ void initialize_positions(SimulationData *sd,
     base::Pointer<FGChain> chain = get_fg_chain(chains[i]);
     chain_pins.push_back
       ( new IMP::npctransport::internal::TemporarySetOptimizationStateRAII
-        (chain->beads[0], false) );
+        (chain->get_bead(0), false) );
   }
 
   int dump_interval = sd->get_rmf_dump_interval_frames();

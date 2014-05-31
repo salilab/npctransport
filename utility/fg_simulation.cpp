@@ -61,7 +61,7 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
   // create a set of random sites (for now)
   base::Pointer<npctransport::FGChain> first_chain =
     npctransport::get_fg_chain(chain_roots[0]);
-  double r = core::XYZR(first_chain->beads[0]).get_radius();
+  double r = core::XYZR(first_chain->get_bead(0)).get_radius();
   Vector2Ds sites;
   std::cout << IMP::base::Showable(sites) << std::endl;
   while (sites.size() < chain_roots.size()) {
@@ -83,7 +83,7 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
   for (unsigned int i = 0; i < chain_roots.size(); ++i) {
     base::Pointer<npctransport::FGChain> chain =
       npctransport::get_fg_chain((chain_roots[i]));
-    core::XYZ d(chain->beads[0]);
+    core::XYZ d(chain->get_bead(0));
     d.set_coordinates(
         Vector3D(sites[i][0], sites[i][1], sd.get_box().get_corner(0)[2]));
     d.set_coordinates_are_optimized(false);
@@ -141,7 +141,8 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
   // compute the relative radius in which particles would be positioned
   // TODO: we assume here that particle radius is smaller
   //       than the cylinder radius - verify in runtime?
-  Particles chain_beads = npctransport::get_fg_chain(chain_roots[0])->beads;
+  Particles chain_beads =
+    npctransport::get_fg_chain(chain_roots[0])->get_beads();
   double particle_radius = IMP::core::XYZR(chain_beads[0]).get_radius();
   // compute fraction of particle from full cylinder radius
   double relative_r = (cyl.get_radius() - particle_radius) / cyl.get_radius();
@@ -170,7 +171,7 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
           cyl.get_inner_point_at(relative_h, relative_r, angle);
       base::Pointer<npctransport::FGChain> cur_chain =
         npctransport::get_fg_chain(chain_roots[chain_num]);
-      core::XYZ d(cur_chain->beads[0]);
+      core::XYZ d(cur_chain->get_bead(0));
       d.set_coordinates(new_anchor);
       d.set_coordinates_are_optimized(false);
       std::cout << "d = " << d << std::endl;
@@ -223,7 +224,7 @@ IMP::base::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
     for (unsigned int k = 0; k < chains.size(); k++) {
       base::Pointer<npctransport::FGChain> cur_chain =
         npctransport::get_fg_chain(chains[k]);
-      core::XYZ d(cur_chain->beads[0]);
+      core::XYZ d(cur_chain->get_bead(0));
       IMP_LOG(ll, "d # " << k << " = " << d << std::endl);
       IMP_LOG(ll, "is optimizable = "
               << d.get_coordinates_are_optimized()

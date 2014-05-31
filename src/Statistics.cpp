@@ -241,21 +241,21 @@ void Statistics::update_fg_stats
         for (unsigned int j = 0; j < chains_i.size(); ++j)
           {
             base::Pointer<FGChain> chain_ij= get_fg_chain(chains_i[j]);
-            fill_in_zr_hist(zr_hist, chain_ij->beads);
+            fill_in_zr_hist(zr_hist, chain_ij->get_beads());
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
             double volume_ij =
-              atom::get_volume(chain_ij->root); // how does the work with TAMD?
+              atom::get_volume(chain_ij->get_root()); // how does the work with TAMD?
              // perhaps chain_ij->beads instead?
             double radius_of_gyration_ij =
-              atom::get_radius_of_gyration(chain_ij->beads);
+              atom::get_radius_of_gyration(chain_ij->get_beads());
 #else
             double volume_ij = -1.;
             double radius_of_gyration_ij = -1.;
 #endif
             UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), volume, volume_ij);
             double length_ij =
-              core::get_distance(core::XYZ(chain_ij->beads[0]),
-                                 core::XYZ(chain_ij->beads.back()));
+              core::get_distance(core::XYZ(chain_ij->get_bead(0)),
+                                 core::XYZ(chain_ij->get_beads().back()));
             UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), length, length_ij);
             UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), radius_of_gyration,
                        radius_of_gyration_ij);
@@ -677,7 +677,7 @@ Statistics::get_interactions_and_interacting
     for (unsigned int j = 0; j < chain_roots.size(); ++j) {
       bool chain_found = false;
       base::Pointer<FGChain> cur_chain= get_fg_chain(chain_roots[j]);
-      Particles const& chain_particles = cur_chain->beads;
+      Particles const& chain_particles = cur_chain->get_beads();
       for (unsigned int k = 0; k < chain_particles.size(); ++k) {
         int num = get_number_of_interactions
           (floaters[i], chain_particles[k] );
@@ -749,7 +749,7 @@ Statistics::get_z_distribution(const ParticlesTemp& ps) const{
 }
 
 void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][3],
-                                 Particles& ps) const{
+                                 ParticlesTemp ps) const{
   double top = get_z_distribution_top();
   double r_max = get_r_distribution_max();
   int zz, rr;

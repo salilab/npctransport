@@ -6,6 +6,7 @@
  *
  */
 
+#include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/Scoring.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
@@ -292,70 +293,68 @@ double Scoring::get_interaction_range_for
 
 
 
-/** add a restraint on particles in an FG nup chain */
-Restraint*
-Scoring::add_chain_restraint(Particles P,
-                             double rest_length_factor,
-                             std::string name)
+// add FG Nup chain with restraints
+void
+Scoring::add_chain_restraints(FGChain* chain)
 {
-  IMP_ALWAYS_CHECK( P.size() > 0,
-                    "No Particles passed.", IMP::base::ValueException );
-  IMP_ALWAYS_CHECK( rest_length_factor > 0,
+  IMP_ALWAYS_CHECK( chain->get_rest_length_factor() > 0,
                     "non-positive rest length factor is not valid",
                     IMP::base::ValueException );
-
-  // Exclusive means that the particles will be in no other
-  // ConsecutivePairContainer this assumption accelerates certain computations
-  IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer, xcpc,
-          (P, "%1% " + name + " consecutive pairs"));
-  // add chain restraint
-  IMP_NEW(LinearWellPairScore, lwps,
-          ( rest_length_factor, get_backbone_k() ) );
-  IMP::base::Pointer<Restraint> cr =
-    IMP::container::create_restraint
-    ( lwps.get(), xcpc.get(),  "%1% " + name  );
-  chain_scores_.push_back( lwps );
-  // save restraint and chain ids to appropriate maps
-  ParticleIndex id = P[0]->get_index();
-  chain_restraints_map_[id] = cr;
-  for(unsigned int i = 0; i < P.size(); i++){
-    ParticleIndex pi = P[i]->get_index();
-    chain_ids_map_[pi] = id;
+  if(chain->get_backbone_k() <= 0 ){
+    chain->set_backbone_k( get_default_backbone_k() );
   }
-
-  return cr;
+  // save chain into map so its restraints can be accessed later
+  chains_set_.insert( chain );
+  // save mapping from all beads back to chains for easy access
+  for(unsigned int i = 0; i < chain->get_number_of_beads(); i++){
+    ParticleIndex bi = chain->get_bead_index(i);
+    bead_to_chain_map_[bi] = chain;
+  }
 }
 
 
 IMP::Restraints
 Scoring::get_chain_restraints_on
-( IMP::SingletonContainerAdaptor P ) const
+( IMP::SingletonContainerAdaptor bead_particles ) const
 {
-  P.set_name_if_default("GetChainRestraintsOnInput%1%");
+  bead_particles.set_name_if_default("GetChainRestraintsOnInput%1%");
   IMP::Restraints R;
-  std::set<ParticleIndex> ids_added;
+  FGChainsSet chains_found;
   IMP_CONTAINER_FOREACH
     ( container::ListSingletonContainer,
-      P,
+      bead_particles,
       {
         if(get_sd()->get_is_fg(_1) &&
-           chain_ids_map_.find(_1) != chain_ids_map_.end()){
-          ParticleIndex id = chain_ids_map_.find(_1)->second;
-          IMP_USAGE_CHECK(chain_restraints_map_.find(id) !=
-                          chain_restraints_map_.end(),
-                          "For some reason a particle appears in chain_ids_map_"
-                          << " but its id is missing from chain_restraints_map_");
-          if( ids_added.find(id) == ids_added.end() )
+           bead_to_chain_map_.find(_1) != bead_to_chain_map_.end())
+          {
+            FGChain* chain =
+              bead_to_chain_map_.find(_1)->second.get();
+            IMP_USAGE_CHECK
+              (chains_set_.find(chain) != chains_set_.end(),
+               "For some reason a bead particle appears in bead to chain map"
+               << " but its chain is missing from chains_set_");
+            if( chains_found.find(chain) == chains_found.end() )
             {
               // mark to prevent duplicates:
-              ids_added.insert(id);
-              Restraint* r =
-                chain_restraints_map_.find(id)->second.get();
-              R.push_back( r );
+              chains_found.insert(chain);
+              R += chain->get_chain_restraints();
             }
         }
       }
       ); // IMP_CONTAINER_FOREACH
+  return R;
+}
+
+Restraints
+Scoring::get_all_chain_restraints() const
+{
+  Restraints R;
+  for ( FGChainsSet::iterator it = chains_set_.begin();
+        it != chains_set_.end(); it++)
+    {
+      FGChain* chain = it->get();
+      R += chain->get_chain_restraints();
+    }
   return R;
 }
 
