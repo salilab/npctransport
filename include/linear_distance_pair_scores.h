@@ -256,6 +256,9 @@ class IMPNPCTRANSPORTEXPORT LinearWellPairScore : public PairScore {
   void set_rest_length_factor(double rest_length_factor)
   { rest_length_factor_ = rest_length_factor; }
   double get_rest_length_factor() const { return rest_length_factor_; }
+  void set_k(double k)
+  { k_ = k; }
+  double get_k() { return k_; }
   double evaluate_index(Model *m, const ParticleIndexPair &p,
                         DerivativeAccumulator *da) const IMP_OVERRIDE;
   ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis) const;
