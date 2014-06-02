@@ -10,6 +10,7 @@
 #include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/randomize_particles.h>
 #include <IMP/npctransport/internal/initialize_positions_RAIIs.h>
+#include <IMP/npctransport/internal/TAMDChain.h>
 #include <IMP/npctransport/util.h>
 #include <IMP/scoped.h>
 #include <IMP/Restraint.h>
@@ -45,7 +46,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 namespace {
 
-  // returns true if XYZ and TAMDParticle decorated
+  // returns true if p is XYZ and TAMDParticle decorated
   bool is_xyz_tamd(IMP::Particle* p)
   {
     return IMP::atom::TAMDParticle::get_is_setup(p) &&
@@ -80,7 +81,7 @@ void optimize_balls(const ParticlesTemp &ps,
                     bool is_rest_length_scaling,
                     rmf::SaveOptimizerState *save,
                     atom::BrownianDynamics *bd,
-                    LinearWellPairScores lwps,
+                    FGChains chains,
                     base::LogLevel ll, bool debug,
                     double short_init_factor = 1.0) {
   // make sure that errors and log messages are marked as coming from this
@@ -103,51 +104,64 @@ void optimize_balls(const ParticlesTemp &ps,
 
   IMP_LOG(PROGRESS, "optimize_balls for n_particles="
           << ps.size() << std::endl);
-  // shrink each of the particles, relax the configuration, repeat
+
+  // ramp temperature, particles radii, bond lengths, reset TAMD if needed
+  // relax the configuration, repeat
   double bd_temperature_orig = bd->get_temperature();
-  for (int i = 0; i < 11; ++i) {
-    boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > attrs
+  for (double ramp_level = 0; ramp_level <= 1.0 ; ramp_level += 0.1) {
+    boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > tmp_set_radii
       ( new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()] );
-    boost::ptr_vector<IMP::npctransport::internal::LinearWellSetLengthRAII>
-      set_temporary_lengths;
-    double factor = .1 * i;
-    double length_factor = is_rest_length_scaling ? (.7 + .3 * factor) : 1.0;
-    // rescale radii temporarily
+    boost::ptr_vector< internal::FGChainScaleRestLengthRAII >
+      tmp_scale_rest_length;
+    boost::ptr_vector< internal::TAMDChainScaleKRAII >
+      tmp_disable_tamd_k;
+    double radius_factor = ramp_level;
+    double rest_length_factor =
+      is_rest_length_scaling ? (.7 + .3 * ramp_level) : 1.0;
+    // rescale particles radii temporarily
     for (unsigned int j = 0; j < ps.size(); ++j) {
-      attrs[j].reset(
-          new ScopedSetFloatAttribute(ps[j], core::XYZR::get_radius_key(),
-                                      core::XYZR(ps[j]).get_radius() * factor));
+      tmp_set_radii[j].reset(
+          new ScopedSetFloatAttribute
+          (ps[j], core::XYZR::get_radius_key(),
+           core::XYZR(ps[j]).get_radius() * radius_factor));
     }
-    // rescale bond length temporarily
-    for (unsigned int j = 0; j < lwps.size(); ++j) {
-      set_temporary_lengths.push_back
-        ( new IMP::npctransport::internal::LinearWellSetLengthRAII
-          (lwps[j], length_factor) );
+    // rescale bond length + TAMD (if needed ) temporarily for all chains
+    for (unsigned int j = 0; j < chains.size(); ++j) {
+      tmp_scale_rest_length.push_back
+        ( new internal::FGChainScaleRestLengthRAII(chains[j],
+                                                   rest_length_factor) );
+      internal::TAMDChain* as_tamd =
+        dynamic_cast< internal::TAMDChain* >(chains[j].get());
+      if(as_tamd){
+        tmp_disable_tamd_k.push_back
+          ( new internal::TAMDChainScaleKRAII(as_tamd, 0.0) );
+      }
     }
-    IMP_LOG(PROGRESS, "Optimizing with radii at " << factor << " of full"
-            << " and length factor " << length_factor << std::endl
+    IMP_LOG(PROGRESS, "Optimizing with radii at " << radius_factor << " of full"
+            << " and length factor " << rest_length_factor << std::endl
             << " energy before = "
             << bd->get_scoring_function()->evaluate(false) << std::endl);
 
     for (int k_simanneal = 0; k_simanneal < 5; ++k_simanneal)
       {
         double temperature =
-          (1.5 - (i + k_simanneal / 5.0) / 11.0) * bd_temperature_orig;
+          (1.5 - (10*ramp_level + k_simanneal / 5.0) / 11.0) * bd_temperature_orig;
         IMP::npctransport::internal::BDSetTemporaryTemperatureRAII
           bd_set_temporary_temperature(bd, temperature);
         bool done = false;
         IMP_OMP_PRAGMA(parallel num_threads(3)) {
           IMP_OMP_PRAGMA(single) {
             int n_bd_cycles =
-              std::ceil(30 * (i / 2 + 2) * std::sqrt((double)ps.size()));
+              std::ceil(30 * (5 * ramp_level + 2) * std::sqrt((double)ps.size()));
             int actual_n_bd_cycles =
               std::ceil(n_bd_cycles * short_init_factor) ;
             double e_bd = bd->optimize( actual_n_bd_cycles );
-            IMP_LOG(PROGRESS, "Energy after bd is " << e_bd << " at " << i << ", "
+            IMP_LOG(PROGRESS, "Energy after bd is " << e_bd <<
+                    " at ramp level " << ramp_level << ", "
                     << k_simanneal << std::endl);
             if (debug) {
               std::ostringstream oss;
-              oss << "Init after " << i << " " << k_simanneal;
+              oss << "Init after " << ramp_level << " " << k_simanneal;
               if (save) {
                 save->update_always(oss.str());
               }
@@ -260,14 +274,14 @@ void initialize_positions(SimulationData *sd,
           false /* no non-bonded attr potentials yet */);
       IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
         set_temporary_scoring_function( sd->get_bd(), sf );
-      update_tamd_particles_coords_from_refs( sd->get_root() );
       optimize_balls(cur_particles,
                      false /*is_scale_rest_length*/,
                      sd->get_rmf_sos_writer(),
                      sd->get_bd(),
-                     sd->get_scoring()->get_chain_scores(),
+                     sd->get_scoring()->get_fg_chains(),
                      base::PROGRESS,
                      debug, short_init_factor);
+      update_tamd_particles_coords_from_refs( sd->get_root() );
     }
   {
     // optimize everything now
@@ -283,20 +297,20 @@ void initialize_positions(SimulationData *sd,
         false /* no non-bonded attr potential yet */ );
     IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
       set_temporary_scoring_function( sd->get_bd(), sf );
-    update_tamd_particles_coords_from_refs( sd->get_root() );
     optimize_balls(sd->get_diffusers()->get_particles(),
                    false /*scale rest length*/,
                    sd->get_rmf_sos_writer(),
                    sd->get_bd(),
-                   sd->get_scoring()->get_chain_scores(),
+                   sd->get_scoring()->get_fg_chains(),
                    base::PROGRESS,
                    debug, short_init_factor);
+    update_tamd_particles_coords_from_refs( sd->get_root() );
     IMP_LOG(VERBOSE, "Custom energy after initialization is "
-              << sd->get_bd()->get_scoring_function()->evaluate(false)
+              << sd->get_bd()->get_scoring_function()->evaluate(true)
               << std::endl);
   }
   IMP_LOG(VERBOSE, "Simulation energy after initialization is " <<
-          sd->get_bd()->get_scoring_function()->evaluate(false)
+          sd->get_bd()->get_scoring_function()->evaluate(true)
           << std::endl);
   print_fgs(*sd);
   // IMP_NEW(core::RestraintsScoringFunction, rsf,

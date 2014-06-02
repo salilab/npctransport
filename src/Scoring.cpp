@@ -6,8 +6,9 @@
  *
  */
 
-#include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/Scoring.h>
+
+#include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
 #include <IMP/npctransport/SlabSingletonScore.h>
@@ -15,6 +16,7 @@
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/npctransport/util.h>
+
 #include <IMP/base_types.h>
 #include <IMP/container_macros.h>
 #include <IMP/algebra/vector_generators.h>

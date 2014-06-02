@@ -7,8 +7,10 @@
  */
 
 #include <IMP/npctransport/FGChain.h>
+#include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/internal/TAMDChain.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
+
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/atom/CenterOfMass.h>
@@ -34,15 +36,9 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 void FGChain::update_bonds_restraint() {
   // IMP_ALWAYS_CHECK( beads.size() > 0,
   //                   "No beads in chain.", IMP::base::ValueException );
-  IMP_ALWAYS_CHECK( rest_length_factor_ > 0.0,
-                    "non-positive rest length factor is not valid",
-                    IMP::base::ValueException );
-
   std::string name = core::Typed(get_root())->get_string();
   IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer, xcpc,
           (this->get_beads(), "%1% " + name + " consecutive pairs"));
-  bonds_score_ = new LinearWellPairScore
-    ( rest_length_factor_, backbone_k_ );
   bonds_restraint_ = container::create_restraint
     ( bonds_score_.get(), xcpc.get(),  "%1% " + name  );
 }
@@ -76,7 +72,7 @@ namespace {
 /******************  utility methods ***************/
 
 FGChain* create_fg_chain
-( SimulationData *sd,
+( SimulationData* sd,
   atom::Hierarchy parent,
   const ::npctransport_proto::Assignment_FGAssignment &fg_data,
   display::Color c )
