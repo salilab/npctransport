@@ -274,7 +274,6 @@ void initialize_positions(SimulationData *sd,
           false /* no non-bonded attr potentials yet */);
       IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
         set_temporary_scoring_function( sd->get_bd(), sf );
-      update_tamd_particles_coords_from_refs( sd->get_root() );
       optimize_balls(cur_particles,
                      false /*is_scale_rest_length*/,
                      sd->get_rmf_sos_writer(),
