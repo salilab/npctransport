@@ -8,20 +8,23 @@
 //TODO: turn FGChain, TAMDChain onto a Decorator? seems to make sense
 //TODO: use "Representation" decorator?
 
-#ifndef IMPNPCTRANSPORT_CREATING_TAMD_PARTICLES_H
-#define IMPNPCTRANSPORT_CREATING_TAMD_PARTICLES_H
+#ifndef IMPNPCTRANSPORT_FG_CHAIN_H
+#define IMPNPCTRANSPORT_FG_CHAIN_H
 
 #include "npctransport_config.h"
-#include "SimulationData.h"
 #include "linear_distance_pair_scores.h"
 #include "internal/npctransport.pb.h"
+
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/base/Object.h>
 #include <IMP/base/nullptr.h>
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/display/Color.h>
 
+
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
+
+class SimulationData;
 
 /**
    a chain with a root
@@ -35,8 +38,6 @@ public:
   base::PointerMember<Particle> root_;
   base::PointerMember<Restraint> bonds_restraint_;
   base::PointerMember<LinearWellPairScore> bonds_score_;
-  double backbone_k_;
-  double rest_length_factor_;
 
  private:
 
@@ -64,13 +65,12 @@ public:
          double rest_length_factor = 1.0,
          std::string name = "chain %1%")
    : base::Object(name),
-      root_(root),
-      bonds_restraint_(nullptr),
-      bonds_score_(nullptr),
-      backbone_k_(backbone_k),
-      rest_length_factor_(rest_length_factor)
+    root_(root),
+    bonds_restraint_(nullptr)
       {
-        IMP_USAGE_CHECK(rest_length_factor_>0.0, "bonds rest length factor should be positive");
+        IMP_USAGE_CHECK(rest_length_factor>0.0, "bonds rest length factor" <<
+                        " should be positive");
+        bonds_score_ = new LinearWellPairScore(rest_length_factor, backbone_k);
       }
 
     atom::Hierarchy get_root() const
@@ -116,7 +116,12 @@ public:
   { return get_beads().size(); }
 
   /**
-      return the restraint accosciated with internal interactions by this chain
+      Returns a restraint accosciated with internal interactions by this chain.
+
+      @note this restraint is affected by future calls to set_rest_length_factor()
+      and set_backbone_k(). However, it applies only to the topology of the chain
+      at the time of call, if the chain topology changes, this methods should be
+      called again.
 
       @param assumes that the chain has a valid root whose leaves are beads
   */
@@ -128,45 +133,45 @@ public:
 
     /** set the equilibrium distance factor between consecutive beads
         relative to the sum of their radii
+
+        @note This affects also restraints previously returned by
+              get_chain_restraints()
+
         \see LinearWellPairScore
     */
-  void set_rest_length_factor(double brlf){
+  void set_rest_length_factor(double rlf){
     IMP_USAGE_CHECK(brlf>0.0, "bonds rest length factor should be positive");
-    rest_length_factor_ = brlf;
-    if(bonds_restraint_ && bonds_score_){
-      // quicker if score exists
-      bonds_score_->set_rest_length_factor(brlf);
-    } else {
-      if(root_){
-        update_bonds_restraint();
-      }
-    }
+      bonds_score_->set_rest_length_factor(rlf);
   }
 
     /** set the force constant between consecutive chain beads
+
+        @note This affects also restraints previously returned by
+              get_chain_restraints()
+
         \see LinearWellPairScore
      */
   void set_backbone_k(double k) {
-    backbone_k_ = k;
-    if(bonds_restraint_ && bonds_score_){
-      // quicker if score exists
-      bonds_score_.get()->set_k(k);
-    } else {
-      if(root_){
-        update_bonds_restraint();
-      }
-    }
+      bonds_score_->set_k(k);
   }
 
-    double get_rest_length_factor(){ return rest_length_factor_; }
+  //! get the equilibrium distance factor between consecutive beads relative
+  //! to the sum of their radii
+  double get_rest_length_factor(){
+    return bonds_score_->get_rest_length_factor();
+  }
 
-      double get_backbone_k() { return backbone_k_; }
+  //! get the force constant between consecutive chain beads
+  double get_backbone_k() {
+    return bonds_score_->get_k();
+  }
 
   IMP_OBJECT_METHODS(FGChain);
 };
 
+IMP_OBJECTS(FGChain, FGChains);
 
-  /******************  utility methods ***************/
+/******************  utility methods ***************/
 
 /**
    Create a chain particle hierarchy, associated with the model of sd,
@@ -198,7 +203,7 @@ public:
 
  */
 FGChain* create_fg_chain
-( SimulationData *sd,
+( IMP::npctransport::SimulationData *sd,
   atom::Hierarchy parent,
   const ::npctransport_proto::Assignment_FGAssignment &fg_data,
   display::Color c );
@@ -221,4 +226,4 @@ FGChain* create_fg_chain
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif /* IMPNPCTRANSPORT_CREATING_TAMD_PARTICLES_H */
+#endif /* IMPNPCTRANSPORT_FG_CHAIN_H */

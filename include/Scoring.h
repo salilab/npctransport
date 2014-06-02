@@ -9,6 +9,14 @@
 #define IMPNPCTRANSPORT_SCORING_H
 
 #include "npctransport_config.h"
+
+#include "FGChain.h"
+#include "linear_distance_pair_scores.h"
+#include "npctransport_proto.fwd.h"
+#include "Parameter.h"
+//#include "SimulationData.h"
+#include "SlabSingletonScore.h"
+
 #include <IMP/Model.h>
 #include <IMP/PairContainer.h>
 #include <IMP/ScoringFunction.h>
@@ -24,11 +32,6 @@
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/core/Typed.h>
 #include <IMP/core/RestraintsScoringFunction.h>
-#include "linear_distance_pair_scores.h"
-#include "Parameter.h"
-//#include "SimulationData.h"
-#include "SlabSingletonScore.h"
-#include "npctransport_proto.fwd.h"
 
 #include <boost/timer.hpp>
 #include <string>
@@ -37,7 +40,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class SimulationData;
-class FGChain;
+//class FGChain;
 
 class IMPNPCTRANSPORTEXPORT Scoring: public Object
 {
@@ -99,8 +102,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
   PointerMember
     <IMP::Restraint> slab_restraint_;
-
-  LinearWellPairScores chain_scores_;
 
   // a map from particle indexes of chain identifiers to corresponding
   // chain backbone restraints (see chain_ids_map)
@@ -536,10 +537,13 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
     { return custom_restraints_; }
 
   /**
-     returns a reference to the collection of score functions for FG backbones
-     (can be used to e.g. scale them up or down during optimization)
+     returns pointers to the collection of the FG Chains stored in
+     this scoring object (can be used to e.g. scale scoring
+     information up or down during optimization)
    */
-  LinearWellPairScores get_chain_scores() { return chain_scores_; }
+  FGChains get_fg_chains() {
+    return FGChains(chains_set_.begin(), chains_set_.end());
+  }
 
   double get_slab_thickness() const { return slab_thickness_; }
 
