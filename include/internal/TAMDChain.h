@@ -76,8 +76,18 @@ class TAMDChain : public npctransport::FGChain{
       return the restraint accosciated with internal interactions by this chain.
       In particular for a TAMD chain, this includes both the bonds between beads,
       and the TAMD spring restraints.
+
+      \see FGChain::get_chain_restraints
   */
   virtual Restraints get_chain_restraints() IMP_OVERRIDE;
+
+  /** returns a list of all tamd springs associated with
+      the tamd restraints (between a diffusing tamd particle and its
+      associated collective variable, eg centroid)
+  */
+  core::HarmonicDistancePairScores& get_tamd_springs_byref() {
+    return tamd_springs_;
+  }
 
 
   IMP_OBJECT_METHODS(TAMDChain);
