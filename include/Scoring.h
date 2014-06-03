@@ -279,7 +279,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
 
   // swig doesn't equate the two protobuf types
-#ifndef SWIG
   /**
      add a SitesPairScore restraint that applies to particles of
      types t0 and t1 (specified in idata) to the PredicatePairsRestraint
@@ -297,7 +296,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   */
   void add_interaction
     ( const ::npctransport_proto::Assignment_InteractionAssignment &idata);
-#endif
 
 
 
@@ -536,6 +534,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   IMP::Restraints get_custom_restraints() const
     { return custom_restraints_; }
 
+#ifndef SWIG
   /**
      returns pointers to the collection of the FG Chains stored in
      this scoring object (can be used to e.g. scale scoring
@@ -544,6 +543,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   FGChains get_fg_chains() {
     return FGChains(chains_set_.begin(), chains_set_.end());
   }
+#endif
 
   double get_slab_thickness() const { return slab_thickness_; }
 

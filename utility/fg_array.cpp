@@ -31,7 +31,7 @@ int do_it(IMP::Pointer<IMP::npctransport::SimulationData> sd) {
   IMP::algebra::Vector2Ds sites;
   std::cout << IMP::base::Showable(sites) << std::endl;
   base::Pointer<FGChain> chain = get_fg_chain(chain_roots[0]);
-  double r = IMP::core::XYZR(chain->beads[0]).get_radius();
+  double r = IMP::core::XYZR(chain->get_bead(0)).get_radius();
   std::cout << "Base is " << base << std::endl;
   do {
     // add a site that is not too close to an existing sites (at least 2*r)
@@ -52,7 +52,7 @@ int do_it(IMP::Pointer<IMP::npctransport::SimulationData> sd) {
   // all anchored to the same z plane)
   for (unsigned int i = 0; i < chain_roots.size(); ++i) {
     base::Pointer<FGChain> chain = get_fg_chain(chain_roots[i]);
-    IMP::core::XYZ d(chain->beads[0]);
+    IMP::core::XYZ d(chain->get_bead(0));
     d.set_coordinates(
         Vector3D(sites[i][0], sites[i][1], sd->get_box().get_corner(0)[2]));
     d.set_coordinates_are_optimized(false);
