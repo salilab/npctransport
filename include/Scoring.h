@@ -106,13 +106,13 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   // a map from particle indexes of chain identifiers to corresponding
   // chain backbone restraints (see chain_ids_map)
   typedef boost::unordered_set
-    < base::UncheckedWeakPointer<FGChain> > FGChainsSet;
+    < base::PointerMember<FGChain> > FGChainsSet;
   FGChainsSet chains_set_;
   // a map from particle indexes of chain beads to the chain objects that they
   // represent (TODO: probably can be obliterated by adding appropriate
   // decorators)
   typedef boost::unordered_map
-    < ParticleIndex, base::UncheckedWeakPointer<FGChain> >
+    < ParticleIndex, base::PointerMember<FGChain> >
     t_particle_index_to_fg_chain_map;
   t_particle_index_to_fg_chain_map bead_to_chain_map_;
 

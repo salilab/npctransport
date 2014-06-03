@@ -6,6 +6,7 @@
  */
 
 #include <IMP/npctransport/ParticleFactory.h>
+#include <IMP/core/Typed.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/display/Colored.h>
 #include <IMP/atom/Hierarchy.h>
