@@ -140,7 +140,7 @@ public:
         \see LinearWellPairScore
     */
   void set_rest_length_factor(double rlf){
-    IMP_USAGE_CHECK(brlf>0.0, "bonds rest length factor should be positive");
+    IMP_USAGE_CHECK(rlf>0.0, "bonds rest length factor should be positive");
       bonds_score_->set_rest_length_factor(rlf);
   }
 
