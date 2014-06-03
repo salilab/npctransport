@@ -321,7 +321,7 @@ Scoring::get_chain_restraints_on
 {
   bead_particles.set_name_if_default("GetChainRestraintsOnInput%1%");
   IMP::Restraints R;
-  FGChainsSet chains_found;
+  FGChainsSet chains_found; // to prevent duplicates
   IMP_CONTAINER_FOREACH
     ( container::ListSingletonContainer,
       bead_particles,
@@ -337,14 +337,10 @@ Scoring::get_chain_restraints_on
                << " but its chain is missing from chains_set_");
             if( chains_found.find(chain) == chains_found.end() )
             {
-              // mark to prevent duplicates:
               chains_found.insert(chain);
-              Restraints chain_R = chain->get_chain_restraints();
-              for(unsigned int i = 0 ; i < chain_R.size(); i++) {
-                R.push_back(chain_R[i]);
-              }
+              R += chain->get_chain_restraints();
             }
-        }
+          }
       }
       ); // IMP_CONTAINER_FOREACH
   return R;
@@ -383,13 +379,12 @@ Scoring::create_close_diffusers_container
   IMP_NEW(CloseBipartitePairContainer, cpc, // so range + 2*slack is what we get
           (particles, optimizable_particles, get_range(), slack_) );
   IMP_NEW( core::AllSamePairPredicate, aspp, () );
-  cpc->add_pair_filter( aspp ); // only relevant for bipartite
-  // IMP_NEW( container::ClosePairContainer, cpc,
-  //            particles,
-  //            get_range(), slack_) );
-  // TODO: this is actually problematic cause applies not only
-  //       within chains (which it should) but also between chain terminii
-  //       or consecutive particles
+  cpc->add_pair_filter( aspp ); // only relevant for bipartite version
+  // The following is for chains (TODO: strongly tied to
+  // implementation but then again, it is possibly important to
+  // exclude bonded interactions - see FGChain.cpp. A possible
+  // solution would be to add a static interface method in FGChain to
+  // return a filter for bonded interactions):
   IMP_NEW( ExclusiveConsecutivePairFilter, ecpf, () );
   cpc->add_pair_filter( ecpf );
   return cpc.release();

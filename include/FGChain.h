@@ -35,14 +35,27 @@ class SimulationData;
 class IMPNPCTRANSPORTEXPORT FGChain : public IMP::base::Object {
 public:
  private:
+  // the root particle in the chain hierarchy
   base::PointerMember<Particle> root_;
+
+  // the restraint on the chain bonds
   base::PointerMember<Restraint> bonds_restraint_;
+
+  // the score acting on consecutive chain beads in bonds_restraint_
   base::PointerMember<LinearWellPairScore> bonds_score_;
+
+  // container for consecutive (bonded) chain beads
+  base::PointerMember<container::ExclusiveConsecutivePairContainer>
+    bead_pairs_;
+
 
  private:
 
-    /** create the bonds restraint for the chain beads based on the
-        internal values of backbone k and bond rest length factor
+  // TODO: this currently cannot work for more than two calls cause of
+  // ExclusiveConsecutivePairContainer - will need to switch to
+  // ConsecutivePairContainer or make a different design to solve this
+    /** recreate the bonds restraint for the chain beads based on the
+        current chain topology
     */
   void update_bonds_restraint();
 
@@ -66,7 +79,8 @@ public:
          std::string name = "chain %1%")
    : base::Object(name),
     root_(root),
-    bonds_restraint_(nullptr)
+    bonds_restraint_(nullptr),
+    bead_pairs_(nullptr)
       {
         IMP_USAGE_CHECK(rest_length_factor>0.0, "bonds rest length factor" <<
                         " should be positive");
@@ -117,6 +131,9 @@ public:
 
   /**
       Returns a restraint accosciated with internal interactions by this chain.
+      Once this method has been called once, it is assumed that the
+      chain topology remains static (the behavior of the restraint
+      if the chain topology changes is undefined, e.g. if beads are added)
 
       @note this restraint is affected by future calls to set_rest_length_factor()
       and set_backbone_k(). However, it applies only to the topology of the chain
@@ -126,8 +143,11 @@ public:
       @param assumes that the chain has a valid root whose leaves are beads
   */
   virtual Restraints get_chain_restraints() {
+    // TODO: add support for a dynamic chain?
     IMP_USAGE_CHECK(root_, "Chain not initialized");
-    update_bonds_restraint();
+    if(!bonds_restraint_){ // TODO: fix for dynamic chain topology?
+      update_bonds_restraint();
+    }
     return Restraints(1,bonds_restraint_);
   }
 

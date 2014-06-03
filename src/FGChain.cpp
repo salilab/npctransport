@@ -20,6 +20,7 @@
 #include <IMP/nullptr.h>
 #include <IMP/core/ChildrenRefiner.h>
 #include <IMP/core/rigid_bodies.h>
+#include <IMP/core/Typed.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/display/Colored.h>
 
@@ -33,14 +34,26 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 /***************** FGChain methods ************/
 
 //!  create the bonds restraint for the chain beads
-void FGChain::update_bonds_restraint() {
-  // IMP_ALWAYS_CHECK( beads.size() > 0,
-  //                   "No beads in chain.", IMP::base::ValueException );
+void FGChain::update_bonds_restraint()
+{
+  // TODO: this currently cannot work for more than two calls cause of
+  // ExclusiveConsecutivePairContainer - will need to switch to
+  // ConsecutivePairContainer or make a different design to solve this
   std::string name = core::Typed(get_root())->get_string();
-  IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer, xcpc,
-          (this->get_beads(), "%1% " + name + " consecutive pairs"));
+  if(bonds_restraint_){
+     IMP_USAGE_CHECK(!bonds_restraint_->get_is_shared(),
+                    "bonds restraint is supposed to become invalidated so it"
+                  " shouldn't be owned by anyone else at this point");
+      bonds_restraint_ = nullptr; // invalidate to release old bead_pairs
+      IMP_USAGE_CHECK(!bead_pairs_->get_is_shared(),
+                    "bead pairs consecutive pair container must be destroyed"
+                    " before it is updated so it cannot be owned by others");
+      bead_pairs_ = nullptr; // invalidate to destruct
+  }
+  bead_pairs_ = new IMP::container::ExclusiveConsecutivePairContainer
+    (this->get_beads(), "%1% " + name + " consecutive pairs");
   bonds_restraint_ = container::create_restraint
-    ( bonds_score_.get(), xcpc.get(),  "%1% " + name  );
+    ( bonds_score_.get(), bead_pairs_.get(),  "%1% " + name  );
 }
 
 
@@ -90,7 +103,6 @@ FGChain* create_fg_chain
            (sd, radius, D_factor, angular_D_factor, c, type) );
 
   // create TAMD or non-TAMD particles P, within hierarchy of root:
-  Particles P; Particle* root;
   if(fg_data.is_tamd() || DEBUG) {
     int d = 2; // outdegree in TAMD hierarchy, TODO: parametrize
     int n_levels = ceil(log(n)/log(d)); // log_d{n}
@@ -110,9 +122,9 @@ FGChain* create_fg_chain
     for (int i = 0; i < n; ++i) {
       P.push_back( pf->create() );
     }
-    root = atom::Hierarchy::setup_particle
-      ( new Particle( sd->get_model() ), P );
-    root->set_name( type.get_string() );
+    Particle* root = atom::Hierarchy::setup_particle
+      ( new Particle( sd->get_model(), type.get_string() ), P );
+    core::Typed::setup_particle(root, type);
     ret_chain = new FGChain(root);
   }
 
