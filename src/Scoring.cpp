@@ -339,10 +339,7 @@ Scoring::get_chain_restraints_on
             if( chains_found.find(chain) == chains_found.end() )
             {
               chains_found.insert(chain);
-              Restraints chain_R = chain->get_chain_restraints();
-              for(unsigned int i = 0 ; i < chain_R.size(); i++) {
-                R.push_back(chain_R[i]);
-              }
+              R += chain->get_chain_restraints();
             }
           }
       }
