@@ -72,8 +72,9 @@ namespace {
       internal::TAMDChain const* tamd_chain =
         dynamic_cast<internal::TAMDChain const*>(chain);
       IMP_USAGE_CHECK(tamd_chain, "chain is expected to be TAMD chain*");
-      for(unsigned int k = 0; k < tamd_chain->images.size(); k++) {
-        atom::Hierarchy h_k( tamd_chain->images[k]);
+      Particles tamd_images = tamd_chain->get_tamd_images();
+      for(unsigned int k = 0; k < tamd_images.size(); k++) {
+        atom::Hierarchy h_k( tamd_images[k]);
         sd->get_root().add_child( h_k );
       }
     }
