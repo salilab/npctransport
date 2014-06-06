@@ -130,16 +130,13 @@ void Statistics::add_interaction_stats
     // add statistics about this interaction to interactions_stats_
     // between all diffusing particles
     ParticlesTemp set0, set1; // TODO: turn to a real set?!
-    IMP_CONTAINER_FOREACH // _1 is the particle index
-      ( SingletonContainer,
-        get_sd()->get_diffusers(),
-        {
-          if (core::Typed(get_model(), _1).get_type() == type0)
-            { set0.push_back( get_model()->get_particle(_1) ); }
-          if (core::Typed(get_model(), _1).get_type() == type1)
-            { set1.push_back( get_model()->get_particle(_1) ); }
-        }
-        );
+    Particles& beads = get_sd()->get_beads_byref();
+    for(unsigned int i = 0; i < beads.size(); i++){
+          if (core::Typed(beads[i]).get_type() == type0)
+            { set0.push_back( beads[i] ); }
+          if (core::Typed(beads[i]).get_type() == type1)
+            { set1.push_back( beads[i] ); }
+    }
     bool include_site_site = true;
     bool include_non_specific = true;
     double range =
@@ -523,11 +520,11 @@ void Statistics::update
     stats->set_bd_simulation_time_ns( sim_time_ns );
     double total_energy  =
       get_sd()->get_bd()->get_scoring_function()->evaluate(false);
-    double energy_per_diffuser =
-      total_energy / get_sd()->get_diffusers()->get_indexes().size();
+    double energy_per_bead =
+      total_energy / get_sd()->get_beads().size();
     UPDATE_AVG(nf, nf_new, (*stats), energy_per_particle,  // TODO: reset?
-               // TODO: these are diffusing particles only
-               energy_per_diffuser );
+               // TODO: remove static beads from stats?
+               energy_per_bead );
     ::npctransport_proto::Statistics_GlobalOrderParams*
         sgop = stats->add_global_order_params();
     sgop->set_time_ns(sim_time_ns);
@@ -548,7 +545,7 @@ void Statistics::update
   // TODO: disable this for now
   //  ::npctransport_proto::Conformation *conformation =
   //   output.mutable_conformation();
-  //    save_pb_conformation(get_diffusers(), sites_, conformation);
+  //    save_pb_conformation(get_beads(), sites_, conformation);
 
   // save RMF for future restarts
   if(!no_save_rmf_to_output){

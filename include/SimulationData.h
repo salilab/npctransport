@@ -14,8 +14,9 @@
 #include <IMP/PairContainer.h>
 #include <IMP/atom/BrownianDynamics.h>
 #include <IMP/atom/Hierarchy.h>
+#include <IMP/SingletonContainer.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
-#include <IMP/container/ListSingletonContainer.h>
+#include <IMP/container/DynamicListSingletonContainer.h>
 #include <IMP/container/PairContainerSet.h>
 #include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/core/pair_predicates.h>
@@ -97,21 +98,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   base::PointerMember< IMP::npctransport::Statistics >
     statistics_;
 
-  // keeps track of whether the diffusers list has
-  // changed (can be invalid if particles added)
-   bool diffusers_changed_;
-
-
-  // keeps track of whether the obstacles list
-  // chnaged (can be invalid if particles added)
-  // TODO: possibly need be same as diffusers - matter
-  //       of efficiency
-   bool obstacles_changed_;
-
-  base::PointerMember
-    <IMP::container::ListSingletonContainer> optimizable_diffusers_;
-
-   base::PointerMember<container::ListSingletonContainer> diffusers_;
+  // all beads in the simulation (=fine-level particles)
+  Particles beads_;
 
   // a writer to an RMF (Rich Molecular Format) type file
   base::PointerMember<rmf::SaveOptimizerState> rmf_sos_writer_;
@@ -222,8 +210,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   }
 #endif
 
-  /** returns a scoring object that is updated with the current list of
-      diffusers and obstacles and associated with this sd
+  /** returns a scoring object that is updated with the current particles
+      hierarch and associated with this sd
   */
  Scoring * get_scoring();
 
@@ -232,8 +220,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
  Statistics* get_statistics();
 
 #ifndef SWIG
-  /** returns a scoring object that is updated with the current list of
-      diffusers and obstacles and associated with this sd
+  /** returns a scoring object that is updated with the current particles
+      hierarchy and associated with this sd
   */
  Scoring const* get_scoring() const;
 
@@ -304,18 +292,30 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   ParticlesTemp get_obstacle_particles() const;
 
 
-  /**
-     returns the container of all diffusing particles that currently exist in
-     this simulation data object (or an empty list if none exists)
-   */
-  container::ListSingletonContainer *get_diffusers();
+#ifndef SWIG
 
   /**
-     returns all diffusing particles that currently exist in
-     this simulation data object get_sd(), which are also optimizable
-     (or an empty list if none exists)
+     returns all diffusing fine-level beads in this
+     simulation data object (or an empty list if none exists)
+     @note efficient - returns an existing container by ref
    */
-  container::ListSingletonContainer* get_optimizable_diffusers();
+  Particles& get_beads_byref(){ return beads_; }
+#endif
+
+  /**
+     returns all diffusing fine-level beads in this
+     simulation data object (or an empty list if none exists)
+     @note efficient - returns an existing container by ref
+   */
+  ParticlesTemp get_beads(){ return beads_; }
+
+
+  /**
+     returns all fine-level beads that currently exist in
+     this simulation data object get_sd(), which are also optimizable
+     (or an empty list if no such bead exists)
+   */
+  ParticlesTemp get_optimizable_beads();
 
   /** get time from which simulation begins */
   double get_initial_simulation_time_ns() const
@@ -342,6 +342,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
   /** Set the sites explicitly. */
   void set_sites(core::ParticleType t0, const algebra::Vector3Ds &sites) {
+    IMP_USAGE_CHECK(sites.size()>0, "trying to set zero sites for particle type"
+                    << t0.get_string() );
     sites_[t0] = sites;
   }
 
@@ -497,22 +499,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
                     bool is_save_restraints_to_rmf = true);
 
   IMP_OBJECT_METHODS(SimulationData);
- private:
-  /** mark that the list of diffusers may have changed recently */
-  void set_diffusers_changed(bool is_changed){
-    diffusers_changed_ = is_changed;
-    if(diffusers_changed_){
-      //      get_scoring()->update_particles();
-    }
-  }
-
-  /** mark that the list of obstacles may have changed recently */
-  void set_obstacles_changed(bool is_changed){
-    obstacles_changed_ = is_changed;
-    if(obstacles_changed_){
-      //      get_scoring()->update_particles();
-    }
-  }
 
 };
 

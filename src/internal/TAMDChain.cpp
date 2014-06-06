@@ -118,8 +118,11 @@ create_tamd_chain( ParticleFactory* pf,
   unsigned int nlevels = ceil(log2(n));
 
   // Setup root centroid with xyzr, diffusion, type and mass
-  std::ostringstream root_oss;  root_oss << "centroid " << nlevels;
-  Particle* root = new Particle( pf->get_model(), root_oss.str() );
+  std::ostringstream root_name_oss;
+  root_name_oss << pf->type_.get_string()
+                << " centroid " << nlevels << " %1%";
+  Particle* root = new Particle
+    ( pf->get_model(), root_name_oss.str() );
   atom::Hierarchy root_h = atom::Hierarchy::setup_particle(root);
   core::XYZR root_xyzr = core::XYZR::setup_particle(root);
   // note: radius will affect diffusion coefficient + visual
@@ -129,19 +132,20 @@ create_tamd_chain( ParticleFactory* pf,
                                                    // for BD to evaluate it?
   IMP_LOG_PROGRESS("root radius " << root_xyzr.get_radius() << std::endl);
   atom::Diffusion::setup_particle(root); // TODO: is needed?
-  core::Typed::setup_particle(root, pf->type_);
+  core::Typed::setup_particle(root,
+                              core::ParticleType("TAMD Centroid") );
   atom::Mass::setup_particle(root, 1.0); // dummy - will be updated by CenterOfMass
 
   // Build TAMD image of root + tamd spring restraint:
-  std::ostringstream image_oss;  image_oss << "TAMD " << nlevels << "-%1%";
+  std::string image_name = "Image " + root->get_name();
   Particle* image = create_tamd_image(  root,
-                                        image_oss.str(),
+                                        image_name,
                                         T_factors[0],
                                         F_factors[0]);
   base::Pointer<core::HarmonicDistancePairScore> tamd_spring=
     new core::HarmonicDistancePairScore(0, Ks[0]);
   base::Pointer<IMP::Restraint> tamd_restraint = new core::PairRestraint
-    ( tamd_spring, ParticlePair(root, image), image_oss.str() );
+    ( tamd_spring, ParticlePair(root, image), image_name );
 
   // build TAMD chain object with children and return it:
   IMP_NEW(TAMDChain, ret_chain, ());
@@ -200,7 +204,9 @@ Particle* create_tamd_image( Particle* p_ref,
   IMP::atom::Hierarchy::setup_particle( p_ret );
   IMP::atom::Diffusion::setup_particle( p_ret ); // diffusion coefficient?!
   IMP::atom::Mass::setup_particle( p_ret, atom::Mass(p_ref).get_mass() );
-  core::Typed::setup_particle( p_ret, core::Typed(p_ref).get_type() );
+  std::string type_name = "TAMD Image " +
+    core::Typed(p_ref).get_type().get_string();
+  core::Typed::setup_particle( p_ret, core::ParticleType(type_name) );
   IMP::atom::TAMDParticle::setup_particle( p_ret, p_ref, T_factor, F_factor);
   return p_ret;
 }

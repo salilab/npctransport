@@ -53,7 +53,7 @@ Scoring::Scoring
 : Object("Scoring%1%"),
   owner_sd_(owner_sd),
   //  is_updating_particles_(false),
-  close_diffusers_container_(nullptr),
+  close_beads_container_(nullptr),
   otpp_(new core::OrderedTypePairPredicate()),
   scoring_function_(nullptr),
   predr_(nullptr),
@@ -84,8 +84,9 @@ Scoring::get_scoring_function(bool update)
 {
   if(!scoring_function_ || update){
     // set up the restraints for the BD simulation:
+    ParticlesTemp beads = get_sd()->get_beads();
     RestraintsTemp rs =
-      get_chain_restraints_on( get_sd()->get_diffusers() );
+      get_chain_restraints_on( beads );
     if (box_is_on_) {
       rs.push_back(get_bounding_box_restraint(update));
     }
@@ -104,25 +105,25 @@ Scoring::get_scoring_function(bool update)
 IMP::ScoringFunction*
 Scoring::get_custom_scoring_function
 ( const RestraintsTemp& extra_restraints,
-  IMP::SingletonContainerAdaptor particles,
-  IMP::SingletonContainerAdaptor optimizable_particles,
+  IMP::SingletonContainerAdaptor beads,
+  IMP::SingletonContainerAdaptor optimizable_beads,
   bool is_attr_interactions_on) const
 {
-  particles.set_name_if_default("NPCGetCustomScoringFunctionParticlesInput%1%");
-  particles.set_name_if_default("NPCGetCustomScoringFunctionOptimiedParticlesInput%1%");
+  beads.set_name_if_default("NPCGetCustomScoringFunctionBeadsInput%1%");
+  beads.set_name_if_default("NPCGetCustomScoringFunctionOptimiedBeadsInput%1%");
     // set up the restraints for the BD simulation:
   RestraintsTemp rs;
   rs += extra_restraints;
-  rs += get_chain_restraints_on( particles );
+  rs += get_chain_restraints_on( beads );
   if (box_is_on_) {
-    rs.push_back( create_bounding_box_restraint( particles ) );
+    rs.push_back( create_bounding_box_restraint( beads ) );
   }
   if (slab_is_on_) {
-    rs.push_back( create_slab_restraint( particles ) );
+    rs.push_back( create_slab_restraint( beads ) );
   }
-  rs += get_custom_restraints(); // TODO: this is problematic cause not restricted to particles - need to decide
-  PairContainer* cpc = create_close_diffusers_container
-    ( particles, optimizable_particles );
+  rs += get_custom_restraints(); // TODO: this is problematic cause not restricted to beads - need to decide
+  PairContainer* cpc = create_close_beads_container
+    ( beads, optimizable_beads );
   rs.push_back( create_predicates_pair_restraint
                 ( cpc, is_attr_interactions_on ) );
   IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
@@ -131,15 +132,15 @@ Scoring::get_custom_scoring_function
 
 
 IMP::PairContainer *
-Scoring::get_close_diffusers_container(bool update)
+Scoring::get_close_beads_container(bool update)
 {
-  if(!close_diffusers_container_ || update){
-    close_diffusers_container_ =
-      create_close_diffusers_container
-      ( get_sd()->get_diffusers(),
-        get_sd()->get_optimizable_diffusers() );
+  if(!close_beads_container_ || update){
+    close_beads_container_ =
+      create_close_beads_container
+      ( get_sd()->get_beads(),
+        get_sd()->get_optimizable_beads() );
       }
-  return close_diffusers_container_;
+  return close_beads_container_;
 }
 
 IMP::container::PredicatePairsRestraint *
@@ -148,7 +149,7 @@ Scoring::get_predicates_pair_restraint
 {
   if(!predr_ || update){
     predr_ = create_predicates_pair_restraint
-      ( get_close_diffusers_container(), true /* attr restraints */ );
+      ( get_close_beads_container(), true /* attr restraints */ );
   }
   return predr_;
 }
@@ -159,7 +160,7 @@ Scoring::get_bounding_box_restraint(bool update)
   IMP_USAGE_CHECK(box_is_on_, "box is not on - can't get restraint");
   if (update || !box_restraint_) {
     box_restraint_ =
-      create_bounding_box_restraint( get_sd()->get_diffusers() );
+      create_bounding_box_restraint( get_sd()->get_beads() );
   }
   return box_restraint_;
 }
@@ -170,21 +171,21 @@ Scoring::get_slab_restraint(bool update)
   IMP_USAGE_CHECK(slab_is_on_, "slab is not on - can't get restraint");
   if (update || !slab_restraint_) {
     slab_restraint_ =
-      create_slab_restraint( get_sd()->get_diffusers() );
+      create_slab_restraint( get_sd()->get_beads() );
   }
   return slab_restraint_;
 }
 
 
 /**
-   add a pair score restraint that applies to particles of
+   add a pair score restraint that applies to beads of
    types t0 and t1 to the PredicatePairsRestraint object returned by
    get_predr().
 
    A SitesPairScore interaction means site-specific
    attractive forces between bidning sites on each particle,
    and non-specific attraction and repulsion (upon penetraion)
-   between the particles themselves.
+   between the beads themselves.
 
    \see SitesPairScore
    \see create_sites_pair_score
@@ -199,7 +200,7 @@ void Scoring::add_interaction
   if (idata.has_interaction_k()) {
     base_k = idata.interaction_k().value();
   }
-  // no particles so drop it
+  // no beads so drop it
   if (interaction_k_factors_.find(type0) == interaction_k_factors_.end() ||
       interaction_k_factors_.find(type1) == interaction_k_factors_.end()) {
     return;
@@ -323,7 +324,7 @@ Scoring::get_chain_restraints_on
   IMP::Restraints R;
   FGChainsSet chains_found; // to prevent duplicates
   IMP_CONTAINER_FOREACH
-    ( container::ListSingletonContainer,
+    ( SingletonContainer,
       bead_particles,
       {
         if(get_sd()->get_is_fg(_1) &&
@@ -364,20 +365,20 @@ Scoring::get_all_chain_restraints() const
 /***************************** Creators ************************/
 /***************************************************************/
 
-// a close pair container for all pair of particles and
-// optimizable particles
+// a close pair container for all pair of specified beads and
+// optimizable beads
 IMP::PairContainer*
-Scoring::create_close_diffusers_container
-( SingletonContainerAdaptor particles,
-  SingletonContainerAdaptor optimizable_particles) const
+Scoring::create_close_beads_container
+( SingletonContainerAdaptor beads,
+  SingletonContainerAdaptor optimizable_beads) const
 {
-  particles.set_name_if_default(
-      "CreateCloseDiffusersContainerParticlesInput%1%");
-  optimizable_particles.set_name_if_default(
-      "CreateCloseDiffusersContainerOptimizableParticlesInput%1%");
+  beads.set_name_if_default(
+      "CreateCloseBeadsContainerBeadsInput%1%");
+  optimizable_beads.set_name_if_default(
+      "CreateCloseBeadsContainerOptimizableBeadsInput%1%");
   using namespace container;
   IMP_NEW(CloseBipartitePairContainer, cpc, // so range + 2*slack is what we get
-          (particles, optimizable_particles, get_range(), slack_) );
+          (beads, optimizable_beads, get_range(), slack_) );
   IMP_NEW( core::AllSamePairPredicate, aspp, () );
   cpc->add_pair_filter( aspp ); // only relevant for bipartite version
   // The following is for chains (TODO: strongly tied to
@@ -397,8 +398,8 @@ container::PredicatePairsRestraint
  bool is_attr_interactions_on) const
 {
   // set linear repulsion upon penetration between all close pairs
-  // returned by get_close_diffusers_container(), with different
-  // scores for interactions between particles of different
+  // returned by get_close_beads_container(), with different
+  // scores for interactions between beads of different
   // (ordered) types
   IMP_NEW(container::PredicatePairsRestraint, predr,
           ( otpp_,
@@ -428,9 +429,9 @@ container::PredicatePairsRestraint
    based on the box_size_, slab_height_, slab_radius_, etc. class variables
 */
 Restraint* Scoring::create_bounding_box_restraint
-( SingletonContainerAdaptor particles) const
+( SingletonContainerAdaptor beads) const
 {
-  particles.set_name_if_default("CreateBoundingBoxRestraintInput%1%");
+  beads.set_name_if_default("CreateBoundingBoxRestraintInput%1%");
   // Add bounding box restraint
   // TODO: what does backbone_spring_k_ has to do
   //       with bounding box constraint?
@@ -439,7 +440,7 @@ Restraint* Scoring::create_bounding_box_restraint
           bbss, (hub.get(), get_sd()->get_box()));
   return
     container::create_restraint(bbss.get(),
-                                particles.get(),
+                                beads.get(),
                                 "bounding box");
 }
 

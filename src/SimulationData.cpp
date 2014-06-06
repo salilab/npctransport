@@ -70,10 +70,6 @@ SimulationData::SimulationData(std::string prev_output_file, bool quick,
   bd_(nullptr),
   scoring_(nullptr),
   statistics_(nullptr),
-  diffusers_changed_(false),
-  obstacles_changed_(false),
-  optimizable_diffusers_(nullptr),
-  diffusers_(nullptr),
   rmf_file_name_(rmf_file_name),
   is_save_restraints_to_rmf_(true)
 {
@@ -185,7 +181,7 @@ void SimulationData::initialize(std::string prev_output_file,
     } else if (pb_data.has_conformation())
     {
       IMP_LOG(VERBOSE, "Restarting from output file conformation" << std::endl);
-      load_pb_conformation(pb_data.conformation(), get_diffusers(), sites_);
+      load_pb_conformation(pb_data.conformation(), get_beads(), sites_);
     }
 
   get_bd()->set_current_time( initial_simulation_time_ns_ );
@@ -226,6 +222,7 @@ void SimulationData::create_fgs
   for (int j = 0; j < fg_data.number().value(); ++j) {
     base::Pointer<FGChain> chain= create_fg_chain
       (this, chains_root, fg_data, display::Color(.3, .3, .3));
+    beads_ += chain->get_beads(); // book keeping
     // set chain j anchors by fg_data if specified
     if (fg_data.anchor_coordinates_size() > j) {
       ::npctransport_proto::Assignment_XYZ xyz =
@@ -252,8 +249,6 @@ void SimulationData::create_fgs
   get_scoring()->set_interaction_k_factor
     ( fg_type, fg_data.interaction_k_factor().value());
 
-  // Bookkeeping:
-  set_diffusers_changed(true);
 }
 
 
@@ -290,6 +285,7 @@ void SimulationData::create_floaters
     {
       Particle *cur_p = pf->create();
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
+      beads_.push_back(cur_p); // book keeping
       get_statistics()->add_floater_stats(cur_p); // stats
     }
   // add interaction sites to particles of this type:
@@ -326,8 +322,6 @@ void SimulationData::create_floaters
                 << std::endl);
       get_scoring()->add_z_bias_restraint(ps, k);
     }
-
-  set_diffusers_changed(true);
 }
 
 
@@ -359,6 +353,7 @@ void SimulationData::create_obstacles
   for (int j = 0; j < o_data.xyzs_size(); ++j) {
       Particle *cur_p = pf->create();
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
+      beads_.push_back(cur_p); // book keeping
       ::npctransport_proto::Assignment_XYZ xyz = o_data.xyzs(j);
       core::XYZ p_xyz(cur_p);
       p_xyz.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
@@ -375,13 +370,12 @@ void SimulationData::create_obstacles
     ( type, o_data.interaction_range_factor().value());
   get_scoring()->set_interaction_k_factor
     ( type, o_data.interaction_k_factor().value());
-  set_obstacles_changed(true);
 }
 
 void SimulationData::add_interaction
 ( const ::npctransport_proto::Assignment_InteractionAssignment & idata)
 {
-  // TODO: if diffusers added later, need to update interaction statistics!
+  // TODO: if beads added later, need to update interaction statistics!
   core::ParticleType type0(idata.type0());
   core::ParticleType type1(idata.type1());
   if (idata.is_on().value()) {
@@ -421,10 +415,10 @@ bool SimulationData::get_is_fg(ParticleIndex pi) const
 atom::Hierarchies SimulationData::get_fg_chain_roots() const
     {
       atom::Hierarchies ret;
-      atom::Hierarchies chains_roots = get_root().get_children();
-      for(unsigned int i =0 ; i < chains_roots.size(); i++) {
-        if( get_is_fg( chains_roots[i] ) ){
-           ret += chains_roots[i].get_children();
+      atom::Hierarchies C = get_root().get_children();
+      for(unsigned int i =0 ; i < C.size(); i++) {
+        if( get_is_fg( C[i] ) ){
+           ret += C[i].get_children();
           }
       }
       return ret;
@@ -541,7 +535,7 @@ void SimulationData::set_rmf_file(const std::string &new_name,
 void SimulationData::dump_geometry() {
   IMP_OBJECT_LOG;
   base::Pointer<display::Writer> w = display::create_writer("dump.pym");
-  IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
+  IMP_NEW(TypedSitesGeometry, g, (get_beads()));
   for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
            sites_.begin();
        it != sites_.end(); ++it) {
@@ -642,51 +636,20 @@ atom::BrownianDynamics *SimulationData::get_bd(bool recreate){
   return bd_;
 }
 
-container::ListSingletonContainer *
-SimulationData::get_diffusers(){
-  // TODO: obstacles ? need to get them out but then fix everything dependent
-  //       on them (e.g. initialize_positions?)
-  bool new_diffusers = !diffusers_ || diffusers_changed_ || obstacles_changed_;
-  if (!diffusers_) {
-    diffusers_ = new container::ListSingletonContainer(m_);
-  }
-  if (new_diffusers) {
-    // Add all leaves of the hierarchy as diffusers
-    ParticlesTemp leaves =
-      get_as<ParticlesTemp>(atom::get_leaves(get_root()));
-    IMP_LOG(TERSE, "Leaves are " << leaves << std::endl);
-    diffusers_->set_particles(leaves);
-    IMP_USAGE_CHECK(leaves.size() == diffusers_->get_indexes().size(),
-                    "Set and get particles don't match");
-    // mark the update
-    set_diffusers_changed(false);
-    set_obstacles_changed(false);
-  }
-  return diffusers_;
-}
-
-container::ListSingletonContainer *
-SimulationData::get_optimizable_diffusers()
+ParticlesTemp
+SimulationData::get_optimizable_beads()
 {
-  if (!optimizable_diffusers_) {
-    optimizable_diffusers_ = new container::ListSingletonContainer(m_);
-  }
-  IMP::ParticlesTemp optimizable_diffusers;
-  IMP_CONTAINER_FOREACH
-    (container::ListSingletonContainer,
-     get_diffusers(),
-     {
-       Particle* p = m_->get_particle(_1);
-       if(core::XYZ::get_is_setup(p)) {
-         core::XYZ p_xyz(p);
-         if(p_xyz.get_coordinates_are_optimized()){
-           optimizable_diffusers.push_back ( p );
-         }
-       }
-     }
-     );
-  optimizable_diffusers_->set_particles(get_diffusers()->get_particles());
-  return optimizable_diffusers_;
+  IMP::ParticlesTemp ret;
+  for(unsigned int i = 0; i < beads_.size(); i++)
+    {
+      if(core::XYZ::get_is_setup(beads_[i]))
+        {
+          core::XYZ xyz(beads_[i]);
+          if(xyz.get_coordinates_are_optimized())
+            {  ret.push_back ( beads_[i] );  }
+        }
+    }
+  return ret;
 }
 
 
@@ -702,7 +665,7 @@ void SimulationData::write_geometry(std::string out) {
   IMP_OBJECT_LOG;
   base::Pointer<display::Writer> w = display::create_writer(out);
   {
-    IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
+    IMP_NEW(TypedSitesGeometry, g, (get_beads()));
     for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
              sites_.begin();
          it != sites_.end(); ++it) {

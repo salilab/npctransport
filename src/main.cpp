@@ -159,7 +159,7 @@ namespace {
                     ->get_predicates_pair_restraint()->evaluate(false)
                 << std::endl;
     if (print_positions) {
-      ParticlesTemp ps = sd->get_diffusers()->get_particles();
+      Particles ps = sd->get_beads();
       for (unsigned int i = 0; i < ps.size(); i++) {
         IMP_OMP_PRAGMA(critical)
           std::cout << ps[i] << ", " << IMP::core::RigidBody(ps[i])

@@ -41,7 +41,7 @@ class IMPNPCTRANSPORTEXPORT TypedSitesGeometry
   boost::unordered_map<core::ParticleType, algebra::Vector3Ds> sites_;
 
  public:
-  TypedSitesGeometry(SingletonContainer *sc)
+  TypedSitesGeometry(SingletonContainerAdaptor sc)
       : display::SingletonsGeometry(sc) {}
   void set_sites(core::ParticleType t, algebra::Vector3Ds s) {
     // std::cout << t << " gets " << s.size() << std::endl;

@@ -67,15 +67,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   // the sim-data that uses this scoring object
   base::UncheckedWeakPointer<SimulationData> owner_sd_;
 
-  // true if the list of particles in the owner_sd has changed
-  // and in the middle of changing it
-  //  bool is_updating_particles_;
-
   /***************** Cache only variables ************/
 
-  // see get_close_diffusers_container()
+  // see get_close_beads_container()
   base::PointerMember
-    <IMP::PairContainer> close_diffusers_container_;
+    <IMP::PairContainer> close_beads_container_;
 
   // generates hash values ('predicates') for ordered types pairs
   // (e.g., pairs of ParticleTypes)
@@ -143,11 +139,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   /**
      returns a scoring function for the NPC simulation, based on:
      1) the chain restraints added by add_chain_restraints()
-     2) default repulsive interactions on particles in get_diffusers()
+     2) default repulsive interactions on particles in get_beads()
      3) attractive interactions that depend on pair types, as added by
         add_interaction()
      4) the slab or bounding box restraints if relevant on all particles
-        in get_diffusers()
+        in get_beads()
      5) z-biasing potential if add_z_bias_restraint() was called for any
         particles
 
@@ -172,9 +168,9 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
         in 'particles'
 
         @param extra_restraints  ad-hoc restraints to be added to scoring function
-        @param particles particles container on which to apply bounding volume
+        @param beads particles container on which to apply bounding volume
                          and pair constraints
-        @param optimizable_particles interaction scores (both repulsive or attractive)
+        @param optimizable_beads interaction scores (both repulsive or attractive)
                                      are computed only for interactions that involve
                                      these optimizable particles.
         @param is_attr_interactions_on if false, only repulsive interactions will be
@@ -183,8 +179,8 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   IMP::ScoringFunction*
     get_custom_scoring_function
     ( const RestraintsTemp& extra_restraints,
-      SingletonContainerAdaptor particles,
-      SingletonContainerAdaptor optimizable_particles,
+      SingletonContainerAdaptor beads,
+      SingletonContainerAdaptor optimizable_beads,
       bool is_attr_interactions_on = true ) const;
 
   /** Update the scoring function that the list of particles,
@@ -206,7 +202,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
                    be used
 
      @return a container with all pairs of particles (a,b) such that:
-     1) a is an optimizable diffuser particle and b is any diffuser
+     1) a is an optimizable bead particle and b is any bead
         particle (static or not).
      2) a and b are close (sphere surfaces within range get_range())
      3) a and b do not appear consecutively within the model (e.g., fg repeats)
@@ -216,10 +212,10 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      @note TODO: right now will not return any consecutive particles - that's
                  erroneous (e.g., last particle of one chain and first particle
                  of next chain) though may be negligible in practice
-     @note supposed to be robust to dynamic changes to the diffusers list,
+     @note supposed to be robust to dynamic changes to the beads list,
            though need to double check (TODO)
   */
-  IMP::PairContainer *get_close_diffusers_container(bool update=false);
+  IMP::PairContainer *get_close_beads_container(bool update=false);
 
   /**
      Returns the restraints over pairs of particles based on their type,
@@ -232,7 +228,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      particle types.  When called for the first time, returns a new
      PredicatePairsRestraints over all diffusing particles and sets a
      default linear repulsion restraint between all pairs returned by
-     get_close_diffusers_container()
+     get_close_beads_container()
 
      @param update if true, forces recreation of the cached container,
                    o/w cached version that was used in last call to
@@ -246,7 +242,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
     (bool update=false);
 
 
-  /** returns the box restraint on >get_sd()->get_diffusers()
+  /** returns the box restraint on >get_sd()->get_beads()
      which will be used in the next call to get_scoring_function(false)
      (so manipulating it might affect the scoring function). Also, if update
      is false, then it is guaranteed that these are the same restraints
@@ -262,7 +258,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   Restraint *get_bounding_box_restraint(bool update=false);
 
 
-  /** returns the slab restraint on >get_sd()->get_diffusers()
+  /** returns the slab restraint on >get_sd()->get_beads()
      which will be used in the next call to get_scoring_function(false)
      (so manipulating it might affect the scoring function). Also, if update
      is false, then it is guaranteed that these are the same restraints
@@ -305,43 +301,39 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
 
   /**
      creates a new pair container that returns all pairs of particles (a,b) such that:
-     1) a is any particle from 'particles' and b is any optimizable particle
-        in 'optimizable_particles' (static or not).
+     1) a is any particle from 'beads' and b is any optimizable particle
+        in 'optimizable_beads' (static or not).
      2) a and b are close (sphere surfaces within range get_range())
      3) a and b do not appear consecutively within the model (e.g., fg repeats)
 
-     @param particles a container For particles over which the return value works
-     @param optimizable_particles A container for particles that are also optimizable.
-
-     @note TODO: right now will not return any consecutive particles - that's
-                 erroneous (e.g., last particle of one chain and first particle
-                 of next chain) though may be negligible in practice
+     @param beads a container For particles over which the return value works
+     @param optimizable_beads A container for particles that are also optimizable.
   */
-  IMP::PairContainer *create_close_diffusers_container
-    ( SingletonContainerAdaptor particles,
-      SingletonContainerAdaptor optimizable_particles)
+  IMP::PairContainer *create_close_beads_container
+    ( SingletonContainerAdaptor beads,
+      SingletonContainerAdaptor optimizable_beads)
     const;
 
   /**
-     Creates a new container for restraints over pairs of particles. Different
-     scores are used for particles of different (ordered) particle types
+     Creates a new container for restraints over pairs of beads. Different
+     scores are used for beads of different (ordered) particle types
      based on interaction_pair_scores, or just a default linear repulsive
-     with k=get_excluded_volume_k() force on all other particle pairs in particle_pairs.
+     with k=get_excluded_volume_k() force on all other pairs in bead_pairs.
 
-     @param particle_pairs a container for the pairs of particles to be restrained
+     @param bead_pairs a container for the pairs of beads to be restrained
      @param is_attr_interactions_on whether to include attractive interactions
                                     that were added by add_interaction()
   */
   container::PredicatePairsRestraint *create_predicates_pair_restraint
-    ( PairContainer* particle_pairs,
+    ( PairContainer* bead_pairs,
       bool is_attr_interactions_on = true) const;
 
   /**
      Creates bounding box restraint based on the box_size_
-     class variable, and apply it to all diffusers returned
-     by get_sd()->get_diffusers()
+     class variable, and apply it to all beads returned
+     by get_sd()->get_beads()
 
-     @param particles particles on which to apply the constraint
+     @param beads beads on which to apply the constraint
 
      @note this restraint is (supposed to) gurantee to be always
            updated with the list inside the container
@@ -349,14 +341,14 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      @return a newly created box restraint
   */
   Restraint* create_bounding_box_restraint
-    ( SingletonContainerAdaptor particles ) const;
+    ( SingletonContainerAdaptor beads ) const;
 
   /**
      Creates slab bounding volume restraint, based on the slab_thickness_
-     and tunnel_radius_ class variables, and apply it to all diffusers
-     returned by get_sd()->get_diffusers()
+     and tunnel_radius_ class variables, and apply it to all beads
+     returned by get_sd()->get_beads()
 
-     @param particles particles on which to apply the constraint
+     @param beads beads on which to apply the constraint
 
      @note this restraint is (supposed to) gurantee to be always
            updated with the list inside the container
@@ -364,7 +356,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
      @return a newly created slab restraint
    */
   Restraint* create_slab_restraint
-    ( SingletonContainerAdaptor particles ) const;
+    ( SingletonContainerAdaptor beads ) const;
 
 
   /************************************************************/
@@ -420,7 +412,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
       add_interaction(), over site-site and/or non-specific
       interactions if applicable.  If not applicable, returns -1.0
 
-      @param t1,t2 the types of particles in this interaction
+      @param t1,t2 the types of beads in this interaction
       @param site_specific include site-site ranges
       @param non_specific include non-specific sphere interaction ranges
       @note if both site_specific and non_specific are true, takes a
@@ -473,7 +465,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
               and contain beads in 'beads'
   */
   Restraints get_chain_restraints_on
-    ( SingletonContainerAdaptor bead_particles ) const;
+    ( SingletonContainerAdaptor beads ) const;
 
   /**
       @return all restraints of fg nup chains that were added by

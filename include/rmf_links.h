@@ -30,8 +30,14 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   boost::unordered_map<ParticleIndex, ParticleIndexes> particles_;
 
  protected:
-  virtual void do_link_particle(Model *m, ParticleIndex root,
-                                ParticleIndex cur,
+  /** link the specified rmf node to particle cur. In addition, load
+      the list of sites associated with the rmf node together with
+      their coordinates (children of type RMF::Geometry decorated with
+      RMF::BallConst) and associate them with the particle type of cur
+      in the SimulationData of cur.
+  */
+  virtual void do_link_particle(kernel::Model *m, kernel::ParticleIndex root,
+                                kernel::ParticleIndex cur,
                                 RMF::NodeConstHandle node) IMP_OVERRIDE;
 
   virtual void do_setup_particle(Model* m, ParticleIndex root,

@@ -213,7 +213,7 @@ void initialize_positions(SimulationData *sd,
   IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
                    "short init factor should be in range (0,1]",
                    IMP::base::ValueException);
-  randomize_particles(sd->get_diffusers()->get_particles(), sd->get_box());
+  randomize_particles(sd->get_beads(), sd->get_box());
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
   }
@@ -285,19 +285,16 @@ void initialize_positions(SimulationData *sd,
     }
   {
     // optimize everything now
-    ParticlesTemp particles =
-      sd->get_diffusers()->get_particles(); // that should include obstacles
-    ParticlesTemp optimizable_particles =
-      get_optimizable_particles( particles );
+    ParticlesTemp beads = sd->get_beads(); // that should include obstacles
+    ParticlesTemp optimizable_beads =
+      get_optimizable_particles( beads );
     base::Pointer<ScoringFunction> sf =
       sd->get_scoring()->get_custom_scoring_function
-      ( extra_restraints,
-        particles,
-        optimizable_particles ,
+      ( extra_restraints, beads, optimizable_beads,
         false /* no non-bonded attr potential yet */ );
     IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
       set_temporary_scoring_function( sd->get_bd(), sf );
-    optimize_balls(sd->get_diffusers()->get_particles(),
+    optimize_balls(sd->get_beads(),
                    false /*scale rest length*/,
                    sd->get_rmf_sos_writer(),
                    sd->get_bd(),

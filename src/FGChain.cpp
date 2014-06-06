@@ -39,7 +39,7 @@ void FGChain::update_bonds_restraint()
   // TODO: this currently cannot work for more than two calls cause of
   // ExclusiveConsecutivePairContainer - will need to switch to
   // ConsecutivePairContainer or make a different design to solve this
-  std::string name = core::Typed(get_root())->get_string();
+  std::string name = get_root().get_particle()->get_name();
   if(bonds_restraint_){
      IMP_USAGE_CHECK(!bonds_restraint_->get_is_shared(),
                     "bonds restraint is supposed to become invalidated so it"
@@ -51,9 +51,9 @@ void FGChain::update_bonds_restraint()
       bead_pairs_ = nullptr; // invalidate to destruct
   }
   bead_pairs_ = new IMP::container::ExclusiveConsecutivePairContainer
-    (this->get_beads(), "%1% " + name + " consecutive pairs");
+    (this->get_beads(), "Bonds %1% " + name + " consecutive pairs");
   bonds_restraint_ = container::create_restraint
-    ( bonds_score_.get(), bead_pairs_.get(),  "%1% " + name  );
+    ( bonds_score_.get(), bead_pairs_.get(),  "Bonds " + name  );
 }
 
 
@@ -112,9 +112,9 @@ FGChain* create_fg_chain
     std::vector<double> Ks(n_levels); // TAMD spring constant
     for(int i=0; i < n_levels; i++) { // i ~ increasing depth from root
       int level = n_levels - i; // level above leaves
-      T_factors[i] = 3 * pow(2,level-1);
-      F_factors[i] = 15 * pow(3,level-1);
-      Ks[i] = 10;
+      T_factors[i] = 2 * pow(2,level-1);
+      F_factors[i] = 10 * pow(3,level-1);
+      Ks[i] = 1;
     }
     ret_chain=
       internal::create_tamd_chain(pf, n, d, T_factors, F_factors, Ks);
@@ -123,9 +123,10 @@ FGChain* create_fg_chain
     for (int i = 0; i < n; ++i) {
       P.push_back( pf->create() );
     }
+    std::string root_name = type.get_string() + " chain_root";
     Particle* root = atom::Hierarchy::setup_particle
-      ( new Particle( sd->get_model(), type.get_string() ), P );
-    core::Typed::setup_particle(root, type);
+      ( new Particle( sd->get_model(), root_name ), P );
+    core::Typed::setup_particle( root, type );
     ret_chain = new FGChain(root);
   }
 
