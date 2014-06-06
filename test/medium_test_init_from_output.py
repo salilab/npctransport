@@ -55,17 +55,17 @@ class Tests(IMP.test.TestCase):
 
     def assert_transporting_equal(self, sd1, sd2):
         """ assert that sd1 and sd2 have identical Transporting statistics """
-        for d1, d2 in zip(sd1.get_diffusers().get_particles(),
-                          sd2.get_diffusers().get_particles()):
+        for d1, d2 in zip(sd1.get_beads(),
+                          sd2.get_beads()):
             if(not IMP.npctransport.Transporting.get_is_setup(d1)):
                 continue
             if(not IMP.npctransport.Transporting.get_is_setup(d2)):
                 continue
             t1 = IMP.npctransport.Transporting(d1)
             t2 = IMP.npctransport.Transporting(d2)
-            print("Diffuser particles: ")
-            print(d1, d2)
-            print("Comparing transport statistics: ", t1, t2)
+            print "Bead particles: "
+            print d1, d2
+            print "Comparing transport statistics: ", t1, t2
             self.assert_(t1.get_is_last_entry_from_top()
                          == t2.get_is_last_entry_from_top())
             self.assertAlmostEqual(t1.get_last_tracked_z(),
@@ -77,12 +77,12 @@ class Tests(IMP.test.TestCase):
 
     def assert_almost_equal_sds(self, sd1, sd2):
         """
-        assert that sd1 and sd2 has nearly identical positions for diffusers
+        assert that sd1 and sd2 has nearly identical positions for beads
         and sites + identical timers and Transporting porperties
         """
-        # check diffusers refframes
-        for p, pp in zip(sd1.get_diffusers().get_particles(),
-                         sd2.get_diffusers().get_particles()):
+        # check beads refframes
+        for p, pp in zip(sd1.get_beads(),
+                         sd2.get_beads()):
             self.assert_((IMP.core.XYZ(p).get_coordinates()
                           - IMP.core.XYZ(pp).get_coordinates()).get_magnitude() < .0001)
             q0 = IMP.core.RigidBody(
@@ -167,7 +167,7 @@ class Tests(IMP.test.TestCase):
                                              out_rmf,
                                              rt_new_output)
         sd.set_rmf_file(out_rmf, False)
-        for i,p in enumerate(sd.get_diffusers().get_particles()):
+        for i,p in enumerate(sd.get_beads()):
             if( i >= len(expected_particles) ):
                 break
             pc= [x for x in IMP.core.XYZ(p).get_coordinates()]

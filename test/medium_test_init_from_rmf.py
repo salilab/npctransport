@@ -33,26 +33,25 @@ class Tests(IMP.test.TestCase):
         print("who")
         return sd
 
-    def _get_diffuser_coords( self, sd, i ):
-        """ returns the coordinates of diffuser number i in SimulationData
-            object sd """
-        d = sd.get_diffusers().get_particles()[i]
-        d_coords = IMP.core.XYZ( d ).get_coordinates()
-        d_rframe = IMP.core.RigidBody( d ).get_reference_frame()
-        print("Diffuser refframe" + str(i) + ":", d,  d_rframe)
-        return d_coords
+    def _get_bead_coords( self, p ):
+        """ returns the coordinates of the particle """
+        rb = IMP.core.RigidBody( p )
+        coords = rb.get_coordinates()
+        refframe = rb.get_reference_frame()
+        print "Bead " + str(p) + "," + str(p.get_index()) + ":",   refframe
+        return coords
 
-    def _get_diffusers_coords( self, sd ):
-        """ get the coordinates list of all diffusers in SimulationData
+    def _get_beads_coords( self, sd ):
+        """ get the coordinates list of all beads in SimulationData
             object sd """
         coords = []
-        for i in range( sd.get_diffusers().get_number_of_particles() ):
-            coords.append( self._get_diffuser_coords( sd, i ) )
+        for bead in sd.get_beads():
+            coords.append( self._get_bead_coords( bead ) )
         return coords
 
     def test_init_from_rmf(self):
         """ Testing whether initialize_positions_from_rmf indeed
-            restores the diffusers coordinates correctly """
+            restores the beads coordinates correctly """
         IMP.set_log_level( IMP.SILENT );
         # First simulation with one seed:
         output_pb1= self.get_tmp_file_name( "output1.pb" );
@@ -60,9 +59,9 @@ class Tests(IMP.test.TestCase):
         print("Starting first simulation with RMF file " + output_rmf1)
         sd = self._make_and_run_simulation( output_pb1, output_rmf1, seed = 1)
         e1 = sd.get_bd().get_scoring_function().evaluate(False)
-        print("*** After first simulation")
-        print("Energy %.2f" % e1)
-        coordsI = self._get_diffusers_coords( sd )
+        print "*** After first simulation"
+        print "Energy %.2f" % e1
+        coordsI = self._get_beads_coords( sd )
         sd = None
 
         # Second simulation with another seed:
@@ -73,9 +72,9 @@ class Tests(IMP.test.TestCase):
         sd = self._make_and_run_simulation( output_pb2, output_rmf2, seed = 2)
         print("XXX")
         e2 = sd.get_bd().get_scoring_function().evaluate(False)
-        print("*** After second simulation")
-        print("Energy %.2f" % e2)
-        coordsII = self._get_diffusers_coords( sd )
+        print "*** After second simulation"
+        print "Energy %.2f" % e2
+        coordsII = self._get_beads_coords( sd )
 
         # Restoration from first simulation through rmf file:
         print("*** Initializing positions from RMF file " + output_rmf1)
@@ -86,7 +85,7 @@ class Tests(IMP.test.TestCase):
         print("Energy %.2f" % e3)
         self.assertAlmostEqual(e1, e3, delta=0.00001)
         self.assertNotAlmostEqual(e1, e2, delta=0.00001)
-        coordsIII = self._get_diffusers_coords( sd )
+        coordsIII = self._get_beads_coords( sd )
         # make sure that all coordinates were restored and as sanity
         # check control, also that the second simulation is different than
         # the first one:
@@ -98,8 +97,8 @@ class Tests(IMP.test.TestCase):
         # Simulate more to scramble stuff
         sd.get_bd().optimize( 1000 )
         e4 = sd.get_bd().get_scoring_function().evaluate(False)
-        print("Energy %.2f" % e4)
-        coordsIV = self._get_diffusers_coords( sd )
+        print "Energy %.2f" % e4
+        coordsIV = self._get_beads_coords( sd )
 
         # Restoration from first simulation through output protobuf file:
         print("*** Initializing positions from ProtoBuf file " + output_pb1)
@@ -114,7 +113,7 @@ class Tests(IMP.test.TestCase):
         print("Energy %.2f" % e5)
         self.assertAlmostEqual(e1, e5, delta=0.00001)
         self.assertNotAlmostEqual(e1, e4, delta=0.00001)
-        coordsV = self._get_diffusers_coords( sd )
+        coordsV = self._get_beads_coords( sd )
         for i in range( len( coordsI ) ):
             for j in range(3):
                 self.assertAlmostEqual(coordsI[i][j], coordsV[i][j], delta=0.00001)
