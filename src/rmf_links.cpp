@@ -94,7 +94,9 @@ void HierarchyWithSitesLoadLink::do_link_particle(Model *m,
         sites.push_back(algebra::Vector3D(cs.begin(), cs.end()));
       }
     }
-    if (sd_) sd_->set_sites(tp, sites);
+    if (sd_ && sites.size() > 0){
+      sd_->set_sites(tp, sites);
+    }
   }
 }
 
@@ -175,7 +177,9 @@ void add_sites(RMF::FileHandle fh, core::ParticleType t, double range,
                algebra::Vector3Ds sites) {
   HierarchyWithSitesSaveLink *l =
       rmf::internal::get_save_link<HierarchyWithSitesSaveLink>(fh);
-  l->add_sites(t, range, sites);
+  if(sites.size() > 0){
+    l->add_sites(t, range, sites);
+  }
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

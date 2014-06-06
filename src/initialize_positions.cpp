@@ -58,210 +58,6 @@ namespace {
       IMP::core::XYZ::get_is_setup(p);
   }
 
-<<<<<<< HEAD
-  return sm.release();
-  }*/
-
-  /*
-//! rescale the size of the move in all BallMovers inside everal serial mover
-//! that is in the MonteCarlo obejct mc, by scale_factor
-void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
-  using namespace core;
-  IMP_ALWAYS_CHECK(scale_factor > 0, "move size scale factor must be positive",
-                   IMP::ValueException);
-  for (unsigned int i = 0; i < mc->get_number_of_movers(); ++i) {
-    MonteCarloMover *mc_i = mc->get_mover(i);
-    SerialMover *sm = dynamic_cast<SerialMover *>(mc_i);
-    if (sm == nullptr) break;
-    for (unsigned int j = 0; j < sm->get_movers().size(); ++j) {
-      MonteCarloMover *sm_j = sm->get_movers()[j];
-      BallMover *bm = dynamic_cast<BallMover *>(sm_j);
-      if (bm == nullptr) break;
-      bm->set_radius(bm->get_radius() * scale_factor);
-    }
-  }
-  } */
-
-
-/**
-   create a Monte-Carlo object for partices ps, scored by isd,
-   with a soft sphere pair score ssps, and move step size scaling move_scaling
-
-   @param ps - the particles
-   @param rs - restraints used for scoring the MC
-   @param excluded - predicates for excluded volume restraints calc
-   @param save - an optional saver to save optimization to file
-   @param debug - if true, save is added as an optimizer state to the MC
-   @param n_movers - number of movrs to apply in each MC step
- */
-/*IMP::Pointer<core::MonteCarlo> create_mc(
-    const ParticlesTemp &ps,
-    const RestraintsTemp& rs,
-    const PairPredicates excluded,
-    rmf::SaveOptimizerState *save, bool debug,
-    unsigned int n_movers = 1) {
-  IMP_ALWAYS_CHECK(n_movers > 0, "number of MC movers must be >0",
-                   ValueException);
-  Model *m = ps[0]->get_model();
-  IMP_NEW(core::MonteCarlo, mc, (m));
-  //  mc->set_score_threshold(.1);
-  if (debug && save) {
-    mc->add_optimizer_state(save);
-  }
-  core::MonteCarloMovers movers;
-  for (unsigned int i = 0; i < n_movers; ++i) {
-    movers.push_back(create_serial_mover(ps));
-  }
-  mc->set_movers(movers);
-
-  // Scoring
-  IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));
-  IMP_NEW(core::SoftSpherePairScore, ssps, (10));
-  // use special incremental support for the non-bonded part
-  isf->add_close_pair_score(ssps, 0, ps, excluded);
-  // TODO (what does this mean?)
-  // we are special casing the nbl term for montecarlo, but using all for CG
-  mc->set_incremental_scoring_function(isf);
-  return mc;
-}
-
-*/
-
-
-/** An RAII class for rescaling the x0 length of a LinearWellPairScore
-    by some factor f (upon construction or using set()). Restores the
-    original value upon destruction
-*/
-class LinearWellSetLengthRAII : public base::RAII {
-
-  WeakPointer< LinearWellPairScore > ps_;
-  double orig_;
-  bool was_set_;
-
- public:
-  IMP_RAII
-    ( LinearWellSetLengthRAII, (LinearWellPairScore *ps, double f),
-      { //Initialize
-        was_set_ = false;
-      },
-      { // Set
-        was_set_ = true;
-        ps_ = ps;
-        orig_ = ps_->get_rest_length_factor();
-        ps_->set_rest_length_factor(orig_ * f);
-      },
-      { // Reset
-        if(was_set_){
-          ps_->set_rest_length_factor(orig_);
-        }
-      },
-      { // Show });
-      } );
-};
-
-
-
-/** An RAII class for temporarily changing the scoring function
-    of an optimizer
-*/
-class OptimizerSetTemporaryScoringFunctionRAII: public base::RAII {
-
-  PointerMember< IMP::ScoringFunction > orig_sf_;
-  PointerMember< IMP::Optimizer > o_;
-  bool was_set_;
-
- public:
-  IMP_RAII
-    ( OptimizerSetTemporaryScoringFunctionRAII,
-      (Optimizer* o, ScoringFunctionAdaptor sfa),
-      { //Initialize
-        was_set_ = false;
-      },
-      { // Set
-        was_set_ = true;
-        o_ = o;
-        orig_sf_ = o_->get_scoring_function();
-        o_->set_scoring_function(sfa);
-      },
-      { // Reset
-        if(was_set_){
-          o_->set_scoring_function(orig_sf_);
-        }
-      },
-      { // Show
-      } );
-};
-
-/** An RAII class for temporarily changing the temperature
-    of a BrownianDynamics object
-*/
-  class BDSetTemporaryTemperatureRAII : public base::RAII {
-
-  double orig_temp_;
-    base::PointerMember
-    < IMP::atom::BrownianDynamics > bd_;
-  bool was_set_;
-
- public:
-  IMP_RAII
-  ( BDSetTemporaryTemperatureRAII,
-    (atom::BrownianDynamics* bd, double temp),
-      { //Initialize
-        was_set_ = false;
-      },
-      { // Set
-        was_set_ = true;
-        bd_ = bd;
-        orig_temp_ = bd_->get_temperature();
-        bd_->set_temperature(temp);
-      },
-      { // Reset
-        if(was_set_){
-          bd_->set_temperature(orig_temp_);
-        }
-      },
-      { // Show
-      } );
-};
-
-/** An RAII class for temporarily setting the optimization stsate of particles
-*/
-class TemporarySetOptimizationStateRAII: public base::RAII {
-  bool orig_;
-  WeakPointer<IMP::Model> m_;
-  ParticleIndex pi_;
-  bool was_set_;
-
- public:
-  IMP_RAII
-  ( TemporarySetOptimizationStateRAII,
-    (ParticleAdaptor pa, bool is_optimized),
-      { //Initialize
-        was_set_ = false;
-      },
-      { // Set
-        was_set_ = true;
-        m_ = pa.get_model();
-        pi_ = pa.get_particle_index();
-        IMP_ALWAYS_CHECK(core::XYZ::get_is_setup( m_, pi_ ),
-                         "p is not XYZ - can't set coordinates opt state",
-                         IMP::ValueException);
-        core::XYZ xyz( m_, pi_ );
-        orig_ = xyz.get_coordinates_are_optimized();
-        xyz.set_coordinates_are_optimized( is_optimized );
-      },
-      { // Reset
-        if(was_set_){
-          core::XYZ(m_, pi_).set_coordinates_are_optimized( orig_ );
-        }
-      },
-      { // Show
-      } );
-};
-
-
-
-=======
   // update the coordinates of all TAMD particles from their
   // reference particles
   void update_tamd_particles_coords_from_refs(atom::Hierarchy root)
@@ -273,7 +69,6 @@ class TemporarySetOptimizationStateRAII: public base::RAII {
       t.update_coordinates_from_ref();
     }
   }
->>>>>>> make TAMD work by fixing various bugs...
 
 /** Take a set of core::XYZR particles and relax them relative to a set of
     restraints. Excluded volume is handle separately, so don't include it
@@ -423,7 +218,7 @@ void initialize_positions(SimulationData *sd,
   IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
                    "short init factor should be in range (0,1]",
                    IMP::base::ValueException);
-  randomize_particles(sd->get_diffusers()->get_particles(), sd->get_box());
+  randomize_particles(sd->get_beads(), sd->get_box());
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
   }
@@ -495,19 +290,16 @@ void initialize_positions(SimulationData *sd,
     }
   {
     // optimize everything now
-    ParticlesTemp particles =
-      sd->get_diffusers()->get_particles(); // that should include obstacles
-    ParticlesTemp optimizable_particles =
-      get_optimizable_particles( particles );
-    Pointer<ScoringFunction> sf =
+    ParticlesTemp beads = sd->get_beads(); // that should include obstacles
+    ParticlesTemp optimizable_beads =
+      get_optimizable_particles( beads );
+    base::Pointer<ScoringFunction> sf =
       sd->get_scoring()->get_custom_scoring_function
-      ( extra_restraints,
-        particles,
-        optimizable_particles ,
+      ( extra_restraints, beads, optimizable_beads,
         false /* no non-bonded attr potential yet */ );
     IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
       set_temporary_scoring_function( sd->get_bd(), sf );
-    optimize_balls(sd->get_diffusers()->get_particles(),
+    optimize_balls(sd->get_beads(),
                    false /*scale rest length*/,
                    sd->get_rmf_sos_writer(),
                    sd->get_bd(),

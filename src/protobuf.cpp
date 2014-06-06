@@ -368,13 +368,13 @@ int get_number_of_work_units(std::string assignment_file) {
 
 void load_pb_conformation
 ( const ::npctransport_proto::Conformation &conformation,
-  IMP::SingletonContainer *diffusers,
+  IMP::SingletonContainerAdaptor beads,
   boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites)
 {
-  IMP_CONTAINER_FOREACH(IMP::SingletonContainer, diffusers, {
+  IMP_CONTAINER_FOREACH(IMP::SingletonContainer, beads, {
       const ::npctransport_proto::Conformation_Particle &pcur =
         conformation.particle(_2);
-      core::RigidBody rb(diffusers->get_model(), _1);
+      core::RigidBody rb(beads->get_model(), _1);
       algebra::Vector3D translation(pcur.x(), pcur.y(), pcur.z());
       algebra::Rotation3D rotation
         ( algebra::Vector4D(pcur.r(), pcur.i(), pcur.j(), pcur.k()) );
@@ -397,18 +397,18 @@ void load_pb_conformation
 }
 
 void save_pb_conformation
-( IMP::SingletonContainer *diffusers,
+( SingletonContainerAdaptor beads,
   const boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites,
   ::npctransport_proto::Conformation *conformation )
 {
   conformation->clear_sites();
   conformation->clear_particle();
   IMP_CONTAINER_FOREACH
-    (IMP::SingletonContainer, diffusers,
+    (IMP::SingletonContainer, beads,
      {
        ::npctransport_proto::Conformation_Particle *pcur =
          conformation->add_particle();
-       core::RigidBody rb(diffusers->get_model(), _1);
+       core::RigidBody rb(beads->get_model(), _1);
        algebra::Transformation3D tr =
          rb.get_reference_frame().get_transformation_to();
        pcur->set_x(tr.get_translation()[0]);

@@ -212,9 +212,9 @@ IMP_OBJECTS(FGChain, FGChains);
    are added to sd->get_scoring() and the tamd images are added to sd->root()
 
    @param[in,out] sd the simulation data whose model is associated with the
-                  new chain. A chain restraint is added to the simulation data
-                  scoring object, and the particle is added to the simulation data
-                  diffusers list.
+                  new chain. The chain is also added to the simulation data
+                  scoring object.
+    .
    @param parent parent hierarchy to which chain is added
    @param[in] fg_data data about the FG chain
    @param[in] c        color of chain particles
