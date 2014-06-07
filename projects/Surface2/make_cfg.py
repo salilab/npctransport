@@ -7,7 +7,8 @@ import re
 import os
 
 # defaults
-fg_bead_R=7.0
+fg_coarse_factor=1.0 # 3
+fg_bead_R=5.0 * math.sqrt(fg_coarse_factor)
 kaps_R = 35.0
 k_fgfg=0.05
 range_fgfg=fg_bead_R*2
@@ -15,7 +16,6 @@ k_fgkap=1.0
 range_fgkap=fg_bead_R+4
 rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
-fg_coarse_factor=1.0 # 3
 z_bias = 0.0 # 0.025
 z_bias_frac = 0.0 #0.5
 # fetch params from cmd-line
@@ -105,7 +105,7 @@ def add_fgs(config, k, nbeads,
                                       type_name= type_name,
                                       number_of_beads= coarse_nbeads,
                                       number=k,
-                                      radius=5 * math.sqrt(coarse_factor),
+                                      radius=fg_bead_R,
                                       interactions= -1, # -1 = centered at bead    #int(math.ceil(1 * coarse_factor)),
                                       rest_length_factor = rest_length_factor)
     fgs.is_tamd = True;
