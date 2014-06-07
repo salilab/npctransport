@@ -7,11 +7,12 @@ import re
 import os
 
 # defaults
+fg_bead_R=7.0
 kaps_R = 35.0
 k_fgfg=0.05
-range_fgfg=7.5
+range_fgfg=fg_bead_R*2
 k_fgkap=1.0
-range_fgkap=7.5
+range_fgkap=fg_bead_R+4
 rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
 fg_coarse_factor=1.0 # 3
@@ -39,7 +40,7 @@ def get_basic_config():
     config.time_step_factor.lower=2.0 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
-    config.excluded_volume_k.lower=0.1
+    config.excluded_volume_k.lower=0.01
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.025
     config.slack.lower = 7.5
