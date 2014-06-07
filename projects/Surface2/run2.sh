@@ -7,4 +7,4 @@ endif
 set k=`git log --pretty=format:"%h" -n 1`
 echo GIT revision $k;
 imppy make_cfg.py test_$k.cfg;
-npc_fg_simulation test_$k.cfg --cylinder_nlayers 3 --conformations movie_tamd.rmf > & LOG_tamd &
+npc_fg_simulation test_$k.cfg --cylinder_nlayers 3 --conformations movie_$k.rmf > & LOG_$k &
