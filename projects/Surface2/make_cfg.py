@@ -159,7 +159,7 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-fgs=(add_fgs(config, k=20, nbeads=32, type_name="FG"))
+fgs=(add_fgs(config, k=24, nbeads=30, type_name="FG"))
 
 
 # add bounding volumes
