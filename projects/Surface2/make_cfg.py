@@ -165,10 +165,10 @@ fgs=(add_fgs(config, k=24, nbeads=30, type_name="FG"))
 
 # add bounding volumes
 config.box_is_on.lower=1
-config.box_side.lower=500 # 2000
+config.box_side.lower=400 # 2000
 config.slab_is_on.lower=1
 config.slab_thickness.lower=100
-config.tunnel_radius.lower=150
+config.tunnel_radius.lower=125
 
 #create_range(interactionFG_FG.interaction_k, lb = 2.5, ub = 7.5, steps = 10, base = 1)
 # internal FG-FG
