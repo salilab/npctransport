@@ -38,7 +38,7 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=2.5
-    config.time_step_factor.lower=2 #### NOTE THIS ####
+    config.time_step_factor.lower=1 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
     config.excluded_volume_k.lower=0.1
@@ -226,7 +226,7 @@ kaps= IMP.npctransport.add_float_type(config,
 #kaps.k_z_bias.lower=z_bias
 #kaps.k_z_bias_fraction.lower=z_bias_frac
 ############### ACTIVE RANGE #############
-create_range(kaps.interaction_k_factor, lb=0.1, ub=5, steps = 5, base=2)
+create_range(kaps.interaction_k_factor, lb=1, ub=5, steps = 5, base=2)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics1= IMP.npctransport.add_float_type(config,
