@@ -140,7 +140,7 @@ public:
       at the time of call, if the chain topology changes, this methods should be
       called again.
 
-      @param assumes that the chain has a valid root whose leaves are beads
+      @note assumes that the chain has a valid root whose leaves are beads
   */
   virtual Restraints get_chain_restraints() {
     // TODO: add support for a dynamic chain?
@@ -214,7 +214,6 @@ IMP_OBJECTS(FGChain, FGChains);
    @param[in,out] sd the simulation data whose model is associated with the
                   new chain. The chain is also added to the simulation data
                   scoring object.
-    .
    @param parent parent hierarchy to which chain is added
    @param[in] fg_data data about the FG chain
    @param[in] c        color of chain particles

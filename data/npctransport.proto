@@ -28,7 +28,7 @@ message Configuration {
     required IntRange number_of_beads=1;
     required IntRange number=2;
     required FloatRange radius=3;
-    required IntRange interactions=4;
+    required IntRange interactions=4; // if i=-1 then FG bead is itself a site
     required FloatRange rest_length_factor=5;
     required FloatRange d_factor=6;
     required FloatRange interaction_k_factor=7;
@@ -66,8 +66,8 @@ message Configuration {
     optional FloatRange interaction_range=5;
   };
 
-  required FloatRange interaction_k=3;
-  required FloatRange interaction_range=4;
+  required FloatRange interaction_k=3; // default k for specific interactions
+  required FloatRange interaction_range=4; // default range of specific interactions
   required FloatRange backbone_k=5;
   required FloatRange time_step_factor=6;
   required FloatRange box_side=7;

@@ -372,6 +372,9 @@ Scoring::create_close_beads_container
 ( SingletonContainerAdaptor beads,
   SingletonContainerAdaptor optimizable_beads) const
 {
+  std::cout << "Creating a close pair container for " << beads->get_particles().size()
+            << " beads, of which " << optimizable_beads->get_particles().size()
+            << " are optimizable" << std::endl;
   beads.set_name_if_default(
       "CreateCloseBeadsContainerBeadsInput%1%");
   optimizable_beads.set_name_if_default(

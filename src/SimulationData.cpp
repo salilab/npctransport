@@ -241,7 +241,7 @@ void SimulationData::create_fgs
 
 
   // Add sites for this type:
-  if (fg_data.interactions().value() > 0) {
+  if (fg_data.interactions().value() != 0) {
     int nsites = fg_data.interactions().value();
     set_sites(fg_type, nsites, fg_data.radius().value());
   }
@@ -292,7 +292,7 @@ void SimulationData::create_floaters
       get_statistics()->add_floater_stats(cur_p); // stats
     }
   // add interaction sites to particles of this type:
-  if (f_data.interactions().value() > 0)
+  if (f_data.interactions().value() != 0)
     {
       int nsites = f_data.interactions().value();
       IMP_LOG(WARNING, nsites << " sites added " << std::endl);
@@ -363,7 +363,7 @@ void SimulationData::create_obstacles
       p_xyz.set_coordinates_are_optimized( !o_data.is_static() );
    }
   // add interaction sites to particles of this type:
-  if (o_data.interactions().value() > 0) {
+  if (o_data.interactions().value() != 0) {
     int nsites = o_data.interactions().value();
     IMP_LOG(WARNING, nsites << " sites added " << std::endl);
     set_sites(type, nsites, o_data.radius().value());
@@ -656,11 +656,16 @@ SimulationData::get_optimizable_beads()
 }
 
 
-void SimulationData::set_sites(core::ParticleType t0, unsigned int n,
+void SimulationData::set_sites(core::ParticleType t, int n,
                                double r) {
-  algebra::Sphere3D s(algebra::get_zero_vector_d<3>(), r);
-  algebra::Vector3Ds sites = algebra::get_uniform_surface_cover(s, n);
-  sites_[t0] = algebra::Vector3Ds(sites.begin(), sites.begin() + n);
+  if(n>0) {
+    algebra::Sphere3D s(algebra::get_zero_vector_d<3>(), r);
+    algebra::Vector3Ds sites = algebra::get_uniform_surface_cover(s, n);
+    sites_[t] = algebra::Vector3Ds(sites.begin(), sites.begin() + n);
+  }
+  if(n == -1) { // centered at bead
+    sites_[t] = algebra::Vector3Ds(1, algebra::Vector3D(0,0,0));
+  }
 }
 
 
