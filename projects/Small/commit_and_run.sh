@@ -1,12 +1,14 @@
 #!/bin/tcsh
-if($#argv < 1) then
-    echo need commit message
-    exit
+
+if ( `git status ./make_cfg.py run2.sh -s | wc -w` > 0 ) then
+    if($#argv < 1) then
+        echo need commit message
+        exit
+    endif
+    echo Committing with message \'$1\'
+    git status -uno
+    git commit  make_cfg.py commit_and_run.sh run.sh -m "$1"
+else
+    echo Nothing to commit - running
 endif
-
-
-echo Committing with message \'$1\'
-git add  make_cfg.py commit_and_run.sh run.sh
-git status -uno
-git commit -m "$1"
-/bin/tcsh -c run.sh
+/bin/tcsh -c ./run.sh
