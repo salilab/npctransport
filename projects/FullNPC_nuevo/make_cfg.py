@@ -219,7 +219,7 @@ config= get_basic_config()
 # Add floaters
 n_kap_interactions=12
 kaps= IMP.npctransport.add_float_type(config,
-                                     number=20,
+                                     number=100,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
@@ -230,7 +230,7 @@ create_range(kaps.interaction_k_factor, lb=0.1, ub=5, steps = 5, base=2)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics1= IMP.npctransport.add_float_type(config,
-                                              number=20,
+                                              number=100,
                                               radius=kaps_R, #-1,
                                               interactions=0,
                                               type_name="crap0")
@@ -295,7 +295,7 @@ add_obstacle(config, "MRCs/Seh1_16copies.mrc", k=16, R=22, origin=mean_loc)
 
 # add bounding volumes
 config.box_is_on.lower=1
-config.box_side.lower=max(max_z,max_x,max_y)*4 # 2000
+config.box_side.lower=max(max_z,max_x,max_y)*3.5 # 2000
 config.slab_is_on.lower=1
 config.tunnel_radius.lower=max_r - config.fgs[0].radius.lower # or also upper when there's steps?
 config.slab_thickness.lower=250.0 # yeast nuclear envelope - see http://books.google.com/books?id=GvxdK1mdqQwC&pg=PA278&lpg=PA278&dq=yeast+nuclear+envelope+dimensions+nanometer&source=bl&ots=tHQoLfXHI1&sig=nRgZmLYnKuiRNP8n6vhm3bapjpI&hl=en&sa=X&ei=VtwKUtvAAsTAyAHOmIDYBg&ved=0CHsQ6AEwCA#v=onepage&q=yeast%20nuclear%20envelope%20dimensions%20nanometer&f=false
