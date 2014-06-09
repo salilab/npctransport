@@ -5,22 +5,24 @@
 # * Copyright 2007-2012 IMP Inventors. All rights reserved.
 # */
 
-#include <IMP/npctransport/main.h>
 #include <IMP/npctransport/npctransport_config.h>
-#include <IMP/npctransport/particle_types.h>
+#include <IMP/npctransport/initialize_positions.h>
+#include <IMP/npctransport/main.h>
+#include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/util.h>
-#include <RMF/utility.h>
-#include <IMP/container/SingletonsRestraint.h>
+
+#include <IMP/benchmark/utility.h>
+#include <IMP/benchmark/benchmark_macros.h>
+
+//#include <IMP/ParticleTuple.h>
+#include <IMP/base_types.h>
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/base/exception.h>
-#include <IMP/npctransport.h>
-#include <IMP/ParticleTuple.h>
-#include <IMP/base_types.h>
-#include <IMP/base/Pointer.h>
 #include <IMP/base/flags.h>
+#include <IMP/base/Pointer.h>
 #include <IMP/Restraint.h>
-#include <IMP/SingletonScore.h>
-#include <IMP/core/Typed.h>
+//#include <RMF/utility.h>
+
 #include <numeric>
 #include <iostream>
 
@@ -39,7 +41,7 @@ int main(int argc, char *argv[]) {
     // preparation::
      IMP_NPC_PARSE_OPTIONS(argc, argv);
      bool verbose = false;
-     unsigned int acceleration_factor = 100;
+     unsigned int acceleration_factor = 200;
     double short_init_factor = 1.0 / acceleration_factor;
     std::string config_pb = IMP::base::create_temporary_file_name
       ("benchmark_initalize.pb", ".pb");
@@ -65,12 +67,24 @@ int main(int argc, char *argv[]) {
                 << " when check level is larger than USAGE" << std::endl;
       return 0;
     }
-    IMP::npctransport::initialize_positions(sd, IMP::RestraintsTemp(),
-                                            verbose, short_init_factor);
+
+    // Test and report:
+    std::ostringstream algo_oss;
+    algo_oss << "Init accelerate " << acceleration_factor;
+#ifdef _OMP
+    algo_oss << " (openmp)";
+#else
+    algo_oss << " (serial)";
+#endif
+    double timev = 0.0;
+    IMP_TIME
+      ( IMP::npctransport::initialize_positions(sd, IMP::RestraintsTemp(),
+                                                verbose, short_init_factor),
+        timev);
+    double score = sd->get_bd()->get_scoring_function()->evaluate(false);
     std::cout << "Energy after benchmark initialization "
-              << "(acclerated by x" << acceleration_factor << "): "
-              << sd->get_bd()->get_scoring_function()->evaluate(false)
-              << std::endl;
+              << algo_oss.str() << " - " << score << std::endl;
+    IMP::benchmark::report("init npc", algo_oss.str(), timev, score);
   }
   catch (const IMP::base::Exception & e) {
     std::cerr << "Error: " << e.what() << std::endl;
