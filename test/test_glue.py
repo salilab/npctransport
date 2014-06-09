@@ -29,7 +29,10 @@ class Tests(IMP.test.TestCase):
         m.set_log_level(IMP.SILENT)
         ds= [self._create_particle(m) for i in range(0,2)]
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
-        ds[1].set_coordinates(IMP.algebra.Vector3D(2*radius,0,0))
+        ds[1].set_coordinates(IMP.algebra.Vector3D(2.5*radius,0,0))
+        distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
+                                            ds[1].get_coordinates())
+        print "Initial distance", distance
         types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
         for d in zip(types, ds):
             IMP.core.Typed.setup_particle(d[1], d[0])
@@ -117,11 +120,11 @@ class Tests(IMP.test.TestCase):
         bd.set_maximum_time_step(dt)
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue2.rmf"))
         for d in zip(types, sites):
-            IMP.npctransport.add_sites(f, d[0], .5*radius, d[1])
+            IMP.npctransport.add_test_sites(f, d[0], .5*radius, d[1])
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
         sos= IMP.rmf.SaveOptimizerState(m, f)
-        sos.set_period(1000)
+        sos.set_period(10)
         bd.add_optimizer_state(sos)
         bd.optimize(nsteps)
         sos.update_always()
@@ -129,7 +132,10 @@ class Tests(IMP.test.TestCase):
         """Check two interactions"""
         IMP.set_log_level(IMP.SILENT)
         dt=IMP.npctransport.get_time_step(1, k, radius)
-        self._test_two(radius, k, .2*radius, .5*k, k, dt)
+        self._test_two(site_range=radius, site_k=k,
+                       nonspec_range=.2*radius, nonspec_k=.5*k,
+                       soft_sphere_k=k, dt=dt)
+
 
     def _create_restraint_three(self, m, ds, site_range, site_k, nonspec_range, nonspec_k,
                                 soft_sphere_k, f=None):
@@ -139,7 +145,7 @@ class Tests(IMP.test.TestCase):
                [IMP.algebra.Vector3D(-radius, 0,0), IMP.algebra.Vector3D(0, 0,-radius)])
         if f:
             for d in zip(ds, sites):
-                IMP.npctransport.add_sites(f, IMP.core.Typed(d[0]).get_type(),
+                IMP.npctransport.add_test_sites(f, IMP.core.Typed(d[0]).get_type(),
                                            .5*radius, d[1])
         rs=[]
         for p in [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)]:
@@ -185,7 +191,9 @@ class Tests(IMP.test.TestCase):
         """Check three interactions"""
         IMP.set_log_level(IMP.SILENT)
         dt=IMP.npctransport.get_time_step(1, k, radius)
-        self._test_three(radius, k, .2*radius, .5*k, k, dt)
+        self._test_three(site_range=radius, site_k=k,
+                       nonspec_range=.2*radius, nonspec_k=.5*k,
+                       soft_sphere_k=k, dt=dt)
     def _rescore_three(self):
         IMP.set_log_level(IMP.SILENT)
         f= RMF.open_rmf_file_read_only(self.get_tmp_file_name("glue3.rmf"))

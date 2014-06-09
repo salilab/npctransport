@@ -76,9 +76,15 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
 
   boost::unordered_map<ParticleIndex, ParticleIndexes> particles_;
 
-  std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const;
-  // for testing without sd
-  boost::unordered_map<core::ParticleType, std::pair<double, algebra::Vector3Ds> > sites_;
+  // for testing without sd - (radius, site-coords) per each particle type
+  boost::unordered_map
+    <core::ParticleType, std::pair<double, algebra::Vector3Ds> > test_sites_;
+
+ private:
+  // add sites associated with particle type t to node cur_node, using
+  // sd_->get_sites() if sd_ is initialized, or using internal
+  // test_sites_ table (used for testing only)
+  void add_sites_to_node(RMF::NodeHandle cur_node, core::ParticleType t) const;
 
  protected:
   virtual void do_setup_node(Model *m, ParticleIndex root,
@@ -93,14 +99,18 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
  public:
   HierarchyWithSitesSaveLink(RMF::FileHandle fh);
   // for testing
-  void add_sites(core::ParticleType t, double range, algebra::Vector3Ds sites) {
-    sites_[t] = std::make_pair(range, sites);
+  void add_test_sites(core::ParticleType t,
+                      double range,
+                      algebra::Vector3Ds sites) {
+    test_sites_[t] = std::make_pair(range, sites);
   }
   static const char *get_name() {return "npctransport save";}
 };
 
-// for testing
-IMPNPCTRANSPORTEXPORT void add_sites(RMF::FileHandle fh, core::ParticleType t,
+//! for testing - adds the list of sites with specified radius, to be
+//! associated with particle type t. The file handle fh relies on this list
+//! only if it doesn't have particles with simulation data keys
+IMPNPCTRANSPORTEXPORT void add_test_sites(RMF::FileHandle fh, core::ParticleType t,
                                      double radius, algebra::Vector3Ds sites);
 
 // note that the corresponding define macro in the .cpp file implicitly

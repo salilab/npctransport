@@ -324,8 +324,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   /**
       Create n interaction sites spread around the surface of a ball of
       radius r, and associate these sites with all particles of type t0
+
+      If n==-1, creates a single site, centered at the bead, and r is ignored
   */
-  void set_sites(core::ParticleType t0, unsigned int n, double r);
+  void set_sites(core::ParticleType t0, int n, double r);
 
   /**
       returns a list of 3D coordinates for the interaction sites associated
