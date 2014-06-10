@@ -239,7 +239,7 @@ nonspecifics1= IMP.npctransport.add_float_type(config,
 #nonspecifics1.k_z_bias_fraction.lower=z_bias_frac
 nonspecifics2= IMP.npctransport.add_float_type(config,
                                               number=50,
-                                              radius=kaps_R*0.1, #-1,
+                                              radius=kaps_R*0.5, #-1,
                                               interactions=0,
                                               type_name="small_crap")
 
