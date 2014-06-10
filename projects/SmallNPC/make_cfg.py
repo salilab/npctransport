@@ -19,7 +19,7 @@ rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
 z_bias = 0.0 # 0.025
 z_bias_frac = 0.0 #0.5
-scale_tunnel = 0.75 # scaling for pore radius
+scale_tunnel = 0.5 # scaling for pore radius
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
     print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
@@ -42,7 +42,7 @@ def get_basic_config():
     config.time_step_factor.lower=1.0 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
-    config.excluded_volume_k.lower=0.1
+    config.excluded_volume_k.lower=0.2
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.025
     config.slack.lower = 7.5
@@ -220,7 +220,7 @@ config= get_basic_config()
 # Add floaters
 n_kap_interactions=12
 kaps= IMP.npctransport.add_float_type(config,
-                                     number=50,
+                                     number=75,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
@@ -231,14 +231,14 @@ create_range(kaps.interaction_k_factor, lb=1.0, ub=5, steps = 5, base=2)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics1= IMP.npctransport.add_float_type(config,
-                                              number=50,
+                                              number=75,
                                               radius=kaps_R, #-1,
                                               interactions=0,
                                               type_name="crap0")
 #nonspecifics1.k_z_bias.lower=z_bias
 #nonspecifics1.k_z_bias_fraction.lower=z_bias_frac
 nonspecifics2= IMP.npctransport.add_float_type(config,
-                                              number=50,
+                                              number=75,
                                               radius=kaps_R*0.5, #-1,
                                               interactions=0,
                                               type_name="small_crap")
