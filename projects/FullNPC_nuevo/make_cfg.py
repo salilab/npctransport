@@ -38,7 +38,7 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=2.5
-    config.time_step_factor.lower=2.0 #### NOTE THIS ####
+    config.time_step_factor.lower=1.0 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
     config.excluded_volume_k.lower=0.1
@@ -46,7 +46,7 @@ def get_basic_config():
     config.nonspecific_k.lower=0.025
     config.slack.lower = 7.5
     config.number_of_trials=1
-    config.dump_interval_ns=50
+    config.dump_interval_ns=1
     config.simulation_time_ns=25000
     config.angular_D_factor.lower=1.0 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
@@ -254,9 +254,9 @@ add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nfgs = 17, nres=240, or
 add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  origin=mean_loc)
 add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
 # add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nfgs=23, nres=330, origin=mean_loc) # nfgs 20-25 = real number for Nup159, depending how you count double motifs and motif regions
-# add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nfgs=46, nres=720, origin=mean_loc)
+add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nfgs=46, nres=720, origin=mean_loc)
 # add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nfgs=21, nres=370,  origin=mean_loc) # nfgs 21-27, depending on treratment of double motifs
-# add_fg_based_on(config, "MRCs/Nup100_8copies_chimera.mrc", k=8, nfgs=44, nres=600, origin=mean_loc)
+#add_fg_based_on(config, "MRCs/Nup100_8copies_chimera.mrc", k=8, nfgs=44, nres=600, origin=mean_loc)
 # add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nfgs=11, nres=220, origin=mean_loc)
 # add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nfgs=11, nres=220, origin=mean_loc)
 # # Nuclear:
