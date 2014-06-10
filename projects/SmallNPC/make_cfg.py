@@ -250,9 +250,9 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  origin=mean_loc, scale_R=scale_R))
-#add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
 #mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nfgs=16, nres=240, scale_R=scale_R))
+mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_R=scale_R))
+#add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
 #add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nfgs = 17, nres=240, origin=mean_loc, scale_R=scale_R)
 # add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nfgs=23, nres=330, origin=mean_loc) # nfgs 20-25 = real number for Nup159, depending how you count double motifs and motif regions
 add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nfgs=46, nres=720, origin=mean_loc, scale_R = scale_R)
