@@ -19,7 +19,7 @@ rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
 z_bias = 0.0 # 0.025
 z_bias_frac = 0.0 #0.5
-scale_R = 0.75 # scaling for pore radius
+scale_tunnel = 0.75 # scaling for pore radius
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
     print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
@@ -120,7 +120,7 @@ def add_interactions_for_fg(fg_name,
 
 
 def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
-                    coarse_factor=fg_coarse_factor, scale_R=1.0):
+                    coarse_factor=fg_coarse_factor, scale_tunnel=1.0):
     ''' Read mrc_filename, cluster to k clusters, and create k
         fgs with nbeads/coarse_factor beads, anchored at the clusters,
         normalized by mean_loc. An additional bead is used for the
@@ -163,9 +163,9 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
     add_interactions_for_fg(type_name, k_fgkap, range_fgkap=radius+4)
     for center in centers:
         pos=fgs.anchor_coordinates.add()
-        pos.x=scale_R*(center[0] - origin[0])
-        pos.y=scale_R*(center[1] - origin[1])
-        pos.z=center[2] - origin[2]
+        pos.x=scale_tunnel*(center[0] - origin[0])
+        pos.y=scale_tunnel*(center[1] - origin[1])
+        pos.z=scale_tunnel*(center[2] - origin[2])
         r = math.sqrt(pos.x**2 + pos.y**2)
         print mrc_filename, "z=", pos.z, "r=", r
         max_r = max(max_r, r)
@@ -183,7 +183,7 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
         @param R the obstacle radius, to be inflated by obstacle_inflate_factor
         @param origin the new origin
 
-        @note if origin==None, initiate it as a 3D coordinate that
+c        @note if origin==None, initiate it as a 3D coordinate that
         is the mean coordinate of the MRC file in mrc_filename.
 
         @return the mean location of the MRC file clusters
@@ -250,12 +250,12 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-#mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nfgs=16, nres=240, scale_R=scale_R))
-mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_R=scale_R))
-#add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
-#add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nfgs = 17, nres=240, origin=mean_loc, scale_R=scale_R)
+#mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nfgs=16, nres=240, scale_tunnel=scale_tunnel))
+mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel))
+add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
+#add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nfgs = 17, nres=240, origin=mean_loc, scale_tunnel=scale_tunnel)
 # add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nfgs=23, nres=330, origin=mean_loc) # nfgs 20-25 = real number for Nup159, depending how you count double motifs and motif regions
-add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nfgs=46, nres=720, origin=mean_loc, scale_R = scale_R)
+add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nfgs=46, nres=720, origin=mean_loc, scale_tunnel = scale_tunnel)
 # add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nfgs=21, nres=370,  origin=mean_loc) # nfgs 21-27, depending on treratment of double motifs
 #add_fg_based_on(config, "MRCs/Nup100_8copies_chimera.mrc", k=8, nfgs=44, nres=600, origin=mean_loc)
 # add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nfgs=11, nres=220, origin=mean_loc)
