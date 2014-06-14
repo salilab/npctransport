@@ -42,7 +42,7 @@ def get_basic_config():
     config.time_step_factor.lower=1.0 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
-    config.excluded_volume_k.lower=2.0
+    config.excluded_volume_k.lower=2*k_fgkap
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.025
     config.slack.lower = 7.5
