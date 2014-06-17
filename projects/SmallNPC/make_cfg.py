@@ -120,7 +120,7 @@ def add_interactions_for_fg(fg_name,
 
 
 def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
-                    coarse_factor=fg_coarse_factor, scale_tunnel=1.0):
+                    coarse_factor=fg_coarse_factor, scale_tunnel=scale_tunnel):
     ''' Read mrc_filename, cluster to k clusters, and create k
         fgs with nbeads/coarse_factor beads, anchored at the clusters,
         normalized by mean_loc. An additional bead is used for the
@@ -252,7 +252,7 @@ max_y=0
 max_z=0
 #mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nfgs=16, nres=240, scale_tunnel=scale_tunnel))
 mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel))
-add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
+add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc, scale_tunnel=scale_tunnel)
 #add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nfgs = 17, nres=240, origin=mean_loc, scale_tunnel=scale_tunnel)
 # add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nfgs=23, nres=330, origin=mean_loc) # nfgs 20-25 = real number for Nup159, depending how you count double motifs and motif regions
 add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nfgs=46, nres=720, origin=mean_loc, scale_tunnel = scale_tunnel)
