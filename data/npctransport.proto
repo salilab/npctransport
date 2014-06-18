@@ -96,7 +96,8 @@ message Configuration {
   optional int32 are_floaters_on_one_slab_side=29 [default=0]; // if true (<>0), all floaters are initially concentrated on one side
   optional FloatRange time_step_wave_factor=30; // if >1.001, use a wave function for time step that allows going beyond formal maximal step in waves
   optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
-  // n=31
+  optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
+  // n=32
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -196,7 +197,9 @@ message Assignment {
   optional int32 is_exclude_floaters_from_slab_initially=37 [default = 1];
   repeated string imp_module_version=38; // repeated - once for each restart
   repeated string npc_module_version=39; // repeated - once for each restart
-  // n=39
+  optional double output_statistics_interval_ns=40 [default=100]; // update interval of statistics file (including order params) in ns
+  optional int32 output_statistics_interval_frames=41 [default=100000]; // update interval of statistics file (including order params) in frames
+  // n=41
 }
 
 message Statistics {

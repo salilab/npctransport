@@ -306,10 +306,13 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   assignment.set_time_step(time_step);
   assignment.set_work_unit(work_unit);
   assignment.set_number_of_frames(get_number_of_frames(assignment, time_step));
-  assignment.set_dump_interval_frames(
-      get_dump_interval_in_frames(assignment, time_step));
-  assignment.set_statistics_interval_frames(
-      get_statistics_interval_in_frames(assignment, time_step));
+  assignment.set_dump_interval_frames
+    ( get_dump_interval_in_frames(assignment, time_step) );
+  assignment.set_statistics_interval_frames
+    ( get_statistics_interval_in_frames(assignment, time_step) );
+  assignment.set_output_statistics_interval_frames
+    ( get_output_statistics_interval_in_frames(assignment, time_step) );
+
   assignment.set_range(get_close_pairs_range(assignment));
   assignment.set_random_seed(random_seed);
   std::fstream out(ofname.c_str(), std::ios::out | std::ios::binary);
