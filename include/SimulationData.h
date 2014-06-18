@@ -53,6 +53,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   Parameter<double> range_;
   Parameter<double> statistics_fraction_;
   Parameter<int> statistics_interval_frames_;
+  Parameter<int> output_statistics_interval_frames_;
   Parameter<double> time_step_;
   Parameter<double> time_step_wave_factor_;
   Parameter<double> maximum_number_of_minutes_;
@@ -67,6 +68,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
  public:
   /** returns the maximal interaction range between particles */
   double get_range() const { return range_; }
+
+  int get_output_statistics_interval_frames()
+  { return output_statistics_interval_frames_; }
 
   /** returns whether should exclude floaters from slab during initialization */
   bool get_is_exclude_floaters_from_slab_initially()

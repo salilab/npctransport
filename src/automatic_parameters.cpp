@@ -96,11 +96,17 @@ double get_time_step(const ::npctransport_proto::Assignment& config,
                        max_trans_relative_to_radius, time_step_factor);
 }
 
+int get_frames_from_ns(double ns, double time_step) {
+  const double fs_in_ns = 1000000;
+  int frames = std::ceil(ns * fs_in_ns / time_step);
+  if (frames <= 0) frames = 1;  // make sure at least every frame
+  return frames;
+}
+
+
 int get_number_of_frames(const ::npctransport_proto::Assignment& config,
                          double time_step) {
-  const double fs_in_ns = 1000000;
-  int ret = std::ceil(config.simulation_time_ns() * fs_in_ns / time_step);
-  if (ret == 0) ret = 1;  // make sure at least every frame
+  int ret = get_frames_from_ns(config.simulation_time_ns(), time_step);
   if (ret > config.maximal_number_of_frames()) {
     IMP_THROW(
         "number of frames " << ret << ", which is required for simulation time"
@@ -112,29 +118,50 @@ int get_number_of_frames(const ::npctransport_proto::Assignment& config,
   return ret;
 }
 
+
 int get_dump_interval_in_frames(const ::npctransport_proto::Assignment& config,
                                 double time_step) {
-  const double fs_in_ns = 1000000;
-  double ret = config.dump_interval_ns() * fs_in_ns / time_step;
-  if (ret == 0) ret = 1;  // make sure at least every frame
-  IMP_LOG(VERBOSE, "dump interval = " << std::ceil(ret) << " frames, "
+  int ret = get_frames_from_ns(config.dump_interval_ns(), time_step);
+  IMP_LOG(VERBOSE, "dump interval = " << ret << " frames, "
             << config.dump_interval_ns() << " ns, time step " << time_step
             << std::endl);
   ;
-  return std::ceil(ret);
+  return ret;
 }
 
-int get_statistics_interval_in_frames(
-    const ::npctransport_proto::Assignment& config, double time_step) {
-  const double fs_in_ns = 1000000;
-  double ret = config.statistics_interval_ns() * fs_in_ns / time_step;
-  if (ret == 0) ret = 1;  // make sure at least every frame
-  IMP_LOG(VERBOSE, "stats interval = " << std::ceil(ret)
-            << " frames, originally "
-            << config.statistics_interval_ns() << " ns, time step " << time_step
+int get_statistics_interval_in_frames
+( const ::npctransport_proto::Assignment& config,
+  double time_step,
+  double default_value_ns)
+{
+  double ns = default_value_ns;
+  if(config.has_statistics_interval_ns()) {
+    ns = config.statistics_interval_ns() ;
+  }
+  int ret = get_frames_from_ns(ns, time_step);
+  IMP_LOG(PROGRESS, "stats interval = "
+          << ret  << " frames, converted from "
+            << ns << " ns, time step " << time_step
             << std::endl);
-  ;
-  return std::ceil(ret);
+  return ret;
+}
+
+int get_output_statistics_interval_in_frames
+( const ::npctransport_proto::Assignment& config,
+  double time_step,
+  double default_value_ns)
+{
+  double ns = default_value_ns;
+  if(config.has_output_statistics_interval_ns()) {
+    ns = config.output_statistics_interval_ns() ;
+  }
+  int ret = get_frames_from_ns(ns, time_step);
+  IMP_LOG(PROGRESS, "output stats interval = "
+          << ret  << " frames, converted from "
+          << ns << " ns, time step " << time_step
+          << std::endl
+          );
+  return ret;
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE
