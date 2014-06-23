@@ -111,10 +111,10 @@ FGChain* create_fg_chain
     std::vector<double> Ks(n_levels); // TAMD spring constant
     for(int i=0; i < n_levels; i++) { // i ~ increasing depth from root
       int level = n_levels - i; // level above leaves
-      T_factors[i] = 2 * pow(2,level-1);
-      F_factors[i] = 10 * pow(3,level-1);
-      //      T_factors[i] = 1.0;
-      //      F_factors[i] = 1.0;
+      //      T_factors[i] = 2 * pow(2,level-1);
+      //      F_factors[i] = 10 * pow(3,level-1);
+      T_factors[i] = 1.0;
+      F_factors[i] = 1.0;
       Ks[i] = 1;
     }
     ret_chain=
