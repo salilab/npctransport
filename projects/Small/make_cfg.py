@@ -44,13 +44,13 @@ def get_basic_config():
     config.excluded_volume_k.lower=0.1
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=0.025
-    config.slack.lower = 7.5
+    config.slack.lower = 15
     config.number_of_trials=1
-    config.dump_interval_ns=0.001
-    config.simulation_time_ns=500
+    config.dump_interval_ns=10
+    config.simulation_time_ns=5000
     config.angular_D_factor.lower=1.0 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
-    config.statistics_interval_ns=0.1
+    config.statistics_interval_ns=1
     config.fg_anchor_inflate_factor=1.0/math.sqrt(fg_coarse_factor)
     config.is_exclude_floaters_from_slab_initially=0
     config.are_floaters_on_one_slab_side = 0 # all on top side
