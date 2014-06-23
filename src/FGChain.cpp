@@ -103,7 +103,7 @@ FGChain* create_fg_chain
            (sd, radius, D_factor, angular_D_factor, c, type) );
 
   // create TAMD or non-TAMD particles P, within hierarchy of root:
-  if(fg_data.is_tamd() || DEBUG) {
+  if(fg_data.is_tamd()) {
     int d = 2; // outdegree in TAMD hierarchy, TODO: parametrize
     int n_levels = ceil(log(n)/log(d)); // log_d{n}
     std::vector<double> T_factors(n_levels); // temperature scaling
@@ -111,10 +111,10 @@ FGChain* create_fg_chain
     std::vector<double> Ks(n_levels); // TAMD spring constant
     for(int i=0; i < n_levels; i++) { // i ~ increasing depth from root
       int level = n_levels - i; // level above leaves
-      //      T_factors[i] = 2 * pow(2,level-1);
-      //      F_factors[i] = 10 * pow(3,level-1);
-      T_factors[i] = 1.0; //2 * pow(2,level-1);
-      F_factors[i] = 1.0; //10 * pow(3,level-1);
+      T_factors[i] = 2 * pow(2,level-1);
+      F_factors[i] = 10 * pow(3,level-1);
+      //      T_factors[i] = 1.0;
+      //      F_factors[i] = 1.0;
       Ks[i] = 1;
     }
     ret_chain=
