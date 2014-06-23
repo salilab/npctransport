@@ -10,6 +10,8 @@
 
 #include "npctransport_config.h"
 #include "linear_distance_pair_scores.h"
+#include "internal/RigidBodyInfo.h"
+#include "internal/sites.h"
 #include <IMP/PairScore.h>
 #include <IMP/UnaryFunction.h>
 #include <IMP/base/Pointer.h>
@@ -19,10 +21,11 @@
 #include <IMP/display/particle_geometry.h>
 #include <IMP/generic.h>
 #include <IMP/algebra/vector_search.h>
+#include <IMP/algebra/Transformation3D.h>
+#include <IMP/base/set_map_macros.h>
 #include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/atom/estimates.h>
 #include <boost/unordered_set.hpp>
-#include "internal/sites.h"
 
 #include <boost/array.hpp>
 
@@ -50,7 +53,34 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore : public LinearInteractionPairScore {
   // (this switching may be made to improve running time efficiency)
   bool sites_first_;
 
+  // the maximal sum of radii of any pair of sites
+  // from sites_ and nnsites_ respectively
+  double max_sites_r_sum_;
+
+ private:
+  typedef IMP_BASE_SMALL_UNORDERED_MAP<ParticleIndex,internal::RigidBodyInfo>
+    t_particles_rb_cache;
+  mutable t_particles_rb_cache particles_rb_cache_;
+  mutable bool is_cache_active_;
+  mutable unsigned int cur_cache_id_; // to keep track of caching rounds
+
   base::PointerMember<algebra::NearestNeighbor3D> nn_;
+
+ private:
+  // maintain a cache for evaluate_index() till
+  // call to deactivate_cache()
+  void activate_cache() const // cache is mutable
+  {
+    is_cache_active_ = true;
+    cur_cache_id_++; // invalidate old entries
+    //    std::cout << "Activating cache with cache id " << cur_cache_id_ << std::endl;
+  }
+
+  void deactivate_cache() const // cache is mutable
+  {
+    is_cache_active_ = false;
+    //    std::cout << "Deactivating cache" << std::endl;
+  }
 
  public:
   /**
@@ -76,6 +106,37 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore : public LinearInteractionPairScore {
                  double k_repulsion, const algebra::Vector3Ds &sites0,
                  const algebra::Vector3Ds &sites1);
 
+  virtual double evaluate_indexes(Model *m, const ParticleIndexPairs &p,
+                                  DerivativeAccumulator *da,
+                                  unsigned int lower_bound,
+                                  unsigned int upper_bound) const IMP_FINAL {
+    activate_cache();
+    double ret=0.0;
+    for (unsigned int i = lower_bound; i < upper_bound; ++i) {
+      ret += evaluate_index(m, p[i], da);
+    }
+    deactivate_cache();
+    return ret;
+  }
+
+  //! evaluated indexes for the range from lower_bound to upper_bound
+  //! in p, if score>max then return max value of double
+  double evaluate_if_good_indexes
+    ( kernel::Model *m, const kernel::ParticleIndexPairs &p,
+      DerivativeAccumulator *da,
+      double max, unsigned int lower_bound, unsigned int upper_bound) const
+  {
+    activate_cache();
+    double ret = 0.0;
+    for (unsigned int i = lower_bound; i < upper_bound; ++i) {
+      ret += evaluate_if_good_index(m, p[i], da, max - ret);
+      if (ret > max) return std::numeric_limits<double>::max();
+    }
+    deactivate_cache();
+    return ret;
+  }
+
+
   /** evaluate the score for the pair of model particle indexes in p,
       updating score derivatives to da
   */
@@ -95,10 +156,44 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore : public LinearInteractionPairScore {
   //! return the k for site-site attraction
   double get_sites_k() const { return sites_k_; }
 
-  IMP_PAIR_SCORE_METHODS(SitesPairScore);
+
+ public:
+
   IMP_OBJECT_METHODS(SitesPairScore);
-  ;
+
+ private:
+
+  // gets the rigid body information (e.g., translation, inverse rotation)
+  // associated with particle m.pi, possibly from cache (depending on internal
+  // cache definitions)
+  inline internal::RigidBodyInfo
+    get_rigid_body_info(Model* m, ParticleIndex pi) const;
+
+
 };
+
+internal::RigidBodyInfo
+SitesPairScore::get_rigid_body_info
+(Model* m, ParticleIndex pi) const
+{
+  IMP_USAGE_CHECK(core::RigidBody::get_is_setup(m, pi),
+                  "PI " << pi.get_index() << " not a rigid body");
+  if(is_cache_active_){
+    std::pair<t_particles_rb_cache::iterator, bool>
+      p = particles_rb_cache_.insert
+      (std::make_pair(pi, internal::RigidBodyInfo()));
+    internal::RigidBodyInfo& rbi_cached = p.first->second;
+    bool const rbi_was_in_cache = !p.second;
+    if(!rbi_was_in_cache || rbi_cached.cache_id != cur_cache_id_)
+      {
+        rbi_cached.set_particle(m, pi, cur_cache_id_);
+      }
+    return rbi_cached;
+  } else {
+    return internal::RigidBodyInfo(m, pi, INVALID_CACHE_ID);
+  }
+}
+
 
 class TemplateBaseSitesPairScore : public LinearInteractionPairScore {
  protected:
@@ -139,6 +234,12 @@ class TemplateBaseSitesPairScore : public LinearInteractionPairScore {
   }
 };
 
+/**
+   pair score with NA sites vs. NB sites in each pair
+
+   WHICH is a variant for which type of evaluation is used (advanced,
+   use True if you don't know better)
+ */
 template <unsigned int NA, unsigned int NB, bool WHICH>
 class TemplateSitesPairScore : public TemplateBaseSitesPairScore {
   typedef TemplateBaseSitesPairScore P;
