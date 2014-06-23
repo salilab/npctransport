@@ -19,7 +19,7 @@ rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
 z_bias = 0.0 # 0.025
 z_bias_frac = 0.0 #0.5
-scale_tunnel = 0.4 # scaling for pore radius
+scale_tunnel = 0.6 # scaling for pore radius
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
     print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
@@ -296,7 +296,7 @@ mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16/4, nfgs = 33,
 
 # add bounding volumes
 config.box_is_on.lower=1
-config.box_side.lower=max(max_z,max_x,max_y)*3.5 # 2000
+config.box_side.lower=max(max_z,max_x,max_y)*4 # 2000
 config.slab_is_on.lower=1
 config.tunnel_radius.lower=max_r - config.fgs[0].radius.lower # or also upper when there's steps?
 config.slab_thickness.lower=250.0 # yeast nuclear envelope - see http://books.google.com/books?id=GvxdK1mdqQwC&pg=PA278&lpg=PA278&dq=yeast+nuclear+envelope+dimensions+nanometer&source=bl&ots=tHQoLfXHI1&sig=nRgZmLYnKuiRNP8n6vhm3bapjpI&hl=en&sa=X&ei=VtwKUtvAAsTAyAHOmIDYBg&ved=0CHsQ6AEwCA#v=onepage&q=yeast%20nuclear%20envelope%20dimensions%20nanometer&f=false
