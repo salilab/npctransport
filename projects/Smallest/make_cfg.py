@@ -19,7 +19,7 @@ rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
 z_bias = 0.0 # 0.025
 z_bias_frac = 0.0 #0.5
-scale_tunnel = 0.6 # scaling for pore radius
+scale_tunnel = 0.75 # scaling for pore radius
 # fetch params from cmd-line
 if(len(sys.argv)<=1):
     print " Usage: <cmd> <outfile> [kaps_R=%.1f] [k_fgfg=%.1f]" % (kaps_R, k_fgfg)
