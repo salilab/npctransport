@@ -22,9 +22,10 @@
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/npctransport/util.h>
 #include <IMP/algebra/vector_generators.h>
-#include <IMP/atom/estimates.h>
+#include <IMP/atom/BrownianDynamicsTAMD.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
+#include <IMP/atom/estimates.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/log.h>
 #include <IMP/core/HarmonicUpperBound.h>
@@ -624,7 +625,7 @@ Statistics const * SimulationData::get_statistics() const
 
 atom::BrownianDynamics *SimulationData::get_bd(bool recreate){
   if (!bd_ || recreate) {
-    bd_ = new atom::BrownianDynamics(m_, "BD%1%", time_step_wave_factor_);
+    bd_ = new atom::BrownianDynamicsTAMD(m_, "BD_tamd%1%", time_step_wave_factor_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_ / 4);
     bd_->set_current_time(0.0);

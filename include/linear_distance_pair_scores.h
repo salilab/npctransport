@@ -144,7 +144,7 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
 
 #ifndef SWIG
   // returns cached intermediate computations from last call to
-  // evaluate_index()
+  // this->evaluate_index()
   EvaluationCache const &get_evaluation_cache() const { return cache_; }
 #endif
 
