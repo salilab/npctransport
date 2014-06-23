@@ -220,7 +220,7 @@ config= get_basic_config()
 # Add floaters
 n_kap_interactions=12
 kaps= IMP.npctransport.add_float_type(config,
-                                     number=50,
+                                     number=30,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
@@ -231,14 +231,14 @@ create_range(kaps.interaction_k_factor, lb=1.0, ub=5, steps = 5, base=2)
 ##########################################
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics1= IMP.npctransport.add_float_type(config,
-                                              number=50,
+                                              number=30,
                                               radius=kaps_R, #-1,
                                               interactions=0,
                                               type_name="crap0")
 #nonspecifics1.k_z_bias.lower=z_bias
 #nonspecifics1.k_z_bias_fraction.lower=z_bias_frac
 nonspecifics2= IMP.npctransport.add_float_type(config,
-                                              number=50,
+                                              number=30,
                                               radius=kaps_R*0.5, #-1,
                                               interactions=0,
                                               type_name="small_crap")
@@ -250,7 +250,7 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel))
+mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16/4, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel))
 #add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
 #add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nfgs=16, nres=240, scale_tunnel=scale_tunnel, origin=mean_loc)
 #add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nfgs = 17, nres=240, origin=mean_loc, scale_tunnel=scale_tunnel)
