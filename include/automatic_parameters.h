@@ -72,7 +72,7 @@ double get_time_step(const ::npctransport_proto::Assignment& config,
    computes the number of frames that approximate a certain number of nanoseconds
    using the specified time_step per step in fs
 
-   @param time in ns
+   @param ns time in ns
    @param time_step step in fs per frame
 */
 IMPNPCTRANSPORTEXPORT
