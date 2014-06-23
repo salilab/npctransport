@@ -6,6 +6,7 @@ import IMP.container
 import math
 
 radius=5
+k=500
 
 class Tests(IMP.test.TestCase):
     def _create_particle(self, m):
@@ -19,7 +20,10 @@ class Tests(IMP.test.TestCase):
         IMP.atom.RigidBodyDiffusion.setup_particle(p)
         return d
     def _test_one(self, site_range, site_k, nonspec_range, nonspec_k,
-                  soft_sphere_k, dt):
+                  soft_sphere_k, dt, ntrial=0):
+        nsteps = 250000
+        if(IMP.base.get_check_level() >= IMP.base.USAGE):
+            nsteps /= 250
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
         ds= [self._create_particle(m) for i in range(0,2)]
@@ -28,29 +32,60 @@ class Tests(IMP.test.TestCase):
         types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
         for d in zip(types, ds):
             IMP.core.Typed.setup_particle(d[1], d[0])
-        sites=([IMP.algebra.Vector3D(radius, 0,0)], [IMP.algebra.Vector3D(-radius, 0,0)])
+        sites=( [ IMP.algebra.Vector3D(radius, 0,0) ],
+                [ IMP.algebra.Vector3D(-math.sqrt(1.0)*radius,math.sqrt(0.0)*radius,0)
+#                  , IMP.algebra.Vector3D(-math.sqrt(0.8)*radius,math.sqrt(0.2)*radius,0)
+                ] )
         ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
-                                            nonspec_k, soft_sphere_k, sites[0], sites[1])
+                                            nonspec_k, soft_sphere_k,
+                                            sites[0], sites[1])
 #        ps.set_log_level(IMP.VERBOSE)
         r= IMP.core.PairRestraint(ps, ds)
         m.add_restraint(r)
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_maximum_time_step(dt)
-        f= RMF.create_rmf_file(self.get_tmp_file_name("glue.rmf"))
+        f= RMF.create_rmf_file(self.get_tmp_file_name("glue1_%d.rmf" % ntrial))
         for d in zip(types, sites):
-            IMP.npctransport.add_sites(f, d[0], .5*radius, d[1])
+            IMP.npctransport.add_test_sites(f, d[0], site_range, d[1])
+        IMP.rmf.add_restraint(f,r)
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         sos= IMP.rmf.SaveOptimizerState(m, f)
-        bd.add_optimizer_state(sos)
+#        bd.add_optimizer_state(sos)
         sos.set_period(1000)
-        bd.optimize(1000)
+        max_delta = 0.75 * site_range
         sos.update_always()
+        for rr,s in zip([2.00, 2.25, 2.50],
+                       [-k*radius/2.0-0.1*k*0.2*radius,-k*radius/4.0, 0.0]):
+            ds[1].set_coordinates(IMP.algebra.Vector3D(rr*radius,0,0))
+            init_score =  bd.get_scoring_function().evaluate(False)
+            print "Initial score x0=", rr, "*R is ", init_score
+            self.assertAlmostEqual(init_score, s, delta = 0.001)
+        for i in range(10):
+            bd.optimize(nsteps / 10)
+            sos.update_always()
+            distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
+                                                ds[1].get_coordinates())
+            print "score", i, " = ", bd.get_scoring_function().evaluate(False)
+            if abs(distance - 2*radius) < max_delta:
+                break;
+        final_score = bd.get_scoring_function().evaluate(False)
+        print "Final distance", distance, "score", final_score
+#        if(IMP.base.get_check_level() < IMP.base.USAGE):
+        self.assertAlmostEqual(distance, 2*radius, delta =max_delta)
+        self.assertLess(final_score, -0.001)
     def test_one(self):
         """Check interaction score repulsion for glue test"""
         IMP.set_log_level(IMP.SILENT)
-        k=500
         dt=IMP.npctransport.get_time_step(1, k, radius)
-        self._test_one(radius, k, .2*radius, .5*k, k, dt)
+        ntrials=3
+        for i in range(ntrials):
+            try:
+                self._test_one(site_range=.5*radius, site_k=k,
+                            nonspec_range=.2*radius, nonspec_k=.1*k,
+                               soft_sphere_k=0.1*k, dt=dt, ntrial=i)
+                return
+            except AssertionError:
+                if i==(ntrials-1): raise
 
     def _test_two(self, site_range, site_k, nonspec_range, nonspec_k,
                   soft_sphere_k, dt):
@@ -92,7 +127,6 @@ class Tests(IMP.test.TestCase):
     def test_two(self):
         """Check two interactions"""
         IMP.set_log_level(IMP.SILENT)
-        k=500
         dt=IMP.npctransport.get_time_step(1, k, radius)
         self._test_two(radius, k, .2*radius, .5*k, k, dt)
 
@@ -149,7 +183,6 @@ class Tests(IMP.test.TestCase):
     def test_three(self):
         """Check three interactions"""
         IMP.set_log_level(IMP.SILENT)
-        k=500
         dt=IMP.npctransport.get_time_step(1, k, radius)
         self._test_three(radius, k, .2*radius, .5*k, k, dt)
     def _rescore_three(self):
