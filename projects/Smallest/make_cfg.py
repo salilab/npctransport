@@ -172,7 +172,7 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
         max_x = max(max_x, abs(pos.x))
         max_y = max(max_y, abs(pos.y))
         max_z = max(max_z, abs(pos.z))
-    fgs.is_tamd = True;
+    fgs.is_tamd = False;
     return mean_loc
 
 def add_obstacle(config, mrc_filename, k, R, origin=None):
