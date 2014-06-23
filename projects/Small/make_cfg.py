@@ -52,8 +52,8 @@ def get_basic_config():
                                       # in crowded environment and for coarse graining
     config.statistics_interval_ns=1
     config.fg_anchor_inflate_factor=1.0/math.sqrt(fg_coarse_factor)
-    config.is_exclude_floaters_from_slab_initially=0
-    config.are_floaters_on_one_slab_side = 0 # all on top side
+    config.is_exclude_floaters_from_slab_initially=1
+    config.are_floaters_on_one_slab_side = 1 # all on top side
     return config
 
 
