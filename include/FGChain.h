@@ -13,7 +13,8 @@
 
 #include "npctransport_config.h"
 #include "linear_distance_pair_scores.h"
-#include "internal/npctransport.pb.h"
+#include "npctransport_proto.fwd.h"
+//#include "internal/npctransport.pb.h"
 
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/base/Object.h>
