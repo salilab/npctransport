@@ -31,6 +31,19 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+// type - variable type to be declared e.g. double
+// var - var name to be declared
+// name - name in protobuf
+// default_value - the default
+#define GET_ASSIGNMENT_DEF(type, var, name, default_value)       \
+  type var;                                                      \
+  {                                                              \
+    if(fg_data.has_##name() )                                    \
+      { var = fg_data.name().value(); }                    \
+    else                                                         \
+      { var = default_value; }                                   \
+  }
+
 /***************** FGChain methods ************/
 
 //!  create the bonds restraint for the chain beads
@@ -111,11 +124,18 @@ FGChain* create_fg_chain
     std::vector<double> Ks(n_levels); // TAMD spring constant
     for(int i=0; i < n_levels; i++) { // i ~ increasing depth from root
       int level = n_levels - i; // level above leaves
-      //      T_factors[i] = 2 * pow(2,level-1);
-      //      F_factors[i] = 10 * pow(3,level-1);
-      T_factors[i] = 1.0;
-      F_factors[i] = 1.0;
-      Ks[i] = 1;
+      GET_ASSIGNMENT_DEF(double, t_coeff, tamd_t_factor_coeff, 1.0);
+      GET_ASSIGNMENT_DEF(double, t_base, tamd_t_factor_base, 1.0);
+      GET_ASSIGNMENT_DEF(double, f_coeff, tamd_f_factor_coeff, 1.0);
+      GET_ASSIGNMENT_DEF(double, f_base, tamd_f_factor_base, 1.0);
+      GET_ASSIGNMENT_DEF(double, k, tamd_k, 1.0);
+      std::cout << "TAMD params: "
+                << t_coeff << ", "  << t_base << ", "
+                << f_coeff << ", "  << f_base << ", "
+                << k << std::endl;
+      T_factors[i] = t_coeff * pow(t_base,level-1);
+      F_factors[i] = f_coeff * pow(f_base,level-1);
+      Ks[i] = k;
     }
     ret_chain=
       internal::create_tamd_chain(pf, n, d, T_factors, F_factors, Ks);
@@ -160,6 +180,6 @@ FGChain* get_fg_chain(Particle* p_root)
 };
 
 
-
+#undef GET_ASSIGNMENT_DEF
 
 IMPNPCTRANSPORT_END_NAMESPACE
