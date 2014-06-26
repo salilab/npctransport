@@ -36,6 +36,11 @@ message Configuration {
     repeated XYZ anchor_coordinates=9; // a fixed coordinate for the first bead in the chain
     optional string type=10; // type name, e.g. "fg_nsp1"
     optional int32 is_tamd=11 [default=0]; // option for using a tamd restraint
+    optional FloatRange tamd_T_factor_coeff=12; // coefficient for accelerated temperature for TAMD particles
+    optional FloatRange tamd_T_factor_base=13; // base for accelerate temperature exponentiation for TAMD particles
+    optional FloatRange tamd_F_factor_coeff=14;// coefficient for increased friction for TAMD particles
+    optional FloatRange tamd_F_factor_base=15;// base for increased friction exponentiation for TAMD particles
+    optional FloatRange tamd_K=16; // spring constant for TAMD particles
   };
   message FloatConfiguration {
     required IntRange number=1;
@@ -129,6 +134,11 @@ message Assignment {
     repeated XYZ anchor_coordinates=9; // a fixed coordinate for the first bead in the chain
     optional string type=10; // e.g., "fg_nsp1"
     optional int32 is_tamd=11 [default=0]; // option for using a tamd restraint
+    optional FloatAssignment tamd_T_factor_coeff=12;
+    optional FloatAssignment tamd_T_factor_base=13;
+    optional FloatAssignment tamd_F_factor_coeff=14;
+    optional FloatAssignment tamd_F_factor_base=15;
+    optional FloatAssignment tamd_K=16;
   };
   message FloaterAssignment {
     required IntAssignment number=1;
