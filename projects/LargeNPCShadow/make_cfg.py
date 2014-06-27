@@ -173,9 +173,9 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
         max_y = max(max_y, abs(pos.y))
         max_z = max(max_z, abs(pos.z))
     fgs.is_tamd = True;
-    fgs.tamd_T_factor_coeff.lower=1.0
+    fgs.tamd_T_factor_coeff.lower=1.1
     fgs.tamd_T_factor_base.lower=1.0
-    fgs.tamd_F_factor_coeff.lower=1.0
+    fgs.tamd_F_factor_coeff.lower=1.1
     fgs.tamd_F_factor_base.lower=1.0
     fgs.tamd_K.lower=1.0
     return mean_loc
