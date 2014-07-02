@@ -13,7 +13,7 @@ k_fgfg=0.05
 FG_RES_PER_BEAD_RAW = 20
 FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 #range_fgfg=FG_RADIUS_RAW*2
-k_fgkap=0.4
+k_fgkap=0.6
 #range_fgkap=FG_RADIUS_RAW+4
 rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
@@ -255,13 +255,13 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel))
-add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
-add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nfgs=16, nres=240, scale_tunnel=scale_tunnel, origin=mean_loc)
+#mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel)) # , origin=mean_loc)
+#add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
+mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nfgs=16, nres=240, scale_tunnel=scale_tunnel)) # , origin=mean_loc)
 add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nfgs = 17, nres=240, origin=mean_loc, scale_tunnel=scale_tunnel)
-add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nfgs=23, nres=330, origin=mean_loc) # nfgs 20-25 = real number for Nup159, depending how you count double motifs and motif regions
+#add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nfgs=23, nres=330, origin=mean_loc) # nfgs 20-25 = real number for Nup159, depending how you count double motifs and motif regions
 add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nfgs=46, nres=720, origin=mean_loc, scale_tunnel = scale_tunnel)
-add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nfgs=21, nres=370,  origin=mean_loc) # nfgs 21-27, depending on treratment of double motifs
+#add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nfgs=21, nres=370,  origin=mean_loc) # nfgs 21-27, depending on treratment of double motifs
 add_fg_based_on(config, "MRCs/Nup100_8copies_chimera.mrc", k=8, nfgs=44, nres=600, origin=mean_loc)
 add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nfgs=11, nres=220, origin=mean_loc)
 add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nfgs=11, nres=220, origin=mean_loc)
@@ -278,18 +278,18 @@ add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nfgs=11, nres
 # (Alber et al. 2007b, Deteriming..., Figure 3)
 add_obstacle(config, "MRCs/Gle1_8copies.mrc", k=8*2, R=21, origin=mean_loc)
 # add_obstacle(config, "MRCs/Gle2_16copies.mrc", k=16, R=23, origin=mean_loc)
-add_obstacle(config, "MRCs/Ndc1_16copies.mrc", k=16*2, R=22, origin=mean_loc)
-# add_obstacle(config, "MRCs/Nic96_16copies_1.mrc", k=16*2, R=24, origin=mean_loc)
+#add_obstacle(config, "MRCs/Ndc1_16copies.mrc", k=16*2, R=22, origin=mean_loc) # too external - I think not needed
+add_obstacle(config, "MRCs/Nic96_16copies_1.mrc", k=16*2, R=24, origin=mean_loc)
 add_obstacle(config, "MRCs/Nic96_16copies_2.mrc", k=16*2, R=24, origin=mean_loc)
 # add_obstacle(config, "MRCs/Nup120_16copies.mrc", k=16*2, R=26, origin=mean_loc)
-add_obstacle(config, "MRCs/Nup133_16copies.mrc", k=16*2, R=27, origin=mean_loc)
+#add_obstacle(config, "MRCs/Nup133_16copies.mrc", k=16*2, R=27, origin=mean_loc) # too external - likely unneeded
 # add_obstacle(config, "MRCs/Nup145C_16copies.mrc", k=16*2, R=23, origin=mean_loc)
-# add_obstacle(config, "MRCs/Nup157_16copies.mrc", k=16*3, R=25, origin=mean_loc)
-# add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16*2, R=29, origin=mean_loc)
-# add_obstacle(config, "MRCs/Nup188_16copies.mrc", k=16*2, R=30, origin=mean_loc)
-# add_obstacle(config, "MRCs/Nup192_16copies.mrc", k=16*2, R=30, origin=mean_loc)
-# add_obstacle(config, "MRCs/Nup53_16copies_chimera.mrc", k=16, R=32, origin=mean_loc) #### omit if include as FG
-# add_obstacle(config, "MRCs/Nup59_16copies.mrc", k=16, R=32, origin=mean_loc) #### omit if include as FG
+add_obstacle(config, "MRCs/Nup157_16copies.mrc", k=16*3, R=25, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup170_16copies.mrc", k=16*2, R=29, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup188_16copies.mrc", k=16*2, R=30, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup192_16copies.mrc", k=16*2, R=30, origin=mean_loc)
+add_obstacle(config, "MRCs/Nup53_16copies_chimera.mrc", k=16, R=32, origin=mean_loc) #### omit if include as FG
+add_obstacle(config, "MRCs/Nup59_16copies.mrc", k=16, R=32, origin=mean_loc) #### omit if include as FG
 # add_obstacle(config, "MRCs/Nup82_8copies_1.mrc", k=8*2, R=23, origin=mean_loc)
 # add_obstacle(config, "MRCs/Nup82_8copies_2.mrc", k=8*2, R=23, origin=mean_loc)
 # add_obstacle(config, "MRCs/Nup84_16copies.mrc", k=16*3, R=20, origin=mean_loc)
