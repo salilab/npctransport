@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
        //       || IMP::base::get_is_quick_test) {
       IMP_TIME(score += sd->get_bd()->optimize(1), timev);
     } else {
-      IMP_TIME(score += sd->get_bd()->optimize(1000), timev);
+      IMP_TIME(score += sd->get_bd()->optimize(10000), timev);
     }
 #ifdef _OMP
     std::string algo = "openmp";

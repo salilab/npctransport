@@ -6,9 +6,10 @@
 # */
 
 #include <IMP/npctransport/npctransport_config.h>
+
 #include <IMP/npctransport/initialize_positions.h>
-#include <IMP/npctransport/main.h>
 #include <IMP/npctransport/protobuf.h>
+#include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/util.h>
 
 #include <IMP/benchmark/utility.h>
