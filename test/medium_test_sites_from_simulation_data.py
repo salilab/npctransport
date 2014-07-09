@@ -175,9 +175,9 @@ class Tests(IMP.test.TestCase):
             sd.get_statistics().update(timer,opt_cycles)
             try:
                 self._assert_kap_in_place(sd, True)
-                print("total energy", sd.get_bd().get_scoring_function().evaluate(False), end=' ')
-                print("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False))
-                self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -50.0)
+                print "total energy", sd.get_bd().get_scoring_function().evaluate(False),
+                print "predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False)
+                self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -30.0)
                 self.assert_(self.is_stats_interact_(assign_file))
                 n_good=n_good+1
             except:
