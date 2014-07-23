@@ -39,7 +39,9 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
   type var;                                                      \
   {                                                              \
     if(fg_data.has_##name() )                                    \
-      { var = fg_data.name().value(); }                    \
+      {                                                          \
+        var = fg_data.name().value();                            \
+      }                                                          \
     else                                                         \
       { var = default_value; }                                   \
   }
