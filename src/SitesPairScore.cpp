@@ -14,6 +14,7 @@
 #include <boost/preprocessor/facilities/apply.hpp>
 #include <boost/preprocessor/seq/elem.hpp>
 #include <boost/preprocessor/tuple/to_seq.hpp>
+#include <math.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -32,35 +33,64 @@ namespace {
   }
 }
 
-/**
-   A score between two spherical particles that contain a fixed set
-   of interaction sites,  sites0 and sites1 (for first and second particle,
-   resp.).
-
-   Note that for a specific pair of particles, each particle might have
-   a different reference frame (rigid body translation and rotation),
-   which is applied to the sites list upon score evaluation.
-
-   @param range          range of site specific attraction
-   @param k_attraction   site specific attraction coefficient
-   @param range_nonspec_attraction range for non-specific attraction
-                                   between particles that contain the sites
-   @param k_nonspec_attraction     non-specific attraction coefficient
-   @param k_repulsion    repulsion coefficient between penetrating particles
-   @param sites0         list of sites on the first particle
-   @param sites1         list of sites on the second particle
-*/
-SitesPairScore::SitesPairScore(double sites_range, double k_attraction,
+// unskewed version of interaction (indifferent to interaction directionality)
+SitesPairScore::SitesPairScore(double range, double k,
                                double range_nonspec_attraction,
-                               double k_nonspec_attraction, double k_repulsion,
+                               double k_nonspec_attraction,
+                               double k_nonspec_repulsion,
                                const algebra::Vector3Ds &sites0,
                                const algebra::Vector3Ds &sites1)
-    : P(k_repulsion, range_nonspec_attraction, k_nonspec_attraction,
-        "SitesPairScore %1%"),
-      sites_range_(sites_range),
-      sites_k_(k_attraction),
+    : P(k_nonspec_repulsion, range_nonspec_attraction,
+        k_nonspec_attraction, "SitesPairScore %1%"),
+      is_skewed_(false),
+      params_unskewed_(range, k),
+      params_normal_(0.0, 0.0),
+      params_tangent_(0.0, 0.0),
       is_cache_active_(false),
       cur_cache_id_(INVALID_CACHE_ID)
+{
+  set_sites(sites0, sites1);
+}
+
+// skewed version of interaction score (different in
+// normal and tangent directions)
+SitesPairScore::SitesPairScore(double range, double k,
+                               double range2_skew, double k_skew,
+                               double range_nonspec_attraction,
+                               double k_nonspec_attraction,
+                               double k_repulsion,
+                               const algebra::Vector3Ds &sites0,
+                               const algebra::Vector3Ds &sites1)
+  :
+  P(k_repulsion, range_nonspec_attraction, k_nonspec_attraction,
+    "SitesPairScore %1%"),
+  params_unskewed_(range, k),
+  params_normal_(0.0, 0.0),
+  params_tangent_(0.0, 0.0),
+  is_cache_active_(false),
+  cur_cache_id_(INVALID_CACHE_ID)
+{
+  // IMP_ALWAYS_CHECK(range2_skew > 0.0 && k_skew > 0.0,
+  //                  "Skew must be positive", base::ValueException);
+  is_skewed_ = (range2_skew != 0.0 && k_skew != 0.0);
+  if(is_skewed_){
+    double kN = sqrt(k / k_skew);
+    double kT = sqrt(k * k_skew);
+    double const r2 = range*range;
+    double const& s = range2_skew; // shorthand
+    double rN = sqrt(r2/(s+1));
+    double rT = sqrt(s*r2/(s+1));
+    params_normal_.set_rk(rN, kN);
+    params_tangent_.set_rk(rT, kT);
+  } else {
+    std::cout << "Creating old version of SitesPairScore, for backward compatibility" << std::endl;
+  }
+  set_sites(sites0, sites1);
+}
+
+
+void SitesPairScore::set_sites(const algebra::Vector3Ds &sites0,
+               const algebra::Vector3Ds &sites1)
 {
   // store the big set of sizes in nnsites_
   if (sites0.size() > sites1.size()) {
@@ -73,8 +103,13 @@ SitesPairScore::SitesPairScore(double sites_range, double k_attraction,
     nnsites_ = sites1;
   }
   nn_ = new algebra::NearestNeighbor3D(nnsites_);
-  max_sites_r_sum_ = get_max_r_sum(sites0, sites1);
+  // Find upper bound for distance between particles whose sites interact
+  double ubound_distance = (get_max_r_sum(sites0, sites1) + params_unskewed_.r);
+  this->ubound_distance2_ = ubound_distance * ubound_distance;
+  IMP_LOG_PROGRESS( "UBOUND,2: " << ubound_distance << " ; "
+                    << this->ubound_distance2_ << std::endl);
 }
+
 
 ModelObjectsTemp SitesPairScore::do_get_inputs(
     Model *m, const ParticleIndexes &pis) const {
@@ -93,18 +128,17 @@ inline double SitesPairScore::evaluate_index(Model *m,
   // I. evaluate non-specific attraction and repulsion between
   //    parent particles before computing for specific sites :
   double non_specific_score = P::evaluate_index(m, pip, da);
-  LinearInteractionPairScore::EvaluationCache lips_cache =
-    P::get_evaluation_cache();
+  LinearInteractionPairScore::EvaluationCache const&
+    lips_cache= P::get_evaluation_cache();
 
   // II. Return if parent particles are out of site-specific interaction range
   //     using cache to avoid some redundant calcs
-  double particles_delta = std::sqrt(lips_cache.particles_delta_squared);
-  double min_sites_delta = particles_delta - max_sites_r_sum_;
-  IMP_LOG(TERSE, "min_sites_delta " << min_sites_delta
-          << " ; range " << sites_range_ << std::endl);  // TODO: VERBOSE
-  if (min_sites_delta > sites_range_) {
-    IMP_LOG(TERSE, "Sites contribution is 0.0 and non-specific score  is "
-                       << non_specific_score << std::endl);  // TODO: VERBOSE
+  double const& distance2= lips_cache.particles_delta_squared;
+  IMP_LOG(PROGRESS, "distance2 " << distance2
+          << " ; distance upper-bound " << ubound_distance2_ <<  std::endl);
+  if (distance2 > ubound_distance2_) {
+    IMP_LOG(PROGRESS, "Sites contribution is 0.0 and non-specific score is "
+            << non_specific_score << std::endl);
     return non_specific_score;
   }
 
@@ -127,7 +161,6 @@ inline double SitesPairScore::evaluate_index(Model *m,
   // algebra::Transformation3D relative = c1->tr.get_inverse() * c0->tr;
   // sum over specific interactions between all pairs of sites:
   double sum = 0;
-  double const sites_range2 = algebra::get_squared(sites_range_);
   for (unsigned int i = 0; i < sites_.size(); ++i) {
     // filter to evaluate only sites within range of attraction:
     // algebra::Vector3D trp = relative.get_transformed(sites_[i]);
@@ -139,17 +172,31 @@ inline double SitesPairScore::evaluate_index(Model *m,
       // double d2=algebra::get_squared(range_);
       algebra::Vector3D g1 = rbi1.tr.get_transformed(nnsites_[j]);
       IMP_LOG_PROGRESS( "Evaluating sites " << g0 << " ; " << g1 << std::endl );
-      sum +=
-        internal::evaluate_one_site_3(sites_k_,
-                                      sites_range_, sites_range2,
-                                      rbi0, rbi1,
-                                      sites_[i], nnsites_[j],
-                                      g0, g1,
-                                      da);
+      if(is_skewed_)
+        {
+          sum +=
+            internal::evaluate_one_site_4(params_unskewed_,
+                                          params_normal_,
+                                          params_tangent_,
+                                          rbi0, rbi1,
+                                          sites_[i], nnsites_[j],
+                                          g0, g1,
+                                          da);
+      } else
+        {
+          sum +=
+            internal::evaluate_one_site_3(params_unskewed_.k,
+                                          params_unskewed_.r,
+                                          params_unskewed_.r2,
+                                          rbi0, rbi1,
+                                          sites_[i], nnsites_[j],
+                                          g0, g1,
+                                          da);
+        }
       IMP_LOG_PROGRESS( "Sum " << sum << std::endl);
     }
   }
-  IMP_LOG(VERBOSE,
+  IMP_LOG(PROGRESS,
           "Sites contribution is " << sum <<
           " and non-specific soft sphere contribution is " << non_specific_score
           << std::endl);
@@ -167,70 +214,5 @@ Restraints SitesPairScore::do_create_current_decomposition(
 }
 
 
-#define IMP_HS(na, nb)                                   \
-  else if (sites0.size() == na && sites1.size() == nb) { \
-    typedef TemplateSitesPairScore<na, nb, true> TSPS;   \
-    IMP_NEW(TSPS, ps, (range, ka, kr, sites0, sites1));  \
-    ppr->set_score(value, ps.get());                     \
-  }
-
-#if IMP_BUILD == IMP_FAST
-#define IMP_S0 \
-  (1)(2)(3)(4)(5)(6)(7)(8)(9)(10)(11)(12)(13)(14)(15)(16)(17)(18)(19)(20)
-#else
-#define IMP_S0 (1)(2)(3)(4)(5)
-#endif
-#define IMP_CALL(a, bb) a(BOOST_PP_SEQ_ELEM(0, bb), BOOST_PP_SEQ_ELEM(1, bb))
-
-#define IMP_MACRO(r, product) IMP_CALL(IMP_HS, product)
-
-/*
-// #define IMP_ADD_CASE(na,nb)  else if (sites0.size()==na
-//                                       && sites1.size()==nb) {
-//     typedef TemplateSitesPairScore<na, nb, true> TSPS;
-//     IMP_NEW(TSPS, ps, (range, ka, rangena, kna, kr, sites0, sites1));
-//     ppr->set_score(value, ps.get());
-//   }
-*/
-
-/**
-   @param rangesa  range of specific attraction
-   @param ksa      coefficient for specific attraction
-   @param rangensa range for non-specific attraction
-   @param knsa      coefficient for non-specific attraction
-   @param kr      coefficient for repulsion between penetrating particles
-   @param sites0   sites on side of first particle
-   @param sites1   sites on side of other particle
-*/
-IMP::PairScore* create_sites_pair_score
-( double rangesa, double ksa, double rangensa,
-  double knsa, double kr,
-  const algebra::Vector3Ds &sites0,
-  const algebra::Vector3Ds &sites1)
-{
-  // use the point-location based one if appropriate
-  if ((sites0.size() >= 4 && sites1.size() >= 4 &&
-       (sites0.size() > .5 * sites1.size() ||
-        sites1.size() > .5 * sites0.size()))) {
-    IMP_NEW(SitesPairScore, ps,
-            (rangesa, ksa, rangensa, knsa, kr, sites0, sites1));
-    return ps.release();
-  }
-  // TODO: check if the approach of the next clause (originally
-  // IMP_ADD_CASE) can accelerate computations by having a template
-  // for spefified site sizes
-  // BOOST_PP_SEQ_FOR_EACH_PRODUCT(IMP_MACRO, (IMP_S0)(IMP_S0))
-  //  IMP_ADD_CASE(1,15)
-  else if (sites0.size() == 1 && sites1.size() == 15) {
-    typedef TemplateSitesPairScore<1, 15, true> TSPS;
-    IMP_NEW(TSPS, tsps, (rangesa, ksa, rangensa, knsa, kr,
-                         sites0, sites1));
-    return tsps.release();
-  } else {
-    IMP_NEW(SitesPairScore, ps, (rangesa, ksa, rangensa, knsa, kr,
-                                 sites0, sites1));
-    return ps.release();
-  }
-}
 
 IMPNPCTRANSPORT_END_NAMESPACE

@@ -216,9 +216,12 @@ void test_one(double range) {
   Vector3Ds sas = get_uniform_surface_cover(s, NA);
   Vector3Ds sbs = get_uniform_surface_cover(s, NB);
   optimize_balls(psa + psb);
-  typedef TemplateSitesPairScore<NA, NB, WHICH> TSPS;
-  IMP_NEW(TSPS, tsps, (range, 1, 0, 0, 1, sas, sbs));
-  IMP_NEW(SitesPairScore, sps, (range, 1, 0, 0, 1, sas, sbs));
+  //  typedef TemplateSitesPairScore<NA, NB, WHICH> TSPS;
+  //IMP_NEW(TSPS, tsps, (range, 1, 0, 0, 1, sas, sbs));
+  IMP_NEW(SitesPairScore, sps, (range, 1, // r, l
+                                1.0, 1.0, // skew
+                                0, 0, 1, // non-specific r, k_attr, k_rep
+                                sas, sbs));
   IMP_NEW(ListSingletonContainer, lsca, (psa));
   IMP_NEW(ListSingletonContainer, lscb, (psb));
   IMP_NEW(AllBipartitePairContainer, abpc, (lsca, lscb));
@@ -234,18 +237,18 @@ void test_one(double range) {
     oss << "sites " << NA << " " << NB << " " << range;
     report(oss.str(), time, scores);
   }
-  {
-    base::Pointer<Restraint> r = create_restraint(tsps.get(), abpc.get());
-    double scores = 0;
-    double time = 0;
-    IMP_TIME({
-      scores += r->evaluate(true);
-    },
-             time);
-    std::ostringstream oss;
-    oss << "template sites " << NA << " " << NB << " " << WHICH << " " << range;
-    report(oss.str(), time, scores);
-  }
+  // {
+  //   base::Pointer<Restraint> r = create_restraint(tsps.get(), abpc.get());
+  //   double scores = 0;
+  //   double time = 0;
+  //   IMP_TIME({
+  //     scores += r->evaluate(true);
+  //   },
+  //            time);
+  //   std::ostringstream oss;
+  //   oss << "template sites " << NA << " " << NB << " " << WHICH << " " << range;
+  //   report(oss.str(), time, scores);
+  // }
 }
 
 template <unsigned int NA, unsigned int NB, bool WHICH>
