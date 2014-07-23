@@ -13,7 +13,7 @@ k_fgfg=0.05
 FG_RES_PER_BEAD_RAW = 20
 FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 #range_fgfg=FG_RADIUS_RAW*2
-k_fgkap=0.001
+k_fgkap=0.01
 k_skew = 0.5
 #range_fgkap=FG_RADIUS_RAW+4
 rest_length_factor = 1 # 1
@@ -175,7 +175,12 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
         max_x = max(max_x, abs(pos.x))
         max_y = max(max_y, abs(pos.y))
         max_z = max(max_z, abs(pos.z))
-    fgs.is_tamd = True;
+    fgs.is_tamd = True
+    # fgs.tamd_T_factor_coeff.lower=1.1
+    # fgs.tamd_T_factor_base.lower=1.0
+    # fgs.tamd_F_factor_coeff.lower=1.1
+    # fgs.tamd_F_factor_base.lower=1.0
+    # fgs.tamd_K.lower=1.0;
     return mean_loc
 
 def add_obstacle(config, mrc_filename, k, R, origin=None):
