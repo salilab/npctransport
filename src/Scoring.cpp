@@ -216,6 +216,14 @@ void Scoring::add_interaction
   double interaction_range =
       base_range * interaction_range_factors_.find(type0)->second *
       interaction_range_factors_.find(type1)->second;
+  double range_tangent_skew = 1.0; // no skew by default
+  if(idata.has_range_tangent_skew()){
+    range_tangent_skew = idata.range_tangent_skew().value();
+  }
+  double k_tangent_skew = 1.0; // no skew by default
+  if(idata.has_k_tangent_skew()){
+    k_tangent_skew = idata.k_tangent_skew().value();
+  }
 
   IMP_LOG(IMP::PROGRESS,
           "creating interaction "
@@ -229,19 +237,20 @@ void Scoring::add_interaction
           );
 
   // add the interaction restraint both for (t0,t1) and (t1,t0)  {
-    // TODO: repulsion was also added in get_predr - do we double count here?
   {
     core::ParticleTypes pts1;
     pts1.push_back(type0);
     pts1.push_back(type1);
     int interaction_id1 = get_ordered_type_pair_predicate()->get_value(pts1);
-    IMP::PairScore* ps1 = create_sites_pair_score
-      ( interaction_range,                  // site-specific
-        interaction_k, nonspecific_range_,  // non-specific = entire particle
-        nonspecific_k_, excluded_volume_k_,
-        get_sd()->get_sites(type0),
-        get_sd()->get_sites(type1)
-        );
+    IMP_NEW(npctransport::SitesPairScore, ps1,
+            (interaction_range, interaction_k,
+             range_tangent_skew, k_tangent_skew,
+             nonspecific_range_,
+             nonspecific_k_,
+             excluded_volume_k_,
+             get_sd()->get_sites(type0),
+             get_sd()->get_sites(type1) )
+            );
    interaction_pair_scores_[interaction_id1] = ps1;
   }
   {
@@ -249,13 +258,15 @@ void Scoring::add_interaction
     pts2.push_back(type1);
     pts2.push_back(type0);
     int interaction_id2 = get_ordered_type_pair_predicate()->get_value(pts2);
-    IMP::PairScore* ps2 = create_sites_pair_score
-      (  interaction_range,                  // site-specific
-         interaction_k, nonspecific_range_,  // non-specific = entire particle
-         nonspecific_k_, excluded_volume_k_,
-         get_sd()->get_sites(type0),
-         get_sd()->get_sites(type1)
-         );
+    IMP_NEW(npctransport::SitesPairScore, ps2,
+            (interaction_range, interaction_k,
+             range_tangent_skew, k_tangent_skew,
+             nonspecific_range_,
+             nonspecific_k_,
+             excluded_volume_k_,
+             get_sd()->get_sites(type0), // TODO: should order be switched?! I think this is a bug!
+             get_sd()->get_sites(type1) )
+            );
     interaction_pair_scores_[interaction_id2] = ps2;
   }
 }

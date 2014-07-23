@@ -5,7 +5,7 @@
 IMP_CLANG_PRAGMA(diagnostic ignored "-Wc++11-long-long")
 %}
 IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
-IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
+%IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, Scoring, Scorings);
 IMP_SWIG_OBJECT(IMP::npctransport, Statistics, StatisticsList);
 IMP_SWIG_OBJECT(IMP::npctransport, SimulationData, SimulationDatas);

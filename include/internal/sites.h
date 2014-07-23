@@ -10,10 +10,13 @@
 
 #include "../npctransport_config.h"
 #include "RigidBodyInfo.h"
+#include "SitesPairScoreParams.h"
+#include <IMP/base/log_macros.h>
 #include <IMP/core/rigid_bodies.h>
 
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
+
 
 inline double evaluate_one_site(
     double k, double range, core::RigidBody rb0, core::RigidBody rb1,
@@ -104,11 +107,15 @@ inline double evaluate_one_site_2(
 }
 
 /**
-    Evaluate interaction on pair of sites
+   Evaluate interaction on a pair of sites as a linear potential
+   (constant force) within the passed attraction range.
+
+   The maximal drop in potential energy in kcal/mol is:
+     DELTA-U = k*range
 
     @param k - force constant
     @param range - attraction range
-    @param range - cached range**2
+    @param range2 - cached range**2
     @param rbi0 - cached information on rigid body 0
     @param rbi1 - cached information on rigid body 1
     @param l0 - site0 local coordinates
@@ -125,17 +132,18 @@ inline double evaluate_one_site_3
   algebra::Vector3D& g0, algebra::Vector3D& g1,
   DerivativeAccumulator *da)
 {
-  static const double MIN_DISTANCE2 = .00001;
-  algebra::VectorD<3> delta = g0 - g1;
-  if(delta[0] > range || delta[1] > range || delta[2] > range) return 0;
-  double distance2 = delta.get_squared_magnitude();
-  if (distance2 > range2) return 0;
-  if (distance2 < MIN_DISTANCE2) return -k * range;
-  double idistance = 1.0f / sqrtf(distance2);
-  double distance = distance2 * idistance;
-  double score = -k * (range - distance);
-  if (da && distance2 > MIN_DISTANCE2) {
-    algebra::Vector3D gderiv0 = (k * idistance) * delta;
+  static const double MIN_D2 = .00001;
+  algebra::VectorD<3> gD = g0 - g1;
+ if(abs(gD[0]) > range || abs(gD[1]) > range || abs(gD[2]) > range)
+   return 0;
+  double d2 = gD.get_squared_magnitude();
+  if (d2 > range2) return 0;
+  if (d2 < MIN_D2) return -k * range;
+  double id = 1.0f / sqrtf(d2);
+  double d = d2 * id;
+  double score = -k * (range - d);
+  if (da && d2 > MIN_D2) {
+    algebra::Vector3D gderiv0 = (k * id) * gD;
     algebra::Vector3D lderiv0 = rbi0.irot.get_rotated(gderiv0);
     rbi0.rb.add_to_derivatives(lderiv0, gderiv0, l0,
                                rbi0.tr.get_rotation(),*da);
@@ -146,6 +154,119 @@ inline double evaluate_one_site_3
   }
   return score;
 }
+
+
+inline double get_U(double dX,
+                         SitesPairScoreParams const& spsp,
+                         double& f)
+{
+  double dX2 = dX*dX;
+  double const& r = spsp.r;
+  double const& k = spsp.k;
+  double const& kr = spsp.kr;
+  double const& kr2 = spsp.kr2;
+  if(dX<r/2)
+    {
+      f= k*dX;
+      return 0.5*k*dX2-0.25*kr2;
+    }
+  if(dX<spsp.r)
+    {
+      f=k*(r-dX);
+      return -0.5*k*dX2 + kr*dX - 0.5*kr2;
+    }
+  f = 0;
+  return 0;
+}
+
+inline double get_V(double dX, double dY,
+                         SitesPairScoreParams const& params_X,
+                         SitesPairScoreParams const& params_Y,
+                         double &fX, double& fY)
+{
+  double fX1, fY1;
+  double UX=get_U(dX, params_X, fX1);
+  double UY=get_U(dY, params_Y, fY1);
+  fX = -UY * fX1;
+  fY = -UX * fY1;
+  return -UX * UY;
+}
+
+
+//! Evaluate interaction on pair of sites
+/** Evaluate interaction on pair of sits using a bell-shaped spline
+    function with force coefficient k and range r, which is skewed
+    (anisotropic) in normal vs. tangent direction, with normal
+    direction defined as the vector between the two beads of rbi0 and
+    rbi1/
+
+    @param params_unskewed params bounds regardless of directionality
+    @param params_N range and k params in normal direction
+    @param params_T range and k params in tangent direction
+    @param rbi0 - cached information on rigid body 0
+    @param rbi1 - cached information on rigid body 1
+    @param l0 - site0 local coordinates
+    @param l1 - site1 local coordinates
+    @param g0 - site0 global coordinates
+    @param g1 - site1 global coordinates
+    @param da - accumulator for reweighting derivatives
+    */
+inline double evaluate_one_site_4
+( SitesPairScoreParams const& params_unskewed,
+  SitesPairScoreParams const& params_N,
+  SitesPairScoreParams const& params_T,
+  RigidBodyInfo& rbi0, RigidBodyInfo& rbi1,
+  const algebra::Vector3D &l0, const algebra::Vector3D &l1,
+  algebra::Vector3D& g0, algebra::Vector3D& g1,
+  DerivativeAccumulator *da)
+{
+  double const& range2 = params_unskewed.r2;
+  algebra::VectorD<3> gD = g0 - g1; // g = global
+  // Quick filters:
+  static const double MIN_D2 = .00001;
+  // If (abs(gD[0]) > range || abs(gD[1]) > range || abs(gD[2]) > range)
+  //     return 0;
+  double d2 = gD.get_squared_magnitude();
+  if (d2 > range2) return 0;
+  if (d2 < MIN_D2)
+    return -0.25 * params_unskewed.k * params_unskewed.r2;
+  // Deconvolute gD to normal and tangent components
+  // gD = dN * gN + dT * gT
+  // where normal direction = vector connecting two rigid bodies:
+  algebra::VectorD<3> gN =
+    rbi0.rb.get_coordinates() - rbi1.rb.get_coordinates();
+  gN /= gN.get_magnitude();
+  double dN = gN * gD;
+  double dT = std::sqrt(d2 - std::pow(dN,2));
+  double score, Fx, Fy;
+  score = get_V(dN, dT, params_N, params_T, Fx, Fy);
+  if (da)
+    {
+      algebra::Vector3D gderiv0(0,0,0);
+      if(Fx > 0) {
+        gderiv0 = Fx * gN;
+      }
+      if(Fy > 0) {
+        algebra::Vector3D gT = (gD - dN * gN) / dT;
+        gderiv0 += Fy * gT;
+      IMP_LOG(PROGRESS,  "gT " << gT);
+      }
+      IMP_LOG(PROGRESS, "Fx " << Fx << " ; Fy " << Fy
+             << " ; gD " << gD
+              << " ; gN " << gN
+              << " ; gderiv0 " << gderiv0
+              << std::endl);
+      algebra::Vector3D lderiv0 = rbi0.irot.get_rotated(gderiv0);
+      rbi0.rb.add_to_derivatives(lderiv0, gderiv0, l0,
+                                 rbi0.tr.get_rotation(),*da);
+      algebra::Vector3D gderiv1 = -gderiv0;
+      algebra::Vector3D lderiv1 = rbi1.irot.get_rotated(gderiv1);
+      rbi1.rb.add_to_derivatives(lderiv1, gderiv1, l1,
+                                 rbi1.tr.get_rotation(),*da);
+    }
+  return score;
+}
+
 
 IMPNPCTRANSPORT_END_INTERNAL_NAMESPACE
 

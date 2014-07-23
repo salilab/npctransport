@@ -5,6 +5,8 @@
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
+// TODO: verify if energy units are kcal/mol or KT
+
 #ifndef IMPNPCTRANSPORT_SITES_PAIR_SCORE_H
 #define IMPNPCTRANSPORT_SITES_PAIR_SCORE_H
 
@@ -38,73 +40,134 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
     the two rigid bodies. Care must be taken to pass the bodies
     in the appropriate order. See construction documentation for more details.
 */
-class IMPNPCTRANSPORTEXPORT SitesPairScore : public LinearInteractionPairScore {
+class IMPNPCTRANSPORTEXPORT SitesPairScore
+: public LinearInteractionPairScore
+{
+ private:
   typedef LinearInteractionPairScore P;
 
-  // range and coefficient of site specific attraction:
-  double sites_range_, sites_k_;
+
+  /************************* class variables ****************/
+  bool is_skewed_; // if true, use params_normal_ and params_tangent_
+  internal::SitesPairScoreParams
+    params_unskewed_; // for any direction (if is_skewed,still gives upper bound)
+  internal::SitesPairScoreParams
+    params_normal_;  // for normal directiom, if is_skewed_
+  internal::SitesPairScoreParams
+    params_tangent_; // for tangent directiom, if is_skewed_
 
   algebra::Vector3Ds
     sites_,  // sites to be searched against nn_(nnsites_)
     nnsites_;               // sites to be stored in nn_ (nearest neighbours)
 
-  // true if sites_ is associated with the first particle and nnsites_ with the
-  // second particle, false otherwise
-  // (this switching may be made to improve running time efficiency)
+  /** sites_first_ is true if sites_ is associated with the first
+      particle and nnsites_ with the second particle, false otherwise
+      (this switching may be made to improve running time efficiency) */
   bool sites_first_;
 
-  // the maximal sum of radii of any pair of sites
-  // from sites_ and nnsites_ respectively
-  double max_sites_r_sum_;
+  //! Maximal square distance between particles whose sites interact
+  //! based on range and list of sites
+  double ubound_distance2_;
 
- private:
+  //! Cache:
   typedef IMP_BASE_SMALL_UNORDERED_MAP<ParticleIndex,internal::RigidBodyInfo>
     t_particles_rb_cache;
   mutable t_particles_rb_cache particles_rb_cache_;
   mutable bool is_cache_active_;
   mutable unsigned int cur_cache_id_; // to keep track of caching rounds
 
+  //! Data structure for finding nearest neighbor (use obsolete)
   PointerMember<algebra::NearestNeighbor3D> nn_;
-
- private:
-  // maintain a cache for evaluate_index() till
-  // call to deactivate_cache()
-  void activate_cache() const // cache is mutable
-  {
-    is_cache_active_ = true;
-    cur_cache_id_++; // invalidate old entries
-    //    std::cout << "Activating cache with cache id " << cur_cache_id_ << std::endl;
-  }
-
-  void deactivate_cache() const // cache is mutable
-  {
-    is_cache_active_ = false;
-    //    std::cout << "Deactivating cache" << std::endl;
-  }
 
  public:
   /**
+     TODO: IMP_DEPRECATED!!!
+
      A score between two spherical particles that contain a fixed set
      of interaction sites,  sites0 and sites1 (for first and second particle,
      resp.).
+
+     The interaction is decomposed into a non-specific interaction
+     between the beads, and the sum of specific interactions between
+     sites on each bead.
+
+     The total energetic potential of each individual site-site interaction (in kcal/mol)
+       DELTA-U = 0.25 * k * r^2
+
+     This is in addition to contribution from the non-specific interaction (in kcal/mol)
+       DELTA-U= 0.5 * k_nonspec_attraction * range_nonspec_attraction
 
      Note that for a specific pair of particles, each particle might have
      a different reference frame (rigid body translation and rotation),
      which is applied to the sites list upon score evaluation.
 
-     @param sites_range    range of site specific attraction
-     @param k_attraction   site specific attraction coefficient
+     @param range    range of site specific attraction
+     @param k        site specific attraction coefficient
      @param range_nonspec_attraction range for non-specific attraction
                                      between particles that contain the sites
      @param k_nonspec_attraction     non-specific attraction coefficient
-     @param k_repulsion    repulsion coefficient between penetrating particles
-     @param sites0         list of sites on the first particle
-     @param sites1         list of sites on the second particle
-   */
-  SitesPairScore(double sites_range, double k_attraction,
-                 double range_nonspec_attraction, double k_nonspec_attraction,
-                 double k_repulsion, const algebra::Vector3Ds &sites0,
+     @param k_nonspec_repulsion    repulsion coefficient between penetrating particles
+     @param sites0    list of sites on the first particle
+     @param sites1    list of sites on the second particle
+
+     \deprecated_at{2.2} Use skewed constructor instead, with 1.0 values if
+     unskewedness needed.
+*/
+  IMPKERNEL_DEPRECATED_METHOD_DECL(2.2)
+  SitesPairScore(double range, double k,
+                 double range_nonspec_attraction,
+                 double k_nonspec_attraction,
+                 double k_nonspec_repulsion,
+                 const algebra::Vector3Ds &sites0,
                  const algebra::Vector3Ds &sites1);
+
+  /**
+     A skered version for a score between two spherical particles that
+     contain a fixed set of interaction sites, sites0 and sites1 (for
+     first and second particle, resp.).
+
+     The interaction is decomposed into a non-specific interaction
+     between the beads, and the sum of specific interactions between
+     sites on each bead.
+
+     The skewing is with regard to directionality of the site-site
+     interaction. The interaction vector between a pair of sites is decomposed into a
+     surface-normal component and a tangent component, each with a
+     different range and force constant, as specified by range_skew
+     and k_skew. The surface normal is the vector between the two bead centers.
+
+     The total energetic potential for each pair of site-site interactions, regardless of skewing, is (in kcal/mol):
+       DELTA-U = 0.25 * k * r^2
+
+     This is in addition to contribution from the non-specific interaction (in kcal/mol)
+       DELTA-U= 0.5 * k_nonspec_attraction * range_nonspec_attraction
+
+     Note that for a specific pair of particles, each particle might have
+     a different reference frame (rigid body translation and rotation),
+     which is applied to the sites list upon score evaluation.
+
+     @param range       Maximal range of site specific attraction in any direction
+                         of specific sites placed on particles
+     @param k           Site specific attraction coefficient
+                         (combination of normal and tangent contributions)
+     @param range2_skew  r_tangent^2/r_normal^2 ratio  (s.t. r_tangent^2 + r_normal^2 = sites_range^2)
+     @param k_skew      k_tangent/k_normal ratio  (s.t. k_tangent * k_normal = 4*k_attraction)
+     @param range_nonspec_attraction  Range for non-specific attraction
+                                      between particles that contain the sites
+     @param k_nonspec_attraction  Non-specific attraction coefficient between particles
+     @param k_nonspec_repulsion   Repulsion coefficient between penetrating particles
+     @param sites0      List of sites on the first particle
+     @param sites1      List of sites on the second particle
+   */
+  SitesPairScore(double range, double k,
+                 double range2_skew, double k_skew,
+                 double range_nonspec_attraction, double k_nonspec_attraction,
+                 double k_nonspec_repulsion,
+                 const algebra::Vector3Ds &sites0,
+                 const algebra::Vector3Ds &sites1);
+
+
+ public:
 
   virtual double evaluate_indexes(Model *m, const ParticleIndexPairs &p,
                                   DerivativeAccumulator *da,
@@ -151,23 +214,41 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore : public LinearInteractionPairScore {
     const IMP_OVERRIDE;
 
   //! return the range for site-site attraction
-  double get_sites_range() const { return sites_range_; }
+  double get_sites_range() const { return params_unskewed_.r; }
 
   //! return the k for site-site attraction
-  double get_sites_k() const { return sites_k_; }
+  double get_sites_k() const { return params_unskewed_.k; }
 
 
  public:
-
   IMP_OBJECT_METHODS(SitesPairScore);
 
  private:
-
   // gets the rigid body information (e.g., translation, inverse rotation)
   // associated with particle m.pi, possibly from cache (depending on internal
   // cache definitions)
   inline internal::RigidBodyInfo
     get_rigid_body_info(Model* m, ParticleIndex pi) const;
+
+ private:
+  // sets the sites associated with each partner to sites0
+  // and sites1, respectively (in local reference frame)
+  void set_sites(const algebra::Vector3Ds &sites0,
+                 const algebra::Vector3Ds &sites1);
+
+ private:
+  // maintain a cache for evaluate_index() till call to deactivate_cache()
+  inline void activate_cache() const
+  {
+    // (note: cache is mutable)
+    is_cache_active_ = true;  cur_cache_id_++;
+  }
+
+  inline void deactivate_cache() const
+  {
+    // (note: cache is mutable)
+    is_cache_active_ = false;
+  }
 
 
 };
@@ -194,115 +275,6 @@ SitesPairScore::get_rigid_body_info
   }
 }
 
-
-class TemplateBaseSitesPairScore : public LinearInteractionPairScore {
- protected:
-  typedef LinearInteractionPairScore P;
-  double range_, k_;
-  inline static boost::tuple<algebra::Transformation3D,
-                             algebra::Transformation3D, algebra::Rotation3D,
-                             algebra::Rotation3D>
-  get_transformations(core::RigidBody rb0, core::RigidBody rb1) {
-    algebra::Transformation3D tr0 =
-        rb0.get_reference_frame().get_transformation_to();
-    algebra::Transformation3D tr1 =
-        rb1.get_reference_frame().get_transformation_to();
-    algebra::Rotation3D itr0 = tr0.get_rotation().get_inverse();
-    algebra::Rotation3D itr1 = tr1.get_rotation().get_inverse();
-    // algebra::Transformation3D relative=tr1.get_inverse() *tr0;
-    return boost::make_tuple(tr0, tr1, itr0, itr1);
-  }
-
- public:
-  TemplateBaseSitesPairScore(double range, double k_attraction,
-                             double range_nonspec_attraction,
-                             double k_nonspec_attraction, double k_repulsion,
-                             std::string name)
-      : P(k_repulsion, range_nonspec_attraction, k_nonspec_attraction, name),
-        range_(range),
-        k_(k_attraction) {}
-  //! return the upper bound on the range over which it is non-zero
-  Restraints do_create_current_decomposition(Model *m,
-                                             const ParticleIndexPair &vt) const
-      IMP_OVERRIDE {
-    Restraints ret;
-    if (evaluate_index(m, vt, nullptr) < 0) {
-      return Restraints(1, IMP::internal::create_tuple_restraint(this, m, vt));
-    } else {
-      return Restraints();
-    }
-  }
-};
-
-/**
-   pair score with NA sites vs. NB sites in each pair
-
-   WHICH is a variant for which type of evaluation is used (advanced,
-   use True if you don't know better)
- */
-template <unsigned int NA, unsigned int NB, bool WHICH>
-class TemplateSitesPairScore : public TemplateBaseSitesPairScore {
-  typedef TemplateBaseSitesPairScore P;
-  boost::array<algebra::Vector3D, NA> sites0_;
-  boost::array<algebra::Vector3D, NB> sites1_;
-
- public:
-  TemplateSitesPairScore(double range, double k_attraction,
-                         double range_nonspec_attraction,
-                         double k_nonspec_attraction, double k_repulsion,
-                         const algebra::Vector3Ds &sites0,
-                         const algebra::Vector3Ds &sites1)
-      : P(range, k_attraction, k_repulsion, range_nonspec_attraction,
-          k_nonspec_attraction, "Sites %1%") {
-    std::copy(sites0.begin(), sites0.end(), &sites0_[0]);
-    std::copy(sites1.begin(), sites1.end(), &sites1_[0]);
-  }
-  inline double evaluate_index(Model *m, const ParticleIndexPair &pp,
-                               DerivativeAccumulator *da) const {
-    core::RigidBody rb0(m, pp[0]), rb1(m, pp[1]);
-    algebra::Transformation3D tr0, tr1;
-    algebra::Rotation3D itr0, itr1;
-    boost::tie(tr0, tr1, itr0, itr1) = P::get_transformations(rb0, rb1);
-    double sum = 0;
-    for (unsigned int i = 0; i < NA; ++i) {
-      for (unsigned int j = 0; j < NB; ++j) {
-        // double d2=algebra::get_squared(range_);
-        if (WHICH) {
-          sum += internal::evaluate_one_site(P::k_, P::range_, rb0, rb1, tr0,
-                                             tr1, itr0, itr1, sites0_[i],
-                                             sites1_[j], da);
-        } else {
-          sum += internal::evaluate_one_site_2(P::k_, P::range_, rb0, rb1, tr0,
-                                               tr1, itr0, itr1, sites0_[i],
-                                               sites1_[j], da);
-        }
-      }
-    }
-    return sum + P::evaluate_index(m, pp, da);
-  }
-};
-
-/**
-   Create a score function between particles with site lists
-   sites0 and sites1 on their surface, with specified interaction
-   parameters.
-
-   @param rangesa  range for specific attraction
-   @param ksa      coefficient for specific attraction
-   @param rangensa range for non-specific attraction
-   @param knsa     coefficient for non-specific attraction
-   @param kr       coefficient for repulsion between penetrating particles
-   @param sites0   location of sites on particles from one side
-   @param sites1   location of sites on particles from other side
-
-   @return a PairScore that works on site-site interaction between
-           adjacent particles
-*/
-IMPNPCTRANSPORTEXPORT
-IMP::PairScore* create_sites_pair_score
-( double rangesa, double ksa, double rangensa, double knsa,
-  double kr, const algebra::Vector3Ds &sites0,
-  const algebra::Vector3Ds &sites1);
 
 
 IMPNPCTRANSPORT_END_NAMESPACE

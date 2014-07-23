@@ -287,7 +287,7 @@ Ranges get_ranges(std::string name, const Message* message,
   }
 } // anonymous namespace
 
-
+namespace {
 void set_default_tamd_options(::npctransport_proto::Assignment assign) {
   unsigned int n = assign.fgs_size();
   for(unsigned int i = 0 ; i < n ; i++) {
@@ -312,7 +312,7 @@ void set_default_tamd_options(::npctransport_proto::Assignment assign) {
     } // if mfg->is_tamd
   } // for
 }
-
+}; // anonymous namespace
 
 
 
@@ -403,6 +403,22 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
         IMP_ALWAYS_CHECK(has_type, "floater " << i << " lacking type",
                          base::ValueException);
       } // for i
+    // // Make sure skew is positive - if not set to 1.0 (neutral skew)
+    // for (int i = 0; i < assignment.interactions_size(); ++i)
+    //   {
+    //     if(assignment.interactions(i).has_k_tangent_skew()) {
+    //       if (assignment.interactions(i).k_tangent_skew().value() <= 0.0){
+    //         assignment.mutable_interactions(i)
+    //           ->mutable_k_tangent_skew()->set_value(1.0); // no skew
+    //       }
+    //     }
+    //     if(assignment.interactions(i).has_range_tangent_skew()) {
+    //       if (assignment.interactions(i).range_tangent_skew().value() <= 0.0){
+    //         assignment.mutable_interactions(i)
+    //           ->mutable_range_tangent_skew()->set_value(1.0); // no skew
+    //       }
+    //     }
+    //   }
   }
 
   bool written = output.SerializeToOstream(&out);
