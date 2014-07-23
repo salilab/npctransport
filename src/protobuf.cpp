@@ -258,33 +258,36 @@ namespace {
   }
 } // anonymous namespace
 
-namespace {
-void set_default_tamd_options(::npctransport_proto::Assignment assign) {
-  unsigned int n = assign.fgs_size();
-  for(unsigned int i = 0 ; i < n ; i++) {
-    ::npctransport_proto::Assignment_FGAssignment* mfg =
-      assign.mutable_fgs(i);
-    if(mfg->is_tamd()){
-      if(!mfg->tamd_t_factor_coeff().has_value()){
-        mfg->mutable_tamd_t_factor_coeff()->set_value(1.0);
-      }
-      if(!mfg->tamd_t_factor_base().has_value()){
-        mfg->mutable_tamd_t_factor_base()->set_value(1.0);
-      }
-        if(!mfg->tamd_f_factor_coeff().has_value()){
-          mfg->mutable_tamd_f_factor_coeff()->set_value(1.0);
-        }
-        if(!mfg->tamd_f_factor_base().has_value()){
-          mfg->mutable_tamd_f_factor_base()->set_value(1.0);
-        }
-        if(!mfg->tamd_k().has_value()){
-          mfg->mutable_tamd_k()->set_value(1.0);
-        }
-    } // if mfg->is_tamd
-  } // for
-}
-}; // anonymous namespace
 
+namespace {
+
+  //! set default value of protobuf message 'prefix' to passed dafault value
+#define SET_DEFAULT(prefix, default_value)                              \
+  {                                                                     \
+    bool has_value = ( *prefix ).has_value();                           \
+    bool invalid_value = has_value ? ( *prefix ).value() <= 0.0 : true; \
+    if(invalid_value){                                                  \
+      ( *prefix ).set_value(default_value);                             \
+    }                                                                   \
+  }
+
+  // set default options for temperature accelerated MD version
+  void set_default_tamd_options(::npctransport_proto::Assignment& assign) {
+    unsigned int n = assign.fgs_size();
+    for(unsigned int i = 0 ; i < n ; i++) {
+      ::npctransport_proto::Assignment_FGAssignment* mfg =
+        assign.mutable_fgs(i);
+      if(mfg->is_tamd()){
+        SET_DEFAULT(mfg->mutable_tamd_t_factor_coeff(), 1.0);
+        SET_DEFAULT(mfg->mutable_tamd_t_factor_base(), 1.0);
+        SET_DEFAULT(mfg->mutable_tamd_f_factor_coeff(), 1.0);
+        SET_DEFAULT(mfg->mutable_tamd_f_factor_base(), 1.0);
+        SET_DEFAULT(mfg->mutable_tamd_k(), 1.0);
+      } // if mfg->is_tamd
+    } // for
+  }
+#undef SET_DEFAULT
+}; // anonymous namespace
 
 
 // see documentation in .h file
