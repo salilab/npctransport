@@ -14,7 +14,7 @@ FG_RES_PER_BEAD_RAW = 20
 FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 #range_fgfg=FG_RADIUS_RAW*2
 k_fgkap=0.01
-k_skew = 0.5
+k_skew = 0.25
 #range_fgkap=FG_RADIUS_RAW+4
 rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
@@ -43,7 +43,7 @@ def get_basic_config():
     config.time_step_factor.lower=0.3 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
-    config.excluded_volume_k.lower=10*math.sqrt(k_fgkap/k_skew)
+    config.excluded_volume_k.lower=100*math.sqrt(k_fgkap/k_skew)
     config.nonspecific_range.lower=4
     config.nonspecific_k.lower=.2*math.sqrt(k_fgkap/k_skew)
     config.slack.lower = 15
@@ -232,6 +232,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
+kaps.site_relative_distance=1.1
 #kaps.k_z_bias.lower=z_bias
 #kaps.k_z_bias_fraction.lower=z_bias_frac
 ############### ACTIVE RANGE #############
