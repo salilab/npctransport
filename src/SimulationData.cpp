@@ -298,7 +298,8 @@ void SimulationData::create_floaters
     {
       int nsites = f_data.interactions().value();
       IMP_LOG(WARNING, nsites << " sites added " << std::endl);
-      set_sites(type, nsites, f_data.radius().value());
+      set_sites(type, nsites,
+                f_data.radius().value() * f_data.site_relative_distance());
     }
   // add type-specific scoring scale factors
   get_scoring()->set_interaction_range_factor
@@ -368,7 +369,8 @@ void SimulationData::create_obstacles
   if (o_data.interactions().value() != 0) {
     int nsites = o_data.interactions().value();
     IMP_LOG(WARNING, nsites << " sites added " << std::endl);
-    set_sites(type, nsites, o_data.radius().value());
+    set_sites(type, nsites,
+              o_data.radius().value());
   }
   // add type-specific scoring scale factors
   get_scoring()->set_interaction_range_factor
@@ -660,12 +662,12 @@ SimulationData::get_optimizable_beads()
 
 void SimulationData::set_sites(core::ParticleType t, int n,
                                double r) {
-  if(n>0) {
+  if(n>0 && r > 0.0) {
     algebra::Sphere3D s(algebra::get_zero_vector_d<3>(), r);
     algebra::Vector3Ds sites = algebra::get_uniform_surface_cover(s, n);
     sites_[t] = algebra::Vector3Ds(sites.begin(), sites.begin() + n);
   }
-  if(n == -1) { // centered at bead
+  if(n == -1 ||  r == 0.0) { // centered at bead
     sites_[t] = algebra::Vector3Ds(1, algebra::Vector3D(0,0,0));
   }
 }
@@ -676,11 +678,10 @@ void SimulationData::write_geometry(std::string out) {
   Pointer<display::Writer> w = display::create_writer(out);
   {
     IMP_NEW(TypedSitesGeometry, g, (get_beads()));
-    for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
-             sites_.begin();
-         it != sites_.end(); ++it) {
-      g->set_sites(it->first, it->second);
-    }
+    for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>
+           ::const_iterator it = sites_.begin(); it != sites_.end(); ++it){
+        g->set_sites(it->first, it->second);
+      }
     w->add_geometry(g);
   }
   Scoring * s = get_scoring();

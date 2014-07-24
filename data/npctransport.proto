@@ -52,6 +52,7 @@ message Configuration {
     optional string type=9; // type name, e.g. "kap121"
     optional FloatRange k_z_bias=10; // if non-0, add a biasing constant force pulling to lower (k>0) or higher (k<0)
     optional FloatRange k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
+    optional double site_relative_distance=12 [default=1.0]; // distance of sites from center relative to particle radius
   };
   message ObstacleConfiguration {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
@@ -152,6 +153,7 @@ message Assignment {
     optional string type=8; // e.g., "kap121"
     optional FloatAssignment k_z_bias=9; // if non-0, add a biasing constant force pulling to lower (k>0) or higher (k<0)
     optional FloatAssignment k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
+    optional double site_relative_distance=12 [default=1.0]; // distance of sites from center relative to particle radius
   };
   message ObstacleAssignment {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
