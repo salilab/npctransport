@@ -159,9 +159,9 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
                                       type_name= type_name,
                                       number_of_beads= nbeads,
                                       number=k,
-                                      radius=radius,
+                                      radius=radius/2.0, # x.5 because of centered site-site interaction
                                       interactions=-1, # nfgs_per_bead_int,
-                                      rest_length_factor = rest_length_factor,
+                                      rest_length_factor = rest_length_factor*2.0, # x2 because of .5 radius
                                       interaction_k_factor = nfgs_per_bead_float)
     add_interactions_for_fg(type_name, k_fgkap, range_fgkap=radius+4)
     for center in centers:
