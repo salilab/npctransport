@@ -8,7 +8,11 @@ import math
 
 radius=30
 site_range_G=radius
-k=0.001
+k_G=0.001
+k=k_G
+k_skew_G=0.5
+nonspec_k_G=0.2*math.sqrt(k_G/k_skew_G)
+print k_G, k_skew_G, nonspec_k_G
 
 class Tests(IMP.test.TestCase):
     def _create_particle(self, m):
@@ -41,9 +45,11 @@ class Tests(IMP.test.TestCase):
                 [ IMP.algebra.Vector3D(-math.sqrt(1.0)*radius,math.sqrt(0.0)*radius,0)
 #                  , IMP.algebra.Vector3D(-math.sqrt(0.8)*radius,math.sqrt(0.2)*radius,0)
                 ] )
-        ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
-                                            nonspec_k, soft_sphere_k,
-                                            sites[0], sites[1])
+        ps= IMP.npctransport.SitesPairScore(site_range, site_k,
+                                            nonspec_range, nonspec_k,
+                                            soft_sphere_k,
+                                            IMP.npctransport.vectors2spheres(sites[0], 0.0),
+                                            IMP.npctransport.vectors2spheres(sites[1], 0.0))
 #        ps.set_log_level(IMP.VERBOSE)
         r= IMP.core.PairRestraint(ps, ds)
         m.add_restraint(r)
@@ -116,7 +122,9 @@ class Tests(IMP.test.TestCase):
         rs=[]
         for p in [(0,1), (1,2), (0,2)]:
             ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
-                                                nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
+                                                nonspec_k, soft_sphere_k,
+                                                IMP.npctransport.vectors2spheres(sites[p[0]], 0.0),
+                                                IMP.npctransport.vectors2spheres(sites[p[1]], 0.0))
 #          ps.set_log_level(IMP.VERBOSE)
             r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
             rs.append(r)
@@ -156,7 +164,9 @@ class Tests(IMP.test.TestCase):
         rs=[]
         for p in [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)]:
             ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
-                                                nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
+                                                nonspec_k, soft_sphere_k,
+                                                IMP.npctransport.vectors2spheres(sites[p[0]], 0.0),
+                                                IMP.npctransport.vectors2spheres(sites[p[1]], 0.0))
 #          ps.set_log_level(IMP.VERBOSE)
             r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
             rs.append(r)
@@ -218,7 +228,7 @@ class Tests(IMP.test.TestCase):
                           range_skew, k_skew,
                           nonspec_range, nonspec_k,
                           soft_sphere_k, dt, ntrial=0):
-        nsteps = 50000000
+        nsteps = 2500000
         if(IMP.base.get_check_level() >= IMP.base.USAGE):
             nsteps /= 250
         m= IMP.Model()
@@ -226,40 +236,48 @@ class Tests(IMP.test.TestCase):
         ds= [self._create_particle(m) for i in range(0,2)]
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(2.5*radius,0,0))
-        ds[0].set_radius(radius/4.0) # for repulsion
-        ds[1].set_radius(radius*0.9)
+        ds[0].set_radius(radius/4.0) #/2.0*0.9) # for repulsion
+        ds[1].set_radius(radius*0.8) # for repulsion
         distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
                                             ds[1].get_coordinates())
         print "Initial distance", distance
         types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
         for d in zip(types, ds):
             IMP.core.Typed.setup_particle(d[1], d[0])
-        sites=( [ IMP.algebra.Vector3D(0,0,0)],#radius+2.0, 0,0) ],
-                [ IMP.algebra.Vector3D(-math.sqrt(1.0)*radius,math.sqrt(0.0)*radius,0)
+        sites0 =  [ IMP.algebra.Sphere3D
+                    ( IMP.algebra.Vector3D(0,0,0),
+                      radius/2.0 ) ]
+        sites1 = [ IMP.algebra.Sphere3D
+                   ( IMP.algebra.Vector3D(-math.sqrt(1.0)*radius,
+                                          math.sqrt(0.0)*radius,
+                                          0.0),
+                     0.0 ) ]
 #                  , IMP.algebra.Vector3D(-math.sqrt(0.8)*radius,math.sqrt(0.2)*radius,0)
-                ] )
+        print site_range, site_k, range_skew, k_skew
+        print nonspec_range, nonspec_k, soft_sphere_k
         ps= IMP.npctransport.SitesPairScore(site_range, site_k,
                                             range_skew, k_skew,
                                             nonspec_range,
-                                            nonspec_k, soft_sphere_k,
-                                            sites[0], sites[1])
+                                            nonspec_k,
+                                            soft_sphere_k,
+                                            sites0, sites1)
 #        ps.set_log_level(IMP.VERBOSE)
         r= IMP.core.PairRestraint(ps, ds)
         m.add_restraint(r)
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_maximum_time_step(dt)
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue1_slide_%d.rmf" % ntrial))
-        for d in zip(types, sites):
-            IMP.npctransport.add_test_sites(f, d[0], site_range/2.0, d[1])
+        for d in zip(types, [sites0, sites1]):
+            IMP.npctransport.add_test_sites(f, d[0], d[1])
         IMP.rmf.add_restraint(f,r)
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         sos= IMP.rmf.SaveOptimizerState(m, f)
         bd.add_optimizer_state(sos)
-        sos.set_period(20000/dt)
+        sos.set_period(2000/dt)
         max_delta = 0.75 * site_range
         sos.update_always()
-        for rr,s in zip([2.00, 2.25, 2.50],
-                       [-0.25*k*radius**2-0.1*k*0.2*radius, 0.0, 0.0]):
+        for rr,s in zip([1.505, 1.51, 1.8],
+                       [-0.25*k*radius**2-nonspec_k*0.2*radius, 0.0, 0.0]):
             print "rr*radius= ", rr*radius, " Expected score", s
             ds[1].set_coordinates(IMP.algebra.Vector3D(rr*radius,0,0))
             print "P0", ds[0]
@@ -286,19 +304,19 @@ class Tests(IMP.test.TestCase):
         """
         print "Sliding"
         IMP.set_log_level(IMP.PROGRESS)
-        dt=IMP.npctransport.get_time_step(1, k, radius)
+        dt=IMP.npctransport.get_time_step(1, k_G, radius)
         dt=10
         print "dT = ", dt
         ntrials=3
         for i in range(ntrials):
             try:
-                k_skew=0.5
-                self._test_one_sliding(site_range=site_range_G, site_k=k,
+                self._test_one_sliding(site_range=site_range_G,
+                                       site_k=k_G,
                                        range_skew=4,
-                                       k_skew=k_skew,
+                                       k_skew=k_skew_G,
                                        nonspec_range=.2*radius,
-                                       nonspec_k=.2*math.sqrt(k/k_skew),
-                                       soft_sphere_k=10*math.sqrt(k/k_skew), dt=dt, ntrial=i)
+                                       nonspec_k=nonspec_k_G,
+                                       soft_sphere_k=10*math.sqrt(k_G/k_skew_G), dt=dt, ntrial=i)
                 return
             except AssertionError:
                 if i==(ntrials-1): raise

@@ -2,6 +2,9 @@
  * Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
+#include <IMP/npctransport/SitesPairScore.h>
+#include <IMP/npctransport/util.h>
+
 #include <IMP/algebra/Transformation3D.h>
 #include <IMP/algebra/Sphere3D.h>
 #include <IMP/algebra/Vector3D.h>
@@ -27,7 +30,6 @@
 #include <IMP/Restraint.h>
 #include <IMP/scoped.h>
 #include <IMP/PairPredicate.h>
-#include <IMP/npctransport/SitesPairScore.h>
 #include <string>
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -218,10 +220,12 @@ void test_one(double range) {
   optimize_balls(psa + psb);
   //  typedef TemplateSitesPairScore<NA, NB, WHICH> TSPS;
   //IMP_NEW(TSPS, tsps, (range, 1, 0, 0, 1, sas, sbs));
-  IMP_NEW(SitesPairScore, sps, (range, 1, // r, l
-                                1.0, 1.0, // skew
-                                0, 0, 1, // non-specific r, k_attr, k_rep
-                                sas, sbs));
+  IMP_NEW(SitesPairScore, sps, ( range, 1, // r, l
+                                 0.0, 0.0, // no-skew version
+                                 0, 0, 1, // non-specific r, k_attr, k_rep
+                                 vectors2spheres(sas, 0.0),
+                                 vectors2spheres(sbs, 0.0) )
+          );
   IMP_NEW(ListSingletonContainer, lsca, (psa));
   IMP_NEW(ListSingletonContainer, lscb, (psb));
   IMP_NEW(AllBipartitePairContainer, abpc, (lsca, lscb));

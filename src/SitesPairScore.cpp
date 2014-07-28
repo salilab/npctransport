@@ -19,13 +19,18 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 namespace {
-  // return maximum sum of radii of pairs of vectors in R0 and R1
-  double get_max_r_sum(const algebra::Vector3Ds& R0,
-                const algebra::Vector3Ds& R1) {
+  // return maximum sum of distance between pairs of particles with
+  // site list R0 and R1 respectively, such that there exists a site
+  // r0 in R0 and a site r1 in R1 that overlap. There are the pair of
+  // sites that has the maximal sum of site radii and distances from
+  // the center.
+  double get_max_r_sum(const algebra::Sphere3Ds& R0,
+                const algebra::Sphere3Ds& R1) {
     double max = 0.0;
     for(unsigned int i = 0; i < R0.size(); i++){
       for(unsigned int j = 0; j < R1.size(); j++){
-        double s = R0[i].get_magnitude() + R1[j].get_magnitude();
+        double s = (R0[i].get_center().get_magnitude() +  R0[i].get_radius())
+          + (R1[j].get_center().get_magnitude() +  R1[i].get_radius());
         max = (max > s) ? max : s;
       }
     }
@@ -38,8 +43,8 @@ SitesPairScore::SitesPairScore(double range, double k,
                                double range_nonspec_attraction,
                                double k_nonspec_attraction,
                                double k_nonspec_repulsion,
-                               const algebra::Vector3Ds &sites0,
-                               const algebra::Vector3Ds &sites1)
+                               const algebra::Sphere3Ds &sites0,
+                               const algebra::Sphere3Ds &sites1)
     : P(k_nonspec_repulsion, range_nonspec_attraction,
         k_nonspec_attraction, "SitesPairScore %1%"),
       is_skewed_(false),
@@ -59,8 +64,8 @@ SitesPairScore::SitesPairScore(double range, double k,
                                double range_nonspec_attraction,
                                double k_nonspec_attraction,
                                double k_repulsion,
-                               const algebra::Vector3Ds &sites0,
-                               const algebra::Vector3Ds &sites1)
+                               const algebra::Sphere3Ds &sites0,
+                               const algebra::Sphere3Ds &sites1)
   :
   P(k_repulsion, range_nonspec_attraction, k_nonspec_attraction,
     "SitesPairScore %1%"),
@@ -82,6 +87,14 @@ SitesPairScore::SitesPairScore(double range, double k,
     double rT = sqrt(s*r2/(s+1));
     params_normal_.set_rk(rN, kN);
     params_tangent_.set_rk(rT, kT);
+    IMP_LOG_PROGRESS("Ks: " << k
+                     << " ; kN " << kN << " , " << params_normal_.k
+                     << " ; kT " << kT << " , " << params_tangent_.k
+                     << std::endl);
+    IMP_LOG_PROGRESS("Range: " << range
+                     << " ; rN " << rN << " , " << params_normal_.r
+                     << " ; rT " << rT << " , " << params_tangent_.r
+                     << std::endl);
   } else {
     std::cout << "Creating old version of SitesPairScore, for backward compatibility" << std::endl;
   }
@@ -89,8 +102,8 @@ SitesPairScore::SitesPairScore(double range, double k,
 }
 
 
-void SitesPairScore::set_sites(const algebra::Vector3Ds &sites0,
-               const algebra::Vector3Ds &sites1)
+void SitesPairScore::set_sites(const algebra::Sphere3Ds &sites0,
+               const algebra::Sphere3Ds &sites1)
 {
   // store the big set of sizes in nnsites_
   if (sites0.size() > sites1.size()) {
@@ -102,7 +115,7 @@ void SitesPairScore::set_sites(const algebra::Vector3Ds &sites0,
     sites_ = sites0;
     nnsites_ = sites1;
   }
-  nn_ = new algebra::NearestNeighbor3D(nnsites_);
+  //  nn_ = new algebra::NearestNeighbor3D(nnsites_); // Need to convert to get_center() of each
   // Find upper bound for distance between particles whose sites interact
   double ubound_distance = (get_max_r_sum(sites0, sites1) + params_unskewed_.r);
   this->ubound_distance2_ = ubound_distance * ubound_distance;
@@ -166,11 +179,11 @@ inline double SitesPairScore::evaluate_index(Model *m,
     // algebra::Vector3D trp = relative.get_transformed(sites_[i]);
     //    Ints nn = nn_->get_in_ball(trp, sites_range_);
     //for (unsigned int j = 0; j < nn.size(); ++j) {
-    algebra::Vector3D g0 = rbi0.tr.get_transformed(sites_[i]);
+    algebra::Vector3D g0 = rbi0.tr.get_transformed(sites_[i].get_center());
     IMP_LOG_PROGRESS( "g0 = " << g0 );
     for(unsigned int j = 0 ; j < nnsites_.size(); ++j) {
       // double d2=algebra::get_squared(range_);
-      algebra::Vector3D g1 = rbi1.tr.get_transformed(nnsites_[j]);
+      algebra::Vector3D g1 = rbi1.tr.get_transformed(nnsites_[j].get_center());
       IMP_LOG_PROGRESS( "Evaluating sites " << g0 << " ; " << g1 << std::endl );
       if(is_skewed_)
         {
@@ -187,7 +200,6 @@ inline double SitesPairScore::evaluate_index(Model *m,
           sum +=
             internal::evaluate_one_site_3(params_unskewed_.k,
                                           params_unskewed_.r,
-                                          params_unskewed_.r2,
                                           rbi0, rbi1,
                                           sites_[i], nnsites_[j],
                                           g0, g1,

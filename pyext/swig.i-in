@@ -62,8 +62,9 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %include "IMP/npctransport/automatic_parameters.h"
 %include "IMP/npctransport/initialize_positions.h"
 %include "IMP/npctransport/Avro2PBReader.h"
+%include "IMP/npctransport/util.h"
 
-%rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
+# %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
 try:
   from .npctransport_pb2 import *

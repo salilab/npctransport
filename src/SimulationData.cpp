@@ -242,14 +242,18 @@ void SimulationData::create_fgs
   // Add sites for this type:
   if (fg_data.interactions().value() != 0) {
     int nsites = fg_data.interactions().value();
-    set_sites(fg_type, nsites, fg_data.radius().value());
+    set_sites(fg_type, nsites,
+              fg_data.radius().value() * fg_data.site_relative_distance(),
+              fg_data.site_radius());
   }
 
   // Add general scoring scale factors information to scoring:
   get_scoring()->set_interaction_range_factor
-    ( fg_type, fg_data.interaction_range_factor().value());
+    ( fg_type,
+      fg_data.interaction_range_factor().value());
   get_scoring()->set_interaction_k_factor
-    ( fg_type, fg_data.interaction_k_factor().value());
+    ( fg_type,
+      fg_data.interaction_k_factor().value());
 
 }
 
@@ -296,7 +300,8 @@ void SimulationData::create_floaters
       int nsites = f_data.interactions().value();
       IMP_LOG(WARNING, nsites << " sites added " << std::endl);
       set_sites(type, nsites,
-                f_data.radius().value() * f_data.site_relative_distance());
+                f_data.radius().value() * f_data.site_relative_distance(),
+                f_data.site_radius());
     }
   // add type-specific scoring scale factors
   get_scoring()->set_interaction_range_factor
@@ -367,7 +372,8 @@ void SimulationData::create_obstacles
     int nsites = o_data.interactions().value();
     IMP_LOG(WARNING, nsites << " sites added " << std::endl);
     set_sites(type, nsites,
-              o_data.radius().value());
+              o_data.radius().value(),
+              0.0);
   }
   // add type-specific scoring scale factors
   get_scoring()->set_interaction_range_factor
@@ -540,7 +546,7 @@ void SimulationData::dump_geometry() {
   IMP_OBJECT_LOG;
   base::Pointer<display::Writer> w = display::create_writer("dump.pym");
   IMP_NEW(TypedSitesGeometry, g, (get_beads()));
-  for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
+  for (boost::unordered_map<core::ParticleType, algebra::Sphere3Ds>::const_iterator it =
            sites_.begin();
        it != sites_.end(); ++it) {
     g->set_sites(it->first, it->second);
@@ -658,14 +664,18 @@ SimulationData::get_optimizable_beads()
 
 
 void SimulationData::set_sites(core::ParticleType t, int n,
-                               double r) {
+                               double r, double sr) {
+  sites_[t] = algebra::Sphere3Ds();
   if(n>0 && r > 0.0) {
     algebra::Sphere3D s(algebra::get_zero_vector_d<3>(), r);
-    algebra::Vector3Ds sites = algebra::get_uniform_surface_cover(s, n);
-    sites_[t] = algebra::Vector3Ds(sites.begin(), sites.begin() + n);
+    algebra::Vector3Ds sites_pos = algebra::get_uniform_surface_cover(s, n);
+    for(int i = 0; i < n; i++) {
+      sites_[t].push_back(algebra::Sphere3D(sites_pos[i], sr));
+    }
   }
   if(n == -1 ||  r == 0.0) { // centered at bead
-    sites_[t] = algebra::Vector3Ds(1, algebra::Vector3D(0,0,0));
+    algebra::Sphere3D zero(algebra::Vector3D(0,0,0), sr);
+    sites_[t] = algebra::Sphere3Ds(n, zero);
   }
 }
 
@@ -675,7 +685,7 @@ void SimulationData::write_geometry(std::string out) {
   base::Pointer<display::Writer> w = display::create_writer(out);
   {
     IMP_NEW(TypedSitesGeometry, g, (get_beads()));
-    for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>
+    for (boost::unordered_map<core::ParticleType, algebra::Sphere3Ds>
            ::const_iterator it = sites_.begin(); it != sites_.end(); ++it){
         g->set_sites(it->first, it->second);
       }

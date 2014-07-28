@@ -76,9 +76,9 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
 
   boost::unordered_map<ParticleIndex, ParticleIndexes> particles_;
 
-  // for testing without sd - (radius, site-coords) per each particle type
+  // for testing without sd - site coords & radii per each particle type
   boost::unordered_map
-    <core::ParticleType, std::pair<double, algebra::Vector3Ds> > test_sites_;
+    <core::ParticleType, algebra::Sphere3Ds>  test_sites_;
 
  private:
   // add sites associated with particle type t to node cur_node, using
@@ -98,12 +98,13 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
 
  public:
   HierarchyWithSitesSaveLink(RMF::FileHandle fh);
+#ifndef SWIG
   // for testing
   void add_test_sites(core::ParticleType t,
-                      double range,
-                      algebra::Vector3Ds sites) {
-    test_sites_[t] = std::make_pair(range, sites);
+                      algebra::Sphere3Ds sites) {
+    test_sites_[t] = sites;
   }
+#endif
   static const char *get_name() {return "npctransport save";}
 };
 
@@ -111,7 +112,14 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
 //! associated with particle type t. The file handle fh relies on this list
 //! only if it doesn't have particles with simulation data keys
 IMPNPCTRANSPORTEXPORT void add_test_sites(RMF::FileHandle fh, core::ParticleType t,
-                                     double radius, algebra::Vector3Ds sites);
+                                     double display_radius, algebra::Vector3Ds sites);
+
+//! for testing - adds the list of sites with specified display radius, to be
+//! associated with particle type t. The file handle fh relies on this list
+//! only if it doesn't have particles with simulation data keys
+IMPNPCTRANSPORTEXPORT void add_test_sites(RMF::FileHandle fh,
+                                          core::ParticleType t,
+                                          algebra::Sphere3Ds sites);
 
 // note that the corresponding define macro in the .cpp file implicitly
 // uses the HierarchyWithSitesLoadLink and HierarchyWithSitesSaveLink

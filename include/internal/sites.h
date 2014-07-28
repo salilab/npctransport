@@ -11,9 +11,12 @@
 #include "../npctransport_config.h"
 #include "RigidBodyInfo.h"
 #include "SitesPairScoreParams.h"
-#include <IMP/base/log_macros.h>
-#include <IMP/core/rigid_bodies.h>
 
+#include <IMP/core/rigid_bodies.h>
+#include <IMP/base/log_macros.h>
+#include <IMP/algebra/vector_generators.h>
+
+#include <cmath> // overloaded versions of abs!!
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 
@@ -106,6 +109,34 @@ inline double evaluate_one_site_2(
   return score;
 }
 
+// note it can be negative if spheres overlap so not strictly
+// 'distance' (in this case the negative result is the distance needed
+// to make the spheres touch)
+//
+// gD = gD*[1-(r1+r2)/|gD|]
+//
+// @param gD [in/out] - raw distance vector to be corrected
+// @param r0 - radius of sphere 0
+// @param r1 - radius of sphere 1
+//
+// @return the magnitude of the corrected gD
+inline double subtract_sphere_radii_from_distance_vector
+(algebra::Vector3D& gD, double r0, double r1)
+{
+  static double const MIN_D = 0.001;
+  double d2 = gD.get_squared_magnitude();
+  double d = sqrtf(d2);
+  double dr= d - r0 - r1;
+  if(d > MIN_D){
+    gD *= (dr/d);
+    return dr;
+  } else {
+    gD = dr * IMP::algebra::get_random_vector_on_unit_sphere();
+  }
+  return dr;
+}
+
+
 /**
    Evaluate interaction on a pair of sites as a linear potential
    (constant force) within the passed attraction range.
@@ -115,47 +146,50 @@ inline double evaluate_one_site_2(
 
     @param k - force constant
     @param range - attraction range
-    @param range2 - cached range**2
     @param rbi0 - cached information on rigid body 0
     @param rbi1 - cached information on rigid body 1
-    @param l0 - site0 local coordinates
-    @param l1 - site1 local coordinates
+    @param l0 - site0 local coordinates + radius
+    @param l1 - site1 local coordinates + radius
     @param g0 - site0 global coordinates
     @param g1 - site1 global coordinates
     @param da - accumulator for reweighting derivatives
     */
 inline double evaluate_one_site_3
 ( double k,
-  double range, double range2,
+  double range,
   RigidBodyInfo& rbi0, RigidBodyInfo& rbi1,
-  const algebra::Vector3D &l0, const algebra::Vector3D &l1,
+  const algebra::Sphere3D &l0, const algebra::Sphere3D &l1,
   algebra::Vector3D& g0, algebra::Vector3D& g1,
   DerivativeAccumulator *da)
 {
-  static const double MIN_D2 = .00001;
+  static const double MIN_D = .001;
   algebra::VectorD<3> gD = g0 - g1;
- if(abs(gD[0]) > range || abs(gD[1]) > range || abs(gD[2]) > range)
-   return 0;
-  double d2 = gD.get_squared_magnitude();
-  if (d2 > range2) return 0;
-  if (d2 < MIN_D2) return -k * range;
-  double id = 1.0f / sqrtf(d2);
-  double d = d2 * id;
+  double d = subtract_sphere_radii_from_distance_vector(gD, l0.get_radius(), l1.get_radius());
+  d = std::abs(d);
+  if (d > range) return 0;
+  if (d < MIN_D) return -k * range;
+  double id = 1.0f / d;
+  //  double d = d2 * id;
   double score = -k * (range - d);
-  if (da && d2 > MIN_D2) {
+  if (da) {
     algebra::Vector3D gderiv0 = (k * id) * gD;
     algebra::Vector3D lderiv0 = rbi0.irot.get_rotated(gderiv0);
-    rbi0.rb.add_to_derivatives(lderiv0, gderiv0, l0,
+    rbi0.rb.add_to_derivatives(lderiv0, gderiv0, l0.get_center(),
                                rbi0.tr.get_rotation(),*da);
     algebra::Vector3D gderiv1 = -gderiv0;
     algebra::Vector3D lderiv1 = rbi1.irot.get_rotated(gderiv1);
-    rbi1.rb.add_to_derivatives(lderiv1, gderiv1, l1,
+    rbi1.rb.add_to_derivatives(lderiv1, gderiv1, l1.get_center(),
                                rbi1.tr.get_rotation(),*da);
   }
   return score;
 }
 
 
+// dX - distance (assumed non-negative)
+// spsp
+// f - force magnitude (output; always non-negative if k positive)
+//
+// returns energy potential (always non-positive if k positive)
 inline double get_U(double dX,
                          SitesPairScoreParams const& spsp,
                          double& f)
@@ -165,26 +199,40 @@ inline double get_U(double dX,
   double const& k = spsp.k;
   double const& kr = spsp.kr;
   double const& kr2 = spsp.kr2;
+  //  int sign = dX > 0 ? 1 : -1;
+  //dX *= sign; // make non-negative
   if(dX<r/2)
     {
-      f= k*dX;
+      f= k*dX;//*sign;
       return 0.5*k*dX2-0.25*kr2;
     }
-  if(dX<spsp.r)
+  if(dX<r)
     {
-      f=k*(r-dX);
+      f=k*(r-dX);//*sign;
       return -0.5*k*dX2 + kr*dX - 0.5*kr2;
     }
   f = 0;
   return 0;
 }
 
+// dX,dY - distance in x,y directions (assumed non-negative!)
+// params_X, paramsY
+// fX,fY - force magnitude in x,y directions (output; always non-negative if k positive)
+//
+// returns energy potential (always non-positive if k positives)
 inline double get_V(double dX, double dY,
                          SitesPairScoreParams const& params_X,
                          SitesPairScoreParams const& params_Y,
                          double &fX, double& fY)
 {
   double fX1, fY1;
+  IMP_LOG_PROGRESS(dX << ","
+                   << dY << ","
+                   << params_X.k << ","
+                   << params_X.r << ","
+                   << params_Y.k << ","
+                   << params_Y.r << ","
+                   << std::endl);
   double UX=get_U(dX, params_X, fX1);
   double UY=get_U(dY, params_Y, fY1);
   fX = -UY * fX1;
@@ -205,8 +253,8 @@ inline double get_V(double dX, double dY,
     @param params_T range and k params in tangent direction
     @param rbi0 - cached information on rigid body 0
     @param rbi1 - cached information on rigid body 1
-    @param l0 - site0 local coordinates
-    @param l1 - site1 local coordinates
+    @param l0 - site0 local coordinates + radius
+    @param l1 - site1 local coordinates + radius
     @param g0 - site0 global coordinates
     @param g1 - site1 global coordinates
     @param da - accumulator for reweighting derivatives
@@ -216,35 +264,55 @@ inline double evaluate_one_site_4
   SitesPairScoreParams const& params_N,
   SitesPairScoreParams const& params_T,
   RigidBodyInfo& rbi0, RigidBodyInfo& rbi1,
-  const algebra::Vector3D &l0, const algebra::Vector3D &l1,
+  const algebra::Sphere3D &l0, const algebra::Sphere3D &l1,
   algebra::Vector3D& g0, algebra::Vector3D& g1,
   DerivativeAccumulator *da)
 {
-  double const& range2 = params_unskewed.r2;
-  algebra::VectorD<3> gD = g0 - g1; // g = global
+  double const& range = params_unskewed.r;
+  algebra::Vector3D gD = g0 - g1; // g = global
   // Quick filters:
-  static const double MIN_D2 = .00001;
-  // If (abs(gD[0]) > range || abs(gD[1]) > range || abs(gD[2]) > range)
-  //     return 0;
-  double d2 = gD.get_squared_magnitude();
-  if (d2 > range2) return 0;
-  if (d2 < MIN_D2)
-    return -0.25 * params_unskewed.k * params_unskewed.r2;
+  static const double MIN_D = 0.001;
+  IMP_LOG_PROGRESS("point distance = " << sqrtf((g0-g1).get_squared_magnitude()));
+  double d = subtract_sphere_radii_from_distance_vector(gD, l0.get_radius(), l1.get_radius());
+  IMP_LOG_PROGRESS(" ; r0= " << l0.get_radius()
+                   << ", ; r1 = " << l1.get_radius()
+                   << " ; sphere distance = " << d
+                   << " ; MIN_D = " << MIN_D
+                   << " ; range = " << range
+                   << std::endl);
+  if (d > range){ // (d2 > range2)
+    IMP_LOG_PROGRESS( "beyond range" << std::endl);
+    return 0;
+  }
+  if (std::abs(d) < MIN_D) {
+    IMP_LOG_PROGRESS( "d < MIN_D" << std::endl);
+    //    return -0.25 * params_unskewed.k * params_unskewed.r2;
+    return 0.0625 * params_unskewed.k * params_N.r2 * params_T.r2;
+  }
   // Deconvolute gD to normal and tangent components
   // gD = dN * gN + dT * gT
   // where normal direction = vector connecting two rigid bodies:
+  double d2 = d*d;
   algebra::VectorD<3> gN =
     rbi0.rb.get_coordinates() - rbi1.rb.get_coordinates();
   gN /= gN.get_magnitude();
-  double dN = gN * gD;
-  double dT = std::sqrt(d2 - std::pow(dN,2));
+  double dN = gN * gD; // note: may be negative
+  double dT = sqrtf(d2 - std::pow(dN,2)); // note: non-negative by constr.
   double score, Fx, Fy;
-  score = get_V(dN, dT, params_N, params_T, Fx, Fy);
+  score = get_V(std::abs(dN), dT, params_N, params_T, Fx, Fy);
+  IMP_LOG_PROGRESS("site score " << score << std::endl);
+  IMP_LOG_PROGRESS( " gD " << gD
+                    << " ; gN " << gN
+                    << " ; dN " << dN
+                    << " ; dT " << dT
+                    << std::endl);
+
   if (da)
     {
       algebra::Vector3D gderiv0(0,0,0);
       if(Fx > 0) {
         gderiv0 = Fx * gN;
+        if(dN < 0){ gderiv0 *= -1.0; }
       }
       if(Fy > 0) {
         algebra::Vector3D gT = (gD - dN * gN) / dT;
@@ -252,16 +320,14 @@ inline double evaluate_one_site_4
       IMP_LOG(PROGRESS,  "gT " << gT);
       }
       IMP_LOG(PROGRESS, "Fx " << Fx << " ; Fy " << Fy
-             << " ; gD " << gD
-              << " ; gN " << gN
               << " ; gderiv0 " << gderiv0
               << std::endl);
       algebra::Vector3D lderiv0 = rbi0.irot.get_rotated(gderiv0);
-      rbi0.rb.add_to_derivatives(lderiv0, gderiv0, l0,
+      rbi0.rb.add_to_derivatives(lderiv0, gderiv0, l0.get_center(),
                                  rbi0.tr.get_rotation(),*da);
       algebra::Vector3D gderiv1 = -gderiv0;
       algebra::Vector3D lderiv1 = rbi1.irot.get_rotated(gderiv1);
-      rbi1.rb.add_to_derivatives(lderiv1, gderiv1, l1,
+      rbi1.rb.add_to_derivatives(lderiv1, gderiv1, l1.get_center(),
                                  rbi1.tr.get_rotation(),*da);
     }
   return score;

@@ -140,4 +140,20 @@ unsigned int find_or_add_interaction_of_type
 }
 
 
+algebra::Sphere3Ds vectors2spheres
+(algebra::Vector3Ds const& vs, double radius){
+  return vectors2spheres(vs.begin(), vs.end(), radius);
+}
+
+
+algebra::Vector3Ds get_spheres_centers
+(algebra::Sphere3Ds const & spheres)
+{
+  algebra::Vector3Ds ret;
+  for(unsigned int i = 0 ; i < spheres.size(); i++) {
+    ret.push_back(spheres[i].get_center());
+  }
+  return ret;
+}
+
 IMPNPCTRANSPORT_END_NAMESPACE

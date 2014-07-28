@@ -7,6 +7,7 @@
  */
 
 #include <IMP/npctransport/rmf_links.h>
+#include <IMP/npctransport/util.h>
 
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/core/rigid_bodies.h>
@@ -88,13 +89,14 @@ void HierarchyWithSitesLoadLink::do_link_particle(Model *m,
       core::Typed::get_is_setup(m, p)) {
     particles_[root].push_back(p);
     core::ParticleType tp = core::Typed(m, p).get_type();
-    algebra::Vector3Ds sites;
+    algebra::Sphere3Ds sites;
     RMF::NodeConstHandles children = node.get_children();
     for (unsigned int i = 0; i < children.size(); ++i) {
       if (children[i].get_type() == RMF::GEOMETRY && bf_.get_is(children[i])) {
         RMF::decorator::BallConst b = bf_.get(children[i]);
         RMF::Vector3 cs = b.get_coordinates();
-        sites.push_back(algebra::Vector3D(cs.begin(), cs.end()));
+        algebra::Vector3D v(cs.begin(), cs.end());
+        sites.push_back(algebra::Sphere3D(v, 0.0)); // TODO: use stored radius?
       }
     }
     if (sd_ && sites.size() > 0){
@@ -119,21 +121,30 @@ HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh)
 void HierarchyWithSitesSaveLink::add_sites_to_node
 ( RMF::NodeHandle cur_node, core::ParticleType t) const
 {
-  double r = 0.0;  algebra::Vector3Ds S;
+  algebra::Sphere3Ds S;
   if (sd_)
     {
-      r = sd_->get_site_radius(t);
       S = sd_->get_sites(t);
     }
   else if (test_sites_.find(t) != test_sites_.end())
     { // note - sites_ is only for external testing w/o sd
-      boost::tie(r, S) = test_sites_.find(t)->second;
+      S = test_sites_.find(t)->second;
     }
   for (unsigned int i = 0; i < S.size(); ++i) {
     RMF::NodeHandle ch = cur_node.add_child("site", RMF::GEOMETRY);
     RMF::decorator::Ball b = bf_.get(ch);
+    b.set_coordinates(RMF::Vector3(S[i].get_center()));
+    double r = S[i].get_radius();
+    if(r <= 0.0){
+      // TODO: always use real radius? problematic cause 0.0 many times - just cause of display in chimera
+      //       maybe find a solution with chimera - or a different field for backward compatibility
+      if(sd_){
+        r = sd_->get_site_display_radius(t);
+      } else {
+        r = 1.0;
+      }
+    }
     b.set_radius(r);
-    b.set_coordinates(RMF::Vector3(S[i]));
     RMF::Vector3 color(1,0,0);
     cf_.get(ch).set_rgb_color(color);
   }
@@ -186,10 +197,25 @@ IMP_DEFINE_LINKERS(HierarchyWithSites, hierarchy_with_sites,
 void add_test_sites(RMF::FileHandle fh, core::ParticleType t, double range,
                algebra::Vector3Ds sites) {
   HierarchyWithSitesSaveLink *l =
-      rmf::internal::get_save_link<HierarchyWithSitesSaveLink>(fh);
+    rmf::internal::get_save_link<HierarchyWithSitesSaveLink>(fh);
   if(sites.size() > 0){
-    l->add_test_sites(t, range, sites);
+    l->add_test_sites(t, vectors2spheres(sites, range));
   }
 }
+
+//! for testing - adds the list of sites with specified display radius, to be
+//! associated with particle type t. The file handle fh relies on this list
+//! only if it doesn't have particles with simulation data keys
+IMPNPCTRANSPORTEXPORT void add_test_sites(RMF::FileHandle fh,
+                                          core::ParticleType t,
+                                          algebra::Sphere3Ds sites)
+ {
+  HierarchyWithSitesSaveLink *l =
+      rmf::internal::get_save_link<HierarchyWithSitesSaveLink>(fh);
+  if(sites.size() > 0){
+    l->add_test_sites(t, sites);
+  }
+}
+
 
 IMPNPCTRANSPORT_END_NAMESPACE
