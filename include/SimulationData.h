@@ -25,6 +25,8 @@
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/rmf/SaveOptimizerState.h>
 #include <IMP/Pointer.h>
+#include <IMP/algebra/Vector3D.h>
+#include <IMP/algebra/Sphere3D.h>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "io.h"
@@ -120,7 +122,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   PointerMember<display::Geometry> static_geom_;
 
-  boost::unordered_map<core::ParticleType, algebra::Vector3Ds> sites_;
+  boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> sites_;
 
   boost::unordered_map<core::ParticleType, double> ranges_;
 
@@ -330,24 +332,48 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
       radius r, and associate these sites with all particles of type t0
 
       If n==-1, creates a single site, centered at the bead, and r is ignored
+
+      @param t0 type of particle to associate with sites
+      @param n number of sites
+      @param r radius at which to position sites relative to t0 origin
+      @param sr radius from site center within which site
+                has maximal interaction energy
   */
-  void set_sites(core::ParticleType t0, int n, double r);
+  void set_sites(core::ParticleType t0, int n, double r, double sr);
 
   /**
       returns a list of 3D coordinates for the interaction sites associated
-      with particles of type t0. The site coordinates are relative to the
-      particles centers.
+      with particles of type t0. The site coordinates are in the
+      particles local reference frame
   */
-  algebra::Vector3Ds get_sites(core::ParticleType t0) const {
+  algebra::Vector3Ds get_site_centers(core::ParticleType t0) const {
+    algebra::Vector3Ds ret;
     if (sites_.find(t0) != sites_.end()) {
-      return sites_.find(t0)->second;
+      algebra::Sphere3Ds sites = sites_.find(t0)->second;
+      for(unsigned int i = 0; i < sites.size(); i++){
+        ret.push_back(sites[i].get_center());
+      }
+      return ret;
     } else {
       return algebra::Vector3Ds();
     }
   }
 
+  /**
+      returns a list of Spheres3D for the interaction sites associated
+      with particles of type t0. The site coordinates are in the
+      particles local reference frame.
+  */
+  algebra::Sphere3Ds get_sites(core::ParticleType t0) const {
+    if (sites_.find(t0) != sites_.end()) {
+      return sites_.find(t0)->second;
+    } else {
+      return algebra::Sphere3Ds();
+    }
+  }
+
   /** Set the sites explicitly. */
-  void set_sites(core::ParticleType t0, const algebra::Vector3Ds &sites) {
+  void set_sites(core::ParticleType t0, const algebra::Sphere3Ds &sites) {
     IMP_USAGE_CHECK(sites.size()>0, "trying to set zero sites for particle type"
                     << t0.get_string() );
     sites_[t0] = sites;
@@ -359,7 +385,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   // TODO: this is not the true value - the true one might depend on the
   //       specific range of each interaction type, so range_ is more
   //       like an upper bound
-  double get_site_radius(core::ParticleType) const { return range_ / 2; }
+  double get_site_display_radius(core::ParticleType) const { return range_ / 2; }
 
   //! Return the maximum number of minutes the simulation can run
   /** Or 0 for no limit. */

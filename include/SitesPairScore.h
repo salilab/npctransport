@@ -56,7 +56,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   internal::SitesPairScoreParams
     params_tangent_; // for tangent directiom, if is_skewed_
 
-  algebra::Vector3Ds
+  algebra::Sphere3Ds
     sites_,  // sites to be searched against nn_(nnsites_)
     nnsites_;               // sites to be stored in nn_ (nearest neighbours)
 
@@ -77,7 +77,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   mutable unsigned int cur_cache_id_; // to keep track of caching rounds
 
   //! Data structure for finding nearest neighbor (use obsolete)
-  PointerMember<algebra::NearestNeighbor3D> nn_;
+  //  PointerMember<algebra::NearestNeighbor3D> nn_;
 
  public:
   /**
@@ -118,8 +118,8 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
                  double range_nonspec_attraction,
                  double k_nonspec_attraction,
                  double k_nonspec_repulsion,
-                 const algebra::Vector3Ds &sites0,
-                 const algebra::Vector3Ds &sites1);
+                 const algebra::Sphere3Ds &sites0,
+                 const algebra::Sphere3Ds &sites1);
 
   /**
      A skered version for a score between two spherical particles that
@@ -163,8 +163,8 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
                  double range2_skew, double k_skew,
                  double range_nonspec_attraction, double k_nonspec_attraction,
                  double k_nonspec_repulsion,
-                 const algebra::Vector3Ds &sites0,
-                 const algebra::Vector3Ds &sites1);
+                 const algebra::Sphere3Ds &sites0,
+                 const algebra::Sphere3Ds &sites1);
 
 
  public:
@@ -233,8 +233,8 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
  private:
   // sets the sites associated with each partner to sites0
   // and sites1, respectively (in local reference frame)
-  void set_sites(const algebra::Vector3Ds &sites0,
-                 const algebra::Vector3Ds &sites1);
+  void set_sites(const algebra::Sphere3Ds &sites0,
+                 const algebra::Sphere3Ds &sites1);
 
  private:
   // maintain a cache for evaluate_index() till call to deactivate_cache()

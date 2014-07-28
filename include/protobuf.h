@@ -87,7 +87,7 @@ IMPNPCTRANSPORTEXPORT int get_number_of_work_units(
 void load_pb_conformation
 ( const ::npctransport_proto::Conformation &conformation,
   IMP::SingletonContainerAdaptor beads,
-  boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites);
+  boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> &sites);
 
 /**
    Saves a protobuf conformation from the diffusers and sites
@@ -101,7 +101,7 @@ void load_pb_conformation
  */
 void save_pb_conformation
 ( IMP::SingletonContainerAdaptor beads,
-  const boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites,
+  const boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> &sites,
   ::npctransport_proto::Conformation *conformation );
 #endif
 

@@ -643,8 +643,8 @@ int Statistics::get_number_of_interactions(Particle *p1, Particle *p2) const {
                                                        );
   if ( get_distance(XYZR(p1), XYZR(p2)) > range_site )
     return 0; // filter on sphere distance
-  const algebra::Vector3Ds &sites1 = get_sd()->get_sites( type1 );
-  const algebra::Vector3Ds  &sites2 = get_sd()->get_sites( type2 );
+  const algebra::Vector3Ds &sites1 = get_sd()->get_site_centers( type1 );
+  const algebra::Vector3Ds  &sites2 = get_sd()->get_site_centers( type2 );
 
   int ct = 0;
   for (unsigned int i1 = 0; i1 < sites1.size(); ++i1)

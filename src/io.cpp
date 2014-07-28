@@ -21,9 +21,9 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 void write_geometry(const ParticlesTemp &kaps,
-                    const algebra::Vector3Ds &kap_sites,
+                    const algebra::Sphere3Ds &kap_sites,
                     const ParticlesTemp &chains,
-                    const algebra::Vector3Ds &chain_sites,
+                    const algebra::Sphere3Ds &chain_sites,
                     const RestraintsTemp &rs, display::Writer *out) {
   for (unsigned int i = 0; i < kaps.size(); ++i) {
     IMP_NEW(SitesGeometry, g, (kaps[i], kap_sites));

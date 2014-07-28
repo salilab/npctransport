@@ -216,11 +216,11 @@ void Scoring::add_interaction
   double interaction_range =
       base_range * interaction_range_factors_.find(type0)->second *
       interaction_range_factors_.find(type1)->second;
-  double range_tangent_skew = 1.0; // no skew by default
+  double range_tangent_skew = 0.0; // no skew by default
   if(idata.has_range_tangent_skew()){
     range_tangent_skew = idata.range_tangent_skew().value();
   }
-  double k_tangent_skew = 1.0; // no skew by default
+  double k_tangent_skew = 0.0; // no skew by default
   if(idata.has_k_tangent_skew()){
     k_tangent_skew = idata.k_tangent_skew().value();
   }

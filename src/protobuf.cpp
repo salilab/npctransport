@@ -456,7 +456,7 @@ int get_number_of_work_units(std::string assignment_file) {
 void load_pb_conformation
 ( const ::npctransport_proto::Conformation &conformation,
   IMP::SingletonContainerAdaptor beads,
-  boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites)
+  boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> &sites)
 {
   IMP_CONTAINER_FOREACH(IMP::SingletonContainer, beads, {
       const ::npctransport_proto::Conformation_Particle &pcur =
@@ -473,19 +473,19 @@ void load_pb_conformation
     const ::npctransport_proto::Conformation::Sites &cur =
       conformation.sites(i);
     core::ParticleType pt(cur.name());
-    sites[pt].clear();
     for (int j = 0; j < cur.coordinates_size(); ++j) {
       const ::npctransport_proto::Conformation::Coordinates &coords =
         cur.coordinates(j);
-      sites[pt]
-        .push_back(algebra::Vector3D(coords.x(), coords.y(), coords.z()));
+      sites[pt][j]._set_center // might not work?
+        (algebra::Vector3D(coords.x(), coords.y(), coords.z()));
+      // radius?
     }
   }
 }
 
 void save_pb_conformation
 ( SingletonContainerAdaptor beads,
-  const boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites,
+  const boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> &sites,
   ::npctransport_proto::Conformation *conformation )
 {
   conformation->clear_sites();
@@ -506,21 +506,22 @@ void save_pb_conformation
        pcur->set_j(tr.get_rotation().get_quaternion()[2]);
        pcur->set_k(tr.get_rotation().get_quaternion()[3]);
      });
-  typedef boost::unordered_map<core::ParticleType, algebra::Vector3Ds> M;
+  typedef boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> M;
   for (M::const_iterator it = sites.begin(); it != sites.end(); it++)
     {
       ::npctransport_proto::Conformation::Sites *cur
         = conformation->add_sites();
       cur->set_name(it->first.get_string());
-      algebra::Vector3Ds coords = it->second;
-      for (algebra::Vector3Ds::const_iterator coord = coords.begin();
-           coord != coords.end(); coord++)
+      algebra::Sphere3Ds spheres = it->second;
+      for (algebra::Sphere3Ds::const_iterator sphere = spheres.begin();
+           sphere != spheres.end(); sphere++)
         {
           ::npctransport_proto::Conformation::Coordinates *out_coords =
             cur->add_coordinates();
-          out_coords->set_x((*coord)[0]);
-          out_coords->set_y((*coord)[1]);
-          out_coords->set_z((*coord)[2]);
+          algebra::Vector3D coord = sphere->get_center();
+          out_coords->set_x(coord[0]);
+          out_coords->set_y(coord[1]);
+          out_coords->set_z(coord[2]);
         }
     }
 }

@@ -147,7 +147,30 @@ get_maximal_number_of_unordered_pairs(ParticlesTemp const& ps0,
   return all_unordered_pairs.size();
 }
 
+#ifndef SWIG
+//! conver vectors to spheres of passed radius
+template<typename V3iter>
+algebra::Sphere3Ds vectors2spheres
+(V3iter first, V3iter  last, double radius)
+{
+  algebra::Sphere3Ds ret;
+  for(V3iter it = first;it != last; it++) {
+    algebra::Vector3D v3(*it);
+    ret.push_back(algebra::Sphere3D(v3, radius));
+  }
+  return ret;
+}
+#endif
 
+//! conver vectors to spheres of passed radius
+IMPNPCTRANSPORTEXPORT
+algebra::Sphere3Ds vectors2spheres
+(algebra::Vector3Ds const& vs, double radius);
+
+// return the center of each sphere is spheres, in same order
+IMPNPCTRANSPORTEXPORT
+algebra::Vector3Ds get_spheres_centers
+(algebra::Sphere3Ds const & spheres);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

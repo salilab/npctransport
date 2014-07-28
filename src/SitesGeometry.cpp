@@ -25,8 +25,11 @@ IMP::display::Geometries SitesGeometry::get_components() const {
   double r = .1 * core::XYZR(get_particle()).get_radius();
   for (unsigned int i = 0; i < sites_.size(); ++i) {
     IMP_NEW(display::SphereGeometry, g,
-            (algebra::Sphere3D(
-                rf.get_transformation_to().get_transformed(sites_[i]), r)));
+            (algebra::Sphere3D
+             ( rf.get_transformation_to().get_transformed
+               (sites_[i].get_center()), r)
+             )
+            );
     g->set_color(display::Color(1, 0, 0));
     ret.push_back(g);
   }
