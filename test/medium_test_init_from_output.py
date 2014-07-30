@@ -189,7 +189,7 @@ class Tests(IMP.test.TestCase):
         sites = sd.get_sites(IMP.core.ParticleType("kap"))
         for i,s in enumerate(sites):
             self.assertAlmostEqual(
-                ( s - expected_sites[i]).get_magnitude(),
+                ( s.get_center() - expected_sites[i]).get_magnitude(),
                 0, delta=.01 )
         # check timers
         t = sd.get_bd().get_current_time()
