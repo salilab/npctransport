@@ -109,13 +109,16 @@ inline double evaluate_one_site_2(
   return score;
 }
 
-// note it can be negative if spheres overlap so not strictly
-// 'distance' (in this case the negative result is the distance needed
-// to make the spheres touch)
+
+// return the sphere distance between the end points of gD,
+// and overrides gD with the distance vector between the corresponding
+// sphere surfaces
 //
 // gD = gD*[1-(r1+r2)/|gD|]
 //
-// @param gD [in/out] - raw distance vector to be corrected
+// @param gD [in/out] - distance vector between sphere centers,
+//                      to be corrected to the distance vector
+//                      between the sphere surfaces
 // @param r0 - radius of sphere 0
 // @param r1 - radius of sphere 1
 //
@@ -124,16 +127,15 @@ inline double subtract_sphere_radii_from_distance_vector
 (algebra::Vector3D& gD, double r0, double r1)
 {
   static double const MIN_D = 0.001;
-  double d2 = gD.get_squared_magnitude();
-  double d = sqrtf(d2);
+  double d = gD.get_magnitude();
   double dr= d - r0 - r1;
+
   if(d > MIN_D){
     gD *= (dr/d);
-    return dr;
   } else {
     gD = dr * IMP::algebra::get_random_vector_on_unit_sphere();
   }
-  return dr;
+  return std::abs(dr);
 }
 
 
@@ -233,6 +235,9 @@ inline double get_V(double dX, double dY,
                    << params_Y.k << ","
                    << params_Y.r << ","
                    << std::endl);
+  if(dX > params_X.r || dY > params_Y.r){
+    fX = 0; fY = 0; return 0;
+  }
   double UX=get_U(dX, params_X, fX1);
   double UY=get_U(dY, params_Y, fY1);
   fX = -UY * fX1;
@@ -268,58 +273,47 @@ inline double evaluate_one_site_4
   algebra::Vector3D& g0, algebra::Vector3D& g1,
   DerivativeAccumulator *da)
 {
-  double const& range = params_unskewed.r;
   algebra::Vector3D gD = g0 - g1; // g = global
-  // Quick filters:
-  static const double MIN_D = 0.001;
-  IMP_LOG_PROGRESS("point distance = " << sqrtf((g0-g1).get_squared_magnitude()));
-  double d = subtract_sphere_radii_from_distance_vector(gD, l0.get_radius(), l1.get_radius());
+  double d2 = gD.get_squared_magnitude();
+  // Decompopse to normal and tangent components,
+  // where only normal direction considers site radii
+  algebra::Vector3D gN = (rbi0.rb.get_coordinates() -
+                          rbi1.rb.get_coordinates()).get_unit_vector();
+  double r  = l0.get_radius() + l1.get_radius();
+  double dN = gN * gD; // not including site radius ;  may be negative cause depends on gN
+  double dNR = dN - r; // include site radius ;  may be negative cause depends on gN
+  double dT2 = d2 - std::pow(dN,2);
+  double dT = sqrtf(dT2); // note: non-negative by construction
+  double score, fx, fy;
+  score = get_V(std::abs(dNR), dT, params_N, params_T, fx, fy);
+
+  IMP_LOG_PROGRESS("point distance = " << sqrtf(d2));
   IMP_LOG_PROGRESS(" ; r0= " << l0.get_radius()
                    << ", ; r1 = " << l1.get_radius()
-                   << " ; sphere distance = " << d
-                   << " ; MIN_D = " << MIN_D
-                   << " ; range = " << range
                    << std::endl);
-  if (d > range){ // (d2 > range2)
-    IMP_LOG_PROGRESS( "beyond range" << std::endl);
-    return 0;
-  }
-  if (std::abs(d) < MIN_D) {
-    IMP_LOG_PROGRESS( "d < MIN_D" << std::endl);
-    //    return -0.25 * params_unskewed.k * params_unskewed.r2;
-    return 0.0625 * params_unskewed.k * params_N.r2 * params_T.r2;
-  }
-  // Deconvolute gD to normal and tangent components
-  // gD = dN * gN + dT * gT
-  // where normal direction = vector connecting two rigid bodies:
-  double d2 = d*d;
-  algebra::VectorD<3> gN =
-    rbi0.rb.get_coordinates() - rbi1.rb.get_coordinates();
-  gN /= gN.get_magnitude();
-  double dN = gN * gD; // note: may be negative
-  double dT = sqrtf(d2 - std::pow(dN,2)); // note: non-negative by constr.
-  double score, Fx, Fy;
-  score = get_V(std::abs(dN), dT, params_N, params_T, Fx, Fy);
   IMP_LOG_PROGRESS("site score " << score << std::endl);
-  IMP_LOG_PROGRESS( " gD " << gD
-                    << " ; gN " << gN
-                    << " ; dN " << dN
+  IMP_LOG_PROGRESS( "dN " << dN
+                    << " ; dNR " << dNR
                     << " ; dT " << dT
+                    << " ; gD " << gD
+                    << " ; gN " << gN
                     << std::endl);
 
   if (da)
     {
       algebra::Vector3D gderiv0(0,0,0);
-      if(Fx > 0) {
-        gderiv0 = Fx * gN;
-        if(dN < 0){ gderiv0 *= -1.0; }
+      if(fx > 0) {
+        gderiv0 = fx * gN;
+        if(dNR < 0){
+          gderiv0 *= -1.0;
+        }
       }
-      if(Fy > 0) {
+      if(dT > 0.0 && fy > 0.0) {
         algebra::Vector3D gT = (gD - dN * gN) / dT;
-        gderiv0 += Fy * gT;
+        gderiv0 += fy * gT;
       IMP_LOG(PROGRESS,  "gT " << gT);
       }
-      IMP_LOG(PROGRESS, "Fx " << Fx << " ; Fy " << Fy
+      IMP_LOG(PROGRESS, "fx " << fx << " ; fy " << fy
               << " ; gderiv0 " << gderiv0
               << std::endl);
       algebra::Vector3D lderiv0 = rbi0.irot.get_rotated(gderiv0);
