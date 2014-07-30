@@ -6,15 +6,46 @@ import read_nups
 import re
 import os
 
+
+
+
 # defaults
 fg_coarse_factor=1.0 # 3
 kaps_R = 35.0
-k_fgfg=0.05
+k_fgfg=0.01
 FG_RES_PER_BEAD_RAW = 20
 FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
+
 #range_fgfg=FG_RADIUS_RAW*2
-k_fgkap=0.01
-k_skew = 0.25
+k_fgkap=0.001
+k=0.001
+k=k
+k_skew=0.25
+rangeN = 10
+rangeT = 20
+range_skew = (rangeT/rangeN)**2
+site_range=math.sqrt(rangeN**2 + rangeT**2)
+kN = k*k_skew/(k_skew+1)
+kT = k/(k_skew+1)
+#fmax = max[(0.5 * kN * rangeN) * (0.25 * kT * rangeT ^ 2),
+#           (0.5 * kT * rangeT) * (0.25 * kN * rangeN ^ 2)]
+fmax = 0.125 * k * rangeN * rangeT * max(rangeN, rangeT)
+dUmax = 0.0625 * k * rangeN**2 * rangeT**2
+nonspec_k=0.1*fmax
+nonspec_range=4
+print "fmax=", fmax
+print "dUmax=", dUmax
+print "range=", site_range
+print "rangeN=", rangeN
+print "rangeT=", rangeT
+print "kN=", kN
+print "kT=", kT
+print "k=", k
+print "k_skew=",  k_skew
+print "k_nonspec=",  nonspec_k
+print "dU_nonspec=", nonspec_range*nonspec_k
+
+
 #range_fgkap=FG_RADIUS_RAW+4
 rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
@@ -43,9 +74,9 @@ def get_basic_config():
     config.time_step_factor.lower=0.3 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
-    config.excluded_volume_k.lower=100*math.sqrt(k_fgkap/k_skew)
-    config.nonspecific_range.lower=4
-    config.nonspecific_k.lower=.2*math.sqrt(k_fgkap/k_skew)
+    config.excluded_volume_k.lower=max(10*fmax,1.0)
+    config.nonspecific_range.lower=nonspec_range
+    config.nonspecific_k.lower=nonspec_k
     config.slack.lower = 15
     config.number_of_trials=1
     config.dump_interval_ns=1
@@ -72,7 +103,7 @@ def add_interactions_for_fg(fg_name,
                                                         interaction_k=k_kap_lower,
                                                         interaction_range=range_fgkap)
     interactionFG_KAP.k_tangent_skew.lower = k_skew
-    interactionFG_KAP.range_tangent_skew.lower = 4
+    interactionFG_KAP.range_tangent_skew.lower = range_skew
     if(k_kap_steps > 1):
         create_range(interactionFG_KAP.interaction_k,
                      k_kap_lower, k_kap_upper,
@@ -163,7 +194,9 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
                                       interactions=-1, # nfgs_per_bead_int,
                                       rest_length_factor = rest_length_factor*2.0, # x2 because of .5 radius
                                       interaction_k_factor = nfgs_per_bead_float)
-    add_interactions_for_fg(type_name, k_fgkap, range_fgkap=radius+4)
+    add_interactions_for_fg(type_name, k_fgkap, range_fgkap=site_range)
+    fgs.site_relative_distance = 0.0
+    fgs.site_radius = 1.25 * radius
     for center in centers:
         pos=fgs.anchor_coordinates.add()
         pos.x=scale_tunnel*(center[0] - origin[0])
@@ -232,7 +265,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
-kaps.site_relative_distance=1.1
+kaps.site_relative_distance=1.2
 #kaps.k_z_bias.lower=z_bias
 #kaps.k_z_bias_fraction.lower=z_bias_frac
 ############### ACTIVE RANGE #############
