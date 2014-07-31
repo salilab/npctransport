@@ -17,7 +17,7 @@ FG_RES_PER_BEAD_RAW = 20
 FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 
 #range_fgfg=FG_RADIUS_RAW*2
-k_fgkap=0.001
+k_fgkap=0.0005
 k=0.0005
 k=k
 k_skew=0.25
@@ -355,7 +355,7 @@ for i,fg0 in enumerate(config.fgs):
                                                            name0= fg0.type,
                                                            name1= fg1.type,
                                                            interaction_k= k_fgfg,
-                                                           interaction_range= fg0.radius.lower + fg1.radius.lower)
+                                                           interaction_range= 4)
 
 # dump to file
 f=open(outfile, "wb")
