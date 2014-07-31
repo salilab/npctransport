@@ -12,7 +12,7 @@ import os
 # defaults
 fg_coarse_factor=1.0 # 3
 kaps_R = 35.0
-k_fgfg=0.01
+k_fgfg=0.001
 FG_RES_PER_BEAD_RAW = 20
 FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 
