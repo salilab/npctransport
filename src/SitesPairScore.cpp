@@ -30,7 +30,7 @@ namespace {
     for(unsigned int i = 0; i < R0.size(); i++){
       for(unsigned int j = 0; j < R1.size(); j++){
         double s = (R0[i].get_center().get_magnitude() +  R0[i].get_radius())
-          + (R1[j].get_center().get_magnitude() +  R1[i].get_radius());
+          + (R1[j].get_center().get_magnitude() +  R1[j].get_radius());
         max = (max > s) ? max : s;
       }
     }

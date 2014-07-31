@@ -674,8 +674,10 @@ void SimulationData::set_sites(core::ParticleType t, int n,
     }
   }
   if(n == -1 ||  r == 0.0) { // centered at bead
+    IMP_ALWAYS_CHECK(n<2, "Cannot set more than one site at bead center",
+                     base::ValueException);
     algebra::Sphere3D zero(algebra::Vector3D(0,0,0), sr);
-    sites_[t] = algebra::Sphere3Ds(n, zero);
+    sites_[t] = algebra::Sphere3Ds(1, zero);
   }
 }
 
