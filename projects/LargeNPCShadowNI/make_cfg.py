@@ -18,9 +18,9 @@ FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 k_fgkap=0.0005
 k=0.0005
 k=k
-k_skew=4
-rangeN = 20
-rangeT = 10
+k_skew=0.25
+rangeN = 10
+rangeT = 20
 range_skew = (rangeT/rangeN)**2
 site_range=math.sqrt(rangeN**2 + rangeT**2)
 kN = k*k_skew/(k_skew+1)
@@ -68,7 +68,7 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=2.5
-    config.time_step_factor.lower=0.5  #### NOTE THIS ####
+    config.time_step_factor.lower=1.5  #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
     config.excluded_volume_k.lower=max(10*fmax,1.0)
@@ -289,13 +289,13 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-#mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel)) # , origin=mean_loc)
-#add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
 mean_loc=(add_fg_based_on(config, "MRCs/Nup57_16copies_chimera.mrc", k=16, nfgs=16, nres=240, scale_tunnel=scale_tunnel)) # , origin=mean_loc)
+add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel , origin=mean_loc)
+add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc, scale_tunnel=scale_tunnel)
 add_fg_based_on(config, "MRCs/Nup49_16copies.mrc", k=16, nfgs = 17, nres=240, origin=mean_loc, scale_tunnel=scale_tunnel)
-#add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nfgs=23, nres=330, origin=mean_loc) # nfgs 20-25 = real number for Nup159, depending how you count double motifs and motif regions
+add_fg_based_on(config, "MRCs/Nup159_8copies.mrc", k=8, nfgs=23, nres=330, origin=mean_loc) # nfgs 20-25 = real number for Nup159, depending how you count double motifs and motif regions
 add_fg_based_on(config, "MRCs/Nup116_8copies_chimera.mrc", k=8, nfgs=46, nres=720, origin=mean_loc, scale_tunnel = scale_tunnel)
-#add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nfgs=21, nres=370,  origin=mean_loc) # nfgs 21-27, depending on treratment of double motifs
+add_fg_based_on(config, "MRCs/Nup42_8copies_chimera.mrc", k=8, nfgs=21, nres=370,  origin=mean_loc) # nfgs 21-27, depending on treratment of double motifs
 add_fg_based_on(config, "MRCs/Nup100_8copies_chimera.mrc", k=8, nfgs=44, nres=600, origin=mean_loc)
 add_fg_based_on(config, "MRCs/Nup145N_8copies_1_chimera.mrc", k=8, nfgs=11, nres=220, origin=mean_loc)
 add_fg_based_on(config, "MRCs/Nup145N_8copies_2_chimera.mrc", k=8, nfgs=11, nres=220, origin=mean_loc)
