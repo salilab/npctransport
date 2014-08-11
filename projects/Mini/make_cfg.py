@@ -196,7 +196,7 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
                                       interaction_k_factor = nfgs_per_bead_float)
     add_interactions_for_fg(type_name, k_fgkap, range_fgkap=site_range)
     fgs.site_relative_distance = 0.5
-    fgs.site_radius = 1.25 * radius
+    fgs.site_radius = 0.75 * radius
     if(mrc_filename != None):
         for center in centers:
             pos=fgs.anchor_coordinates.add()
