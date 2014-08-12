@@ -70,7 +70,7 @@ def get_basic_config():
     config.time_step_factor.lower=1.5 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
-    config.excluded_volume_k.lower=max(10*fmax,1.0)
+    config.excluded_volume_k.lower=max(fmax,1.0)
     config.nonspecific_range.lower=nonspec_range
     config.nonspecific_k.lower=nonspec_k
     config.slack.lower = 15
@@ -197,7 +197,7 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
                                       interaction_k_factor = nfgs_per_bead_float)
     add_interactions_for_fg(type_name, k_fgkap, range_fgkap=site_range)
     fgs.site_relative_distance = 0.5
-    fgs.site_radius = 0.75 * radius
+    fgs.site_radius = 0.7 * radius
     if(mrc_filename != None):
         for center in centers:
             pos=fgs.anchor_coordinates.add()
@@ -268,7 +268,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
-kaps.site_relative_distance=1.2
+kaps.site_relative_distance=1.1
 #kaps.k_z_bias.lower=z_bias
 #kaps.k_z_bias_fraction.lower=z_bias_frac
 #create_range(kaps.interaction_k_factor, lb=1.0, ub=5, steps = 5, base=2)
