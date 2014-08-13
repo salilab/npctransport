@@ -70,7 +70,7 @@ def get_basic_config():
     config.time_step_factor.lower=1.5 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
-    config.excluded_volume_k.lower=max(fmax,1.0)
+    config.excluded_volume_k.lower=max(10.0*fmax,1.0)
     config.nonspecific_range.lower=nonspec_range
     config.nonspecific_k.lower=nonspec_k
     config.slack.lower = 15
@@ -185,7 +185,7 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
     res_per_bead = FG_RES_PER_BEAD_RAW * coarse_factor
     nbeads = int( math.ceil( float(nres) / res_per_bead) ) + ANCHOR_BEADS
     nfgs_per_bead_float =  nfgs / float(nbeads)
-    SITE_SITE_SCALE = 0.75
+    SITE_SITE_SCALE = 0.9
     radius = FG_RADIUS_RAW * math.sqrt(coarse_factor) * SITE_SITE_SCALE # scale for centered site-site interaction
     fgs= IMP.npctransport.add_fg_type(config,
                                       type_name= type_name,
@@ -194,6 +194,7 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
                                       radius=radius,
                                       interactions=1, # nfgs_per_bead_int,
                                       rest_length_factor = rest_length_factor/SITE_SITE_SCALE, # scale to counter radius rescale
+                                      d_factor = 1.0/SITE_SITE_SCALE, # scale to counter radius rescale
                                       interaction_k_factor = nfgs_per_bead_float)
     add_interactions_for_fg(type_name, k_fgkap, range_fgkap=site_range)
     fgs.site_relative_distance = 0.5
