@@ -75,8 +75,8 @@ def get_basic_config():
     config.nonspecific_k.lower=nonspec_k
     config.slack.lower = 15
     config.number_of_trials=1
-    config.dump_interval_ns=0.01
-    config.simulation_time_ns=100
+    config.dump_interval_ns=10
+    config.simulation_time_ns=25000
     config.angular_D_factor.lower=1.0 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
     config.statistics_interval_ns=1
@@ -269,7 +269,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
-kaps.site_relative_distance=1.05
+kaps.site_relative_distance=1.00
 #kaps.k_z_bias.lower=z_bias
 #kaps.k_z_bias_fraction.lower=z_bias_frac
 #create_range(kaps.interaction_k_factor, lb=1.0, ub=5, steps = 5, base=2)
