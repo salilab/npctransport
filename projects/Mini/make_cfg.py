@@ -265,11 +265,11 @@ config= get_basic_config()
 # Add floaters
 n_kap_interactions=12
 kaps= IMP.npctransport.add_float_type(config,
-                                     number=5,
+                                     number=3,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
-kaps.site_relative_distance=1.1
+kaps.site_relative_distance=1.05
 #kaps.k_z_bias.lower=z_bias
 #kaps.k_z_bias_fraction.lower=z_bias_frac
 #create_range(kaps.interaction_k_factor, lb=1.0, ub=5, steps = 5, base=2)
@@ -294,7 +294,7 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-mean_loc=(add_fg_based_on(config, mrc_filename=None, k=10, nfgs=32, nres=125, scale_tunnel=scale_tunnel))
+mean_loc=(add_fg_based_on(config, mrc_filename=None, k=6, nfgs=32, nres=125, scale_tunnel=scale_tunnel))
 
 #mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel)) # , origin=mean_loc)
 #add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
@@ -342,7 +342,7 @@ mean_loc=(add_fg_based_on(config, mrc_filename=None, k=10, nfgs=32, nres=125, sc
 
 # add bounding volumes
 config.box_is_on.lower=1
-config.box_side.lower=600 # max(max_z,max_x,max_y)*3.5 # 2000
+config.box_side.lower=500 # max(max_z,max_x,max_y)*3.5 # 2000
 config.slab_is_on.lower=0
 #config.tunnel_radius.lower=max_r - config.fgs[0].radius.lower # or also upper when there's steps?
 #config.slab_thickness.lower=250.0 # yeast nuclear envelope - see http://books.google.com/books?id=GvxdK1mdqQwC&pg=PA278&lpg=PA278&dq=yeast+nuclear+envelope+dimensions+nanometer&source=bl&ots=tHQoLfXHI1&sig=nRgZmLYnKuiRNP8n6vhm3bapjpI&hl=en&sa=X&ei=VtwKUtvAAsTAyAHOmIDYBg&ved=0CHsQ6AEwCA#v=onepage&q=yeast%20nuclear%20envelope%20dimensions%20nanometer&f=false
