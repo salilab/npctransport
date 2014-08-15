@@ -9,13 +9,13 @@ import os
 # defaults
 fg_coarse_factor=1.0 # 3
 kaps_R = 35.0
-k_fgfg=0.0001
+k_fgfg=0.00045
 FG_RES_PER_BEAD_RAW = 20
 FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 
 
 #range_fgfg=FG_RADIUS_RAW*2
-k_fgkap=0.0005
+k_fgkap=0.0023
 k=k_fgkap
 k_skew=1.0 #0.25
 rangeN = 14.14 # 10
@@ -268,9 +268,7 @@ kaps= IMP.npctransport.add_float_type(config,
 kaps.site_relative_distance=1.00
 #kaps.k_z_bias.lower=z_bias
 #kaps.k_z_bias_fraction.lower=z_bias_frac
-############### ACTIVE RANGE #############
-create_range(kaps.interaction_k_factor, lb=1.0, ub=5, steps = 5, base=2)
-##########################################
+#create_range(kaps.interaction_k_factor, lb=1.0, ub=5, steps = 5, base=2)
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics1= IMP.npctransport.add_float_type(config,
                                               number=75,
