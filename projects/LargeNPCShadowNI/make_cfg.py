@@ -16,8 +16,7 @@ FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 
 #range_fgfg=FG_RADIUS_RAW*2
 k_fgkap=0.0005
-k=0.0005
-k=k
+k=k_fgkap
 k_skew=1.0 #0.25
 rangeN = 14.14 # 10
 rangeT = 14.14 # 20
@@ -67,8 +66,8 @@ def get_basic_config():
     config.statistics_fraction.lower=1.0
     config.interaction_k.lower=10
     config.interaction_range.lower=1
-    config.backbone_k.lower=2.5
-    config.time_step_factor.lower=1.5  #### NOTE THIS ####
+    config.backbone_k.lower=.25
+    config.time_step_factor.lower=10  #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
     config.excluded_volume_k.lower=max(10*fmax,1.0)
@@ -180,20 +179,24 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
         origin = mean_loc
     ANCHOR_BEADS=1
     res_per_bead = FG_RES_PER_BEAD_RAW * coarse_factor
-    radius = FG_RADIUS_RAW * math.sqrt(coarse_factor)
+    SITE_SITE_SCALE = 0.9 # scale for centered interaction site
+    radius = FG_RADIUS_RAW * math.sqrt(coarse_factor) * SITE_SITE_SCALE
     nbeads = int( math.ceil( float(nres) / res_per_bead) ) + ANCHOR_BEADS
     nfgs_per_bead_float =  nfgs / float(nbeads)
+
     fgs= IMP.npctransport.add_fg_type(config,
                                       type_name= type_name,
                                       number_of_beads= nbeads,
                                       number=k,
-                                      radius=radius/2.0, # x.5 because of centered site-site interaction
-                                      interactions=-1, # nfgs_per_bead_int,
-                                      rest_length_factor = rest_length_factor*2.0, # x2 because of .5 radius
+                                      radius=radius,
+                                      interactions=1, # nfgs_per_bead_int,
+                                      rest_length_factor = rest_length_factor/SITE_SITE_SCALE, # scale to counter radius rescale
+                                      d_factor = 1.0/SITE_SITE_SCALE, # scale to counter radius rescale
                                       interaction_k_factor = nfgs_per_bead_float)
+
     add_interactions_for_fg(type_name, k_fgkap, range_fgkap=site_range)
-    fgs.site_relative_distance = 0.0
-    fgs.site_radius = 1.25 * radius
+    fgs.site_relative_distance = 0.5
+    fgs.site_radius = 0.7 * radius
     for center in centers:
         pos=fgs.anchor_coordinates.add()
         pos.x=scale_tunnel*(center[0] - origin[0])
@@ -262,7 +265,7 @@ kaps= IMP.npctransport.add_float_type(config,
                                      radius=kaps_R,
                                       interactions= n_kap_interactions,
                                       type_name="kap")
-kaps.site_relative_distance=1.2
+kaps.site_relative_distance=1.00
 #kaps.k_z_bias.lower=z_bias
 #kaps.k_z_bias_fraction.lower=z_bias_frac
 ############### ACTIVE RANGE #############
