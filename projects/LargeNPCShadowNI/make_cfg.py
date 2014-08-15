@@ -67,7 +67,7 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=.25
-    config.time_step_factor.lower=10  #### NOTE THIS ####
+    config.time_step_factor.lower=3  #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
     config.excluded_volume_k.lower=max(10*fmax,1.0)
