@@ -15,7 +15,7 @@ FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 
 
 #range_fgfg=FG_RADIUS_RAW*2
-k_fgkap=0.0001
+k_fgkap=0.001
 k=k_fgkap
 k_skew=1.0 #0.25
 rangeN = 14.14 # 10
