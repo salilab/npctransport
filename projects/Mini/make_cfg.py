@@ -43,7 +43,7 @@ print "k_nonspec=",  nonspec_k
 print "dU_nonspec=", nonspec_range*nonspec_k
 
 #range_fgkap=FG_RADIUS_RAW+4
-rest_length_factor = 3 # 1
+rest_length_factor = 1 # 1
 obstacle_inflate_factor = 1.3
 z_bias = 0.0 # 0.025
 z_bias_frac = 0.0 #0.5
@@ -67,7 +67,7 @@ def get_basic_config():
     config.interaction_k.lower=10
     config.interaction_range.lower=1
     config.backbone_k.lower=.25
-    config.time_step_factor.lower=1 #### NOTE THIS ####
+    config.time_step_factor.lower=3 #### NOTE THIS ####
     #create_range(config.rest_length_factor, .5, 1, 10)
     config.time_step_wave_factor.lower=1 #### NOTE THIS ####
     config.excluded_volume_k.lower=max(10.0*fmax,1.0)
