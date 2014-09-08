@@ -183,10 +183,10 @@ def add_fg_based_on(config, mrc_filename, k, nfgs, nres, origin=None,
         type_name="fg"
         ANCHOR_BEADS=0
     res_per_bead = FG_RES_PER_BEAD_RAW * coarse_factor
+    SITE_SITE_SCALE = 0.9 # scale for centered interaction site
+    radius = FG_RADIUS_RAW * math.sqrt(coarse_factor) * SITE_SITE_SCALE
     nbeads = int( math.ceil( float(nres) / res_per_bead) ) + ANCHOR_BEADS
     nfgs_per_bead_float =  nfgs / float(nbeads)
-    SITE_SITE_SCALE = 0.9
-    radius = FG_RADIUS_RAW * math.sqrt(coarse_factor) * SITE_SITE_SCALE # scale for centered site-site interaction
     fgs= IMP.npctransport.add_fg_type(config,
                                       type_name= type_name,
                                       number_of_beads= nbeads,
@@ -294,7 +294,7 @@ max_r=0
 max_x=0
 max_y=0
 max_z=0
-mean_loc=(add_fg_based_on(config, mrc_filename=None, k=6, nfgs=32, nres=125, scale_tunnel=scale_tunnel))
+mean_loc=(add_fg_based_on(config, mrc_filename=None, k=6, nfgs=8, nres=120, scale_tunnel=scale_tunnel)) # originally: 32 fgs per 600 residues
 
 #mean_loc=(add_fg_based_on(config, "MRCs/Nsp1_16copies_1.mrc", k=16, nfgs = 33, nres=600,  scale_tunnel=scale_tunnel)) # , origin=mean_loc)
 #add_fg_based_on(config, "MRCs/Nsp1_16copies_2.mrc", k=16, nfgs = 33, nres=600, origin=mean_loc)
