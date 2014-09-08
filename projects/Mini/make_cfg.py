@@ -15,7 +15,7 @@ FG_RADIUS_RAW = 11.85 # based on 30A Rg for 125 (even though Rg < surface R)
 
 
 #range_fgfg=FG_RADIUS_RAW*2
-k_fgkap=0.0005
+k_fgkap=0.001
 k=k_fgkap
 k_skew=1.0 #0.25
 rangeN = 14.14 #10
@@ -75,7 +75,7 @@ def get_basic_config():
     config.nonspecific_k.lower=nonspec_k
     config.slack.lower = 15
     config.number_of_trials=1
-    config.dump_interval_ns=0.05
+    config.dump_interval_ns=10.0
     config.simulation_time_ns=25000
     config.angular_D_factor.lower=1.0 #lower to account for increased dynamic viscosity
                                       # in crowded environment and for coarse graining
