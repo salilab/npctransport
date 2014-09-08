@@ -43,7 +43,7 @@ print "k_nonspec=",  nonspec_k
 print "dU_nonspec=", nonspec_range*nonspec_k
 
 #range_fgkap=FG_RADIUS_RAW+4
-rest_length_factor = 1 # 1
+rest_length_factor = 3 # 1
 obstacle_inflate_factor = 1.3
 z_bias = 0.0 # 0.025
 z_bias_frac = 0.0 #0.5
