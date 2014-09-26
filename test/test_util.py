@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from IMP.npctransport import *
 import sys
 import math

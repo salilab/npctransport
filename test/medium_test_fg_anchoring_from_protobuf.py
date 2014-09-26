@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from IMP.npctransport import *
 import IMP.test
 import sys
