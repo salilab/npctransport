@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 from IMP.npctransport import *
 import sys
 """Create the protobuf for the test test_main"""

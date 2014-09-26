@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
 #/**
 # * \file fg_array.cpp
 # * \brief Simulate an fg and a kap interacting

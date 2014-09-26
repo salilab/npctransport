@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """Add cylinders of a given radius to the passed file."""
 import IMP.em
 import sys
