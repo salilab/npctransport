@@ -1,3 +1,4 @@
+from __future__ import print_function
 from IMP.npctransport import *
 import sys
 import math
@@ -111,4 +112,4 @@ def make_simple_cfg(outfile, is_slab_on = True, n_particles_factor = 1):
     # dump to file
     f=open(outfile, "wb")
     f.write(config.SerializeToString())
-    print config
+    print(config)

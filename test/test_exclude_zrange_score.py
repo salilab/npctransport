@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
@@ -17,7 +18,7 @@ def out_zrange(d):
 class ExcludeZRangeTests(IMP.test.TestCase):
     def test_cone_(self):
         """Check exclude z-range singleton score"""
-        print "top", top, "bottom", bottom, "k", k, "particle-radius", radius
+        print("top", top, "bottom", bottom, "k", k, "particle-radius", radius)
         # setup model
         m= IMP.Model()
         p= IMP.Particle(m)
@@ -36,17 +37,17 @@ class ExcludeZRangeTests(IMP.test.TestCase):
 
         # position d randonmly within excluded zrange
         d.set_coordinates(IMP.algebra.get_random_vector_in(bb_exclude))
-        print d.get_coordinates()
+        print(d.get_coordinates())
         # steep descent out of excluded zone (hopefully)
         cg= IMP.core.SteepestDescent(m)
         cg.set_scoring_function(r)
         cg.set_log_level(IMP.VERBOSE)
         for i in range(0,10000):
             s=cg.optimize(3)
-            print d.get_coordinates(), s
+            print(d.get_coordinates(), s)
             if s==0:
                 break
-        print d.get_coordinates()
+        print(d.get_coordinates())
         self.assert_(out_zrange(d))
 if __name__ == '__main__':
     IMP.test.main()

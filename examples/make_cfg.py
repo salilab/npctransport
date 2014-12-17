@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 from IMP.npctransport import *
 import sys
 
@@ -113,4 +114,4 @@ create_range(interactionFG_FG.interaction_k,
 # dump to file
 f=open(outfile, "wb")
 f.write(config.SerializeToString())
-print config
+print(config)

@@ -65,6 +65,6 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 try:
   from npctransport_pb2 import *
 except:
-  print "no protobuf support in python"
+  print("no protobuf support in python")
 from _configuration import *
 %}

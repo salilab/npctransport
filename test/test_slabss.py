@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
@@ -21,12 +22,12 @@ def out_slab(d):
     rxz= (c[0]**2+c[1]**2)**.5
     if rxz +radius < slab_radius+.5:
         return True
-    print rxz, slab_radius-radius, c[2], slab_height/2.0+radius
+    print(rxz, slab_radius-radius, c[2], slab_height/2.0+radius)
     return False
 class ConeTests(IMP.test.TestCase):
     def test_cone_construction(self):
         """Check slab singleton score"""
-        print "radius", radius, "slab radius", slab_radius, "slab_height", slab_height
+        print("radius", radius, "slab radius", slab_radius, "slab_height", slab_height)
         m= IMP.Model()
         p= IMP.Particle(m)
         d= IMP.core.XYZR.setup_particle(p)
@@ -38,7 +39,7 @@ class ConeTests(IMP.test.TestCase):
         r= IMP.core.SingletonRestraint(slabss, p, "slab")
         while out_slab(d):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
-        print d.get_coordinates()
+        print(d.get_coordinates())
         w= IMP.display.PymolWriter(self.get_tmp_file_name("slabss.pym"))
         w.set_frame(0)
         g=IMP.core.XYZRGeometry(d)
@@ -53,7 +54,7 @@ class ConeTests(IMP.test.TestCase):
             w.add_geometry([g, sg])
             if s==0:
                 break
-        print d.get_coordinates()
+        print(d.get_coordinates())
         self.assert_(out_slab(d))
 if __name__ == '__main__':
     IMP.test.main()

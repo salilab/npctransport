@@ -1,4 +1,4 @@
-
+from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
@@ -41,7 +41,7 @@ class ConeTests(IMP.test.TestCase):
                     sp=rbs[i].get_reference_frame().get_global_coordinates(sites[i][0])
                     spo= orb.get_reference_frame().get_global_coordinates(s[0])
                     ds= IMP.algebra.get_distance(sp, spo)
-                    print "i=",i, "d=", d, "dsites=", ds
+                    print("i=",i, "d=", d, "dsites=", ds)
                     if ds > (radius/2.0):
                         failures+=1
                         ok=False
@@ -53,7 +53,7 @@ class ConeTests(IMP.test.TestCase):
 
     def test_sites_pair_score(self):
         """Check sites pair score"""
-        print "Check sites pair score"
+        print("Check sites pair score")
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
         rb0= self._create_particle(m)
@@ -78,13 +78,13 @@ class ConeTests(IMP.test.TestCase):
         self._randomize([rb0, rb1], [s0, s1], bb)
         self._show([rb0, rb1], [s0, s1], w)
         cg= IMP.core.ConjugateGradients(m)
-        print "SCORE=",m.evaluate(True)
+        print("SCORE=",m.evaluate(True))
 
         rb0.get_particle().show()
         rb1.get_particle().show()
 
         cg.optimize(1000)
-        print "SCORE=",m.evaluate(True)
+        print("SCORE=",m.evaluate(True))
         rb0.get_particle().show()
         rb1.get_particle().show()
         w.set_frame(1)
@@ -94,7 +94,7 @@ class ConeTests(IMP.test.TestCase):
         s0g= rf0.get_global_coordinates(s0[0])
         s1g= rf1.get_global_coordinates(s1[0])
         d= IMP.algebra.get_distance(s0g, s1g)
-        print "Sites", s0g, s1g, "d=", d
+        print("Sites", s0g, s1g, "d=", d)
         self.assert_(d < 1)
 if __name__ == '__main__':
     IMP.test.main()

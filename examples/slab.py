@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP.npctransport
 import IMP
 import RMF
@@ -44,4 +45,4 @@ bd.add_optimizer_state(os)
 bd.set_maximum_time_step(2000)
 
 bd.optimize(100)
-print "File is", nm
+print("File is", nm)

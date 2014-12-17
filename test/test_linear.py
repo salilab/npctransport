@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
@@ -42,14 +43,14 @@ class ConeTests(IMP.test.TestCase):
         cg.set_log_level(IMP.VERBOSE)
         cg.set_step_size(.01)
         cg.set_maximum_step_size(.01)
-        print "initial", m.evaluate(True)
+        print("initial", m.evaluate(True))
         cg.optimize(1000)
         w.set_frame(1)
         self._show(ds, w)
         for d in ds:
             for d1 in ds:
                 if d!=d1:
-                    print d, d1
+                    print(d, d1)
                     self.assert_(IMP.core.get_distance(d, d1) > -.1)
     def test_cone_construction2(self):
         """Check interaction score repulsion"""
@@ -75,28 +76,28 @@ class ConeTests(IMP.test.TestCase):
         cg.set_step_size(.003)
         cg.set_threshold(-10000)
         cg.set_maximum_step_size(.003)
-        print "initial", m.evaluate(True)
+        print("initial", m.evaluate(True))
         cg.optimize(1000)
         w.set_frame(1)
         self._show(ds, w)
         for d in ds:
             for d1 in ds:
                 if d!=d1:
-                    print d, d1
+                    print(d, d1)
                     self.assert_(IMP.core.get_distance(d, d1) > -.1)
         ss= IMP.algebra.Sphere3D(IMP.algebra.Vector3D(0,0,0),
                                                       radius+rng*.9)
         ds[1].set_coordinates(IMP.algebra.get_random_vector_on(ss))
         w.set_frame(2)
         self._show(ds, w)
-        print "initial", m.evaluate(True)
+        print("initial", m.evaluate(True))
         cg.optimize(1000)
         w.set_frame(3)
         self._show(ds, w)
         for d in ds:
             for d1 in ds:
                 if d!=d1:
-                    print d, d1
+                    print(d, d1)
                     self.assert_(IMP.core.get_distance(d, d1) > -.1\
                                    and IMP.core.get_distance(d, d1) < .1)
 

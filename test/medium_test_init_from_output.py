@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP
 import IMP.test
 import RMF
@@ -23,13 +24,13 @@ class Tests(IMP.test.TestCase):
         return - the resulting simulation data object
         """
         IMP.base.set_log_level(IMP.base.SILENT)
-        print "assigning parameter ranges from config"
+        print("assigning parameter ranges from config")
         num = assign_ranges(config, output,
                             0, True, 10)
 #        IMP.set_log_level(IMP.TERSE)
         sd = IMP.npctransport.SimulationData(output, False)
         sd.set_rmf_file( self.get_tmp_file_name("out0.rmf"), False )
-        print "BEFORE INIT", time.ctime()
+        print("BEFORE INIT", time.ctime())
         if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
             short_init_factor = 0.00001
             opt_cycles = 2
@@ -38,17 +39,17 @@ class Tests(IMP.test.TestCase):
             opt_cycles = 10000
         sd.get_bd().set_log_level(IMP.base.SILENT)
         IMP.npctransport.initialize_positions(sd, [], False, short_init_factor)
-        print "AFTER INIT", time.ctime()
+        print("AFTER INIT", time.ctime())
         obd = sd.get_bd()
         obd.optimize(opt_cycles)
-        print "AFTER OPTIMIZE", time.ctime()
+        print("AFTER OPTIMIZE", time.ctime())
         timer = IMP.npctransport.timer()
         # lame test
         # rt= sd.get_root()
         # rtt= IMP.npctransport.Transporting.setup_particle(rt, True)
         # rtf= rt.get_child(0)
         # rttf= IMP.npctransport.Transporting.setup_particle(rtf, False)
-        print "updating stats"
+        print("updating stats")
         sd.get_statistics().update(timer, 0)
         return sd
 
@@ -62,9 +63,9 @@ class Tests(IMP.test.TestCase):
                 continue
             t1 = IMP.npctransport.Transporting(d1)
             t2 = IMP.npctransport.Transporting(d2)
-            print "Diffuser particles: "
-            print d1, d2
-            print "Comparing transport statistics: ", t1, t2
+            print("Diffuser particles: ")
+            print(d1, d2)
+            print("Comparing transport statistics: ", t1, t2)
             self.assert_(t1.get_is_last_entry_from_top()
                          == t2.get_is_last_entry_from_top())
             self.assertAlmostEqual(t1.get_last_tracked_z(),
@@ -96,7 +97,7 @@ class Tests(IMP.test.TestCase):
             ).get_rotation(
             ).get_quaternion(
             )
-            print q0, q1
+            print(q0, q1)
             for qa, qb in zip(q0, q1):
                 self.assertAlmostEqual(qa, qb, delta=.01)
         # check sites
@@ -114,7 +115,7 @@ class Tests(IMP.test.TestCase):
 
     def test_init_from_output(self):
         """ Testing whether positions are loaded properly from output file """
-        print "TEST_INIT_FROM_OUTPUT"
+        print("TEST_INIT_FROM_OUTPUT")
         # random generator initialization
         IMP.base.set_log_level(IMP.base.SILENT)
         config = self.get_tmp_file_name("simple_cfg.pb")
@@ -123,20 +124,20 @@ class Tests(IMP.test.TestCase):
             is_slab_on=True,
             n_particles_factor=1.5)
         rt_output = self.get_tmp_file_name("round_trip_output.pb")
-        print "RT output: ", rt_output
+        print("RT output: ", rt_output)
         sd = self.run_from_config(config, rt_output)
 
-        print "reloading from output file ", rt_output
+        print("reloading from output file ", rt_output)
         sdp = IMP.npctransport.SimulationData(rt_output, False)
         sd.set_rmf_file( self.get_tmp_file_name("out1.rmf"), False )
-        print "After reload", time.ctime()
+        print("After reload", time.ctime())
         self.assert_almost_equal_sds(sd, sdp)
 #        print "updating stats at end"
 #        sd.update_statistics(timer, 0);
 
     def test_init_from_old_output1(self):
         """ Testing whether an old output file is loaded properly """
-        print "TEST_INIT_FROM_OLD_OUTPUT1"
+        print("TEST_INIT_FROM_OLD_OUTPUT1")
         expected_sites = [ (3.67394e-15, 0, -30),
                            (17.2447, -0.377296, -24.5455),
                            (-1.55764, -23.0892, -19.0909),
@@ -159,8 +160,8 @@ class Tests(IMP.test.TestCase):
         rt_prev_output = self.get_input_file_name("out149.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")
         rt_new_output = self.get_tmp_file_name("out.pb")
-        print "reloading from output file ", rt_prev_output
-        print "New Output: ", rt_new_output
+        print("reloading from output file ", rt_prev_output)
+        print("New Output: ", rt_new_output)
         sd = IMP.npctransport.SimulationData(rt_prev_output,
                                              False,
                                              out_rmf,
@@ -199,13 +200,13 @@ class Tests(IMP.test.TestCase):
         Testing whether a more recent output file (Dec 2013) is loaded
         at all
         """
-        print "TEST_INIT_FROM_OLD_OUTPUT_MORE_RECENT"
+        print("TEST_INIT_FROM_OLD_OUTPUT_MORE_RECENT")
         IMP.base.set_log_level(IMP.base.SILENT)
         rt_prev_output = self.get_input_file_name("out_more_recent.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")
         rt_new_output = self.get_tmp_file_name("out.pb")
-        print "reloading from output file ", rt_prev_output
-        print "New Output: ", rt_new_output
+        print("reloading from output file ", rt_prev_output)
+        print("New Output: ", rt_new_output)
         sd = IMP.npctransport.SimulationData(rt_prev_output,
                                              False,
                                              out_rmf,

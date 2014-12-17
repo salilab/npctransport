@@ -1,3 +1,4 @@
+from __future__ import print_function
 from IMP.npctransport import *
 import IMP.test
 import sys
@@ -46,7 +47,7 @@ class Tests(IMP.test.TestCase):
         # dump to file
         f=open(cfg_file, "wb")
         f.write(config.SerializeToString())
-        print config
+        print(config)
         f.close()
         return coords
 
@@ -60,7 +61,7 @@ class Tests(IMP.test.TestCase):
         for fg,c in zip(fgs,coords):
             fg_c = IMP.core.XYZ( fg.get_child(0) ).get_coordinates()
             d2 = sum([(a-b)**2 for a,b in zip(fg_c,c)])
-            print fg_c, c, d2
+            print(fg_c, c, d2)
             self.assertEqual(d2, 0)
 
     def test_fg_anchoring_through_protobuf(self):
@@ -72,7 +73,7 @@ class Tests(IMP.test.TestCase):
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         coords = self._create_cfg_file_with_fg_anchors( cfg_file )
-        print "assigning parameter ranges from config"
+        print("assigning parameter ranges from config")
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
         sd= IMP.npctransport.SimulationData(assign_file, False, "")
 #                                            self.get_tmp_file_name("out.rmf"));
@@ -80,7 +81,7 @@ class Tests(IMP.test.TestCase):
         # verify that anchors remain intact during optimization
         if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
             short_init_factor=0.00001
-            print "short position initialization in non-fast mode"
+            print("short position initialization in non-fast mode")
         else:
             short_init_factor=0.1
         IMP.npctransport.initialize_positions(sd,[],False,short_init_factor)

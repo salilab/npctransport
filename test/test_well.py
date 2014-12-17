@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
@@ -49,7 +50,7 @@ class ConeTests(IMP.test.TestCase):
         bd.add_optimizer_state(w)
         bd.optimize(1000)
         dist= IMP.core.get_distance(ds[0], ds[1])
-        print dist
+        print(dist)
         self.assertAlmostEqual(dist, 0, delta=radius)
 
 if __name__ == '__main__':

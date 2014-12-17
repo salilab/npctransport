@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
@@ -8,7 +9,7 @@ import IMP.base
 
 class ConeTests(IMP.test.TestCase):
     def test_rmf_sites(self):
-     print "p"
+     print("p")
      RMF.set_log_level("Trace")
      seed = 1.0 # use time instead?
      IMP.base.random_number_generator.seed( seed )
@@ -43,9 +44,9 @@ class ConeTests(IMP.test.TestCase):
      del fg
      for n in dir():
        del n
-     print "done"
+     print("done")
 if __name__ == '__main__':
   try:
     IMP.test.main()
   except:
-    print "oops"
+    print("oops")

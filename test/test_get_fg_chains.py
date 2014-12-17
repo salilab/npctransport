@@ -1,3 +1,4 @@
+from __future__ import print_function
 from IMP.npctransport import *
 import IMP.base
 import IMP.test
@@ -59,12 +60,12 @@ class Tests(IMP.test.TestCase):
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         coords = self._create_cfg_file_with_fgs(cfg_file)
-        print "assigning parameter ranges from config"
+        print("assigning parameter ranges from config")
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 )
         sd= IMP.npctransport.SimulationData(assign_file, False)
         sd.set_rmf_file( self.get_tmp_file_name("out.rmf") )
         fgs = sd.get_fg_chains( ) # atom.Hierarchies
-        print " fgs ", fgs
+        print(" fgs ", fgs)
         ones = 0
         twos = 0
         for fg in fgs:

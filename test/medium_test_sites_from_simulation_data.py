@@ -1,3 +1,4 @@
+from __future__ import print_function
 from IMP.npctransport import *
 import IMP.base
 import IMP.test
@@ -77,7 +78,7 @@ class Tests(IMP.test.TestCase):
                 site2_c = rf2.get_transformation_to().get_transformed(site2)
                 D = IMP.algebra.get_distance(site1_c, site2_c)
                 if(D < distance_thresh):
-                    print "Close sites", site1_c, site2_c, "D", D
+                    print("Close sites", site1_c, site2_c, "D", D)
                     return True
         return False
 
@@ -101,9 +102,9 @@ class Tests(IMP.test.TestCase):
                                    (fg_R+diffuser_R) / 10.0,
                                    0)
             self.assert_( self.find_close_sites(sd, kap, fg_anchor) )
-            print "Kap coords", kap_c,
-            print "FG coords", anchor_c,
-            print "D", D
+            print("Kap coords", kap_c, end=' ')
+            print("FG coords", anchor_c, end=' ')
+            print("D", D)
 
     def is_stats_interact_(self, output_file):
         ''' verify that stats order parametrs know about the interaction '''
@@ -126,14 +127,14 @@ class Tests(IMP.test.TestCase):
         '''
 
         if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
-            print "SLOW MODE"
+            print("SLOW MODE")
             fast = False
             short_init_factor=0.0001
             opt_cycles=100
             n_iter = 10
             n_good_thresh=1
         else:
-            print "FAST MODE"
+            print("FAST MODE")
             fast = True
             short_init_factor=0.1
             opt_cycles=12500
@@ -145,11 +146,11 @@ class Tests(IMP.test.TestCase):
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         pymol_file = self.get_tmp_file_name("sites.pym")
         self._create_cfg_file_with_fg_anchors( cfg_file )
-        print "assigning parameter ranges from config", cfg_file,
-        print "to file", assign_file
+        print("assigning parameter ranges from config", cfg_file, end=' ')
+        print("to file", assign_file)
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
         rmf_file = self.get_tmp_file_name("out.rmf");
-        print "RMF file", rmf_file
+        print("RMF file", rmf_file)
         sd= IMP.npctransport.SimulationData(assign_file, False)
         sd.set_rmf_file(rmf_file, False)
         self._assert_kap_in_place(sd, False)
@@ -158,8 +159,8 @@ class Tests(IMP.test.TestCase):
         sd.get_bd().set_log_level(IMP.base.SILENT)
         IMP.npctransport.initialize_positions( sd, [], False,
                                                short_init_factor)
-        print
-        print
+        print()
+        print()
 #        IMP.base.set_log_level(IMP.base.PROGRESS)
         sd.write_geometry(pymol_file)
         n_good=0
@@ -171,23 +172,23 @@ class Tests(IMP.test.TestCase):
             sd.get_statistics().update(timer,opt_cycles)
             try:
                 self._assert_kap_in_place(sd, True)
-                print "total energy", sd.get_bd().get_scoring_function().evaluate(False),
-                print "predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False)
+                print("total energy", sd.get_bd().get_scoring_function().evaluate(False), end=' ')
+                print("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False))
                 self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -50.0)
                 self.assert_(self.is_stats_interact_(assign_file))
                 n_good=n_good+1
             except:
                 continue
             if(n_good >= n_good_thresh):
-                print "total energy", sd.get_bd().get_scoring_function().evaluate(False),
-                print "predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False),
+                print("total energy", sd.get_bd().get_scoring_function().evaluate(False), end=' ')
+                print("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False), end=' ')
                 return True
         if fast:
-            print "Failed to glue particles after %d iterations of %d opt cycles" \
-                % (n_iter, opt_cycles)
+            print("Failed to glue particles after %d iterations of %d opt cycles" \
+                % (n_iter, opt_cycles))
             self.assert_(n_good >= n_good_thresh)
         else:
-            print "Debug mode - couldn't glue particles in such short run"
+            print("Debug mode - couldn't glue particles in such short run")
 
 
 if __name__ == '__main__':

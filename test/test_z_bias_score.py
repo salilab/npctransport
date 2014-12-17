@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
@@ -28,7 +29,7 @@ class ZBiasTests(IMP.test.TestCase):
 
         # position d randonmly within excluded zrange
         d.set_coordinates([1,1,100])
-        print "BEFORE=", d.get_coordinates()
+        print("BEFORE=", d.get_coordinates())
         # steep descent out of excluded zone (hopefully)
         cg= IMP.core.SteepestDescent(m)
         cg.set_scoring_function(sr)
@@ -38,7 +39,7 @@ class ZBiasTests(IMP.test.TestCase):
 #            print d.get_coordinates(), s
             if s <= 0:
                 break
-        print "AFTER=", d.get_coordinates(), "Score =", s
+        print("AFTER=", d.get_coordinates(), "Score =", s)
         self.assert_(d.get_z() <= 0.01 and
                      d.get_x() == 1 and
                      d.get_y() == 1)

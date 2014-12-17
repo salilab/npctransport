@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
@@ -27,7 +28,7 @@ class Tests(IMP.test.TestCase):
             ds[1].set_coordinate(0, .1*i)
             e= sf.evaluate(True)
             deriv=ds[1].get_derivatives()
-            print .1*i, e, deriv
+            print(.1*i, e, deriv)
             if .1*i > 2*radius:
                 self.assertEqual(e, 0)
             elif .1*i < 2*radius:
@@ -47,7 +48,7 @@ class Tests(IMP.test.TestCase):
             ds[1].set_coordinate(0, .1*i)
             e= ps.evaluate(ds, None)
             ef=e= fps.evaluate(ds, None)
-            print .1*i, e, ef
+            print(.1*i, e, ef)
 
 if __name__ == '__main__':
     IMP.test.main()

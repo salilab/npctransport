@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
@@ -58,18 +59,18 @@ class Tests(IMP.test.TestCase):
                        [-k*radius/2.0-0.1*k*0.2*radius,-k*radius/4.0, 0.0]):
             ds[1].set_coordinates(IMP.algebra.Vector3D(rr*radius,0,0))
             init_score =  bd.get_scoring_function().evaluate(False)
-            print "Initial score x0=", rr, "*R is ", init_score
+            print("Initial score x0=", rr, "*R is ", init_score)
             self.assertAlmostEqual(init_score, s, delta = 0.001)
         for i in range(10):
             bd.optimize(nsteps / 10)
             sos.update_always()
             distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
                                                 ds[1].get_coordinates())
-            print "score", i, " = ", bd.get_scoring_function().evaluate(False)
+            print("score", i, " = ", bd.get_scoring_function().evaluate(False))
             if abs(distance - 2*radius) < max_delta:
                 break;
         final_score = bd.get_scoring_function().evaluate(False)
-        print "Final distance", distance, "score", final_score
+        print("Final distance", distance, "score", final_score)
 #        if(IMP.base.get_check_level() < IMP.base.USAGE):
         self.assertAlmostEqual(distance, 2*radius, delta =max_delta)
         self.assertLess(final_score, -0.001)
@@ -175,10 +176,10 @@ class Tests(IMP.test.TestCase):
         sos= IMP.rmf.SaveOptimizerState(m, f)
         sos.set_period(1000)
         bd.add_optimizer_state(sos)
-        print "optimizin"
+        print("optimizin")
         IMP.set_log_level(IMP.SILENT)
         bd.optimize(3000)
-        print "done"
+        print("done")
         sos.update_always()
     def test_three(self):
         """Check three interactions"""
@@ -194,8 +195,8 @@ class Tests(IMP.test.TestCase):
         k=500
         rs= self._create_restraint_three(m, ds,  radius, k, .2*radius, .5*k, k)
         IMP.rmf.load_frame(f, 0)
-        print rs[0].evaluate(True)
+        print(rs[0].evaluate(True))
         IMP.rmf.load_frame(f, f.get_number_of_frames()-1)
-        print rs[0].evaluate(True)
+        print(rs[0].evaluate(True))
 if __name__ == '__main__':
     IMP.test.main()

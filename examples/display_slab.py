@@ -1,3 +1,4 @@
+from __future__ import print_function
 import IMP.npctransport
 import IMP
 import RMF
@@ -89,5 +90,5 @@ w.add_geometry(gs)
 
 if use_rmf:
     IMP.rmf.save_frame(rmf, 0)
-    print "chimera", rnm
-print "pymol", nm
+    print("chimera", rnm)
+print("pymol", nm)
