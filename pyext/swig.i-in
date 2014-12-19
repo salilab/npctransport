@@ -63,8 +63,8 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
 try:
-  from npctransport_pb2 import *
+  from .npctransport_pb2 import *
 except:
   print("no protobuf support in python")
-from _configuration import *
+from ._configuration import *
 %}
