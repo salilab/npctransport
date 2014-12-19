@@ -1,5 +1,5 @@
 from __future__ import print_function
-from IMP.npctransport import *
+import IMP.npctransport
 import IMP.test
 import sys
 
@@ -8,7 +8,7 @@ class Tests(IMP.test.TestCase):
     """ Testing whether an avro file is read properly by Avro2PBReader """
     in_avro= self.get_input_file_name( "avro.sample");
     print("parsing", in_avro)
-    a=Avro2PBReader([in_avro])
+    a = IMP.npctransport.Avro2PBReader([in_avro])
     o = IMP.npctransport.Output()
     s = a.read_next()
     while s != "": # while valid output

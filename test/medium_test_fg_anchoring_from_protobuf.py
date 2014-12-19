@@ -1,5 +1,5 @@
 from __future__ import print_function
-from IMP.npctransport import *
+import IMP.npctransport
 import IMP.test
 import sys
 import math
@@ -16,7 +16,7 @@ class Tests(IMP.test.TestCase):
         the anchor coordinates 3D tuples by same order as they were added
         to the config file fgs[0] object
         '''
-        config = Configuration()
+        config = IMP.npctransport.Configuration()
         IMP.npctransport.set_default_configuration(config)
         kaps_R = 10.0
         config.box_is_on.lower=1
