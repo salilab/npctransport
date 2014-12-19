@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 nranges=1
 
 def create_range(field, lb, ub=None, steps=5, base=2):
@@ -12,7 +14,7 @@ def create_range(field, lb, ub=None, steps=5, base=2):
     base - lograithmic base for spacing, use 1 for standard even-sized steps
     """
     field.lower=lb
-    if ub and steps <> 1:
+    if ub and steps != 1:
         field.upper=ub
         field.steps=steps
         global nranges
@@ -76,7 +78,7 @@ def add_float_type(config, number, radius,
     f.d_factor.lower=d_factor
     f.interaction_k_factor.lower=interaction_k_factor
     f.interaction_range_factor.lower=interaction_range_factor
-    if(type_name <> None):
+    if type_name != None:
         f.type = type_name
     return f
 
@@ -154,4 +156,4 @@ def write(config):
         #config.dump_interval=1
         f=open(options.quick, "wb")
         f.write(config.SerializeToString())
-    print nranges, "work units"
+    print(nranges, "work units")
