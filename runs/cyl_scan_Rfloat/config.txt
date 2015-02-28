@@ -1,0 +1,411 @@
+kaps_R = 25.00
+interaction_k {
+  lower: 10
+}
+interaction_range {
+  lower: 1
+}
+backbone_k {
+  lower: 1
+}
+time_step_factor {
+  lower: 1
+}
+box_side {
+  lower: 700
+}
+box_is_on {
+  lower: 1
+}
+slab_thickness {
+  lower: 150
+}
+tunnel_radius {
+  lower: 90
+}
+slab_is_on {
+  lower: 1
+}
+slack {
+  lower: 8
+}
+number_of_trials: 1
+maximal_number_of_frames: 1000000000
+fgs {
+  number_of_beads {
+    lower: 20
+  }
+  number {
+    lower: 32
+  }
+  radius {
+    lower: 6
+  }
+  interactions {
+    lower: 1
+  }
+  rest_length_factor {
+    lower: 1.5
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "fg0"
+}
+floaters {
+  number {
+    lower: 1
+  }
+  radius {
+    lower: 25.0
+  }
+  interactions {
+    lower: 12
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 15
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R15"
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 16
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R16"
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 17
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R17"
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 18
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R18"
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 19
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R19"
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 20
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R20"
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 21
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R21"
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 22
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R22"
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 23
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R23"
+}
+floaters {
+  number {
+    lower: 50
+  }
+  radius {
+    lower: 24
+  }
+  interactions {
+    lower: 0
+  }
+  d_factor {
+    lower: 1
+  }
+  interaction_k_factor {
+    lower: 1
+  }
+  interaction_range_factor {
+    lower: 1
+  }
+  type: "R24"
+}
+interactions {
+  type0: "fg0"
+  type1: "R15"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "R16"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "R17"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "R18"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "R19"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "R20"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "R21"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "R22"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "R23"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "R24"
+  is_on {
+    lower: 1
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "kap"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 0.1
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+interactions {
+  type0: "fg0"
+  type1: "fg0"
+  is_on {
+    lower: 1
+  }
+  interaction_k {
+    lower: 0.01
+    upper: 10
+    steps: 7
+    base: 2
+  }
+  interaction_range {
+    lower: 2
+  }
+}
+dump_interval_ns: 250
+nonspecific_range {
+  lower: 2.0
+}
+nonspecific_k {
+  lower: 0.75
+}
+angular_D_factor {
+  lower: 0.3
+}
+statistics_interval_ns: 10
+excluded_volume_k {
+  lower: 20
+}
+simulation_time_ns: 10000
+statistics_fraction {
+  lower: 1.0
+}
+fg_anchor_inflate_factor: 1.0
+are_floaters_on_one_slab_side: 0
+is_exclude_floaters_from_slab_initially: 1
+
