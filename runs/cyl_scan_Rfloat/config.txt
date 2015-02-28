@@ -389,10 +389,10 @@ interactions {
 }
 dump_interval_ns: 250
 nonspecific_range {
-  lower: 2.0
+  lower: 1.0
 }
 nonspecific_k {
-  lower: 0.75
+  lower: 1.5
 }
 angular_D_factor {
   lower: 0.3

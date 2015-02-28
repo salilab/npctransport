@@ -118,8 +118,8 @@ add_interactions_for_fg("fg0", k_kap_lower=0.1)
 #add_interactions_for_fg("fg2", kap_k)
 
 # non-specific attraction
-config.nonspecific_range.lower= 2.0
-config.nonspecific_k.lower= 0.75
+config.nonspecific_range.lower= 1.0
+config.nonspecific_k.lower= 1.5
 
 interactionFG_FG= IMP.npctransport.add_interaction(config,
                                                    name0= "fg0",
