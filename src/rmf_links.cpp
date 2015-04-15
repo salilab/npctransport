@@ -30,9 +30,9 @@ HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
 }
 
 void HierarchyWithSitesLoadLink::do_load_hierarchy(
-    RMF::NodeConstHandle root_node, kernel::Model *m,
-    kernel::ParticleIndex root) {
-  BOOST_FOREACH(kernel::ParticleIndex pi, particles_.find(root)->second) {
+    RMF::NodeConstHandle root_node, Model *m,
+    ParticleIndex root) {
+  BOOST_FOREACH(ParticleIndex pi, particles_.find(root)->second) {
     // load particle transport directionality if needed
     RMF::NodeConstHandle nh = rmf::get_node_from_association(
         root_node.get_file(), m->get_particle(pi));
@@ -77,9 +77,9 @@ void HierarchyWithSitesLoadLink::do_load_hierarchy(
   }
 }
 
-void HierarchyWithSitesLoadLink::do_link_particle(kernel::Model *m,
-                                                  kernel::ParticleIndex root,
-                                                  kernel::ParticleIndex p,
+void HierarchyWithSitesLoadLink::do_link_particle(Model *m,
+                                                  ParticleIndex root,
+                                                  ParticleIndex p,
                                                   RMF::NodeConstHandle node) {
   if (atom::Hierarchy(m, p).get_number_of_children() == 0 &&
       core::Typed::get_is_setup(m, p)) {
@@ -122,9 +122,9 @@ std::pair<double, algebra::Vector3Ds> HierarchyWithSitesSaveLink::get_sites(
   }
 }
 
-void HierarchyWithSitesSaveLink::do_setup_node(kernel::Model *m,
-                                             kernel::ParticleIndex root,
-                                             kernel::ParticleIndex cur,
+void HierarchyWithSitesSaveLink::do_setup_node(Model *m,
+                                             ParticleIndex root,
+                                             ParticleIndex cur,
                                              RMF::NodeHandle cur_node) {
   if (!sd_ && m->get_has_attribute(get_simulation_data_key(), cur)) {
     Object *o = m->get_attribute(get_simulation_data_key(), cur);
@@ -147,10 +147,10 @@ void HierarchyWithSitesSaveLink::do_setup_node(kernel::Model *m,
   }
 }
 
-void HierarchyWithSitesSaveLink::do_save_hierarchy(kernel::Model *m,
-                                                   kernel::ParticleIndex root,
+void HierarchyWithSitesSaveLink::do_save_hierarchy(Model *m,
+                                                   ParticleIndex root,
                                                    RMF::NodeHandle root_node) {
-  BOOST_FOREACH(kernel::ParticleIndex p, particles_.find(root)->second) {
+  BOOST_FOREACH(ParticleIndex p, particles_.find(root)->second) {
     RMF::NodeHandle n = rmf::get_node_from_association(root_node.get_file(),
                                                  m->get_particle(p));
     if (Transporting::get_is_setup(m, p)) {

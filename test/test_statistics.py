@@ -145,7 +145,7 @@ class Tests(IMP.test.TestCase):
             d.set_coordinates(v)
             rb.add_member(pc)
         # to make sure coordinates get updated
-        cr= IMP.kernel._ConstRestraint(0, rb.get_rigid_members())
+        cr= IMP._ConstRestraint(0, rb.get_rigid_members())
         m.add_restraint(cr)
         dd= IMP.atom.RigidBodyDiffusion.setup_particle(p)
         nD=10.0*dd.get_rotational_diffusion_coefficient()
