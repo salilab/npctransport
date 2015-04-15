@@ -112,7 +112,7 @@ double SlabSingletonScore::evaluate_index(Model *m, const ParticleIndex pi,
 
 ModelObjectsTemp SlabSingletonScore::do_get_inputs(
     Model *m, const ParticleIndexes &pis) const {
-  return IMP::kernel::get_particles(m, pis);
+  return IMP::get_particles(m, pis);
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

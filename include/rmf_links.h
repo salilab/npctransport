@@ -27,15 +27,15 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   RMF::IntKey n_entries_top_key_;
   // optimization data:
   RMF::IntKey coordinates_are_optimized_key_;
-  boost::unordered_map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
+  boost::unordered_map<ParticleIndex, ParticleIndexes> particles_;
 
  protected:
-  virtual void do_link_particle(kernel::Model *m, kernel::ParticleIndex root,
-                                kernel::ParticleIndex cur,
+  virtual void do_link_particle(Model *m, ParticleIndex root,
+                                ParticleIndex cur,
                                 RMF::NodeConstHandle node) IMP_OVERRIDE;
 
-  virtual void do_setup_particle(kernel::Model* m, kernel::ParticleIndex root,
-                                 kernel::ParticleIndex cur,
+  virtual void do_setup_particle(Model* m, ParticleIndex root,
+                                 ParticleIndex cur,
                                  RMF::NodeConstHandle node) IMP_OVERRIDE {
     IMP_NOT_IMPLEMENTED;
     IMP_UNUSED(m);     IMP_UNUSED(root);
@@ -48,8 +48,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
       ParticleTransportStatisticsOptimizerState)
   */
   virtual void do_load_hierarchy(RMF::NodeConstHandle root_node,
-                                 kernel::Model *m,
-                                 kernel::ParticleIndex pi) IMP_OVERRIDE;
+                                 Model *m,
+                                 ParticleIndex pi) IMP_OVERRIDE;
 
  public:
   HierarchyWithSitesLoadLink(RMF::FileConstHandle fh);
@@ -68,20 +68,20 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
   // optimization data:
   RMF::IntKey coordinates_are_optimized_key_;
 
-  boost::unordered_map<kernel::ParticleIndex, kernel::ParticleIndexes> particles_;
+  boost::unordered_map<ParticleIndex, ParticleIndexes> particles_;
 
   std::pair<double, algebra::Vector3Ds> get_sites(core::ParticleType t) const;
   // for testing without sd
   boost::unordered_map<core::ParticleType, std::pair<double, algebra::Vector3Ds> > sites_;
 
  protected:
-  virtual void do_setup_node(kernel::Model *m, kernel::ParticleIndex root,
-                           kernel::ParticleIndex cur,
+  virtual void do_setup_node(Model *m, ParticleIndex root,
+                           ParticleIndex cur,
                            RMF::NodeHandle cur_node) IMP_OVERRIDE;
 
   /** save the values of a hierarchy
   */
-  virtual void do_save_hierarchy(kernel::Model *m, kernel::ParticleIndex root,
+  virtual void do_save_hierarchy(Model *m, ParticleIndex root,
                                  RMF::NodeHandle root_node) IMP_OVERRIDE;
 
  public:

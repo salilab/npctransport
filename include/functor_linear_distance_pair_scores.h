@@ -34,7 +34,7 @@ class FunctorLinearSoftSpherePairScore
 #ifndef SWIG
       IMP::score_functor::DistancePairScore<LinearSoftSphereScore>
 #else
-      IMP::kernel::PairScore
+      IMP::PairScore
 #endif
       {
   typedef IMP::score_functor::DistancePairScore<LinearSoftSphereScore> P;
@@ -107,7 +107,7 @@ class FunctorLinearInteractionPairScore
 #ifndef SWIG
       IMP::score_functor::DistancePairScore<LinearInteractionScore>
 #else
-      IMP::kernel::PairScore
+      IMP::PairScore
 #endif
       {
   typedef IMP::score_functor::DistancePairScore<LinearInteractionScore> P;

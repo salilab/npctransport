@@ -80,7 +80,7 @@ class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const
       IMP_OVERRIDE
-  { return IMP::kernel::get_particles(m, pis);  }
+  { return IMP::get_particles(m, pis);  }
 
   IMP_SINGLETON_SCORE_METHODS(ZBiasSingletonScore);
   IMP_OBJECT_METHODS(ZBiasSingletonScore);
