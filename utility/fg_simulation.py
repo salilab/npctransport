@@ -16,7 +16,7 @@ import IMP.atom
 import IMP.display
 import IMP.container
 import IMP
-import IMP.base
+import IMP
 import IMP.npctransport
 #import IMP.benchmark
 #import IMP.example
@@ -346,7 +346,7 @@ color_fgs( sd )
 ntrials = sd.get_number_of_trials()
 print "Number of trials: ", ntrials
 for i in range(ntrials):
-    clc = IMP.base.CreateLogContext("iteration")
+    clc = IMP.CreateLogContext("iteration")
     if(not flags.quick): # TODO: why is that?
         sd.reset_rmf()
     print "Initializing..."

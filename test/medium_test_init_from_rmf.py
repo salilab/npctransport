@@ -5,13 +5,13 @@ import RMF
 import IMP.rmf
 import IMP.container
 import math
-import IMP.base
+import IMP
 from IMP.npctransport import *
 
 class Tests(IMP.test.TestCase):
 
     def _make_and_run_simulation(self, output_pb_file, output_rmf_file, seed):
-        IMP.base.random_number_generator.seed( seed )
+        IMP.random_number_generator.seed( seed )
         config= IMP.npctransport.get_data_path( "quick2.pb" )
         IMP.set_log_level( IMP.SILENT );
         print("assigning parameter ranges")
@@ -55,7 +55,7 @@ class Tests(IMP.test.TestCase):
         IMP.set_log_level( IMP.SILENT );
         # First simulation with one seed:
         output_pb1= self.get_tmp_file_name( "output1.pb" );
-        output_rmf1= IMP.base.create_temporary_file_name( "output", ".rmf" );
+        output_rmf1= IMP.create_temporary_file_name( "output", ".rmf" );
         print("Starting first simulation with RMF file " + output_rmf1)
         sd = self._make_and_run_simulation( output_pb1, output_rmf1, seed = 1)
         e1 = sd.get_bd().get_scoring_function().evaluate(False)
@@ -66,7 +66,7 @@ class Tests(IMP.test.TestCase):
 
         # Second simulation with another seed:
         output_pb2= self.get_tmp_file_name( "output2.pb" );
-        output_rmf2= IMP.base.create_temporary_file_name( "output2", ".rmf" );
+        output_rmf2= IMP.create_temporary_file_name( "output2", ".rmf" );
         print("*** Starting second simulation with RMF file " + output_rmf2)
         print("YYY")
         sd = self._make_and_run_simulation( output_pb2, output_rmf2, seed = 2)

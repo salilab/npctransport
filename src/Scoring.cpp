@@ -313,7 +313,7 @@ Scoring::add_chain_restraints(FGChain* chain)
 {
   IMP_ALWAYS_CHECK( chain->get_rest_length_factor() > 0,
                     "non-positive rest length factor is not valid",
-                    IMP::base::ValueException );
+                    IMP::ValueException );
   if(chain->get_backbone_k() <= 0 ){
     chain->set_backbone_k( get_default_backbone_k() );
   }

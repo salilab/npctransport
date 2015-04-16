@@ -76,7 +76,7 @@ SitesPairScore::SitesPairScore(double range, double k,
   cur_cache_id_(INVALID_CACHE_ID)
 {
   // IMP_ALWAYS_CHECK(range2_skew > 0.0 && k_skew > 0.0,
-  //                  "Skew must be positive", base::ValueException);
+  //                  "Skew must be positive", ValueException);
   is_skewed_ = (range2_skew != 0.0 && k_skew != 0.0);
   if(is_skewed_){
     double kN = sqrt(k / k_skew);

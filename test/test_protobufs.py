@@ -2,7 +2,7 @@ from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
-import IMP.base
+import IMP
 import math
 
 radius=5
@@ -45,7 +45,7 @@ class ConeTests(IMP.test.TestCase):
     def test_1(self):
         """Check creating a configuration and assigning values"""
         seed = 1.0 # use time instead?
-        IMP.base.random_number_generator.seed(seed)
+        IMP.random_number_generator.seed(seed)
         config_name= self.get_tmp_file_name("configuration.pb")
         self._make_config(config_name)
         assignment_name= self.get_tmp_file_name("assignment.pb")

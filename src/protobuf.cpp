@@ -149,7 +149,7 @@ Ranges get_ranges(std::string name, const Message* message,
   Ranges get_ranges(std::string name, const Message* message,
                     Message* out_message) {
     std::string contextname = (std::string("get_ranges: ") + name);
-    IMP::base::CreateLogContext gr(contextname.c_str());
+    IMP::CreateLogContext gr(contextname.c_str());
     const Reflection* r(message->GetReflection());
     const Reflection* out_r(out_message->GetReflection());
     /*IMP_LOG(VERBOSE, "Inspecting " << name << " "
@@ -335,7 +335,7 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   npctransport_proto::Output output;
   npctransport_proto::Assignment& assignment = *output.mutable_assignment();
   output.mutable_statistics(); // create if not there
-  base::SetLogState sls(base::WARNING);
+  SetLogState sls(WARNING);
   Ranges ranges = get_ranges("all", &config, &assignment);
   /*for (unsigned int i=0; i< ranges.size(); ++i) {
     std::cout << ranges[i].lb << " " << ranges[i].ub << " " << ranges[i].steps
@@ -395,7 +395,7 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
           has_type = ( assignment.fgs(i).type() != "" );
         }
         IMP_ALWAYS_CHECK(has_type, "fg " << i << " lacking type",
-                         base::ValueException);
+                         ValueException);
       } // for i
     for (int i = 0; i < assignment.floaters_size(); ++i)
       {
@@ -404,7 +404,7 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
           has_type = (assignment.floaters(i).type() != "" );
         }
         IMP_ALWAYS_CHECK(has_type, "floater " << i << " lacking type",
-                         base::ValueException);
+                         ValueException);
       } // for i
     // // Make sure skew is positive - if not set to 1.0 (neutral skew)
     // for (int i = 0; i < assignment.interactions_size(); ++i)
@@ -441,10 +441,10 @@ int get_number_of_work_units(std::string assignment_file) {
   config.ParseFromIstream(&in);
   npctransport_proto::Assignment assignment;
 <<<<<<< HEAD
-  base::SetLogState sls(VERBOSE);
+  SetLogState sls(VERBOSE);
   Ranges ranges = get_ranges("all", &input, &assignment);
 =======
-  base::SetLogState sls(base::VERBOSE);
+  SetLogState sls(VERBOSE);
   Ranges ranges = get_ranges("all", &config, &assignment);
 >>>>>>> added parametrization to TAMD temperature, friction and spring constant parameters + minor formatting, edits
   Floats values;

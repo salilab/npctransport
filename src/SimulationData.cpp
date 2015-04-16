@@ -92,7 +92,7 @@ void SimulationData::initialize(std::string prev_output_file,
   bool read = pb_data.ParseFromIstream(&file);
   if (!read) {
     IMP_THROW("Unable to read data from protobuf" << prev_output_file,
-              base::IOException);
+              IOException);
   }
   pb_data.mutable_statistics(); // create it if not there
   const ::npctransport_proto::Assignment &
@@ -144,10 +144,10 @@ void SimulationData::initialize(std::string prev_output_file,
       IMP_ALWAYS_CHECK(pb_assignment.fgs(i).has_type(),
                        "old or corrupt assignment file"
                        << ", which lacks fg types" << std::endl,
-                       base::ValueException);
+                       ValueException);
       IMP_ALWAYS_CHECK(pb_assignment.fgs(i).type() != "",
                        "FG should've been assigned a valued type,"
-                       " possiblu thru protobuf.h", base::ValueException);
+                       " possiblu thru protobuf.h", ValueException);
       create_fgs(pb_assignment.fgs(i));
     }
   for (int i = 0; i < pb_assignment.floaters_size(); ++i)
@@ -156,7 +156,7 @@ void SimulationData::initialize(std::string prev_output_file,
       IMP_ALWAYS_CHECK(pb_assignment.floaters(i).has_type(),
                        "old or corrupt assignment file"
                        << ", which lacks floater types"
-                       << std::endl, base::ValueException);
+                       << std::endl, ValueException);
       IMP_USAGE_CHECK( pb_assignment.floaters(i).type() != "",
                        "Floater should've been assigned a type"
                        << " thru protobuf.h");
@@ -208,12 +208,12 @@ void SimulationData::create_fgs
 {
   // Save type:
   IMP_ALWAYS_CHECK(fg_data.has_type(), "fg type missing in fg_data",
-                   base::ValueException)
+                   ValueException)
     core::ParticleType fg_type(fg_data.type());
   IMP_ALWAYS_CHECK( fg_types_.find(fg_type) == fg_types_.end(),
                     "Currently support only single insertion of each type,"
                     " can be fixed if needed in the future",
-                    base::ValueException);
+                    ValueException);
   fg_types_.insert(fg_type);
 
   // Make main root:
@@ -225,7 +225,7 @@ void SimulationData::create_fgs
 
   // Add n chains:
   for (int j = 0; j < fg_data.number().value(); ++j) {
-    base::Pointer<FGChain> chain= create_fg_chain
+    Pointer<FGChain> chain= create_fg_chain
       (this, chains_root, fg_data, display::Color(.3, .3, .3));
     beads_ += chain->get_beads(); // book keeping
     // set chain j anchors by fg_data if specified
@@ -275,7 +275,7 @@ void SimulationData::create_floaters
   }
   IMP_ALWAYS_CHECK( floater_types_.find(type) == floater_types_.end(),
                     "Currently support only single insertion of each type,"
-                    " can be fixed in the future", base::ValueException);
+                    " can be fixed in the future", ValueException);
   floater_types_.insert(type);
 
   // Main root for type:
@@ -585,7 +585,7 @@ atom::Hierarchy
     }
   }
   IMP_THROW("particle type " << type << " not found",
-            base::ValueException);
+            ValueException);
 }
 
 void SimulationData::reset_rmf() {
@@ -678,7 +678,7 @@ void SimulationData::set_sites(core::ParticleType t, int n,
   }
   if(n == -1 ||  r == 0.0) { // centered at bead
     IMP_ALWAYS_CHECK(n<2, "Cannot set more than one site at bead center",
-                     base::ValueException);
+                     ValueException);
     algebra::Sphere3D zero(algebra::Vector3D(0,0,0), sr);
     sites_[t] = algebra::Sphere3Ds(1, zero);
   }

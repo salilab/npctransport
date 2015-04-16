@@ -29,8 +29,8 @@ int do_it(IMP::Pointer<IMP::npctransport::SimulationData> sd) {
   IMP::atom::Hierarchies chain_roots = sd->get_fg_chain_roots();
   // create a set of random sites (for now)
   IMP::algebra::Vector2Ds sites;
-  std::cout << IMP::base::Showable(sites) << std::endl;
-  base::Pointer<FGChain> chain = get_fg_chain(chain_roots[0]);
+  std::cout << IMP::Showable(sites) << std::endl;
+  Pointer<FGChain> chain = get_fg_chain(chain_roots[0]);
   double r = IMP::core::XYZR(chain->get_bead(0)).get_radius();
   std::cout << "Base is " << base << std::endl;
   do {
@@ -51,7 +51,7 @@ int do_it(IMP::Pointer<IMP::npctransport::SimulationData> sd) {
   // anchor each fg chain to the (x,y) site (only by x,y coords,
   // all anchored to the same z plane)
   for (unsigned int i = 0; i < chain_roots.size(); ++i) {
-    base::Pointer<FGChain> chain = get_fg_chain(chain_roots[i]);
+    Pointer<FGChain> chain = get_fg_chain(chain_roots[i]);
     IMP::core::XYZ d(chain->get_bead(0));
     d.set_coordinates(
         Vector3D(sites[i][0], sites[i][1], sd->get_box().get_corner(0)[2]));

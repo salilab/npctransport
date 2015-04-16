@@ -11,7 +11,7 @@
 #include <IMP/atom/CenterOfMass.h>
 #include <IMP/atom/Mass.h>
 #include <IMP/atom/TAMDParticle.h>
-#include <IMP/base/Pointer.h>
+#include <IMP/Pointer.h>
 #include <IMP/core/ChildrenRefiner.h>
 #include <IMP/core/PairRestraint.h>
 #include <IMP/core/rigid_bodies.h>
@@ -56,7 +56,7 @@ void TAMDChain::add_children
   int n_left = n;
   while(n_left > 0){
     int n1 = n1_base + (n_excess-- > 0 ? 1 : 0); // actual beads per child
-    base::Pointer<TAMDChain> child_chain =
+    Pointer<TAMDChain> child_chain =
       create_tamd_chain(pf, n1, d, T_factors, F_factors1, Ks1);
     n_left -= n1;
     get_root().add_child( child_chain->get_root() );
@@ -69,7 +69,7 @@ void TAMDChain::add_children
   }
 
   // Setup root as center of mass of its children:
-  // base::Pointer<core::ChildrenRefiner> refiner =
+  // Pointer<core::ChildrenRefiner> refiner =
   //  new core::ChildrenRefiner( atom::Hierarchy::get_default_traits() );
   atom::CenterOfMass::setup_particle(get_root(),
                                      get_root().get_children());
@@ -142,9 +142,9 @@ create_tamd_chain( ParticleFactory* pf,
                                         image_name,
                                         T_factors[0],
                                         F_factors[0]);
-  base::Pointer<core::HarmonicDistancePairScore> tamd_spring=
+  Pointer<core::HarmonicDistancePairScore> tamd_spring=
     new core::HarmonicDistancePairScore(0, Ks[0]);
-  base::Pointer<IMP::Restraint> tamd_restraint = new core::PairRestraint
+  Pointer<IMP::Restraint> tamd_restraint = new core::PairRestraint
     ( tamd_spring, ParticlePair(root, image), image_name );
 
   // build TAMD chain object with children and return it:

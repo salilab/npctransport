@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Add cylinders of a given radius to the passed file."""
-import IMP.base
+import IMP
 import RMF
 from IMP.npctransport import *
 import sys
@@ -116,16 +116,16 @@ fg_color=[255.0/255, 204.0/255 , 102.0/255]
 kap_color=[128.0/255, 0, 64.0/255]
 crap_color=[70.0/255, 90.0/255, 220.0/255]
 def main():
-    IMP.base.add_string_flag("input", "", "The RMF file to add cylinders to.")
-    IMP.base.add_string_flag("ref_output", "", "reference output file from which info e.g. fg nup types can be extracted")
-    IMP.base.add_float_flag("radius", 5, "The radius of the cylinder.")
-    IMP.base.add_float_flag("site_radius", 2, "The radius of the sites.")
-    IMP.base.add_bool_flag("recolor_fgs", "recolor fg nup chains")
-    IMP.base.add_bool_flag("recolor_floats", "recolor floating (diffusing) molecules")
-    IMP.base.setup_from_argv(sys.argv, "Prettify a movie")
-    fh= RMF.open_rmf_file(IMP.base.get_string_flag("input"))
-    ref_output = IMP.base.get_string_flag("ref_output")
-    radius= IMP.base.get_float_flag("radius")
+    IMP.add_string_flag("input", "", "The RMF file to add cylinders to.")
+    IMP.add_string_flag("ref_output", "", "reference output file from which info e.g. fg nup types can be extracted")
+    IMP.add_float_flag("radius", 5, "The radius of the cylinder.")
+    IMP.add_float_flag("site_radius", 2, "The radius of the sites.")
+    IMP.add_bool_flag("recolor_fgs", "recolor fg nup chains")
+    IMP.add_bool_flag("recolor_floats", "recolor floating (diffusing) molecules")
+    IMP.setup_from_argv(sys.argv, "Prettify a movie")
+    fh= RMF.open_rmf_file(IMP.get_string_flag("input"))
+    ref_output = IMP.get_string_flag("ref_output")
+    radius= IMP.get_float_flag("radius")
     print "opened", fh.get_name()
     cf = RMF.CylinderFactory(fh)
     rff = RMF.ReferenceFrameFactory(fh)
@@ -137,18 +137,18 @@ def main():
 
     fh.set_current_frame(RMF.ALL_FRAMES)
 
-    if(IMP.base.get_bool_flag("recolor_floats")):
+    if(IMP.get_bool_flag("recolor_floats")):
         _recolor(fh.get_root_node(), tf, cdf, floater_types[0:1], kap_color)
         _recolor(fh.get_root_node(), tf, cdf, floater_types[1:], crap_color)
 
-    _resize_sites(fh.get_root_node(), bf, IMP.base.get_float_flag("site_radius"))
+    _resize_sites(fh.get_root_node(), bf, IMP.get_float_flag("site_radius"))
 
     cylinders = []
     for i, type in enumerate(fg_types):
         color = IMP.display.get_display_color(i)
         rgb = [color.get_red(), color.get_green(), color.get_blue()]
         cylinders += _add_nodes(fh.get_root_node(), cf, cdf, tf, [type], radius, rgb) # fg_color
-        if(IMP.base.get_bool_flag("recolor_fgs")):
+        if(IMP.get_bool_flag("recolor_fgs")):
             _recolor(fh.get_root_node(), tf, cdf, [type], rgb) # fg_color
 
     for i in range(0, fh.get_number_of_frames()):

@@ -14,7 +14,7 @@
 #include "linear_distance_pair_scores.h"
 #include "npctransport_proto.fwd.h"
 #include "Parameter.h"
-//#include "SimulationData.h"
+// #include "SimulationData.h"
 #include "SlabSingletonScore.h"
 
 #include <IMP/Model.h>
@@ -102,7 +102,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   // a map from particle indexes of chain identifiers to corresponding
   // chain backbone restraints (see chain_ids_map)
   typedef boost::unordered_set
-    < base::PointerMember<FGChain> > FGChainsSet;
+    < PointerMember<FGChain> > FGChainsSet;
   FGChainsSet chains_set_;
   // a map from particle indexes of chain beads to the chain objects that they
   // represent (TODO: probably can be obliterated by adding appropriate

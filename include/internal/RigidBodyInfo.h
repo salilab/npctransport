@@ -11,7 +11,7 @@
 
 #include "../npctransport_config.h"
 #include <IMP/core/rigid_bodies.h>
-#include <IMP/base/check_macros.h>
+#include <IMP/check_macros.h>
 #include <boost/current_function.hpp>
 
 IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE

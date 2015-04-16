@@ -119,14 +119,14 @@ IMP::AddBoolFlag show_work_units_adder
   "Show the number of work units" ,
   &show_number_of_work_units);
 double short_init_factor = 1.0;
-base::AddFloatFlag short_init_adder
+AddFloatFlag short_init_adder
 ( "short_init_factor",
   "Run an abbreviated version of system initialization, which takes"
   " a fraction of a full initialization, in the range (0.0..1.0]"
   " [default=1.0]",
   &short_init_factor);
 double short_sim_factor = 1.0;
-base::AddFloatFlag short_sim_adder
+AddFloatFlag short_sim_adder
 ( "short_sim_factor",
   "Run an abbreviated version of the simulation, which takes"
   " a fraction of a full simulation (or more if >1.0)"

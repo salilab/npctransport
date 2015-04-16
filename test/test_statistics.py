@@ -24,7 +24,7 @@ class Tests(IMP.test.TestCase):
     def test_repulsion(self):
         """Check diffusion coefficient estimation"""
         print("TEST_REPULSION")
-        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             print("INTERNAL")
             n_cycles = 1000
             delta_factor = 0.5

@@ -24,7 +24,7 @@
 #include <IMP/generic.h>
 #include <IMP/algebra/vector_search.h>
 #include <IMP/algebra/Transformation3D.h>
-#include <IMP/base/set_map_macros.h>
+#include <IMP/set_map_macros.h>
 #include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/atom/estimates.h>
 #include <boost/unordered_set.hpp>

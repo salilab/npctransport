@@ -53,7 +53,7 @@ class Tests(IMP.test.TestCase):
     def _test_one(self, site_range, site_k, nonspec_range, nonspec_k,
                   soft_sphere_k, dt, ntrial=0):
         nsteps = 250000
-        if(IMP.base.get_check_level() >= IMP.base.USAGE):
+        if(IMP.get_check_level() >= IMP.USAGE):
             nsteps /= 250
         m= IMP.Model()
         m.set_log_level(IMP.PROGRESS)
@@ -109,7 +109,7 @@ class Tests(IMP.test.TestCase):
                 break;
         final_score = bd.get_scoring_function().evaluate(False)
         print("Final distance", distance, "score", final_score)
-#        if(IMP.base.get_check_level() < IMP.base.USAGE):
+#        if(IMP.get_check_level() < IMP.USAGE):
         self.assertAlmostEqual(distance, 2*radius, delta =max_delta)
         self.assertLess(final_score, -0.001)
     def test_one(self):
@@ -129,7 +129,7 @@ class Tests(IMP.test.TestCase):
     def _test_two(self, site_range, site_k, nonspec_range, nonspec_k,
                   soft_sphere_k, dt):
         nsteps = 2000
-        if(IMP.base.get_check_level() >= IMP.base.USAGE):
+        if(IMP.get_check_level() >= IMP.USAGE):
             nsteps /= 10
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
@@ -251,7 +251,7 @@ class Tests(IMP.test.TestCase):
                           nonspec_range, nonspec_k,
                           soft_sphere_k, dt, ntrial=0):
         nsteps = 5000E+6 / dt
-        if(IMP.base.get_check_level() >= IMP.base.USAGE):
+        if(IMP.get_check_level() >= IMP.USAGE):
             nsteps /= 250
         m= IMP.Model()
         m.set_log_level(IMP.PROGRESS)
@@ -320,7 +320,7 @@ class Tests(IMP.test.TestCase):
                 break;
         final_score = bd.get_scoring_function().evaluate(False)
         print "Final distance", distance, "score", final_score
-#        if(IMP.base.get_check_level() < IMP.base.USAGE):
+#        if(IMP.get_check_level() < IMP.USAGE):
         self.assertAlmostEqual(distance, 2*radius, delta =max_delta)
         self.assertLess(final_score, -0.001)
     def test_one_sliding(self):

@@ -17,8 +17,8 @@
 //#include "internal/npctransport.pb.h"
 
 #include <IMP/atom/Hierarchy.h>
-#include <IMP/base/Object.h>
-#include <IMP/base/nullptr.h>
+#include <IMP/Object.h>
+#include <IMP/nullptr.h>
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/display/Color.h>
 
@@ -33,20 +33,20 @@ class SimulationData;
     root - root of hierarchy
     beads - fine chain particles
 */
-class IMPNPCTRANSPORTEXPORT FGChain : public IMP::base::Object {
+class IMPNPCTRANSPORTEXPORT FGChain : public IMP::Object {
 public:
  private:
   // the root particle in the chain hierarchy
-  base::PointerMember<Particle> root_;
+  PointerMember<Particle> root_;
 
   // the restraint on the chain bonds
-  base::PointerMember<Restraint> bonds_restraint_;
+  PointerMember<Restraint> bonds_restraint_;
 
   // the score acting on consecutive chain beads in bonds_restraint_
-  base::PointerMember<LinearWellPairScore> bonds_score_;
+  PointerMember<LinearWellPairScore> bonds_score_;
 
   // container for consecutive (bonded) chain beads
-  base::PointerMember<container::ExclusiveConsecutivePairContainer>
+  PointerMember<container::ExclusiveConsecutivePairContainer>
     bead_pairs_;
 
 
@@ -78,7 +78,7 @@ public:
          double backbone_k = 0.0,
          double rest_length_factor = 1.0,
          std::string name = "chain %1%")
-   : base::Object(name),
+   : Object(name),
     root_(root),
     bonds_restraint_(nullptr),
     bead_pairs_(nullptr)

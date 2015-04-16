@@ -27,7 +27,7 @@
 #include <IMP/flags.h>
 #include <IMP/log.h>
 #include <IMP/log_macros.h>
-//#include <IMP/base/internal/graph_utility.h>
+//#include <IMP/internal/graph_utility.h>
 //#include <IMP/core/RestraintsScoringFunction.h>
 #include <IMP/core/BallMover.h>
 #include <IMP/core/Hierarchy.h>
@@ -45,7 +45,7 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 // bool show_dependency_graph = false;
-// base::AddBoolFlag show_dep_adder("show_dependency_graph",
+// AddBoolFlag show_dep_adder("show_dependency_graph",
 //                                  "Show the dependency graph",
 //                                  &show_dependency_graph);
 
@@ -87,21 +87,21 @@ void optimize_balls(const ParticlesTemp &ps,
                     rmf::SaveOptimizerState *save,
                     atom::BrownianDynamics *bd,
                     FGChains chains,
-                    base::LogLevel ll, bool debug,
+                    LogLevel ll, bool debug,
                     double short_init_factor = 1.0) {
   // make sure that errors and log messages are marked as coming from this
   // function
   IMP_FUNCTION_LOG;
 
-  base::SetLogState sls(ll);
+  SetLogState sls(ll);
   {
     IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.",
-                     IMP::base::ValueException);
+                     IMP::ValueException);
     IMP_ALWAYS_CHECK(bd, "bd optimizer unspecified",
-                     IMP::base::ValueException);
+                     IMP::ValueException);
     IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
                      "short init factor should be in range (0,1]",
-                     IMP::base::ValueException);
+                     IMP::ValueException);
   }
   if(save)
     IMP_LOG(VERBOSE, "BEGIN o_b(): Saver has been called so far " <<
@@ -198,7 +198,7 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
   Hierarchy root = sd.get_root();
   Hierarchies chains = sd.get_fg_chain_roots( );
   for (unsigned int k = 0; k < chains.size(); k++) {
-    base::Pointer<FGChain> cur_chain = get_fg_chain(chains[k]);
+    Pointer<FGChain> cur_chain = get_fg_chain(chains[k]);
     core::XYZ d(cur_chain->get_bead(0));
     IMP_LOG(PROGRESS, "d # " << k << " = " << d << std::endl);
     IMP_LOG(PROGRESS, "is optimizable = " << d.get_coordinates_are_optimized()
@@ -217,7 +217,7 @@ void initialize_positions(SimulationData *sd,
   sd->set_was_used(true);
   IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
                    "short init factor should be in range (0,1]",
-                   IMP::base::ValueException);
+                   IMP::ValueException);
   randomize_particles(sd->get_beads(), sd->get_box());
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
@@ -227,7 +227,7 @@ void initialize_positions(SimulationData *sd,
     IMP::npctransport::internal::TemporarySetOptimizationStateRAII> chain_pins;
   atom::Hierarchies chains = sd->get_fg_chain_roots();
   for (unsigned int i = 0; i < chains.size(); ++i) {
-    base::Pointer<FGChain> chain = get_fg_chain(chains[i]);
+    Pointer<FGChain> chain = get_fg_chain(chains[i]);
     chain_pins.push_back
       ( new IMP::npctransport::internal::TemporarySetOptimizationStateRAII
         (chain->get_bead(0), false) );
@@ -284,7 +284,7 @@ void initialize_positions(SimulationData *sd,
                      sd->get_rmf_sos_writer(),
                      sd->get_bd(),
                      sd->get_scoring()->get_fg_chains(),
-                     base::PROGRESS,
+                     PROGRESS,
                      debug, short_init_factor);
       update_tamd_particles_coords_from_refs( sd->get_root() );
     }
@@ -293,7 +293,7 @@ void initialize_positions(SimulationData *sd,
     ParticlesTemp beads = sd->get_beads(); // that should include obstacles
     ParticlesTemp optimizable_beads =
       get_optimizable_particles( beads );
-    base::Pointer<ScoringFunction> sf =
+    Pointer<ScoringFunction> sf =
       sd->get_scoring()->get_custom_scoring_function
       ( extra_restraints, beads, optimizable_beads,
         false /* no non-bonded attr potential yet */ );
@@ -304,7 +304,7 @@ void initialize_positions(SimulationData *sd,
                    sd->get_rmf_sos_writer(),
                    sd->get_bd(),
                    sd->get_scoring()->get_fg_chains(),
-                   base::PROGRESS,
+                   PROGRESS,
                    debug, short_init_factor);
     update_tamd_particles_coords_from_refs( sd->get_root() );
     IMP_LOG(VERBOSE, "Custom energy after initialization is "
@@ -323,7 +323,7 @@ void initialize_positions(SimulationData *sd,
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->set_period(dump_interval);  // restore output rate
     sd->get_rmf_sos_writer()->update_always("done initializing");
-    IMP_LOG(base::PROGRESS, "init: sos writer set dump interval period "
+    IMP_LOG(PROGRESS, "init: sos writer set dump interval period "
             << dump_interval << std::endl);
   }
   print_fgs(*sd);

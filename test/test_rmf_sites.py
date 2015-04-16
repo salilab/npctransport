@@ -4,7 +4,7 @@ import IMP.test
 import IMP.npctransport
 import RMF
 import math
-import IMP.base
+import IMP
 
 
 class ConeTests(IMP.test.TestCase):
@@ -12,7 +12,7 @@ class ConeTests(IMP.test.TestCase):
      print("p")
      RMF.set_log_level("Trace")
      seed = 1.0 # use time instead?
-     IMP.base.random_number_generator.seed( seed )
+     IMP.random_number_generator.seed( seed )
       # create sim data and write to file then check
      config= IMP.npctransport.Configuration()
      IMP.npctransport.set_default_configuration(config)
@@ -39,7 +39,7 @@ class ConeTests(IMP.test.TestCase):
      self.assertEqual(len(sites), 2)
      del back
      del cfg
-     IMP.base.set_log_level(IMP.base.MEMORY)
+     IMP.set_log_level(IMP.MEMORY)
      #del sd
      del fg
      for n in dir():

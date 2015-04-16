@@ -1,6 +1,6 @@
 from __future__ import print_function
 from IMP.npctransport import *
-import IMP.base
+import IMP
 import IMP.test
 import IMP.core
 import sys
@@ -129,7 +129,7 @@ class Tests(IMP.test.TestCase):
         in the context of simualtion data optimization
         '''
 
-        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             print("SLOW MODE")
             fast = False
             short_init_factor=0.0001
@@ -158,13 +158,13 @@ class Tests(IMP.test.TestCase):
         sd.set_rmf_file(rmf_file, False)
         self._assert_kap_in_place(sd, False)
         # init and run
-        IMP.base.set_log_level(IMP.base.SILENT)
-        sd.get_bd().set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
+        sd.get_bd().set_log_level(IMP.SILENT)
         IMP.npctransport.initialize_positions( sd, [], False,
                                                short_init_factor)
         print()
         print()
-#        IMP.base.set_log_level(IMP.base.PROGRESS)
+#        IMP.set_log_level(IMP.PROGRESS)
         sd.write_geometry(pymol_file)
         n_good=0
         timer= IMP.npctransport.timer();

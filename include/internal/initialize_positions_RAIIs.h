@@ -18,10 +18,10 @@
 #include <IMP/Optimizer.h>
 #include <IMP/ScoringFunction.h>
 #include <IMP/atom/BrownianDynamics.h>
-#include <IMP/base/exception.h>
-#include <IMP/base/Pointer.h>
-#include <IMP/base/RAII.h>
-#include <IMP/base/raii_macros.h>
+#include <IMP/exception.h>
+#include <IMP/Pointer.h>
+#include <IMP/RAII.h>
+#include <IMP/raii_macros.h>
 #include <IMP/core/DistancePairScore.h>
 #include <IMP/core/XYZ.h>
 #include <cmath>
@@ -35,10 +35,10 @@ An RAII class for rescaling the rest length of an FGChain
     Restores the original value upon destruction
 */
 class FGChainScaleRestLengthRAII
-: public base::RAII
+: public RAII
 {
 private:
-  base::PointerMember< FGChain > chain_;
+  PointerMember< FGChain > chain_;
   double orig_;
   bool was_set_;
 
@@ -71,10 +71,10 @@ An RAII class for rescaling the bond force constant k of an FGChain
     Restores the original value upon destruction
 */
 class FGChainScaleBackboneKRAII
-: public base::RAII
+: public RAII
 {
 private:
-  base::PointerMember< FGChain > chain_;
+  PointerMember< FGChain > chain_;
   double orig_;
   bool was_set_;
 
@@ -108,10 +108,10 @@ private:
     set()). Restores the original value upon destruction
 */
 class TAMDChainScaleKRAII
-: public base::RAII
+: public RAII
 {
 private:
-  base::PointerMember< internal::TAMDChain > chain_;
+  PointerMember< internal::TAMDChain > chain_;
   Floats origs_;
   bool was_set_;
 
@@ -154,10 +154,10 @@ private:
 /** An RAII class for temporarily changing the scoring function
     of an optimizer
 */
-class OptimizerSetTemporaryScoringFunctionRAII: public base::RAII {
+class OptimizerSetTemporaryScoringFunctionRAII: public RAII {
 
-  base::PointerMember< IMP::ScoringFunction > orig_sf_;
-  base::PointerMember< IMP::Optimizer > o_;
+  PointerMember< IMP::ScoringFunction > orig_sf_;
+  PointerMember< IMP::Optimizer > o_;
   bool was_set_;
 
  public:
@@ -185,10 +185,10 @@ class OptimizerSetTemporaryScoringFunctionRAII: public base::RAII {
 /** An RAII class for temporarily changing the temperature
     of a BrownianDynamics object
 */
-  class BDSetTemporaryTemperatureRAII : public base::RAII {
+  class BDSetTemporaryTemperatureRAII : public RAII {
 
   double orig_temp_;
-    base::PointerMember
+    PointerMember
     < IMP::atom::BrownianDynamics > bd_;
   bool was_set_;
 
@@ -216,9 +216,9 @@ class OptimizerSetTemporaryScoringFunctionRAII: public base::RAII {
 
 /** An RAII class for temporarily setting the optimization stsate of particles
 */
-class TemporarySetOptimizationStateRAII: public base::RAII {
+class TemporarySetOptimizationStateRAII: public RAII {
   bool orig_;
-  IMP::base::WeakPointer<IMP::Model> m_;
+  IMP::WeakPointer<IMP::Model> m_;
   IMP::ParticleIndex pi_;
   bool was_set_;
 
@@ -235,7 +235,7 @@ class TemporarySetOptimizationStateRAII: public base::RAII {
         pi_ = pa.get_particle_index();
         IMP_ALWAYS_CHECK(core::XYZ::get_is_setup( m_, pi_ ),
                          "p is not XYZ - can't set coordinates opt state",
-                         IMP::base::ValueException);
+                         IMP::ValueException);
         core::XYZ xyz( m_, pi_ );
         orig_ = xyz.get_coordinates_are_optimized();
         xyz.set_coordinates_are_optimized( is_optimized );

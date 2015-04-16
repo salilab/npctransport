@@ -19,7 +19,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 
-class IMPNPCTRANSPORTEXPORT ParticleFactory : public IMP::base::Object {
+class IMPNPCTRANSPORTEXPORT ParticleFactory : public IMP::Object {
  public:
   /** The simulation data whose model is associated with new particle
   */
@@ -68,7 +68,7 @@ class IMPNPCTRANSPORTEXPORT ParticleFactory : public IMP::base::Object {
                  core::ParticleType type,
                  std::string name = "Particle factory %1%")
    :
-  IMP::base::Object(name),
+  IMP::Object(name),
     sd_(sd),
     radius_(radius),
     D_factor_(D_factor),

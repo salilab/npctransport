@@ -92,7 +92,7 @@ void Statistics::add_fg_chain_stats
     Particle* p = chain_beads[k];
     IMP_ALWAYS_CHECK( core::Typed(p).get_type() == type,
                       "All beads in chain must be of same type for now",
-                      base::ValueException);
+                      ValueException);
     IMP_NEW(BodyStatisticsOptimizerState, bsos,
             ( p, statistics_interval_frames_ ) );
     fgs_bodies_stats_map_[type].back().push_back( bsos );
@@ -163,7 +163,7 @@ OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
   if(o == nullptr) o = get_sd()->get_bd();
   IMP_ALWAYS_CHECK( o, "null optimizer in add_optimizer_states()"
                     " and get_sd()->get_bd() is invalid",
-                    base::ValueException);
+                    ValueException);
   OptimizerStates ret;
   for (FGsBodyStatisticsOSsMap::iterator iter = fgs_bodies_stats_map_.begin();
        iter != fgs_bodies_stats_map_.end(); iter++)
@@ -237,7 +237,7 @@ void Statistics::update_fg_stats
         double avg_length = 0.0;
         for (unsigned int j = 0; j < chains_i.size(); ++j)
           {
-            base::Pointer<FGChain> chain_ij= get_fg_chain(chains_i[j]);
+            Pointer<FGChain> chain_ij= get_fg_chain(chains_i[j]);
             fill_in_zr_hist(zr_hist, chain_ij->get_beads());
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
             double volume_ij =
@@ -468,7 +468,7 @@ void Statistics::update
                     << pOutStats_i->type0() << ", " << pOutStats_i->type1()
                     << "] and bps_i " << s_type0 << ", " << s_type1 << "]"
                     << std::endl,
-                base::ValueException);
+                ValueException);
     }
     // some preparations
     Int n0 = bps_i->get_number_of_particles_1();
@@ -673,7 +673,7 @@ Statistics::get_interactions_and_interacting
     bool floater_found = false;
     for (unsigned int j = 0; j < chain_roots.size(); ++j) {
       bool chain_found = false;
-      base::Pointer<FGChain> cur_chain= get_fg_chain(chain_roots[j]);
+      Pointer<FGChain> cur_chain= get_fg_chain(chain_roots[j]);
       Particles const& chain_particles = cur_chain->get_beads();
       for (unsigned int k = 0; k < chain_particles.size(); ++k) {
         int num = get_number_of_interactions

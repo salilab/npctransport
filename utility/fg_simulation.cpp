@@ -59,11 +59,11 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
   // anchor fgs to surface,
   // for now using random non-overlapping points
   // create a set of random sites (for now)
-  base::Pointer<npctransport::FGChain> first_chain =
+  Pointer<npctransport::FGChain> first_chain =
     npctransport::get_fg_chain(chain_roots[0]);
   double r = core::XYZR(first_chain->get_bead(0)).get_radius();
   Vector2Ds sites;
-  std::cout << IMP::base::Showable(sites) << std::endl;
+  std::cout << IMP::Showable(sites) << std::endl;
   while (sites.size() < chain_roots.size()) {
     Vector2D cur = get_random_vector_in(surface);
     bool bad = false;
@@ -81,7 +81,7 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
   }
   // anchor each fg chain to a site
   for (unsigned int i = 0; i < chain_roots.size(); ++i) {
-    base::Pointer<npctransport::FGChain> chain =
+    Pointer<npctransport::FGChain> chain =
       npctransport::get_fg_chain((chain_roots[i]));
     core::XYZ d(chain->get_bead(0));
     d.set_coordinates(
@@ -169,7 +169,7 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
       double angle = k * angle_increments;
       algebra::Vector3D new_anchor =
           cyl.get_inner_point_at(relative_h, relative_r, angle);
-      base::Pointer<npctransport::FGChain> cur_chain =
+      Pointer<npctransport::FGChain> cur_chain =
         npctransport::get_fg_chain(chain_roots[chain_num]);
       core::XYZ d(cur_chain->get_bead(0));
       d.set_coordinates(new_anchor);
@@ -222,7 +222,7 @@ IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
 
     Hierarchies chains = sd.get_fg_chain_roots();
     for (unsigned int k = 0; k < chains.size(); k++) {
-      base::Pointer<npctransport::FGChain> cur_chain =
+      Pointer<npctransport::FGChain> cur_chain =
         npctransport::get_fg_chain(chains[k]);
       core::XYZ d(cur_chain->get_bead(0));
       IMP_LOG(ll, "d # " << k << " = " << d << std::endl);
@@ -278,7 +278,7 @@ int main(int argc, char* argv[]) {
           get_exclude_from_channel_restraint(*sd);
       initialization_restraints.push_back(r);
     }
-    //IMP_LOG(base::PROGRESS, initialization_restraints << std::endl);
+    //IMP_LOG(PROGRESS, initialization_restraints << std::endl);
     npctransport::do_main_loop(sd, initialization_restraints);
     //print_fgs(*sd, TERSE);
     IMP::show_timings(std::cout);

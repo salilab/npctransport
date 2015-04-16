@@ -106,7 +106,7 @@ FGChain* create_fg_chain
   const ::npctransport_proto::Assignment_FGAssignment &fg_data,
   display::Color c )
 {
-  base::Pointer<FGChain> ret_chain = nullptr;
+  Pointer<FGChain> ret_chain = nullptr;
 
   // set up factory for chain particles:
   core::ParticleType type(fg_data.type());

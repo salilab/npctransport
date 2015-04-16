@@ -13,7 +13,7 @@
 #include "SitesPairScoreParams.h"
 
 #include <IMP/core/rigid_bodies.h>
-#include <IMP/base/log_macros.h>
+#include <IMP/log_macros.h>
 #include <IMP/algebra/vector_generators.h>
 
 #include <cmath> // overloaded versions of abs!!

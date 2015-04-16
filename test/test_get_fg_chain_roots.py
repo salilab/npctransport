@@ -1,6 +1,6 @@
 from __future__ import print_function
 from IMP.npctransport import *
-import IMP.base
+import IMP
 import IMP.test
 import sys
 import math
@@ -56,7 +56,7 @@ class Tests(IMP.test.TestCase):
         Test that SimulationData.get_fg_chain_roots() works correctly
         '''
 
-        IMP.base.set_log_level(IMP.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         coords = self._create_cfg_file_with_fgs(cfg_file)

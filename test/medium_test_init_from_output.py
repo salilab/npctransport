@@ -5,7 +5,7 @@ import RMF
 import IMP.rmf
 import IMP.container
 import math
-import IMP.base
+import IMP
 import test_util
 from IMP.npctransport import *
 import time
@@ -23,7 +23,7 @@ class Tests(IMP.test.TestCase):
 
         return - the resulting simulation data object
         """
-        IMP.base.set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         print("assigning parameter ranges from config")
         num = assign_ranges(config, output,
                             0, True, 10)
@@ -31,13 +31,13 @@ class Tests(IMP.test.TestCase):
         sd = IMP.npctransport.SimulationData(output, False)
         sd.set_rmf_file( self.get_tmp_file_name("out0.rmf"), False )
         print("BEFORE INIT", time.ctime())
-        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             short_init_factor = 0.00001
             opt_cycles = 2
         else:
             short_init_factor = 0.01
             opt_cycles = 10000
-        sd.get_bd().set_log_level(IMP.base.SILENT)
+        sd.get_bd().set_log_level(IMP.SILENT)
         IMP.npctransport.initialize_positions(sd, [], False, short_init_factor)
         print("AFTER INIT", time.ctime())
         obd = sd.get_bd()
@@ -117,7 +117,7 @@ class Tests(IMP.test.TestCase):
         """ Testing whether positions are loaded properly from output file """
         print("TEST_INIT_FROM_OUTPUT")
         # random generator initialization
-        IMP.base.set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         config = self.get_tmp_file_name("simple_cfg.pb")
         test_util.make_simple_cfg(
             config,
@@ -156,7 +156,7 @@ class Tests(IMP.test.TestCase):
 
         # random generator initialization
         # RMF.set_log_level("trace")
-        IMP.base.set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         rt_prev_output = self.get_input_file_name("out149.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")
         rt_new_output = self.get_tmp_file_name("out.pb")
@@ -201,7 +201,7 @@ class Tests(IMP.test.TestCase):
         at all
         """
         print("TEST_INIT_FROM_OLD_OUTPUT_MORE_RECENT")
-        IMP.base.set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         rt_prev_output = self.get_input_file_name("out_more_recent.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")
         rt_new_output = self.get_tmp_file_name("out.pb")
