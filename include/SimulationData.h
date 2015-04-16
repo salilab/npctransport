@@ -23,7 +23,7 @@
 #include <IMP/core/Typed.h>
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/rmf/SaveOptimizerState.h>
-#include <IMP/base/Pointer.h>
+#include <IMP/Pointer.h>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "io.h"
@@ -37,7 +37,7 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
+class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  private:
   // params
   Parameter<double> box_side_;
@@ -84,17 +84,17 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
 
  private:
   // the model on which the simulation is run
-  base::PointerMember<Model> m_;
+  PointerMember<Model> m_;
 
   // The BrownianDynamic simulator
-  base::PointerMember<atom::BrownianDynamics> bd_;
+  PointerMember<atom::BrownianDynamics> bd_;
 
   // The scoring function wrapper for the simulation
-  base::PointerMember< IMP::npctransport::Scoring >
+  PointerMember <IMP::npctransport::Scoring >
     scoring_;
 
   // The statistics manger for this simulation
-  base::PointerMember< IMP::npctransport::Statistics >
+  PointerMember <IMP::npctransport::Statistics >
     statistics_;
 
   // keeps track of whether the diffusers list has
@@ -108,16 +108,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   //       of efficiency
    bool obstacles_changed_;
 
-  base::PointerMember
+  PointerMember
     <IMP::container::ListSingletonContainer> optimizable_diffusers_;
 
-   base::PointerMember<container::ListSingletonContainer> diffusers_;
+   PointerMember<container::ListSingletonContainer> diffusers_;
 
   // a writer to an RMF (Rich Molecular Format) type file
-  base::PointerMember<rmf::SaveOptimizerState> rmf_sos_writer_;
+  PointerMember<rmf::SaveOptimizerState> rmf_sos_writer_;
 
   // the root of the model hierarchy
-  base::PointerMember<Particle> root_;
+  PointerMember<Particle> root_;
 
   // fg types  - a list of all fg/floater/obstacle types that were
   // added via create_fgs/floaters/obstacles(), so far
@@ -126,7 +126,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public base::Object {
   ParticleTypeSet floater_types_;
   ParticleTypeSet obstacle_types_;
 
-  base::PointerMember<display::Geometry> static_geom_;
+  PointerMember<display::Geometry> static_geom_;
 
   boost::unordered_map<core::ParticleType, algebra::Vector3Ds> sites_;
 

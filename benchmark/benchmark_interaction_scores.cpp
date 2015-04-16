@@ -39,10 +39,10 @@ ParticlesTemp create_particles(Model *m, const BoundingBox3D &bb, int n) {
 
 template <class Score>
 void test_one(std::string name, Score *score, AllBipartitePairContainer *abpc) {
-  base::Pointer<Restraint> r = create_restraint(score, abpc);
+  Pointer<Restraint> r = create_restraint(score, abpc);
   double scores = 0;
   double time = 0;
-  base::Pointer<ScoringFunction> sf = r->create_scoring_function();
+  Pointer<ScoringFunction> sf = r->create_scoring_function();
   sf->evaluate(true);
   int n = 0;
   IMP_TIME({
@@ -55,7 +55,7 @@ void test_one(std::string name, Score *score, AllBipartitePairContainer *abpc) {
 }
 
 int main(int argc, char **argv) {
-  IMP::base::setup_from_argv(argc, argv, "benchmark interaction scores");
+  IMP::setup_from_argv(argc, argv, "benchmark interaction scores");
   BoundingBox3D bb = get_cube_d<3>(10);
   IMP_NEW(Model, m, ());
   ParticlesTemp psa = create_particles(m, bb, number_of_particles);

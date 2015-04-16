@@ -10,7 +10,7 @@
 
 #include "npctransport_config.h"
 #include "SimulationData.h"
-#include <IMP/base/WeakPointer.h>
+#include <IMP/WeakPointer.h>
 #include <IMP/core/Typed.h>
 #include <IMP/display/Color.h>
 
@@ -23,7 +23,7 @@ class ParticleFactory {
  public:
   /** The simulation data whose model is associated with new particle
   */
-  IMP::base::WeakPointer<SimulationData> sd_;
+  IMP::WeakPointer<SimulationData> sd_;
 
   /** particle radius (A) */
   double radius_;

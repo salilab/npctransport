@@ -24,7 +24,7 @@
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/Selection.h>
-#include <IMP/base/log.h>
+#include <IMP/log.h>
 #include <IMP/core/HarmonicUpperBound.h>
 #include <IMP/core/pair_predicates.h>
 #include <IMP/core/RestraintsScoringFunction.h>
@@ -550,7 +550,7 @@ void SimulationData::set_rmf_file(const std::string &new_name,
 
 void SimulationData::dump_geometry() {
   IMP_OBJECT_LOG;
-  base::Pointer<display::Writer> w = display::create_writer("dump.pym");
+  Pointer<display::Writer> w = display::create_writer("dump.pym");
   IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
   for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
            sites_.begin();
@@ -692,7 +692,7 @@ void SimulationData::set_sites(core::ParticleType t0, unsigned int n,
 
 void SimulationData::write_geometry(std::string out) {
   IMP_OBJECT_LOG;
-  base::Pointer<display::Writer> w = display::create_writer(out);
+  Pointer<display::Writer> w = display::create_writer(out);
   {
     IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
     for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =

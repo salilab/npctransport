@@ -13,7 +13,7 @@
 #pragma GCC diagnostic pop
 
 #include <IMP/atom/estimates.h>
-#include <IMP/base/exception.h>
+#include <IMP/exception.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 using namespace IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE;
@@ -107,7 +107,7 @@ int get_number_of_frames(const ::npctransport_proto::Assignment& config,
                             << config.simulation_time_ns()
                             << " exceeds the specified maximal value "
                             << config.maximal_number_of_frames(),
-        IMP::base::ValueException);
+        IMP::ValueException);
   }
   return ret;
 }

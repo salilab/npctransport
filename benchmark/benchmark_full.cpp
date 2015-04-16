@@ -14,14 +14,14 @@
 #include <IMP.h>
 #include <RMF/utility.h>
 #include <IMP/container/SingletonsRestraint.h>
-#include <IMP/base/CreateLogContext.h>
-#include <IMP/base/exception.h>
+#include <IMP/CreateLogContext.h>
+#include <IMP/exception.h>
 #include <IMP/npctransport.h>
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
-#include <IMP/base/enums.h>
-#include <IMP/base/flags.h>
-#include <IMP/base/Pointer.h>
+#include <IMP/enums.h>
+#include <IMP/flags.h>
+#include <IMP/Pointer.h>
 #include <IMP/Restraint.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/benchmark/utility.h>
@@ -38,30 +38,30 @@
 
 int main(int argc, char *argv[]) {
   try {
-    IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
+    IMP::Pointer<IMP::npctransport::SimulationData> sd;
     IMP_NPC_PARSE_OPTIONS(argc, argv);
     std::string input =
         IMP::npctransport::get_data_path("benchmark_full_restart.pb");
-    std::string output = IMP::base::create_temporary_file_name("output", ".pb");
+    std::string output = IMP::create_temporary_file_name("output", ".pb");
     {
       IMP_OMP_PRAGMA(critical);
       ::npctransport_proto::Output prev_output;
       std::ifstream file(input.c_str(), std::ios::binary);
       bool read = prev_output.ParseFromIstream(&file);
       IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << input,
-                       IMP::base::ValueException);
+                       IMP::ValueException);
       prev_output.mutable_assignment()
-          ->set_random_seed(IMP::base::get_random_seed());
+          ->set_random_seed(IMP::get_random_seed());
       std::ofstream outf(output.c_str(), std::ios::binary);
       prev_output.SerializeToOstream(&outf);
     }
-    IMP::base::set_log_level(IMP::base::SILENT);
+    IMP::set_log_level(IMP::SILENT);
     sd = new IMP::npctransport::SimulationData(output, false);
 
     sd->get_model()->update();
     double timev, score = 0;
-    if(IMP::base::get_check_level() >= IMP::base::USAGE ) {
-       //       || IMP::base::get_is_quick_test) {
+    if(IMP::get_check_level() >= IMP::USAGE ) {
+       //       || IMP::get_is_quick_test) {
       IMP_TIME(score += sd->get_bd()->optimize(1), timev);
     } else {
       IMP_TIME(score += sd->get_bd()->optimize(10000), timev);
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 #endif
     IMP::benchmark::report("full npc", algo, timev, score);
   }
-  catch (const IMP::base::Exception & e) {
+  catch (const IMP::Exception & e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }

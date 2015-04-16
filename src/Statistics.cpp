@@ -20,8 +20,8 @@
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/Selection.h>
-#include <IMP/base/log.h>
-#include <IMP/base/flags.h>
+#include <IMP/log.h>
+#include <IMP/flags.h>
 #include <IMP/core/pair_predicates.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/core/generic.h>
@@ -35,7 +35,7 @@
 #include <IMP/npctransport/internal/npctransport.pb.h>
 
 bool no_save_rmf_to_output = false;
-IMP::base::AddBoolFlag  no_save_rmf_to_output_adder
+IMP::AddBoolFlag  no_save_rmf_to_output_adder
 ( "no_save_rmf_to_output",
   "If true, save final rmf buffer to output file [default=false]",
   &no_save_rmf_to_output);

@@ -18,7 +18,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
    initialize and return a simulation data object based on
    program command line parameters
 
-   @throw IMP::base::IOException if there was any IO problem
+   @throw IMP::IOException if there was any IO problem
 */
 IMPNPCTRANSPORTEXPORT
 IMP::npctransport::SimulationData *startup(int argc, char *argv[]);

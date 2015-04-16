@@ -13,13 +13,13 @@
 #include <IMP/rmf/atom_links.h>
 #include <IMP/rmf/link_macros.h>
 #include <boost/unordered_map.hpp>
-#include <IMP/base/WeakPointer.h>
+#include <IMP/WeakPointer.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
     : public rmf::HierarchyLoadLink {
-  base::WeakPointer<SimulationData> sd_;
+  WeakPointer<SimulationData> sd_;
   RMF::decorator::BallConstFactory bf_;
   // Transporting decorator related keys:
   RMF::IntKey is_last_entry_from_top_key_;
@@ -58,7 +58,7 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
 
 class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
     : public rmf::HierarchySaveLink {
-  base::WeakPointer<SimulationData> sd_;
+  WeakPointer<SimulationData> sd_;
   RMF::decorator::BallFactory bf_;
   RMF::decorator::ColoredFactory cf_;
   // Transporting decorator related keys:

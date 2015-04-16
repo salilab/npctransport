@@ -13,8 +13,8 @@
 #include <IMP/PairContainer.h>
 #include <IMP/ScoringFunction.h>
 #include <IMP/atom/Hierarchy.h>
-#include <IMP/base/Pointer.h>
-#include <IMP/base/WeakPointer.h>
+#include <IMP/Pointer.h>
+#include <IMP/WeakPointer.h>
 #include <boost/unordered_map.hpp>
 #include <IMP/container/CloseBipartitePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
@@ -38,7 +38,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class SimulationData;
 
-class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
+class IMPNPCTRANSPORTEXPORT Scoring: public Object
 {
  private:
   Parameter<double> box_side_;
@@ -61,7 +61,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
  private:
 
   // the sim-data that uses this scoring object
-  base::UncheckedWeakPointer<SimulationData> owner_sd_;
+  UncheckedWeakPointer<SimulationData> owner_sd_;
 
   // true if the list of particles in the owner_sd has changed
   // and in the middle of changing it
@@ -70,22 +70,22 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   /***************** Cache only variables ************/
 
   // see get_close_diffusers_container()
-  base::PointerMember
+  PointerMember
     <IMP::PairContainer> close_diffusers_container_;
 
   // generates hash values ('predicates') for ordered types pairs
   // (e.g., pairs of ParticleTypes)
-  base::PointerMember
+  PointerMember
     <IMP::core::OrderedTypePairPredicate> otpp_;
 
-  base::PointerMember
+  PointerMember
     <IMP::core::RestraintsScoringFunction> scoring_function_;
 
   // contains all restraints between pairs of particle types
-  base::PointerMember
+  PointerMember
     <container::PredicatePairsRestraint> predr_;
 
-  typedef  boost::unordered_map< int, base::PointerMember< IMP::PairScore > >
+  typedef  boost::unordered_map< int, PointerMember<IMP::PairScore > >
     t_map_pair_type_to_pair_score;
   // scores between particle, mapped by their interaction id,
   // where interaction id is from OrderedTypePairPredicate otpp_
@@ -93,10 +93,10 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   t_map_pair_type_to_pair_score
     interaction_pair_scores_;
 
-  base::PointerMember
+  PointerMember
     <IMP::Restraint> box_restraint_;
 
-  base::PointerMember
+  PointerMember
     <IMP::Restraint> slab_restraint_;
 
   LinearWellPairScores chain_scores_;
@@ -104,7 +104,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
   // a map from particle indexes of chain identifiers to corresponding
   // chain backbone restraints (see chain_ids_map)
   typedef boost::unordered_map
-    < ParticleIndex, IMP::base::PointerMember<Restraint> >
+    < ParticleIndex, IMP::PointerMember<Restraint> >
     t_chain_restraints_map;
   t_chain_restraints_map chain_restraints_map_;
   // a map from particle indexes of particles to a particle index of a
@@ -545,7 +545,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
     ( IMP::core::ParticleType type, double value )
     {
       IMP_ALWAYS_CHECK(value>0, "interaction_range_factor must be positive",
-                       IMP::base::ValueException);
+                       IMP::ValueException);
       interaction_range_factors_[type] = value;
     }
 
@@ -558,7 +558,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public base::Object
     ( IMP::core::ParticleType type, double value )
     {
       IMP_ALWAYS_CHECK(value>0, "interaction_k_factor must be positive",
-                       IMP::base::ValueException);
+                       IMP::ValueException);
       interaction_k_factors_[type] = value;
     }
 

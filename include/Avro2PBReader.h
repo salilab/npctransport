@@ -11,9 +11,9 @@
 
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
-#include <IMP/base/value_macros.h>
-#include <IMP/base/types.h>
-#include <IMP/base/showable_macros.h>
+#include <IMP/value_macros.h>
+#include <IMP/types.h>
+#include <IMP/showable_macros.h>
 
 #ifndef SWIG
 IMP_GCC_PUSH_POP(diagnostic push)

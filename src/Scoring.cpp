@@ -22,8 +22,8 @@
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/atom/Selection.h>
-#include <IMP/base/exception.h>
-#include <IMP/base/log.h>
+#include <IMP/exception.h>
+#include <IMP/log.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
@@ -59,7 +59,7 @@ Scoring::Scoring
 {
   IMP_ALWAYS_CHECK(owner_sd_ != nullptr,
                    "Must have non-null owner simulation data",
-                   IMP::base::ValueException);
+                   IMP::ValueException);
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
   GET_ASSIGNMENT(slab_thickness);
@@ -213,7 +213,7 @@ void Scoring::add_interaction
       base_range * interaction_range_factors_.find(type0)->second *
       interaction_range_factors_.find(type1)->second;
 
-  IMP_LOG(IMP::base::PROGRESS,
+  IMP_LOG(IMP::PROGRESS,
           "creating interaction "
             << idata.type0() << "," << idata.type1()
             << " effective_k = " << interaction_k
@@ -299,10 +299,10 @@ Scoring::add_chain_restraint(Particles P,
                              std::string name)
 {
   IMP_ALWAYS_CHECK( P.size() > 0,
-                    "No Particles passed.", IMP::base::ValueException );
+                    "No Particles passed.", IMP::ValueException );
   IMP_ALWAYS_CHECK( rest_length_factor > 0,
                     "non-positive rest length factor is not valid",
-                    IMP::base::ValueException );
+                    IMP::ValueException );
 
   // Exclusive means that the particles will be in no other
   // ConsecutivePairContainer this assumption accelerates certain computations
@@ -311,7 +311,7 @@ Scoring::add_chain_restraint(Particles P,
   // add chain restraint
   IMP_NEW(LinearWellPairScore, lwps,
           ( rest_length_factor, get_backbone_k() ) );
-  IMP::base::Pointer<Restraint> cr =
+  IMP::Pointer<Restraint> cr =
     IMP::container::create_restraint
     ( lwps.get(), xcpc.get(),  "%1% " + name  );
   chain_scores_.push_back( lwps );

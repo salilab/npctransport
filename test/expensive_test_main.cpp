@@ -8,9 +8,9 @@
 #include <IMP/npctransport/Scoring.h>
 #include <IMP/npctransport.h>
 #include <IMP/npctransport/main.h>
-#include <IMP/base/exception.h>
-#include <IMP/base/flags.h>
-#include <IMP/base/types.h>
+#include <IMP/exception.h>
+#include <IMP/flags.h>
+#include <IMP/types.h>
 #include <vector>
 #include <string>
 
@@ -24,27 +24,27 @@ int main(int argc, char *argv[]) {
     }
     new_argv.push_back("--short_init_factor");
     new_argv.push_back("0.1");
-    IMP::base::setup_from_argv(new_argv,
+    IMP::setup_from_argv(new_argv,
                                "Test of the main loop for npc transport");
     // prepare assignment and simulation data
     std::string config = IMP::npctransport::get_data_path("quick.pb");
     std::string assignment =
-        IMP::base::create_temporary_file_name("output", ".pb");
+        IMP::create_temporary_file_name("output", ".pb");
     std::string output =
-        IMP::base::create_temporary_file_name("output", ".rmf");
-    IMP::base::set_log_level(IMP::base::LogLevel(IMP::base::PROGRESS));
+        IMP::create_temporary_file_name("output", ".rmf");
+    IMP::set_log_level(IMP::LogLevel(IMP::base::PROGRESS));
     int num = IMP::npctransport::assign_ranges(config, assignment, 0, true,
-                                               IMP::base::get_random_seed());
+                                               IMP::get_random_seed());
     std::cout << "num ranges " << num << std::endl;
     IMP_NEW(IMP::npctransport::SimulationData, sd,
             (assignment, true /* quick */));
     sd->set_rmf_file(output);
-    sd->get_model()->set_log_level(IMP::base::PROGRESS);
+    sd->get_model()->set_log_level(IMP::PROGRESS);
     std::cout << "Files are " << assignment << " and " << output << std::endl;
     // simulate
     IMP::npctransport::do_main_loop(sd, IMP::RestraintsTemp());
   }
-  catch (IMP::base::Exception e) {
+  catch (IMP::Exception e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;
   }

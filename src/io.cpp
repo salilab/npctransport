@@ -10,7 +10,7 @@
 #include <IMP/npctransport/SitesGeometry.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/atom/Hierarchy.h>
-#include <IMP/base/Pointer.h>
+#include <IMP/Pointer.h>
 #include <IMP/display/restraint_geometry.h>
 #include <RMF/decorators.h>
 #include <IMP/rmf/atom_io.h>

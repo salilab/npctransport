@@ -10,9 +10,9 @@
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/npctransport/Transporting.h>
 #include <IMP/core/XYZ.h>
-#include <IMP/base/check_macros.h>
-#include <IMP/base/exception.h>
-#include <IMP/base/log.h>
+#include <IMP/check_macros.h>
+#include <IMP/exception.h>
+#include <IMP/log.h>
 #include <boost/foreach.hpp>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
@@ -42,7 +42,7 @@ void HierarchyWithSitesLoadLink::do_load_hierarchy(
                        "is_last_entry_from_top is relevant only for particles"
                        " decorated with Transporting class - particle "
                        << m->get_particle_name(pi),
-                       IMP::base::ValueException);
+                       IMP::ValueException);
       IMP_ALWAYS_CHECK(IMP::core::XYZ::get_is_setup(m, pi) &&
                        nh.get_has_value(n_entries_bottom_key_) &&
                        nh.get_has_value(n_entries_top_key_),
@@ -50,7 +50,7 @@ void HierarchyWithSitesLoadLink::do_load_hierarchy(
                        "coordinates and the RMF node would have all relevant "
                        "keys for a transporting particle, particle "
                        << m->get_particle_name(pi),
-                       IMP::base::ValueException);
+                       IMP::ValueException);
       bool is_last_entry_from_top = nh.get_value(is_last_entry_from_top_key_);
       Transporting ot(m, pi);
       ot.set_is_last_entry_from_top(is_last_entry_from_top);
@@ -69,7 +69,7 @@ void HierarchyWithSitesLoadLink::do_load_hierarchy(
       IMP_ALWAYS_CHECK(core::XYZ::get_is_setup(m, pi),
                        "coordinates are optimized are only valid"
                        " for XYZ decorated particles",
-                       IMP::base::ValueException);
+                       IMP::ValueException);
       core::XYZ xyz(m, pi);
       xyz.set_coordinates_are_optimized
         ( nh.get_static_value( coordinates_are_optimized_key_ ) );

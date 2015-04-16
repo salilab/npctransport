@@ -53,7 +53,7 @@ IMPNPCTRANSPORTEXPORT void show_ranges(std::string fname);
    @param random_seed the random seed used to initialize the IMP random number
                       generator for this simulation
 
-   @throw IMP::base::ValueException if any of the values in the configuration
+   @throw IMP::ValueException if any of the values in the configuration
    file
               are in conflict (e.g., simulation time and maximal number of
    frames)

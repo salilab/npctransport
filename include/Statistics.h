@@ -25,7 +25,7 @@
 #include <IMP/core/Typed.h>
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/rmf/SaveOptimizerState.h>
-#include <IMP/base/Pointer.h>
+#include <IMP/Pointer.h>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "io.h"
@@ -52,9 +52,9 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class SimulationData; // fwd incomplete declaration
 
-class IMPNPCTRANSPORTEXPORT Statistics : public base::Object {
+class IMPNPCTRANSPORTEXPORT Statistics : public Object {
  private:
-  base::UncheckedWeakPointer<SimulationData> owner_sd_;
+  UncheckedWeakPointer<SimulationData> owner_sd_;
 
   // interval of simulation frames for gathering stats
   Parameter<int> statistics_interval_frames_;
@@ -87,7 +87,7 @@ class IMPNPCTRANSPORTEXPORT Statistics : public base::Object {
 
   // statistics of pairs of interactions for each interaction type
   typedef boost::unordered_map< npctransport::InteractionType,
-    base::PointerMember<BipartitePairsStatisticsOptimizerState> >
+    PointerMember<BipartitePairsStatisticsOptimizerState> >
     BipartitePairsStatisticsOSMap;
   BipartitePairsStatisticsOSMap interaction_stats_map_;
 

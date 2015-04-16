@@ -11,9 +11,9 @@
 #include <IMP/npctransport/main.h>
 #include <IMP/base_types.h>
 #include <boost/timer.hpp>
-#include <IMP/base/log.h>
-#include <IMP/base/exception.h>
-#include <IMP/base/check_macros.h>
+#include <IMP/log.h>
+#include <IMP/exception.h>
+#include <IMP/check_macros.h>
 //#include <IMP/benchmark/Profiler.h>
 #include <IMP/npctransport/initialize_positions.h>
 #include <IMP/rmf/frames.h>
@@ -28,8 +28,8 @@
 //#include <IMP/rmf.h>
 //#include <IMP.h>
 #include <IMP/container.h>
-#include <IMP/base/CreateLogContext.h>
-#include <IMP/base/random.h>
+#include <IMP/CreateLogContext.h>
+#include <IMP/random.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/internal/boost_main.h>
 #include <IMP/npctransport.h>
@@ -41,10 +41,10 @@
 //#include <IMP/example/counting.h>
 //#include <IMP/example/optimizing.h>
 
-#include <IMP/base/nullptr.h>
-#include <IMP/base/nullptr_macros.h>
-#include <IMP/base/check_macros.h>
-#include <IMP/base/exception.h>
+#include <IMP/nullptr.h>
+#include <IMP/nullptr_macros.h>
+#include <IMP/check_macros.h>
+#include <IMP/exception.h>
 #include <boost/cstdint.hpp>
 #include <numeric>
 #include <cmath>
@@ -55,22 +55,22 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 boost::int64_t work_unit = -1;
-IMP::base::AddIntFlag work_unitadder
+IMP::AddIntFlag work_unitadder
 ( "work_unit", "The work unit",
   &work_unit);
 std::string configuration = "configuration.pb";
-IMP::base::AddStringFlag configuration_adder
+IMP::AddStringFlag configuration_adder
 ( "configuration", "input configuration file in protobuf format"
   " [default: %default]",
   &configuration);
 std::string output = "output.pb";
-IMP::base::AddStringFlag output_adder
+IMP::AddStringFlag output_adder
 ( "output", "output assignments and statistics file in protobuf format,"
   " recording the assignment being executed"
   " [default: %default]",
   &output);
 std::string restart = "";
-IMP::base::AddStringFlag restart_adder
+IMP::AddStringFlag restart_adder
 ( "restart", "output file of a previous run, from which to restart"
   " this run (also initializing the final coordinates"
   " from this previous run, if they exist in the output"
@@ -78,12 +78,12 @@ IMP::base::AddStringFlag restart_adder
   " [default: %default]",
   &restart);
 std::string conformations = "";
-IMP::base::AddStringFlag conformations_adder
+IMP::AddStringFlag conformations_adder
 ( "conformations", "RMF file for recording the conforomations along the "
   " simulation [default: %default]",
   &conformations);
 std::string init_rmffile = "";
-IMP::base::AddStringFlag init_rmf_adder
+IMP::AddStringFlag init_rmf_adder
 ( "init_rmffile", "[OBSOLETE]"
   " RMF file for initializing the simulation with its"
   " last frame (to continue a previous run). Note that"
@@ -91,30 +91,30 @@ IMP::base::AddStringFlag init_rmf_adder
   " an older output file when using the --restart flag",
   &init_rmffile);
 std::string final_conformations = "final_conformations.rmf";
-IMP::base::AddStringFlag final_conformations_adder
+IMP::AddStringFlag final_conformations_adder
 ( "final_conformations",
   "RMF file for recording the initial and final conformations "
   " [default: %default]",
   &final_conformations);
 bool verbose = false;
-IMP::base::AddBoolFlag verbose_adder
+IMP::AddBoolFlag verbose_adder
 ( "verbose", "Print more info during run",
   &verbose);
 bool first_only = false;
-IMP::base::AddBoolFlag first_only_adder
+IMP::AddBoolFlag first_only_adder
 ( "first_only",
   "Only do the first simulation block",
   &first_only);
 bool initialize_only = false;
-IMP::base::AddBoolFlag initialize_only_adder
+IMP::AddBoolFlag initialize_only_adder
 ( "initialize_only", "Run the initialization and then stop",
   &initialize_only);
 bool show_steps = false;
-IMP::base::AddBoolFlag show_steps_adder
+IMP::AddBoolFlag show_steps_adder
 ( "show_steps", "Show the steps for each modified variable",
   &show_steps);
 bool show_number_of_work_units = false;
-IMP::base::AddBoolFlag show_work_units_adder
+IMP::AddBoolFlag show_work_units_adder
 ( "show_number_of_work_units",
   "Show the number of work units" ,
   &show_number_of_work_units);
@@ -133,7 +133,7 @@ base::AddFloatFlag short_sim_adder
   " [default=1.0]",
   &short_sim_factor);
 bool no_save_restraints_to_rmf = false;
-IMP::base::AddBoolFlag no_save_restraints_to_rmf_adder
+IMP::AddBoolFlag no_save_restraints_to_rmf_adder
 ( "no_save_restraints_to_rmf",
   "whether not to save restraints to rmf conformations and final rms,"
   " if either is applicable",
@@ -191,7 +191,7 @@ namespace {
     std::ifstream file(restart.c_str(), std::ios::binary);
     bool read = prev_output.ParseFromIstream(&file);
     IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << restart,
-                     IMP::base::ValueException);
+                     IMP::ValueException);
     prev_output.mutable_assignment()->set_random_seed(actual_seed);
     std::ofstream outf(output.c_str(), std::ios::binary);
     prev_output.SerializeToOstream(&outf);
@@ -266,12 +266,12 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
   IMP_ALWAYS_CHECK( short_init_factor <= 1.0 && short_init_factor > 0,
                     "short_init_factor must be in the range (0..1.0]",
-                    IMP::base::ValueException );
+                    IMP::ValueException );
   IMP_OMP_PRAGMA(critical)
-  std::cout << "Random seed is " << IMP::base::get_random_seed() << std::endl;
-  IMP::base::Pointer<IMP::npctransport::SimulationData> sd;
-  write_output_based_on_flags(IMP::base::get_random_seed());
-  sd = new IMP::npctransport::SimulationData(output, IMP::base::run_quick_test);
+  std::cout << "Random seed is " << IMP::get_random_seed() << std::endl;
+  IMP::Pointer<IMP::npctransport::SimulationData> sd;
+  write_output_based_on_flags(IMP::get_random_seed());
+  sd = new IMP::npctransport::SimulationData(output, IMP::run_quick_test);
   if (!conformations.empty()) {
     sd->set_rmf_file(conformations,
                      !no_save_restraints_to_rmf);
@@ -299,7 +299,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   bool is_BD_equilibration = is_initial_optimization;
   bool is_BD_full_run = !initialize_only;
 
-  base::Pointer<rmf::SaveOptimizerState> conformations_rmf_sos =
+  Pointer<rmf::SaveOptimizerState> conformations_rmf_sos =
       sd->get_rmf_sos_writer();
   RMF::FileHandle final_rmf_fh;
   if (!final_conformations.empty()) {
@@ -308,9 +308,9 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   }
   boost::timer total_time;
   for (unsigned int i = 0; i < sd->get_number_of_trials(); ++i) {
-    IMP::base::CreateLogContext clc("iteration");
+    IMP::CreateLogContext clc("iteration");
     boost::timer timer;
-    //    IMP::base::set_log_level(IMP::base::PROGRESS);
+    //    IMP::set_log_level(IMP::PROGRESS);
     std::cout << "Simulation trial " << i << " out of "
               << sd->get_number_of_trials() << std::endl;
     if (is_initial_optimization) {

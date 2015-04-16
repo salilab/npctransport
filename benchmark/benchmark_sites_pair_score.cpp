@@ -19,11 +19,11 @@
 #include <IMP/core/ConjugateGradients.h>
 #include <IMP/core/BallMover.h>
 #include <IMP/core/SphereDistancePairScore.h>
-#include <IMP/base/log_macros.h>
-#include <IMP/base/flags.h>
+#include <IMP/log_macros.h>
+#include <IMP/flags.h>
 #include <IMP/Model.h>
 #include <IMP/Particle.h>
-#include <IMP/base/Pointer.h>
+#include <IMP/Pointer.h>
 #include <IMP/Restraint.h>
 #include <IMP/scoped.h>
 #include <IMP/PairPredicate.h>
@@ -152,7 +152,7 @@ void optimize_balls(const ParticlesTemp &ps,
     IMP_NEW(container::ClosePairContainer, cpc,
             (lsc, 0, core::XYZR(ps[0]).get_radius()));
     cpc->add_pair_filters(excluded);
-    base::Pointer<Restraint> r =
+    Pointer<Restraint> r =
         container::create_restraint(ssps.get(), cpc.get());
     cg->set_scoring_function(rs + RestraintsTemp(1, r.get()));
     cg->set_optimizer_states(opt_states);
@@ -223,7 +223,7 @@ void test_one(double range) {
   IMP_NEW(ListSingletonContainer, lscb, (psb));
   IMP_NEW(AllBipartitePairContainer, abpc, (lsca, lscb));
   if (WHICH) {
-    base::Pointer<Restraint> r = create_restraint(sps.get(), abpc.get());
+    Pointer<Restraint> r = create_restraint(sps.get(), abpc.get());
     double scores = 0;
     double time = 0;
     IMP_TIME({
@@ -235,7 +235,7 @@ void test_one(double range) {
     report(oss.str(), time, scores);
   }
   {
-    base::Pointer<Restraint> r = create_restraint(tsps.get(), abpc.get());
+    Pointer<Restraint> r = create_restraint(tsps.get(), abpc.get());
     double scores = 0;
     double time = 0;
     IMP_TIME({
@@ -257,8 +257,8 @@ void test_ranges() {
 }
 
 int main(int, char **) {
-  if(IMP::base::get_check_level() >= IMP::base::USAGE
-     || IMP::base::get_is_quick_test){
+  if(IMP::get_check_level() >= IMP::USAGE
+     || IMP::get_is_quick_test){
     std::cout << "Skipping test because check level is greater or equal USAGE"
               << std::endl;
     return 0;

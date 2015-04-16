@@ -9,7 +9,7 @@
 #define IMPNPCTRANSPORT_PARAMETER_H
 
 #include "npctransport_config.h"
-#include <IMP/base/check_macros.h>
+#include <IMP/check_macros.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 

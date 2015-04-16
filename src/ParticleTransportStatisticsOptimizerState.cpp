@@ -9,16 +9,16 @@
 #include <IMP/npctransport/ParticleTransportStatisticsOptimizerState.h>
 #include <IMP/npctransport/Transporting.h>
 #include <IMP/core/rigid_bodies.h>
-#include <IMP/base/check_macros.h>
-#include <IMP/base/exception.h>
-#include <IMP/base/log.h>
+#include <IMP/check_macros.h>
+#include <IMP/exception.h>
+#include <IMP/log.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 ParticleTransportStatisticsOptimizerState::
     ParticleTransportStatisticsOptimizerState(
         Particle *p, Float bottom_z, Float top_z,
-        base::WeakPointer<IMP::atom::Simulator> owner)
+        WeakPointer<IMP::atom::Simulator> owner)
       : P(p->get_model(), "ParticleTransportStatisticsOptimizerState%1%"),
       p_(p),
       bottom_z_(bottom_z),
@@ -27,7 +27,7 @@ ParticleTransportStatisticsOptimizerState::
   IMP_ALWAYS_CHECK(!Transporting::get_is_setup(p_),
                    "Particle already defined as a transporting particle,"
                    " and cannot be tracked by this object",
-                   IMP::base::ValueException);
+                   IMP::ValueException);
   Transporting::setup_particle(p_, false);  // initial value doesn't matter
   this->reset();
 }

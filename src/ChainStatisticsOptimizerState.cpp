@@ -50,7 +50,7 @@ double ChainStatisticsOptimizerState::get_correlation_time() const {
       last = angle;
     }
   }
-  IMP_LOG(base::VERBOSE, n << " correlation events" << std::endl);
+  IMP_LOG(VERBOSE, n << " correlation events" << std::endl);
 
   if (n == 0) {
     return std::numeric_limits<double>::infinity();
@@ -60,7 +60,7 @@ double ChainStatisticsOptimizerState::get_correlation_time() const {
 
 Floats ChainStatisticsOptimizerState::get_diffusion_coefficients() const {
   if (positions_.empty()) return Floats();
-  base::Vector<algebra::Vector3Ds> displacements(
+  Vector<algebra::Vector3Ds> displacements(
       positions_[0].size(), algebra::Vector3Ds(positions_.size() - 1));
   for (unsigned int i = 1; i < positions_.size(); ++i) {
     algebra::Transformation3D rel =

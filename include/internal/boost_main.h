@@ -7,9 +7,9 @@
 #ifndef IMPNPCTRANSPORT_BOOST_MAIN_H
 #define IMPNPCTRANSPORT_BOOST_MAIN_H
 
-#include <IMP/base/flags.h>
+#include <IMP/flags.h>
 
 #define IMP_NPC_PARSE_OPTIONS(argc, argv) \
-  IMP::base::setup_from_argv(argc, argv, "Something npcish");
+  IMP::setup_from_argv(argc, argv, "Something npcish");
 
 #endif /* IMPNPCTRANSPORT_BOOST_MAIN_H */

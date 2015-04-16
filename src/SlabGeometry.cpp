@@ -38,10 +38,10 @@ namespace {
 namespace {
 const std::pair<algebra::Vector3Ds, Ints> get_mesh(double height, double radius,
                                                    double width) {
-  base::Vector<algebra::Plane3D> slab;
+  Vector<algebra::Plane3D> slab;
   slab.push_back(algebra::Plane3D(height, algebra::Vector3D(0, 0, 1)));
   slab.push_back(algebra::Plane3D(height, algebra::Vector3D(0, 0, -1)));
-  base::Vector<algebra::Plane3D> tunnel;
+  Vector<algebra::Plane3D> tunnel;
   unsigned int npoints = 40;
   for (unsigned int i = 0; i < npoints; ++i) {
     double f = 2.0 * i * PI / (npoints - 1.0);

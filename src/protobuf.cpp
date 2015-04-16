@@ -17,8 +17,8 @@
 #include <IMP/algebra/GridD.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/algebra/grid_storages.h>
-#include <IMP/base/CreateLogContext.h>
-#include <IMP/base/SetLogState.h>
+#include <IMP/CreateLogContext.h>
+#include <IMP/SetLogState.h>
 #include <boost/scoped_ptr.hpp>
 #include <fstream>
 #include <iostream>
@@ -76,7 +76,7 @@ struct Range {
     out << name << " " << lb << "-" << ub << " in " << steps;
   });
 };
-typedef base::Vector<Range> Ranges;
+typedef Vector<Range> Ranges;
 
 double get_value(const Reflection* r, const Message* m,
                  const FieldDescriptor* fd) {
@@ -122,7 +122,7 @@ void set_value(const Reflection* r, Message* m, const FieldDescriptor* fd,
 Ranges get_ranges(std::string name, const Message* message,
                   Message* out_message) {
   std::string contextname = (std::string("get_ranges: ") + name);
-  IMP::base::CreateLogContext gr(contextname.c_str());
+  IMP::CreateLogContext gr(contextname.c_str());
   const Reflection* r(message->GetReflection());
   const Reflection* out_r(out_message->GetReflection());
   /*IMP_LOG(VERBOSE, "Inspecting " << name << " "
@@ -367,7 +367,7 @@ int get_number_of_work_units(std::string assignment_file) {
   }
   input.ParseFromIstream(&in);
   npctransport_proto::Assignment assignment;
-  base::SetLogState sls(base::VERBOSE);
+  base::SetLogState sls(VERBOSE);
   Ranges ranges = get_ranges("all", &input, &assignment);
   Floats values;
   Ints indexes;

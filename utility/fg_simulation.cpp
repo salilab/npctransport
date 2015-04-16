@@ -19,14 +19,14 @@
 //#include <IMP.h>
 //#include <RMF/utility.h>
 #include <IMP/container/SingletonsRestraint.h>
-#include <IMP/base/CreateLogContext.h>
-#include <IMP/base/exception.h>
-#include <IMP/base/enums.h>
+#include <IMP/CreateLogContext.h>
+#include <IMP/exception.h>
+#include <IMP/enums.h>
 #include <IMP/npctransport.h>
 #include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
-#include <IMP/base/Pointer.h>
-#include <IMP/base/statistics.h>
+#include <IMP/Pointer.h>
+#include <IMP/base_statistics.h>
 #include <IMP/Restraint.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/core/Typed.h>
@@ -65,7 +65,7 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
   // create a set of random sites (for now)
   double r = core::XYZR(chains[0].get_child(0)).get_radius();
   Vector2Ds sites;
-  std::cout << IMP::base::Showable(sites) << std::endl;
+  std::cout << IMP::Showable(sites) << std::endl;
   while (sites.size() < chains.size()) {
     Vector2D cur = get_random_vector_in(surface);
     bool bad = false;
@@ -194,7 +194,7 @@ IMP::ParticlesTemp get_kaps_and_craps(IMP::npctransport::SimulationData& sd) {
   return ret;
 }
 
-IMP::base::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
+IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
     IMP::npctransport::SimulationData& sd) {
   using namespace IMP;
 
@@ -212,7 +212,7 @@ IMP::base::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
 }
 
   // print the first atoms of all the fgs in sd
-  void print_fgs(IMP::npctransport::SimulationData& sd, IMP::base::LogLevel ll)
+  void print_fgs(IMP::npctransport::SimulationData& sd, IMP::LogLevel ll)
   {
     using namespace IMP;
     using atom::Hierarchy;
@@ -230,7 +230,7 @@ IMP::base::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
   }
 
 boost::int64_t cylinder_nlayers = 0;
-IMP::base::AddIntFlag cylinder_adder(
+IMP::AddIntFlag cylinder_adder(
     "cylinder_nlayers", "anchor FG nups to a cylindrical pore with a slab of"
                         " dimensions that are specified in"
                         " the config file, with specified number of FG layers"
@@ -238,7 +238,7 @@ IMP::base::AddIntFlag cylinder_adder(
     &cylinder_nlayers);
 
 bool surface_anchoring = false;
-IMP::base::AddBoolFlag surface_adder("surface_anchoring",
+IMP::AddBoolFlag surface_adder("surface_anchoring",
                                      "anchor FG nups to bottom of cube",
                                      &surface_anchoring);
 }
@@ -248,17 +248,17 @@ int main(int argc, char* argv[]) {
   using namespace IMP;
 
   // logging stuff:
-  IMP::base::CreateLogContext main("main");
+  IMP::CreateLogContext main("main");
   // preparation::
   try {
-    IMP::base::Pointer<npctransport::SimulationData> sd =
+    IMP::Pointer<npctransport::SimulationData> sd =
         npctransport::startup(argc, argv);
-    //print_fgs(*sd, IMP::base::TERSE);
+    //print_fgs(*sd, IMP::TERSE);
     if (surface_anchoring) {
       IMP_ALWAYS_CHECK(cylinder_nlayers == 0,
                        "surface anchoring and cylinder"
                        " anchoring flags are mutually exclusive",
-                       IMP::base::ValueException);
+                       IMP::ValueException);
       set_fg_grid(*sd);
     }
     if (cylinder_nlayers > 0) {
@@ -271,16 +271,16 @@ int main(int argc, char* argv[]) {
     if (sd->get_scoring()->get_has_slab() &&
         sd->get_is_exclude_floaters_from_slab_initially()) {
       // if has slab, exclude from channel initially
-      IMP::base::Pointer<IMP::Restraint> r =
+      IMP::Pointer<IMP::Restraint> r =
           get_exclude_from_channel_restraint(*sd);
       initialization_restraints.push_back(r);
     }
     //IMP_LOG(base::PROGRESS, initialization_restraints << std::endl);
     npctransport::do_main_loop(sd, initialization_restraints);
-    //print_fgs(*sd, base::TERSE);
-    IMP::base::show_timings(std::cout);
+    //print_fgs(*sd, TERSE);
+    IMP::show_timings(std::cout);
   }
-  catch (const IMP::base::Exception & e) {
+  catch (const IMP::Exception & e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return -1;
   }

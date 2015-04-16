@@ -13,10 +13,10 @@
 #include <IMP/core/DistancePairScore.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/atom/BrownianDynamics.h>
-#include <IMP/base/Pointer.h>
-#include <IMP/base/exception.h>
-#include <IMP/base/object_macros.h>
-#include <IMP/base/RAII.h>
+#include <IMP/Pointer.h>
+#include <IMP/exception.h>
+#include <IMP/object_macros.h>
+#include <IMP/RAII.h>
 #include <IMP/core/RestraintsScoringFunction.h>
 #include <IMP/core/ConjugateGradients.h>
 #include <IMP/core/MonteCarlo.h>
@@ -26,19 +26,19 @@
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/core/SphereDistancePairScore.h>
-#include <IMP/base/log_macros.h>
-#include <IMP/base/log.h>
+#include <IMP/log_macros.h>
+#include <IMP/log.h>
 #include <IMP/container/ListSingletonContainer.h>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <IMP/scoped.h>
 #include <IMP/PairPredicate.h>
 #include <IMP/container/generic.h>
-#include <IMP/base/internal/graph_utility.h>
+#include <IMP/internal/graph_utility.h>
 #include <IMP/npctransport/SimulationData.h>
-#include <IMP/base/raii_macros.h>
-#include <IMP/base/log.h>
-#include <IMP/base/flags.h>
+#include <IMP/raii_macros.h>
+#include <IMP/log.h>
+#include <IMP/flags.h>
 //#include <IMP/example/optimizing.h>
 #include <IMP/npctransport/internal/boost_main.h>
 #include <cmath>
@@ -77,7 +77,7 @@ core::MonteCarloMover *create_serial_mover(const ParticlesTemp &ps,
 void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
   using namespace core;
   IMP_ALWAYS_CHECK(scale_factor > 0, "move size scale factor must be positive",
-                   IMP::base::ValueException);
+                   IMP::ValueException);
   for (unsigned int i = 0; i < mc->get_number_of_movers(); ++i) {
     MonteCarloMover *mc_i = mc->get_mover(i);
     SerialMover *sm = dynamic_cast<SerialMover *>(mc_i);
@@ -103,7 +103,7 @@ void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
    @param debug - if true, save is added as an optimizer state to the MC
    @param n_movers - number of movrs to apply in each MC step
  */
-/*IMP::base::Pointer<core::MonteCarlo> create_mc(
+/*IMP::Pointer<core::MonteCarlo> create_mc(
     const ParticlesTemp &ps,
     const RestraintsTemp& rs,
     const PairPredicates excluded,
@@ -143,7 +143,7 @@ void rescale_move_size(core::MonteCarlo *mc, double scale_factor = 1.0) {
 */
 class LinearWellSetLengthRAII : public base::RAII {
 
-  base::WeakPointer< LinearWellPairScore > ps_;
+  WeakPointer< LinearWellPairScore > ps_;
   double orig_;
   bool was_set_;
 
@@ -175,8 +175,8 @@ class LinearWellSetLengthRAII : public base::RAII {
 */
 class OptimizerSetTemporaryScoringFunctionRAII: public base::RAII {
 
-  base::PointerMember< IMP::ScoringFunction > orig_sf_;
-  base::PointerMember< IMP::Optimizer > o_;
+  PointerMember< IMP::ScoringFunction > orig_sf_;
+  PointerMember< IMP::Optimizer > o_;
   bool was_set_;
 
  public:
@@ -237,7 +237,7 @@ class OptimizerSetTemporaryScoringFunctionRAII: public base::RAII {
 */
 class TemporarySetOptimizationStateRAII: public base::RAII {
   bool orig_;
-  base::WeakPointer<IMP::Model> m_;
+  WeakPointer<IMP::Model> m_;
   ParticleIndex pi_;
   bool was_set_;
 
@@ -254,7 +254,7 @@ class TemporarySetOptimizationStateRAII: public base::RAII {
         pi_ = pa.get_particle_index();
         IMP_ALWAYS_CHECK(core::XYZ::get_is_setup( m_, pi_ ),
                          "p is not XYZ - can't set coordinates opt state",
-                         IMP::base::ValueException);
+                         IMP::ValueException);
         core::XYZ xyz( m_, pi_ );
         orig_ = xyz.get_coordinates_are_optimized();
         xyz.set_coordinates_are_optimized( is_optimized );
@@ -462,7 +462,7 @@ void initialize_positions(SimulationData *sd,
         continue; // noting to optimize if no (optimizable) particles
       }
       // switch local to sf till end of scope
-      base::Pointer<ScoringFunction> sf =
+      Pointer<ScoringFunction> sf =
         sd->get_scoring()->get_custom_scoring_function
         ( extra_restraints,
           cur_particles,
@@ -484,7 +484,7 @@ void initialize_positions(SimulationData *sd,
       sd->get_diffusers()->get_particles(); // that should include obstacles
     ParticlesTemp optimizable_particles =
       get_optimizable_particles( particles );
-    base::Pointer<ScoringFunction> sf =
+    Pointer<ScoringFunction> sf =
       sd->get_scoring()->get_custom_scoring_function
       ( extra_restraints,
         particles,

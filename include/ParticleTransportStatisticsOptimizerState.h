@@ -29,7 +29,7 @@ class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
   typedef core::PeriodicOptimizerState P;
   Particle *p_;             // the particle
   Float bottom_z_, top_z_;  // channel boundaries on z-axis
-  base::WeakPointer<IMP::atom::Simulator> owner_;
+  WeakPointer<IMP::atom::Simulator> owner_;
   unsigned int n_transports_up_;        // from bottom to top of channel
   unsigned int n_transports_down_;      // from top to bottom of channOBel
   Floats transport_time_points_in_ns_;  // simulation time points of each
@@ -56,18 +56,18 @@ class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
    */
   ParticleTransportStatisticsOptimizerState(
       Particle *p, Float bottom_z, Float top_z,
-      base::WeakPointer<IMP::atom::Simulator> owner = nullptr);
+      WeakPointer<IMP::atom::Simulator> owner = nullptr);
 
   //! sets a simulator that moves this particle and can provide simulation time
   //! information about it, or IMP::nullptr if none
-  void set_owner(base::WeakPointer<IMP::atom::Simulator> owner) {
+  void set_owner(WeakPointer<IMP::atom::Simulator> owner) {
     owner_ = owner;
   }
 
   //! returns the simulator that was declared in the constructor or by
   //set_owner()
   //! to moves this particle, and provide simulation time information about it.
-  base::WeakPointer<IMP::atom::Simulator> get_owner() const { return owner_; }
+  WeakPointer<IMP::atom::Simulator> get_owner() const { return owner_; }
 
   /**
       Returns the number of times the particle crossed the channel

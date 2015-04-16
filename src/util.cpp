@@ -7,8 +7,8 @@
 
 #include <IMP/npctransport/util.h>
 #include <IMP/npctransport/typedefs.h>
-#include <IMP/base/check_macros.h>
-#include <IMP/base/exception.h>
+#include <IMP/check_macros.h>
+#include <IMP/exception.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/core/Typed.h>
 #include <IMP/base_types.h>
@@ -35,7 +35,7 @@ void configuration_txt2pb
   npctransport_proto::Configuration config;
   std::ifstream ifs_txt(config_txt.c_str());
   IMP_ALWAYS_CHECK(ifs_txt, "File " << config_txt << " not found",
-                   IMP::base::IOException);
+                   IMP::IOException);
   io::IstreamInputStream isis_txt(&ifs_txt);
   google::protobuf::TextFormat::Parse(&isis_txt, &config);
   ifs_txt.close();

@@ -3,7 +3,7 @@
 #include <ValidSchema.hh>
 #include <Compiler.hh>
 #include <Stream.hh>
-#include <IMP/base/file.h>
+#include <IMP/file.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 

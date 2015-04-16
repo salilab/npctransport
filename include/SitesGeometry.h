@@ -9,7 +9,7 @@
 #define IMPNPCTRANSPORT_SITES_GEOMETRY_H
 
 #include "npctransport_config.h"
-#include <IMP/base/Pointer.h>
+#include <IMP/Pointer.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/core/Typed.h>
 #include <IMP/display/particle_geometry.h>

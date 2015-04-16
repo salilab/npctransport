@@ -18,7 +18,7 @@
 
 #include <DataFile.hh>
 //#include <google/protobuf/text_format.h>
-#include <IMP/base/exception.h>
+#include <IMP/exception.h>
 #include <fstream>
 #include <iomanip>
 

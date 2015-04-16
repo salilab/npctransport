@@ -11,7 +11,7 @@
 #include <RMF/utility.h>
 
 namespace {
-int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
+int do_it(IMP::Pointer<IMP::npctransport::SimulationData> sd) {
   using namespace IMP;
   using namespace IMP::npctransport;
   using namespace IMP::algebra;
@@ -28,7 +28,7 @@ int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
   IMP::atom::Hierarchies chains = get_fg_chains(root);
   // create a set of random sites (for now)
   IMP::algebra::Vector2Ds sites;
-  std::cout << IMP::base::Showable(sites) << std::endl;
+  std::cout << IMP::Showable(sites) << std::endl;
   double r = IMP::core::XYZR(chains[0].get_child(0)).get_radius();
   std::cout << "Base is " << base << std::endl;
   do {
@@ -62,7 +62,7 @@ int do_it(IMP::base::Pointer<IMP::npctransport::SimulationData> sd) {
 
 int main(int argc, char *argv[]) {
   int ret;
-  IMP::base::Pointer<IMP::npctransport::SimulationData> sd =
+  IMP::Pointer<IMP::npctransport::SimulationData> sd =
       IMP::npctransport::startup(argc, argv);
 
   ret = do_it(sd);
