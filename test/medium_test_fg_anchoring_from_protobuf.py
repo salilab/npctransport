@@ -56,7 +56,7 @@ class Tests(IMP.test.TestCase):
         verify that fg anchors are still in same place as in the originally
         specified coordinates coords
         '''
-        fgs = sd.get_fg_chains(  ) # atom.Hierarchies
+        fgs = sd.get_fg_chain_roots(  ) # atom.Hierarchies
         # verify that anchors are in placed
         for fg,c in zip(fgs,coords):
             fg_c = IMP.core.XYZ( fg.get_child(0) ).get_coordinates()
@@ -69,7 +69,7 @@ class Tests(IMP.test.TestCase):
         Test that FG nups can be anchored properly through protobuf file
         '''
 
-        IMP.base.set_log_level(IMP.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         coords = self._create_cfg_file_with_fg_anchors( cfg_file )
@@ -79,7 +79,7 @@ class Tests(IMP.test.TestCase):
 #                                            self.get_tmp_file_name("out.rmf"));
         self._assert_anchors_in_place(sd, coords)
         # verify that anchors remain intact during optimization
-        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             short_init_factor=0.00001
             print("short position initialization in non-fast mode")
         else:

@@ -5,7 +5,7 @@ import RMF
 import IMP.rmf
 import IMP.container
 import math
-import IMP.base
+import IMP
 import test_util
 from IMP.npctransport import *
 import time
@@ -23,7 +23,7 @@ class Tests(IMP.test.TestCase):
 
         return - the resulting simulation data object
         """
-        IMP.base.set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         print("assigning parameter ranges from config")
         num = assign_ranges(config, output,
                             0, True, 10)
@@ -31,13 +31,13 @@ class Tests(IMP.test.TestCase):
         sd = IMP.npctransport.SimulationData(output, False)
         sd.set_rmf_file( self.get_tmp_file_name("out0.rmf"), False )
         print("BEFORE INIT", time.ctime())
-        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             short_init_factor = 0.00001
             opt_cycles = 2
         else:
             short_init_factor = 0.01
             opt_cycles = 10000
-        sd.get_bd().set_log_level(IMP.base.SILENT)
+        sd.get_bd().set_log_level(IMP.SILENT)
         IMP.npctransport.initialize_positions(sd, [], False, short_init_factor)
         print("AFTER INIT", time.ctime())
         obd = sd.get_bd()
@@ -55,17 +55,17 @@ class Tests(IMP.test.TestCase):
 
     def assert_transporting_equal(self, sd1, sd2):
         """ assert that sd1 and sd2 have identical Transporting statistics """
-        for d1, d2 in zip(sd1.get_diffusers().get_particles(),
-                          sd2.get_diffusers().get_particles()):
+        for d1, d2 in zip(sd1.get_beads(),
+                          sd2.get_beads()):
             if(not IMP.npctransport.Transporting.get_is_setup(d1)):
                 continue
             if(not IMP.npctransport.Transporting.get_is_setup(d2)):
                 continue
             t1 = IMP.npctransport.Transporting(d1)
             t2 = IMP.npctransport.Transporting(d2)
-            print("Diffuser particles: ")
-            print(d1, d2)
-            print("Comparing transport statistics: ", t1, t2)
+            print "Bead particles: "
+            print d1, d2
+            print "Comparing transport statistics: ", t1, t2
             self.assert_(t1.get_is_last_entry_from_top()
                          == t2.get_is_last_entry_from_top())
             self.assertAlmostEqual(t1.get_last_tracked_z(),
@@ -77,12 +77,12 @@ class Tests(IMP.test.TestCase):
 
     def assert_almost_equal_sds(self, sd1, sd2):
         """
-        assert that sd1 and sd2 has nearly identical positions for diffusers
+        assert that sd1 and sd2 has nearly identical positions for beads
         and sites + identical timers and Transporting porperties
         """
-        # check diffusers refframes
-        for p, pp in zip(sd1.get_diffusers().get_particles(),
-                         sd2.get_diffusers().get_particles()):
+        # check beads refframes
+        for p, pp in zip(sd1.get_beads(),
+                         sd2.get_beads()):
             self.assert_((IMP.core.XYZ(p).get_coordinates()
                           - IMP.core.XYZ(pp).get_coordinates()).get_magnitude() < .0001)
             q0 = IMP.core.RigidBody(
@@ -117,7 +117,7 @@ class Tests(IMP.test.TestCase):
         """ Testing whether positions are loaded properly from output file """
         print("TEST_INIT_FROM_OUTPUT")
         # random generator initialization
-        IMP.base.set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         config = self.get_tmp_file_name("simple_cfg.pb")
         test_util.make_simple_cfg(
             config,
@@ -156,7 +156,7 @@ class Tests(IMP.test.TestCase):
 
         # random generator initialization
         # RMF.set_log_level("trace")
-        IMP.base.set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         rt_prev_output = self.get_input_file_name("out149.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")
         rt_new_output = self.get_tmp_file_name("out.pb")
@@ -167,7 +167,7 @@ class Tests(IMP.test.TestCase):
                                              out_rmf,
                                              rt_new_output)
         sd.set_rmf_file(out_rmf, False)
-        for i,p in enumerate(sd.get_diffusers().get_particles()):
+        for i,p in enumerate(sd.get_beads()):
             if( i >= len(expected_particles) ):
                 break
             pc= [x for x in IMP.core.XYZ(p).get_coordinates()]
@@ -189,7 +189,7 @@ class Tests(IMP.test.TestCase):
         sites = sd.get_sites(IMP.core.ParticleType("kap"))
         for i,s in enumerate(sites):
             self.assertAlmostEqual(
-                ( s - expected_sites[i]).get_magnitude(),
+                ( s.get_center() - expected_sites[i]).get_magnitude(),
                 0, delta=.01 )
         # check timers
         t = sd.get_bd().get_current_time()
@@ -201,7 +201,7 @@ class Tests(IMP.test.TestCase):
         at all
         """
         print("TEST_INIT_FROM_OLD_OUTPUT_MORE_RECENT")
-        IMP.base.set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         rt_prev_output = self.get_input_file_name("out_more_recent.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")
         rt_new_output = self.get_tmp_file_name("out.pb")

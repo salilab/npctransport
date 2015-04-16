@@ -9,7 +9,7 @@
 
 #include <IMP/npctransport/Statistics.h>
 #include <IMP/npctransport/SimulationData.h>
-#include <IMP/npctransport/particle_types.h>
+#include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/enums.h>
 #include <IMP/npctransport/io.h>
@@ -92,7 +92,7 @@ void Statistics::add_fg_chain_stats
     Particle* p = chain_beads[k];
     IMP_ALWAYS_CHECK( core::Typed(p).get_type() == type,
                       "All beads in chain must be of same type for now",
-                      base::ValueException);
+                      ValueException);
     IMP_NEW(BodyStatisticsOptimizerState, bsos,
             ( p, statistics_interval_frames_ ) );
     fgs_bodies_stats_map_[type].back().push_back( bsos );
@@ -130,16 +130,13 @@ void Statistics::add_interaction_stats
     // add statistics about this interaction to interactions_stats_
     // between all diffusing particles
     ParticlesTemp set0, set1; // TODO: turn to a real set?!
-    IMP_CONTAINER_FOREACH // _1 is the particle index
-      ( SingletonContainer,
-        get_sd()->get_diffusers(),
-        {
-          if (core::Typed(get_model(), _1).get_type() == type0)
-            { set0.push_back( get_model()->get_particle(_1) ); }
-          if (core::Typed(get_model(), _1).get_type() == type1)
-            { set1.push_back( get_model()->get_particle(_1) ); }
-        }
-        );
+    Particles& beads = get_sd()->get_beads_byref();
+    for(unsigned int i = 0; i < beads.size(); i++){
+          if (core::Typed(beads[i]).get_type() == type0)
+            { set0.push_back( beads[i] ); }
+          if (core::Typed(beads[i]).get_type() == type1)
+            { set1.push_back( beads[i] ); }
+    }
     bool include_site_site = true;
     bool include_non_specific = true;
     double range =
@@ -166,7 +163,7 @@ OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
   if(o == nullptr) o = get_sd()->get_bd();
   IMP_ALWAYS_CHECK( o, "null optimizer in add_optimizer_states()"
                     " and get_sd()->get_bd() is invalid",
-                    base::ValueException);
+                    ValueException);
   OptimizerStates ret;
   for (FGsBodyStatisticsOSsMap::iterator iter = fgs_bodies_stats_map_.begin();
        iter != fgs_bodies_stats_map_.end(); iter++)
@@ -226,8 +223,10 @@ void Statistics::update_fg_stats
           it = fgt.begin(); it != fgt.end(); it++ )
     {
       core::ParticleType type_i = *it;
-      ParticlesTemp ps_i = get_sd()->get_particles_of_type( type_i );
-      if(ps_i.size() == 0) continue; // TODO: add warning?
+      atom::Hierarchy root_i = get_sd()->get_root_of_type( type_i );
+      ParticlesTemp chains_i = root_i.get_children();
+      if(chains_i.size() == 0)
+        continue; // TODO: add warning?
       // can happen only upon dynamic changes...
       unsigned int i = find_or_add_fg_of_type( stats, type_i );
 
@@ -236,27 +235,30 @@ void Statistics::update_fg_stats
         double avg_volume = 0.0;
         double avg_radius_of_gyration = 0.0;
         double avg_length = 0.0;
-        for (unsigned int j = 0; j < ps_i.size(); ++j)
+        for (unsigned int j = 0; j < chains_i.size(); ++j)
           {
-            atom::Hierarchy hj(ps_i[j]);
-            ParticlesTemp chainj = get_as<ParticlesTemp>(atom::get_leaves(hj));
-            fill_in_zr_hist(zr_hist, chainj);
+            Pointer<FGChain> chain_ij= get_fg_chain(chains_i[j]);
+            fill_in_zr_hist(zr_hist, chain_ij->get_beads());
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
-            double volume = atom::get_volume(hj);
-            double radius_of_gyration = atom::get_radius_of_gyration(chainj);
+            double volume_ij =
+              atom::get_volume(chain_ij->get_root()); // how does the work with TAMD?
+             // perhaps chain_ij->beads instead?
+            double radius_of_gyration_ij =
+              atom::get_radius_of_gyration(chain_ij->get_beads());
 #else
-            double volume = -1.;
-            double radius_of_gyration = -1.;
+            double volume_ij = -1.;
+            double radius_of_gyration_ij = -1.;
 #endif
-            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), volume, volume);
-            double length =
-              core::get_distance(core::XYZ(chainj[0]), core::XYZ(chainj.back()));
-            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), length, length);
+            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), volume, volume_ij);
+            double length_ij =
+              core::get_distance(core::XYZ(chain_ij->get_bead(0)),
+                                 core::XYZ(chain_ij->get_beads().back()));
+            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), length, length_ij);
             UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), radius_of_gyration,
-                       radius_of_gyration);
-            avg_volume += volume / ps_i.size();
-            avg_radius_of_gyration += radius_of_gyration / ps_i.size();
-            avg_length += length / ps_i.size();
+                       radius_of_gyration_ij);
+            avg_volume += volume_ij / chains_i.size();
+            avg_radius_of_gyration += radius_of_gyration_ij / chains_i.size();
+            avg_length += length_ij / chains_i.size();
           } // for j (fg chain)
         npctransport_proto::Statistics_FGOrderParams*
           fgrc = stats->mutable_fgs(i)->add_order_params();
@@ -406,39 +408,29 @@ void Statistics::update
 
    // FG-floaters interactions
    ParticleTypeSet const &ft = get_sd()->get_floater_types();
+   atom::Hierarchies fg_chain_roots =  get_sd()->get_fg_chain_roots() ;
    for ( ParticleTypeSet::const_iterator
            it = ft.begin(); it != ft.end(); it++ )
        {
-         IMP_LOG(VERBOSE, "GATHERING STATS for type " << *it << std::endl);
-         ParticlesTemp ps = get_sd()->get_particles_of_type( *it );
-         if(ps.size() == 0) // TODO: makes sense that this should happen?
+         ParticlesTemp cur_floaters =
+           get_sd()->get_root_of_type( *it ).get_children();
+         if(cur_floaters.size() == 0) // TODO: superfluous?
            continue;
          unsigned int i = find_or_add_floater_of_type( stats, *it );
-         double site_site_pairs, interacting_floaters,
-           bead_floater_pairs, chain_floater_pairs;
-         atom::Hierarchies fgs =  get_sd()->get_fg_chains() ;
+         double site_site_pairs;
+         double interacting_floaters;
+         double bead_floater_pairs;
+         double chain_floater_pairs;
          boost::tie(site_site_pairs, interacting_floaters,
-                   bead_floater_pairs, chain_floater_pairs)
-          = get_interactions_and_interacting(ps, fgs);
-        // {
-        //   //TODO: delete - this now only goes as order param
-        //   //      keeping for a while for backward compat.
-        //   UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
-        //              site_interactions_per_floater, -1);
-        //   UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
-        //              interacting_fraction, -1);
-        //   UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
-        //              chains_per_interacting_floater, -1);
-        //   UPDATE_AVG(nf, nf_new, *stats->mutable_floaters(i),
-        //            beads_per_interacting_floater, -1);
-        // }
+                    bead_floater_pairs, chain_floater_pairs)
+           = get_interactions_and_interacting(cur_floaters, fg_chain_roots);
         npctransport_proto::Statistics_FloaterOrderParams*
           frc = stats->mutable_floaters(i)->add_order_params();
         frc->set_time_ns(sim_time_ns);
         frc->set_site_interactions_per_floater
-          (site_site_pairs / ps.size());
+          (site_site_pairs / cur_floaters.size());
         frc->set_interacting_fraction
-          (interacting_floaters / ps.size());
+          (interacting_floaters / cur_floaters.size());
         frc->set_beads_per_interacting_floater
           (bead_floater_pairs / interacting_floaters);
         frc->set_chains_per_interacting_floater
@@ -447,13 +439,13 @@ void Statistics::update
           {
             int n_z0, n_z1, n_z2, n_z3;
             boost::tie(n_z0, n_z1, n_z2, n_z3) =
-              get_z_distribution(ps);
+              get_z_distribution(cur_floaters);
             frc->set_n_z0(n_z0);
             frc->set_n_z1(n_z1);
             frc->set_n_z2(n_z2);
             frc->set_n_z3(n_z3);
-          } // for it
-      }
+          }
+      } // for(it)
 
   // update statistics gathered on interaction rates
   for (BipartitePairsStatisticsOSMap::iterator
@@ -476,7 +468,7 @@ void Statistics::update
                     << pOutStats_i->type0() << ", " << pOutStats_i->type1()
                     << "] and bps_i " << s_type0 << ", " << s_type1 << "]"
                     << std::endl,
-                base::ValueException);
+                ValueException);
     }
     // some preparations
     Int n0 = bps_i->get_number_of_particles_1();
@@ -528,11 +520,11 @@ void Statistics::update
     stats->set_bd_simulation_time_ns( sim_time_ns );
     double total_energy  =
       get_sd()->get_bd()->get_scoring_function()->evaluate(false);
-    double energy_per_diffuser =
-      total_energy / get_sd()->get_diffusers()->get_indexes().size();
+    double energy_per_bead =
+      total_energy / get_sd()->get_beads().size();
     UPDATE_AVG(nf, nf_new, (*stats), energy_per_particle,  // TODO: reset?
-               // TODO: these are diffusing particles only
-               energy_per_diffuser );
+               // TODO: remove static beads from stats?
+               energy_per_bead );
     ::npctransport_proto::Statistics_GlobalOrderParams*
         sgop = stats->add_global_order_params();
     sgop->set_time_ns(sim_time_ns);
@@ -553,7 +545,7 @@ void Statistics::update
   // TODO: disable this for now
   //  ::npctransport_proto::Conformation *conformation =
   //   output.mutable_conformation();
-  //    save_pb_conformation(get_diffusers(), sites_, conformation);
+  //    save_pb_conformation(get_beads(), sites_, conformation);
 
   // save RMF for future restarts
   if(!no_save_rmf_to_output){
@@ -651,8 +643,8 @@ int Statistics::get_number_of_interactions(Particle *p1, Particle *p2) const {
                                                        );
   if ( get_distance(XYZR(p1), XYZR(p2)) > range_site )
     return 0; // filter on sphere distance
-  const algebra::Vector3Ds &sites1 = get_sd()->get_sites( type1 );
-  const algebra::Vector3Ds  &sites2 = get_sd()->get_sites( type2 );
+  const algebra::Vector3Ds &sites1 = get_sd()->get_site_centers( type1 );
+  const algebra::Vector3Ds  &sites2 = get_sd()->get_site_centers( type2 );
 
   int ct = 0;
   for (unsigned int i1 = 0; i1 < sites1.size(); ++i1)
@@ -681,10 +673,11 @@ Statistics::get_interactions_and_interacting
     bool floater_found = false;
     for (unsigned int j = 0; j < chain_roots.size(); ++j) {
       bool chain_found = false;
-      unsigned int const N = chain_roots[j].get_number_of_children();
-      for (unsigned int k = 0; k < N; ++k) {
+      Pointer<FGChain> cur_chain= get_fg_chain(chain_roots[j]);
+      Particles const& chain_particles = cur_chain->get_beads();
+      for (unsigned int k = 0; k < chain_particles.size(); ++k) {
         int num = get_number_of_interactions
-          (floaters[i], chain_roots[j].get_child(k) );
+          (floaters[i], chain_particles[k] );
         if (num > 0) {
           IMP_LOG(VERBOSE, "Found " << num
             << " site-site interactions between floater " << i <<
@@ -753,7 +746,7 @@ Statistics::get_z_distribution(const ParticlesTemp& ps) const{
 }
 
 void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][3],
-                                 ParticlesTemp& ps) const{
+                                 ParticlesTemp ps) const{
   double top = get_z_distribution_top();
   double r_max = get_r_distribution_max();
   int zz, rr;

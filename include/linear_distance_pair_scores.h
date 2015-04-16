@@ -139,12 +139,23 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   mutable EvaluationCache cache_;
 
  public:
+  /**
+   The score is 0 if the spheres are beyond the attractive range.
+   Within the attractive range, the score decreases linearly (= attraction)
+   with slope k_attr_ until the spheres touch. Once the spheres begin to
+   penetrate each other, the score rises linearly with slope k_rep_
+   (= repulsion), though it may be negative for small penetration.
+
+   The energy potential difference between the unbound state and when the
+   beads touch is:
+     DELTA-U=0.5*k_attr*range_attr;
+   */
   LinearInteractionPairScore(double k_rep, double range_attr, double k_attr,
                              std::string name = "LinearIDPairScore%1%");
 
 #ifndef SWIG
   // returns cached intermediate computations from last call to
-  // evaluate_index()
+  // this->evaluate_index()
   EvaluationCache const &get_evaluation_cache() const { return cache_; }
 #endif
 
@@ -213,6 +224,9 @@ inline double LinearInteractionPairScore::evaluate_index(
   algebra::Vector3D delta =
       m->get_sphere(pp[0]).get_center() - m->get_sphere(pp[1]).get_center();
   delta_length_2 = delta.get_squared_magnitude();
+  IMP_LOG(PROGRESS,
+          "LinearInteractionPairScore cached delta2 "
+          << cache_.particles_delta_squared << std::endl);
   x0 = m->get_sphere(pp[0]).get_radius() + m->get_sphere(pp[1]).get_radius();
   // Terminate immediately if very far, work with squares for speed
   // equivalent to [delta_length > x0 + attr_range]:
@@ -256,6 +270,9 @@ class IMPNPCTRANSPORTEXPORT LinearWellPairScore : public PairScore {
   void set_rest_length_factor(double rest_length_factor)
   { rest_length_factor_ = rest_length_factor; }
   double get_rest_length_factor() const { return rest_length_factor_; }
+  void set_k(double k)
+  { k_ = k; }
+  double get_k() { return k_; }
   double evaluate_index(Model *m, const ParticleIndexPair &p,
                         DerivativeAccumulator *da) const IMP_OVERRIDE;
   ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis) const;

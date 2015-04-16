@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
         IMP::create_temporary_file_name("output", ".pb");
     std::string output =
         IMP::create_temporary_file_name("output", ".rmf");
-    IMP::set_log_level(IMP::LogLevel(IMP::base::PROGRESS));
+    IMP::set_log_level(IMP::LogLevel(IMP::PROGRESS));
     int num = IMP::npctransport::assign_ranges(config, assignment, 0, true,
                                                IMP::get_random_seed());
     std::cout << "num ranges " << num << std::endl;

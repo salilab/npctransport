@@ -1,6 +1,6 @@
 from __future__ import print_function
 from IMP.npctransport import *
-import IMP.base
+import IMP
 import IMP.test
 import sys
 import math
@@ -51,30 +51,32 @@ class Tests(IMP.test.TestCase):
         f.close()
 
 
-    def test_get_fg_chains(self):
+    def test_get_fg_chain_roots(self):
         '''
-        Test that SimulationData.get_fg_chains() works correctly
+        Test that SimulationData.get_fg_chain_roots() works correctly
         '''
 
-        IMP.base.set_log_level(IMP.SILENT)
+        IMP.set_log_level(IMP.SILENT)
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         coords = self._create_cfg_file_with_fgs(cfg_file)
         print("assigning parameter ranges from config")
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 )
+        print "Loading SimData"
         sd= IMP.npctransport.SimulationData(assign_file, False)
         sd.set_rmf_file( self.get_tmp_file_name("out.rmf") )
-        fgs = sd.get_fg_chains( ) # atom.Hierarchies
-        print(" fgs ", fgs)
+        fgs = sd.get_fg_chain_roots( ) # atom.Hierarchies
+        print " fgs ", fgs
         ones = 0
         twos = 0
         for fg in fgs:
+            chain = get_fg_chain(fg)
             type_name = IMP.core.Typed(fg.get_child(0)).get_type().get_string()
             if(type_name == "my_fg1"):
-                self.assert_(fg.get_number_of_children() == 3)
+                self.assert_(chain.get_number_of_beads() == 3)
                 ones = ones + 1
             if(type_name == "my_fg2"):
-                self.assert_(fg.get_number_of_children() == 6)
+                self.assert_(chain.get_number_of_beads() == 6)
                 twos = twos + 1
         self.assert_(ones == 2 and twos == 3)
 

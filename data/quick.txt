@@ -55,6 +55,7 @@ fgs {
   interaction_range_factor {
     lower: 1.0
   }
+  type: "fg0"
 }
 floaters {
   number {
@@ -75,10 +76,11 @@ floaters {
   interaction_range_factor {
     lower: 1.0
   }
+  type: "kap0"
 }
 interactions {
   type0: "fg0"
-  type1: "kap"
+  type1: "kap0"
   is_on {
     lower: 1
   }

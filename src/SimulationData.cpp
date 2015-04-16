@@ -6,23 +6,26 @@
  *
  */
 
+#include <IMP/npctransport/FGChain.h>
+#include <IMP/npctransport/ParticleFactory.h>
+#include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesGeometry.h>
 #include <IMP/npctransport/SlabGeometry.h>
 #include <IMP/npctransport/SlabSingletonScore.h>
 #include <IMP/npctransport/ParticleFactory.h>
-#include <IMP/npctransport/particle_types.h>
+// #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
-#include <IMP/npctransport/creating_particles.h>
 #include <IMP/npctransport/enums.h>
 #include <IMP/npctransport/io.h>
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/npctransport/util.h>
 #include <IMP/algebra/vector_generators.h>
-#include <IMP/atom/estimates.h>
+#include <IMP/atom/BrownianDynamicsTAMD.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
+#include <IMP/atom/estimates.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/log.h>
 #include <IMP/core/HarmonicUpperBound.h>
@@ -71,10 +74,6 @@ SimulationData::SimulationData(std::string prev_output_file, bool quick,
   bd_(nullptr),
   scoring_(nullptr),
   statistics_(nullptr),
-  diffusers_changed_(false),
-  obstacles_changed_(false),
-  optimizable_diffusers_(nullptr),
-  diffusers_(nullptr),
   rmf_file_name_(rmf_file_name),
   is_save_restraints_to_rmf_(true)
 {
@@ -93,7 +92,7 @@ void SimulationData::initialize(std::string prev_output_file,
   bool read = pb_data.ParseFromIstream(&file);
   if (!read) {
     IMP_THROW("Unable to read data from protobuf" << prev_output_file,
-              base::IOException);
+              IOException);
   }
   pb_data.mutable_statistics(); // create it if not there
   const ::npctransport_proto::Assignment &
@@ -109,6 +108,7 @@ void SimulationData::initialize(std::string prev_output_file,
   GET_ASSIGNMENT(angular_d_factor);
   GET_VALUE(range);
   GET_VALUE(statistics_interval_frames);
+  GET_VALUE_DEF(output_statistics_interval_frames,10000);
   GET_ASSIGNMENT(statistics_fraction);
   GET_VALUE(time_step);
   GET_ASSIGNMENT_DEF(time_step_wave_factor, 1.0);
@@ -141,33 +141,26 @@ void SimulationData::initialize(std::string prev_output_file,
   for (int i = 0; i < pb_assignment.fgs_size(); ++i)
     {
       // verify type first
-      if(!pb_assignment.fgs(i).has_type())
-        {
-          std::string name = type_of_fg[i].get_string();
-          pb_data.mutable_assignment()
-            ->mutable_fgs(i)->set_type( name );
-          IMP_LOG(WARNING, "old or corrupt assignment file"
-                    << ", which lacks fg types, using " << name << std::endl);
-        }
-      IMP_USAGE_CHECK(pb_assignment.fgs(i).type() != "",
-                      "FG should've been assigned a valued type,"
-                      " possiblu thru protobuf.h");
+      IMP_ALWAYS_CHECK(pb_assignment.fgs(i).has_type(),
+                       "old or corrupt assignment file"
+                       << ", which lacks fg types" << std::endl,
+                       ValueException);
+      IMP_ALWAYS_CHECK(pb_assignment.fgs(i).type() != "",
+                       "FG should've been assigned a valued type,"
+                       " possiblu thru protobuf.h", ValueException);
       create_fgs(pb_assignment.fgs(i));
     }
   for (int i = 0; i < pb_assignment.floaters_size(); ++i)
     {
       // verify type first
-      if(!pb_assignment.floaters(i).has_type())
-        {
-          std::string name = type_of_float[i].get_string();
-          pb_data.mutable_assignment()
-            ->mutable_floaters(i)->set_type( name );
-          IMP_LOG(WARNING, "old or corrupt assignment file"
-                 << ", which lacks floater types, using " << name << std::endl);
-        }
+      IMP_ALWAYS_CHECK(pb_assignment.floaters(i).has_type(),
+                       "old or corrupt assignment file"
+                       << ", which lacks floater types"
+                       << std::endl, ValueException);
       IMP_USAGE_CHECK( pb_assignment.floaters(i).type() != "",
-                       "Floater should've been assigned a type thru protobuf.h");
-      create_floaters(pb_assignment.floaters(i), type_of_float[i],
+                       "Floater should've been assigned a type"
+                       << " thru protobuf.h");
+      create_floaters(pb_assignment.floaters(i),
                       display::get_display_color(i));
     }
   for (int i = 0; i < pb_assignment.obstacles_size(); ++i) {
@@ -193,7 +186,7 @@ void SimulationData::initialize(std::string prev_output_file,
     } else if (pb_data.has_conformation())
     {
       IMP_LOG(VERBOSE, "Restarting from output file conformation" << std::endl);
-      load_pb_conformation(pb_data.conformation(), get_diffusers(), sites_);
+      load_pb_conformation(pb_data.conformation(), get_beads(), sites_);
     }
 
   get_bd()->set_current_time( initial_simulation_time_ns_ );
@@ -213,52 +206,58 @@ void SimulationData::initialize(std::string prev_output_file,
 void SimulationData::create_fgs
 ( const ::npctransport_proto::Assignment_FGAssignment &fg_data)
 {
-  // set type
-  IMP_USAGE_CHECK(fg_data.has_type(), "It is assumed that fg data has"
-                  "a type by now");
-  IMP_LOG(PROGRESS, "creating FG of type '" << fg_data.type() << "'");
-  core::ParticleType type(fg_data.type());
-  if (fg_data.number().value() > 0) {
-    IMP_ALWAYS_CHECK( fg_types_.find(type) == fg_types_.end(),
-                      "Currently support only single insertion of each type,"
-                      " can be easily fixed in the future", base::ValueException);
-    fg_types_.insert(type);
-    ParticlesTemp fg_particles;
-    IMP::Particle* p_fg_root = new IMP::Particle( get_model() );
-    atom::Hierarchy fg_root = atom::Hierarchy::setup_particle(p_fg_root);
-    fg_root->set_name(type.get_string());
-    atom::Hierarchy(get_root()).add_child(fg_root);
-    for (int j = 0; j < fg_data.number().value(); ++j) {
-      IMP::Particle* pc=
-        create_fg_chain(this, fg_data, display::Color(.3, .3, .3));
-      atom::Hierarchy hc(pc);
-      fg_root.add_child(hc);
-      fg_particles.push_back(pc);
-      ParticlesTemp chain_beads = hc.get_children();
-      // set chain anchors if specified
-      if (fg_data.anchor_coordinates_size() > j) {
-        ::npctransport_proto::Assignment_XYZ xyz =
-          fg_data.anchor_coordinates(j);
-        core::XYZR d(chain_beads[0]);
-        d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
-        d.set_radius(d.get_radius() * fg_anchor_inflate_factor_); // inflate
-        d.set_coordinates_are_optimized(false);
-      }
-      get_statistics()->add_fg_chain_stats( chain_beads ); // stats
-    } // for j
-    particles_[type] = fg_particles;
-    // add sites for this type
-    if (fg_data.interactions().value() > 0) {
-      int nsites = fg_data.interactions().value();
-      set_sites(type, nsites, fg_data.radius().value());
+  // Save type:
+  IMP_ALWAYS_CHECK(fg_data.has_type(), "fg type missing in fg_data",
+                   ValueException)
+    core::ParticleType fg_type(fg_data.type());
+  IMP_ALWAYS_CHECK( fg_types_.find(fg_type) == fg_types_.end(),
+                    "Currently support only single insertion of each type,"
+                    " can be fixed if needed in the future",
+                    ValueException);
+  fg_types_.insert(fg_type);
+
+  // Make main root:
+  atom::Hierarchy chains_root =
+    atom::Hierarchy::setup_particle(new IMP::Particle( get_model() ) );
+  core::Typed::setup_particle(chains_root, fg_type);
+  chains_root->set_name( fg_type.get_string() ); //+ " root" );
+  get_root().add_child(chains_root);
+
+  // Add n chains:
+  for (int j = 0; j < fg_data.number().value(); ++j) {
+    Pointer<FGChain> chain= create_fg_chain
+      (this, chains_root, fg_data, display::Color(.3, .3, .3));
+    beads_ += chain->get_beads(); // book keeping
+    // set chain j anchors by fg_data if specified
+    if (fg_data.anchor_coordinates_size() > j) {
+      ::npctransport_proto::Assignment_XYZ xyz =
+        fg_data.anchor_coordinates(j);
+      core::XYZR d(chain->get_bead(0));
+      d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
+      d.set_radius(d.get_radius() * fg_anchor_inflate_factor_); // inflate
+      d.set_coordinates_are_optimized(false);
     }
-    // add general scoring scale factors
-    get_scoring()->set_interaction_range_factor
-    ( type, fg_data.interaction_range_factor().value());
-    get_scoring()->set_interaction_k_factor
-      ( type, fg_data.interaction_k_factor().value());
-    set_diffusers_changed(true);
-  } // if
+    // add stats on chain
+    get_statistics()->add_fg_chain_stats( chain->get_beads() );
+  } // for j
+
+
+  // Add sites for this type:
+  if (fg_data.interactions().value() != 0) {
+    int nsites = fg_data.interactions().value();
+    set_sites(fg_type, nsites,
+              fg_data.radius().value() * fg_data.site_relative_distance(),
+              fg_data.site_radius());
+  }
+
+  // Add general scoring scale factors information to scoring:
+  get_scoring()->set_interaction_range_factor
+    ( fg_type,
+      fg_data.interaction_range_factor().value());
+  get_scoring()->set_interaction_k_factor
+    ( fg_type,
+      fg_data.interaction_k_factor().value());
+
 }
 
 
@@ -266,46 +265,46 @@ void SimulationData::create_fgs
    Adds the 'floaters' (free diffusing particles) to the model hierarchy,
    based on the settings in data
 */
-void SimulationData::create_floaters(
-    const ::npctransport_proto::Assignment_FloaterAssignment &f_data,
-    core::ParticleType default_type, display::Color color) {
-  core:: ParticleType type(default_type);
-  if (f_data.has_type()){
-    type = core::ParticleType(f_data.type());
-  }
+void SimulationData::create_floaters
+( const ::npctransport_proto::Assignment_FloaterAssignment &f_data,
+  display::Color color)
+{
+  core::ParticleType type(f_data.type());
   if (f_data.number().value() == 0) {
     return;
   }
   IMP_ALWAYS_CHECK( floater_types_.find(type) == floater_types_.end(),
                     "Currently support only single insertion of each type,"
-                    " can be fixed in the future", base::ValueException);
+                    " can be fixed in the future", ValueException);
   floater_types_.insert(type);
-  // create a sub hierarchy with this type of floaters:
+
+  // Main root for type:
   atom::Hierarchy cur_root =
     atom::Hierarchy::setup_particle(new Particle(get_model()));
-  IMP_LOG(WARNING,  "   type " << type.get_string() << std::endl);
+  core::Typed::setup_particle(cur_root, type);
   cur_root->set_name(type.get_string());
-  atom::Hierarchy(get_root()).add_child(cur_root);
-  // populate hierarchy with particles:
-  ParticleFactory pf(this, f_data.radius().value(),
-                     f_data.d_factor().value(),
-                     angular_d_factor_,
-                     color, type);
-  ParticlesTemp cur_particles;
+  get_root().add_child(cur_root);
+  // Populate floaters under root:
+  IMP_NEW(ParticleFactory, pf,
+          (this, f_data.radius().value(),
+           f_data.d_factor().value(),
+           angular_d_factor_,
+           color, type) );
   for (int j = 0; j < f_data.number().value(); ++j)
     {
-      Particle *cur_p = pf.create();
-      cur_particles.push_back( cur_p );
+      Particle *cur_p = pf->create();
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
+      beads_.push_back(cur_p); // book keeping
       get_statistics()->add_floater_stats(cur_p); // stats
     }
-  particles_[type] = cur_particles;
   // add interaction sites to particles of this type:
-  if (f_data.interactions().value() > 0)
+  if (f_data.interactions().value() != 0)
     {
       int nsites = f_data.interactions().value();
       IMP_LOG(WARNING, nsites << " sites added " << std::endl);
-      set_sites(type, nsites, f_data.radius().value());
+      set_sites(type, nsites,
+                f_data.radius().value() * f_data.site_relative_distance(),
+                f_data.site_radius());
     }
   // add type-specific scoring scale factors
   get_scoring()->set_interaction_range_factor
@@ -313,7 +312,7 @@ void SimulationData::create_floaters(
   get_scoring()->set_interaction_k_factor
       ( type, f_data.interaction_k_factor().value());
 
-  // add z-biasing potential for particle with highest z*k (='energy')
+  // add z-biasing potential for fraction of particles
   if(f_data.has_k_z_bias()) if (f_data.k_z_bias().value() != 0)
     {
       double k = f_data.k_z_bias().value();
@@ -327,15 +326,13 @@ void SimulationData::create_floaters(
       ParticlesTemp ps;
       for (unsigned int i = 0; i < n_bias ; i++)
         {
-          ps.push_back( cur_particles[i] );
+          ps.push_back( cur_root.get_child(i) );
         }
       IMP_LOG(VERBOSE, "Biasing " << n_bias << " floaters"
                 << " of type " << type
                 << std::endl);
       get_scoring()->add_z_bias_restraint(ps, k);
     }
-
-  set_diffusers_changed(true);
 }
 
 
@@ -351,46 +348,47 @@ void SimulationData::create_obstacles
     return;
   }
   obstacle_types_.insert(type);
-  // create a sub hierarchy with this type of floaters:
+  // Main root for type:
   atom::Hierarchy cur_root =
     atom::Hierarchy::setup_particle(new Particle(get_model()));
+  core::Typed::setup_particle(cur_root, type);
   IMP_LOG(WARNING,  "   obstacle type " << type.get_string() << std::endl);
   cur_root->set_name(type.get_string());
-  atom::Hierarchy(get_root()).add_child(cur_root);
-  // populate hierarchy with particles:
-  ParticleFactory pf(this, o_data.radius().value(),
-                     o_data.d_factor().value(),
-                     angular_d_factor_,
-                     display::Color(.3, .6, .6), type);
-  ParticlesTemp cur_particles;
+  get_root().add_child(cur_root);
+  // Populate hierarchy with obstacles:
+  IMP_NEW(ParticleFactory, pf,
+          ( this, o_data.radius().value(),
+            o_data.d_factor().value(),
+            angular_d_factor_,
+            display::Color(.3, .6, .6), type) );
   for (int j = 0; j < o_data.xyzs_size(); ++j) {
-      Particle *cur_p = pf.create();
-      cur_particles.push_back( cur_p );
+      Particle *cur_p = pf->create();
       cur_root.add_child(atom::Hierarchy::setup_particle(cur_p));
+      beads_.push_back(cur_p); // book keeping
       ::npctransport_proto::Assignment_XYZ xyz = o_data.xyzs(j);
       core::XYZ p_xyz(cur_p);
       p_xyz.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
       p_xyz.set_coordinates_are_optimized( !o_data.is_static() );
    }
-  particles_[type] = cur_particles;
   // add interaction sites to particles of this type:
-  if (o_data.interactions().value() > 0) {
+  if (o_data.interactions().value() != 0) {
     int nsites = o_data.interactions().value();
     IMP_LOG(WARNING, nsites << " sites added " << std::endl);
-    set_sites(type, nsites, o_data.radius().value());
+    set_sites(type, nsites,
+              o_data.radius().value(),
+              0.0);
   }
   // add type-specific scoring scale factors
   get_scoring()->set_interaction_range_factor
     ( type, o_data.interaction_range_factor().value());
   get_scoring()->set_interaction_k_factor
     ( type, o_data.interaction_k_factor().value());
-  set_obstacles_changed(true);
 }
 
 void SimulationData::add_interaction
 ( const ::npctransport_proto::Assignment_InteractionAssignment & idata)
 {
-  // TODO: if diffusers added later, need to update interaction statistics!
+  // TODO: if beads added later, need to update interaction statistics!
   core::ParticleType type0(idata.type0());
   core::ParticleType type1(idata.type1());
   if (idata.is_on().value()) {
@@ -424,39 +422,37 @@ bool SimulationData::get_is_fg(ParticleIndex pi) const
   return false;
  }
 
-atom::Hierarchies SimulationData::get_fg_chains(atom::Hierarchy root) const
-{
-  IMP_INTERNAL_CHECK(root, "root for SimulationData::get_fg_chains() is null");
-  // TODO: maybe FGs should just be marked by a decorator, and not identified by
-  //       type alone
-  atom::Hierarchies ret;
-  if (root.get_number_of_children() == 0) {
-    return ret;
-  }
-  // I. return root itself if the type of its first direct child is fg
-  ParticleIndex pi_child0 = root.get_child(0).get_particle_index();
-  if (get_is_fg(pi_child0)) {
-      return atom::Hierarchies(1, root);
-  }
-  // II. If not returned yet, recurse on all of root's children
-  for (unsigned int i = 0; i < root.get_number_of_children(); ++i) {
-    ret += get_fg_chains(root.get_child(i));
-  }
-  return ret;
-}
+
+//!  return all the fg hierarchies in the simulation data Object
+//!  that stand for individual FG chains
+atom::Hierarchies SimulationData::get_fg_chain_roots() const
+    {
+      atom::Hierarchies ret;
+      atom::Hierarchies C = get_root().get_children();
+      for(unsigned int i =0 ; i < C.size(); i++) {
+        if( get_is_fg( C[i] ) ){
+           ret += C[i].get_children();
+          }
+      }
+      return ret;
+    }
+
 
 /** return all the obstacle particles */
 ParticlesTemp SimulationData::get_obstacle_particles() const
 {
-  ParticlesTemp ret;
   typedef boost::unordered_set<core::ParticleType> ParticleTypeSet;
+
+  ParticlesTemp ret;
   ParticleTypeSet const& o_types = get_obstacle_types();
-  for(ParticleTypeSet::const_iterator
-        ti = o_types.begin(); ti != o_types.end(); ti++)
-    {
-      atom::Hierarchies hs = get_particles_of_type(*ti);
-      ret += ParticlesTemp( atom::get_leaves( hs ) );
+  for(unsigned int i = 0; i < get_root().get_number_of_children(); i++) {
+    atom::Hierarchy root_of_type = get_root().get_child(i);
+    core::ParticleType type = core::Typed(root_of_type).get_type();
+    if(o_types.find(type) != o_types.end()) {
+      Particles o_leaves = get_leaves(root_of_type) ;
+      ret.insert( ret.begin(), o_leaves.begin(), o_leaves.end() );
     }
+  }
   return ret;
 }
 
@@ -486,13 +482,14 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
   //       Scoring.cpp (for better encapsulation
   IMP_LOG(TERSE, "Setting up dump" << std::endl);
   Scoring* s=get_scoring();
-  add_hierarchies_with_sites(fh, atom::Hierarchy(get_root()).get_children());
+  add_hierarchies_with_sites(fh, get_root().get_children());
   if(with_restraints) {
     IMP::rmf::add_restraints( fh, RestraintsTemp
                               (1, s->get_predicates_pair_restraint() )
                               );
     IMP::rmf::add_restraints(fh, s->get_all_chain_restraints() );
     IMP::rmf::add_restraints(fh, s->get_z_bias_restraints() );
+    IMP::rmf::add_restraints(fh, s->get_custom_restraints() );
   }
   if (s->get_has_bounding_box()) {
     if(with_restraints) {
@@ -551,8 +548,8 @@ void SimulationData::set_rmf_file(const std::string &new_name,
 void SimulationData::dump_geometry() {
   IMP_OBJECT_LOG;
   Pointer<display::Writer> w = display::create_writer("dump.pym");
-  IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
-  for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
+  IMP_NEW(TypedSitesGeometry, g, (get_beads()));
+  for (boost::unordered_map<core::ParticleType, algebra::Sphere3Ds>::const_iterator it =
            sites_.begin();
        it != sites_.end(); ++it) {
     g->set_sites(it->first, it->second);
@@ -572,6 +569,23 @@ void SimulationData::dump_geometry() {
               box_side_ /* w */) );
      w->add_geometry( slab_geometry );
   }
+}
+
+
+/**
+   Returns the root of all chains of type 'type'
+*/
+atom::Hierarchy
+  SimulationData::get_root_of_type(core::ParticleType type) const
+{
+  atom::Hierarchies H = get_root().get_children();
+  for(unsigned int i = 0; i < H.size(); i++) {
+    if(core::Typed(H[i]).get_type() == type) {
+      return H[i];
+    }
+  }
+  IMP_THROW("particle type " << type << " not found",
+            ValueException);
 }
 
 void SimulationData::reset_rmf() {
@@ -619,7 +633,7 @@ Statistics const * SimulationData::get_statistics() const
 
 atom::BrownianDynamics *SimulationData::get_bd(bool recreate){
   if (!bd_ || recreate) {
-    bd_ = new atom::BrownianDynamics(m_, "BD%1%", time_step_wave_factor_);
+    bd_ = new atom::BrownianDynamicsTAMD(m_, "BD_tamd%1%", time_step_wave_factor_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_ / 4);
     bd_->set_current_time(0.0);
@@ -635,58 +649,39 @@ atom::BrownianDynamics *SimulationData::get_bd(bool recreate){
   return bd_;
 }
 
-container::ListSingletonContainer *
-SimulationData::get_diffusers(){
-  // TODO: obstacles ? need to get them out but then fix everything dependent
-  //       on them (e.g. initialize_positions?)
-  bool new_diffusers = !diffusers_ || diffusers_changed_ || obstacles_changed_;
-  if (!diffusers_) {
-    diffusers_ = new container::ListSingletonContainer(m_);
-  }
-  if (new_diffusers) {
-    // Add all leaves of the hierarchy as diffusers
-    ParticlesTemp leaves = get_as<ParticlesTemp>(atom::get_leaves(get_root()));
-    IMP_LOG(TERSE, "Leaves are " << leaves << std::endl);
-    diffusers_->set_particles(leaves);
-    IMP_USAGE_CHECK(leaves.size() == diffusers_->get_indexes().size(),
-                    "Set and get particles don't match");
-    // mark the update
-    set_diffusers_changed(false);
-    set_obstacles_changed(false);
-  }
-  return diffusers_;
-}
-
-container::ListSingletonContainer *
-SimulationData::get_optimizable_diffusers()
+ParticlesTemp
+SimulationData::get_optimizable_beads()
 {
-  if (!optimizable_diffusers_) {
-    optimizable_diffusers_ = new container::ListSingletonContainer(m_);
-  }
-  IMP::ParticlesTemp optimizable_diffusers;
-  IMP_CONTAINER_FOREACH
-    (container::ListSingletonContainer,
-     get_diffusers(),
-     {
-       Particle* p = m_->get_particle(_1);
-       if(core::XYZ::get_is_setup(p)) {
-         core::XYZ p_xyz(p);
-         if(p_xyz.get_coordinates_are_optimized()){
-           optimizable_diffusers.push_back ( p );
-         }
-       }
-     }
-     );
-  optimizable_diffusers_->set_particles(get_diffusers()->get_particles());
-  return optimizable_diffusers_;
+  IMP::ParticlesTemp ret;
+  for(unsigned int i = 0; i < beads_.size(); i++)
+    {
+      if(core::XYZ::get_is_setup(beads_[i]))
+        {
+          core::XYZ xyz(beads_[i]);
+          if(xyz.get_coordinates_are_optimized())
+            {  ret.push_back ( beads_[i] );  }
+        }
+    }
+  return ret;
 }
 
 
-void SimulationData::set_sites(core::ParticleType t0, unsigned int n,
-                               double r) {
-  algebra::Sphere3D s(algebra::get_zero_vector_d<3>(), r);
-  algebra::Vector3Ds sites = algebra::get_uniform_surface_cover(s, n);
-  sites_[t0] = algebra::Vector3Ds(sites.begin(), sites.begin() + n);
+void SimulationData::set_sites(core::ParticleType t, int n,
+                               double r, double sr) {
+  sites_[t] = algebra::Sphere3Ds();
+  if(n>0 && r > 0.0) {
+    algebra::Sphere3D s(algebra::get_zero_vector_d<3>(), r);
+    algebra::Vector3Ds sites_pos = algebra::get_uniform_surface_cover(s, n);
+    for(int i = 0; i < n; i++) {
+      sites_[t].push_back(algebra::Sphere3D(sites_pos[i], sr));
+    }
+  }
+  if(n == -1 ||  r == 0.0) { // centered at bead
+    IMP_ALWAYS_CHECK(n<2, "Cannot set more than one site at bead center",
+                     ValueException);
+    algebra::Sphere3D zero(algebra::Vector3D(0,0,0), sr);
+    sites_[t] = algebra::Sphere3Ds(1, zero);
+  }
 }
 
 
@@ -694,12 +689,11 @@ void SimulationData::write_geometry(std::string out) {
   IMP_OBJECT_LOG;
   Pointer<display::Writer> w = display::create_writer(out);
   {
-    IMP_NEW(TypedSitesGeometry, g, (get_diffusers()));
-    for (boost::unordered_map<core::ParticleType, algebra::Vector3Ds>::const_iterator it =
-             sites_.begin();
-         it != sites_.end(); ++it) {
-      g->set_sites(it->first, it->second);
-    }
+    IMP_NEW(TypedSitesGeometry, g, (get_beads()));
+    for (boost::unordered_map<core::ParticleType, algebra::Sphere3Ds>
+           ::const_iterator it = sites_.begin(); it != sites_.end(); ++it){
+        g->set_sites(it->first, it->second);
+      }
     w->add_geometry(g);
   }
   Scoring * s = get_scoring();

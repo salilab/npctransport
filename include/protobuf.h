@@ -73,11 +73,11 @@ IMPNPCTRANSPORTEXPORT int get_number_of_work_units(
    Loads a protobuf conformation into the diffusers and sites
 
    @param conformation the saved conformation protobuf message
-   @param diffusers corresponding diffusers to be updated
+   @param beads corresponding diffusers to be updated
    @param sites a map of sites for each diffuser particle type
                 to be updated
 
-   @note the diffusers and sites must have the same structure
+   @note the beads and sites must have the same structure
                        as the ones used when saving (e.g. their
                        non-changing variables are expected to
                        be identical, and they differ only in the
@@ -86,13 +86,13 @@ IMPNPCTRANSPORTEXPORT int get_number_of_work_units(
 */
 void load_pb_conformation
 ( const ::npctransport_proto::Conformation &conformation,
-  IMP::SingletonContainer *diffusers,
-  boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites);
+  IMP::SingletonContainerAdaptor beads,
+  boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> &sites);
 
 /**
    Saves a protobuf conformation from the diffusers and sites
 
-   @param diffusers diffusers to save
+   @param beads beads to save
    @param sites a map of sites for each diffuser particle type
                 to be saved
    @param conformation the conformation protobuf message to be save
@@ -100,8 +100,8 @@ void load_pb_conformation
    \see load_pb_conformation
  */
 void save_pb_conformation
-( IMP::SingletonContainer *diffusers,
-  const boost::unordered_map<core::ParticleType, algebra::Vector3Ds> &sites,
+( IMP::SingletonContainerAdaptor beads,
+  const boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> &sites,
   ::npctransport_proto::Conformation *conformation );
 #endif
 

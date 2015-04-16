@@ -25,7 +25,7 @@ bbss= IMP.core.BoundingBox3DSingletonScore(IMP.core.HarmonicUpperBound(0,10),
                                          bb)
 bbr= IMP.core.SingletonRestraint(bbss, p, "bb")
 
-nm=IMP.base.create_temporary_file_name("slab", ".rmf")
+nm=IMP.create_temporary_file_name("slab", ".rmf")
 rmf= RMF.create_rmf_file(nm)
 IMP.rmf.add_hierarchies(rmf, [p])
 bbg= IMP.display.BoundingBoxGeometry(bb)

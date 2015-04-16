@@ -38,8 +38,8 @@ class ConeTests(IMP.test.TestCase):
                         failures+=1
                         ok=False
                         break
-                    sp=rbs[i].get_reference_frame().get_global_coordinates(sites[i][0])
-                    spo= orb.get_reference_frame().get_global_coordinates(s[0])
+                    sp=rbs[i].get_reference_frame().get_global_coordinates(sites[i][0].get_center())
+                    spo= orb.get_reference_frame().get_global_coordinates(s[0].get_center())
                     ds= IMP.algebra.get_distance(sp, spo)
                     print("i=",i, "d=", d, "dsites=", ds)
                     if ds > (radius/2.0):
@@ -59,8 +59,8 @@ class ConeTests(IMP.test.TestCase):
         rb0= self._create_particle(m)
         rb1= self._create_particle(m)
         bb= IMP.algebra.get_cube_3d(15)
-        s0=[IMP.algebra.Vector3D(radius, 0,0)]
-        s1=[IMP.algebra.Vector3D(0, radius,0)]
+        s0=[IMP.algebra.Sphere3D(IMP.algebra.Vector3D(radius, 0, 0), 0.0)]
+        s1=[IMP.algebra.Sphere3D(IMP.algebra.Vector3D(0, radius, 0), 0.0)]
         r_sites = 1000
         k_sites = 10
         r_nonspec_atr = 0
@@ -68,8 +68,7 @@ class ConeTests(IMP.test.TestCase):
         k_rep = 10
         ps= IMP.npctransport.SitesPairScore(r_sites,k_sites,
                                             r_nonspec_atr, k_nonspec_atr, k_rep,
-                                            s0,
-                                            s1)
+                                            s0, s1)
         IMP.set_log_level(IMP.SILENT)
         r= IMP.core.PairRestraint(ps, (rb0, rb1))
         m.add_restraint(r)
@@ -91,8 +90,8 @@ class ConeTests(IMP.test.TestCase):
         self._show([rb0, rb1], [s0, s1], w)
         rf0= rb0.get_reference_frame()
         rf1= rb1.get_reference_frame()
-        s0g= rf0.get_global_coordinates(s0[0])
-        s1g= rf1.get_global_coordinates(s1[0])
+        s0g= rf0.get_global_coordinates(s0[0].get_center())
+        s1g= rf1.get_global_coordinates(s1[0].get_center())
         d= IMP.algebra.get_distance(s0g, s1g)
         print("Sites", s0g, s1g, "d=", d)
         self.assert_(d < 1)

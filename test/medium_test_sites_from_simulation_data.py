@@ -1,6 +1,6 @@
 from __future__ import print_function
 from IMP.npctransport import *
-import IMP.base
+import IMP
 import IMP.test
 import IMP.core
 import sys
@@ -34,12 +34,10 @@ class Tests(IMP.test.TestCase):
                                           radius=fg_R,
                                           interactions=12,
                                           rest_length_factor = 1.5)
-        coords = []
         pos=fgs.anchor_coordinates.add()
-        c = fg_coords
-        pos.x=c[0]
-        pos.y=c[1]
-        pos.z=c[2]
+        pos.x=fg_coords[0]
+        pos.y=fg_coords[1]
+        pos.z=fg_coords[2]
         kaps= IMP.npctransport.add_float_type(config,
                                               number=1,
                                               radius=diffuser_R,
@@ -85,7 +83,12 @@ class Tests(IMP.test.TestCase):
 
 
     def _assert_kap_in_place(self, sd, really_assert=True):
-        fg_anchor = sd.get_fg_chains()[0].get_child(0)
+        first_chain = IMP.npctransport.get_fg_chain(sd.get_fg_chain_roots()[0])
+        print first_chain
+        print vars(first_chain)
+        print "WHOOO"
+        fg_anchor = first_chain.get_bead(0)
+        print fg_anchor
         kap = None
         r=sd.get_root()
         for rchild in r.get_children():
@@ -126,7 +129,7 @@ class Tests(IMP.test.TestCase):
         in the context of simualtion data optimization
         '''
 
-        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             print("SLOW MODE")
             fast = False
             short_init_factor=0.0001
@@ -155,13 +158,13 @@ class Tests(IMP.test.TestCase):
         sd.set_rmf_file(rmf_file, False)
         self._assert_kap_in_place(sd, False)
         # init and run
-        IMP.base.set_log_level(IMP.base.SILENT)
-        sd.get_bd().set_log_level(IMP.base.SILENT)
+        IMP.set_log_level(IMP.SILENT)
+        sd.get_bd().set_log_level(IMP.SILENT)
         IMP.npctransport.initialize_positions( sd, [], False,
                                                short_init_factor)
         print()
         print()
-#        IMP.base.set_log_level(IMP.base.PROGRESS)
+#        IMP.set_log_level(IMP.PROGRESS)
         sd.write_geometry(pymol_file)
         n_good=0
         timer= IMP.npctransport.timer();
@@ -172,9 +175,9 @@ class Tests(IMP.test.TestCase):
             sd.get_statistics().update(timer,opt_cycles)
             try:
                 self._assert_kap_in_place(sd, True)
-                print("total energy", sd.get_bd().get_scoring_function().evaluate(False), end=' ')
-                print("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False))
-                self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -50.0)
+                print "total energy", sd.get_bd().get_scoring_function().evaluate(False),
+                print "predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False)
+                self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -30.0)
                 self.assert_(self.is_stats_interact_(assign_file))
                 n_good=n_good+1
             except:

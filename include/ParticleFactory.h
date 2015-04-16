@@ -1,5 +1,5 @@
 /**
- * \file creating_particles.h
+ * \file ParticleFactory.h
  * \brief description
  *
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
@@ -19,7 +19,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 
-class ParticleFactory {
+class IMPNPCTRANSPORTEXPORT ParticleFactory : public IMP::Object {
  public:
   /** The simulation data whose model is associated with new particle
   */
@@ -42,25 +42,34 @@ class ParticleFactory {
 
  public:
   /**
-     construct a factory that produces particles with specified attributes
+     construct a factory that produces diffusing particles with specified attributes,
+     with a default mass of 1.0
 
     @param sd the simulation data whose model is associated with new particles
-    - particles are also saved to the sd diffusers list
+    - particles are decorated with a simulation data attribute to mark their owner
     @param radius particle radius (A)
     @param D_factor diffusion factor (relative to that auto-calculated
-                    from radius)
+                    from radius). If 0.0, no diffusion or angular diffusion
+                    is set up.
     @param angular_D_factor angular diffusion factor (relative to that
-                            auto-calculated from radius*D_factor)
+                            auto-calculated from radius times D_factor). If
+                            non-positive, do not setup angular rigid
+                            body diffusion (still set up Diffusion if
+                            D_factor>0.0)
     @param color color for new particles
     @param type the type of new particles
+    @param name object name
    */
  ParticleFactory(SimulationData* sd,
                  double radius,
                  double D_factor,
                  double angular_D_factor,
                  display::Color color,
-                 core::ParticleType type)
-   : sd_(sd),
+                 core::ParticleType type,
+                 std::string name = "Particle factory %1%")
+   :
+  IMP::Object(name),
+    sd_(sd),
     radius_(radius),
     D_factor_(D_factor),
     angular_D_factor_(angular_D_factor),
@@ -79,9 +88,21 @@ class ParticleFactory {
   */
   IMP::Particle* create(std::string name="");
 
+  //! return model associated with this factory
   Model* get_model() {
     return sd_->get_model();
   }
+
+  //! return SimulationData object associated with this factory
+  SimulationData* get_simulation_data() {
+    return sd_;
+  }
+
+  //! return radius of generated particles
+  double get_radius() const { return radius_; }
+
+
+  IMP_OBJECT_METHODS(ParticleFactory);
 };
 
 

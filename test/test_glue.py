@@ -6,8 +6,38 @@ import RMF
 import IMP.container
 import math
 
-radius=5
-k=500
+# //r = rx * sqrt(s+1)
+# r = rx^2 + ry^2
+# s = ry^2/rx^2
+# dU = -0.0625 * k * rx^2 * ry^2
+
+radius=30
+k_G=0.001
+k=k_G
+k_skew_G=0.25
+rangeN = 10
+rangeT = 20
+range_skew_G = (rangeT/rangeN)**2
+site_range_G=math.sqrt(rangeN**2 + rangeT**2)
+kN = k_G*k_skew_G/(k_skew_G+1)
+kT = k_G/(k_skew_G+1)
+#fmax = max[(0.5 * kN * rangeN) * (0.25 * kT * rangeT ^ 2),
+#           (0.5 * kT * rangeT) * (0.25 * kN * rangeN ^ 2)]
+fmax = 0.125 * k_G * rangeN * rangeT * max(rangeN, rangeT)
+dUmax = 0.0625 * k_G * rangeN**2 * rangeT**2
+nonspec_k_G=0.1*fmax
+nonspec_range_G=.2*radius
+print "fmax=", fmax
+print "dUmax=", dUmax
+print "range=", site_range_G
+print "rangeN=", rangeN
+print "rangeT=", rangeT
+print "kN=", kN
+print "kT=", kT
+print "k=", k_G
+print "k_skew=",  k_skew_G
+print "k_nonspec=",  nonspec_k_G
+print "dU_nonspec=", nonspec_range_G*nonspec_k_G
 
 class Tests(IMP.test.TestCase):
     def _create_particle(self, m):
@@ -23,13 +53,16 @@ class Tests(IMP.test.TestCase):
     def _test_one(self, site_range, site_k, nonspec_range, nonspec_k,
                   soft_sphere_k, dt, ntrial=0):
         nsteps = 250000
-        if(IMP.base.get_check_level() >= IMP.base.USAGE):
+        if(IMP.get_check_level() >= IMP.USAGE):
             nsteps /= 250
         m= IMP.Model()
-        m.set_log_level(IMP.SILENT)
+        m.set_log_level(IMP.PROGRESS)
         ds= [self._create_particle(m) for i in range(0,2)]
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
-        ds[1].set_coordinates(IMP.algebra.Vector3D(2*radius,0,0))
+        ds[1].set_coordinates(IMP.algebra.Vector3D(2.5*radius,0,0))
+        distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
+                                            ds[1].get_coordinates())
+        print "Initial distance", distance
         types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
         for d in zip(types, ds):
             IMP.core.Typed.setup_particle(d[1], d[0])
@@ -37,9 +70,11 @@ class Tests(IMP.test.TestCase):
                 [ IMP.algebra.Vector3D(-math.sqrt(1.0)*radius,math.sqrt(0.0)*radius,0)
 #                  , IMP.algebra.Vector3D(-math.sqrt(0.8)*radius,math.sqrt(0.2)*radius,0)
                 ] )
-        ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
-                                            nonspec_k, soft_sphere_k,
-                                            sites[0], sites[1])
+        ps= IMP.npctransport.SitesPairScore(site_range, site_k,
+                                            nonspec_range, nonspec_k,
+                                            soft_sphere_k,
+                                            IMP.npctransport.vectors2spheres(sites[0], 0.0),
+                                            IMP.npctransport.vectors2spheres(sites[1], 0.0))
 #        ps.set_log_level(IMP.VERBOSE)
         r= IMP.core.PairRestraint(ps, ds)
         m.add_restraint(r)
@@ -57,7 +92,10 @@ class Tests(IMP.test.TestCase):
         sos.update_always()
         for rr,s in zip([2.00, 2.25, 2.50],
                        [-k*radius/2.0-0.1*k*0.2*radius,-k*radius/4.0, 0.0]):
+            print "rr*radius= ", rr*radius
             ds[1].set_coordinates(IMP.algebra.Vector3D(rr*radius,0,0))
+            print "P0", ds[0]
+            print "P1", ds[1]
             init_score =  bd.get_scoring_function().evaluate(False)
             print("Initial score x0=", rr, "*R is ", init_score)
             self.assertAlmostEqual(init_score, s, delta = 0.001)
@@ -71,12 +109,12 @@ class Tests(IMP.test.TestCase):
                 break;
         final_score = bd.get_scoring_function().evaluate(False)
         print("Final distance", distance, "score", final_score)
-#        if(IMP.base.get_check_level() < IMP.base.USAGE):
+#        if(IMP.get_check_level() < IMP.USAGE):
         self.assertAlmostEqual(distance, 2*radius, delta =max_delta)
         self.assertLess(final_score, -0.001)
     def test_one(self):
         """Check interaction score repulsion for glue test"""
-        IMP.set_log_level(IMP.SILENT)
+        IMP.set_log_level(IMP.PROGRESS)
         dt=IMP.npctransport.get_time_step(1, k, radius)
         ntrials=3
         for i in range(ntrials):
@@ -91,7 +129,7 @@ class Tests(IMP.test.TestCase):
     def _test_two(self, site_range, site_k, nonspec_range, nonspec_k,
                   soft_sphere_k, dt):
         nsteps = 2000
-        if(IMP.base.get_check_level() >= IMP.base.USAGE):
+        if(IMP.get_check_level() >= IMP.USAGE):
             nsteps /= 10
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
@@ -108,7 +146,9 @@ class Tests(IMP.test.TestCase):
         rs=[]
         for p in [(0,1), (1,2), (0,2)]:
             ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
-                                                nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
+                                                nonspec_k, soft_sphere_k,
+                                                IMP.npctransport.vectors2spheres(sites[p[0]], 0.0),
+                                                IMP.npctransport.vectors2spheres(sites[p[1]], 0.0))
 #          ps.set_log_level(IMP.VERBOSE)
             r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
             rs.append(r)
@@ -117,11 +157,11 @@ class Tests(IMP.test.TestCase):
         bd.set_maximum_time_step(dt)
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue2.rmf"))
         for d in zip(types, sites):
-            IMP.npctransport.add_sites(f, d[0], .5*radius, d[1])
+            IMP.npctransport.add_test_sites(f, d[0], site_range, d[1])
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         IMP.rmf.add_restraints(f, rs)
         sos= IMP.rmf.SaveOptimizerState(m, f)
-        sos.set_period(1000)
+        sos.set_period(10)
         bd.add_optimizer_state(sos)
         bd.optimize(nsteps)
         sos.update_always()
@@ -129,7 +169,10 @@ class Tests(IMP.test.TestCase):
         """Check two interactions"""
         IMP.set_log_level(IMP.SILENT)
         dt=IMP.npctransport.get_time_step(1, k, radius)
-        self._test_two(radius, k, .2*radius, .5*k, k, dt)
+        self._test_two(site_range=radius, site_k=k,
+                       nonspec_range=.2*radius, nonspec_k=.5*k,
+                       soft_sphere_k=k, dt=dt)
+
 
     def _create_restraint_three(self, m, ds, site_range, site_k, nonspec_range, nonspec_k,
                                 soft_sphere_k, f=None):
@@ -139,12 +182,14 @@ class Tests(IMP.test.TestCase):
                [IMP.algebra.Vector3D(-radius, 0,0), IMP.algebra.Vector3D(0, 0,-radius)])
         if f:
             for d in zip(ds, sites):
-                IMP.npctransport.add_sites(f, IMP.core.Typed(d[0]).get_type(),
+                IMP.npctransport.add_test_sites(f, IMP.core.Typed(d[0]).get_type(),
                                            .5*radius, d[1])
         rs=[]
         for p in [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)]:
             ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
-                                                nonspec_k, soft_sphere_k, sites[p[0]], sites[p[1]])
+                                                nonspec_k, soft_sphere_k,
+                                                IMP.npctransport.vectors2spheres(sites[p[0]], 0.0),
+                                                IMP.npctransport.vectors2spheres(sites[p[1]], 0.0))
 #          ps.set_log_level(IMP.VERBOSE)
             r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
             rs.append(r)
@@ -185,7 +230,9 @@ class Tests(IMP.test.TestCase):
         """Check three interactions"""
         IMP.set_log_level(IMP.SILENT)
         dt=IMP.npctransport.get_time_step(1, k, radius)
-        self._test_three(radius, k, .2*radius, .5*k, k, dt)
+        self._test_three(site_range=radius, site_k=k,
+                       nonspec_range=.2*radius, nonspec_k=.5*k,
+                       soft_sphere_k=k, dt=dt)
     def _rescore_three(self):
         IMP.set_log_level(IMP.SILENT)
         f= RMF.open_rmf_file_read_only(self.get_tmp_file_name("glue3.rmf"))
@@ -197,6 +244,108 @@ class Tests(IMP.test.TestCase):
         IMP.rmf.load_frame(f, 0)
         print(rs[0].evaluate(True))
         IMP.rmf.load_frame(f, f.get_number_of_frames()-1)
-        print(rs[0].evaluate(True))
+        print rs[0].evaluate(True)
+
+    def _test_one_sliding(self, site_range, site_k,
+                          range_skew, k_skew,
+                          nonspec_range, nonspec_k,
+                          soft_sphere_k, dt, ntrial=0):
+        nsteps = 5000E+6 / dt
+        if(IMP.get_check_level() >= IMP.USAGE):
+            nsteps /= 250
+        m= IMP.Model()
+        m.set_log_level(IMP.PROGRESS)
+        ds= [self._create_particle(m) for i in range(0,2)]
+        ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
+        ds[1].set_coordinates(IMP.algebra.Vector3D(2.5*radius,0,0))
+        ds[0].set_radius(radius*0.4) #/2.0*0.9) # for repulsion
+        ds[1].set_radius(radius*0.8) # for repulsion
+        distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
+                                            ds[1].get_coordinates())
+        print "Initial distance", distance
+        types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
+        for d in zip(types, ds):
+            IMP.core.Typed.setup_particle(d[1], d[0])
+        sites0 =  [ IMP.algebra.Sphere3D
+                    ( IMP.algebra.Vector3D(0,0,0),
+                      radius/2.0 ) ]
+        sites1 = [ IMP.algebra.Sphere3D
+                   ( IMP.algebra.Vector3D(-math.sqrt(1.0)*radius,
+                                          math.sqrt(0.0)*radius,
+                                          0.0),
+                     0.0 ) ]
+#                  , IMP.algebra.Vector3D(-math.sqrt(0.8)*radius,math.sqrt(0.2)*radius,0)
+        print site_range, site_k, range_skew, k_skew
+        print nonspec_range, nonspec_k, soft_sphere_k
+        ps= IMP.npctransport.SitesPairScore(site_range, site_k,
+                                            range_skew, k_skew,
+                                            nonspec_range,
+                                            nonspec_k,
+                                            soft_sphere_k,
+                                            sites0, sites1)
+#        ps.set_log_level(IMP.VERBOSE)
+        r= IMP.core.PairRestraint(ps, ds)
+        m.add_restraint(r)
+        bd= IMP.atom.BrownianDynamics(m)
+        bd.set_maximum_time_step(dt)
+        f= RMF.create_rmf_file(self.get_tmp_file_name("glue1_slide_%d.rmf" % ntrial))
+        for d in zip(types, [sites0, sites1]):
+            IMP.npctransport.add_test_sites(f, d[0], d[1])
+        IMP.rmf.add_restraint(f,r)
+        w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
+        sos= IMP.rmf.SaveOptimizerState(m, f)
+        bd.add_optimizer_state(sos)
+        sos.set_period(math.ceil(100000.0/dt))
+        max_delta = 0.75 * site_range
+        sos.update_always()
+        rangex = site_range_G / math.sqrt(range_skew_G+1)
+        rangey = rangex * math.sqrt(range_skew_G)
+        for rr,s in zip([1.50, 1.51, 1.8],
+                       [-0.0625*k*(rangex*rangey)**2-nonspec_k*0.2*radius, 0.0, 0.0]):
+            print "rr*radius= ", rr*radius, " Expected score", s
+            ds[1].set_coordinates(IMP.algebra.Vector3D(rr*radius,0,0))
+            print "P0", ds[0]
+            print "P1", ds[1]
+            init_score =  bd.get_scoring_function().evaluate(False)
+            print "Initial score [x0=", rr, "*R] is ", init_score
+#            self.assertAlmostEqual(init_score, s, delta = 0.001)
+        ds[1].set_coordinates(IMP.algebra.Vector3D(1.4*radius,0,0))
+        for i in range(10):
+            bd.optimize(nsteps / 10)
+            sos.update_always()
+            distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
+                                                ds[1].get_coordinates())
+            print "score", i, " = ", bd.get_scoring_function().evaluate(False)
+            if abs(distance - 2*radius) < max_delta:
+                break;
+        final_score = bd.get_scoring_function().evaluate(False)
+        print "Final distance", distance, "score", final_score
+#        if(IMP.get_check_level() < IMP.USAGE):
+        self.assertAlmostEqual(distance, 2*radius, delta =max_delta)
+        self.assertLess(final_score, -0.001)
+    def test_one_sliding(self):
+        """Check interaction score repulsion for glue test, sliding
+        """
+        print "Sliding"
+        IMP.set_log_level(IMP.PROGRESS)
+        dt=IMP.npctransport.get_time_step(1, k_G, radius)
+        dt=50000
+        print "dT = ", dt
+        ntrials=3
+        for i in range(ntrials):
+            try:
+                self._test_one_sliding(site_range=site_range_G,
+                                       site_k=k_G,
+                                       range_skew=range_skew_G,
+                                       k_skew=k_skew_G,
+                                       nonspec_range=nonspec_range_G,
+                                       nonspec_k=nonspec_k_G,
+                                       soft_sphere_k=100*math.sqrt(k_G/k_skew_G), dt=dt, ntrial=i)
+                return
+            except AssertionError:
+                if i==(ntrials-1): raise
+
+
+
 if __name__ == '__main__':
     IMP.test.main()

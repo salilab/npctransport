@@ -7,7 +7,6 @@
 
 #include <IMP/npctransport/main.h>
 #include <IMP/npctransport/npctransport_config.h>
-#include <IMP/npctransport/particle_types.h>
 #include <IMP/algebra.h>
 #include <IMP/core.h>
 #include <IMP/rmf.h>

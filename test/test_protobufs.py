@@ -2,7 +2,7 @@ from __future__ import print_function
 import IMP
 import IMP.test
 import IMP.npctransport
-import IMP.base
+import IMP
 import math
 
 radius=5
@@ -17,16 +17,18 @@ class ConeTests(IMP.test.TestCase):
         IMP.npctransport.create_range(config.nonspecific_k, .2, 20, 3)
 
         fg= IMP.npctransport.add_fg_type(config,
-                                         type_name="fg",
+                                         type_name="fg0",
                                          number_of_beads=10,
                                          number=1,
                                          radius=10,
                                          interactions=1)
+        print "FG TYPE:", fg.type
         IMP.npctransport.create_range(fg.rest_length_factor, .5, .8, 3)
 
         kap= IMP.npctransport.add_float_type(config,
                                              number=1,
-                                             radius=10)
+                                             radius=10,
+                                             type_name="kap0")
         IMP.npctransport.create_range(kap.number,0, 10,3)
         IMP.npctransport.create_range(kap.interactions, 1, 10, 3)
 
@@ -34,16 +36,16 @@ class ConeTests(IMP.test.TestCase):
             (config, type_name="obstacle", R=10)
         IMP.npctransport.create_range(obstacle.radius, 1, 10, 3)
 
-        interaction= IMP.npctransport.add_interaction(config, "fg", "fg")
+        interaction= IMP.npctransport.add_interaction(config, "fg0", "fg0")
         IMP.npctransport.create_range(interaction.is_on,0,1,2)
 
-        interaction= IMP.npctransport.add_interaction(config, "fg", "kap")
+        interaction= IMP.npctransport.add_interaction(config, "fg0", "kap0")
         f=open(name, "wb")
         f.write(config.SerializeToString())
     def test_1(self):
         """Check creating a configuration and assigning values"""
         seed = 1.0 # use time instead?
-        IMP.base.random_number_generator.seed(seed)
+        IMP.random_number_generator.seed(seed)
         config_name= self.get_tmp_file_name("configuration.pb")
         self._make_config(config_name)
         assignment_name= self.get_tmp_file_name("assignment.pb")

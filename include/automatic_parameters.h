@@ -69,6 +69,16 @@ double get_time_step(const ::npctransport_proto::Assignment& config,
                      double max_trans_relative_to_radius = 0.1);
 
 /**
+   computes the number of frames that approximate a certain number of nanoseconds
+   using the specified time_step per step in fs
+
+   @param ns time in ns
+   @param time_step step in fs per frame
+*/
+IMPNPCTRANSPORTEXPORT
+int get_frames_from_ns(double ns, double time_step);
+
+/**
    computes the number of frames needed to acheive simulation time
    required in the confiugration time, with time step computed from
    config.
@@ -97,12 +107,32 @@ int get_dump_interval_in_frames(const ::npctransport_proto::Assignment& config,
    computes the number of frames for the specified statistics_interval,
    normalized by the time step if the interval is specified in ns
 
-   @param config the simulation parameters
+   @param assign the simulation assignment parameters
    @param time_step the time step in femtoseconds
+   @param default_value_ns interval in ns to use if none specified in
+                           assignment parameters
 */
 IMPNPCTRANSPORTEXPORT
-int get_statistics_interval_in_frames(
-    const ::npctransport_proto::Assignment& config, double time_step);
+int get_statistics_interval_in_frames
+( const ::npctransport_proto::Assignment& assign,
+  double time_step,
+  double default_value_ns = 0.1);
+
+/**
+   computes the maximal interval for outputting statistics to output file
+   (and to dump order params) in frames, for the output_statistics_interval_ns
+   param in assignment, based on specified time_step
+
+   @param assign the simulation assignment parameters
+   @param time_step the time step in femtoseconds
+   @param default_value_ns interval in ns to use if none specified in
+                           assignment parameters
+*/
+IMPNPCTRANSPORTEXPORT
+int get_output_statistics_interval_in_frames
+( const ::npctransport_proto::Assignment& assign,
+  double time_step,
+  double default_value_ns = 1.0);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

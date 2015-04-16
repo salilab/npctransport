@@ -119,14 +119,14 @@ IMP::AddBoolFlag show_work_units_adder
   "Show the number of work units" ,
   &show_number_of_work_units);
 double short_init_factor = 1.0;
-base::AddFloatFlag short_init_adder
+AddFloatFlag short_init_adder
 ( "short_init_factor",
   "Run an abbreviated version of system initialization, which takes"
   " a fraction of a full initialization, in the range (0.0..1.0]"
   " [default=1.0]",
   &short_init_factor);
 double short_sim_factor = 1.0;
-base::AddFloatFlag short_sim_adder
+AddFloatFlag short_sim_adder
 ( "short_sim_factor",
   "Run an abbreviated version of the simulation, which takes"
   " a fraction of a full simulation (or more if >1.0)"
@@ -159,7 +159,7 @@ namespace {
                     ->get_predicates_pair_restraint()->evaluate(false)
                 << std::endl;
     if (print_positions) {
-      ParticlesTemp ps = sd->get_diffusers()->get_particles();
+      Particles ps = sd->get_beads();
       for (unsigned int i = 0; i < ps.size(); i++) {
         IMP_OMP_PRAGMA(critical)
           std::cout << ps[i] << ", " << IMP::core::RigidBody(ps[i])
@@ -292,7 +292,7 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
 void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   using namespace IMP;
   sd->set_was_used( true );
-  const int max_frames_per_chunk = 100000;
+  const int max_frames_per_chunk = sd->get_output_statistics_interval_frames();
   /** initial optimization and equilibration needed unless starting
       from another output file or rmf file */
   bool is_initial_optimization = restart.empty() && init_rmffile.empty();

@@ -14,8 +14,9 @@
 #include <IMP/PairContainer.h>
 #include <IMP/atom/BrownianDynamics.h>
 #include <IMP/atom/Hierarchy.h>
+#include <IMP/SingletonContainer.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
-#include <IMP/container/ListSingletonContainer.h>
+#include <IMP/container/DynamicListSingletonContainer.h>
 #include <IMP/container/PairContainerSet.h>
 #include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/core/pair_predicates.h>
@@ -24,6 +25,8 @@
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/rmf/SaveOptimizerState.h>
 #include <IMP/Pointer.h>
+#include <IMP/algebra/Vector3D.h>
+#include <IMP/algebra/Sphere3D.h>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "io.h"
@@ -52,6 +55,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   Parameter<double> range_;
   Parameter<double> statistics_fraction_;
   Parameter<int> statistics_interval_frames_;
+  Parameter<int> output_statistics_interval_frames_;
   Parameter<double> time_step_;
   Parameter<double> time_step_wave_factor_;
   Parameter<double> maximum_number_of_minutes_;
@@ -66,6 +70,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  public:
   /** returns the maximal interaction range between particles */
   double get_range() const { return range_; }
+
+  int get_output_statistics_interval_frames()
+  { return output_statistics_interval_frames_; }
 
   /** returns whether should exclude floaters from slab during initialization */
   bool get_is_exclude_floaters_from_slab_initially()
@@ -97,21 +104,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   PointerMember <IMP::npctransport::Statistics >
     statistics_;
 
-  // keeps track of whether the diffusers list has
-  // changed (can be invalid if particles added)
-   bool diffusers_changed_;
-
-
-  // keeps track of whether the obstacles list
-  // chnaged (can be invalid if particles added)
-  // TODO: possibly need be same as diffusers - matter
-  //       of efficiency
-   bool obstacles_changed_;
-
-  PointerMember
-    <IMP::container::ListSingletonContainer> optimizable_diffusers_;
-
-   PointerMember<container::ListSingletonContainer> diffusers_;
+  // all beads in the simulation (=fine-level particles)
+  Particles beads_;
 
   // a writer to an RMF (Rich Molecular Format) type file
   PointerMember<rmf::SaveOptimizerState> rmf_sos_writer_;
@@ -128,13 +122,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   PointerMember<display::Geometry> static_geom_;
 
-  boost::unordered_map<core::ParticleType, algebra::Vector3Ds> sites_;
+  boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> sites_;
 
   boost::unordered_map<core::ParticleType, double> ranges_;
-
-  // the list of particles for each particle type
-  // e.g., particles_[ ParticleType("fg0") ]
-  boost::unordered_map<core::ParticleType, ParticlesTemp> particles_;
 
   // the RMF format file to which simulation output is dumped:
   std::string rmf_file_name_;
@@ -161,13 +151,11 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
      @param f_data data for floater in protobuf format as specified
                  in data/npctransport.proto
-     @param default_type for backward compatibility only, a default type
-                         of particle if one is not specified in data.type
      @param color a color for all floaters of this type
    */
   void create_floaters(
       const ::npctransport_proto::Assignment_FloaterAssignment &f_data,
-      core::ParticleType default_type, display::Color color);
+      display::Color color);
 
   /**
      Adds the 'obstacles' (possibly static e.g. nups that make the pore)
@@ -228,8 +216,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   }
 #endif
 
-  /** returns a scoring object that is updated with the current list of
-      diffusers and obstacles and associated with this sd
+  /** returns a scoring object that is updated with the current particles
+      hierarch and associated with this sd
   */
  Scoring * get_scoring();
 
@@ -238,8 +226,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  Statistics* get_statistics();
 
 #ifndef SWIG
-  /** returns a scoring object that is updated with the current list of
-      diffusers and obstacles and associated with this sd
+  /** returns a scoring object that is updated with the current particles
+      hierarchy and associated with this sd
   */
  Scoring const* get_scoring() const;
 
@@ -298,39 +286,42 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
      @return all the fg hierarchies in the simulation data object
              that stand for individual FG chains
   */
+  atom::Hierarchies get_fg_chain_roots() const;
+
+  /** \deprecated_at{2.2}, use get_fg_chain_roots() instead */
+  IMPCORE_DEPRECATED_METHOD_DECL(2.2)
   atom::Hierarchies get_fg_chains() const
-    {
-      return get_fg_chains(get_root());
-    }
-
-
-  /**
-     retrieve fg chains from root
-
-     @param root the root under which to look for FGs
-
-     @return all the fg hierarchies under root, which match any fg type
-             that was added to this simulation previously
-  */
-  atom::Hierarchies get_fg_chains(atom::Hierarchy root) const;
+    { return get_fg_chain_roots(); }
 
 
   /** return all the obstacle particles */
   ParticlesTemp get_obstacle_particles() const;
 
 
-  /**
-     returns the container of all diffusing particles that currently exist in
-     this simulation data object (or an empty list if none exists)
-   */
-  container::ListSingletonContainer *get_diffusers();
+#ifndef SWIG
 
   /**
-     returns all diffusing particles that currently exist in
-     this simulation data object get_sd(), which are also optimizable
-     (or an empty list if none exists)
+     returns all diffusing fine-level beads in this
+     simulation data object (or an empty list if none exists)
+     @note efficient - returns an existing container by ref
    */
-  container::ListSingletonContainer* get_optimizable_diffusers();
+  Particles& get_beads_byref(){ return beads_; }
+#endif
+
+  /**
+     returns all diffusing fine-level beads in this
+     simulation data object (or an empty list if none exists)
+     @note efficient - returns an existing container by ref
+   */
+  ParticlesTemp get_beads(){ return beads_; }
+
+
+  /**
+     returns all fine-level beads that currently exist in
+     this simulation data object get_sd(), which are also optimizable
+     (or an empty list if no such bead exists)
+   */
+  ParticlesTemp get_optimizable_beads();
 
   /** get time from which simulation begins */
   double get_initial_simulation_time_ns() const
@@ -339,24 +330,52 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   /**
       Create n interaction sites spread around the surface of a ball of
       radius r, and associate these sites with all particles of type t0
+
+      If n==-1, creates a single site, centered at the bead, and r is ignored
+
+      @param t0 type of particle to associate with sites
+      @param n number of sites
+      @param r radius at which to position sites relative to t0 origin
+      @param sr radius from site center within which site
+                has maximal interaction energy
   */
-  void set_sites(core::ParticleType t0, unsigned int n, double r);
+  void set_sites(core::ParticleType t0, int n, double r, double sr);
 
   /**
       returns a list of 3D coordinates for the interaction sites associated
-      with particles of type t0. The site coordinates are relative to the
-      particles centers.
+      with particles of type t0. The site coordinates are in the
+      particles local reference frame
   */
-  algebra::Vector3Ds get_sites(core::ParticleType t0) const {
+  algebra::Vector3Ds get_site_centers(core::ParticleType t0) const {
+    algebra::Vector3Ds ret;
     if (sites_.find(t0) != sites_.end()) {
-      return sites_.find(t0)->second;
+      algebra::Sphere3Ds sites = sites_.find(t0)->second;
+      for(unsigned int i = 0; i < sites.size(); i++){
+        ret.push_back(sites[i].get_center());
+      }
+      return ret;
     } else {
       return algebra::Vector3Ds();
     }
   }
 
+  /**
+      returns a list of Spheres3D for the interaction sites associated
+      with particles of type t0. The site coordinates are in the
+      particles local reference frame.
+  */
+  algebra::Sphere3Ds get_sites(core::ParticleType t0) const {
+    if (sites_.find(t0) != sites_.end()) {
+      return sites_.find(t0)->second;
+    } else {
+      return algebra::Sphere3Ds();
+    }
+  }
+
   /** Set the sites explicitly. */
-  void set_sites(core::ParticleType t0, const algebra::Vector3Ds &sites) {
+  void set_sites(core::ParticleType t0, const algebra::Sphere3Ds &sites) {
+    IMP_USAGE_CHECK(sites.size()>0, "trying to set zero sites for particle type"
+                    << t0.get_string() );
     sites_[t0] = sites;
   }
 
@@ -366,7 +385,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   // TODO: this is not the true value - the true one might depend on the
   //       specific range of each interaction type, so range_ is more
   //       like an upper bound
-  double get_site_radius(core::ParticleType) const { return range_ / 2; }
+  double get_site_display_radius(core::ParticleType) const { return range_ / 2; }
 
   //! Return the maximum number of minutes the simulation can run
   /** Or 0 for no limit. */
@@ -475,17 +494,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   void dump_geometry();
 
   /**
-      Returns the list of particles in the simulation model
-      of type 'type', or empty list if not found.
-      The particles returned are all sets of direct children of the
-      main root (so the diffusing particles are their leaves)
+      Returns the root of all chains of type 'type'
   */
-  ParticlesTemp get_particles_of_type(core::ParticleType type) const {
-    boost::unordered_map<core::ParticleType, ParticlesTemp>::const_iterator iter;
-    iter = particles_.find(type);
-    if (iter != particles_.end()) return iter->second;
-    return ParticlesTemp();
-  }
+  atom::Hierarchy get_root_of_type(core::ParticleType type) const;
 
   unsigned int get_number_of_frames() const { return number_of_frames_; }
 
@@ -520,22 +531,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
                     bool is_save_restraints_to_rmf = true);
 
   IMP_OBJECT_METHODS(SimulationData);
- private:
-  /** mark that the list of diffusers may have changed recently */
-  void set_diffusers_changed(bool is_changed){
-    diffusers_changed_ = is_changed;
-    if(diffusers_changed_){
-      //      get_scoring()->update_particles();
-    }
-  }
-
-  /** mark that the list of obstacles may have changed recently */
-  void set_obstacles_changed(bool is_changed){
-    obstacles_changed_ = is_changed;
-    if(obstacles_changed_){
-      //      get_scoring()->update_particles();
-    }
-  }
 
 };
 

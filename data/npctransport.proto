@@ -28,13 +28,21 @@ message Configuration {
     required IntRange number_of_beads=1;
     required IntRange number=2;
     required FloatRange radius=3;
-    required IntRange interactions=4;
+    required IntRange interactions=4; // # sites ; if i=-1 then FG bead is itself a site
     required FloatRange rest_length_factor=5;
     required FloatRange d_factor=6;
     required FloatRange interaction_k_factor=7;
     required FloatRange interaction_range_factor=8;
     repeated XYZ anchor_coordinates=9; // a fixed coordinate for the first bead in the chain
     optional string type=10; // type name, e.g. "fg_nsp1"
+    optional int32 is_tamd=11 [default=0]; // option for using a tamd restraint
+    optional FloatRange tamd_T_factor_coeff=12; // coefficient for accelerated temperature for TAMD particles
+    optional FloatRange tamd_T_factor_base=13; // base for accelerate temperature exponentiation for TAMD particles
+    optional FloatRange tamd_F_factor_coeff=14;// coefficient for increased friction for TAMD particles
+    optional FloatRange tamd_F_factor_base=15;// base for increased friction exponentiation for TAMD particles
+    optional FloatRange tamd_K=16; // spring constant for TAMD particles
+    optional double site_relative_distance=17 [default=1.0]; // distance of sites from center relative to particle radius
+    optional double site_radius=18 [default=0.0]; // radius around site within which maximal interaction energy xis felt
   };
   message FloatConfiguration {
     required IntRange number=1;
@@ -46,6 +54,8 @@ message Configuration {
     optional string type=9; // type name, e.g. "kap121"
     optional FloatRange k_z_bias=10; // if non-0, add a biasing constant force pulling to lower (k>0) or higher (k<0)
     optional FloatRange k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
+    optional double site_relative_distance=12 [default=1.0]; // distance of sites from center relative to particle radius
+    optional double site_radius=13 [default=0.0]; // radius around site within which maximal interaction energy is felt
   };
   message ObstacleConfiguration {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
@@ -61,12 +71,14 @@ message Configuration {
     required string type0=1; // e.g., "fg_nsp1"
     required string type1=2; // e.g., "kap121"
     required IntRange is_on=3;
-    optional FloatRange interaction_k=4;
-    optional FloatRange interaction_range=5;
+    optional FloatRange interaction_k=4; // if decomposed to normal and tangent components, this is kN*kT
+    optional FloatRange interaction_range=5; // if decomposed to normal and tangent component, this is sqrt(rN^2+rT^2)
+    optional FloatRange k_tangent_skew=6; // skew of k towards (or against) tangent direction, namely kT/kN (1 = no skew ; 0 = old algo for backward comp.)
+    optional FloatRange range_tangent_skew=7; // ske of range towards (or against) tangent direction, namely rangeT/rangeN (1 = no skew; 0 = old algo for backward comp.)
   };
 
-  required FloatRange interaction_k=3;
-  required FloatRange interaction_range=4;
+  required FloatRange interaction_k=3; // default k for specific interactions
+  required FloatRange interaction_range=4; // default range of specific interactions
   required FloatRange backbone_k=5;
   required FloatRange time_step_factor=6;
   required FloatRange box_side=7;
@@ -95,7 +107,8 @@ message Configuration {
   optional int32 are_floaters_on_one_slab_side=29 [default=0]; // if true (<>0), all floaters are initially concentrated on one side
   optional FloatRange time_step_wave_factor=30; // if >1.001, use a wave function for time step that allows going beyond formal maximal step in waves
   optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
-  // n=31
+  optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
+  // n=32
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -126,6 +139,14 @@ message Assignment {
     required FloatAssignment interaction_range_factor=8; // by how much to increase the rest length from 2xradius
     repeated XYZ anchor_coordinates=9; // a fixed coordinate for the first bead in the chain
     optional string type=10; // e.g., "fg_nsp1"
+    optional int32 is_tamd=11 [default=0]; // option for using a tamd restraint
+    optional FloatAssignment tamd_T_factor_coeff=12;
+    optional FloatAssignment tamd_T_factor_base=13;
+    optional FloatAssignment tamd_F_factor_coeff=14;
+    optional FloatAssignment tamd_F_factor_base=15;
+    optional FloatAssignment tamd_K=16;
+    optional double site_relative_distance=17 [default=1.0]; // distance of sites from center relative to particle radius
+    optional double site_radius=18 [default=0.0]; // radius around site at which maximal interaction is felt
   };
   message FloaterAssignment {
     required IntAssignment number=1;
@@ -137,6 +158,8 @@ message Assignment {
     optional string type=8; // e.g., "kap121"
     optional FloatAssignment k_z_bias=9; // if non-0, add a biasing constant force pulling to lower (k>0) or higher (k<0)
     optional FloatAssignment k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
+    optional double site_relative_distance=12 [default=1.0]; // distance of sites from center relative to particle radius
+    optional double site_radius=13 [default=0.0]; // radius around site at which maximal interaction is felt
   };
   message ObstacleAssignment {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
@@ -154,6 +177,9 @@ message Assignment {
     required IntAssignment is_on=3;
     optional FloatAssignment interaction_k=4;
     optional FloatAssignment interaction_range=5;
+    optional FloatAssignment k_tangent_skew=6; // skew of k towards (or against) tangent direction, namely kT/kN (1 = no skew ; 0 = old algo for backward comp)
+    optional FloatAssignment range_tangent_skew=7; // ske of range towards (or against) tangent direction, namely rangeT/rangeN (1 = no skew ; 0 = old algo for backward comp)
+
   };
   required int32 work_unit=1;
   required FloatAssignment interaction_k=3;
@@ -194,7 +220,9 @@ message Assignment {
   optional int32 is_exclude_floaters_from_slab_initially=37 [default = 1];
   repeated string imp_module_version=38; // repeated - once for each restart
   repeated string npc_module_version=39; // repeated - once for each restart
-  // n=39
+  optional double output_statistics_interval_ns=40 [default=100]; // update interval of statistics file (including order params) in ns
+  optional int32 output_statistics_interval_frames=41 [default=100000]; // update interval of statistics file (including order params) in frames
+  // n=41
 }
 
 message Statistics {
