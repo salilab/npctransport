@@ -10,6 +10,7 @@
 #include <IMP/npctransport/SitesGeometry.h>
 #include <IMP/npctransport/SlabGeometry.h>
 #include <IMP/npctransport/SlabSingletonScore.h>
+#include <IMP/npctransport/ParticleFactory.h>
 #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
