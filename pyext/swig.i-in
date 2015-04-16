@@ -5,7 +5,7 @@
 IMP_CLANG_PRAGMA(diagnostic ignored "-Wc++11-long-long")
 %}
 IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
-%IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
+// IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, Scoring, Scorings);
 IMP_SWIG_OBJECT(IMP::npctransport, Statistics, StatisticsList);
 IMP_SWIG_OBJECT(IMP::npctransport, SimulationData, SimulationDatas);
@@ -28,7 +28,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, BodyStatisticsOptimizerState, BodyStatisticsO
 IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, BipartitePairsStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, ParticleTransportStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, FGChain, FGChains);
-# IMP_SWIG_OBJECT(IMP::npctransport::internal, TAMDChain, TAMDChains);
+// IMP_SWIG_OBJECT(IMP::npctransport::internal, TAMDChain, TAMDChains);
 IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
 IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 
@@ -47,7 +47,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %include "IMP/npctransport/SimulationData.h"
 %include "IMP/npctransport/io.h"
 %include "IMP/npctransport/ParticleFactory.h"
-# %include "IMP/npctransport/internal/TAMDChain.h"
+// %include "IMP/npctransport/internal/TAMDChain.h"
 %include "IMP/npctransport/rmf_links.h"
 %include "IMP/npctransport/Transporting.h"
 %include "IMP/npctransport/protobuf.h"
@@ -64,7 +64,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %include "IMP/npctransport/Avro2PBReader.h"
 %include "IMP/npctransport/util.h"
 
-# %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
+// %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
 try:
   from .npctransport_pb2 import *
