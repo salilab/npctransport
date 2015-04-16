@@ -70,7 +70,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   double ubound_distance2_;
 
   //! Cache:
-  typedef IMP_BASE_SMALL_UNORDERED_MAP<ParticleIndex,internal::RigidBodyInfo>
+  typedef IMP_KERNEL_SMALL_UNORDERED_MAP<ParticleIndex,internal::RigidBodyInfo>
     t_particles_rb_cache;
   mutable t_particles_rb_cache particles_rb_cache_;
   mutable bool is_cache_active_;

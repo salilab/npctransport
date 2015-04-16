@@ -16,6 +16,7 @@
 #include <IMP/Restraint.h>
 #include <IMP/ScoringFunction.h>
 #include <IMP/atom/BrownianDynamics.h>
+#include <IMP/atom/TAMDParticle.h>
 #include <IMP/Pointer.h>
 #include <IMP/exception.h>
 #include <IMP/object_macros.h>

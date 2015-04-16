@@ -118,34 +118,6 @@ namespace {
   //         <name>, if the range belong directly to the message).
   //
 
-<<<<<<< HEAD
-Ranges get_ranges(std::string name, const Message* message,
-                  Message* out_message) {
-  std::string contextname = (std::string("get_ranges: ") + name);
-  IMP::CreateLogContext gr(contextname.c_str());
-  const Reflection* r(message->GetReflection());
-  const Reflection* out_r(out_message->GetReflection());
-  /*IMP_LOG(VERBOSE, "Inspecting " << name << " "
-    << message->GetTypeName() << std::endl);*/
-  /*std::cout << "inspecting " << name << " " << message->GetTypeName()
-    << std::endl;*/
-  Ranges ret;
-  const Descriptor* d(message->GetDescriptor());
-  const Descriptor* out_d(out_message->GetDescriptor());
-  const FieldDescriptor* lfd(d->FindFieldByName("lower"));
-  const FieldDescriptor* ufd(d->FindFieldByName("upper"));
-  if (lfd && ufd) {  // current message directly contains range
-    if (r->HasField(*message, ufd)) {
-      IMP_LOG(VERBOSE, "Found range " << name << std::endl);
-      Range cur;
-      const FieldDescriptor* sfd(d->FindFieldByName("steps"));
-      const FieldDescriptor* bfd(d->FindFieldByName("base"));
-      cur.name = name;
-      cur.lb = get_value(r, message, lfd);
-      cur.ub = get_value(r, message, ufd);
-      if (lfd->type() == FieldDescriptor::TYPE_INT32) {
-        cur.base = 1;  // evenly spaced
-=======
   Ranges get_ranges(std::string name, const Message* message,
                     Message* out_message) {
     std::string contextname = (std::string("get_ranges: ") + name);
@@ -179,7 +151,6 @@ Ranges get_ranges(std::string name, const Message* message,
         cur.m = out_message;
         ret.push_back(cur);
         // IMP_LOG(VERBOSE, "Ret is " << IMP::Showable(ret) << std::endl);
->>>>>>> added parametrization to TAMD temperature, friction and spring constant parameters + minor formatting, edits
       } else {
         IMP_LOG(VERBOSE, "Found value " << name << std::endl);
         const FieldDescriptor* out_lfd(out_d->FindFieldByName("value"));
@@ -440,13 +411,8 @@ int get_number_of_work_units(std::string assignment_file) {
   }
   config.ParseFromIstream(&in);
   npctransport_proto::Assignment assignment;
-<<<<<<< HEAD
-  SetLogState sls(VERBOSE);
-  Ranges ranges = get_ranges("all", &input, &assignment);
-=======
   SetLogState sls(VERBOSE);
   Ranges ranges = get_ranges("all", &config, &assignment);
->>>>>>> added parametrization to TAMD temperature, friction and spring constant parameters + minor formatting, edits
   Floats values;
   Ints indexes;
   int ret = assign_internal(ranges, 0, values, indexes, false);
