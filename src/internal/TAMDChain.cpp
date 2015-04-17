@@ -114,8 +114,8 @@ create_tamd_chain( ParticleFactory* pf,
       return create_singleton_tamd_chain( pf );
     }
 
-  // Initial preparation:
-  unsigned int nlevels = ceil(log2(n));
+  // Initial preparation (can't use log2(n) since that requires C99):
+  unsigned int nlevels = ceil(log(n) / log(2.));
 
   // Setup root centroid with xyzr, diffusion, type and mass
   std::ostringstream root_name_oss;
