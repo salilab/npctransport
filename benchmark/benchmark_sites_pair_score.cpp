@@ -136,11 +136,11 @@ void optimize_balls(const ParticlesTemp &ps,
                     const RestraintsTemp &rs = RestraintsTemp(),
                     const PairPredicates &excluded = PairPredicates(),
                     const OptimizerStates &opt_states = OptimizerStates(),
-                    base::LogLevel ll = base::DEFAULT) {
+                    LogLevel ll = DEFAULT) {
   // make sure that errors and log messages are marked as coming from this
   // function
   IMP_FUNCTION_LOG;
-  base::SetLogState sls(ll);
+  SetLogState sls(ll);
   IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.", ValueException);
   Model *m = ps[0]->get_model();
   // double scale = core::XYZR(ps[0]).get_radius();

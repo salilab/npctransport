@@ -150,9 +150,9 @@ void HierarchyWithSitesSaveLink::add_sites_to_node
   }
 }
 
-void HierarchyWithSitesSaveLink::do_setup_node(kernel::Model *m,
-                                             kernel::ParticleIndex root,
-                                             kernel::ParticleIndex cur,
+void HierarchyWithSitesSaveLink::do_setup_node(Model *m,
+                                             ParticleIndex root,
+                                             ParticleIndex cur,
                                              RMF::NodeHandle cur_node) {
   if (!sd_ && m->get_has_attribute(get_simulation_data_key(), cur)) {
     Object *o = m->get_attribute(get_simulation_data_key(), cur);
