@@ -95,7 +95,8 @@ fg_middle= IMP.npctransport.add_fg_type(config,
 kaps= IMP.npctransport.add_float_type(config,
                                      number=1,
                                      radius=kaps_R,
-                                     interactions=12)
+                                     interactions=12,
+                                      type_name="kap")
 #create_range(kaps.radius, lb = 10, ub = 30, steps = 5, base = 1)
 nonspecifics={}
 rrange=range(5,15,1)+[25,30]
