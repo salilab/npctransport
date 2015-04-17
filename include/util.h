@@ -24,6 +24,7 @@ Simulate an fg and a kap interacting
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 /** returns particles with optimizable coordinates from particles */
+IMPNPCTRANSPORTEXPORT
 ParticlesTemp get_optimizable_particles
 (ParticlesTemp const& particles);
 
@@ -46,6 +47,7 @@ IMPNPCTRANSPORTEXPORT void configuration_txt2pb
     @param s the statistics message for searching the fg
     @param pt the type of fg to look for
 */
+IMPNPCTRANSPORTEXPORT
 unsigned int find_or_add_fg_of_type(::npctransport_proto::Statistics* s,
                                     IMP::core::ParticleType pt);
 
@@ -54,6 +56,7 @@ unsigned int find_or_add_fg_of_type(::npctransport_proto::Statistics* s,
     @param s the statistics message for searching t
     @param pt the type to look for
 */
+IMPNPCTRANSPORTEXPORT
 unsigned int find_or_add_floater_of_type(::npctransport_proto::Statistics* s,
                                          IMP::core::ParticleType pt);
 
@@ -64,6 +67,7 @@ unsigned int find_or_add_floater_of_type(::npctransport_proto::Statistics* s,
   @param it the type to look for
   @return the index of the interaction type in s.interaction()
 */
+IMPNPCTRANSPORTEXPORT
 unsigned int find_or_add_interaction_of_type
 ( ::npctransport_proto::Statistics* s,
   IMP::npctransport::InteractionType it);
