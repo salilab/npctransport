@@ -226,6 +226,7 @@ IMP_OBJECTS(FGChain, FGChains);
    @return chain structure (with root and chain beads)
 
  */
+IMPNPCTRANSPORTEXPORT
 FGChain* create_fg_chain
 ( IMP::npctransport::SimulationData *sd,
   atom::Hierarchy parent,
@@ -237,16 +238,18 @@ FGChain* create_fg_chain
    gets a chain structure from a root of an FG nup
    (by adding its ordered leaves)
 */
- FGChain* get_fg_chain(atom::Hierarchy root);
+IMPNPCTRANSPORTEXPORT
+FGChain* get_fg_chain(atom::Hierarchy root);
 
- /**
+/**
     gets a chain structure from a root of an FG nup
     (by adding its ordered leaves)
 
     @param p_root a particle that is assumed to be
                   Hierarchy decorated
  */
- FGChain* get_fg_chain(Particle* p_root);
+IMPNPCTRANSPORTEXPORT
+FGChain* get_fg_chain(Particle* p_root);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
