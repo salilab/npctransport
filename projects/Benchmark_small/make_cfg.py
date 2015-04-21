@@ -85,7 +85,7 @@ def add_fg(config, k, nbeads, type_name,
 
 
 # ************** MAIN: *************
-IMP.set_log_level(IMP.base.SILENT)
+IMP.set_log_level(IMP.SILENT)
 config= get_basic_config()
 
 add_fg(config, k=2, nbeads = 30, type_name="fg")

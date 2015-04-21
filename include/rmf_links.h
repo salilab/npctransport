@@ -36,8 +36,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
       RMF::BallConst) and associate them with the particle type of cur
       in the SimulationData of cur.
   */
-  virtual void do_link_particle(kernel::Model *m, kernel::ParticleIndex root,
-                                kernel::ParticleIndex cur,
+  virtual void do_link_particle(Model *m, ParticleIndex root,
+                                ParticleIndex cur,
                                 RMF::NodeConstHandle node) IMP_OVERRIDE;
 
   virtual void do_setup_particle(Model* m, ParticleIndex root,

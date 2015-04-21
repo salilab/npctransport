@@ -185,7 +185,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   //! evaluated indexes for the range from lower_bound to upper_bound
   //! in p, if score>max then return max value of double
   double evaluate_if_good_indexes
-    ( kernel::Model *m, const kernel::ParticleIndexPairs &p,
+    ( Model *m, const ParticleIndexPairs &p,
       DerivativeAccumulator *da,
       double max, unsigned int lower_bound, unsigned int upper_bound) const
   {

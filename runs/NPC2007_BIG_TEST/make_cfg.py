@@ -162,7 +162,7 @@ def add_obstacle(config, mrc_filename, k, R, origin=None):
 
 
 # ************** MAIN: *************
-IMP.set_log_level(IMP.base.SILENT)
+IMP.set_log_level(IMP.SILENT)
 config= get_basic_config()
 
 # Add floaters

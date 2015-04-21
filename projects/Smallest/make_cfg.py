@@ -214,7 +214,7 @@ c        @note if origin==None, initiate it as a 3D coordinate that
 
 
 # ************** MAIN: *************
-IMP.set_log_level(IMP.base.SILENT)
+IMP.set_log_level(IMP.SILENT)
 config= get_basic_config()
 
 # Add floaters
