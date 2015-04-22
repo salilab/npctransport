@@ -11,10 +11,10 @@
 #include <ValidSchema.hh>
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
+IMP_GCC_PRAGMA(diagnostic push)
+IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
 #include "npctransport.pb.h"
-#pragma GCC diagnostic pop
+IMP_GCC_PRAGMA(diagnostic pop)
 
 #include <DataFile.hh>
 //#include <google/protobuf/text_format.h>
