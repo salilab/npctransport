@@ -115,7 +115,7 @@ create_tamd_chain( ParticleFactory* pf,
     }
 
   // Initial preparation (can't use log2(n) since that requires C99):
-  unsigned int nlevels = ceil(log(n) / log(2.));
+  unsigned int nlevels = ceil(log(static_cast<float>(n)) / log(2.));
 
   // Setup root centroid with xyzr, diffusion, type and mass
   std::ostringstream root_name_oss;
@@ -127,7 +127,7 @@ create_tamd_chain( ParticleFactory* pf,
   core::XYZR root_xyzr = core::XYZR::setup_particle(root);
   // note: radius will affect diffusion coefficient + visual
   //       sqrt(n) to approximate a coil
-  root_xyzr.set_radius(pf->get_radius() * sqrt(n) );
+  root_xyzr.set_radius(pf->get_radius() * sqrt(static_cast<float>(n)) );
   root_xyzr.set_coordinates_are_optimized(true); // TODO: needed or dangerous
                                                    // for BD to evaluate it?
   IMP_LOG_PROGRESS("root radius " << root_xyzr.get_radius() << std::endl);

@@ -120,7 +120,8 @@ FGChain* create_fg_chain
   // create TAMD or non-TAMD particles P, within hierarchy of root:
   if(fg_data.is_tamd()) {
     int d = 2; // outdegree in TAMD hierarchy, TODO: parametrize
-    int n_levels = ceil(log(n)/log(d)); // log_d{n}
+    int n_levels = ceil(log(static_cast<float>(n))
+                        /log(static_cast<float>(d))); // log_d{n}
     std::vector<double> T_factors(n_levels); // temperature scaling
     std::vector<double> F_factors(n_levels); // friction scaling
     std::vector<double> Ks(n_levels); // TAMD spring constant
