@@ -159,12 +159,6 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   EvaluationCache const &get_evaluation_cache() const { return cache_; }
 #endif
 
-  IMP_IMPLEMENT_INLINE(double evaluate(const ParticlePair &p,
-                                       DerivativeAccumulator *da) const,
-                       {
-    return evaluate_index(IMP::internal::get_model(p),
-                          IMP::internal::get_index(p), da);
-  });
   IMP_IMPLEMENT(double evaluate_index(Model *m, const ParticleIndexPair &p,
                                       DerivativeAccumulator *da) const
                 IMP_OVERRIDE);
