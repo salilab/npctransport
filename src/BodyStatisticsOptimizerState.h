@@ -11,7 +11,6 @@
 #include <IMP/algebra/geometric_alignment.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/Simulator.h>
-#include <IMP/compatibility/set.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BodyStatisticsOptimizerState::BodyStatisticsOptimizerState(Particle* p)
