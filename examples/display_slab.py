@@ -89,6 +89,6 @@ if use_rmf:
 w.add_geometry(gs)
 
 if use_rmf:
-    IMP.rmf.save_frame(rmf, 0)
+    IMP.rmf.save_frame(rmf)
     print("chimera", rnm)
 print("pymol", nm)

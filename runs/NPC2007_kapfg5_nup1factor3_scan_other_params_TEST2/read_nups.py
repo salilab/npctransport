@@ -251,7 +251,7 @@ def main():
         rmf= RMF.create_rmf_file(options.output[0])
         # IMP.rmf.add_hierarchy(rmf, h_intense_samples)
         IMP.rmf.add_hierarchy(rmf, h_root)
-        IMP.rmf.save_frame(rmf, 0)
+        IMP.rmf.save_frame(rmf)
         del rmf
 
 

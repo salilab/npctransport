@@ -241,9 +241,9 @@ class Tests(IMP.test.TestCase):
         ds= IMP.rmf.create_hierarchies(f, m)
         k=500
         rs= self._create_restraint_three(m, ds,  radius, k, .2*radius, .5*k, k)
-        IMP.rmf.load_frame(f, 0)
+        IMP.rmf.load_frame(f, RMF.FrameID(0))
         print(rs[0].evaluate(True))
-        IMP.rmf.load_frame(f, f.get_number_of_frames()-1)
+        IMP.rmf.load_frame(f, RMF.FrameID(f.get_number_of_frames()-1))
         print rs[0].evaluate(True)
 
     def _test_one_sliding(self, site_range, site_k,
