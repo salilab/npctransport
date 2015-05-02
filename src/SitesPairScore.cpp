@@ -188,8 +188,7 @@ inline double SitesPairScore::evaluate_index(Model *m,
       if(is_skewed_)
         {
           sum +=
-            internal::evaluate_one_site_4(params_unskewed_,
-                                          params_normal_,
+            internal::evaluate_one_site_4(params_normal_,
                                           params_tangent_,
                                           rbi0, rbi1,
                                           sites_[i], nnsites_[j],

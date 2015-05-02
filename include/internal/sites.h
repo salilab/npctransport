@@ -253,8 +253,7 @@ inline double get_V(double dX, double dY,
     direction defined as the vector between the two beads of rbi0 and
     rbi1/
 
-    @param params_unskewed params bounds regardless of directionality
-    @param params_N range and k params in normal direction
+     @param params_N range and k params in normal direction
     @param params_T range and k params in tangent direction
     @param rbi0 - cached information on rigid body 0
     @param rbi1 - cached information on rigid body 1
@@ -265,8 +264,7 @@ inline double get_V(double dX, double dY,
     @param da - accumulator for reweighting derivatives
     */
 inline double evaluate_one_site_4
-( SitesPairScoreParams const& params_unskewed,
-  SitesPairScoreParams const& params_N,
+( SitesPairScoreParams const& params_N,
   SitesPairScoreParams const& params_T,
   RigidBodyInfo& rbi0, RigidBodyInfo& rbi1,
   const algebra::Sphere3D &l0, const algebra::Sphere3D &l1,
