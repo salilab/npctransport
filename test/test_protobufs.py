@@ -22,7 +22,7 @@ class ConeTests(IMP.test.TestCase):
                                          number=1,
                                          radius=10,
                                          interactions=1)
-        print "FG TYPE:", fg.type
+        print("FG TYPE:", fg.type)
         IMP.npctransport.create_range(fg.rest_length_factor, .5, .8, 3)
 
         kap= IMP.npctransport.add_float_type(config,

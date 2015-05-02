@@ -38,7 +38,7 @@ class Tests(IMP.test.TestCase):
         rb = IMP.core.RigidBody( p )
         coords = rb.get_coordinates()
         refframe = rb.get_reference_frame()
-        print "Bead " + str(p) + "," + str(p.get_index()) + ":",   refframe
+        print("Bead " + str(p) + "," + str(p.get_index()) + ":",   refframe)
         return coords
 
     def _get_beads_coords( self, sd ):
@@ -59,8 +59,8 @@ class Tests(IMP.test.TestCase):
         print("Starting first simulation with RMF file " + output_rmf1)
         sd = self._make_and_run_simulation( output_pb1, output_rmf1, seed = 1)
         e1 = sd.get_bd().get_scoring_function().evaluate(False)
-        print "*** After first simulation"
-        print "Energy %.2f" % e1
+        print ("*** After first simulation")
+        print ("Energy %.2f" % e1)
         coordsI = self._get_beads_coords( sd )
         sd = None
 
@@ -72,8 +72,8 @@ class Tests(IMP.test.TestCase):
         sd = self._make_and_run_simulation( output_pb2, output_rmf2, seed = 2)
         print("XXX")
         e2 = sd.get_bd().get_scoring_function().evaluate(False)
-        print "*** After second simulation"
-        print "Energy %.2f" % e2
+        print ("*** After second simulation")
+        print ("Energy %.2f" % e2)
         coordsII = self._get_beads_coords( sd )
 
         # Restoration from first simulation through rmf file:
@@ -83,8 +83,8 @@ class Tests(IMP.test.TestCase):
         e3 = sd.get_bd().get_scoring_function().evaluate(False)
         print("*** After initializing positions from RMF file " + output_rmf1)
         print("Energy %.2f" % e3)
-        self.assertAlmostEqual(e1, e3, delta=0.00001)
-        self.assertNotAlmostEqual(e1, e2, delta=0.00001)
+        self.assertAlmostEqual(e1, e3, delta=0.0001)
+        self.assertNotAlmostEqual(e1, e2, delta=0.0001)
         coordsIII = self._get_beads_coords( sd )
         # make sure that all coordinates were restored and as sanity
         # check control, also that the second simulation is different than
@@ -97,7 +97,7 @@ class Tests(IMP.test.TestCase):
         # Simulate more to scramble stuff
         sd.get_bd().optimize( 1000 )
         e4 = sd.get_bd().get_scoring_function().evaluate(False)
-        print "Energy %.2f" % e4
+        print ("Energy %.2f" % e4)
         coordsIV = self._get_beads_coords( sd )
 
         # Restoration from first simulation through output protobuf file:

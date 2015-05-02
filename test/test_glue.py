@@ -27,17 +27,18 @@ fmax = 0.125 * k_G * rangeN * rangeT * max(rangeN, rangeT)
 dUmax = 0.0625 * k_G * rangeN**2 * rangeT**2
 nonspec_k_G=0.1*fmax
 nonspec_range_G=.2*radius
-print "fmax=", fmax
-print "dUmax=", dUmax
-print "range=", site_range_G
-print "rangeN=", rangeN
-print "rangeT=", rangeT
-print "kN=", kN
-print "kT=", kT
-print "k=", k_G
-print "k_skew=",  k_skew_G
-print "k_nonspec=",  nonspec_k_G
-print "dU_nonspec=", nonspec_range_G*nonspec_k_G
+
+print ("fmax=", fmax)
+print ("dUmax=", dUmax)
+print ("range=", site_range_G)
+print ("rangeN=", rangeN)
+print ("rangeT=", rangeT)
+print ("kN=", kN)
+print ("kT=", kT)
+print ("k=", k_G)
+print ("k_skew=",  k_skew_G)
+print ("k_nonspec=",  nonspec_k_G)
+print ("dU_nonspec=", nonspec_range_G*nonspec_k_G)
 
 class Tests(IMP.test.TestCase):
     def _create_particle(self, m):
@@ -62,7 +63,7 @@ class Tests(IMP.test.TestCase):
         ds[1].set_coordinates(IMP.algebra.Vector3D(2.5*radius,0,0))
         distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
                                             ds[1].get_coordinates())
-        print "Initial distance", distance
+        print ("Initial distance", distance)
         types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
         for d in zip(types, ds):
             IMP.core.Typed.setup_particle(d[1], d[0])
@@ -92,10 +93,10 @@ class Tests(IMP.test.TestCase):
         sos.update_always()
         for rr,s in zip([2.00, 2.25, 2.50],
                        [-k*radius/2.0-0.1*k*0.2*radius,-k*radius/4.0, 0.0]):
-            print "rr*radius= ", rr*radius
+            print ("rr*radius= ", rr*radius)
             ds[1].set_coordinates(IMP.algebra.Vector3D(rr*radius,0,0))
-            print "P0", ds[0]
-            print "P1", ds[1]
+            print ("P0", ds[0])
+            print ("P1", ds[1])
             init_score =  bd.get_scoring_function().evaluate(False)
             print("Initial score x0=", rr, "*R is ", init_score)
             self.assertAlmostEqual(init_score, s, delta = 0.001)
@@ -244,7 +245,7 @@ class Tests(IMP.test.TestCase):
         IMP.rmf.load_frame(f, RMF.FrameID(0))
         print(rs[0].evaluate(True))
         IMP.rmf.load_frame(f, RMF.FrameID(f.get_number_of_frames()-1))
-        print rs[0].evaluate(True)
+        print (rs[0].evaluate(True))
 
     def _test_one_sliding(self, site_range, site_k,
                           range_skew, k_skew,
@@ -262,7 +263,7 @@ class Tests(IMP.test.TestCase):
         ds[1].set_radius(radius*0.8) # for repulsion
         distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
                                             ds[1].get_coordinates())
-        print "Initial distance", distance
+        print ("Initial distance", distance)
         types=[IMP.core.ParticleType(d.get_name()+" type") for d in ds]
         for d in zip(types, ds):
             IMP.core.Typed.setup_particle(d[1], d[0])
@@ -275,8 +276,8 @@ class Tests(IMP.test.TestCase):
                                           0.0),
                      0.0 ) ]
 #                  , IMP.algebra.Vector3D(-math.sqrt(0.8)*radius,math.sqrt(0.2)*radius,0)
-        print site_range, site_k, range_skew, k_skew
-        print nonspec_range, nonspec_k, soft_sphere_k
+        print (site_range, site_k, range_skew, k_skew)
+        print (nonspec_range, nonspec_k, soft_sphere_k)
         ps= IMP.npctransport.SitesPairScore(site_range, site_k,
                                             range_skew, k_skew,
                                             nonspec_range,
@@ -302,12 +303,12 @@ class Tests(IMP.test.TestCase):
         rangey = rangex * math.sqrt(range_skew_G)
         for rr,s in zip([1.50, 1.51, 1.8],
                        [-0.0625*k*(rangex*rangey)**2-nonspec_k*0.2*radius, 0.0, 0.0]):
-            print "rr*radius= ", rr*radius, " Expected score", s
+            print ("rr*radius= ", rr*radius, " Expected score", s)
             ds[1].set_coordinates(IMP.algebra.Vector3D(rr*radius,0,0))
-            print "P0", ds[0]
-            print "P1", ds[1]
+            print ("P0", ds[0])
+            print ("P1", ds[1])
             init_score =  bd.get_scoring_function().evaluate(False)
-            print "Initial score [x0=", rr, "*R] is ", init_score
+            print ("Initial score [x0=", rr, "*R] is ", init_score)
 #            self.assertAlmostEqual(init_score, s, delta = 0.001)
         ds[1].set_coordinates(IMP.algebra.Vector3D(1.4*radius,0,0))
         for i in range(10):
@@ -315,22 +316,22 @@ class Tests(IMP.test.TestCase):
             sos.update_always()
             distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
                                                 ds[1].get_coordinates())
-            print "score", i, " = ", bd.get_scoring_function().evaluate(False)
+            print ("score", i, " = ", bd.get_scoring_function().evaluate(False))
             if abs(distance - 2*radius) < max_delta:
                 break;
         final_score = bd.get_scoring_function().evaluate(False)
-        print "Final distance", distance, "score", final_score
+        print ("Final distance", distance, "score", final_score)
 #        if(IMP.get_check_level() < IMP.USAGE):
         self.assertAlmostEqual(distance, 2*radius, delta =max_delta)
         self.assertLess(final_score, -0.001)
     def test_one_sliding(self):
         """Check interaction score repulsion for glue test, sliding
         """
-        print "Sliding"
+        print ("Sliding")
         IMP.set_log_level(IMP.PROGRESS)
         dt=IMP.npctransport.get_time_step(1, k_G, radius)
         dt=50000
-        print "dT = ", dt
+        print ("dT = ", dt)
         ntrials=3
         for i in range(ntrials):
             try:

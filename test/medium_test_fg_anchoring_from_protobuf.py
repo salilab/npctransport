@@ -74,7 +74,7 @@ class Tests(IMP.test.TestCase):
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         coords = self._create_cfg_file_with_fg_anchors( cfg_file )
         print("assigning parameter ranges from config")
-        num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
+        num=IMP.npctransport.assign_ranges( cfg_file, assign_file, 0, False, 10 );
         sd= IMP.npctransport.SimulationData(assign_file, False, "")
 #                                            self.get_tmp_file_name("out.rmf"));
         self._assert_anchors_in_place(sd, coords)

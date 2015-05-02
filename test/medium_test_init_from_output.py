@@ -63,9 +63,9 @@ class Tests(IMP.test.TestCase):
                 continue
             t1 = IMP.npctransport.Transporting(d1)
             t2 = IMP.npctransport.Transporting(d2)
-            print "Bead particles: "
-            print d1, d2
-            print "Comparing transport statistics: ", t1, t2
+            print ("Bead particles: ")
+            print (d1, d2)
+            print ("Comparing transport statistics: ", t1, t2)
             self.assert_(t1.get_is_last_entry_from_top()
                          == t2.get_is_last_entry_from_top())
             self.assertAlmostEqual(t1.get_last_tracked_z(),

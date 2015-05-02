@@ -84,11 +84,10 @@ class Tests(IMP.test.TestCase):
 
     def _assert_kap_in_place(self, sd, really_assert=True):
         first_chain = IMP.npctransport.get_fg_chain(sd.get_fg_chain_roots()[0])
-        print first_chain
-        print vars(first_chain)
-        print "WHOOO"
+        print (first_chain)
+        print (vars(first_chain))
         fg_anchor = first_chain.get_bead(0)
-        print fg_anchor
+        print (fg_anchor)
         kap = None
         r=sd.get_root()
         for rchild in r.get_children():
@@ -175,8 +174,8 @@ class Tests(IMP.test.TestCase):
             sd.get_statistics().update(timer,opt_cycles)
             try:
                 self._assert_kap_in_place(sd, True)
-                print "total energy", sd.get_bd().get_scoring_function().evaluate(False),
-                print "predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False)
+                print ("total energy", sd.get_bd().get_scoring_function().evaluate(False),)
+                print ("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False))
                 self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -30.0)
                 self.assert_(self.is_stats_interact_(assign_file))
                 n_good=n_good+1
