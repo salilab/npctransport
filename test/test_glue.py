@@ -78,8 +78,8 @@ class Tests(IMP.test.TestCase):
                                             IMP.npctransport.vectors2spheres(sites[1], 0.0))
 #        ps.set_log_level(IMP.VERBOSE)
         r= IMP.core.PairRestraint(ps, ds)
-        m.add_restraint(r)
         bd= IMP.atom.BrownianDynamics(m)
+        bd.set_scoring_function(r)
         bd.set_maximum_time_step(dt)
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue1_%d.rmf" % ntrial))
         for d in zip(types, sites):
@@ -286,8 +286,8 @@ class Tests(IMP.test.TestCase):
                                             sites0, sites1)
 #        ps.set_log_level(IMP.VERBOSE)
         r= IMP.core.PairRestraint(ps, ds)
-        m.add_restraint(r)
         bd= IMP.atom.BrownianDynamics(m)
+        bd.set_scoring_function(r)
         bd.set_maximum_time_step(dt)
         f= RMF.create_rmf_file(self.get_tmp_file_name("glue1_slide_%d.rmf" % ntrial))
         for d in zip(types, [sites0, sites1]):

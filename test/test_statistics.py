@@ -37,6 +37,7 @@ class Tests(IMP.test.TestCase):
         IMP.core.XYZR(p).set_coordinates_are_optimized(True)
         dt=1000
         bd= IMP.atom.BrownianDynamics(m)
+        bd.set_scoring_function([IMP.RestraintSet(m, "empty set")])
         bd.set_maximum_time_step(dt)
         os= IMP.npctransport.BodyStatisticsOptimizerState(p)
         os.set_period(10)
@@ -105,10 +106,11 @@ class Tests(IMP.test.TestCase):
         p_rb.set_coordinates_are_optimized(True)
         # create a magnet that pulls p towards it:
         (magnet_restraint, p_magnet_rb)= self._create_magnet_restraint(m, p, [0,0,30])
-        m.add_restraint( magnet_restraint)
+        sf = IMP.core.RestraintsScoringFunction([magnet_restraint])
         # make simulation of p running towards p_magnet:
         dt= 10
         bd= IMP.atom.BrownianDynamics(m)
+        bd.set_scoring_function(sf)
         bd.set_maximum_time_step(dt)
         print("hey")
         os= IMP.npctransport.ParticleTransportStatisticsOptimizerState(p,10,20)
@@ -146,12 +148,13 @@ class Tests(IMP.test.TestCase):
             rb.add_member(pc)
         # to make sure coordinates get updated
         cr= IMP._ConstRestraint(0, rb.get_rigid_members())
-        m.add_restraint(cr)
+        sf = IMP.core.RestraintsScoringFunction([cr])
         dd= IMP.atom.RigidBodyDiffusion.setup_particle(p)
         nD=10.0*dd.get_rotational_diffusion_coefficient()
         dd.set_rotational_diffusion_coefficient(nD)
         dt=10000
         bd= IMP.atom.BrownianDynamics(m)
+        bd.set_scoring_function(sf)
         bd.set_maximum_time_step(dt)
         os= IMP.npctransport.ChainStatisticsOptimizerState(rb.get_rigid_members())
         os.set_period(10)
