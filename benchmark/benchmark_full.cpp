@@ -16,7 +16,6 @@
 #include <IMP/CreateLogContext.h>
 #include <IMP/exception.h>
 #include <IMP/npctransport.h>
-#include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
 #include <IMP/enums.h>
 #include <IMP/flags.h>

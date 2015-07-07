@@ -19,7 +19,6 @@
 #include <IMP/exception.h>
 #include <IMP/enums.h>
 #include <IMP/npctransport.h>
-#include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
 #include <IMP/Pointer.h>
 #include <IMP/base_statistics.h>

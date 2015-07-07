@@ -145,7 +145,8 @@ create_tamd_chain( ParticleFactory* pf,
   Pointer<core::HarmonicDistancePairScore> tamd_spring=
     new core::HarmonicDistancePairScore(0, Ks[0]);
   Pointer<IMP::Restraint> tamd_restraint = new core::PairRestraint
-    ( tamd_spring, ParticlePair(root, image), image_name );
+    ( pf->get_model(), tamd_spring,
+      ParticleIndexPair(root->get_index(), image->get_index()), image_name );
 
   // build TAMD chain object with children and return it:
   IMP_NEW(TAMDChain, ret_chain, ());

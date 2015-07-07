@@ -6,7 +6,6 @@
 
 #define IMP_NPC_MAIN
 #include <IMP/npctransport/main.h>
-#include <IMP/ParticleTuple.h>
 #include <RMF/utility.h>
 
 int main(int argc, char *argv[]) {

@@ -6,7 +6,6 @@
 
 #define IMP_NPC_MAIN
 #include <IMP/npctransport/main.h>
-#include <IMP/ParticleTuple.h>
 #include <IMP/npctransport/FGChain.h>
 #include <IMP/Pointer.h>
 #include <RMF/utility.h>

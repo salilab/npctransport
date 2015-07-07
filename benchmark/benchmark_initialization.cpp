@@ -15,7 +15,6 @@
 #include <IMP/benchmark/utility.h>
 #include <IMP/benchmark/benchmark_macros.h>
 
-//#include <IMP/ParticleTuple.h>
 #include <IMP/base_types.h>
 #include <IMP/CreateLogContext.h>
 #include <IMP/exception.h>

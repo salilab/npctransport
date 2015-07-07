@@ -66,7 +66,9 @@ void FGChain::update_bonds_restraint()
       bead_pairs_ = nullptr; // invalidate to destruct
   }
   bead_pairs_ = new IMP::container::ExclusiveConsecutivePairContainer
-    (this->get_beads(), "Bonds %1% " + name + " consecutive pairs");
+    (get_root().get_model(),
+     IMP::get_indexes(this->get_beads()),
+     "Bonds %1% " + name + " consecutive pairs");
   bonds_restraint_ = container::create_restraint
     ( bonds_score_.get(), bead_pairs_.get(),  "Bonds " + name  );
 }
