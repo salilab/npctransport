@@ -96,7 +96,8 @@ SitesPairScore::SitesPairScore(double range, double k,
                      << " ; rT " << rT << " , " << params_tangent_.r
                      << std::endl);
   } else {
-    std::cout << "Creating old version of SitesPairScore, for backward compatibility" << std::endl;
+    IMP_LOG(WARNING, "Creating old version of SitesPairScore, for "
+                     "backwards compatibility" << std::endl);
   }
   set_sites(sites0, sites1);
 }
