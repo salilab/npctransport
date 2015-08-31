@@ -53,6 +53,7 @@ int main(int argc, char *argv[]) {
            << std::endl;
     */
 
+    IMP::set_log_level(IMP::SILENT);
     // assign and run::
     IMP::npctransport::configuration_txt2pb(config_txt, config_pb);
     IMP::npctransport::assign_ranges(config_pb, output, 100, false,
