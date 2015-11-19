@@ -149,7 +149,7 @@ FGChain* create_fg_chain
     for (int i = 0; i < n; ++i) {
       P.push_back( pf->create() );
     }
-    std::string root_name = type.get_string() + " chain_root";
+    std::string root_name = type.get_string(); // + " chain_root";
     Particle* root = atom::Hierarchy::setup_particle
       ( new Particle( sd->get_model(), root_name ), P );
     core::Typed::setup_particle( root, type );
