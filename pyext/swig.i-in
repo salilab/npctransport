@@ -1,4 +1,6 @@
 %import "RMF.i"
+%import "IMP_kernel.i"
+%import "IMP_score_functor.i"
 %{
 #include <RMF.h>
 #include <RMF/HDF5.h>
@@ -31,6 +33,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, FGChain, FGChains);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleFactory, ParticleFactories);
 // IMP_SWIG_OBJECT(IMP::npctransport::internal, TAMDChain, TAMDChains);
 IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
+//IMP_SWIG_VALUE(IMP::npctransport, LinearInteraction, LinearInteractions);
 IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 
 %apply unsigned int { boost::uint32_t }
@@ -38,8 +41,13 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 
 %include "IMP_npctransport.Parameter.i"
 %include "IMP/npctransport/typedefs.h"
+
 %include "IMP/npctransport/linear_distance_pair_scores.h"
+%include "IMP/npctransport/functor_linear_distance_pair_scores_typedefs.h"
+%template(_DistancePairScoreForLinearSoftSphere) IMP::score_functor::DistancePairScore<IMP::npctransport::LinearSoftSphereScore>;
+%template(_DistancePairScoreForLinearInteraction) IMP::score_functor::DistancePairScore<IMP::npctransport::LinearInteractionScore>;
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"
+
 %include "IMP/npctransport/SitesGeometry.h"
 %include "IMP/npctransport/SitesPairScore.h"
 %include "IMP/npctransport/FGChain.h"
