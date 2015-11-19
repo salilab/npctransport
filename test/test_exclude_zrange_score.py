@@ -33,7 +33,7 @@ class ExcludeZRangeTests(IMP.test.TestCase):
         # create restrain on z-range exclusion
         exclude_zrange_ss= \
             IMP.npctransport.ExcludeZRangeSingletonScore(bottom, top, k)
-        r= IMP.core.SingletonRestraint(exclude_zrange_ss, p, "slab")
+        r= IMP.core.SingletonRestraint(m, exclude_zrange_ss, p.get_index(), "slab")
 
         # position d randonmly within excluded zrange
         d.set_coordinates(IMP.algebra.get_random_vector_in(bb_exclude))

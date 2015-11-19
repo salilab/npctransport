@@ -70,7 +70,7 @@ class ConeTests(IMP.test.TestCase):
                                             r_nonspec_atr, k_nonspec_atr, k_rep,
                                             s0, s1)
         IMP.set_log_level(IMP.SILENT)
-        r= IMP.core.PairRestraint(ps, (rb0, rb1))
+        r= IMP.core.PairRestraint(m, ps, (rb0.get_particle_index(), rb1.get_particle_index()))
         sf = IMP.core.RestraintsScoringFunction([r])
         w= IMP.display.PymolWriter("out.pym")
         w.set_frame(0)

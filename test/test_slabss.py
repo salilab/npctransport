@@ -36,7 +36,7 @@ class ConeTests(IMP.test.TestCase):
         bb= IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       IMP.algebra.Vector3D(boxw,boxw,boxw))
         slabss= IMP.npctransport.SlabSingletonScore(slab_height, slab_radius, 1)
-        r= IMP.core.SingletonRestraint(slabss, p, "slab")
+        r= IMP.core.SingletonRestraint(m, slabss, p.get_index(), "slab")
         while out_slab(d):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
         print(d.get_coordinates())

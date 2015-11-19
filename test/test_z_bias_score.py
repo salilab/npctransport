@@ -25,7 +25,7 @@ class ZBiasTests(IMP.test.TestCase):
                                       IMP.algebra.Vector3D(boxw, boxw, boxw))
         zbss= \
             IMP.npctransport.ZBiasSingletonScore(k)
-        sr= IMP.core.SingletonRestraint(zbss, p, "zbias")
+        sr= IMP.core.SingletonRestraint(m, zbss, p.get_index(), "zbias")
 
         # position d randonmly within excluded zrange
         d.set_coordinates([1,1,100])

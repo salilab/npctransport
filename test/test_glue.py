@@ -59,6 +59,7 @@ class Tests(IMP.test.TestCase):
         m= IMP.Model()
         m.set_log_level(IMP.PROGRESS)
         ds= [self._create_particle(m) for i in range(0,2)]
+        dsi= [x.get_particle_index() for x in ds];
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(2.5*radius,0,0))
         distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
@@ -77,7 +78,7 @@ class Tests(IMP.test.TestCase):
                                             IMP.npctransport.vectors2spheres(sites[0], 0.0),
                                             IMP.npctransport.vectors2spheres(sites[1], 0.0))
 #        ps.set_log_level(IMP.VERBOSE)
-        r= IMP.core.PairRestraint(ps, ds)
+        r= IMP.core.PairRestraint(m, ps, dsi)
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_scoring_function(r)
         bd.set_maximum_time_step(dt)
@@ -135,6 +136,7 @@ class Tests(IMP.test.TestCase):
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
         ds= [self._create_particle(m) for i in range(0,3)]
+        dsi= [x.get_particle_index() for x in ds];
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(2*radius,0,0))
         ds[2].set_coordinates(IMP.algebra.Vector3D(0,0,2*radius))
@@ -150,8 +152,8 @@ class Tests(IMP.test.TestCase):
                                                 nonspec_k, soft_sphere_k,
                                                 IMP.npctransport.vectors2spheres(sites[p[0]], 0.0),
                                                 IMP.npctransport.vectors2spheres(sites[p[1]], 0.0))
-#          ps.set_log_level(IMP.VERBOSE)
-            r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
+            #          ps.set_log_level(IMP.VERBOSE)
+            r=IMP.core.PairRestraint(m, ps, (dsi[p[0]], dsi[p[1]]))
             rs.append(r)
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_scoring_function(rs)
@@ -177,6 +179,7 @@ class Tests(IMP.test.TestCase):
 
     def _create_restraint_three(self, m, ds, site_range, site_k, nonspec_range, nonspec_k,
                                 soft_sphere_k, f=None):
+        dsi= [x.get_particle_index() for x in ds];
         sites=([IMP.algebra.Vector3D(radius, 0,0), IMP.algebra.Vector3D(0, 0,radius)],
                [IMP.algebra.Vector3D(-radius, 0,0), IMP.algebra.Vector3D(0, 0,radius)],
                [IMP.algebra.Vector3D(radius, 0, 0), IMP.algebra.Vector3D(0, 0,-radius)],
@@ -192,7 +195,7 @@ class Tests(IMP.test.TestCase):
                                                 IMP.npctransport.vectors2spheres(sites[p[0]], 0.0),
                                                 IMP.npctransport.vectors2spheres(sites[p[1]], 0.0))
 #          ps.set_log_level(IMP.VERBOSE)
-            r=IMP.core.PairRestraint(ps, (ds[p[0]], ds[p[1]]))
+            r=IMP.core.PairRestraint(m, ps, (dsi[p[0]], dsi[p[1]]))
             rs.append(r)
             r.evaluate(False)
             d=r.create_current_decomposition()
@@ -204,6 +207,7 @@ class Tests(IMP.test.TestCase):
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
         ds= [self._create_particle(m) for i in range(0,4)]
+        dsi= [x.get_particle_index() for x in ds];
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(2*radius,0,0))
         ds[2].set_coordinates(IMP.algebra.Vector3D(0,0,2*radius))
@@ -257,6 +261,7 @@ class Tests(IMP.test.TestCase):
         m= IMP.Model()
         m.set_log_level(IMP.PROGRESS)
         ds= [self._create_particle(m) for i in range(0,2)]
+        dsi= [x.get_particle_index() for x in ds];
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(2.5*radius,0,0))
         ds[0].set_radius(radius*0.4) #/2.0*0.9) # for repulsion
@@ -285,7 +290,7 @@ class Tests(IMP.test.TestCase):
                                             soft_sphere_k,
                                             sites0, sites1)
 #        ps.set_log_level(IMP.VERBOSE)
-        r= IMP.core.PairRestraint(ps, ds)
+        r= IMP.core.PairRestraint(m, ps, dsi)
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_scoring_function(r)
         bd.set_maximum_time_step(dt)

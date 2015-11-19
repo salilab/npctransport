@@ -19,11 +19,12 @@ class Tests(IMP.test.TestCase):
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
         ds= [self._create_particle(m) for i in range(0,2)]
+        dsi=[x.get_particle_index() for x in ds]
         ps= IMP.npctransport.LinearSoftSpherePairScore(1)
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0));
         ds[1].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ps.set_log_level(IMP.SILENT)
-        sf= IMP.core.PairRestraint(ps, ds).create_scoring_function();
+        sf= IMP.core.PairRestraint(m, ps, dsi).create_scoring_function();
         for i in range(1,100):
             ds[1].set_coordinate(0, .1*i)
             e= sf.evaluate(True)

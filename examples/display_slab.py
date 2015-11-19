@@ -78,7 +78,7 @@ for c in IMP.algebra.get_grid_interior_cover_by_spacing(bb, 5):
     if dm > particle_radius:
         continue
     color= IMP.display.get_hot_color(-(dm-particle_radius)/(height+particle_radius))
-    m.evaluate(True)
+    m.update() #evaluate(True)
     seg= IMP.algebra.Segment3D(c, c+dv)
     g= IMP.display.SegmentGeometry(seg)
     g.set_color(color)

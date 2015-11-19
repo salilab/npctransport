@@ -10,7 +10,7 @@ import math
 radius=5
 
 class ConeTests(IMP.test.TestCase):
-    def _create_particle(self, m):
+    def _create_diffuser(self, m):
         p= IMP.Particle(m)
         d= IMP.core.XYZR.setup_particle(p)
         d.set_radius(radius)
@@ -30,12 +30,13 @@ class ConeTests(IMP.test.TestCase):
         """Check linear well"""
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
-        ds= [self._create_particle(m) for i in range(0,2)]
+        ds= [self._create_diffuser(m) for i in range(0,2)]
+        dsi=[x.get_particle_index() for x in ds]
         ds[1].set_coordinates(IMP.algebra.Vector3D(0,2*radius,0))
         rest_length_factor = 1.0
         k = 20
         ps= IMP.npctransport.LinearWellPairScore(rest_length_factor, k)
-        r= IMP.core.PairRestraint(ps, ds)
+        r= IMP.core.PairRestraint(m, ps, dsi)
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_maximum_time_step(100)
         bd.set_scoring_function([r])
