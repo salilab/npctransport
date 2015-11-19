@@ -28,6 +28,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, BodyStatisticsOptimizerState, BodyStatisticsO
 IMP_SWIG_OBJECT(IMP::npctransport, BipartitePairsStatisticsOptimizerState, BipartitePairsStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, ParticleTransportStatisticsOptimizerStates);
 IMP_SWIG_OBJECT(IMP::npctransport, FGChain, FGChains);
+IMP_SWIG_OBJECT(IMP::npctransport, ParticleFactory, ParticleFactories);
 // IMP_SWIG_OBJECT(IMP::npctransport::internal, TAMDChain, TAMDChains);
 IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
 IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
