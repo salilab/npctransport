@@ -84,7 +84,7 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   typedef boost::unordered_map< core::ParticleType,
     std::vector< std::vector<int> > >
     ParticleTypeZRDistributionMap;
-  ParticleZRDistributionMap particle_type_zr_distribution_map_;
+  ParticleTypeZRDistributionMap particle_type_zr_distribution_map_;
 
   // statistics about entire FG chains, for each FG type
   typedef boost::unordered_map<core::ParticleType, ChainStatisticsOptimizerStates>
@@ -156,7 +156,7 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
 
      Comment: assume a pore geometry, no checks made that it is so
    */
-  void update_particle_type_zr_distribution_map(Particle p);
+  void update_particle_type_zr_distribution_map(Particle* p);
 
 
   /**

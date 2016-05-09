@@ -8,6 +8,7 @@
 
 #include <IMP/npctransport/ParticleTransportStatisticsOptimizerState.h>
 #include <IMP/npctransport/Transporting.h>
+#include <IMP/npctransport/Statistics.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/check_macros.h>
 #include <IMP/exception.h>
@@ -18,12 +19,14 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 ParticleTransportStatisticsOptimizerState::
     ParticleTransportStatisticsOptimizerState(
         Particle *p, Float bottom_z, Float top_z,
+        WeakPointer<IMP::npctransport::Statistics> statistics_manager,
         WeakPointer<IMP::atom::Simulator> owner)
       : P(p->get_model(), "ParticleTransportStatisticsOptimizerState%1%"),
-      p_(p),
-      bottom_z_(bottom_z),
-      top_z_(top_z),
-      owner_(owner) {
+        p_(p),
+        bottom_z_(bottom_z),
+        top_z_(top_z),
+        statistics_manager_(statistics_manager),
+        owner_(owner) {
   IMP_ALWAYS_CHECK(!Transporting::get_is_setup(p_),
                    "Particle already defined as a transporting particle,"
                    " and cannot be tracked by this object",
@@ -45,11 +48,10 @@ void ParticleTransportStatisticsOptimizerState::reset() {
 void
 ParticleTransportStatisticsOptimizerState
 ::update_particle_type_zr_distribution_map() {
-  if (owner_ == nullptr){
+  if (statistics_manager_ == nullptr){
     return;
   }
-  Statistics s = owner_->get_statistics();
-  s->update_particle_type_zr_distribution_map(p_);
+  statistics_manager_->update_particle_type_zr_distribution_map(p_);
 }
 
 void ParticleTransportStatisticsOptimizerState::do_update(unsigned int) {

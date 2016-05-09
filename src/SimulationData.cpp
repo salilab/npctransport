@@ -291,7 +291,7 @@ void SimulationData::create_floaters
            angular_d_factor_,
            color, type) );
   if(f_data.beads_tail_n()>0){ // TODO: make beads a hierarchical structure - for now it's simplest this way
-    for (unsigned int i=0; i < f_data.beads_tail_n(); i++) {
+    for (int i=0; i < f_data.beads_tail_n(); i++) {
       IMP_NEW(ParticleFactory, pf,
               (this, f_data.beads_tail_radius(),
                f_data.d_factor().value(),

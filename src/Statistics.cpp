@@ -113,7 +113,9 @@ void Statistics::add_floater_stats
       IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
               (p,
                -0.5 * get_sd()->get_slab_thickness(),  // tunnel bottom
-               0.5 * get_sd()->get_slab_thickness() )   // tunnel top
+               0.5 * get_sd()->get_slab_thickness(),  // tunnel top
+               this // statistics manager
+               )
               );
       ptsos->set_period(statistics_interval_frames_);
       floaters_transport_stats_map_[type].push_back( ptsos );
@@ -323,10 +325,10 @@ void Statistics::update_fg_stats
 
 void Statistics
 ::update_particle_type_zr_distribution_map
-( Particle p )
+( Particle* p )
 {
   const float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
-  ParticleType pt=Typed(p).get_type();
+  core::ParticleType pt( core::Typed(p).get_type() );
   ParticleTypeZRDistributionMap::iterator it =
     particle_type_zr_distribution_map_.find(pt);
   // add distribution table if needed
@@ -336,11 +338,11 @@ void Statistics
     unsigned int nz = std::floor(top/GRID_RESOLUTION_ANGSTROMS);
     unsigned int nr = std::floor(r_max/GRID_RESOLUTION_ANGSTROMS);
     particle_type_zr_distribution_map_[pt]=
-      std::vector(nz, std::vector(nr, 0));
+      std::vector<std::vector<int>>(nz, std::vector<int>(nr, 0));
     it=particle_type_zr_distribution_map_.find(pt);
   }
   //update distribution
-  core::XYZ xyz(ps[i]);
+  core::XYZ xyz(p);
   float z = std::abs(xyz.get_z());
   float r = std::sqrt( std::pow(xyz.get_x(),2) +
                         std::pow(xyz.get_y(),2) );
@@ -474,15 +476,15 @@ void Statistics::update
             frc->set_n_z2(n_z2);
             frc->set_n_z3(n_z3);
           }
-        // Recreate z-r histogram based on this->zr_hist:
+        // Recreate z-r histogram based on retrieved zr_hist:
         ParticleTypeZRDistributionMap::mapped_type zr_hist=
-          particle_type_zr_distribution_map_::find(*it)->second;
+          particle_type_zr_distribution_map_.find(*it)->second;
         stats->mutable_floaters(i)->clear_zr_hist();
         for(unsigned int ii=0; ii < zr_hist.size(); ii++) {
           ::npctransport_proto::Statistics_Ints* zii_r_hist=
-            stats->mutable_floaters(u)->add_zr_hists();
+            stats->mutable_floaters(i)->mutable_zr_hist()->add_ints_list();
           for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++) {
-            zii_r_hist.add_ints(zr_hist[ii][jj]);
+            zii_r_hist->add_ints(zr_hist[ii][jj]);
           }
         }
 
@@ -786,7 +788,7 @@ Statistics::get_z_distribution(const ParticlesTemp& ps) const{
   return boost::make_tuple(zh[0],zh[1],zh[2],zh[3]);
 }
 
-void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][7],
+void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][3],
                                  ParticlesTemp ps) const{
   double top = get_z_distribution_top();
   double r_max = get_r_distribution_max();
@@ -804,9 +806,9 @@ void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][7],
     } else {
       zz=3;
     }
-    rr = (unsigned int)(floor(4*r/r_max));
-    if(rr>7) {
-      rr=6;
+    rr = (unsigned int)(floor(2*r/r_max));
+    if(rr>2) {
+      rr=2;
     }
     zr_hist[zz][rr]++;
   } // i (particles)

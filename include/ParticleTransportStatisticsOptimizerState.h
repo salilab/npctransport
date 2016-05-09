@@ -19,6 +19,8 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+class Statistics;
+
 /**
      Maintains transport statistics about a particle p in a z-axis
      aligned channel,
@@ -27,8 +29,9 @@ class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
     : public core::PeriodicOptimizerState {
  private:
   typedef core::PeriodicOptimizerState P;
-  Particle *p_;             // the particle
+  Particle* p_;             // the particle
   Float bottom_z_, top_z_;  // channel boundaries on z-axis
+  WeakPointer<IMP::npctransport::Statistics> statistics_manager_;
   WeakPointer<IMP::atom::Simulator> owner_;
   unsigned int n_transports_up_;        // from bottom to top of channel
   unsigned int n_transports_down_;      // from top to bottom of channOBel
@@ -50,12 +53,14 @@ class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
      @param p the particle, assumed to be decorated as a RigidBody
      @param bottom_z the z coordinate of the channel bottom
      @param top_z the z coordinate of the channel top
-     @param owner a simulator that is moving this particle and can provide it
-     with
-                  time information, or nullptr
+     @param statistics_manager Statistics object that can be
+            used to communicate back pertinent information from
+            this object, or nullptr if not managed
+     @param owner a simulator that is moving this particle and can provide it with time information, or nullptr
    */
   ParticleTransportStatisticsOptimizerState(
       Particle *p, Float bottom_z, Float top_z,
+      WeakPointer<IMP::npctransport::Statistics> statistics_manager = nullptr,
       WeakPointer<IMP::atom::Simulator> owner = nullptr);
 
   //! sets a simulator that moves this particle and can provide simulation time
