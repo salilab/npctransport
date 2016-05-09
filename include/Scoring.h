@@ -161,7 +161,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      1) the chain restraints added by add_chain_restraints()
         that overlap with 'particles'
      2) default repulsive interactions between particles in particles
-        nad optimizable particles
+        and optimizable particles
      3) attractive interactions that depend on pair types, as added by
         add_interaction()
      4) the slab or bounding box restraints if relevant on all particles

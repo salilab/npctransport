@@ -56,6 +56,11 @@ message Configuration {
     optional FloatRange k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
     optional double site_relative_distance=12 [default=1.0]; // distance of sites from center relative to particle radius
     optional double site_radius=13 [default=0.0]; // radius around site within which maximal interaction energy is felt
+    optional int32 beads_tail_n=14 [default=0]; // option for a tail of beads, 0 for none
+    optional double beads_tail_radius=15 [default=0]; // radius of tail beads
+    optional double beads_tail_k=16 [default=1.0]; // k for tail springs;
+    optional double beads_tail_bond_length=17 [default=1.0]; // length of bond between beads
+
   };
   message ObstacleConfiguration {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
@@ -160,6 +165,10 @@ message Assignment {
     optional FloatAssignment k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
     optional double site_relative_distance=12 [default=1.0]; // distance of sites from center relative to particle radius
     optional double site_radius=13 [default=0.0]; // radius around site at which maximal interaction is felt
+    optional int32 beads_tail_n=14 [default=0]; // option for a tail of beads, 0 for none
+    optional double beads_tail_radius=15 [default=0]; // radius of tail beads
+    optional double beads_tail_k=16 [default=1.0]; // k for tail springs;
+    optional double beads_tail_bond_length=17 [default=1.0]; // length of bond between beads
   };
   message ObstacleAssignment {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
@@ -229,6 +238,9 @@ message Statistics {
   message Ints { // list of ints
      repeated int32 ints=1;
   }
+  message Ints_list { // list of list of ints
+          repeated Ints ints_list=1;
+  }
   message FGOrderParams {
     required double time_ns=1;
     required double volume=2;
@@ -269,6 +281,7 @@ message Statistics {
     repeated double transport_time_points_ns=8; // records the time points of transports in simulation time (TODO: assuming single trial?)
     optional string type=9; // type name, e.g. "kap121"
     repeated FloaterOrderParams order_params=10;
+    optional  Ints_list zr_hist=11; // histogram of z (dimenion 1) and r (dimension 2) coordinates
   }
   message InteractionOrderParams{
     required float time_ns=1;

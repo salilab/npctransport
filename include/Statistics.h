@@ -80,6 +80,12 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
     ParticleTransportStatisticsOSsMap;
   ParticleTransportStatisticsOSsMap floaters_transport_stats_map_;
 
+  // distributions
+  typedef boost::unordered_map< core::ParticleType,
+    std::vector< std::vector<int> > >
+    ParticleTypeZRDistributionMap;
+  ParticleZRDistributionMap particle_type_zr_distribution_map_;
+
   // statistics about entire FG chains, for each FG type
   typedef boost::unordered_map<core::ParticleType, ChainStatisticsOptimizerStates>
     ChainStatisticsOSsMap;
@@ -142,6 +148,16 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
             optimizer will be guaranteed to work well
   */
   OptimizerStates add_optimizer_states(Optimizer* o = nullptr);
+
+  /**
+     updates the map of z-r distribtions of particle coordinates
+     with p's binned position counts (z is absolute vertical location,
+     r is distance from pore axis)
+
+     Comment: assume a pore geometry, no checks made that it is so
+   */
+  void update_particle_type_zr_distribution_map(Particle p);
+
 
   /**
       opens / creates statistics protobuf file, and update it

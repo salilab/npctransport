@@ -30,6 +30,7 @@
 
 #include <numeric>
 #include <set>
+#include <math.h>
 #include "boost/tuple/tuple.hpp"
 
 #include <IMP/npctransport/internal/npctransport.pb.h>
@@ -320,6 +321,34 @@ void Statistics::update_fg_stats
     } // for it (fg type)
 }
 
+void Statistics
+::update_particle_type_zr_distribution_map
+( Particle p )
+{
+  const float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
+  ParticleType pt=Typed(p).get_type();
+  ParticleTypeZRDistributionMap::iterator it =
+    particle_type_zr_distribution_map_.find(pt);
+  // add distribution table if needed
+  if(it==particle_type_zr_distribution_map_.end()) {
+    float top = get_z_distribution_top();
+    float r_max = get_r_distribution_max();
+    unsigned int nz = std::floor(top/GRID_RESOLUTION_ANGSTROMS);
+    unsigned int nr = std::floor(r_max/GRID_RESOLUTION_ANGSTROMS);
+    particle_type_zr_distribution_map_[pt]=
+      std::vector(nz, std::vector(nr, 0));
+    it=particle_type_zr_distribution_map_.find(pt);
+  }
+  //update distribution
+  core::XYZ xyz(ps[i]);
+  float z = std::abs(xyz.get_z());
+  float r = std::sqrt( std::pow(xyz.get_x(),2) +
+                        std::pow(xyz.get_y(),2) );
+  unsigned int zz= std::floor(z/GRID_RESOLUTION_ANGSTROMS);
+  unsigned int rr= std::floor(r/GRID_RESOLUTION_ANGSTROMS);
+  it->second[zz][rr]++;
+}
+
 
 // @param nf_new number of new frames accounted for in this statistics update
 void Statistics::update
@@ -445,6 +474,18 @@ void Statistics::update
             frc->set_n_z2(n_z2);
             frc->set_n_z3(n_z3);
           }
+        // Recreate z-r histogram based on this->zr_hist:
+        ParticleTypeZRDistributionMap::mapped_type zr_hist=
+          particle_type_zr_distribution_map_::find(*it)->second;
+        stats->mutable_floaters(i)->clear_zr_hist();
+        for(unsigned int ii=0; ii < zr_hist.size(); ii++) {
+          ::npctransport_proto::Statistics_Ints* zii_r_hist=
+            stats->mutable_floaters(u)->add_zr_hists();
+          for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++) {
+            zii_r_hist.add_ints(zr_hist[ii][jj]);
+          }
+        }
+
       } // for(it)
 
   // update statistics gathered on interaction rates
@@ -745,11 +786,11 @@ Statistics::get_z_distribution(const ParticlesTemp& ps) const{
   return boost::make_tuple(zh[0],zh[1],zh[2],zh[3]);
 }
 
-void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][3],
+void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][7],
                                  ParticlesTemp ps) const{
   double top = get_z_distribution_top();
   double r_max = get_r_distribution_max();
-  int zz, rr;
+  unsigned int zz, rr;
   for(unsigned int i = 0; i < ps.size() ; i++){
     core::XYZ d(ps[i]);
     double z = d.get_z();
@@ -763,12 +804,9 @@ void Statistics::fill_in_zr_hist(unsigned int zr_hist[4][3],
     } else {
       zz=3;
     }
-    if(r < r_max / 2.0) {
-      rr=0;
-    } else if (r < r_max) {
-      rr=1;
-    } else {
-      rr=2;
+    rr = (unsigned int)(floor(4*r/r_max));
+    if(rr>7) {
+      rr=6;
     }
     zr_hist[zz][rr]++;
   } // i (particles)
