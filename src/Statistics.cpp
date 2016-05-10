@@ -333,18 +333,22 @@ void Statistics
   }
   const float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
   core::ParticleType pt( core::Typed(p).get_type() );
-  ParticleTypeZRDistributionMap::iterator it =
-    particle_type_zr_distribution_map_.find(pt);
+  std::pair<ParticleTypeZRDistributionMap::iterator, bool> it_pair;
+  it_pair.first= particle_type_zr_distribution_map_.find(pt);
   // add distribution table if needed
-  if(it==particle_type_zr_distribution_map_.end()) {
+  if(it_pair.first==particle_type_zr_distribution_map_.end()) {
     float z_max =  get_sd()->get_box_size() / 2.0; // get_z_distribution_top();
     float r_max =  get_sd()->get_box_size() / std::sqrt(2.0); // get_r_distribution_max();
-    unsigned int nz= std::floor(z_max/GRID_RESOLUTION_ANGSTROMS)+5;
-    unsigned int nr= std::floor(r_max/GRID_RESOLUTION_ANGSTROMS)+5;
-    particle_type_zr_distribution_map_[pt]=
-      std::vector<std::vector<int>>(nz, std::vector<int>(nr, 0));
-    it=particle_type_zr_distribution_map_.find(pt);
+    unsigned int nz= std::floor(z_max/GRID_RESOLUTION_ANGSTROMS)+5; // +5 for slack
+    unsigned int nr= std::floor(r_max/GRID_RESOLUTION_ANGSTROMS)+5; // +5 for slack
+    ParticleTypeZRDistributionMap::value_type vt =
+      std::make_pair(pt,
+                     std::vector<std::vector<int> >
+                     (nz, std::vector<int>(nr, 0)));
+    it_pair=particle_type_zr_distribution_map_.insert(vt);
+    IMP_USAGE_CHECK(it_pair.second, type << "pt " << already exists);
   }
+  ParticleTypeZRDistributionMap::iterator& it=it_pair.first;
   //update distribution
   core::XYZ xyz(p);
   float z = std::abs(xyz.get_z());

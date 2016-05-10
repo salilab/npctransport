@@ -26,6 +26,7 @@
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/rmf/SaveOptimizerState.h>
 #include <IMP/Pointer.h>
+#include <IMP/set_map_macros.h>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "io.h"
@@ -65,34 +66,34 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   // statistics about all fgs, per particle, per chain, per particle type
   typedef std::vector< BodyStatisticsOptimizerStates >
     FGsBodyStatisticsOSs;
-  typedef boost::unordered_map<core::ParticleType, FGsBodyStatisticsOSs>
+  typedef IMP_KERNEL_LARGE_UNORDERED_MAP<core::ParticleType, FGsBodyStatisticsOSs>
     FGsBodyStatisticsOSsMap;
   FGsBodyStatisticsOSsMap fgs_bodies_stats_map_;
 
   // statistics about all floaters (kaps etc.), per particle type
-  typedef boost::unordered_map<core::ParticleType, BodyStatisticsOptimizerStates>
+  typedef IMP_KERNEL_LARGE_UNORDERED_MAP<core::ParticleType, BodyStatisticsOptimizerStates>
     BodyStatisticsOSsMap;
   BodyStatisticsOSsMap floaters_stats_map_;
 
   // transport statistics about all floaters (kaps etc.) per particle type
-  typedef boost::unordered_map< core::ParticleType,
+  typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,
     ParticleTransportStatisticsOptimizerStates>
     ParticleTransportStatisticsOSsMap;
   ParticleTransportStatisticsOSsMap floaters_transport_stats_map_;
 
   // distributions
-  typedef boost::unordered_map< core::ParticleType,
+  typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,
     std::vector< std::vector<int> > >
     ParticleTypeZRDistributionMap;
   ParticleTypeZRDistributionMap particle_type_zr_distribution_map_;
 
   // statistics about entire FG chains, for each FG type
-  typedef boost::unordered_map<core::ParticleType, ChainStatisticsOptimizerStates>
+  typedef IMP_KERNEL_LARGE_UNORDERED_MAP<core::ParticleType, ChainStatisticsOptimizerStates>
     ChainStatisticsOSsMap;
   ChainStatisticsOSsMap chains_stats_map_;
 
   // statistics of pairs of interactions for each interaction type
-  typedef boost::unordered_map< npctransport::InteractionType,
+  typedef IMP_KERNEL_LARGE_UNORDERED_MAP< npctransport::InteractionType,
     PointerMember<BipartitePairsStatisticsOptimizerState> >
     BipartitePairsStatisticsOSMap;
   BipartitePairsStatisticsOSMap interaction_stats_map_;
