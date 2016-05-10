@@ -486,17 +486,20 @@ void Statistics::update
             frc->set_n_z3(n_z3);
           }
         // Recreate z-r histogram based on retrieved zr_hist:
-        ParticleTypeZRDistributionMap::mapped_type zr_hist=
-          particle_type_zr_distribution_map_.find(*it)->second;
-        stats->mutable_floaters(i)->clear_zr_hist();
-        for(unsigned int ii=0; ii < zr_hist.size(); ii++) {
-          ::npctransport_proto::Statistics_Ints* zii_r_hist=
-            stats->mutable_floaters(i)->mutable_zr_hist()->add_ints_list();
-          for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++) {
-            zii_r_hist->add_ints(zr_hist[ii][jj]);
+        ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
+          particle_type_zr_distribution_map_.find(*it);
+        if(ptzrdm_it != particle_type_zr_distribution_map_.end()) {
+          ParticleTypeZRDistributionMap::mapped_type zr_hist=
+            ptzrdm_it->second;
+          stats->mutable_floaters(i)->clear_zr_hist();
+          for(unsigned int ii=0; ii < zr_hist.size(); ii++) {
+            ::npctransport_proto::Statistics_Ints* zii_r_hist=
+              stats->mutable_floaters(i)->mutable_zr_hist()->add_ints_list();
+            for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++) {
+              zii_r_hist->add_ints(zr_hist[ii][jj]);
+            }
           }
         }
-
       } // for(it)
 
   // update statistics gathered on interaction rates
