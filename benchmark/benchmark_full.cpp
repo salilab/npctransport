@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
     }
     IMP::set_log_level(IMP::SILENT);
     sd = new IMP::npctransport::SimulationData(output, false);
+    sd->activate_statistics();
 
     sd->get_model()->update();
     double timev, score = 0;

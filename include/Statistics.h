@@ -143,7 +143,7 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   /**
       @param o optimizer to which optimizer states are added,
                use get_sd()->get_bd() if nullptr
-      @return the list of optimizer states that were addedxb
+      @return the list of optimizer states that were added
 
       @note If called for more than one optimizer, only the last
             optimizer will be guaranteed to work well

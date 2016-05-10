@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
     std::cout << "num ranges " << num << std::endl;
     IMP_NEW(IMP::npctransport::SimulationData, sd,
             (assignment, true /* quick */));
+    sd->activate_statistics();
     sd->set_rmf_file(output);
     sd->get_model()->set_log_level(IMP::PROGRESS);
     std::cout << "Files are " << assignment << " and " << output << std::endl;

@@ -640,7 +640,10 @@ Statistics const * SimulationData::get_statistics() const
   return statistics_;
 }
 
-atom::BrownianDynamics *SimulationData::get_bd(bool recreate){
+atom::BrownianDynamics
+*SimulationData::get_bd
+(bool recreate)
+{
   if (!bd_ || recreate) {
     bd_ = new atom::BrownianDynamicsTAMD(m_, "BD_tamd%1%", time_step_wave_factor_);
     bd_->set_maximum_time_step(time_step_);
@@ -653,9 +656,12 @@ atom::BrownianDynamics *SimulationData::get_bd(bool recreate){
       bd_->add_optimizer_state(get_rmf_sos_writer());
     }
     //#endif
-    get_statistics()->add_optimizer_states( bd_ );
   }
   return bd_;
+}
+
+void SimulationData::activate_statistics(){
+    get_statistics()->add_optimizer_states( get_bd() );
 }
 
 ParticlesTemp

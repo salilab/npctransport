@@ -232,17 +232,20 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  Scoring const* get_scoring() const;
 
   /** returns a Statistics object that is updated by this simulation data
-  */
+   */
  Statistics const* get_statistics() const;
 
 #endif
 
   /** gets the Brownian Dynamics object that is capable of simulating
-      this data
+      this data. Statistics are not yet active for the simulation.
 
       @param recreate if true, forces recreation of the bd object
   */
-  atom::BrownianDynamics *get_bd(bool recreate = false);
+ atom::BrownianDynamics *get_bd(bool recreate = false);
+
+  //! activates Brownian Dynamics statistics tracking
+  void activate_statistics();
 
   /** returns the requested fraction of time for taking statistics */
   double get_statistics_fraction() const { return statistics_fraction_; }

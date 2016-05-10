@@ -40,6 +40,7 @@ class Tests(IMP.test.TestCase):
         sd.get_bd().set_log_level(IMP.SILENT)
         IMP.npctransport.initialize_positions(sd, [], False, short_init_factor)
         print("AFTER INIT", time.ctime())
+        sd.activate_statistics()
         obd = sd.get_bd()
         obd.optimize(opt_cycles)
         print("AFTER OPTIMIZE", time.ctime())
@@ -129,6 +130,7 @@ class Tests(IMP.test.TestCase):
 
         print("reloading from output file ", rt_output)
         sdp = IMP.npctransport.SimulationData(rt_output, False)
+        sdp.activate_statistics()
         sd.set_rmf_file( self.get_tmp_file_name("out1.rmf"), False )
         print("After reload", time.ctime())
         self.assert_almost_equal_sds(sd, sdp)
@@ -166,6 +168,7 @@ class Tests(IMP.test.TestCase):
                                              False,
                                              out_rmf,
                                              rt_new_output)
+        sd.activate_statistics()
         sd.set_rmf_file(out_rmf, False)
         for i,p in enumerate(sd.get_beads()):
             if( i >= len(expected_particles) ):
@@ -211,6 +214,7 @@ class Tests(IMP.test.TestCase):
                                              False,
                                              out_rmf,
                                              rt_new_output)
+        sd.activate_statistics()
         sd.set_rmf_file(out_rmf, False)
 #        sd.get_bd().optimize(1)
 
