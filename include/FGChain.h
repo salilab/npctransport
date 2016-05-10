@@ -199,7 +199,7 @@ IMP_OBJECTS(FGChain, FGChains);
 /******************  utility methods ***************/
 
 /**
-   Create a chain particle hierarchy, associated with the model of sd,
+   Create a chain particle hierarchy, to be owned by the model of sd,
    with restraint bonding consecutive particles added to sd, according to the
    parameters specified in fg_data.
 
@@ -235,14 +235,14 @@ FGChain* create_fg_chain
 
 
 /**
-   gets a chain structure from a root of an FG nup
+   gets a newly allocated chain structure from a root of an FG nup
    (by adding its ordered leaves)
 */
 IMPNPCTRANSPORTEXPORT
 FGChain* get_fg_chain(atom::Hierarchy root);
 
 /**
-    gets a chain structure from a root of an FG nup
+    gets a newly allocated chain structure from a root of an FG nup
     (by adding its ordered leaves)
 
     @param p_root a particle that is assumed to be

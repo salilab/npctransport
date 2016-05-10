@@ -140,8 +140,8 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
   // compute the relative radius in which particles would be positioned
   // TODO: we assume here that particle radius is smaller
   //       than the cylinder radius - verify in runtime?
-  Particles chain_beads =
-    npctransport::get_fg_chain(chain_roots[0])->get_beads();
+  Pointer<npctransport::FGChain> chain0(npctransport::get_fg_chain(chain_roots[0]));
+  Particles chain_beads = chain0->get_beads();
   double particle_radius = IMP::core::XYZR(chain_beads[0]).get_radius();
   // compute fraction of particle from full cylinder radius
   double relative_r = (cyl.get_radius() - particle_radius) / cyl.get_radius();
@@ -156,20 +156,22 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
     dLayers = 1.0 / (n_layers - 1);
   }
   // calculate angle increments between adjacent fg nups in each layers
-  int chains_per_layer = (int)(std::ceil(chain_roots.size() / (n_layers + 0.0)));
+  unsigned int n_chains=chain_roots.size();
+  int chains_per_layer = (int)(std::ceil(n_chains / (n_layers + 0.0)));
   double angle_increments = 2 * IMP::PI / chains_per_layer;
   // pin chains to each layer
   for (int layer_num = 0; layer_num < n_layers; layer_num++) {
     double relative_h = h_bottom_layer + layer_num * dLayers;
     for (int k = 0; k < chains_per_layer; k++) {
       unsigned int chain_num = layer_num * chains_per_layer + k;
-      if (chain_num >= chain_roots.size())
-        break;  // may happen if len(chains) does not divide by n_layers
+      if (chain_num >= n_chains)
+        break;  // may happen if len(chains) is not a multiply of n_layers
       double angle = k * angle_increments;
       algebra::Vector3D new_anchor =
           cyl.get_inner_point_at(relative_h, relative_r, angle);
-      Pointer<npctransport::FGChain> cur_chain =
-        npctransport::get_fg_chain(chain_roots[chain_num]);
+      Pointer<npctransport::FGChain> cur_chain
+        ( npctransport::get_fg_chain(chain_roots[chain_num]) );
+      cur_chain->set_was_used(true);
       core::XYZ d(cur_chain->get_bead(0));
       d.set_coordinates(new_anchor);
       d.set_coordinates_are_optimized(false);
@@ -212,24 +214,24 @@ IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
   return sr;
 }
 
-  // print the first atoms of all the fgs in sd
-  void print_fgs(IMP::npctransport::SimulationData& sd, IMP::LogLevel ll)
-  {
-    using namespace IMP;
-    using atom::Hierarchy;
-    using atom::Hierarchies;
+  // // print the first atoms of all the fgs in sd
+  // void print_fgs(IMP::npctransport::SimulationData& sd, IMP::LogLevel ll)
+  // {
+  //   using namespace IMP;
+  //   using atom::Hierarchy;
+  //   using atom::Hierarchies;
 
-    Hierarchies chains = sd.get_fg_chain_roots();
-    for (unsigned int k = 0; k < chains.size(); k++) {
-      Pointer<npctransport::FGChain> cur_chain =
-        npctransport::get_fg_chain(chains[k]);
-      core::XYZ d(cur_chain->get_bead(0));
-      IMP_LOG(ll, "d # " << k << " = " << d << std::endl);
-      IMP_LOG(ll, "is optimizable = "
-              << d.get_coordinates_are_optimized()
-              << std::endl);
-    }
-  }
+  //   Hierarchies chains = sd.get_fg_chain_roots();
+  //   for (unsigned int k = 0; k < chains.size(); k++) {
+  //     Pointer<npctransport::FGChain> cur_chain =
+  //       npctransport::get_fg_chain(chains[k]);
+  //     core::XYZ d(cur_chain->get_bead(0));
+  //     IMP_LOG(ll, "d # " << k << " = " << d << std::endl);
+  //     IMP_LOG(ll, "is optimizable = "
+  //             << d.get_coordinates_are_optimized()
+  //             << std::endl);
+  //   }
+  // }
 
 boost::int64_t cylinder_nlayers = 0;
 IMP::AddIntFlag cylinder_adder(

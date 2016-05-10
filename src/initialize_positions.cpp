@@ -133,6 +133,7 @@ void optimize_balls(const ParticlesTemp &ps,
     }
     // rescale bond length + TAMD (if needed ) temporarily for all chains
     for (unsigned int j = 0; j < chains.size(); ++j) {
+      std::cout<< "optimize balls CHAIN: " << chains[j] << std::endl;
       tmp_scale_rest_length.push_back
         ( new internal::FGChainScaleRestLengthRAII(chains[j],
                                                    rest_length_factor) );
@@ -200,6 +201,7 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
   Hierarchies chains = sd.get_fg_chain_roots( );
   for (unsigned int k = 0; k < chains.size(); k++) {
     Pointer<FGChain> cur_chain = get_fg_chain(chains[k]);
+    cur_chain->set_was_used(true);
     core::XYZ d(cur_chain->get_bead(0));
     IMP_LOG(PROGRESS, "d # " << k << " = " << d << std::endl);
     IMP_LOG(PROGRESS, "is optimizable = " << d.get_coordinates_are_optimized()

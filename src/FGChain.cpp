@@ -169,10 +169,10 @@ FGChain* create_fg_chain
 }
 
 
-// gets a chain structure from a root of an FG nup
+// create a newly allocated chain structure from a root of an FG nup
 // (by adding its ordered leaves)
 FGChain* get_fg_chain(atom::Hierarchy root){
-  IMP_NEW(FGChain, ret, ( root.get_particle() ) );
+  IMP_NEW(FGChain, ret, ( root.get_particle(), 0.0, 1.0, "chain copy %1%" ) );
   return ret.release();
 }
 
