@@ -346,7 +346,7 @@ void Statistics
                      std::vector<std::vector<int> >
                      (nz, std::vector<int>(nr, 0)));
     it_pair=particle_type_zr_distribution_map_.insert(vt);
-    IMP_USAGE_CHECK(it_pair.second, type << "pt " << already exists);
+    IMP_USAGE_CHECK(it_pair.second, "type " << pt << " already exists");
   }
   ParticleTypeZRDistributionMap::iterator& it=it_pair.first;
   //update distribution
