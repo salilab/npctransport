@@ -5,7 +5,7 @@
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
- */
+*/
 
 #include <IMP/npctransport/Statistics.h>
 #include <IMP/npctransport/SimulationData.h>
@@ -21,6 +21,7 @@
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/log.h>
+#include <IMP/check_macros.h>
 #include <IMP/flags.h>
 #include <IMP/core/pair_predicates.h>
 #include <IMP/core/XYZR.h>
@@ -327,16 +328,19 @@ void Statistics
 ::update_particle_type_zr_distribution_map
 ( Particle* p )
 {
+  if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
+    return;
+  }
   const float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
   core::ParticleType pt( core::Typed(p).get_type() );
   ParticleTypeZRDistributionMap::iterator it =
     particle_type_zr_distribution_map_.find(pt);
   // add distribution table if needed
   if(it==particle_type_zr_distribution_map_.end()) {
-    float top = get_z_distribution_top();
-    float r_max = get_r_distribution_max();
-    unsigned int nz = std::floor(top/GRID_RESOLUTION_ANGSTROMS);
-    unsigned int nr = std::floor(r_max/GRID_RESOLUTION_ANGSTROMS);
+    float z_max =  get_sd()->get_box_size() / 2.0; // get_z_distribution_top();
+    float r_max =  get_sd()->get_box_size() / std::sqrt(2.0); // get_r_distribution_max();
+    unsigned int nz= std::floor(z_max/GRID_RESOLUTION_ANGSTROMS)+5;
+    unsigned int nr= std::floor(r_max/GRID_RESOLUTION_ANGSTROMS)+5;
     particle_type_zr_distribution_map_[pt]=
       std::vector<std::vector<int>>(nz, std::vector<int>(nr, 0));
     it=particle_type_zr_distribution_map_.find(pt);
@@ -348,6 +352,11 @@ void Statistics
                         std::pow(xyz.get_y(),2) );
   unsigned int zz= std::floor(z/GRID_RESOLUTION_ANGSTROMS);
   unsigned int rr= std::floor(r/GRID_RESOLUTION_ANGSTROMS);
+  IMP_INTERNAL_CHECK(zz < it->second.size() &&
+                     rr < it->second[0].size(),
+                  "zz=" <<  zz << " >= " << it->second.size()
+                  << " or r=" << rr << " >= " << it->second[0].size()
+                   << " ;  z=" << z << " r=" << r);
   it->second[zz][rr]++;
 }
 
@@ -627,7 +636,7 @@ void Statistics::reset_statistics_optimizer_states()
       for (unsigned int j = 0; j < iter->second.size(); j++)
         {
           iter->second[j]->reset();
-        } // for j
+        } // for jb
     } // for iter
 
   if (get_sd()->get_has_slab()) {
@@ -640,6 +649,7 @@ void Statistics::reset_statistics_optimizer_states()
             iter->second[j]->reset();
           } // for j
       } // for iter
+    particle_type_zr_distribution_map_.clear();
   }
 
   for (ChainStatisticsOSsMap::iterator iter = chains_stats_map_.begin();
