@@ -269,6 +269,7 @@ message Statistics {
     optional double local_diffusion_coefficient=8 [default=0];
     optional string type=9; // type name, e.g. "fg_nsp1"
     repeated FGOrderParams order_params=10;
+    optional  Ints_list zr_hist=11; // histogram of z (dimenion 1) and r (dimension 2) coordinates
   }
   message FloatStats {
     //    optional double site_interactions_per_floater=1 [default=0]; // number of site interactions per floater

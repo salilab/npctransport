@@ -105,11 +105,6 @@ class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
   /** resets the number of transports statistics to 0 */
   void reset();
 
-  /** updates the z-r distriubution table in owner's statistics
-      for this particle type (distribution of z coordinates and r coordinates)
-  */
-  void update_particle_type_zr_distribution_map();
-
   virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
   IMP_OBJECT_METHODS(ParticleTransportStatisticsOptimizerState);
 };

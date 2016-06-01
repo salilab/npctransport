@@ -19,6 +19,8 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+class Statistics;
+
 /** Track the rotational correlation time of a rigid body particle*/
 /** The correlation with at most the last 100 updates is tracked*/
 class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
@@ -26,9 +28,13 @@ class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
  private:
   typedef core::PeriodicOptimizerState P;
   Particle *p_;
+  WeakPointer<IMP::npctransport::Statistics> statistics_manager_;
   std::deque<algebra::Transformation3D> positions_;
+
   Particle *get_particle() const { return p_; }
+
   void add_orientation(algebra::Rotation3D rot) { positions_.push_back(rot); }
+
   double get_dt() const;
 
  public:
@@ -36,11 +42,24 @@ class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
      @param p the particle being wrapped
      @param periodicity frame interval for statistics, equiv. to set_period(1)
    */
-  BodyStatisticsOptimizerState(Particle *p, unsigned int periodicity=1);
+  BodyStatisticsOptimizerState
+    (Particle *p,
+     WeakPointer<IMP::npctransport::Statistics> statistics_manager = nullptr,
+     unsigned int periodicity=1);
+
   double get_correlation_time() const;
+
   double get_diffusion_coefficient() const;
+
   void reset();
+
+  /** updates the z-r distriubution table in owner's statistics
+      for this particle type (distribution of z coordinates and r coordinates)
+  */
+  void update_particle_type_zr_distribution_map();
+
   virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+
   IMP_OBJECT_METHODS(BodyStatisticsOptimizerState);
 };
 IMP_OBJECTS(BodyStatisticsOptimizerState, BodyStatisticsOptimizerStates);

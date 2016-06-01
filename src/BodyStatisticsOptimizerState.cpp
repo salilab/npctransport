@@ -14,11 +14,15 @@
 #include <IMP/container/ClosePairContainer.h>
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
+#include <IMP/npctransport/Statistics.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BodyStatisticsOptimizerState::BodyStatisticsOptimizerState
-( Particle* p, unsigned int periodicity)
-  : P(p->get_model(), "BodyStatisticsOptimizerState%1%"), p_(p)
+( Particle* p,
+  WeakPointer<IMP::npctransport::Statistics> statistics_manager,
+  unsigned int periodicity)
+  : P(p->get_model(), "BodyStatisticsOptimizerState%1%"), p_(p),
+        statistics_manager_(statistics_manager)
 {
   set_period(periodicity);
 }
@@ -70,7 +74,18 @@ double BodyStatisticsOptimizerState::get_diffusion_coefficient() const {
                                          get_period() * get_dt());
 }
 
+void
+BodyStatisticsOptimizerState
+::update_particle_type_zr_distribution_map() {
+  if (statistics_manager_ == nullptr){
+    return;
+  }
+  statistics_manager_->update_particle_type_zr_distribution_map(p_);
+}
+
+
 void BodyStatisticsOptimizerState::do_update(unsigned int) {
+  this->update_particle_type_zr_distribution_map();
   positions_.push_back(core::RigidBody(p_)
                            .get_reference_frame().get_transformation_to());
   while (positions_.size() > 1000) {

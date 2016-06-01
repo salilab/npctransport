@@ -45,17 +45,7 @@ void ParticleTransportStatisticsOptimizerState::reset() {
   IMP_LOG(PROGRESS, "ParticleTransportStatistics - RESET" << std::endl);
 }
 
-void
-ParticleTransportStatisticsOptimizerState
-::update_particle_type_zr_distribution_map() {
-  if (statistics_manager_ == nullptr){
-    return;
-  }
-  statistics_manager_->update_particle_type_zr_distribution_map(p_);
-}
-
 void ParticleTransportStatisticsOptimizerState::do_update(unsigned int) {
-  this->update_particle_type_zr_distribution_map();
   const double fs_in_ns = 1.0E+6;
   Transporting pt(p_);
   double prev_z = pt.get_last_tracked_z();
