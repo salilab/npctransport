@@ -2047,7 +2047,7 @@ interactions {
     lower: 2.0
   }
 }
-dump_interval_ns: 0.1
+dump_interval_ns: 1.0
 nonspecific_range {
   lower: 1.5
 }

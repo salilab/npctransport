@@ -7,11 +7,13 @@ import sys
 import math
 #import read_nups
 
-fg_R = 25
-diffuser_R = 25
+fg_R = 20
+diffuser_R = 20
 fg_coords = [25,25,25]
 kap_type = "my_kap"
 fg_type = "my_fg"
+interaction_k=10.0
+interaction_range=5.0
 
 class Tests(IMP.test.TestCase):
 
@@ -26,13 +28,14 @@ class Tests(IMP.test.TestCase):
         config = Configuration()
         IMP.npctransport.set_default_configuration(config)
         config.box_is_on.lower=1
-        config.box_side.lower=125
+        config.box_side.lower=150
+        config.excluded_volume_k.lower=5
         fgs= IMP.npctransport.add_fg_type(config,
                                           type_name=fg_type,
                                           number_of_beads=1,
                                           number=1,
                                           radius=fg_R,
-                                          interactions=12,
+                                          interactions=6,
                                           rest_length_factor = 1.5)
         pos=fgs.anchor_coordinates.add()
         pos.x=fg_coords[0]
@@ -41,15 +44,15 @@ class Tests(IMP.test.TestCase):
         kaps= IMP.npctransport.add_float_type(config,
                                               number=1,
                                               radius=diffuser_R,
-                                              interactions=12,
+                                              interactions=6,
                                               type_name=kap_type,
-                                              d_factor=3
+                                              d_factor=0.3
                                               )
         interactionFG_KAP= IMP.npctransport.add_interaction(config,
                                      name0=fg_type,
                                      name1=kap_type,
-                                     interaction_k=10,
-                                     interaction_range=5)
+                                     interaction_k=interaction_k,
+                                     interaction_range=interaction_range)
 
         # nonspecifics= IMP.npctransport.add_float_type(config,
         #                                               number=1,
@@ -60,14 +63,13 @@ class Tests(IMP.test.TestCase):
         f.write(config.SerializeToString())
         f.close()
 
-    def find_close_sites(self, sd, p1, p2, distance_thresh=2.0):
+    def find_close_sites(self, sd, p1, p2, distance_thresh=5.0):
         """
         return true if two sites are below distance_thresh from each other
         between particles p1 and p2
         """
-
-        sites1=sd.get_sites(IMP.core.Typed(p1).get_type())
-        sites2=sd.get_sites(IMP.core.Typed(p2).get_type())
+        sites1=sd.get_site_centers(IMP.core.Typed(p1).get_type())
+        sites2=sd.get_site_centers(IMP.core.Typed(p2).get_type())
         rf1 = IMP.core.RigidBody(p1).get_reference_frame()
         rf2 = IMP.core.RigidBody(p2).get_reference_frame()
         for site1 in sites1:
@@ -84,10 +86,10 @@ class Tests(IMP.test.TestCase):
 
     def _assert_kap_in_place(self, sd, really_assert=True):
         first_chain = IMP.npctransport.get_fg_chain(sd.get_fg_chain_roots()[0])
-        print (first_chain)
-        print (vars(first_chain))
+#        print (first_chain)
+#        print (vars(first_chain))
         fg_anchor = first_chain.get_bead(0)
-        print (fg_anchor)
+#        print (fg_anchor)
         kap = None
         r=sd.get_root()
         for rchild in r.get_children():
@@ -103,7 +105,12 @@ class Tests(IMP.test.TestCase):
             self.assertAlmostEqual( D / 10.0,
                                    (fg_R+diffuser_R) / 10.0,
                                    0)
-            self.assert_( self.find_close_sites(sd, kap, fg_anchor) )
+            print ("Asserted close balls")
+            self.assert_( self.find_close_sites(sd,
+                                                kap,
+                                                fg_anchor,
+                                                interaction_range*1.5) )
+            print ("Asserted close sites")
             print("Kap coords", kap_c, end=' ')
             print("FG coords", anchor_c, end=' ')
             print("D", D)
@@ -174,12 +181,13 @@ class Tests(IMP.test.TestCase):
             sd.get_statistics().update(timer,opt_cycles)
             try:
                 self._assert_kap_in_place(sd, True)
+                print ("Asserted kap interacts")
                 print ("total energy", sd.get_bd().get_scoring_function().evaluate(False),)
                 print ("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False))
                 self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -30.0)
                 self.assert_(self.is_stats_interact_(assign_file))
                 n_good=n_good+1
-            except:
+            except AssertionError:
                 continue
             if(n_good >= n_good_thresh):
                 print("total energy", sd.get_bd().get_scoring_function().evaluate(False), end=' ')
