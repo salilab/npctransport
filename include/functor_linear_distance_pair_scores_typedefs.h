@@ -9,6 +9,7 @@
 #define IMPNPCTRANSPORT_FUNCTOR_LINEAR_DISTANCE_PAIR_SCORES_TYPEDEFS_H
 
 #include "npctransport_config.h"
+#include <IMP/showable_macros.h>
 #include <IMP/algebra/utility.h>
 #include <IMP/score_functor/LinearLowerBound.h>
 #include <IMP/score_functor/SphereDistance.h>
@@ -73,8 +74,16 @@ class LinearInteraction : public score_functor::LinearLowerBound {
                              double squared_distance) const {
     return squared_distance > algebra::get_squared(attr_range_);
   }
+
+  IMP_SHOWABLE_INLINE(LinearInteraction,
+                      out << "LinearInteraction attr-range " << attr_range_
+                      << " attr-k " << k_attr_
+                      << " rep-k " << P::get_k() );
 };
 //#endif
+
+IMP_OBJECTS(LinearInteraction, LinearInteractions);
+
 
 typedef score_functor::SphereDistance<LinearInteraction> LinearInteractionScore;
 

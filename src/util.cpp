@@ -29,7 +29,7 @@ using namespace IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE;
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 // Converts protobuf configuration file from txt to pb format
-void configuration_txt2pb
+void get_protobuf_configuration_from_text
 (std::string config_txt, std::string config_pb)
 {
   npctransport_proto::Configuration config;
@@ -140,9 +140,9 @@ unsigned int find_or_add_interaction_of_type
 }
 
 
-algebra::Sphere3Ds vectors2spheres
+algebra::Sphere3Ds get_spheres_from_vectors
 (algebra::Vector3Ds const& vs, double radius){
-  return vectors2spheres(vs.begin(), vs.end(), radius);
+  return get_spheres_from_vectors(vs.begin(), vs.end(), radius);
 }
 
 

@@ -2,16 +2,20 @@
 
 #env.IMPModuleTest()
 
-spelling_exceptions=['avro','rmf','cpc','predr','optimizable']
+spelling_exceptions=['avro','rmf','cpc','predr','optimizable','zr','protobuf']
 show_exceptions=['timer']
-value_object_exceptions=['timer']
+value_object_exceptions=['timer','LinearInteraction']
 function_name_exceptions= \
-       ['SimulationData.initialize_positions_from_rmf',
+       ['SimulationData.activate_statistics',
+        'SimulationData.initialize_positions_from_rmf',
         'SimulationData.switch_suspend_rmf',
         'BipartitePairsStatisticsOptimizerState.get_average_off_per_bound_II_per_ns',
         'BipartitePairsStatisticsOptimizerState.get_average_off_per_bound_I_per_ns',
         'BipartitePairsStatisticsOptimizerState.get_average_on_per_unbound_II_per_ns',
         'BipartitePairsStatisticsOptimizerState.get_average_on_per_unbound_I_per_ns',
         'BipartitePairsStatisticsOptimizerState.get_on_II_stats_period_ns',
-        'BipartitePairsStatisticsOptimizerState.get_on_I_stats_period_ns'
+        'BipartitePairsStatisticsOptimizerState.get_on_I_stats_period_ns',
+        'assign_ranges',
+        'initialize_positions',
+        'make_unordered_particle_index_pair'
         ]

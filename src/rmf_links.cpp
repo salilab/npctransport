@@ -199,7 +199,7 @@ void add_test_sites(RMF::FileHandle fh, core::ParticleType t, double range,
   HierarchyWithSitesSaveLink *l =
     rmf::internal::get_save_link<HierarchyWithSitesSaveLink>(fh);
   if(sites.size() > 0){
-    l->add_test_sites(t, vectors2spheres(sites, range));
+    l->add_test_sites(t, get_spheres_from_vectors(sites, range));
   }
 }
 

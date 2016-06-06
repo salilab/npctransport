@@ -11,10 +11,14 @@
 #include <ValidSchema.hh>
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 IMP_GCC_PRAGMA(diagnostic push)
+#endif
 IMP_GCC_PRAGMA(diagnostic ignored "-Wsign-compare")
 #include "npctransport.pb.h"
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 IMP_GCC_PRAGMA(diagnostic pop)
+#endif
 
 #include <DataFile.hh>
 //#include <google/protobuf/text_format.h>

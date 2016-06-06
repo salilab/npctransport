@@ -93,27 +93,28 @@ void debug_print_location(std::string context, bool reset = false) {
    create n optimizable rigid body particles for model m
    with random coordinates and orientation within bounding box bb
 */
-Particles create_particles(Model *m, const BoundingBox3D &bb, int n) {
-  Particles ret;
+ParticleIndexes create_particles(Model *m, const BoundingBox3D &bb, int n) {
+  ParticleIndexes ret;
   for (int i = 0; i < n; ++i) {
     IMP_NEW(Particle, p, (m));
-    XYZR d = XYZR::setup_particle(p);
+    ParticleIndex pi=p->get_index();
+    XYZR d = XYZR::setup_particle(m,pi);
     d.set_radius(radius);
     d.set_coordinates(get_random_vector_in(bb));
-    ret.push_back(p);
+    ret.push_back(pi);
     d.set_coordinates_are_optimized(true);
     Transformation3D tr(get_random_rotation_3d(), get_zero_vector_d<3>());
     ReferenceFrame3D rf(tr);
-    RigidBody::setup_particle(p, rf);
+    RigidBody::setup_particle(m, pi, rf);
   }
   return ret;
 }
 
-core::MonteCarloMover *create_serial_mover(const ParticlesTemp &ps) {
+  core::MonteCarloMover *create_serial_mover(IMP::Model* m, const ParticleIndexes &pis) {
   core::MonteCarloMovers movers;
-  for (unsigned int i = 0; i < ps.size(); ++i) {
-    double scale = core::XYZR(ps[i]).get_radius();
-    movers.push_back(new core::BallMover(ParticlesTemp(1, ps[i]), scale * 2));
+  for (unsigned int i = 0; i < pis.size(); ++i) {
+    double scale = core::XYZR(m, pis[i]).get_radius();
+    movers.push_back(new core::BallMover(m, pis[i], scale * 2));
   }
   IMP_NEW(core::SerialMover, sm, (get_as<core::MonteCarloMoversTemp>(movers)));
   return sm.release();
@@ -132,27 +133,31 @@ core::MonteCarloMover *create_serial_mover(const ParticlesTemp &ps) {
 
     \include optimize_balls.cpp
 */
-void optimize_balls(const ParticlesTemp &ps,
-                    const RestraintsTemp &rs = RestraintsTemp(),
-                    const PairPredicates &excluded = PairPredicates(),
-                    const OptimizerStates &opt_states = OptimizerStates(),
-                    LogLevel ll = DEFAULT) {
+  void optimize_balls(IMP::Model* m,
+                      const ParticleIndexes &pis,
+                      const RestraintsTemp &rs = RestraintsTemp(),
+                      const PairPredicates &excluded = PairPredicates(),
+                      const OptimizerStates &opt_states = OptimizerStates(),
+                      LogLevel ll = DEFAULT) {
   // make sure that errors and log messages are marked as coming from this
   // function
   IMP_FUNCTION_LOG;
   SetLogState sls(ll);
-  IMP_ALWAYS_CHECK(!ps.empty(), "No Particles passed.", ValueException);
-  Model *m = ps[0]->get_model();
+  IMP_ALWAYS_CHECK(!pis.empty(), "No Particles passed.", ValueException);
   // double scale = core::XYZR(ps[0]).get_radius();
+  Particles ps;
+  for(unsigned int i=0; i<pis.size(); i++){
+    ps.push_back(m->get_particle(pis[i]));
+  }
 
   IMP_NEW(core::SoftSpherePairScore, ssps, (10));
   IMP_NEW(core::ConjugateGradients, cg, (m));
   cg->set_optimizer_states(opt_states);
   {
     // set up restraints for cg
-    IMP_NEW(container::ListSingletonContainer, lsc, (ps));
+    IMP_NEW(container::ListSingletonContainer, lsc, (m, pis));
     IMP_NEW(container::ClosePairContainer, cpc,
-            (lsc, 0, core::XYZR(ps[0]).get_radius()));
+            (lsc, 0, core::XYZR(m, pis[0]).get_radius()));
     cpc->add_pair_filters(excluded);
     Pointer<Restraint> r =
         container::create_restraint(ssps.get(), cpc.get());
@@ -164,7 +169,7 @@ void optimize_balls(const ParticlesTemp &ps,
   IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));
   {
     // set up MC
-    mc->add_mover(create_serial_mover(ps));
+    mc->add_mover(create_serial_mover(m, pis));
     // we are special casing the nbl term for montecarlo, but using all for CG
     mc->set_incremental_scoring_function(isf);
     // use special incremental support for the non-bonded part
@@ -187,16 +192,16 @@ void optimize_balls(const ParticlesTemp &ps,
     double factor = .1 * i;
     IMP_LOG_PROGRESS("Optimizing with radii at " << factor << " of full"
                                                  << std::endl);
-    for (unsigned int j = 0; j < ps.size(); ++j) {
+    for (unsigned int j = 0; j < pis.size(); ++j) {
       attrs.push_back(
           new ScopedSetFloatAttribute(ps[j], core::XYZR::get_radius_key(),
-                                      core::XYZR(ps[j]).get_radius() * factor));
+                                      core::XYZR(m,pis[j]).get_radius() * factor));
     }
     // changed all radii
     isf->set_moved_particles(isf->get_movable_indexes());
     for (int j = 0; j < 5; ++j) {
       mc->set_kt(100.0 / (3 * j + 1));
-      mc->optimize(ps.size() * (j + 1) * 100);
+      mc->optimize(pis.size() * (j + 1) * 100);
       double e = cg->optimize(10);
       IMP_LOG_PROGRESS("Energy is " << e << std::endl);
       if (e < .000001) break;
@@ -212,22 +217,22 @@ template <unsigned int NA, unsigned int NB, bool WHICH>
 void test_one(double range) {
   BoundingBox3D bb = get_cube_d<3>(50);
   IMP_NEW(Model, m, ());
-  Particles psa = create_particles(m, bb, number_of_particles);
-  Particles psb = create_particles(m, bb, number_of_particles);
+  ParticleIndexes psa = create_particles(m, bb, number_of_particles);
+  ParticleIndexes psb = create_particles(m, bb, number_of_particles);
   Sphere3D s(get_zero_vector_d<3>(), radius);
   Vector3Ds sas = get_uniform_surface_cover(s, NA);
   Vector3Ds sbs = get_uniform_surface_cover(s, NB);
-  optimize_balls(psa + psb);
+  optimize_balls(m, psa + psb);
   //  typedef TemplateSitesPairScore<NA, NB, WHICH> TSPS;
   //IMP_NEW(TSPS, tsps, (range, 1, 0, 0, 1, sas, sbs));
   IMP_NEW(SitesPairScore, sps, ( range, 1, // r, l
                                  0.0, 0.0, // no-skew version
                                  0, 0, 1, // non-specific r, k_attr, k_rep
-                                 vectors2spheres(sas, 0.0),
-                                 vectors2spheres(sbs, 0.0) )
+                                 get_spheres_from_vectors(sas, 0.0),
+                                 get_spheres_from_vectors(sbs, 0.0) )
           );
-  IMP_NEW(ListSingletonContainer, lsca, (psa));
-  IMP_NEW(ListSingletonContainer, lscb, (psb));
+  IMP_NEW(ListSingletonContainer, lsca, (m, psa));
+  IMP_NEW(ListSingletonContainer, lscb, (m, psb));
   IMP_NEW(AllBipartitePairContainer, abpc, (lsca, lscb));
   if (WHICH) {
     Pointer<Restraint> r = create_restraint(sps.get(), abpc.get());

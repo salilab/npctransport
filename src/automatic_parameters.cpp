@@ -7,10 +7,14 @@
  */
 
 #include <IMP/npctransport/automatic_parameters.h>
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic push
+#endif
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #include "npctransport.pb.h"
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic pop
+#endif
 
 #include <IMP/atom/estimates.h>
 #include <IMP/exception.h>
