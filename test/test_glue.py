@@ -12,8 +12,9 @@ import math
 # dU = -0.0625 * k * rx^2 * ry^2
 
 radius=30
-k_G=0.001
+k_G=0.005
 k=k_G
+site_range=.5*radius
 k_skew_G=0.25
 rangeN = 10
 rangeT = 20
@@ -25,6 +26,7 @@ kT = k_G/(k_skew_G+1)
 #           (0.5 * kT * rangeT) * (0.25 * kN * rangeN ^ 2)]
 fmax = 0.125 * k_G * rangeN * rangeT * max(rangeN, rangeT)
 dUmax = 0.0625 * k_G * rangeN**2 * rangeT**2
+k=dUmax/site_range
 nonspec_k_G=0.1*fmax
 nonspec_range_G=.2*radius
 
@@ -60,8 +62,8 @@ class Tests(IMP.test.TestCase):
                "nonspec-k", nonspec_k, "[kCal/mol/A]",
                "repulsive-k", soft_sphere_k, "[kCal/mol/A]",
                "dT", dt)
-        print("dG-site:", site-range*site-k, "[kCal/mol]")
-        nsteps = 250000
+        print("dG-site:", site_range*site_k, "[kCal/mol]")
+        nsteps = math.ceil(25E+6 / dt);
         if(IMP.get_check_level() >= IMP.USAGE):
             nsteps /= 250
         m= IMP.Model()
@@ -110,7 +112,7 @@ class Tests(IMP.test.TestCase):
             print("Initial score x0=", rr, "*R is ", init_score)
             self.assertAlmostEqual(init_score, s, delta = 0.001)
         for i in range(10):
-            bd.optimize(nsteps / 10)
+            bd.optimize(math.ceil(nsteps / 10))
             sos.update_always()
             distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
                                                 ds[1].get_coordinates())
@@ -125,7 +127,7 @@ class Tests(IMP.test.TestCase):
     def test_one(self):
         """Check interaction score repulsion for glue test"""
         IMP.set_log_level(IMP.PROGRESS)
-        dt=IMP.npctransport.get_time_step(1, k, radius)
+        dt=IMP.npctransport.get_time_step(1, k, radius, .2*radius,0.1)
         ntrials=3
         for i in range(ntrials):
             try:
@@ -179,7 +181,7 @@ class Tests(IMP.test.TestCase):
     def test_two(self):
         """Check two interactions"""
         IMP.set_log_level(IMP.SILENT)
-        dt=IMP.npctransport.get_time_step(1, k, radius)
+        dt=IMP.npctransport.get_time_step(1, k, radius,.2*radius)
         self._test_two(site_range=radius, site_k=k,
                        nonspec_range=.2*radius, nonspec_k=.5*k,
                        soft_sphere_k=k, dt=dt)
@@ -242,7 +244,7 @@ class Tests(IMP.test.TestCase):
     def test_three(self):
         """Check three interactions"""
         IMP.set_log_level(IMP.SILENT)
-        dt=IMP.npctransport.get_time_step(1, k, radius)
+        dt=IMP.npctransport.get_time_step(1, k, radius, .2*radius)
         self._test_three(site_range=radius, site_k=k,
                        nonspec_range=.2*radius, nonspec_k=.5*k,
                        soft_sphere_k=k, dt=dt)
@@ -263,7 +265,7 @@ class Tests(IMP.test.TestCase):
                           range_skew, k_skew,
                           nonspec_range, nonspec_k,
                           soft_sphere_k, dt, ntrial=0):
-        nsteps = 5000E+6 / dt
+        nsteps = 5E+6 / dt
         if(IMP.get_check_level() >= IMP.USAGE):
             nsteps /= 250
         m= IMP.Model()
@@ -302,7 +304,10 @@ class Tests(IMP.test.TestCase):
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_scoring_function(r)
         bd.set_maximum_time_step(dt)
-        f= RMF.create_rmf_file(self.get_tmp_file_name("glue1_slide_%d.rmf" % ntrial))
+        rmf_fname=self.get_tmp_file_name("glue1_slide_%d.rmf" % ntrial)
+        rmf_fname="glue1_slide_%d.rmf" % ntrial
+        print ("RMF:",rmf_fname)
+        f= RMF.create_rmf_file(rmf_fname)
         for d in zip(types, [sites0, sites1]):
             IMP.npctransport.add_test_sites(f, d[0], d[1])
         IMP.rmf.add_restraint(f,r)
@@ -325,7 +330,7 @@ class Tests(IMP.test.TestCase):
 #            self.assertAlmostEqual(init_score, s, delta = 0.001)
         ds[1].set_coordinates(IMP.algebra.Vector3D(1.4*radius,0,0))
         for i in range(10):
-            bd.optimize(nsteps / 10)
+            bd.optimize(math.ceil(nsteps / 10))
             sos.update_always()
             distance = IMP.algebra.get_distance(ds[0].get_coordinates(),
                                                 ds[1].get_coordinates())
@@ -340,10 +345,11 @@ class Tests(IMP.test.TestCase):
     def test_one_sliding(self):
         """Check interaction score repulsion for glue test, sliding
         """
-        print ("Sliding")
+        print ("==\nSliding\n==")
         IMP.set_log_level(IMP.PROGRESS)
-        dt=IMP.npctransport.get_time_step(1, k_G, radius)
-        dt=50000
+        dt=IMP.npctransport.get_time_step(1, k_G, radius, nonspec_range_G, 0.1)
+        dt=min(dt,20000)
+#        dt=50000
         print ("dT = ", dt)
         ntrials=3
         for i in range(ntrials):

@@ -37,7 +37,8 @@ double get_close_pairs_range(const ::npctransport_proto::Assignment& config);
                         coefficient)
     @param max_k        the maximal force applied on any particle
                         in the simulation
-    @param min_radius   the minimal radius/range of any relevant particle/interaction in the system
+    @param min_radius   the minimal radius of any interaction in the system
+    @param min_range    the minimal range of any interaction
     @param max_trans_relative_to_radius the maximal estimated translation
                                         allowed for any particle as fraction of
                                         min_radius (before factoring by
@@ -48,9 +49,9 @@ double get_close_pairs_range(const ::npctransport_proto::Assignment& config);
 */
 IMPNPCTRANSPORTEXPORT  // TODO: is max_k also correct for springs?
     double
-        get_time_step(double max_d_factor, double max_k, double min_radius,
-                      double max_trans_relative_to_radius = 0.1,
-                      double time_step_factor = 1.0);
+get_time_step(double max_d_factor, double max_k, double min_radius, double min_range,
+              double max_trans_relative_to_radius = 0.1,
+              double time_step_factor = 1.0);
 
 /** computes the time step size that is required for a stable simulation,
     where the translation of any particle at any simulation time step is

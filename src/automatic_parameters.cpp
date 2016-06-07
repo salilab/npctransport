@@ -47,22 +47,24 @@ double get_close_pairs_range(const ::npctransport_proto::Assignment& config) {
   return get_close_pairs_range(max_range, max_range_factor);
 }
 
-double get_time_step(double max_d_factor, double max_k, double min_radius,
+double get_time_step(double max_d_factor, double max_k, double min_radius, double min_range,
                      double max_trans_relative_to_radius,
                      double time_step_factor) {
   double D =
       max_d_factor * atom::get_einstein_diffusion_coefficient(min_radius);
-  double max_length = max_trans_relative_to_radius * min_radius;
+  double max_length = max_trans_relative_to_radius * std::min(min_radius, min_range);
   // binary search between minimal and maximal time steps
   // till they converge near time step that obtains maximal translation
   double ts_max = 1e12, ts_min = 0;
   do {
-    double mid = .5 * (ts_max + ts_min);
-    double length = atom::get_diffusion_length(D, max_k, mid);
+    double ts_mid = .5 * (ts_max + ts_min);
+    // maximal estimated movement due to either force or random diffusion
+    double length = std::max(atom::get_diffusion_length(D, max_k, ts_mid),
+                             atom::get_diffusion_length(D, ts_mid));
     if (length > max_length) {
-      ts_max = mid;
+      ts_max = ts_mid;
     } else {
-      ts_min = mid;
+      ts_min = ts_mid;
     }
   } while ((ts_max - ts_min) > .1 * ts_max);
   return time_step_factor * ts_min;
@@ -78,25 +80,26 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
   double time_step_factor = a.time_step_factor().value();
   double max_d_factor = 1.0;
   double min_radius = std::numeric_limits<double>::max();
+  double min_range = std::numeric_limits<double>::max();
   double max_k = 0.0;
   double max_k_factor = 1.0;
-  double min_radius_factor = 1.0;
+  double min_range_factor = 1.0;
   UPDATE_MAX(k, a.interaction_k);
   UPDATE_MAX(k, a.backbone_k);  // TODO: is this valid for harmonic k?
   UPDATE_MAX(k, a.nonspecific_k);
-  UPDATE_MIN(radius, a.nonspecific_range);
+  UPDATE_MIN(range, a.nonspecific_range);
   UPDATE_MAX(k, a.excluded_volume_k);
   for (int i = 0; i < a.fgs_size(); ++i) {
     UPDATE_MAX(d_factor, a.fgs(i).d_factor);
     UPDATE_MIN(radius, a.fgs(i).radius);
     UPDATE_MAX(k_factor, a.fgs(i).interaction_k_factor);
-    UPDATE_MIN(radius_factor, a.fgs(i).interaction_range_factor);
+    UPDATE_MIN(range_factor, a.fgs(i).interaction_range_factor);
   }
   for (int i = 0; i < a.floaters_size(); ++i) {
     UPDATE_MAX(d_factor, a.floaters(i).d_factor);
     UPDATE_MIN(radius, a.floaters(i).radius);
     UPDATE_MAX(k_factor, a.floaters(i).interaction_k_factor);
-    UPDATE_MIN(radius_factor, a.floaters(i).interaction_range_factor);
+    UPDATE_MIN(range_factor, a.floaters(i).interaction_range_factor);
   }
   for (int i = 0; i < a.interactions_size(); ++i) {
     if (a.interactions(i).has_interaction_k() && a.interactions(i).has_interaction_range()) {
@@ -106,7 +109,7 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
         std::cout << "interaction #" << i
                   << " range: " << a.interactions(i).interaction_range().value()
                   << std::endl;
-        UPDATE_MIN(radius, a.interactions(i).interaction_range);
+        UPDATE_MIN(range, a.interactions(i).interaction_range);
       }
     }
   }
@@ -115,11 +118,12 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
             << " max_d_factor " << max_d_factor
             << " max-k " << max_k
             << " max-k-factor " << max_k_factor << " min_radius " << min_radius
-            << " min-range/radius-factor " << min_radius_factor
+            << " min-range " << min_range
+            << " min-range-factor " << min_range_factor
             << " max-trans-relative-to-R " << max_trans_relative_to_radius
             << " time-step-factor " << time_step_factor
             << std::endl;
-  double dT_fs= get_time_step(max_d_factor, max_k * max_k_factor, min_radius * min_radius_factor,
+  double dT_fs= get_time_step(max_d_factor, max_k * max_k_factor, min_radius, min_range * min_range_factor,
                        max_trans_relative_to_radius, time_step_factor);
   std::cout << "dT = " << dT_fs << " [fs]" << std::endl;
   return dT_fs;
