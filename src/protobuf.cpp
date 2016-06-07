@@ -334,7 +334,7 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
     }
   }
   // assignment work units and automatic parameters
-  double max_trans_relative_to_radius = 0.3; // TODO: param?
+  double max_trans_relative_to_radius = 0.15; // TODO: param?
   double time_step = get_time_step(assignment, max_trans_relative_to_radius);
   assignment.set_time_step(time_step);
   assignment.set_work_unit(work_unit);

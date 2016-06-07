@@ -24,7 +24,7 @@ class Tests(IMP.test.TestCase):
         return - the resulting simulation data object
         """
         IMP.set_log_level(IMP.SILENT)
-        print("assigning parameter ranges from config")
+        print("assigning parameter ranges from config into output", output)
         num = assign_ranges(config, output,
                             0, True, 10)
 #        IMP.set_log_level(IMP.TERSE)

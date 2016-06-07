@@ -37,7 +37,7 @@ double get_close_pairs_range(const ::npctransport_proto::Assignment& config);
                         coefficient)
     @param max_k        the maximal force applied on any particle
                         in the simulation
-    @param min_radius   the minimal radius of any particle in the system
+    @param min_radius   the minimal radius/range of any relevant particle/interaction in the system
     @param max_trans_relative_to_radius the maximal estimated translation
                                         allowed for any particle as fraction of
                                         min_radius (before factoring by

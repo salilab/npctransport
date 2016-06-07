@@ -53,6 +53,14 @@ class Tests(IMP.test.TestCase):
         return d
     def _test_one(self, site_range, site_k, nonspec_range, nonspec_k,
                   soft_sphere_k, dt, ntrial=0):
+        print ("Test one:",
+               "site-range", site_range, "[A]",
+               "site-k", site_k, "[kCal/mol/A]",
+               "nonspec-range", nonspec_range, "[A]",
+               "nonspec-k", nonspec_k, "[kCal/mol/A]",
+               "repulsive-k", soft_sphere_k, "[kCal/mol/A]",
+               "dT", dt)
+        print("dG-site:", site-range*site-k, "[kCal/mol]")
         nsteps = 250000
         if(IMP.get_check_level() >= IMP.USAGE):
             nsteps /= 250
@@ -75,8 +83,8 @@ class Tests(IMP.test.TestCase):
         ps= IMP.npctransport.SitesPairScore(site_range, site_k,
                                             nonspec_range, nonspec_k,
                                             soft_sphere_k,
-                                            IMP.npctransport.vectors2spheres(sites[0], 0.0),
-                                            IMP.npctransport.vectors2spheres(sites[1], 0.0))
+                                            IMP.npctransport.get_spheres_from_vectors(sites[0], 0.0),
+                                            IMP.npctransport.get_spheres_from_vectors(sites[1], 0.0))
 #        ps.set_log_level(IMP.VERBOSE)
         r= IMP.core.PairRestraint(m, ps, dsi)
         bd= IMP.atom.BrownianDynamics(m)
@@ -150,8 +158,8 @@ class Tests(IMP.test.TestCase):
         for p in [(0,1), (1,2), (0,2)]:
             ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
                                                 nonspec_k, soft_sphere_k,
-                                                IMP.npctransport.vectors2spheres(sites[p[0]], 0.0),
-                                                IMP.npctransport.vectors2spheres(sites[p[1]], 0.0))
+                                                IMP.npctransport.get_spheres_from_vectors(sites[p[0]], 0.0),
+                                                IMP.npctransport.get_spheres_from_vectors(sites[p[1]], 0.0))
             #          ps.set_log_level(IMP.VERBOSE)
             r=IMP.core.PairRestraint(m, ps, (dsi[p[0]], dsi[p[1]]))
             rs.append(r)
@@ -192,8 +200,8 @@ class Tests(IMP.test.TestCase):
         for p in [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)]:
             ps= IMP.npctransport.SitesPairScore(site_range, site_k, nonspec_range,
                                                 nonspec_k, soft_sphere_k,
-                                                IMP.npctransport.vectors2spheres(sites[p[0]], 0.0),
-                                                IMP.npctransport.vectors2spheres(sites[p[1]], 0.0))
+                                                IMP.npctransport.get_spheres_from_vectors(sites[p[0]], 0.0),
+                                                IMP.npctransport.get_spheres_from_vectors(sites[p[1]], 0.0))
 #          ps.set_log_level(IMP.VERBOSE)
             r=IMP.core.PairRestraint(m, ps, (dsi[p[0]], dsi[p[1]]))
             rs.append(r)
