@@ -80,11 +80,11 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
   double min_radius = std::numeric_limits<double>::max();
   double max_k = 0.0;
   double max_k_factor = 1.0;
-  double min_range_factor = 1.0;
+  double min_radius_factor = 1.0;
   UPDATE_MAX(k, a.interaction_k);
   UPDATE_MAX(k, a.backbone_k);  // TODO: is this valid for harmonic k?
   UPDATE_MAX(k, a.nonspecific_k);
-  UPDATE_MIN(range, a.nonspecific_range)
+  UPDATE_MIN(radius, a.nonspecific_range)
   UPDATE_MAX(k, a.excluded_volume_k);
   for (int i = 0; i < a.fgs_size(); ++i) {
     UPDATE_MAX(d_factor, a.fgs(i).d_factor);
@@ -115,11 +115,11 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
             << " max_d_factor " << max_d_factor
             << " max-k " << max_k
             << " max-k-factor " << max_k_factor << " min_radius " << min_radius
-            << " min-range-factor " << min_range_factor
+            << " min-range/radius-factor " << min_radius_factor
             << " max-trans-relative-to-R " << max_trans_relative_to_radius
             << " time-step-factor " << time_step_factor
             << std::endl;
-  double dT_fs= get_time_step(max_d_factor, max_k * max_k_factor, min_radius * min_range_factor,
+  double dT_fs= get_time_step(max_d_factor, max_k * max_k_factor, min_radius * min_radius_factor,
                        max_trans_relative_to_radius, time_step_factor);
   std::cout << "dT = " << dT_fs << " [fs]" << std::endl;
   return dT_fs;
