@@ -84,19 +84,19 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
   UPDATE_MAX(k, a.interaction_k);
   UPDATE_MAX(k, a.backbone_k);  // TODO: is this valid for harmonic k?
   UPDATE_MAX(k, a.nonspecific_k);
-  UPDATE_MIN(radius, a.nonspecific_range)
+  UPDATE_MIN(radius, a.nonspecific_range);
   UPDATE_MAX(k, a.excluded_volume_k);
   for (int i = 0; i < a.fgs_size(); ++i) {
     UPDATE_MAX(d_factor, a.fgs(i).d_factor);
     UPDATE_MIN(radius, a.fgs(i).radius);
     UPDATE_MAX(k_factor, a.fgs(i).interaction_k_factor);
-    UPDATE_MIN(range_factor, a.fgs(i).interaction_range_factor);
+    UPDATE_MIN(radius_factor, a.fgs(i).interaction_range_factor);
   }
   for (int i = 0; i < a.floaters_size(); ++i) {
     UPDATE_MAX(d_factor, a.floaters(i).d_factor);
     UPDATE_MIN(radius, a.floaters(i).radius);
     UPDATE_MAX(k_factor, a.floaters(i).interaction_k_factor);
-    UPDATE_MIN(range_factor, a.floaters(i).interaction_range_factor);
+    UPDATE_MIN(radius_factor, a.floaters(i).interaction_range_factor);
   }
   for (int i = 0; i < a.interactions_size(); ++i) {
     if (a.interactions(i).has_interaction_k() && a.interactions(i).has_interaction_range()) {
