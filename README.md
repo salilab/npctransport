@@ -1,9 +1,16 @@
-npctransport
-
 The npctransport module is a module for simulating transport through the NPC.
 
-_Author(s)_: Daniel Russel, Barak Raveh
+_Authors: Barak Raveh, Daniel Russel
 
 _License_:
 
-_Publications_:
+_Publications_: Timney*, Raveh* et al., in review
+
+Building from source in a nutshell (see https://integrativemodeling.org/latest/doc/manual/installation.html): 
+- Make sure IMP prerequisites are installed
+- Install the CGAL package 
+- Install the protobuf package
+- Download IMP source code as explained in the installation manual
+- add npctransport as a subfolder in the 'modules' subfolder
+- Build IMP according to instruction as usual
+- The npctransport installation can be tested using ctest, eg - "ctest -R npctransport"
