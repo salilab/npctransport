@@ -305,8 +305,8 @@ class Tests(IMP.test.TestCase):
         bd.set_scoring_function(r)
         bd.set_maximum_time_step(dt)
         rmf_fname=self.get_tmp_file_name("glue1_slide_%d.rmf" % ntrial)
-        rmf_fname="glue1_slide_%d.rmf" % ntrial
-        print ("RMF:",rmf_fname)
+#        rmf_fname="glue1_slide_%d.rmf" % ntrial
+#        print ("RMF:",rmf_fname)
         f= RMF.create_rmf_file(rmf_fname)
         for d in zip(types, [sites0, sites1]):
             IMP.npctransport.add_test_sites(f, d[0], d[1])
