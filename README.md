@@ -11,6 +11,6 @@ Building from source in a nutshell (see https://integrativemodeling.org/latest/d
 - Install the CGAL package 
 - Install the protobuf package
 - Download IMP source code as explained in the installation manual
-- add npctransport as a subfolder in the 'modules' subfolder
-- Build IMP according to instruction as usual
+- add npctransport as a subfolder in the 'modules' subfolder (e.g. "cd <IMP-REPOSITORY>/modules && git clone https://github.com/salilab/npctransport/"
+- Build IMP according to online instructions as usual
 - The npctransport installation can be tested using ctest, eg - "ctest -R npctransport"
