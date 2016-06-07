@@ -6,7 +6,7 @@ License:
 
 Publications: Timney*, Raveh* et al., in review
 
-Building from source in a nutshell (see https://integrativemodeling.org/latest/doc/manual/installation.html): 
+Building from source in a nutshell (see https://integrativemodeling.org/latest/doc/manual/installation.html for general IMP installation instruction): 
 - Make sure IMP prerequisites are installed
 - Install the CGAL package 
 - Install the protobuf package
