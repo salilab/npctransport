@@ -143,11 +143,11 @@ inline double subtract_sphere_radii_from_distance_vector
    Evaluate interaction on a pair of sites as a linear potential
    (constant force) within the passed attraction range.
 
-   The maximal drop in potential energy in kcal/mol is:
+   The maximal drop in potential energy in kCal/mol is:
      DELTA-U = k*range
 
-    @param k - force constant
-    @param range - attraction range
+    @param k - force constant [kCal/mol/A]
+    @param range - attraction range [A]
     @param rbi0 - cached information on rigid body 0
     @param rbi1 - cached information on rigid body 1
     @param l0 - site0 local coordinates + radius
@@ -187,11 +187,17 @@ inline double evaluate_one_site_3
 }
 
 
-// dX - distance (assumed non-negative)
-// spsp
-// f - force magnitude (output; always non-negative if k positive)
+// Computes a bounded harmonic 1-D energy potential with range spsp.r
+// The force increases linearly with slope spsp.k between dX=0 and
+// dX=r/2 and then diminishes linearly, till it reaches zero at dX=r.
 //
-// returns energy potential (always non-positive if k positive)
+// dX - distance (assumed non-negative)
+// spsp - interaction parameters such as force constant k, range r
+//        and various cached computations
+// f - output force magnitude (always non-negative if k positive)
+//
+// returns 1-D energy potential (always non-positive if k positive)
+// and s increases linearly
 inline double get_U(double dX,
                          SitesPairScoreParams const& spsp,
                          double& f)
@@ -199,8 +205,8 @@ inline double get_U(double dX,
   double dX2 = dX*dX;
   double const& r = spsp.r;
   double const& k = spsp.k;
-  double const& kr = spsp.kr;
-  double const& kr2 = spsp.kr2;
+  double const& kr = spsp.kr; // k*r
+  double const& kr2 = spsp.kr2; // k*r^2
   //  int sign = dX > 0 ? 1 : -1;
   //dX *= sign; // make non-negative
   if(dX<r/2)
@@ -211,15 +217,21 @@ inline double get_U(double dX,
   if(dX<r)
     {
       f=k*(r-dX);//*sign;
-      return -0.5*k*dX2 + kr*dX - 0.5*kr2;
+      return -0.5*k*dX2 + kr*dX - 0.5*kr2; // integral of f, shifted such that U=0 at dX=r.
     }
   f = 0;
   return 0;
 }
 
+// Compute a 2-D bounded ellipsoidal harmonic potential which is the
+// product of a 1-D harmonic potential on the x-axis that is defined
+// by params_X, and a potential on the y-axis that is defined by
+// params_Y. See get_U()
+//
 // dX,dY - distance in x,y directions (assumed non-negative!)
-// params_X, paramsY
-// fX,fY - force magnitude in x,y directions (output; always non-negative if k positive)
+// params_X, paramsY - parameters of harmonic potential on
+//                    x- and y-axes, respectively
+// fX,fY - output force magnitude in x,y directions (output; always non-negative if k positive)
 //
 // returns energy potential (always non-positive if k positives)
 inline double get_V(double dX, double dY,
@@ -238,11 +250,12 @@ inline double get_V(double dX, double dY,
   if(dX > params_X.r || dY > params_Y.r){
     fX = 0; fY = 0; return 0;
   }
-  double UX=get_U(dX, params_X, fX1);
-  double UY=get_U(dY, params_Y, fY1);
-  fX = -UY * fX1;
-  fY = -UX * fY1;
-  return -UX * UY;
+  double uX=get_U(dX, params_X, fX1);
+  double uY=get_U(dY, params_Y, fY1);
+  double V=-uX*uY;
+  fX = -uY * fX1; //fX is d(uX*uY)/dX1
+  fY = -uX * fY1; //fY is d(uX*uY)/dY1
+  return V;;
 }
 
 
