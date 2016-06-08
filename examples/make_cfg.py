@@ -60,6 +60,13 @@ def add_interactions_for_fg(fg_name,
                                        interaction_range=0)
 
 # ********* MAIN: *********
+try:
+    import google.protobuf
+except ImportError:
+    print('npctransport python module requires the python protobuf package.\n'
+          'One way to install the protobuf python package is using pip - "pip install protobuf" on a local'
+          ' python installation, see documentation of pip.')
+    exit(-1)
 config= get_basic_config()
 config.dump_interval_ns=1
 config.simulation_time_ns=0.01

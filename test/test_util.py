@@ -143,3 +143,19 @@ def create_rb(m, radius):
     rb= IMP.core.RigidBody.setup_particle(p, IMP.algebra.ReferenceFrame3D())
     rb.set_coordinates_are_optimized(True)
     return rb
+
+def test_protobuf_installed(test_class):
+    '''
+    Test that protobuf is installed on python. test_class is a unittest class. For typical tests, use 'self'
+    '''
+    protobuf_installed=False
+    try:
+        import google.protobuf
+        protobuf_installed=True
+    except ImportError:
+        print(
+            'ERROR: npctransport python module requires the python protobuf package.'
+            ' One common way is using pip - "pip install protobuf" on a local'
+            ' python installation, see documentation of pip.'
+            )
+    test_class.assertTrue(protobuf_installed)

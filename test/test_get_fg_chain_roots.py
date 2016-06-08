@@ -5,7 +5,7 @@ import IMP.test
 import sys
 import math
 #import read_nups
-
+import test_util
 
 class Tests(IMP.test.TestCase):
 
@@ -57,6 +57,7 @@ class Tests(IMP.test.TestCase):
         '''
 
         IMP.set_log_level(IMP.SILENT)
+        test_util.test_protobuf_installed(self)
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         coords = self._create_cfg_file_with_fgs(cfg_file)

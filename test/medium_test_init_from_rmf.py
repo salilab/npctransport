@@ -7,6 +7,7 @@ import IMP.container
 import math
 import IMP
 from IMP.npctransport import *
+import test_util
 
 class Tests(IMP.test.TestCase):
 
@@ -53,6 +54,7 @@ class Tests(IMP.test.TestCase):
         """ Testing whether initialize_positions_from_rmf indeed
             restores the beads coordinates correctly """
         IMP.set_log_level( IMP.SILENT );
+        test_util.test_protobuf_installed(self)
         # First simulation with one seed:
         output_pb1= self.get_tmp_file_name( "output1.pb" );
         output_rmf1= IMP.create_temporary_file_name( "output", ".rmf" );
@@ -118,8 +120,6 @@ class Tests(IMP.test.TestCase):
             for j in range(3):
                 self.assertAlmostEqual(coordsI[i][j], coordsV[i][j], delta=0.00001)
                 self.assertNotAlmostEqual(coordsI[i][j], coordsIV[i][j], delta=0.00001)
-        print("almost end")
 
 if __name__ == '__main__':
     IMP.test.main()
-    print("end")

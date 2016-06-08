@@ -3,6 +3,7 @@ import IMP.npctransport
 import IMP.test
 import sys
 import math
+import test_util
 #import read_nups
 
 
@@ -70,6 +71,7 @@ class Tests(IMP.test.TestCase):
         '''
 
         IMP.set_log_level(IMP.SILENT)
+        test_util.test_protobuf_installed(self)
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         coords = self._create_cfg_file_with_fg_anchors( cfg_file )

@@ -1,10 +1,12 @@
 from __future__ import print_function
+
+
 import IMP
 import IMP.test
 import IMP.npctransport
 import IMP
 import math
-
+from test_util import *
 radius=5
 
 class ConeTests(IMP.test.TestCase):
@@ -44,6 +46,7 @@ class ConeTests(IMP.test.TestCase):
         f.write(config.SerializeToString())
     def test_1(self):
         """Check creating a configuration and assigning values"""
+        test_protobuf_installed(self)
         seed = 1.0 # use time instead?
         IMP.random_number_generator.seed(seed)
         config_name= self.get_tmp_file_name("configuration.pb")

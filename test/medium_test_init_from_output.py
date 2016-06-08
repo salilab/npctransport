@@ -117,6 +117,7 @@ class Tests(IMP.test.TestCase):
     def test_init_from_output(self):
         """ Testing whether positions are loaded properly from output file """
         print("TEST_INIT_FROM_OUTPUT")
+        test_util.test_protobuf_installed(self)
         # random generator initialization
         IMP.set_log_level(IMP.SILENT)
         config = self.get_tmp_file_name("simple_cfg.pb")
@@ -140,6 +141,7 @@ class Tests(IMP.test.TestCase):
     def test_init_from_old_output1(self):
         """ Testing whether an old output file is loaded properly """
         print("TEST_INIT_FROM_OLD_OUTPUT1")
+        test_util.test_protobuf_installed(self)
         expected_sites = [ (3.67394e-15, 0, -30),
                            (17.2447, -0.377296, -24.5455),
                            (-1.55764, -23.0892, -19.0909),
@@ -204,6 +206,7 @@ class Tests(IMP.test.TestCase):
         at all
         """
         print("TEST_INIT_FROM_OLD_OUTPUT_MORE_RECENT")
+        test_util.test_protobuf_installed(self)
         IMP.set_log_level(IMP.SILENT)
         rt_prev_output = self.get_input_file_name("out_more_recent.pb")
         out_rmf = self.get_tmp_file_name("movie.rmf")

@@ -6,6 +6,7 @@ import IMP.core
 import sys
 import math
 #import read_nups
+import test_util
 
 fg_R = 20
 diffuser_R = 20
@@ -139,6 +140,7 @@ class Tests(IMP.test.TestCase):
         in the context of simualtion data optimization
         '''
 
+        test_util.test_protobuf_installed(self)
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             print("SLOW MODE")
             fast = False
