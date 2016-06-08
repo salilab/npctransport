@@ -40,11 +40,13 @@ class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
  public:
   /**
      @param p the particle being wrapped
+     @param statistics_manager an optional statistical manager to which statistical udpates are sent
+                               (of e.g. zr-distribution that are colllectively gathered)
      @param periodicity frame interval for statistics, equiv. to set_period(1)
    */
   BodyStatisticsOptimizerState
     (Particle *p,
-     WeakPointer<IMP::npctransport::Statistics> statistics_manager = nullptr,
+     IMP::npctransport::Statistics* statistics_manager = nullptr,
      unsigned int periodicity=1);
 
   double get_correlation_time() const;

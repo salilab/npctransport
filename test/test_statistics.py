@@ -39,6 +39,8 @@ class Tests(IMP.test.TestCase):
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_scoring_function([IMP.RestraintSet(m, "empty set")])
         bd.set_maximum_time_step(dt)
+        print(p)
+        print (dir(p))
         os= IMP.npctransport.BodyStatisticsOptimizerState(p)
         os.set_period(10)
         bd.add_optimizer_state(os)

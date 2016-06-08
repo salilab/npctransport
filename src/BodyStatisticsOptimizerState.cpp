@@ -19,7 +19,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BodyStatisticsOptimizerState::BodyStatisticsOptimizerState
 ( Particle* p,
-  WeakPointer<IMP::npctransport::Statistics> statistics_manager,
+  IMP::npctransport::Statistics* statistics_manager,
   unsigned int periodicity)
   : P(p->get_model(), "BodyStatisticsOptimizerState%1%"), p_(p),
         statistics_manager_(statistics_manager)
