@@ -28,8 +28,9 @@ class Tests(IMP.test.TestCase):
         config = Configuration()
         IMP.npctransport.set_default_configuration(config)
         config.box_is_on.lower=1
-        config.box_side.lower=200
+        config.box_side.lower=100
         config.excluded_volume_k.lower=7.5
+#        config.dump_interval_ns=10;
         fgs= IMP.npctransport.add_fg_type(config,
                                           type_name=fg_type,
                                           number_of_beads=1,
@@ -37,16 +38,16 @@ class Tests(IMP.test.TestCase):
                                           radius=fg_R,
                                           interactions=6,
                                           rest_length_factor = 1.5)
-        pos=fgs.anchor_coordinates.add()
-        pos.x=fg_coords[0]
-        pos.y=fg_coords[1]
-        pos.z=fg_coords[2]
+#        pos=fgs.anchor_coordinates.add()
+#        pos.x=fg_coords[0]
+#        pos.y=fg_coords[1]
+#        pos.z=fg_coords[2]
         kaps= IMP.npctransport.add_float_type(config,
                                               number=1,
                                               radius=diffuser_R,
                                               interactions=6,
                                               type_name=kap_type,
-                                              d_factor=0.3
+                                              d_factor=1.0
                                               )
         interactionFG_KAP= IMP.npctransport.add_interaction(config,
                                      name0=fg_type,
@@ -77,7 +78,7 @@ class Tests(IMP.test.TestCase):
             for site2 in sites2:
                 site2_c = rf2.get_transformation_to().get_transformed(site2)
                 D = IMP.algebra.get_distance(site1_c, site2_c)
-                if(D < distance_thresh*2):
+                if(D < distance_thresh*1.5 and D >= distance_thresh):
                     print("Almost close sites", site1_c, site2_c, "D", D)
                 if(D < distance_thresh):
                     print("Close sites", site1_c, site2_c, "D", D)
@@ -151,7 +152,7 @@ class Tests(IMP.test.TestCase):
             short_init_factor=0.1
             opt_cycles_ns=10.0
             n_iter = 100
-            n_good_thresh=2
+            n_good_thresh=3
 
         # prepare run
         cfg_file = self.get_tmp_file_name("barak_config.pb")
@@ -161,7 +162,8 @@ class Tests(IMP.test.TestCase):
         print("assigning parameter ranges from config", cfg_file, end=' ')
         print("to file", assign_file)
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
-        rmf_file = self.get_tmp_file_name("out.rmf");
+#        rmf_file = self.get_tmp_file_name("out.rmf");
+        rmf_file="tmp.rmf"
         print("RMF file", rmf_file)
         sd= IMP.npctransport.SimulationData(assign_file, False)
         sd.set_rmf_file(rmf_file, False)
