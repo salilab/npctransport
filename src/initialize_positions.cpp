@@ -133,7 +133,7 @@ void optimize_balls(const ParticlesTemp &ps,
     }
     // rescale bond length + TAMD (if needed ) temporarily for all chains
     for (unsigned int j = 0; j < chains.size(); ++j) {
-      std::cout<< "optimize balls CHAIN: " << chains[j] << std::endl;
+      //      std::cout<< "optimize balls CHAIN: " << chains[j] << std::endl;
       tmp_scale_rest_length.push_back
         ( new internal::FGChainScaleRestLengthRAII(chains[j],
                                                    rest_length_factor) );
