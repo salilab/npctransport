@@ -4,16 +4,11 @@ import IMP.test
 import IMP.npctransport
 import IMP.container
 import math
+from test_util import *
 
 radius=5
 
 class ConeTests(IMP.test.TestCase):
-    def _create_particle(self, m):
-        p= IMP.Particle(m)
-        d= IMP.core.XYZR.setup_particle(p)
-        d.set_radius(radius)
-        d.set_coordinates_are_optimized(True)
-        return d
     def _randomize(self, ds, bb):
         for d in ds:
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
@@ -25,12 +20,13 @@ class ConeTests(IMP.test.TestCase):
         """Check linear soft sphere"""
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
-        ds= [self._create_particle(m) for i in range(0,2)]
+        ps= [create_diffusing_rb_particle(m, radius) for i in range(0,2)]
+        ds= [IMP.core.XYZR(p) for p in ps];
         apps= IMP.container.AllPairContainer(IMP.container.ListSingletonContainer(m, IMP.get_indexes(ds)))
-        ps= IMP.npctransport.LinearSoftSpherePairScore(10)
-        ps.set_log_level(IMP.VERBOSE)
+        lssps= IMP.npctransport.LinearSoftSpherePairScore(10)
+        lssps.set_log_level(IMP.VERBOSE)
         m.set_log_level(IMP.SILENT)
-        r= IMP.container.PairsRestraint(ps, apps)
+        r= IMP.container.PairsRestraint(lssps, apps)
         sf = IMP.core.RestraintsScoringFunction([r])
         bb= IMP.algebra.get_cube_3d(5)
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
@@ -58,15 +54,16 @@ class ConeTests(IMP.test.TestCase):
         m= IMP.Model()
         rng=3
         m.set_log_level(IMP.SILENT)
-        ds= [self._create_particle(m) for i in range(0,2)]
+        ps= [create_diffusing_rb_particle(m,radius) for i in range(0,2)]
+        ds= [IMP.core.XYZR(p) for p in ps];
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[0].set_coordinates_are_optimized(False)
         bb= IMP.algebra.get_cube_3d(3)
         self._randomize(ds, bb)
         apps= IMP.container.AllPairContainer(IMP.container.ListSingletonContainer(m, IMP.get_indexes(ds)))
-        ps= IMP.npctransport.LinearInteractionPairScore(radius*2, 10, rng)
-        ps.set_log_level(IMP.VERBOSE)
-        r= IMP.container.PairsRestraint(ps, apps)
+        lips= IMP.npctransport.LinearInteractionPairScore(radius*2, 10, rng)
+        lips.set_log_level(IMP.VERBOSE)
+        r= IMP.container.PairsRestraint(lips, apps)
         sf = IMP.core.RestraintsScoringFunction([r])
         bb= IMP.algebra.get_cube_3d(5)
         self._randomize(ds[1:], bb)

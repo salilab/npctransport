@@ -5,6 +5,7 @@ import IMP.npctransport
 import RMF
 import IMP.container
 import math
+from test_util import *
 
 # //r = rx * sqrt(s+1)
 # r = rx^2 + ry^2
@@ -43,16 +44,6 @@ print ("k_nonspec=",  nonspec_k_G)
 print ("dU_nonspec=", nonspec_range_G*nonspec_k_G)
 
 class Tests(IMP.test.TestCase):
-    def _create_particle(self, m):
-        p= IMP.Particle(m)
-        d= IMP.core.XYZR.setup_particle(p)
-        d.set_radius(radius)
-        IMP.atom.Hierarchy.setup_particle(p)
-        IMP.atom.Mass.setup_particle(p, 1.0)
-        IMP.core.RigidBody.setup_particle(p, IMP.algebra.ReferenceFrame3D())
-        d.set_coordinates_are_optimized(True)
-        IMP.atom.RigidBodyDiffusion.setup_particle(p)
-        return d
     def _test_one(self, site_range, site_k, nonspec_range, nonspec_k,
                   soft_sphere_k, dt, ntrial=0):
         print ("Test one:",
@@ -68,7 +59,8 @@ class Tests(IMP.test.TestCase):
             nsteps /= 250
         m= IMP.Model()
         m.set_log_level(IMP.PROGRESS)
-        ds= [self._create_particle(m) for i in range(0,2)]
+        ps= [create_diffusing_rb_particle(m,radius) for i in range(0,2)]
+        ds= [IMP.core.XYZR(p) for p in ps];
         dsi= [x.get_particle_index() for x in ds];
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(2.5*radius,0,0))
@@ -145,7 +137,8 @@ class Tests(IMP.test.TestCase):
             nsteps /= 10
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
-        ds= [self._create_particle(m) for i in range(0,3)]
+        ps= [create_diffusing_rb_particle(m,radius) for i in range(0,3)]
+        ds= [IMP.core.XYZR(p) for p in ps];
         dsi= [x.get_particle_index() for x in ds];
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(2*radius,0,0))
@@ -216,7 +209,8 @@ class Tests(IMP.test.TestCase):
                   soft_sphere_k, dt):
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
-        ds= [self._create_particle(m) for i in range(0,4)]
+        ps= [create_diffusing_rb_particle(m,radius) for i in range(0,4)]
+        ds= [IMP.core.XYZR(p) for p in ps];
         dsi= [x.get_particle_index() for x in ds];
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(2*radius,0,0))
@@ -270,7 +264,8 @@ class Tests(IMP.test.TestCase):
             nsteps /= 250
         m= IMP.Model()
         m.set_log_level(IMP.PROGRESS)
-        ds= [self._create_particle(m) for i in range(0,2)]
+        ps= [create_diffusing_rb_particle(m,radius) for i in range(0,2)]
+        ds= [IMP.core.XYZR(p) for p in ps];
         dsi= [x.get_particle_index() for x in ds];
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(2.5*radius,0,0))

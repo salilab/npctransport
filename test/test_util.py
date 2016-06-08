@@ -115,3 +115,31 @@ def make_simple_cfg(outfile, is_slab_on = True, n_particles_factor = 1):
     f=open(outfile, "wb")
     f.write(config.SerializeToString())
     print(config)
+
+
+def create_diffusing_rb_particle(m, radius):
+    ''' 
+    create a diffusing rigid-body particle of specified radius 
+    and mass 1.0, with hierarchy traits
+    '''
+    p= IMP.Particle(m)
+    d= IMP.core.XYZR.setup_particle(p)
+    d.set_radius(radius)
+    IMP.atom.Hierarchy.setup_particle(p)
+    IMP.atom.Mass.setup_particle(p, 1.0)
+    IMP.core.RigidBody.setup_particle(p, IMP.algebra.ReferenceFrame3D())
+    d.set_coordinates_are_optimized(True)
+    IMP.atom.RigidBodyDiffusion.setup_particle(p)
+    return p
+
+def create_rb(m, radius):
+    '''
+    create a rigid-body particle of specified radius 
+    returns rigid body decorator
+    '''
+    p= IMP.Particle(m)
+    d= IMP.core.XYZR.setup_particle(p)
+    d.set_radius(radius)
+    rb= IMP.core.RigidBody.setup_particle(p, IMP.algebra.ReferenceFrame3D())
+    rb.set_coordinates_are_optimized(True)
+    return rb

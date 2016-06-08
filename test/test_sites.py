@@ -3,17 +3,11 @@ import IMP
 import IMP.test
 import IMP.npctransport
 import math
+from test_util import *
 
 radius=5
 
 class ConeTests(IMP.test.TestCase):
-    def _create_particle(self, m):
-        p= IMP.Particle(m)
-        d= IMP.core.XYZR.setup_particle(p)
-        d.set_radius(radius)
-        rb= IMP.core.RigidBody.setup_particle(p, IMP.algebra.ReferenceFrame3D())
-        rb.set_coordinates_are_optimized(True)
-        return rb
     def _randomize(self, rbs, sites, bb):
         '''
         randomize reference frames of rbs such that each rb and
@@ -56,8 +50,8 @@ class ConeTests(IMP.test.TestCase):
         print("Check sites pair score")
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
-        rb0= self._create_particle(m)
-        rb1= self._create_particle(m)
+        rb0= create_rb(m,radius)
+        rb1= create_rb(m,radius)
         bb= IMP.algebra.get_cube_3d(15)
         s0=[IMP.algebra.Sphere3D(IMP.algebra.Vector3D(radius, 0, 0), 0.0)]
         s1=[IMP.algebra.Sphere3D(IMP.algebra.Vector3D(0, radius, 0), 0.0)]
