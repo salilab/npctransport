@@ -12,8 +12,8 @@ diffuser_R = 20
 fg_coords = [25,25,25]
 kap_type = "my_kap"
 fg_type = "my_fg"
-interaction_k=10.0
-interaction_range=5.0
+interaction_k=7.5
+interaction_range=7.5
 
 class Tests(IMP.test.TestCase):
 
@@ -28,8 +28,8 @@ class Tests(IMP.test.TestCase):
         config = Configuration()
         IMP.npctransport.set_default_configuration(config)
         config.box_is_on.lower=1
-        config.box_side.lower=150
-        config.excluded_volume_k.lower=5
+        config.box_side.lower=200
+        config.excluded_volume_k.lower=7.5
         fgs= IMP.npctransport.add_fg_type(config,
                                           type_name=fg_type,
                                           number_of_beads=1,
@@ -77,6 +77,8 @@ class Tests(IMP.test.TestCase):
             for site2 in sites2:
                 site2_c = rf2.get_transformation_to().get_transformed(site2)
                 D = IMP.algebra.get_distance(site1_c, site2_c)
+                if(D < distance_thresh*2):
+                    print("Almost close sites", site1_c, site2_c, "D", D)
                 if(D < distance_thresh):
                     print("Close sites", site1_c, site2_c, "D", D)
                     return True
@@ -102,10 +104,11 @@ class Tests(IMP.test.TestCase):
         D = IMP.algebra.get_distance(kap_c, anchor_c)
         if really_assert:
             # assert that they're close and have close sites
-            self.assertAlmostEqual( D / 10.0,
-                                   (fg_R+diffuser_R) / 10.0,
+            self.assertAlmostEqual( D / 15.0, # close up to 15A difference from touching
+                                   (fg_R+diffuser_R) / 15.0,
                                    0)
-            print ("Asserted close balls")
+            print("Balls are close", D, " radii: ", fg_R, diffuser_R)
+            print ("Asserting close balls")
             self.assert_( self.find_close_sites(sd,
                                                 kap,
                                                 fg_anchor,
@@ -139,16 +142,16 @@ class Tests(IMP.test.TestCase):
             print("SLOW MODE")
             fast = False
             short_init_factor=0.0001
-            opt_cycles=100
+            opt_cycles_ns=0.05
             n_iter = 10
             n_good_thresh=1
         else:
             print("FAST MODE")
             fast = True
             short_init_factor=0.1
-            opt_cycles=12500
-            n_iter = 200
-            n_good_thresh=3
+            opt_cycles_ns=10.0
+            n_iter = 100
+            n_good_thresh=2
 
         # prepare run
         cfg_file = self.get_tmp_file_name("barak_config.pb")
@@ -168,6 +171,7 @@ class Tests(IMP.test.TestCase):
         sd.get_bd().set_log_level(IMP.SILENT)
         IMP.npctransport.initialize_positions( sd, [], False,
                                                short_init_factor)
+        opt_cycles_frames=math.ceil(opt_cycles_ns*1E+6/sd.get_bd().get_maximum_time_step());
         print()
         print()
 #        IMP.set_log_level(IMP.PROGRESS)
@@ -177,8 +181,8 @@ class Tests(IMP.test.TestCase):
         sd.get_statistics().reset_statistics_optimizer_states()
         sd.get_bd().set_current_time(0.0)
         for i in range(n_iter):
-            sd.get_bd().optimize(opt_cycles)
-            sd.get_statistics().update(timer,opt_cycles)
+            sd.get_bd().optimize(opt_cycles_frames)
+            sd.get_statistics().update(timer,opt_cycles_frames)
             try:
                 self._assert_kap_in_place(sd, True)
                 print ("Asserted kap interacts")
@@ -194,8 +198,8 @@ class Tests(IMP.test.TestCase):
                 print("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False), end=' ')
                 return True
         if fast:
-            print("Failed to glue particles after %d iterations of %d opt cycles" \
-                % (n_iter, opt_cycles))
+            print("Failed to glue particles after %d iterations x %d opt frames (total %.3f ns)" \
+                % (n_iter, opt_cycles_frames, opt_cycles_ns*n_iter))
             self.assert_(n_good >= n_good_thresh)
         else:
             print("Debug mode - couldn't glue particles in such short run")

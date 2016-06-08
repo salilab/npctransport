@@ -42,8 +42,8 @@ def set_default_configuration(config):
     config.maximal_number_of_frames=1000000000
     config.simulation_time_ns=10
     config.dump_interval_ns=50
-    config.nonspecific_range.lower=2
-    config.nonspecific_k.lower=.3
+    config.nonspecific_range.lower=8
+    config.nonspecific_k.lower=.075
     config.angular_D_factor.lower=5
     config.statistics_interval_ns=.001
     config.excluded_volume_k.lower=20
