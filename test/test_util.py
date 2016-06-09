@@ -152,7 +152,6 @@ def test_protobuf_installed(test_class):
     try:
         import google.protobuf
         protobuf_installed=True
-        raise ImportError
     except ImportError:
         msg='ERROR: npctransport python module requires the python protobuf package.' \
             ' One common way is using pip - "pip install protobuf" on a local' \
