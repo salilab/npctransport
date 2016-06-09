@@ -86,8 +86,11 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
   double min_range_factor = 1.0;
   UPDATE_MAX(k, a.interaction_k);
   UPDATE_MAX(k, a.backbone_k);  // TODO: is this valid for harmonic k?
-  UPDATE_MAX(k, a.nonspecific_k);
-  UPDATE_MIN(range, a.nonspecific_range);
+  if(a.nonspecific_range().value()>0.0 &&
+     a.nonspecific_k().value()>0.0) {
+    UPDATE_MAX(k, a.nonspecific_k);
+    UPDATE_MIN(range, a.nonspecific_range);
+  }
   UPDATE_MAX(k, a.excluded_volume_k);
   for (int i = 0; i < a.fgs_size(); ++i) {
     UPDATE_MAX(d_factor, a.fgs(i).d_factor);
