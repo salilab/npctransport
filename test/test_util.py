@@ -152,10 +152,10 @@ def test_protobuf_installed(test_class):
     try:
         import google.protobuf
         protobuf_installed=True
+        raise ImportError
     except ImportError:
-        print(
-            'ERROR: npctransport python module requires the python protobuf package.'
-            ' One common way is using pip - "pip install protobuf" on a local'
+        msg='ERROR: npctransport python module requires the python protobuf package.' \
+            ' One common way is using pip - "pip install protobuf" on a local' \
             ' python installation, see documentation of pip.'
-            )
-    test_class.assertTrue(protobuf_installed)
+        test_class.fail(msg)
+#    test_class.assertTrue(protobuf_installed)
