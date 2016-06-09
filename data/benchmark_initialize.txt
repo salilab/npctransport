@@ -1,8 +1,8 @@
 interaction_k {
-  lower: 10.0
+  lower: 1.0
 }
 interaction_range {
-  lower: 1.0
+  lower: 5.0
 }
 backbone_k {
   lower: 1.0
@@ -976,10 +976,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -996,10 +996,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1016,10 +1016,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1036,10 +1036,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1056,10 +1056,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1076,10 +1076,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1096,10 +1096,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1116,10 +1116,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1136,10 +1136,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1156,10 +1156,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1176,10 +1176,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.0
+    lower: 1.08
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1196,10 +1196,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1209,10 +1209,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1222,10 +1222,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1235,10 +1235,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1248,10 +1248,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1261,10 +1261,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1274,10 +1274,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1287,10 +1287,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1300,10 +1300,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1313,10 +1313,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1326,10 +1326,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1339,10 +1339,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1352,10 +1352,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1365,10 +1365,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1378,10 +1378,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1391,10 +1391,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1404,10 +1404,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1417,10 +1417,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1430,10 +1430,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1443,10 +1443,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1456,10 +1456,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1469,10 +1469,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1482,10 +1482,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1495,10 +1495,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1508,10 +1508,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1521,10 +1521,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1534,10 +1534,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1547,10 +1547,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1560,10 +1560,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1573,10 +1573,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1586,10 +1586,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1599,10 +1599,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1612,10 +1612,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1625,10 +1625,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1638,10 +1638,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1651,10 +1651,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1664,10 +1664,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1677,10 +1677,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1690,10 +1690,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1703,10 +1703,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1716,10 +1716,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1729,10 +1729,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1742,10 +1742,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1755,10 +1755,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1768,10 +1768,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1781,10 +1781,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1794,10 +1794,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1807,10 +1807,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1820,10 +1820,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1833,10 +1833,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1846,10 +1846,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1859,10 +1859,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1872,10 +1872,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1885,10 +1885,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1898,10 +1898,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1911,10 +1911,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1924,10 +1924,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1937,10 +1937,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1950,10 +1950,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1963,10 +1963,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1976,10 +1976,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -1989,10 +1989,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -2002,10 +2002,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -2015,10 +2015,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -2028,10 +2028,10 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 interactions {
@@ -2041,15 +2041,15 @@ interactions {
     lower: 1
   }
   interaction_k {
-    lower: 3.5
+    lower: 1.0
   }
   interaction_range {
-    lower: 2.0
+    lower: 5.0
   }
 }
 dump_interval_ns: 1.0
 nonspecific_range {
-  lower: 1.5
+  lower: 5.0
 }
 nonspecific_k {
   lower: 0.01
@@ -2059,7 +2059,7 @@ angular_D_factor {
 }
 statistics_interval_ns: 0.1
 excluded_volume_k {
-  lower: 20.0
+  lower: 10.0
 }
 simulation_time_ns: 10.0
 statistics_fraction {
