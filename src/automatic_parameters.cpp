@@ -109,9 +109,6 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
       if(a.interactions(i).interaction_k().value()>0.0 &&
          a.interactions(i).interaction_range().value()>0.0) {
         UPDATE_MAX(k_factor, a.interactions(i).interaction_k);
-        std::cout << "interaction #" << i
-                  << " range: " << a.interactions(i).interaction_range().value()
-                  << std::endl;
         UPDATE_MIN(range, a.interactions(i).interaction_range);
       }
     }
