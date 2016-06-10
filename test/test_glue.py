@@ -25,7 +25,8 @@ kN = k_G*k_skew_G/(k_skew_G+1)
 kT = k_G/(k_skew_G+1)
 #fmax = max[(0.5 * kN * rangeN) * (0.25 * kT * rangeT ^ 2),
 #           (0.5 * kT * rangeT) * (0.25 * kN * rangeN ^ 2)]
-fmax = 0.125 * k_G * rangeN * rangeT * max(rangeN, rangeT)
+fmax = max(rangeN*kN/2.0, rangeT*kT/2.0)
+rangemax = max(rangeN,rangeT)
 dUmax = 0.0625 * k_G * rangeN**2 * rangeT**2
 k=dUmax/site_range
 nonspec_k_G=0.1*fmax
@@ -342,7 +343,7 @@ class Tests(IMP.test.TestCase):
         """
         print ("==\nSliding\n==")
         IMP.set_log_level(IMP.PROGRESS)
-        dt=IMP.npctransport.get_time_step(1, k_G, radius, nonspec_range_G, 0.1)
+        dt=IMP.npctransport.get_time_step(1, fmax, radius, min(rangemax,nonspec_range_G), 0.1)
         dt=min(dt,20000)
 #        dt=50000
         print ("dT = ", dt)

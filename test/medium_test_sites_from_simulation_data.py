@@ -13,7 +13,7 @@ diffuser_R = 20
 fg_coords = [25,25,25]
 kap_type = "my_kap"
 fg_type = "my_fg"
-interaction_k=7.5
+interaction_k=3.5
 interaction_range=7.5
 
 class Tests(IMP.test.TestCase):
@@ -31,6 +31,7 @@ class Tests(IMP.test.TestCase):
         config.box_is_on.lower=1
         config.box_side.lower=100
         config.excluded_volume_k.lower=7.5
+#        config.time_step_factor.lower=0.5
 #        config.dump_interval_ns=10;
         fgs= IMP.npctransport.add_fg_type(config,
                                           type_name=fg_type,

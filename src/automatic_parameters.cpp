@@ -106,14 +106,37 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
   }
   for (int i = 0; i < a.interactions_size(); ++i) {
     if (a.interactions(i).has_interaction_k() && a.interactions(i).has_interaction_range()) {
-      if(a.interactions(i).interaction_k().value()>0.0 &&
-         a.interactions(i).interaction_range().value()>0.0) {
-        UPDATE_MAX(k_factor, a.interactions(i).interaction_k);
-        UPDATE_MIN(range, a.interactions(i).interaction_range);
+      double k=a.interactions(i).interaction_k().value();
+      double range=a.interactions(i).interaction_range().value();
+      if(range>0.0 && k>0.0) {
+	bool is_skewed=false;
+	if(a.interactions(i).has_k_tangent_skew() &&
+	   a.interactions(i).has_range_tangent_skew()) {
+	  if(a.interactions(i).k_tangent_skew().value()>0.0 &&
+	     a.interactions(i).range_tangent_skew().value()>0.0) {
+	    is_skewed=true;
+	  }
+	}
+	if(is_skewed){
+	  // normalize for skew and compute maximal force k (k*range/2.0) in skewed interaction force field
+	  double k_tangent_skew=a.interactions(i).k_tangent_skew().value();
+	  double range_tangent_skew=a.interactions(i).range_tangent_skew().value();
+	  double range1=range*std::sqrt(range_tangent_skew);
+	  double range2=range/std::sqrt(range_tangent_skew);
+	  double k1=k*std::sqrt(k_tangent_skew)*range1/2.0;
+	  double k2=k/std::sqrt(k_tangent_skew)*range2/2.0;
+	  k=    std::max(k1,k2);
+	  range=std::min(range1,range2);
+	  std::cout << "Skewed interaction detected - k1*range1/2.0 " << k1 << " k2*range2/2.0 " << k2 
+		    << " range1 " << range1 << " range 2 " << range2 << std::endl;
+	}
+	max_k=    std::max(max_k,k);
+	min_range=std::min(min_range,range);
+	
       }
     }
   }
-
+  
   std::cout << "get_time_step(): "
             << " max_d_factor " << max_d_factor
             << " max-k " << max_k
