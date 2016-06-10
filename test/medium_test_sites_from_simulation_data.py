@@ -13,7 +13,7 @@ diffuser_R = 20
 fg_coords = [25,25,25]
 kap_type = "my_kap"
 fg_type = "my_fg"
-interaction_k=3.5
+interaction_k=7.5
 interaction_range=7.5
 
 class Tests(IMP.test.TestCase):

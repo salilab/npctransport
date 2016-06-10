@@ -146,7 +146,7 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
             << " max-trans-relative-to-R " << max_trans_relative_to_radius
             << " time-step-factor " << time_step_factor
             << std::endl;
-  double dT_fs= get_time_step(max_d_factor, max_k * max_k_factor, min_radius, min_range * min_range_factor,
+  double dT_fs= get_time_step(max_d_factor, max_k * max_k_factor, min_radius, min_range * min_range_factor * min_range_factor,
                        max_trans_relative_to_radius, time_step_factor);
   std::cout << "dT = " << dT_fs << " [fs]" << std::endl;
   return dT_fs;
