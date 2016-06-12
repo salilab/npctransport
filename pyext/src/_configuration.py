@@ -111,7 +111,8 @@ def add_obstacle_type(config, type_name, R, xyzs=[],
     return o
 
 def add_interaction(config, name0, name1,
-                    interaction_k=None, interaction_range=None, is_on=1):
+                    interaction_k=None, interaction_range=None, is_on=1,
+                    k_tangent_skew=None, range_tangent_skew=None):
     i= config.interactions.add()
     i.type0= name0
     i.type1=name1
@@ -120,6 +121,9 @@ def add_interaction(config, name0, name1,
     if interaction_range:
       i.interaction_range.lower=interaction_range
     i.is_on.lower=is_on
+    if not (k_tangent_skew is None and range_tangent_skew is None):
+        i.k_tangent_skew.lower     = k_tangent_skew
+        i.range_tangent_skew.lower = range_tangent_skew
     return i
 
 
