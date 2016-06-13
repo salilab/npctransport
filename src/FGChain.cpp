@@ -98,6 +98,7 @@ namespace {
   }
 
   // append appropriate suffixes for type fields of chain particle, if specified
+  // also update name, if current name is equal to the type
   void update_chain_particle_type_suffixes
   ( FGChain* fgc,
     const ::npctransport_proto::Assignment_FGAssignment &fg_data )
@@ -121,6 +122,9 @@ namespace {
       IMP_USAGE_CHECK(core::Typed::get_is_setup(p),
                       "FG chain particle is expected to be typed");
       core::Typed(p).set_type(type);
+      if(p->get_name()==type_prefix){
+        p->set_name(type);
+      }
     }
   }
 
