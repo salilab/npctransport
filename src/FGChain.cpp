@@ -123,7 +123,7 @@ namespace {
                       "FG chain particle is expected to be typed");
       core::Typed(p).set_type(type);
       if(p->get_name()==type_prefix){
-        p->set_name(type);
+        p->set_name(type.get_string());
       }
     }
   }
