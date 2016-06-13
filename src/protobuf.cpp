@@ -179,7 +179,15 @@ namespace {
           if (out_fd) {
             IMP_LOG(VERBOSE, "Found constant " << fd->name() << std::endl);
             if (out_fd->type() == FieldDescriptor::TYPE_STRING) {
-              out_r->SetString(out_message, out_fd, r->GetString(*message, fd));
+                if (fd->is_repeated()) {
+                int sz = r->FieldSize(*message, fd);
+                for(int i = 0; i < sz; ++i) {
+                  std::string str=r->GetRepeatedString(*message, fd, i);
+                  out_r->AddString(out_message, out_fd, str);
+                }
+              } else {
+                out_r->SetString(out_message, out_fd, r->GetString(*message, fd));
+              }
             } else {
               set_value(out_r, out_message, out_fd, get_value(r, message, fd));
             }

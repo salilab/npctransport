@@ -238,7 +238,7 @@ void SimulationData::create_fgs
       d.set_coordinates_are_optimized(false);
     }
     // add stats on chain
-    get_statistics()->add_fg_chain_stats( chain->get_beads() );
+    get_statistics()->add_fg_chain_stats( chain );
   } // for j
 
 

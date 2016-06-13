@@ -79,25 +79,31 @@ Statistics::Statistics
 
 //! add statistics about an FG chain
 void Statistics::add_fg_chain_stats
-( ParticlesTemp chain_beads )
+( FGChain* fg_chain )
 {
+  ParticlesTemp chain_beads = fg_chain->get_beads();
   if(chain_beads.size() == 0)
     return;
-  core::ParticleType type = core::Typed(chain_beads[0]).get_type();
   // chain stats
   IMP_NEW( ChainStatisticsOptimizerState, csos,
            (chain_beads, statistics_interval_frames_ ) );
-  chains_stats_map_[type].push_back( csos );
+  core::ParticleType chain_type = core::Typed(fg_chain->get_root()).get_type();
+  chains_stats_map_[chain_type].push_back( csos );
   // stats for each chain particle
-  fgs_bodies_stats_map_[type].push_back( BodyStatisticsOptimizerStates() );
+  std::set<core::ParticleType> p_types_encountered;
   for (unsigned int k = 0; k < chain_beads.size(); ++k) {
     Particle* p = chain_beads[k];
-    IMP_ALWAYS_CHECK( core::Typed(p).get_type() == type,
-                      "All beads in chain must be of same type for now",
-                      ValueException);
+    core::ParticleType p_type = core::Typed(p).get_type();
+    //    IMP_ALWAYS_CHECK( chain_type == p_type,
+    //                  "All beads in chain must be of same type for now",
+    //                  ValueException);
+    if(p_types_encountered.find(p_type) == p_types_encountered.end()) {
+      p_types_encountered.insert(p_type);
+      fgs_bodies_stats_map_[p_type].push_back( BodyStatisticsOptimizerStates() );
+    }
     IMP_NEW(BodyStatisticsOptimizerState, bsos,
             ( p, this,  statistics_interval_frames_ ) );
-    fgs_bodies_stats_map_[type].back().push_back( bsos );
+    fgs_bodies_stats_map_[p_type].back().push_back( bsos );
   }  // for k
 }
 

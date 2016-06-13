@@ -118,9 +118,9 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   //! add statistics about an FG chain
   /** add statistics about an FG chains
 
-      @param chain_beads the beads in the FG chain in consecutive order
+      @param fg_chain the chain
   */
-  void add_fg_chain_stats(IMP::ParticlesTemp chain_beads);
+  void add_fg_chain_stats(FGChain* fg_chain);
 
   //! add statistics about a floater particle
   /** add statistics about a floater particle

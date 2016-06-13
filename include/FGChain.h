@@ -205,8 +205,10 @@ IMP_OBJECTS(FGChain, FGChains);
 
    Notes:
 
-   All nodes in the hierarchy share the same type, based on the type
-   string fg_data.type().
+   The type of the chain root is specified in fg_data.type(). Individual
+   particles may have different types if fg_data.type_suffix_list is non-empty.
+   In this case, the type of particle i is suffixed with fg_data.type_suffix_list[i],
+   or remains fg_data.type() if the suffix is "".
 
    The rest length between two consecutive chain beads is
    fg_data.radius() * 2.0 * fg_data.rest_length_factor() and the

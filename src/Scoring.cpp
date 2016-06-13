@@ -286,8 +286,9 @@ double Scoring::get_interaction_range_for
     (get_ordered_type_pair_predicate())->get_value(pts);
   t_map_pair_type_to_pair_score::const_iterator iter =
     interaction_pair_scores_.find(iid);
-  IMP_USAGE_CHECK(iter != interaction_pair_scores_.end(),
-                  "looking for a range for a non-existent interaction type");
+  if(iter == interaction_pair_scores_.end()){
+    return 0; // when not defined then only repulsive force upon touching
+  }
   IMP::PairScore const* ps = iter->second;
   // Get ranges (assuming Sites or LinearInteraction pair scores)
   double range_ss = -1.0; // site-specific

@@ -97,10 +97,39 @@ namespace {
     }
   }
 
+  // append appropriate suffixes for type fields of chain particle, if specified
+  void update_chain_particle_type_suffixes
+  ( FGChain* fgc,
+    const ::npctransport_proto::Assignment_FGAssignment &fg_data )
+  {
+    unsigned int n1 = fg_data.type_suffix_list_size();
+    unsigned int n2 = fgc->get_number_of_beads();
+    if ( n1 == 0 ) {
+      return;
+    }
+    std::cout << "n1,n2: " << n1 << "," << n2 << std::endl;
+    IMP_ALWAYS_CHECK(n1==n2,
+                     "Size of list of type suffixes in FG chain assignment"
+                     " should be equal to either zero or to the chain size",
+                     IMP::ValueException);
+
+    std::string type_prefix=fg_data.type();
+    for(unsigned int i=0; i<n1; i++){
+      std::string type_suffix=fg_data.type_suffix_list(i);
+      core::ParticleType type(type_prefix + type_suffix);
+      IMP::Particle* p=fgc->get_bead(i);
+      IMP_USAGE_CHECK(core::Typed::get_is_setup(p),
+                      "FG chain particle is expected to be typed");
+      core::Typed(p).set_type(type);
+    }
+  }
+
+
 } // anonymous namespace
 
 
 /******************  utility methods ***************/
+
 
 FGChain* create_fg_chain
 ( SimulationData* sd,
@@ -155,6 +184,9 @@ FGChain* create_fg_chain
     core::Typed::setup_particle( root, type );
     ret_chain = new FGChain(root);
   }
+
+  // update individual particle types if specified
+  update_chain_particle_type_suffixes(ret_chain, fg_data);
 
   // add chain beads, etc. to sd under parent
   add_chain_to_sd(ret_chain, sd, parent, fg_data);
