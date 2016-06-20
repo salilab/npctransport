@@ -13,7 +13,10 @@ slab_radius=3
 slab_height=5
 #random.uniform(5,30)
 boxw= max([1.5*slab_radius,slab_height])
-def out_slab(d):
+def out_slab(p):
+    ''' verify particle p is out of slab.
+        p is assumed to be decorated by XYZR '''
+    d=IMP.core.XYZR(p)
     c= d.get_coordinates()
     if c[2]> slab_height/2.0+radius-.5:
         return True
@@ -25,7 +28,7 @@ def out_slab(d):
     print(rxz, slab_radius-radius, c[2], slab_height/2.0+radius)
     return False
 class ConeTests(IMP.test.TestCase):
-    def test_cone_construction(self):
+    def test_slab_singleton_score(self):
         """Check slab singleton score"""
         print("radius", radius, "slab radius", slab_radius, "slab_height", slab_height)
         m= IMP.Model()
@@ -36,8 +39,10 @@ class ConeTests(IMP.test.TestCase):
         bb= IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       IMP.algebra.Vector3D(boxw,boxw,boxw))
         slabss= IMP.npctransport.SlabSingletonScore(slab_height, slab_radius, 1)
+        self.assertEqual(slabss.get_bottom_z(),-0.5*slab_height);
+        self.assertEqual(slabss.get_top_z(),+0.5*slab_height);
         r= IMP.core.SingletonRestraint(m, slabss, p.get_index(), "slab")
-        while out_slab(d):
+        while out_slab(p):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
         print(d.get_coordinates())
         w= IMP.display.PymolWriter(self.get_tmp_file_name("slabss.pym"))
