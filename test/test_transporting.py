@@ -23,9 +23,10 @@ class Tests(IMP.test.TestCase):
         self.assertEqual(t.get_n_entries_bottom(),10)
         t.set_n_entries_top(20)
         self.assertEqual(t.get_n_entries_top(),20)
+        # test decoration
+        t2=IMP.npctransport.Transporting(p)
+        self.assertEqual(t.get_particle_index(), t2.get_particle_index())
+
 
 if __name__ == '__main__':
     IMP.test.main()
-
-
-
