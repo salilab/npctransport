@@ -39,19 +39,42 @@ double get_close_pairs_range(const ::npctransport_proto::Assignment& a) {
       // TODO: can support is_on, though it's rare
       if(range>0.0 && k>0.0) {
         // compute skewed range if needed
-	bool is_skewed=false;
-	if(a.interactions(i).has_k_tangent_skew() &&
-	   a.interactions(i).has_range_tangent_skew()) {
-	  if(a.interactions(i).k_tangent_skew().value()>0.0 &&
-	     a.interactions(i).range_tangent_skew().value()>0.0) {
-	    is_skewed=true;
+	bool is_orientational=false;
+	if(a.interactions(i).has_range_sigma0_deg() &&
+	   a.interactions(i).has_range_sigma1_deg()) {
+	  if(a.interactions(i).range_sigma0_deg().value()!=0.0 &&
+	     a.interactions(i).range_sigma1_deg().value()!=0.0) {
+	    is_orientational=true;
 	  }
 	}
-	if(is_skewed){
-	  double range_tangent_skew=a.interactions(i).range_tangent_skew().value();
-	  double range1=range*std::sqrt(range_tangent_skew);
-	  double range2=range/std::sqrt(range_tangent_skew);
-          range=std::max(range1, range2);
+	if(is_orientational){
+	  const double pi = 3.1415926535897;
+	  double range_sigma0_rad=a.interactions(i).range_sigma0_deg().value()*pi/180.0;
+	  double range_sigma1_rad=a.interactions(i).range_sigma1_deg().value()*pi/180.0;
+	  std::string type0=a.interactions(i).type0();
+	  std::string type1=a.interactions(i).type1();
+	  double R0=0.0;
+	  double R1=0.0;
+	  for(unsigned int ii=0; ii<a.floaters_size(); ii++){
+	    if(a.floaters(ii).type()==type0){
+	      R0=a.floaters(ii).radius().value();
+	    }
+	    if(a.floaters(ii).type()==type1){
+	      R1=a.floaters(ii).radius().value();
+	    }
+	  }
+	  for(unsigned int ii=0; ii<a.fgs_size(); ii++){
+	    if(a.fgs(ii).type()==type0){
+	      R0=a.fgs(ii).radius().value();
+	    }
+	    if(a.fgs(ii).type()==type1){
+	      R1=a.fgs(ii).radius().value();
+	    }
+	  }
+	  double chord0=2*R0*std::sin(range_sigma0_rad/2.0);
+	  double chord1=2*R1*std::sin(range_sigma1_rad/2.0);
+	  double chord=std::max(chord0,chord1);
+	  range=std::max(range, chord);
         }
         // udpate max range
         max_range=std::max(max_range, range);
@@ -130,15 +153,15 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
       double k=a.interactions(i).interaction_k().value();
       double range=a.interactions(i).interaction_range().value();
       if(range>0.0 && k>0.0) {
-	bool is_skewed=false;
+	bool is_orientational=false;
 	if(a.interactions(i).has_k_tangent_skew() &&
 	   a.interactions(i).has_range_tangent_skew()) {
 	  if(a.interactions(i).k_tangent_skew().value()>0.0 &&
 	     a.interactions(i).range_tangent_skew().value()>0.0) {
-	    is_skewed=true;
+	    is_orientational=true;
 	  }
 	}
-	if(is_skewed){
+	if(is_orientational){
 	  // normalize for skew and compute maximal force k (k*range/2.0) in skewed interaction force field
 	  double k_tangent_skew=a.interactions(i).k_tangent_skew().value();
 	  double range_tangent_skew=a.interactions(i).range_tangent_skew().value();

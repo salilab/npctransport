@@ -31,36 +31,17 @@ namespace {
       for(unsigned int j = 0; j < R1.size(); j++){
         double s = (R0[i].get_center().get_magnitude() +  R0[i].get_radius())
           + (R1[j].get_center().get_magnitude() +  R1[j].get_radius());
-        max = (max > s) ? max : s;
+        max = std::max(max,s);
       }
     }
     return max;
   }
 }
 
-// unskewed version of interaction (indifferent to interaction directionality)
-SitesPairScore::SitesPairScore(double range, double k,
-                               double range_nonspec_attraction,
-                               double k_nonspec_attraction,
-                               double k_nonspec_repulsion,
-                               const algebra::Sphere3Ds &sites0,
-                               const algebra::Sphere3Ds &sites1)
-    : P(k_nonspec_repulsion, range_nonspec_attraction,
-        k_nonspec_attraction, "SitesPairScore %1%"),
-      is_skewed_(false),
-      params_unskewed_(range, k),
-      params_normal_(0.0, 0.0),
-      params_tangent_(0.0, 0.0),
-      is_cache_active_(false),
-      cur_cache_id_(INVALID_CACHE_ID)
-{
-  set_sites(sites0, sites1);
-}
 
-// skewed version of interaction score (different in
-// normal and tangent directions)
+// orientation-dependent interaction score
 SitesPairScore::SitesPairScore(double range, double k,
-                               double range2_skew, double k_skew,
+			       double sigma0_deg, double sigma1_deg,
                                double range_nonspec_attraction,
                                double k_nonspec_attraction,
                                double k_repulsion,
@@ -69,61 +50,26 @@ SitesPairScore::SitesPairScore(double range, double k,
   :
   P(k_repulsion, range_nonspec_attraction, k_nonspec_attraction,
     "SitesPairScore %1%"),
-  params_unskewed_(range, k),
-  params_normal_(0.0, 0.0),
-  params_tangent_(0.0, 0.0),
+  params_(range, k, sigma0_deg, sigma1_deg),
+  sites0_(sites0),
+  sites1_(sites1),
   is_cache_active_(false),
   cur_cache_id_(INVALID_CACHE_ID)
 {
-  // IMP_ALWAYS_CHECK(range2_skew > 0.0 && k_skew > 0.0,
-  //                  "Skew must be positive", ValueException);
-  is_skewed_ = (range2_skew != 0.0 && k_skew != 0.0);
-  if(is_skewed_){
-    double kN = sqrt(k / k_skew);
-    double kT = sqrt(k * k_skew);
-    double const r2 = range*range;
-    double const& s = range2_skew; // shorthand
-    double rN = sqrt(r2/(s+1));
-    double rT = sqrt(s*r2/(s+1));
-    params_normal_.set_rk(rN, kN);
-    params_tangent_.set_rk(rT, kT);
-    IMP_LOG_PROGRESS("Ks: " << k
-                     << " ; kN " << kN << " , " << params_normal_.k
-                     << " ; kT " << kT << " , " << params_tangent_.k
-                     << std::endl);
-    IMP_LOG_PROGRESS("Range: " << range
-                     << " ; rN " << rN << " , " << params_normal_.r
-                     << " ; rT " << rT << " , " << params_tangent_.r
-                     << std::endl);
-  } else {
+  IMP_LOG_PROGRESS( "Setting up SitesPairScore with sites0 " 
+		    << sites0_ << " sites1 " << sites1_ << std::endl);
+  is_orientational_score_ = (sigma0_deg > 0.0 && sigma1_deg > 0.0);
+  if(!is_orientational_score_){
     IMP_LOG(WARNING, "Creating old version of SitesPairScore, for "
-                     "backwards compatibility" << std::endl);
+	    "backwards compatibility" << std::endl);
   }
-  set_sites(sites0, sites1);
-}
-
-
-void SitesPairScore::set_sites(const algebra::Sphere3Ds &sites0,
-               const algebra::Sphere3Ds &sites1)
-{
-  // store the big set of sizes in nnsites_
-  if (sites0.size() > sites1.size()) {
-    sites_first_ = false;
-    sites_ = sites1;
-    nnsites_ = sites0;
-  } else {
-    sites_first_ = true;
-    sites_ = sites0;
-    nnsites_ = sites1;
-  }
-  //  nn_ = new algebra::NearestNeighbor3D(nnsites_); // Need to convert to get_center() of each
   // Find upper bound for distance between particles whose sites interact
-  double ubound_distance = (get_max_r_sum(sites0, sites1) + params_unskewed_.r);
-  this->ubound_distance2_ = ubound_distance * ubound_distance;
+  // to be used for fast filtering - the range + sites radii
+  double ubound_distance = (get_max_r_sum(sites0, sites1) + params_.r);
+  ubound_distance2_ = ubound_distance * ubound_distance;
   IMP_LOG_PROGRESS( "UBOUND,2: " << ubound_distance << " ; "
                     << this->ubound_distance2_ << std::endl);
 }
-
 
 ModelObjectsTemp SitesPairScore::do_get_inputs(
     Model *m, const ParticleIndexes &pis) const {
@@ -160,8 +106,6 @@ inline double SitesPairScore::evaluate_index(Model *m,
   // bring sites_ to the frame of reference of nn_sites_ and nn_
   ParticleIndex pi0 = pip[0];
   ParticleIndex pi1 = pip[1];
-  // make sure rb0 is associated with sites_, and rb1 with nn_sites_:
-  if (!sites_first_) std::swap(pi0, pi1);
   // get rbi0/1 from cache, update if needed
   internal::RigidBodyInfo rbi0 = get_rigid_body_info(m, pi0);
   internal::RigidBodyInfo rbi1 = get_rigid_body_info(m, pi1);
@@ -171,37 +115,28 @@ inline double SitesPairScore::evaluate_index(Model *m,
   IMP_LOG_PROGRESS( "RBI1.cache_id " << rbi1.cache_id
                     << "RBI1.RB " << rbi1.rb
                     << "RBI1.tr " << rbi1.tr << std::endl);
-  // bring sites_ to the correct orientation relative to nn_sites_[j]
-  // algebra::Transformation3D relative = c1->tr.get_inverse() * c0->tr;
   // sum over specific interactions between all pairs of sites:
   double sum = 0;
-  for (unsigned int i = 0; i < sites_.size(); ++i) {
-    // filter to evaluate only sites within range of attraction:
-    // algebra::Vector3D trp = relative.get_transformed(sites_[i]);
-    //    Ints nn = nn_->get_in_ball(trp, sites_range_);
-    //for (unsigned int j = 0; j < nn.size(); ++j) {
-    algebra::Vector3D g0 = rbi0.tr.get_transformed(sites_[i].get_center());
-    IMP_LOG_PROGRESS( "g0 = " << g0 );
-    for(unsigned int j = 0 ; j < nnsites_.size(); ++j) {
-      // double d2=algebra::get_squared(range_);
-      algebra::Vector3D g1 = rbi1.tr.get_transformed(nnsites_[j].get_center());
-      IMP_LOG_PROGRESS( "Evaluating sites " << g0 << " ; " << g1 << std::endl );
-      if(is_skewed_)
+  for (unsigned int i = 0; i < sites0_.size(); ++i) {
+    algebra::Vector3D g0 = rbi0.tr.get_transformed(sites0_[i].get_center());
+    for(unsigned int j = 0 ; j < sites1_.size(); ++j) {
+      algebra::Vector3D g1 = rbi1.tr.get_transformed(sites1_[j].get_center());
+      IMP_LOG_PROGRESS( "Evaluating sites at global coordinates: " << g0 << " ; " << g1 << std::endl );
+      if(is_orientational_score_)
         {
           sum +=
-            internal::evaluate_one_site_4(params_normal_,
-                                          params_tangent_,
+            internal::evaluate_pair_of_sites(params_,
                                           rbi0, rbi1,
-                                          sites_[i], nnsites_[j],
+                                          sites0_[i], sites1_[j],
                                           g0, g1,
                                           da);
       } else
-        {
+        { // old score
           sum +=
-            internal::evaluate_one_site_3(params_unskewed_.k,
-                                          params_unskewed_.r,
+            internal::evaluate_one_site_3(params_.k,
+                                          params_.r,
                                           rbi0, rbi1,
-                                          sites_[i], nnsites_[j],
+                                          sites0_[i], sites1_[j],
                                           g0, g1,
                                           da);
         }

@@ -12,6 +12,7 @@
 
 #include "npctransport_config.h"
 #include "linear_distance_pair_scores.h"
+#include "SitesPairScoreParams.h"
 #include "internal/RigidBodyInfo.h"
 #include "internal/sites.h"
 #include <IMP/PairScore.h>
@@ -48,25 +49,14 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
 
 
   /************************* class variables ****************/
-  bool is_skewed_; // if true, use params_normal_ and params_tangent_
-  internal::SitesPairScoreParams
-    params_unskewed_; // for any direction (if is_skewed,still gives upper bound)
-  internal::SitesPairScoreParams
-    params_normal_;  // for normal directiom, if is_skewed_
-  internal::SitesPairScoreParams
-    params_tangent_; // for tangent directiom, if is_skewed_
-
+  bool is_orientational_score_; // if true, use orientation-dependent score
+  SitesPairScoreParams params_;
   algebra::Sphere3Ds
-    sites_,  // sites to be searched against nn_(nnsites_)
-    nnsites_;               // sites to be stored in nn_ (nearest neighbours)
+    sites0_, sites1_;
 
-  /** sites_first_ is true if sites_ is associated with the first
-      particle and nnsites_ with the second particle, false otherwise
-      (this switching may be made to improve running time efficiency) */
-  bool sites_first_;
 
-  //! Maximal square distance between particles whose sites interact
-  //! based on range and list of sites
+  //! Maximal square of distance between particles with interacting sites
+  //! based on the interaction range and list of sites
   double ubound_distance2_;
 
   //! Cache:
@@ -76,68 +66,20 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   mutable bool is_cache_active_;
   mutable unsigned int cur_cache_id_; // to keep track of caching rounds
 
-  //! Data structure for finding nearest neighbor (use obsolete)
-  //  PointerMember<algebra::NearestNeighbor3D> nn_;
-
  public:
-  /**
-     TODO: IMP_DEPRECATED!!!
-
-     A score between two spherical particles that contain a fixed set
-     of interaction sites,  sites0 and sites1 (for first and second particle,
-     resp.).
-
-     The interaction is decomposed into a non-specific interaction
-     between the beads, and the sum of specific interactions between
-     sites on each bead.
-
-     The total energetic potential of each individual site-site interaction (in kcal/mol)
-       DELTA-U = 0.25 * k * r^2
-
-     This is in addition to contribution from the non-specific interaction (in kcal/mol)
-       DELTA-U= 0.5 * k_nonspec_attraction * range_nonspec_attraction
-
-     Note that for a specific pair of particles, each particle might have
-     a different reference frame (rigid body translation and rotation),
-     which is applied to the sites list upon score evaluation.
-
-     @param range    range of site specific attraction
-     @param k        site specific attraction coefficient
-     @param range_nonspec_attraction range for non-specific attraction
-                                     between particles that contain the sites
-     @param k_nonspec_attraction     non-specific attraction coefficient
-     @param k_nonspec_repulsion    repulsion coefficient between penetrating particles
-     @param sites0    list of sites on the first particle
-     @param sites1    list of sites on the second particle
-
-     \deprecated_at{2.2} Use skewed constructor instead, with 1.0 values if
-     unskewedness needed.
-*/
-  IMPKERNEL_DEPRECATED_METHOD_DECL(2.2)
-  SitesPairScore(double range, double k,
-                 double range_nonspec_attraction,
-                 double k_nonspec_attraction,
-                 double k_nonspec_repulsion,
-                 const algebra::Sphere3Ds &sites0,
-                 const algebra::Sphere3Ds &sites1);
 
   /**
-     A skered version for a score between two spherical particles that
+     An orientation dependent score between two spherical particles that
      contain a fixed set of interaction sites, sites0 and sites1 (for
      first and second particle, resp.).
 
-     The interaction is decomposed into a non-specific interaction
-     between the beads, and the sum of specific interactions between
-     sites on each bead.
+     The interaction is composed of a non-specific interaction term
+     between the bead shperes, and the sum of interactions between
+     specific interactions sites of each bead.
 
-     The skewing is with regard to directionality of the site-site
-     interaction. The interaction vector between a pair of sites is decomposed into a
-     surface-normal component and a tangent component, each with a
-     different range and force constant, as specified by range_skew
-     and k_skew. The surface normal is the vector between the two bead centers.
-
-     The total energetic potential for each pair of site-site interactions, regardless of skewing, is (in kcal/mol):
-       DELTA-U = 0.25 * k * r^2
+     The maximal potential energy difference due to each pair of interacting
+     sites is (in kcal/mol):
+       DELTA-U = 0.25 * k * range^2 [TODO: MIGHT BE OUTDATED - VERIFY]
 
      This is in addition to contribution from the non-specific interaction (in kcal/mol)
        DELTA-U= 0.5 * k_nonspec_attraction * range_nonspec_attraction
@@ -146,21 +88,25 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      a different reference frame (rigid body translation and rotation),
      which is applied to the sites list upon score evaluation.
 
-     @param range       Maximal range of site specific attraction in any direction
+     @param range        Maximal range of site specific attraction in any direction
                          of specific sites placed on particles
-     @param k           Site specific attraction coefficient
-                         (combination of normal and tangent contributions)
-     @param range2_skew  r_tangent^2/r_normal^2 ratio  (s.t. r_tangent^2 + r_normal^2 = sites_range^2)
-     @param k_skew      k_tangent/k_normal ratio  (s.t. k_tangent * k_normal = 4*k_attraction)
-     @param range_nonspec_attraction  Range for non-specific attraction
+     @param k            Maximal site specific attraction coefficient (in
+                         kcal/mol/A^2 for orientation-dependent or kcal/mol/A for 
+			 orientation-independent interacations) 
+     @param sigma0_deg, sigma1_deg Maximal rotational range of sites 0 and 1, resepctively, 
+                         on the particle surface, specified in degrees. If either is 0,
+			 the pair score between site centers is used with a constant k.
+     @param range_nonspec_attraction  Range for non-specific attraction term
                                       between particles that contain the sites
      @param k_nonspec_attraction  Non-specific attraction coefficient between particles
-     @param k_nonspec_repulsion   Repulsion coefficient between penetrating particles
-     @param sites0      List of sites on the first particle
-     @param sites1      List of sites on the second particle
+                                  (constant force in kCal/mol/A within specified range)
+     @param k_nonspec_repulsion   Repulsion coefficient between particles (constant force
+                                  applied when particle spheres overlap in kCal/mol/A)
+     @param sites0      List of sites on the first particle, in its local reference frame
+     @param sites1      List of sites on the second particle, in its local reference frame
    */
   SitesPairScore(double range, double k,
-                 double range2_skew, double k_skew,
+		 double sigma0_deg, double sigma1_deg,
                  double range_nonspec_attraction, double k_nonspec_attraction,
                  double k_nonspec_repulsion,
                  const algebra::Sphere3Ds &sites0,
@@ -214,11 +160,12 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
     const IMP_OVERRIDE;
 
   //! return the range for site-site attraction
-  double get_sites_range() const { return params_unskewed_.r; }
+  double get_sites_range() const { return params_.r; }
 
   //! return the k for site-site attraction
-  double get_sites_k() const { return params_unskewed_.k; }
+  double get_sites_k() const { return params_.k; }
 
+  SitesPairScoreParams get_parameters() const {return params_;}
 
  public:
   IMP_OBJECT_METHODS(SitesPairScore);

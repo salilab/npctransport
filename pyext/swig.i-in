@@ -33,6 +33,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, FGChain, FGChains);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleFactory, ParticleFactories);
 // IMP_SWIG_OBJECT(IMP::npctransport::internal, TAMDChain, TAMDChains);
 IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
+IMP_SWIG_VALUE(IMP::npctransport, SitesPairScoreParams, SitesPairScoreParamsList);
 //IMP_SWIG_VALUE(IMP::npctransport, LinearInteraction, LinearInteractions);
 IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 
@@ -48,6 +49,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %template(_DistancePairScoreForLinearInteraction) IMP::score_functor::DistancePairScore<IMP::npctransport::LinearInteractionScore>;
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"
 
+%include "IMP/npctransport/SitesPairScoreParams.h"
 %include "IMP/npctransport/SitesGeometry.h"
 %include "IMP/npctransport/SitesPairScore.h"
 %include "IMP/npctransport/FGChain.h"

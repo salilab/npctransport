@@ -74,13 +74,15 @@ message Configuration {
     required string type=8; // type name, e.g. "nup53"
   };
   message Interaction {
-    required string type0=1; // e.g., "fg_nsp1"
-    required string type1=2; // e.g., "kap121"
+    required string type0=1; // site 0 type name, e.g., "fg_nsp1"
+    required string type1=2; // site 1 type name, e.g., "kap121"
     required IntRange is_on=3;
     optional FloatRange interaction_k=4; // if decomposed to normal and tangent components, this is kN*kT
     optional FloatRange interaction_range=5; // if decomposed to normal and tangent component, this is sqrt(rN^2+rT^2)
-    optional FloatRange k_tangent_skew=6; // skew of k towards (or against) tangent direction, namely kT/kN (1 = no skew ; 0 = old algo for backward comp.)
-    optional FloatRange range_tangent_skew=7; // ske of range towards (or against) tangent direction, namely rangeT/rangeN (1 = no skew; 0 = old algo for backward comp.)
+    optional FloatRange k_tangent_skew=6; // obsolete
+    optional FloatRange range_tangent_skew=7; // obsolete
+    optional FloatRange range_sigma0_deg=8; // maximal angle around site0 with active attraction (0.0 for isotropic interaction between site-centers)
+    optional FloatRange range_sigma1_deg=9; // maximal angle around site1 with active attraction (0.0 for isotropic interaction between site centers)
   };
 
   required FloatRange interaction_k=3; // default k for specific interactions
@@ -190,7 +192,8 @@ message Assignment {
     optional FloatAssignment interaction_range=5;
     optional FloatAssignment k_tangent_skew=6; // skew of k towards (or against) tangent direction, namely kT/kN (1 = no skew ; 0 = old algo for backward comp)
     optional FloatAssignment range_tangent_skew=7; // ske of range towards (or against) tangent direction, namely rangeT/rangeN (1 = no skew ; 0 = old algo for backward comp)
-
+    optional FloatAssignment range_sigma0_deg=8; // maximal angle around site0 with active attraction (if not defined, then use isotropic interaction between site centers with constant k)
+    optional FloatAssignment range_sigma1_deg=9; // maximal angle around site1 with active attraction (if not defined, then use isotropic interaction between site centers with constant k)
   };
   required int32 work_unit=1;
   required FloatAssignment interaction_k=3;

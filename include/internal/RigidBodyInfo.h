@@ -28,6 +28,8 @@ public:
   core::RigidBody rb;
   algebra::Transformation3D tr; // transformation of rb
   algebra::Rotation3D irot; //inverse rotation of rb
+  double radius;
+  double iradius; // inverse radius
   unsigned int cache_id; // a serial number for keeping track of cache
 
 public:
@@ -38,6 +40,10 @@ public:
     cache_id = cache_id_arg;
     tr = rb.get_reference_frame().get_transformation_to();
     irot = tr.get_rotation().get_inverse();
+    IMP::Model* m=rb.get_model();
+    IMP::ParticleIndex pi=rb.get_particle_index();
+    radius=m->get_sphere(pi).get_radius();
+    iradius = 1.0/radius;
   }
 
 public:

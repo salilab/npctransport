@@ -60,7 +60,7 @@ class ConeTests(IMP.test.TestCase):
         r_nonspec_atr = 0
         k_nonspec_atr = 0
         k_rep = 10
-        ps= IMP.npctransport.SitesPairScore(r_sites,k_sites,
+        ps= IMP.npctransport.SitesPairScore(r_sites,k_sites,0.0,0.0,
                                             r_nonspec_atr, k_nonspec_atr, k_rep,
                                             s0, s1)
         IMP.set_log_level(IMP.SILENT)

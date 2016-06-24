@@ -192,48 +192,46 @@ Scoring::get_slab_restraint(bool update)
 */
 void Scoring::add_interaction
 ( const ::npctransport_proto::Assignment_InteractionAssignment &idata)
-{
+{ 
   // extract interaction params
   core::ParticleType type0(idata.type0());
   core::ParticleType type1(idata.type1());
-  double base_k = interaction_k_;
-  if (idata.has_interaction_k()) {
-    base_k = idata.interaction_k().value();
-  }
-  // no beads so drop it
+  // no beads so drop it (using interaction k just as a proxy to test existence)
   if (interaction_k_factors_.find(type0) == interaction_k_factors_.end() ||
       interaction_k_factors_.find(type1) == interaction_k_factors_.end()) {
     return;
   }
-  double interaction_k = base_k * interaction_k_factors_.find(type0)
-                                      ->second  // TODO: validate type exists
-                         *
-                         interaction_k_factors_.find(type1)->second;
+
+  // compute factored k, range, and sigmas
+  double base_k = interaction_k_;
+  if (idata.has_interaction_k()) {
+    base_k = idata.interaction_k().value();
+  }
+  double interaction_k = base_k * interaction_k_factors_.find(type0)->second  // TODO: validate type exists
+                                * interaction_k_factors_.find(type1)->second;
   double base_range = interaction_range_;
   if (idata.has_interaction_range()) {
     base_range = idata.interaction_range().value();
   }
   double interaction_range =
       base_range * interaction_range_factors_.find(type0)->second *
-      interaction_range_factors_.find(type1)->second;
-  double range_tangent_skew = 0.0; // no skew by default
-  if(idata.has_range_tangent_skew()){
-    range_tangent_skew = idata.range_tangent_skew().value();
+                   interaction_range_factors_.find(type1)->second;
+  double sigma0=0.0, sigma1=0.0;
+  if (idata.has_range_sigma0_deg() &&
+      idata.has_range_sigma0_deg()) {
+    sigma0 = idata.range_sigma0_deg().value();
+    sigma1 = idata.range_sigma1_deg().value();
   }
-  double k_tangent_skew = 0.0; // no skew by default
-  if(idata.has_k_tangent_skew()){
-    k_tangent_skew = idata.k_tangent_skew().value();
-  }
-
   IMP_LOG(IMP::PROGRESS,
           "creating interaction "
-            << idata.type0() << "," << idata.type1()
-            << " effective_k = " << interaction_k
-            << ", effective_range = " << interaction_range
-            << ", nonspecific k = " << nonspecific_k_
-            << ", nonspecific range = " << nonspecific_range_
-            << ", excluded volume k = " << excluded_volume_k_
-            << std::endl
+	  << idata.type0() << "," << idata.type1()
+	  << " effective_k = " << interaction_k
+	  << ", effective_range = " << interaction_range
+	  << ", sigma0/1 = " << sigma0 << "," << sigma1
+	  << ", nonspecific k = " << nonspecific_k_
+	  << ", nonspecific range = " << nonspecific_range_
+	  << ", excluded volume k = " << excluded_volume_k_
+	  << std::endl
           );
 
   // add the interaction restraint both for (t0,t1) and (t1,t0)  {
@@ -244,7 +242,7 @@ void Scoring::add_interaction
     int interaction_id1 = get_ordered_type_pair_predicate()->get_value(pts1);
     IMP_NEW(npctransport::SitesPairScore, ps1,
             (interaction_range, interaction_k,
-             range_tangent_skew, k_tangent_skew,
+	     sigma0, sigma1,
              nonspecific_range_,
              nonspecific_k_,
              excluded_volume_k_,
@@ -260,12 +258,12 @@ void Scoring::add_interaction
     int interaction_id2 = get_ordered_type_pair_predicate()->get_value(pts2);
     IMP_NEW(npctransport::SitesPairScore, ps2,
             (interaction_range, interaction_k,
-             range_tangent_skew, k_tangent_skew,
+	     sigma1, sigma0,
              nonspecific_range_,
              nonspecific_k_,
              excluded_volume_k_,
-             get_sd()->get_sites(type0), // TODO: should order be switched?! I think this is a bug!
-             get_sd()->get_sites(type1) )
+             get_sd()->get_sites(type1),
+             get_sd()->get_sites(type0) )
             );
     interaction_pair_scores_[interaction_id2] = ps2;
   }
