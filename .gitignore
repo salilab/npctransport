@@ -6,7 +6,14 @@
 *.orig
 *.gcno
 *.gcda
+.#*
+#*
+*.pym
 CMakeLists.txt
 CMakeModules/
 CMakeLists.txt
 Files.cmake
+npctransport.pb.cc
+npctransport.pb.h
+npctransport_pb2.py
+pyext/#swig.i-in#
