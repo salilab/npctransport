@@ -12,7 +12,7 @@
 
 #include "npctransport_config.h"
 #include "linear_distance_pair_scores.h"
-#include "SitesPairScoreParameters.h"
+#include "SitesPairScoreParams.h"
 #include "internal/RigidBodyInfo.h"
 #include "internal/sites.h"
 #include <IMP/PairScore.h>
@@ -50,7 +50,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
 
   /************************* class variables ****************/
   bool is_orientational_score_; // if true, use orientation-dependent score
-  SitesPairScoreParameters params_;
+  SitesPairScoreParams params_;
   algebra::Sphere3Ds
     sites0_, sites1_;
 
@@ -165,7 +165,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   //! return the k for site-site attraction
   double get_sites_k() const { return params_.k; }
 
-  SitesPairScoreParameters get_parameters() const {return params_;}
+  SitesPairScoreParams get_parameters() const {return params_;}
 
  public:
   IMP_OBJECT_METHODS(SitesPairScore);
