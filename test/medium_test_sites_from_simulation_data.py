@@ -15,7 +15,7 @@ kap_type = "my_kap"
 fg_type = "my_fg"
 interaction_k=3
 interaction_range=7.5
-DEBUG=1
+DEBUG=0
 
 class Tests(IMP.test.TestCase):
 
