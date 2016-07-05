@@ -8,13 +8,14 @@ import math
 #import read_nups
 import test_util
 
-fg_R = 20
-diffuser_R = 20
+fg_R = 15
+diffuser_R = 15
 fg_coords = [25,25,25]
 kap_type = "my_kap"
 fg_type = "my_fg"
-interaction_k=7.5
+interaction_k=3
 interaction_range=7.5
+DEBUG=1
 
 class Tests(IMP.test.TestCase):
 
@@ -29,8 +30,10 @@ class Tests(IMP.test.TestCase):
         config = Configuration()
         IMP.npctransport.set_default_configuration(config)
         config.box_is_on.lower=1
-        config.box_side.lower=100
+        config.box_side.lower=150
         config.excluded_volume_k.lower=7.5
+        if(DEBUG):
+            config.dump_interval_ns=1.0
 #        config.time_step_factor.lower=0.5
 #        config.dump_interval_ns=10;
         fgs= IMP.npctransport.add_fg_type(config,
@@ -55,7 +58,10 @@ class Tests(IMP.test.TestCase):
                                      name0=fg_type,
                                      name1=kap_type,
                                      interaction_k=interaction_k,
-                                     interaction_range=interaction_range)
+                                     interaction_range=interaction_range,
+                                                            range_sigma0_deg=60,
+                                                            range_sigma1_deg=60)
+
 
         # nonspecifics= IMP.npctransport.add_float_type(config,
         #                                               number=1,
@@ -141,6 +147,7 @@ class Tests(IMP.test.TestCase):
         in the context of simualtion data optimization
         '''
 
+        # Prepare run:
         test_util.test_protobuf_installed(self)
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             print("SLOW MODE")
@@ -152,26 +159,35 @@ class Tests(IMP.test.TestCase):
         else:
             print("FAST MODE")
             fast = True
-            short_init_factor=0.1
+            short_init_factor=0.01
             opt_cycles_ns=10.0
             n_iter = 100
             n_good_thresh=3
-
-        # prepare run
-        cfg_file = self.get_tmp_file_name("barak_config.pb")
-        assign_file = self.get_tmp_file_name("barak_assign.pb")
-        pymol_file = self.get_tmp_file_name("sites.pym")
+        if(DEBUG):
+            opt_cycles_ns=opt_cycles_ns*200
+            n_iter=1
+            cfg_file = "barak_config.pb"
+            assign_file = "barak_assign.pb"
+            pymol_file = "sites.pym"
+            n_good_thresh=1
+        else:
+            cfg_file = self.get_tmp_file_name("barak_config.pb")
+            assign_file = self.get_tmp_file_name("barak_assign.pb")
+            pymol_file = self.get_tmp_file_name("sites.pym")
         self._create_cfg_file_with_fg_anchors( cfg_file )
-        print("assigning parameter ranges from config", cfg_file, end=' ')
-        print("to file", assign_file)
+#        print("assigning parameter ranges from config", cfg_file, end=' ')
+#        print("to file", assign_file)
         num=assign_ranges( cfg_file, assign_file, 0, False, 10 );
-#        rmf_file = self.get_tmp_file_name("out.rmf");
-        rmf_file="tmp.rmf"
-        print("RMF file", rmf_file)
         sd= IMP.npctransport.SimulationData(assign_file, False)
+        if(DEBUG):
+            rmf_file="tmp.rmf"
+        else:
+            rmf_file = self.get_tmp_file_name("out.rmf");
+        print("RMF file", rmf_file)
         sd.set_rmf_file(rmf_file, False)
         self._assert_kap_in_place(sd, False)
-        # init and run
+
+        # Init and run:
         IMP.set_log_level(IMP.SILENT)
         sd.get_bd().set_log_level(IMP.SILENT)
         IMP.npctransport.initialize_positions( sd, [], False,
@@ -194,8 +210,10 @@ class Tests(IMP.test.TestCase):
                 print ("total energy", sd.get_bd().get_scoring_function().evaluate(False),)
                 print ("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False))
                 self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -30.0)
-                self.assert_(self.is_stats_interact_(assign_file))
                 n_good=n_good+1
+                print("NGOOD", n_good)
+                self.assert_(self.is_stats_interact_(assign_file))
+                print("stats interact asserted")
             except AssertionError:
                 continue
             if(n_good >= n_good_thresh):

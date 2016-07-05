@@ -10,7 +10,7 @@
 
 #include "../npctransport_config.h"
 #include "RigidBodyInfo.h"
-#include "../SitesPairScoreParams.h"
+#include "../SitesPairScoreParameters.h"
 
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/log_macros.h>
@@ -113,7 +113,7 @@ inline double evaluate_one_site_3
   @param deriv derivative of U_1D at dX, opposite sign to spsp.k*dX)
 */
 inline double get_U_1D(double dX,
-                         SitesPairScoreParams const& spsp,
+                         SitesPairScoreParameters const& spsp,
                          double& deriv)
 {
   double dX2 = dX*dX;
@@ -165,19 +165,19 @@ bell-shaped spline
     direction defined as the vector between the two beads of rbi0 and
     rbi1/
 
-     @param params_N range and k params in normal direction
-    @param params_T range and k params in tangent direction
+    @param spsp parameters of sites pair score
     @param rbi1 - cached information on rigid body 1
     @param rbi2 - cached information on rigid body 2
-    @param l0 - site0 local coordinates + radius
-    @param l1 - site1 local coordinates + radius
-    @param g0 - site0 global coordinates
-    @param g1 - site1 global coordinates
+    @param lSite1 - site0 local coordinates + radius
+    @param lSite2 - site1 local coordinates + radius
+    @param gSite1 - site0 global coordinates
+    @param gSite2 - site1 global coordinates
     @param da - accumulator for reweighting derivatives, 
                 or null to disable force and torque computations
     */
-inline double evaluate_pair_of_sites
-( SitesPairScoreParams const& spsp,
+inline 
+double evaluate_pair_of_sites
+( SitesPairScoreParameters const& spsp,
   RigidBodyInfo& rbi1, RigidBodyInfo& rbi2,
   const algebra::Sphere3D &lSite1, const algebra::Sphere3D &lSite2,
   algebra::Vector3D& gSite1, algebra::Vector3D& gSite2,
