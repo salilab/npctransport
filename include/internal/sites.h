@@ -53,7 +53,7 @@ inline double subtract_sphere_radii_from_distance_vector
    Evaluate interaction on a pair of sites as a linear potential
    (constant force) within the passed attraction range.
 
-   The maximal drop in potential energy in kCal/mol is:
+   The maximal drop in potential energy in kcal/mol is:
      DELTA-U = k*range
 
     @param k - force constant [kCal/mol/A]
@@ -102,10 +102,10 @@ inline double evaluate_one_site_3
 /**
   Computes a bell-shaped attractive potential with range spsp.r,
   which results from an attractive force that increases linearly
-  from dX=0 to dX=0.5*spsp.r with slope spsp.k, and diminishes linearly 
+  from dX=0 to dX=0.5*spsp.r with slope spsp.k, and diminishes linearly
   between dX=0.5*spsp.r and dX=spsp.r with slope -spsp.k.
 
-  @param dX distnace (note negative dX mean overlap, which will result 
+  @param dX distnace (note negative dX mean overlap, which will result
                       in spsp.k*dX repulsion force)
   @param spsp score parameters and precomputed parameters, including
               range spsp.r in A, and force coefficient spsp.k in units of
@@ -157,7 +157,7 @@ inline double get_derivative_k_factor(double sin_sigma, double cos_sigma_max){
     and either site1 or site2 within a range sigma1_max or sigma2_max,
     respectively.  .  The resulting energy potential results in
     appropriate torques on rb1 and rb2.
-    
+
 
 bell-shaped spline
     function with force coefficient k and range r, which is skewed
@@ -172,10 +172,10 @@ bell-shaped spline
     @param lSite2 - site1 local coordinates + radius
     @param gSite1 - site0 global coordinates
     @param gSite2 - site1 global coordinates
-    @param da - accumulator for reweighting derivatives, 
+    @param da - accumulator for reweighting derivatives,
                 or null to disable force and torque computations
     */
-inline 
+inline
 double evaluate_pair_of_sites
 ( SitesPairScoreParameters const& spsp,
   RigidBodyInfo& rbi1, RigidBodyInfo& rbi2,
@@ -197,7 +197,7 @@ double evaluate_pair_of_sites
   Vector3D gUnitRB2Site2 = (gSite2-gRB2)*rbi2.iradius;
   double cosSigma1 = gUnitRB1Site1*gUnitRB1RB2;
   double cosSigma2 = gUnitRB2Site2*gUnitRB2RB1;
-  if(cosSigma1<spsp.cosSigma1_max || cosSigma2<spsp.cosSigma2_max){ 
+  if(cosSigma1<spsp.cosSigma1_max || cosSigma2<spsp.cosSigma2_max){
     // equivalent to sigma>sigma_max, so out of range
     return 0;
   }
@@ -206,14 +206,14 @@ double evaluate_pair_of_sites
   double kFactor1=get_k_factor(cosSigma1, spsp.cosSigma1_max);
   double kFactor2=get_k_factor(cosSigma2, spsp.cosSigma2_max);
   double kFactor=kFactor1*kFactor2;
-  IMP_LOG_VERBOSE('kFactor1 ' << kFactor1 << 
-		  ' kFactor2 ' << kFactor2); 
+  IMP_LOG_VERBOSE('kFactor1 ' << kFactor1 <<
+		  ' kFactor2 ' << kFactor2);
   double u_1D, derivR_1D; // energy and derivative before factoring k
   double rbSphereDist=gRB1RB2.get_magnitude()-rbi1.radius-rbi2.radius;
   u_1D=get_U_1D(rbSphereDist, spsp, derivR_1D);
   double score=kFactor*u_1D;
   IMP_LOG_VERBOSE('score ' << score);
-  
+
   // III. Apply force to rigid bodies if derivative accumulator is active
   if(da){
     // Add translational force:
@@ -223,7 +223,7 @@ double evaluate_pair_of_sites
     IMP::core::XYZ(rbi2.rb).add_to_derivatives(-gDerivR_on_RB1, *da); // reaction
     IMP_LOG_VERBOSE('global translation derivative on first rb ' << gDerivR_on_RB1);
     // Add torque:
-    // (note it is assumed that the opposing torque is 
+    // (note it is assumed that the opposing torque is
     // dissipated in water, so no action/reaction between RB1 and RB2)
     if(kFactor1>0.0 && kFactor1<0.99999){ // within attraction range
       Vector3D tmp1 = get_vector_product(gUnitRB1Site1,gUnitRB1RB2);
@@ -239,7 +239,7 @@ double evaluate_pair_of_sites
       IMP_LOG_VERBOSE('global torque on first rb ' << lTorque_on_RB1);
     }
     if(kFactor2>0.0 && kFactor2<0.99999){ // within attraction range
-      Vector3D tmp2 = get_vector_product(gUnitRB2Site2,gUnitRB2RB1); 
+      Vector3D tmp2 = get_vector_product(gUnitRB2Site2,gUnitRB2RB1);
       double absSinSigma2 = tmp2.get_magnitude();
       IMP_USAGE_CHECK(absSinSigma2>0.00001,
 		      "abs(sinSigma2) is expected to be positive within attraction force range" );
@@ -247,7 +247,7 @@ double evaluate_pair_of_sites
       double dKFactor2=get_derivative_k_factor(absSinSigma2, spsp.cosSigma2_max);
       double fS2=-u_1D*kFactor1 *dKFactor2;
       Vector3D gTorque_on_RB2=fS2*gRotSigma2;
-      Vector3D lTorque_on_RB2=rbi2.irot.get_rotated(gTorque_on_RB2); 
+      Vector3D lTorque_on_RB2=rbi2.irot.get_rotated(gTorque_on_RB2);
       rbi2.rb.add_to_torque(lTorque_on_RB2, *da);
       IMP_LOG_VERBOSE('global torque on second rb ' << lTorque_on_RB2);
     }
@@ -262,7 +262,7 @@ double evaluate_pair_of_sites
 
 
 
- 
+
 
 IMPNPCTRANSPORT_END_INTERNAL_NAMESPACE
 

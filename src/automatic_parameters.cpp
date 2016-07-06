@@ -123,12 +123,10 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
   // / k). So this is a conservative time step choice in that respect.
   double time_step_factor = a.time_step_factor().value();
   double max_d_factor = 1.0;
-  double min_radius = std::numeric_limits<double>::max();
-  double min_range = std::numeric_limits<double>::max();
-  double max_k = 0.0;
-  double max_k_factor = 1.0;
-  double min_range_factor = 1.0;
-  UPDATE_MAX(k, a.interaction_k);
+  double min_radius = std::numeric_limits<double>::max(); // in A
+  double min_range = std::numeric_limits<double>::max(); // in A
+  double max_k = 0.0; // in kcal/mol/A
+
   UPDATE_MAX(k, a.backbone_k);  // TODO: is this valid for harmonic k?
   if(a.nonspecific_range().value()>0.0 &&
      a.nonspecific_k().value()>0.0) {
@@ -139,59 +137,88 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
   for (int i = 0; i < a.fgs_size(); ++i) {
     UPDATE_MAX(d_factor, a.fgs(i).d_factor);
     UPDATE_MIN(radius, a.fgs(i).radius);
-    UPDATE_MAX(k_factor, a.fgs(i).interaction_k_factor);
-    UPDATE_MIN(range_factor, a.fgs(i).interaction_range_factor);
   }
   for (int i = 0; i < a.floaters_size(); ++i) {
     UPDATE_MAX(d_factor, a.floaters(i).d_factor);
     UPDATE_MIN(radius, a.floaters(i).radius);
-    UPDATE_MAX(k_factor, a.floaters(i).interaction_k_factor);
-    UPDATE_MIN(range_factor, a.floaters(i).interaction_range_factor);
   }
-  for (int i = 0; i < a.interactions_size(); ++i) {
-    if (a.interactions(i).has_interaction_k() && a.interactions(i).has_interaction_range()) {
-      double k=a.interactions(i).interaction_k().value();
-      double range=a.interactions(i).interaction_range().value();
-      if(range>0.0 && k>0.0) {
-	bool is_orientational=false;
-	if(a.interactions(i).has_k_tangent_skew() &&
-	   a.interactions(i).has_range_tangent_skew()) {
-	  if(a.interactions(i).k_tangent_skew().value()>0.0 &&
-	     a.interactions(i).range_tangent_skew().value()>0.0) {
-	    is_orientational=true;
-	  }
-	}
-	if(is_orientational){
-	  // normalize for skew and compute maximal force k (k*range/2.0) in skewed interaction force field
-	  double k_tangent_skew=a.interactions(i).k_tangent_skew().value();
-	  double range_tangent_skew=a.interactions(i).range_tangent_skew().value();
-	  double range1=range*std::sqrt(range_tangent_skew);
-	  double range2=range/std::sqrt(range_tangent_skew);
-	  double k1=k*std::sqrt(k_tangent_skew)*range1/2.0;
-	  double k2=k/std::sqrt(k_tangent_skew)*range2/2.0;
-	  k=    std::max(k1,k2);
-	  range=std::min(range1,range2);
-	  std::cout << "Skewed interaction detected - k1*range1/2.0 " << k1 << " k2*range2/2.0 " << k2
-		    << " range1 " << range1 << " range 2 " << range2 << std::endl;
-	}
-	max_k=    std::max(max_k,k);
-	min_range=std::min(min_range,range);
+  double base_k = a.interaction_k().value();
+  double base_range = a.interaction_range().value();
 
+  // go over all interaction and compute their maximal k (in kcal/mol/A)
+  // and minimum range (in A)
+  for (int i = 0; i < a.interactions_size(); ++i) {
+    double k=base_k;
+    double range=base_range;
+    if (a.interactions(i).has_interaction_k()) {
+      k=a.interactions(i).interaction_k().value();
+    }
+    if (a.interactions(i).has_interaction_range()) {
+      range=a.interactions(i).interaction_range().value();
+    }
+    // factor k and range + retrieve particles radii
+    std::string type0=a.interactions(i).type0();
+    std::string type1=a.interactions(i).type1();
+    double R0;
+    double R1;
+    for(unsigned int ii=0; ii<a.floaters_size(); ii++){
+      if(a.floaters(ii).type()==type0){
+        k*=a.floaters(ii).interaction_k_factor().value();
+        range*=a.floaters(ii).interaction_range_factor().value();
+        R0=a.floaters(ii).radius().value();
+      }
+      if(a.floaters(ii).type()==type1){
+        k*=a.floaters(ii).interaction_k_factor().value();
+        range*=a.floaters(ii).interaction_range_factor().value();
+        R1=a.floaters(ii).radius().value();
       }
     }
-  }
+    for(unsigned int ii=0; ii<a.fgs_size(); ii++){
+      if(a.fgs(ii).type()==type0){
+        k*=a.fgs(ii).interaction_k_factor().value();
+        range*=a.fgs(ii).interaction_range_factor().value();
+        R0=a.fgs(ii).radius().value();
+      }
+      if(a.fgs(ii).type()==type1){
+        k*=a.fgs(ii).interaction_k_factor().value();
+        range*=a.fgs(ii).interaction_range_factor().value();
+        R1=a.fgs(ii).radius().value();
+      }
+    }
+    // compute skewed range if needed
+    bool is_orientational=false;
+    if(a.interactions(i).has_range_sigma0_deg() &&
+       a.interactions(i).has_range_sigma1_deg()) {
+      if(a.interactions(i).range_sigma0_deg().value()!=0.0 &&
+         a.interactions(i).range_sigma1_deg().value()!=0.0) {
+        is_orientational=true;
+      }
+    }
+    if(is_orientational){
+      k*=0.5*range; // the maximal k for this interction
+      const double pi = 3.1415926535897;
+      double range_sigma0_rad=a.interactions(i).range_sigma0_deg().value()*pi/180.0;
+      double range_sigma1_rad=a.interactions(i).range_sigma1_deg().value()*pi/180.0;
+      double chord0=2*R0*std::sin(range_sigma0_rad/2.0);
+      double chord1=2*R1*std::sin(range_sigma1_rad/2.0);
+      double min_chord=std::min(chord0,chord1);
+      range=std::min(range, min_chord);
+    } // if is_orientation
+    if(range>0.0 && k>0.0) {
+      max_k=std::max(max_k, k);
+      min_range=std::min(min_range, range);
+    }
+  } // for interactions(i)
 
   std::cout << "get_time_step(): "
             << " max_d_factor " << max_d_factor
             << " max-k " << max_k
-            << " max-k-factor " << max_k_factor << " min_radius " << min_radius
             << " min-range " << min_range
-            << " min-range-factor " << min_range_factor
             << " max-trans-relative-to-R " << max_trans_relative_to_radius
             << " time-step-factor " << time_step_factor
             << std::endl;
-  double dT_fs= get_time_step(max_d_factor, max_k * max_k_factor, min_radius, min_range * min_range_factor * min_range_factor,
-                       max_trans_relative_to_radius, time_step_factor);
+  double dT_fs= get_time_step(max_d_factor, max_k, min_radius, min_range,
+                              max_trans_relative_to_radius, time_step_factor);
   std::cout << "dT = " << dT_fs << " [fs]" << std::endl;
   return dT_fs;
 

@@ -148,7 +148,12 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
 
    The energy potential difference between the unbound state and when the
    beads touch is:
-     DELTA-U=0.5*k_attr*range_attr;
+     DELTA-U=0.5*k_attr*range_attr [kcal/mol]
+
+     @param k_rep repulsion force constant in kcal/mol/A units
+     @param range_attr attraction range between sphere surfaces
+     @param k_attr attraction force constant in kcal/mol/A unit
+     @param name score object names
    */
   LinearInteractionPairScore(double k_rep, double range_attr, double k_attr,
                              std::string name = "LinearIDPairScore%1%");
@@ -194,13 +199,13 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis) const
       IMP_OVERRIDE;
 
-  //! returns the range for sphere-sphere attraction
+  //! returns the range for sphere-sphere attraction in A
   double get_range_attraction() const { return range_attr_; }
 
-  //! returns the k for sphere-sphere attraction
+  //! returns the k for sphere-sphere attraction in kcal/mol/A units
   double get_k_attraction() const { return k_attr_; }
 
-  //! returns the k for sphere-sphere repulsion
+  //! returns the k for sphere-sphere repulsion in kcal/mol/A units
   double get_k_repulsion() const { return k_rep_; }
 
 
@@ -255,7 +260,7 @@ class IMPNPCTRANSPORTEXPORT LinearWellPairScore : public PairScore {
      @param rest_length_factor the resting distance between particles
                                relative to their sum of radii
      @param k the force constant (attractive if beyond or repulsive
-              if below rest length)
+              if below rest length) in units kcal/mol/A
      @param name the name of the score
    */
   LinearWellPairScore(double rest_length_factor, double k,
