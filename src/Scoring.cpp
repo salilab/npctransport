@@ -28,8 +28,11 @@
 #include <IMP/exception.h>
 #include <IMP/log.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
+#include <IMP/container/ClosePairContainer.h>
+#include <IMP/container/PairContainerSet.h>
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
+#include <IMP/container/SingletonContainerSet.h>
 #include <IMP/container/generic.h>
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/core/DistancePairScore.h>
@@ -115,12 +118,17 @@ Scoring::get_scoring_function_restraints(bool force_update)
 IMP::ScoringFunction*
 Scoring::get_custom_scoring_function
 ( const RestraintsTemp& extra_restraints,
-  IMP::SingletonContainerAdaptor beads,
+  IMP::SingletonContainerAdaptor non_optimizable_beads,
   IMP::SingletonContainerAdaptor optimizable_beads,
   bool is_attr_interactions_on) const
 {
-  beads.set_name_if_default("NPCGetCustomScoringFunctionBeadsInput%1%");
-  beads.set_name_if_default("NPCGetCustomScoringFunctionOptimiedBeadsInput%1%");
+  non_optimizable_beads.set_name_if_default("NPCGetCustomScoringFunctionNonOptimizableBeadsInput%1%");
+  optimizable_beads.set_name_if_default("NPCGetCustomScoringFunctionOptimizableBeadsInput%1%");
+  IMP::SingletonContainers beads_list;
+  beads_list.push_back(non_optimizable_beads);
+  beads_list.push_back(optimizable_beads);
+  IMP_NEW(IMP::container::SingletonContainerSet, beads, (beads_list));
+
     // set up the restraints for the BD simulation:
   RestraintsTemp rs;
   rs += extra_restraints;
@@ -133,7 +141,7 @@ Scoring::get_custom_scoring_function
   }
   rs += get_custom_restraints(); // TODO: this is problematic cause not restricted to beads - need to decide
   PairContainer* cpc = create_close_beads_container
-    ( beads, optimizable_beads );
+    ( non_optimizable_beads, optimizable_beads );
   rs.push_back( create_predicates_pair_restraint
                 ( cpc, is_attr_interactions_on ) );
   IMP_NEW(core::RestraintsScoringFunction, rsf, (rs));
@@ -147,7 +155,7 @@ Scoring::get_close_beads_container(bool update)
   if(!close_beads_container_ || update){
     close_beads_container_ =
       create_close_beads_container
-      ( get_sd()->get_beads(),
+      ( get_particle_indexes(get_sd()->get_non_optimizable_beads()),
         get_sd()->get_optimizable_beads() );
       }
   return close_beads_container_;
@@ -385,33 +393,48 @@ Scoring::get_all_chain_restraints() const
 /***************************** Creators ************************/
 /***************************************************************/
 
-// a close pair container for all pair of specified beads and
-// optimizable beads
+// a close pair container for all unordered non-self pairs of specified beads and
+// optimizable beads that include at least one optimizable bead
 IMP::PairContainer*
 Scoring::create_close_beads_container
-( SingletonContainerAdaptor beads,
+( SingletonContainerAdaptor non_optimizable_beads,
   SingletonContainerAdaptor optimizable_beads) const
 {
-  std::cout << "Creating a close pair container for " << beads->get_particles().size()
-            << " beads, of which " << optimizable_beads->get_particles().size()
-            << " are optimizable" << std::endl;
-  beads.set_name_if_default(
-      "CreateCloseBeadsContainerBeadsInput%1%");
+  using namespace container;
+  std::cout << "Creating a close pair container for " << non_optimizable_beads->get_particles().size()
+            << " non-optimizable beads and " << optimizable_beads->get_particles().size()
+            << " optimizable ones" << std::endl;
+  non_optimizable_beads.set_name_if_default(
+      "CreateCloseBeadsContainerNonOptimizableBeadsInput%1%");
   optimizable_beads.set_name_if_default(
       "CreateCloseBeadsContainerOptimizableBeadsInput%1%");
-  using namespace container;
-  IMP_NEW(CloseBipartitePairContainer, cpc, // so range + 2*slack is what we get
-          (beads, optimizable_beads, get_range(), slack_) );
-  IMP_NEW( core::AllSamePairPredicate, aspp, () );
-  cpc->add_pair_filter( aspp ); // only relevant for bipartite version
-  // The following is for chains (TODO: strongly tied to
-  // implementation but then again, it is possibly important to
-  // exclude bonded interactions - see FGChain.cpp. A possible
-  // solution would be to add a static interface method in FGChain to
-  // return a filter for bonded interactions):
-  IMP_NEW( ExclusiveConsecutivePairFilter, ecpf, () );
-  cpc->add_pair_filter( ecpf );
-  return cpc.release();
+
+  PairContainers pc_list;
+  {
+    // filter for excluding self pairs
+    IMP_NEW( core::AllSamePairPredicate, aspp, () );
+    // Filter for excluding consecutive chain beads (TODO: strongly tied to
+    // implementation but then again, it is possibly important to
+    // exclude bonded interactions - see FGChain.cpp. A possible
+    // solution would be to add a static interface method in FGChain to
+    // return a filter for bonded interactions):
+    IMP_NEW( ExclusiveConsecutivePairFilter, ecpf, () ); // TODO: bug - might affect non-bonded beads that appear consecutively too
+    // Pairs of opptimizable with optimizable:
+    IMP_NEW(ClosePairContainer, cpc, // so range + 2*slack is what we get
+            (optimizable_beads, get_range(), slack_) );
+    cpc->add_pair_filter( aspp );
+    cpc->add_pair_filter( ecpf );
+    pc_list.push_back(cpc);
+    // Pairs of non-optiomizable with optimizable if applicable:
+    IMP_NEW(CloseBipartitePairContainer, cbpc, // so range + 2*slack is what we get
+            (non_optimizable_beads, optimizable_beads, get_range(), slack_) );
+    cbpc->add_pair_filter( aspp );
+    cbpc->add_pair_filter( ecpf );
+    pc_list.push_back(cbpc);
+  }
+
+  IMP_NEW(PairContainerSet, pcs, (pc_list));
+  return pcs.release();
 }
 
 
@@ -420,7 +443,7 @@ container::PredicatePairsRestraint
 (PairContainer* pair_container,
  bool is_attr_interactions_on) const
 {
-  // set linear repulsion upon penetration between all close pairs
+  // set linear repulsion upon penetration among all close pairs
   // returned by get_close_beads_container(), with different
   // scores for interactions between beads of different
   // (ordered) types

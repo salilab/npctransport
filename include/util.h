@@ -28,6 +28,16 @@ IMPNPCTRANSPORTEXPORT
 ParticlesTemp get_optimizable_particles
 (ParticlesTemp const& particles);
 
+/** returns particles with non-optimizable coordinates from particles */
+IMPNPCTRANSPORTEXPORT
+ParticlesTemp get_non_optimizable_particles
+(ParticlesTemp const& particles);
+
+/** returns particle indexes from a list of particles */
+IMPNPCTRANSPORTEXPORT
+ParticleIndexes get_particle_indexes
+(ParticlesTemp const& particles);
+
 /**
    Converts protobuf configuration file config_txt (which is in pretty
    protobuf textual output format) to binary protobuf format

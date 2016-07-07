@@ -177,27 +177,42 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
         in 'particles'
 
         @param extra_restraints  ad-hoc restraints to be added to scoring function
-        @param beads particles container on which to apply bounding volume
-                         and pair constraints
-        @param optimizable_beads interaction scores (both repulsive or attractive)
-                                     are computed only for interactions that involve
-                                     these optimizable particles.
+        @param non_optimizable_beads particles container on which to apply bounding volume
+                         and pair constraints only if they also involve optimizable beads
+        @param optimizable_beads particles container on which to apply bounding volume
+                         and pair contstraints, either with other optimizable beads or with
+                         non-optimizable ones.
         @param is_attr_interactions_on if false, only repulsive interactions will be
                                        computed between pairs of particles
+        @note it is assumed the two sets of beads are disjoint
   */
   IMP::ScoringFunction*
     get_custom_scoring_function
     ( const RestraintsTemp& extra_restraints,
-      SingletonContainerAdaptor beads,
+      SingletonContainerAdaptor non_optimizable_beads,
       SingletonContainerAdaptor optimizable_beads,
       bool is_attr_interactions_on = true ) const;
 
-  /** Update the scoring function that the list of particles,
-      to be retrieved from owning simulation data, has changed
-   */
-  //  void update_particles() const{
-  //    is_updating_particles_ = true;
-  //  }
+  //! same as other get_custom_scoring_function variant but
+  //! based on a list of particle indexes and allowing an empty vector
+  //! of non-optimizable beads as input
+  //! @note  The optimizable beads are still
+  //! treated dynamically (e.g. if they're associated with a dynamic container)
+  IMP::ScoringFunction*
+    get_custom_scoring_function
+    ( const RestraintsTemp& extra_restraints,
+      ParticleIndexes non_optimizable_beads,
+      SingletonContainerAdaptor optimizable_beads,
+      bool is_attr_interactions_on = true ) const
+    {
+      IMP_NEW(IMP::container::ListSingletonContainer,
+              nob_lsc,
+              (get_model(), non_optimizable_beads));
+      return get_custom_scoring_function(extra_restraints,
+                                         nob_lsc,
+                                         optimizable_beads,
+                                         is_attr_interactions_on);
+    }
 
 
   /**
@@ -213,8 +228,10 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      @return a container with all pairs of particles (a,b) such that:
      1) a is an optimizable bead particle and b is any bead
         particle (static or not).
-     2) a and b are close (sphere surfaces within range get_range())
-     3) a and b do not appear consecutively within the model (e.g., fg repeats)
+     2) a and b are close (sphere surfaces within range get_range()+some slack)
+     3) a and b do not appear consecutively within the model (e.g., bonded fg motifs)
+     4) a and b are not the same particles
+     5) b and a do not appear on the list (= unordered list)
 
      @note if udpate=false, might fail to include e.g., new particles
            or new interactions that were added after the last call
@@ -310,18 +327,40 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
   /**
      creates a new pair container that returns all pairs of particles (a,b) such that:
-     1) a is any particle from 'beads' and b is any optimizable particle
-        in 'optimizable_beads' (static or not).
+     1) a is any particle from 'non_optimizable_beads' or 'optimizable beads',
+        and b is any particle in 'optimizable_beads'
      2) a and b are close (sphere surfaces within range get_range())
      3) a and b do not appear consecutively within the model (e.g., fg repeats)
+     4) a is not b
+     5) b and a do not appear in the list (effectively, a list of unordered pairs)
 
-     @param beads a container For particles over which the return value works
-     @param optimizable_beads A container for particles that are also optimizable.
+     @param non_optimizable_beads a container for particles that are assumed to be non-optimizable
+                                  and therefore are not paired among themselves
+     @param optimizable_beads A container for particles that are assumed to be optimizable, and may
+                              be paired among themselves or with non_optimizable_beads
+     @note it is assumed the two sets of beads are disjoint
   */
   IMP::PairContainer *create_close_beads_container
-    ( SingletonContainerAdaptor beads,
+    ( SingletonContainerAdaptor non_optimiziable_beads,
       SingletonContainerAdaptor optimizable_beads)
     const;
+
+  //! same as other create_close_beads_container variant but
+  //! based on a list of particle indexes and allowing an empty vector
+  //! of non-optimizable beads as input. The optimizable beads are still
+  //! treated dynamically (e.g. if they're associated with a dynamic container)
+  IMP::PairContainer *create_close_beads_container
+    ( ParticleIndexes non_optimizable_beads,
+      SingletonContainerAdaptor optimizable_beads)
+    const
+    {
+      IMP_NEW(IMP::container::ListSingletonContainer,
+              nob_lsc,
+              (get_model(), non_optimizable_beads));
+      return create_close_beads_container(nob_lsc,
+                                          optimizable_beads);
+    }
+
 
   /**
      Creates a new container for restraints over pairs of beads. Different

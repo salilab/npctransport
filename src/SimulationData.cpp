@@ -684,6 +684,22 @@ SimulationData::get_optimizable_beads()
   return ret;
 }
 
+ParticlesTemp
+SimulationData::get_non_optimizable_beads()
+{
+  IMP::ParticlesTemp ret;
+  for(unsigned int i = 0; i < beads_.size(); i++)
+    {
+      if(core::XYZ::get_is_setup(beads_[i]))
+        {
+          core::XYZ xyz(beads_[i]);
+          if(!xyz.get_coordinates_are_optimized())
+            {  ret.push_back ( beads_[i] );  }
+        }
+    }
+  return ret;
+}
+
 
 void SimulationData::set_sites(core::ParticleType t, int n,
                                double r, double sr) {

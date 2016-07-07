@@ -266,20 +266,23 @@ void initialize_positions(SimulationData *sd,
       cur_particles += cur_fg_beads;
       IMP_LOG(VERBOSE, "Optimizing " <<  cur_particles.size()
                << " particles of type " << *it);
-      ParticlesTemp cur_optimizable_particles =
+      ParticlesTemp cur_non_optimizable_beads =
+        get_non_optimizable_particles( cur_particles);
+      ParticlesTemp cur_optimizable_beads =
         get_optimizable_particles( cur_particles);
-      IMP_LOG(VERBOSE, " ; " << cur_optimizable_particles.size()
+      IMP_LOG(VERBOSE, " ; " << cur_optimizable_beads.size()
              << " optimizable" << std::endl);
-      if( cur_particles.size() * cur_optimizable_particles.size() == 0){
+      if( cur_particles.size() * cur_optimizable_beads.size() == 0){
         IMP_LOG( WARNING, "No optimizable particles of type " << *it );
         continue; // noting to optimize if no (optimizable) particles
       }
+
       // switch local to sf till end of scope
       Pointer<ScoringFunction> sf =
         sd->get_scoring()->get_custom_scoring_function
         ( extra_restraints,
-          cur_particles,
-          cur_optimizable_particles,
+          get_particle_indexes(cur_non_optimizable_beads),
+          cur_optimizable_beads,
           false /* no non-bonded attr potentials yet */);
       IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
         set_temporary_scoring_function( sd->get_bd(), sf );
@@ -295,11 +298,15 @@ void initialize_positions(SimulationData *sd,
   {
     // optimize everything now
     ParticlesTemp beads = sd->get_beads(); // that should include obstacles
+    ParticlesTemp non_optimizable_beads =
+      get_non_optimizable_particles( beads );
     ParticlesTemp optimizable_beads =
       get_optimizable_particles( beads );
     Pointer<ScoringFunction> sf =
       sd->get_scoring()->get_custom_scoring_function
-      ( extra_restraints, beads, optimizable_beads,
+      ( extra_restraints,
+        get_particle_indexes(non_optimizable_beads),
+        optimizable_beads,
         false /* no non-bonded attr potential yet */ );
     IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
       set_temporary_scoring_function( sd->get_bd(), sf );

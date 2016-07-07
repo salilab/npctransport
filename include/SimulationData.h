@@ -314,7 +314,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   /**
      returns all diffusing fine-level beads in this
      simulation data object (or an empty list if none exists)
-     @note efficient - returns an existing container by ref
    */
   ParticlesTemp get_beads(){ return beads_; }
 
@@ -325,6 +324,14 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
      (or an empty list if no such bead exists)
    */
   ParticlesTemp get_optimizable_beads();
+
+  /**
+     returns all fine-level beads that currently exist in
+     this simulation data object get_sd(), which are also non-optimizable
+     (or an empty list if no such bead exists)
+   */
+  ParticlesTemp get_non_optimizable_beads();
+
 
   /** get time from which simulation begins */
   double get_initial_simulation_time_ns() const

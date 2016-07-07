@@ -48,18 +48,47 @@ void get_protobuf_configuration_from_text
 ParticlesTemp get_optimizable_particles
 (ParticlesTemp const& particles)
 {
-  ParticlesTemp optimizables;
+  ParticlesTemp ret;
   for(unsigned int i = 0; i < particles.size(); i++)
     {
       Particle* p = particles[i];
       if(core::XYZ::get_is_setup(p)) {
         core::XYZ p_xyz(p);
         if(p_xyz.get_coordinates_are_optimized()){
-          optimizables.push_back ( p );
+          ret.push_back ( p );
         }
       }
     }
-  return optimizables;
+  return ret;
+}
+
+ParticlesTemp get_non_optimizable_particles
+(ParticlesTemp const& particles)
+{
+  ParticlesTemp ret;
+  for(unsigned int i = 0; i < particles.size(); i++)
+    {
+      Particle* p = particles[i];
+      if(core::XYZ::get_is_setup(p)) {
+        core::XYZ p_xyz(p);
+        if(!p_xyz.get_coordinates_are_optimized()){
+          ret.push_back ( p );
+        }
+      }
+    }
+  return ret;
+}
+
+/** returns particle indexes from a list of particles */
+IMPNPCTRANSPORTEXPORT
+ParticleIndexes get_particle_indexes
+(ParticlesTemp const& particles)
+{
+  ParticleIndexes ret;
+  for(unsigned int i=0; i<particles.size(); i++){
+    ret.push_back(particles[i]->get_index());
+  }
+  return ret;
 }
 
 
