@@ -356,6 +356,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       timer.restart();
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;
       if (conformations_rmf_sos) {
+        sd->get_bd()->get_scoring_function()->evaluate(false); // score before writing rmf so restraints and such are up to date
         conformations_rmf_sos->update_always(
             "Before running (post equilibration)");
       }
@@ -369,6 +370,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       std::cout << "Run trial #" << i << " finished succesfully" << std::endl;
     }
     if (conformations_rmf_sos) {
+      sd->get_bd()->get_scoring_function()->evaluate(false); // score before writing rmf so restraints and such are up to date
       conformations_rmf_sos->update_always("Final frame");
     }
     if (!final_conformations.empty()) {

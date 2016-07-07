@@ -56,7 +56,7 @@ SitesPairScore::SitesPairScore(double range, double k,
   is_cache_active_(false),
   cur_cache_id_(INVALID_CACHE_ID)
 {
-  IMP_LOG_PROGRESS( "Setting up SitesPairScore with sites0 " 
+  IMP_LOG_PROGRESS( "Setting up SitesPairScore with sites0 "
 		    << sites0_ << " sites1 " << sites1_ << std::endl);
   is_orientational_score_ = (sigma0_deg > 0.0 && sigma1_deg > 0.0);
   if(!is_orientational_score_){
@@ -150,15 +150,15 @@ inline double SitesPairScore::evaluate_index(Model *m,
   return sum + non_specific_score;
 }
 
-Restraints SitesPairScore::do_create_current_decomposition(
-    Model *m, const ParticleIndexPair &pi) const {
-  Restraints ret;
-  if (evaluate_index(m, pi, nullptr) < 0) {
-    return Restraints(1, IMP::internal::create_tuple_restraint(this, m, pi));
-  } else {
-    return Restraints();
-  }
-}
+// Restraints SitesPairScore::do_create_current_decomposition(
+//     Model *m, const ParticleIndexPair &pi) const {
+//   Restraints ret;
+//   if (evaluate_index(m, pi, nullptr) < 0) {
+//     return Restraints(1, IMP::internal::create_tuple_restraint(this, m, pi));
+//   } else {
+//     return Restraints();
+//   }
+// }
 
 
 

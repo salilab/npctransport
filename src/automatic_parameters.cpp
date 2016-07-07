@@ -55,7 +55,7 @@ double get_close_pairs_range(const ::npctransport_proto::Assignment& a) {
 	  std::string type1=a.interactions(i).type1();
 	  double R0=0.0;
 	  double R1=0.0;
-	  for(unsigned int ii=0; ii<a.floaters_size(); ii++){
+	  for(int ii=0; ii<a.floaters_size(); ii++){
 	    if(a.floaters(ii).type()==type0){
 	      R0=a.floaters(ii).radius().value();
 	    }
@@ -63,7 +63,7 @@ double get_close_pairs_range(const ::npctransport_proto::Assignment& a) {
 	      R1=a.floaters(ii).radius().value();
 	    }
 	  }
-	  for(unsigned int ii=0; ii<a.fgs_size(); ii++){
+	  for(int ii=0; ii<a.fgs_size(); ii++){
 	    if(a.fgs(ii).type()==type0){
 	      R0=a.fgs(ii).radius().value();
 	    }
@@ -161,7 +161,7 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
     std::string type1=a.interactions(i).type1();
     double R0;
     double R1;
-    for(unsigned int ii=0; ii<a.floaters_size(); ii++){
+    for(int ii=0; ii<a.floaters_size(); ii++){
       if(a.floaters(ii).type()==type0){
         k*=a.floaters(ii).interaction_k_factor().value();
         range*=a.floaters(ii).interaction_range_factor().value();
@@ -173,7 +173,7 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
         R1=a.floaters(ii).radius().value();
       }
     }
-    for(unsigned int ii=0; ii<a.fgs_size(); ii++){
+    for(int ii=0; ii<a.fgs_size(); ii++){
       if(a.fgs(ii).type()==type0){
         k*=a.fgs(ii).interaction_k_factor().value();
         range*=a.fgs(ii).interaction_range_factor().value();

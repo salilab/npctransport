@@ -322,8 +322,8 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
               }*/
   int ret = 0;
   if (ranges.empty()) {
-    IMP_WARN("No message with value ranges detected for file " << fname);
-    // return 0;
+    IMP_WARN("No message with value ranges detected for file '" << fname
+             << "' - this is probably fine" << std::endl);
   } else {
     Floats values;
     Ints indexes;

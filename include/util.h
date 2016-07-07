@@ -101,10 +101,11 @@ inline algebra::Vector3D get_global_from_local_v3( Particle* p,
 
 
 /**
-   return number of members lost and gained from old to cur
+   returns |old/core| and |cur/old|, i.e., the number of
+   items lost from old, and the ones gained in cur.
 
-   @note it is assumed that old and cur are sorted iteratable objects
-         (e.g. std::set) whose begin() and end() methods qualify as inputs
+   @note it is assumed that old and cur are ordered iteratable objects
+         (e.g. std::set) whose begin() and end() methods qualify as valid inputs
          for std::set_difference
 */
 template<class t_set>
@@ -129,10 +130,10 @@ inline std::pair<t_value, t_value>
 }
 
 
-/** gets the maximal theoretical number of unordered pairs
+/** gets the maximal theoretical number of unordered pairs of different particles
     between two sets of particles (note that the calculation
-    is not trivial since ps0 and ps1 may not be disjoint
-    and the pairs are unordered)
+    is not entirely trivial since ps0 and ps1 may be overlapping sets
+    while the pairs are unordered)
 */
 inline unsigned int
 get_maximal_number_of_unordered_pairs(ParticlesTemp const& ps0,
@@ -144,6 +145,9 @@ get_maximal_number_of_unordered_pairs(ParticlesTemp const& ps0,
     {
       for(unsigned int j = 0; j < ps1.size(); j++)
         {
+          if(ps0[i]->get_index()==ps1[j]->get_index()){
+            continue;
+          }
           all_unordered_pairs.insert
             ( make_unordered_pair( ps0[i].get(), ps1[j].get() ) );
         }

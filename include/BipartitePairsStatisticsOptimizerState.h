@@ -89,16 +89,17 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
      Constructor
 
      @param[in] m             the model associated with particlesI / II
-     @param[in] interaction_type the types of particles involved in the
-                                 interaction, assumed to be the types of
-                                 particlesI and II
+     @param[in] interaction_type the pair of interacting particle types, assumed to
+                                 be the types of all particles in particlesI and
+                                 particlesII, respectively.
      @param[in] particlesI    particles from one side of the interaction
      @param[in] particlesII    particles from other side of the interaction
-     @param[in] contact_range keep track of particle pairs whose sphere distances
-                              are in that range
+     @param[in] contact_range define a contact for particle pairs whose sphere distances
+                              are within contact_range in [A]
      @param[in] slack         slack for updating close particles in appropriate
                               CloseBiparyiyrPairContainer, this affects only
-                              performance - touch only if you know why
+                              performance - touch only if you know what you're
+                              doing
   */
   BipartitePairsStatisticsOptimizerState(
       Model* m,
@@ -114,8 +115,8 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   InteractionType get_interaction_type() const { return interaction_type_; }
 
   /**
-     returns the average number of all pairs of particles that
-     touch each other per update
+     returns the average number of interacting pairs of particles
+     per update
   */
   double get_average_number_of_contacts() const { return avg_ncontacts_; }
 
@@ -214,7 +215,7 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   /**
      update fraction bound with n1 bound particles of type I;
      and n2 bound particles of type II, assuming old_updates
-     for the old averag
+     for the old average
    */
   void update_fraction_bound(unsigned int n1,
                              unsigned int n2,

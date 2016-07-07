@@ -69,7 +69,8 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
  public:
 
   /**
-     An orientation dependent score between two spherical particles that
+     For positive sigmas, this is an orientation dependent score between two
+     spherical particles that
      contain a fixed set of interaction sites, sites0 and sites1 (for
      first and second particle, resp.).
 
@@ -77,12 +78,28 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      between the bead shperes, and the sum of interactions between
      specific interactions sites of each bead.
 
-     The maximal potential energy difference due to each pair of interacting
-     sites is (in kcal/mol):
-       DELTA-U = 0.25 * k * range^2 [TODO: MIGHT BE OUTDATED - VERIFY]
+     If \sigma{0} and \sigma{1} are positive, the attractive force
+     between pairs of sites at an optimal orientation (sites facing
+     each other) depends on their distance x. The attraction force
+     magnitude is k*x when x<=0.5*range and k*(range-x) when x is
+     between 0.5*range and range.  When site0 is rotated by \sigma <
+     \sigma{0}, this force decays further by a factor
+     (cos{\sigma}-cos{\sigma}0)/(1.0-cos{\sigma0}). The force decays
+     similarly when site1 is rotated by \sigma < \sigma{1}.  The
+     maximal potential energy difference due to such pair of
+     interacting sites is:
+       max\DELTA{U}_{site_site} = 0.25 * k * range^2 [kcal/mol]
 
-     This is in addition to contribution from the non-specific interaction (in kcal/mol)
-       DELTA-U= 0.5 * k_nonspec_attraction * range_nonspec_attraction
+     If sigma0_deg or sigma1_deg are non-positive, the attractive
+     force between pairs of sites within the attraction range is a
+     constant k, and the maximal interaction energy is instead:
+       max\DELTA{U}_{site-site} = k * range [kCal/mol]
+
+     In addition to site-site interaction, theere is a constanct
+     attractive force k_nonspec_attraction between the sphere surfaces
+     up to a range range_nonspec_attraction, with maximal energy
+     contribution:
+       max\DELTA{U}_{non-specifiec} = 0.5 * k_nonspec_attraction * range_nonspec_attraction [kcal/mol]
 
      Note that for a specific pair of particles, each particle might have
      a different reference frame (rigid body translation and rotation),
@@ -91,9 +108,9 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @param range        Maximal range of site specific attraction in any direction
                          of specific sites placed on particles
      @param k            Maximal site specific attraction coefficient (in
-                         kcal/mol/A^2 for orientation-dependent or kcal/mol/A for 
-			 orientation-independent interacations) 
-     @param sigma0_deg, sigma1_deg Maximal rotational range of sites 0 and 1, resepctively, 
+                         kcal/mol/A^2 when sigma0_deg and sigma1_deg are positive,
+                         or kcal/mol/A otherwise, i.e., for orientation-independent interacations)
+     @param sigma0_deg, sigma1_deg Maximal rotational range of sites 0 and 1, resepctively,
                          on the particle surface, specified in degrees. If either is 0,
 			 the pair score between site centers is used with a constant k.
      @param range_nonspec_attraction  Range for non-specific attraction term
@@ -155,9 +172,9 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const;
 
-  Restraints do_create_current_decomposition(Model *m,
-                                             const ParticleIndexPair &vt)
-    const IMP_OVERRIDE;
+  //  Restraints do_create_current_decomposition(Model *m,
+  //                                           const ParticleIndexPair &vt)
+  //  const IMP_OVERRIDE;
 
   //! return the range for site-site attraction
   double get_sites_range() const { return params_.r; }

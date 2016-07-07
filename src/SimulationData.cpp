@@ -493,15 +493,19 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
   Scoring* s=get_scoring();
   add_hierarchies_with_sites(fh, get_root().get_children());
   if(with_restraints) {
-    IMP::rmf::add_restraints( fh, RestraintsTemp
-                              (1, s->get_predicates_pair_restraint() )
-                              );
+    IMP::rmf::add_restraints
+      (fh, s->get_scoring_function_restraints(true));
+  }
+  if(with_restraints && false) {
+    IMP::rmf::add_restraints(fh, RestraintsTemp
+                             (1, s->get_predicates_pair_restraint() )
+                             );
     IMP::rmf::add_restraints(fh, s->get_all_chain_restraints() );
     IMP::rmf::add_restraints(fh, s->get_z_bias_restraints() );
     IMP::rmf::add_restraints(fh, s->get_custom_restraints() );
   }
   if (s->get_has_bounding_box()) {
-    if(with_restraints) {
+    if(with_restraints && false) {
       IMP::rmf::add_restraints
         ( fh, RestraintsTemp(1, s->get_bounding_box_restraint()) );
     }
@@ -509,7 +513,7 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
     IMP::rmf::add_static_geometries(fh, display::Geometries(1, bbg));
   }
   if (s->get_has_slab()) {
-    if(with_restraints) {
+    if(with_restraints && false) {
       IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_slab_restraint()));
     }
     IMP_NEW(SlabWireGeometry, slab_geometry,

@@ -170,6 +170,7 @@ void optimize_balls(const ParticlesTemp &ps,
               std::ostringstream oss;
               oss << "Init after " << ramp_level << " " << k_simanneal;
               if (save) {
+                bd->get_scoring_function()->evaluate(false);
                 save->update_always(oss.str());
               }
               IMP_LOG(VERBOSE, "updating RMF " << oss.str() << std::endl);
@@ -325,6 +326,11 @@ void initialize_positions(SimulationData *sd,
   // IMP_LOG(WARNING, "Initial energy is " << rsf->evaluate(false) << std::endl);
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->set_period(dump_interval);  // restore output rate
+    sd->get_bd()->get_scoring_function()->evaluate(false);
+    IMP::RestraintsTemp rs(sd->get_scoring()->get_scoring_function_restraints(true));
+    for(int i=0; i<rs.size(); i++){
+      rs[i]->get_score();
+    }
     sd->get_rmf_sos_writer()->update_always("done initializing");
     IMP_LOG(PROGRESS, "init: sos writer set dump interval period "
             << dump_interval << std::endl);

@@ -98,8 +98,18 @@ Scoring::get_scoring_function(bool update)
     rs.push_back(this->get_predicates_pair_restraint(update));
 
     scoring_function_  = new core::RestraintsScoringFunction(rs);
+    scoring_function_rs_ = rs;
   }
   return scoring_function_;
+}
+
+IMP::Restraints
+Scoring::get_scoring_function_restraints(bool force_update)
+{
+  if(!scoring_function_ || force_update){
+    get_scoring_function(force_update);
+  }
+  return scoring_function_rs_; // updated in get_scoring_function()
 }
 
 IMP::ScoringFunction*
@@ -192,7 +202,7 @@ Scoring::get_slab_restraint(bool update)
 */
 void Scoring::add_interaction
 ( const ::npctransport_proto::Assignment_InteractionAssignment &idata)
-{ 
+{
   // extract interaction params
   core::ParticleType type0(idata.type0());
   core::ParticleType type1(idata.type1());

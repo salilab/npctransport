@@ -88,20 +88,20 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
     dynamic_cast< atom::Simulator* >( get_optimizer() );
   IMP_USAGE_CHECK( simulator, "Optimizer must be a simulator in order to use "
                    "BipartitePairsStatisticsOptimizerState, for time stats" );
-  double cur_time_ns = simulator->get_current_time() / FS_IN_NS;
+  double new_time_ns = simulator->get_current_time() / FS_IN_NS;
   if(is_reset_ == true){
-    IMP_LOG(PROGRESS, "Starting bpsos with simulation time " << cur_time_ns);
-    time_ns_ = cur_time_ns;
+    IMP_LOG(PROGRESS, "Starting bpsos with simulation time " << new_time_ns);
+    time_ns_ = new_time_ns;
     is_reset_ = false;
   }
-  double elapsed_time_ns = cur_time_ns - time_ns_;
+  double elapsed_time_ns = new_time_ns - time_ns_;
   IMP_LOG(PROGRESS,
-          "cur/time/elapsed "
-          << std::setprecision(3) << cur_time_ns << " "
+          "Bipartite stats new-time/old-time/elapsed-time "
+          << std::setprecision(3) << new_time_ns << " "
           << std::setprecision(3) << time_ns_ << " "
           << std::setprecision(3) << elapsed_time_ns
           << std::endl);
-  IMP_LOG(PROGRESS, "Stats time BEFORE:"
+  IMP_LOG(PROGRESS, "Bipartite stats time span before current update:"
           << " misc " << std::setprecision(3) << stats_time_ns_
           << " / off " << std::setprecision(3) << off_stats_time_ns_
           << " / on " << std::setprecision(3) << on_stats_time_ns_
@@ -109,35 +109,40 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
           << " / onII " << std::setprecision(3) << on_II_stats_time_ns_
           << std::endl);
 
-  // Update the lists of bound particles and their interactions
-  close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh
-  boost::unordered_set<ParticleIndex> cur_bounds_I;
-  boost::unordered_set<ParticleIndex> cur_bounds_II;
-  std::set<ParticleIndexPair> cur_contacts; // more efficient if ordered set
-  IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
-                        close_bipartite_pair_container_,
-                        {
-                          ParticleIndexPair const& pip = _1;
-                          core::XYZR s0(get_model(), pip[0]);
-                          core::XYZR s1(get_model(), pip[1]);
-                          if(core::get_distance(s0, s1) < range_)
-                            {
-                              cur_bounds_I.insert(pip[0]);
-                              cur_bounds_II.insert(pip[1]);
-                              cur_contacts.insert
-                                ( make_unordered_particle_index_pair( _1 ) );
-                            }
-                        });
+  // Update the lists of bound particles and their interactions,
+  // for all bipartite pairs of distinct particles
+  close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh container
+  boost::unordered_set<ParticleIndex> new_bounds_I;
+  boost::unordered_set<ParticleIndex> new_bounds_II;
+  std::set<ParticleIndexPair> new_contacts; // more efficient if ordered set
+  IMP_CONTAINER_FOREACH
+    (IMP::container::CloseBipartitePairContainer,
+     close_bipartite_pair_container_,
+     {
+       ParticleIndexPair const& pip = _1;
+       core::XYZR s0(get_model(), pip[0]);
+       core::XYZR s1(get_model(), pip[1]);
+       if(core::get_distance(s0, s1) < range_ &&
+          pip[0]!=pip[1])
+         {
+           new_bounds_I.insert(pip[0]);
+           new_bounds_II.insert(pip[1]);
+           new_contacts.insert
+             ( make_unordered_particle_index_pair( _1 ) );
+         }
+     });
   IMP_LOG(PROGRESS,
-          cur_bounds_I.size() << "/" << n_particles_I_ << " bound-I ; "
-          << cur_bounds_II.size() << "/" << n_particles_II_ << " bound-II ; "
-          << cur_contacts.size() << " contacts" << std::endl);
+          new_bounds_I.size() << "/" << n_particles_I_
+          << " bound-I(" << interaction_type_.first<< "); "
+          << new_bounds_II.size() << "/" << n_particles_II_
+          << " bound-II" << interaction_type_.second << "); "
+          << new_contacts.size() << " contacts" << std::endl);
 
   // Update avg_ncontacts_:
   if(elapsed_time_ns>0)
     {
       update_weighted_average(avg_ncontacts_, // old
-                              cur_contacts.size(), // new
+                              new_contacts.size(), // new
                               stats_time_ns_,
                               elapsed_time_ns);
     }
@@ -151,11 +156,11 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
       double n_bounds_I_lost, n_bounds_I_gained,
         n_bounds_II_lost, n_bounds_II_gained; // double for divide
       boost::tie(n_contacts_lost, n_contacts_gained) =
-        get_n_lost_and_gained( contacts_, cur_contacts);
+        get_n_lost_and_gained( contacts_, new_contacts);
       boost::tie(n_bounds_I_lost, n_bounds_I_gained) =
-        get_n_lost_and_gained( bounds_I_, cur_bounds_I);
+        get_n_lost_and_gained( bounds_I_, new_bounds_I);
       boost::tie(n_bounds_II_lost, n_bounds_II_gained) =
-        get_n_lost_and_gained( bounds_II_, cur_bounds_II);
+        get_n_lost_and_gained( bounds_II_, new_bounds_II);
       double n_contacts_before = contacts_.size();
       double n_bounds_I_before = bounds_I_.size();
       double n_bounds_II_before = bounds_II_.size();
@@ -223,7 +228,7 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
         if( n_contacts_before > 0 || n_unbounds_I_before > 0 )
           {
             IMP_LOG(PROGRESS, "prev_contacts " << contacts_.size()
-                    << " cur_contacts " << cur_contacts.size()
+                    << " new_contacts " << new_contacts.size()
                     << " contacts_lost " << n_contacts_lost
                     << " contacts_gained " << n_contacts_gained
                     << std::endl);
@@ -254,13 +259,13 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
       // TODO: next lines - n_particles_XX_ not dynamic
       // TODO: pct is misleading - it is fraction
       double pct_bound_particles_I =
-        (cur_bounds_I.size() + 0.0) / n_particles_I_;
+        (new_bounds_I.size() + 0.0) / n_particles_I_;
       update_weighted_average( avg_pct_bound_particles_I_,
                                pct_bound_particles_I,
                                stats_time_ns_,
                                elapsed_time_ns);
       double pct_bound_particles_II =
-        (cur_bounds_II.size() + 0.0) / n_particles_II_;
+        (new_bounds_II.size() + 0.0) / n_particles_II_;
       update_weighted_average( avg_pct_bound_particles_II_,
                                pct_bound_particles_II,
                                stats_time_ns_,
@@ -269,11 +274,11 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
 
   // update records
   n_updates_++;
-  bounds_I_ = cur_bounds_I;
-  bounds_II_ = cur_bounds_II;
-  contacts_ = cur_contacts;
+  bounds_I_ = new_bounds_I;
+  bounds_II_ = new_bounds_II;
+  contacts_ = new_contacts;
   stats_time_ns_ += elapsed_time_ns;
-  time_ns_ = cur_time_ns;
+  time_ns_ = new_time_ns;
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

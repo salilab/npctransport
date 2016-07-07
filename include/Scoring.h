@@ -80,6 +80,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
   PointerMember
     <IMP::core::RestraintsScoringFunction> scoring_function_;
+  IMP::Restraints scoring_function_rs_; // the restraints associated with the last created scoring_function_, valid only when it is not null
 
   // contains all restraints between pairs of particle types
   PointerMember
@@ -147,14 +148,22 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      5) z-biasing potential if add_z_bias_restraint() was called for any
         particles
 
-     @param update if true, forces recreation of the scoring function,
-                   o/w cached version may be retrieved, which may not
-                   be completely up to date
+     @param if force_update is true, forces recreation of the scoring function,
+                   o/w cached version may be retrieved if available, which may not
+                   be completely up to date.
 
-     @note if udpate=false, might fail to include e.g., new particles
+     @note if force_udpate=false, might fail to include e.g., new particles
            or new interactions that were added after the last call
    */
-  IMP::ScoringFunction* get_scoring_function(bool update=false);
+  IMP::ScoringFunction* get_scoring_function(bool force_update=false);
+
+  /**
+     returns the restrains associated with the scoring function return by
+     get_scoring_function(force_update)
+  */
+  IMP::Restraints
+    get_scoring_function_restraints(bool force_update=false);
+
 
   /**
      returns a custom scoring function for the NPC simulation, based on:
