@@ -225,7 +225,7 @@ void Scoring::add_interaction
   if (idata.has_interaction_k()) {
     base_k = idata.interaction_k().value();
   }
-  double interaction_k = base_k * interaction_k_factors_.find(type0)->second  // TODO: validate type exists
+  double interaction_k = base_k * interaction_k_factors_.find(type0)->second  
                                 * interaction_k_factors_.find(type1)->second;
   double base_range = interaction_range_;
   if (idata.has_interaction_range()) {
