@@ -7,7 +7,7 @@
 *.gcno
 *.gcda
 .#*
-#*
+*#
 *.pym
 CMakeLists.txt
 CMakeModules/
