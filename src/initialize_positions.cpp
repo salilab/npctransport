@@ -335,7 +335,7 @@ void initialize_positions(SimulationData *sd,
     sd->get_rmf_sos_writer()->set_period(dump_interval);  // restore output rate
     sd->get_bd()->get_scoring_function()->evaluate(false);
     IMP::RestraintsTemp rs(sd->get_scoring()->get_scoring_function_restraints(true));
-    for(int i=0; i<rs.size(); i++){
+    for(unsigned int i=0; i<rs.size(); i++){
       rs[i]->get_score();
     }
     sd->get_rmf_sos_writer()->update_always("done initializing");

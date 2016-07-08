@@ -30,6 +30,17 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
   // time series of the positions of particles in the chain:
   std::deque<algebra::Vector3Ds> positions_;
 
+  // mean radius-of-gyration and its square since last reset
+  double mean_rgyr_;
+  double mean_rgyr2_;
+
+  // mean end-to-end length and its square since last reset
+  double mean_end_to_end_;
+  double mean_end_to_end2_;
+
+  // number of samples over which means are computed
+  int n_;
+
   double get_dt() const;
 
  public:
@@ -45,6 +56,30 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
   Floats get_diffusion_coefficients() const;
 
   double get_diffusion_coefficient() const;
+
+  //! returns the mean Rgyr of this chain
+  double get_mean_radius_of_gyration() const{
+    return mean_rgyr_;
+  }
+
+  //! returns the mean Rgyr^2, which can be used to compute
+  //! std-dev (but recorded separately so it could be averaged with
+  //! other chains)
+  double get_mean_square_radius_of_gyration() const{
+    return mean_rgyr2_;
+  }
+
+    //! returns the mean end-to-end distance of this chain
+  double get_mean_end_to_end_distance() const{
+    return mean_end_to_end_;
+  }
+
+  //! returns the mean square end-to-end distance, which can be used to compute
+  //! std-dev (but recorded separately so it could be averaged with
+  //! other chains)
+  double get_mean_square_end_to_end_distance() const{
+    return mean_end_to_end_;
+  }
 
   /**
      Resets all the statistics about that chain

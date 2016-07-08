@@ -249,8 +249,10 @@ message Statistics {
   message FGOrderParams {
     required double time_ns=1;
     required double volume=2;
-    required double radius_of_gyration=3;
-    required double length=4;
+    optional double mean_radius_of_gyration=3;
+    optional double mean_square_radius_of_gyration=5;
+    optional double mean_end_to_end_distance=4;
+    optional double mean_square_end_to_end_distance=6;
   }
   message FloaterOrderParams {
     required double time_ns=1;

@@ -227,7 +227,7 @@ void Statistics::update_fg_stats
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
     ->get_bd()->get_current_time() / FS_IN_NS;
 
-  // General FG chain statistics:
+  // Go over all fg types:
   ParticleTypeSet const &fgt = get_sd()->get_fg_types();
   for ( ParticleTypeSet::const_iterator
           it = fgt.begin(); it != fgt.end(); it++ )
@@ -236,47 +236,11 @@ void Statistics::update_fg_stats
       atom::Hierarchy root_i = get_sd()->get_root_of_type( type_i );
       ParticlesTemp chains_i = root_i.get_children();
       if(chains_i.size() == 0)
-        continue; // TODO: add warning?
-      // can happen only upon dynamic changes...
+        continue;
       unsigned int i = find_or_add_fg_of_type( stats, type_i );
-
-      // Chain stats from current snapshot:
-      {
-        double avg_volume = 0.0;
-        double avg_radius_of_gyration = 0.0;
-        double avg_length = 0.0;
-        for (unsigned int j = 0; j < chains_i.size(); ++j)
-          {
-            Pointer<FGChain> chain_ij= get_fg_chain(chains_i[j]);
-            fill_in_zr_hist(zr_hist, chain_ij->get_beads());
-#ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
-            double volume_ij =
-              atom::get_volume(chain_ij->get_root()); // how does the work with TAMD?
-             // perhaps chain_ij->beads instead?
-            double radius_of_gyration_ij =
-              atom::get_radius_of_gyration(chain_ij->get_beads());
-#else
-            double volume_ij = -1.;
-            double radius_of_gyration_ij = -1.;
-#endif
-            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), volume, volume_ij);
-            double length_ij =
-              core::get_distance(core::XYZ(chain_ij->get_bead(0)),
-                                 core::XYZ(chain_ij->get_beads().back()));
-            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), length, length_ij);
-            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), radius_of_gyration,
-                       radius_of_gyration_ij);
-            avg_volume += volume_ij / chains_i.size();
-            avg_radius_of_gyration += radius_of_gyration_ij / chains_i.size();
-            avg_length += length_ij / chains_i.size();
-          } // for j (fg chain)
-        npctransport_proto::Statistics_FGOrderParams*
-          fgrc = stats->mutable_fgs(i)->add_order_params();
-        fgrc->set_time_ns(sim_time_ns);
-        fgrc->set_volume(avg_volume);
-        fgrc->set_radius_of_gyration(avg_radius_of_gyration);
-        fgrc->set_length(avg_length);
-      }
+      npctransport_proto::Statistics_FGOrderParams*
+        fgi_op = stats->mutable_fgs(i)->add_order_params();
+      fgi_op->set_time_ns(sim_time_ns);
 
       // Average chain stats from optimizer state:
       {
@@ -285,6 +249,10 @@ void Statistics::update_fg_stats
                         "type missing from stats");
         ChainStatisticsOptimizerStates& cs_i =
           chains_stats_map_.find(type_i)->second;
+        double mean_radius_of_gyration=0.0;
+        double mean_square_radius_of_gyration=0.0;
+        double mean_end_to_end_distance=0.0;
+        double mean_square_end_to_end_distance=0.0;
         for (unsigned int j = 0; j < cs_i.size(); ++j)
           {
             unsigned int cnf = nf * cs_i.size() + j;
@@ -298,8 +266,47 @@ void Statistics::update_fg_stats
             UPDATE_AVG(cnf, nf_new, *stats->mutable_fgs(i),
                        local_diffusion_coefficient,
                        std::accumulate(df.begin(), df.end(), 0.0) / df.size());
+            mean_radius_of_gyration+=
+              cs_i[j]->get_mean_radius_of_gyration()/cs_i.size();
+            mean_square_radius_of_gyration+=
+              cs_i[j]->get_mean_square_radius_of_gyration()/cs_i.size();
+            mean_end_to_end_distance+=
+              cs_i[j]->get_mean_end_to_end_distance()/cs_i.size();
+            mean_square_end_to_end_distance+=
+              cs_i[j]->get_mean_square_end_to_end_distance()/cs_i.size();
             cs_i[j]->reset();
           } // for j (fg chain)
+        UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i),
+                   radius_of_gyration, mean_radius_of_gyration);
+        UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i),
+                   length, mean_end_to_end_distance);
+        fgi_op->set_mean_radius_of_gyration
+          (mean_radius_of_gyration);
+        fgi_op->set_mean_square_radius_of_gyration
+          (mean_square_radius_of_gyration);
+        fgi_op->set_mean_end_to_end_distance
+          (mean_end_to_end_distance);
+        fgi_op->set_mean_square_end_to_end_distance
+          (mean_square_end_to_end_distance);
+      }
+
+      // Additional chain stats from current snapshot:
+      {
+        double avg_volume = 0.0;
+        for (unsigned int j = 0; j < chains_i.size(); ++j)
+          {
+            Pointer<FGChain> chain_ij= get_fg_chain(chains_i[j]);
+            fill_in_zr_hist(zr_hist, chain_ij->get_beads());
+#ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
+            double volume_ij =
+              atom::get_volume(chain_ij->get_root()); // how does the work with TAMD?
+#else
+            double volume_ij = -1.;
+#endif
+            UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), volume, volume_ij);
+            avg_volume += volume_ij / chains_i.size();
+          } // for j (fg chain)
+        fgi_op->set_volume(avg_volume);
       }
 
       // FG average body stats from optimizer state:

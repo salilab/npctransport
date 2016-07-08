@@ -127,7 +127,6 @@ inline double SitesPairScore::evaluate_index(Model *m,
           sum +=
             internal::evaluate_pair_of_sites(params_,
                                           rbi0, rbi1,
-                                          sites0_[i], sites1_[j],
                                           g0, g1,
                                           da);
       } else

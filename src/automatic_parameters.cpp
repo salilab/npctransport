@@ -159,8 +159,8 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
     // factor k and range + retrieve particles radii
     std::string type0=a.interactions(i).type0();
     std::string type1=a.interactions(i).type1();
-    double R0;
-    double R1;
+    double R0(-1.0);
+    double R1(-1.0);
     for(int ii=0; ii<a.floaters_size(); ii++){
       if(a.floaters(ii).type()==type0){
         k*=a.floaters(ii).interaction_k_factor().value();
@@ -195,6 +195,8 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
       }
     }
     if(is_orientational){
+      IMP_USAGE_CHECK(R0>0.0 && R1>0.0,
+                      "R0 or R1 could not be found for type0 or type1");
       k*=0.5*range; // the maximal k for this interction
       const double pi = 3.1415926535897;
       double range_sigma0_rad=a.interactions(i).range_sigma0_deg().value()*pi/180.0;

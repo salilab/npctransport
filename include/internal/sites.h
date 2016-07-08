@@ -179,7 +179,6 @@ inline
 double evaluate_pair_of_sites
 ( SitesPairScoreParameters const& spsp,
   RigidBodyInfo& rbi1, RigidBodyInfo& rbi2,
-  const algebra::Sphere3D &lSite1, const algebra::Sphere3D &lSite2,
   algebra::Vector3D& gSite1, algebra::Vector3D& gSite2,
   DerivativeAccumulator *da)
 {
