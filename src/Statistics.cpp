@@ -160,7 +160,7 @@ void Statistics::add_interaction_stats
     if (set0.size() > 0 && set1.size() > 0)
       {
         IMP_NEW(BipartitePairsStatisticsOptimizerState, bpsos,
-                (get_model(), interaction_type, set0, set1,
+                (this, interaction_type, set0, set1,
                  range, slack));
         bpsos->set_period(statistics_interval_frames_);
         interaction_stats_map_[interaction_type] = bpsos;

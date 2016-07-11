@@ -7,6 +7,7 @@
  */
 
 #include <IMP/npctransport/BipartitePairsStatisticsOptimizerState.h>
+#include <IMP/npctransport/Statistics.h>
 #include <IMP/npctransport/enums.h>
 #include <IMP/npctransport/util.h>
 #include <IMP/container/ClosePairContainer.h>
@@ -126,8 +127,8 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
                           int num = statistics_manager_->get_number_of_interactions
                             (pip[0], pip[1] ); // verify actual site-site interactions
                           if(num>0){
-                            new_bound_I.insert(pip[0]);
-                            new_bound_II.insert(pip[1]);
+                            new_bounds_I.insert(pip[0]);
+                            new_bounds_II.insert(pip[1]);
                             new_contacts.insert
                               ( make_unordered_particle_index_pair( _1 ) );
                           }
@@ -282,6 +283,5 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
   time_ns_ = new_time_ns;
 }
 
-}
 
 IMPNPCTRANSPORT_END_NAMESPACE

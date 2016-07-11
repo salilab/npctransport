@@ -208,6 +208,21 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   }
 #endif
 
+  /** get the number of site-site interactions between two particles,
+      based on site pair score between p1 and p2 in this->get_sd() */
+  int get_number_of_interactions
+    (Particle *p1, Particle *p2) const;
+
+  /** get the number of site-site interactions between two particles
+      with indexes pi1 and pi2 in model get_model(),
+      based on site pair score in get_sd()
+  */
+  int get_number_of_interactions
+    (ParticleIndex pi1, ParticleIndex pi2) const {
+    return get_number_of_interactions
+      (get_model()->get_particle(pi1),
+       get_model()->get_particle(pi2));
+  }
 
  private:
 
@@ -232,11 +247,6 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   // 4 - sum of # of chain-floater that site-intercat
   boost::tuple<double, double, double, double> get_interactions_and_interacting
     ( const ParticlesTemp &floaters, const atom::Hierarchies &chain_roots) const;
-
-
-  // TODO: move to util.h, possibly internal
-  /** get the number of site-site interactions between two particles */
-  int get_number_of_interactions(Particle *a, Particle *b) const;
 
   //! @return the top of a z-axis bin for various stats
   double get_z_distribution_top() const;
