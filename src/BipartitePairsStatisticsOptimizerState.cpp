@@ -43,12 +43,14 @@ namespace {
 
 
 BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
-(  Model* m,
+(  WeakPointer<IMP::npctransport::Statistics> statistics_manager,
    InteractionType interaction_type,
    const ParticlesTemp& particlesI, const ParticlesTemp& particlesII,
    double contact_range, double slack
    )
-  : P(m, "BipartitePairsStatisticsOptimizerState%1%"),
+  : P(statistics_manager ? statistics_manager->get_model() : nullptr,
+      "BipartitePairsStatisticsOptimizerState%1%"),
+    statistics_manager_(statistics_manager),
     is_reset_(true),
     interaction_type_(interaction_type),
     n_particles_I_(particlesI.size()),
@@ -111,26 +113,25 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
 
   // Update the lists of bound particles and their interactions,
   // for all bipartite pairs of distinct particles
-  close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh container
-  boost::unordered_set<ParticleIndex> new_bounds_I;
-  boost::unordered_set<ParticleIndex> new_bounds_II;
-  std::set<ParticleIndexPair> new_contacts; // more efficient if ordered set
-  IMP_CONTAINER_FOREACH
-    (IMP::container::CloseBipartitePairContainer,
-     close_bipartite_pair_container_,
-     {
-       ParticleIndexPair const& pip = _1;
-       core::XYZR s0(get_model(), pip[0]);
-       core::XYZR s1(get_model(), pip[1]);
-       if(core::get_distance(s0, s1) < range_ &&
-          pip[0]!=pip[1])
-         {
-           new_bounds_I.insert(pip[0]);
-           new_bounds_II.insert(pip[1]);
-           new_contacts.insert
-             ( make_unordered_particle_index_pair( _1 ) );
-         }
-     });
+  // Update the lists of bound particles and their interactions
+  close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh
+  t_particle_index_set new_bounds_I, new_bounds_II;
+  t_particle_index_pair_set new_contacts; // more efficient if ordered set
+  IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
+                        close_bipartite_pair_container_,
+                        {
+                          ParticleIndexPair const& pip = _1;
+                          core::XYZR s0(get_model(), pip[0]);
+                          core::XYZR s1(get_model(), pip[1]);
+                          int num = statistics_manager_->get_number_of_interactions
+                            (pip[0], pip[1] ); // verify actual site-site interactions
+                          if(num>0){
+                            new_bound_I.insert(pip[0]);
+                            new_bound_II.insert(pip[1]);
+                            new_contacts.insert
+                              ( make_unordered_particle_index_pair( _1 ) );
+                          }
+                        });
   IMP_LOG(PROGRESS,
           new_bounds_I.size() << "/" << n_particles_I_
           << " bound-I(" << interaction_type_.first<< "); "
@@ -279,6 +280,8 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
   contacts_ = new_contacts;
   stats_time_ns_ += elapsed_time_ns;
   time_ns_ = new_time_ns;
+}
+
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

@@ -20,6 +20,8 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+class Statistics;
+
 /** Track the interaction between pairs from one group of particles
     with particles from another group, within some specified contat
     range
@@ -28,7 +30,11 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
     : public core::PeriodicOptimizerState {
  private:
   typedef core::PeriodicOptimizerState P;
+  typedef IMP_KERNEL_LARGE_UNORDERED_SET<ParticleIndex> t_particle_index_set;
+  typedef IMP_KERNEL_LARGE_UNORDERED_SET<ParticleIndexPair> t_particle_index_pair_set;
  private:
+  WeakPointer<IMP::npctransport::Statistics> statistics_manager_;
+
   bool is_reset_;
 
   int n_updates_;
@@ -60,9 +66,9 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
 
   // list of bound particles of each type + list of their contacts after
   // last round of update
-  boost::unordered_set<ParticleIndex> bounds_I_;
-  boost::unordered_set<ParticleIndex> bounds_II_;
-  std::set<ParticleIndexPair> contacts_; // more efficient if ordered set
+  t_particle_index_set bounds_I_;
+  t_particle_index_set bounds_II_;
+  t_particle_index_pair_set contacts_;
 
   // Average since last reset:
   double avg_pct_bound_particles_I_; // particles in group I
@@ -101,12 +107,12 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
                               performance - touch only if you know what you're
                               doing
   */
-  BipartitePairsStatisticsOptimizerState(
-      Model* m,
-      InteractionType interaction_type,  // TODO: remove this from class?
-                                         //       a bit ugly and ungeneral
-      const ParticlesTemp& particlesI, const ParticlesTemp& particlesII,
-      double contact_range = 1.0, double slack = 1.0);
+  BipartitePairsStatisticsOptimizerState
+    (WeakPointer<IMP::npctransport::Statistics> statistics_manager,
+     InteractionType interaction_type,  // TODO: remove this from class?
+                                        //       a bit ugly and ungeneral
+     const ParticlesTemp& particlesI, const ParticlesTemp& particlesII,
+     double contact_range = 1.0, double slack = 1.0);
 
   /**
      returns the particle types of the first and second group of particles,
@@ -217,9 +223,10 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
      and n2 bound particles of type II, assuming old_updates
      for the old average
    */
-  void update_fraction_bound(unsigned int n1,
-                             unsigned int n2,
-                             unsigned int old_updates);
+  //  void update_fraction_bound(unsigned int n1,
+  //                            unsigned int n2,
+  //                           unsigned int old_updates);
+
 
  public:
   IMP_OBJECT_METHODS(BipartitePairsStatisticsOptimizerState);
