@@ -651,6 +651,7 @@ void Statistics::update
   // dump to file
   std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
   output.SerializeToOstream(&outf);
+  outf.flush();
   }
 
 void Statistics::reset_statistics_optimizer_states()

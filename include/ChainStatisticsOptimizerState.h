@@ -78,7 +78,7 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
   //! std-dev (but recorded separately so it could be averaged with
   //! other chains)
   double get_mean_square_end_to_end_distance() const{
-    return mean_end_to_end_;
+    return mean_end_to_end2_;
   }
 
   /**

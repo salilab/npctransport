@@ -282,7 +282,7 @@ int main(int argc, char* argv[]) {
     //IMP_LOG(PROGRESS, initialization_restraints << std::endl);
     npctransport::do_main_loop(sd, initialization_restraints);
     //print_fgs(*sd, TERSE);
-    IMP::show_timings(std::cout);
+    //    IMP::show_timings(std::cout);
   }
   catch (const IMP::Exception & e) {
     std::cerr << "Error: " << e.what() << std::endl;
