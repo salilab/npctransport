@@ -118,11 +118,17 @@ inline algebra::Vector3D get_global_from_local_v3( Particle* p,
          (e.g. std::set) whose begin() and end() methods qualify as valid inputs
          for std::set_difference
 */
-template<class t_set>
+template<class t_ordered_set>
 inline boost::tuple<unsigned int, unsigned int>
-  get_n_lost_and_gained(t_set old, t_set cur)
+  get_n_lost_and_gained(t_ordered_set old, t_ordered_set cur)
 {
-  t_set lost, gained;
+  t_ordered_set lost, gained;
+  IMP_USAGE_CHECK
+    (std::is_sorted(old.begin(), old.end()),
+     'get_n_lost_and_gained() is expecting an ordered set only');
+  IMP_USAGE_CHECK
+    (std::is_sorted(cur.begin(), cur.end()),
+     'get_n_lost_and_gained() is expecting an ordered set only');
   std::set_difference(old.begin(), old.end(), cur.begin(), cur.end(),
                       std::inserter(lost, lost.begin()) );
   std::set_difference(cur.begin(), cur.end(), old.begin(), old.end(),

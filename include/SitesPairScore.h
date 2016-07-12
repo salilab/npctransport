@@ -168,6 +168,30 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   */
   virtual double evaluate_index(Model *m, const ParticleIndexPair &p,
                                 DerivativeAccumulator *da) const IMP_OVERRIDE;
+#ifndef SWIG
+  /**
+     EvaluatE all site-site interactions
+     for evaluate_index() for the pair pip in model m. If da is not nullptr,
+     it accumulated appropriate derivatives. If n_contacts_accumulator>=0,
+     then the number of individual contacts found is asscumulated there.
+
+     @param m the model
+     @param pip the pair of particle indexes in m
+     @param da optional accumulator for force and torque derivatives
+     @param n_contacts_accumulator optional pointer to accumulator for number of
+           individual contacts.
+
+     @return the site-site contributions for the score for the pair
+             pip in model m.
+  */
+  double
+    evaluate_site_contributions
+    (Model *m,
+     const ParticleIndexPair &pip,
+     DerivativeAccumulator *da,
+     int* n_contacts_accumulator = nullptr
+     ) const;
+#endif
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const;
@@ -188,6 +212,8 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   IMP_OBJECT_METHODS(SitesPairScore);
 
  private:
+
+
   // gets the rigid body information (e.g., translation, inverse rotation)
   // associated with particle m.pi, possibly from cache (depending on internal
   // cache definitions)

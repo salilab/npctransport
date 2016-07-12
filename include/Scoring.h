@@ -455,6 +455,10 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
       only if interaction_k is not specified for a certain interaction */
   double get_interaction_k() const { return interaction_k_; }
 
+  //! returns the pair score for particles of types t1 and t2   */
+  IMP::PairScore const* get_predicate_pair_score
+    ( core::ParticleType t1, core::ParticleType t2) const;
+
   /** @return maximal actual interaction range (normalized by
       range factors) for a given interaction type, as set by
       add_interaction(), over site-site and/or non-specific
@@ -470,6 +474,23 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
     (core::ParticleType t1, core::ParticleType t2,
      bool site_specific = true,
      bool non_specific = false) const;
+
+  //! return number of site-site interaction that contribute
+  //! to the score between pi1 and pi2 in the model, based on their
+  //! current coordinates and their particle types
+  int get_number_of_site_site_interactions
+    ( ParticleIndex p1, ParticleIndex p2) const;
+
+  //! return number of site-site interaction that contribute
+  //! to the score between p1 and p2, based on their
+  //! current coordinates and their particle types
+  int get_number_of_site_site_interactions
+    ( Particle const* p1, Particle const* p2) const
+  {
+    return
+      get_number_of_site_site_interactions
+      (p1->get_index(), p2->get_index());
+  }
 
 
   core::OrderedTypePairPredicate* get_ordered_type_pair_predicate()

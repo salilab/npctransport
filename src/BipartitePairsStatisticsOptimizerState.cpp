@@ -8,6 +8,8 @@
 
 #include <IMP/npctransport/BipartitePairsStatisticsOptimizerState.h>
 #include <IMP/npctransport/Statistics.h>
+#include <IMP/npctransport/SimulationData.h>
+#include <IMP/npctransport/Scoring.h>
 #include <IMP/npctransport/enums.h>
 #include <IMP/npctransport/util.h>
 #include <IMP/container/ClosePairContainer.h>
@@ -77,6 +79,8 @@ void BipartitePairsStatisticsOptimizerState::reset() {
   n_updates_ = 0;
   stats_time_ns_ = 0;
   off_stats_time_ns_ = 0.0;
+  off_I_stats_time_ns_ = 0.0;
+  off_II_stats_time_ns_ = 0.0;
   on_stats_time_ns_ = 0.0;
   on_I_stats_time_ns_ = 0.0;
   on_II_stats_time_ns_ = 0.0;
@@ -114,18 +118,19 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
 
   // Update the lists of bound particles and their interactions,
   // for all bipartite pairs of distinct particles
-  // Update the lists of bound particles and their interactions
   close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh
-  t_particle_index_set new_bounds_I, new_bounds_II;
-  t_particle_index_pair_set new_contacts; // more efficient if ordered set
+  t_particle_index_ordered_set new_bounds_I, new_bounds_II;
+  t_particle_index_pair_ordered_set new_contacts; // more efficient if ordered set
   IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
                         close_bipartite_pair_container_,
                         {
                           ParticleIndexPair const& pip = _1;
                           core::XYZR s0(get_model(), pip[0]);
                           core::XYZR s1(get_model(), pip[1]);
-                          int num = statistics_manager_->get_number_of_interactions
-                            (pip[0], pip[1] ); // verify actual site-site interactions
+                          int num =
+                            statistics_manager_->get_sd()->get_scoring()
+                            ->get_number_of_site_site_interactions
+                            (pip[0], pip[1] );
                           if(num>0){
                             new_bounds_I.insert(pip[0]);
                             new_bounds_II.insert(pip[1]);
@@ -173,43 +178,56 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
         {
           IMP_USAGE_CHECK( n_bounds_I_before > 0 && n_bounds_II_before > 0,
                            "positive contacts but no bounds type I or II");
-          double off_per_contact_per_ns =
-            n_contacts_lost / n_contacts_before / elapsed_time_ns;
-          double off_per_bound_I_per_ns =
-            n_bounds_I_lost / n_bounds_I_before / elapsed_time_ns;
-          double off_per_bound_II_per_ns =
-            n_bounds_II_lost / n_bounds_II_before / elapsed_time_ns;
-          update_weighted_average(avg_off_per_contact_per_ns_,
-                                  off_per_contact_per_ns,
-                                  off_stats_time_ns_,
-                                  elapsed_time_ns);
-          update_weighted_average(avg_off_per_bound_I_per_ns_,
-                                  off_per_bound_I_per_ns,
-                                  off_stats_time_ns_,
-                                  elapsed_time_ns);
-          update_weighted_average(avg_off_per_bound_II_per_ns_,
-                                  off_per_bound_II_per_ns,
-                                  off_stats_time_ns_,
-                                  elapsed_time_ns);
-          off_stats_time_ns_ += elapsed_time_ns;
+          {
+            double weighted_time_ns = ( n_contacts_before * elapsed_time_ns);
+            double off_per_contact_per_ns =
+              n_contacts_lost / weighted_time_ns;
+            update_weighted_average(avg_off_per_contact_per_ns_,
+                                    off_per_contact_per_ns,
+                                    off_stats_time_ns_,
+                                    weighted_time_ns);
+            off_stats_time_ns_ += weighted_time_ns;
+          }
+          {
+            double weighted_time_ns=( n_bounds_I_before * elapsed_time_ns);
+            double off_per_bound_I_per_ns =
+              n_bounds_I_lost / weighted_time_ns;
+            update_weighted_average(avg_off_per_bound_I_per_ns_,
+                                    off_per_bound_I_per_ns,
+                                    off_I_stats_time_ns_,
+                                    weighted_time_ns);
+            off_I_stats_time_ns_ += weighted_time_ns;
+          }
+          {
+            double weighted_time_ns=( n_bounds_II_before * elapsed_time_ns);
+            double off_per_bound_II_per_ns =
+              n_bounds_II_lost / weighted_time_ns;
+            update_weighted_average(avg_off_per_bound_II_per_ns_,
+                                    off_per_bound_II_per_ns,
+                                    off_II_stats_time_ns_,
+                                    weighted_time_ns);
+            off_II_stats_time_ns_ += weighted_time_ns;
+          }
         }
       if( n_unbounds_I_before > 0) {
+        double weighted_time_ns =  n_unbounds_I_before * elapsed_time_ns;
         double on_per_unbound_I_per_ns =
-          n_bounds_I_gained / n_unbounds_I_before / elapsed_time_ns;
+          n_bounds_I_gained / weighted_time_ns;
         update_weighted_average(avg_on_per_unbound_I_per_ns_,
                                 on_per_unbound_I_per_ns,
                                 on_I_stats_time_ns_,
-                                elapsed_time_ns);
-        on_I_stats_time_ns_ += elapsed_time_ns;
+                                weighted_time_ns);
+        on_I_stats_time_ns_ += weighted_time_ns;
       }
       if( n_unbounds_II_before > 0) {
+        double weighted_time_ns =  n_unbounds_II_before * elapsed_time_ns;
         double on_per_unbound_II_per_ns =
-          n_bounds_II_gained / n_unbounds_II_before / elapsed_time_ns;
+          n_bounds_II_gained / weighted_time_ns;
         update_weighted_average(avg_on_per_unbound_II_per_ns_,
                                 on_per_unbound_II_per_ns,
                                 on_II_stats_time_ns_,
-                                elapsed_time_ns);
-        on_II_stats_time_ns_ += elapsed_time_ns;
+                                weighted_time_ns);
+        on_II_stats_time_ns_ += weighted_time_ns;
       }
       double n_missing_contacts_before =
         n_possible_contacts_ - n_contacts_before;
@@ -217,13 +235,14 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
         {
           double n_missing_contacts_before =
             n_possible_contacts_ - n_contacts_before;
+          double weighted_time_ns = n_missing_contacts_before * elapsed_time_ns;
           double on_per_missing_contact_per_ns =
-            n_contacts_gained / n_missing_contacts_before / elapsed_time_ns;
+            n_contacts_gained / weighted_time_ns;
           update_weighted_average(avg_on_per_missing_contact_per_ns_,
                                   on_per_missing_contact_per_ns,
                                   on_stats_time_ns_,
-                                  elapsed_time_ns);
-          on_stats_time_ns_ += elapsed_time_ns;
+                                  weighted_time_ns);
+          on_stats_time_ns_ += weighted_time_ns;
       }
 
       IMP_IF_LOG(PROGRESS) {

@@ -38,6 +38,10 @@ double BodyStatisticsOptimizerState::get_dt() const {
 }
 
 double BodyStatisticsOptimizerState::get_correlation_time() const {
+  bool IS_DISABLED=true; // DISABLE FOR NOW CAUSE TIME CONSUMING
+  if(IS_DISABLED){
+    return std::numeric_limits<double>::infinity();
+  }
   double sum = 0;
   int n = 0;
   Floats angles;

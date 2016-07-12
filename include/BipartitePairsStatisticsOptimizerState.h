@@ -30,8 +30,8 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
     : public core::PeriodicOptimizerState {
  private:
   typedef core::PeriodicOptimizerState P;
-  typedef IMP_KERNEL_LARGE_UNORDERED_SET<ParticleIndex> t_particle_index_set;
-  typedef IMP_KERNEL_LARGE_UNORDERED_SET<ParticleIndexPair> t_particle_index_pair_set;
+  typedef IMP_KERNEL_LARGE_ORDERED_SET<ParticleIndex> t_particle_index_ordered_set; // got to be ordered
+  typedef IMP_KERNEL_LARGE_ORDERED_SET<ParticleIndexPair> t_particle_index_pair_ordered_set;
  private:
   WeakPointer<IMP::npctransport::Statistics> statistics_manager_;
 
@@ -41,13 +41,15 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   double time_ns_; // simulation time in ns
   double stats_time_ns_; // time statistics were gathered for miscs
   double off_stats_time_ns_; // time when off-rate calculations were gathered,
-                            // requiring presence of bounds
+                            // requiring presence of bounds, weighted by #contacts
+  double off_I_stats_time_ns_; // weighted by number of bounds I
+  double off_II_stats_time_ns_; // weighted by number of bounds II
   double on_stats_time_ns_; // time when on-rate calcualtions were gathered,
                             // requiring presence of unbounds
   double on_I_stats_time_ns_; // time when on-rate calcualtions were gathered
-                              // for particles I
+                              // for particles I, weighted by their number
   double on_II_stats_time_ns_; // time when on-rate calcualtions were gathered
-                              // for particles II
+                              // for particles II, weighted by their number
 
   // the types of particles involved in the interaction (type of group I and II)
   // TODO: a bit ugly and ungeneral, we might have mixed types in principle
@@ -66,9 +68,9 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
 
   // list of bound particles of each type + list of their contacts after
   // last round of update
-  t_particle_index_set bounds_I_;
-  t_particle_index_set bounds_II_;
-  t_particle_index_pair_set contacts_;
+  t_particle_index_ordered_set bounds_I_;
+  t_particle_index_ordered_set bounds_II_;
+  t_particle_index_pair_ordered_set contacts_;
 
   // Average since last reset:
   double avg_pct_bound_particles_I_; // particles in group I
@@ -202,7 +204,13 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   double get_off_stats_period_ns() const
   { return off_stats_time_ns_; };
 
-  double get_on_stats_period_ns() const
+  double get_off_I_stats_period_ns() const
+  { return off_I_stats_time_ns_; };
+
+    double get_off_II_stats_period_ns() const
+  { return off_II_stats_time_ns_; };
+
+    double get_on_stats_period_ns() const
   { return on_stats_time_ns_; };
 
   double get_on_I_stats_period_ns() const

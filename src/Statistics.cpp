@@ -576,6 +576,10 @@ void Statistics::update
       ( bps_i->get_average_off_per_bound_II_per_ns() );
     siop->set_off_stats_period_ns
       ( bps_i->get_off_stats_period_ns() );
+    siop->set_off_i_stats_period_ns
+      ( bps_i->get_off_I_stats_period_ns() );
+    siop->set_off_ii_stats_period_ns
+      ( bps_i->get_off_II_stats_period_ns() );
     siop->set_avg_on_per_missing_contact_per_ns
       ( bps_i->get_average_on_per_missing_contact_per_ns() );
     siop->set_on_stats_period_ns
@@ -723,37 +727,6 @@ void Statistics::set_interrupted(bool tf) {
 
 /************ private utility methods ****************/
 
-// number of site-site interactions between p1 and p2
-int Statistics::get_number_of_interactions(Particle *p1, Particle *p2) const {
-  using namespace IMP::core;
-  core::ParticleType type1 = Typed(p1).get_type();
-  core::ParticleType type2 = Typed(p2).get_type();
-  double range_site =
-    get_sd()->get_scoring()->get_interaction_range_for(type1, type2,
-                                                       true, // site
-                                                       false // non-spec
-                                                       );
-  if ( get_distance(XYZR(p1), XYZR(p2)) > range_site )
-    return 0; // filter on sphere distance
-  const algebra::Vector3Ds &sites1 = get_sd()->get_site_centers( type1 );
-  const algebra::Vector3Ds  &sites2 = get_sd()->get_site_centers( type2 );
-
-  int ct = 0;
-  for (unsigned int i1 = 0; i1 < sites1.size(); ++i1)
-    {
-      algebra::Vector3D v1 = get_global_from_local_v3(p1, sites1[i1]);
-      for (unsigned int i2 = 0; i2 < sites2.size(); ++i2)
-        {
-          algebra::Vector3D v2 = get_global_from_local_v3(p2, sites2[i2]);
-          if (algebra::get_distance(v1, v2) < range_site)
-            {
-              ++ct;
-            }
-        } // for i2
-    } // for i1
-  return ct;
-}
-
 // see doc in .h file
 boost::tuple<double, double, double, double>
 Statistics::get_interactions_and_interacting
@@ -768,7 +741,8 @@ Statistics::get_interactions_and_interacting
       Pointer<FGChain> cur_chain= get_fg_chain(chain_roots[j]);
       Particles const& chain_particles = cur_chain->get_beads();
       for (unsigned int k = 0; k < chain_particles.size(); ++k) {
-        int num = get_number_of_interactions
+        int num = get_sd()->get_scoring()
+          ->get_number_of_site_site_interactions
           (floaters[i], chain_particles[k] );
         if (num > 0) {
           IMP_LOG(VERBOSE, "Found " << num

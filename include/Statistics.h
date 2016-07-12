@@ -208,21 +208,6 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   }
 #endif
 
-  /** get the number of site-site interactions between two particles,
-      based on site pair score between p1 and p2 in this->get_sd() */
-  int get_number_of_interactions
-    (Particle *p1, Particle *p2) const;
-
-  /** get the number of site-site interactions between two particles
-      with indexes pi1 and pi2 in model get_model(),
-      based on site pair score in get_sd()
-  */
-  int get_number_of_interactions
-    (ParticleIndex pi1, ParticleIndex pi2) const {
-    return get_number_of_interactions
-      (get_model()->get_particle(pi1),
-       get_model()->get_particle(pi2));
-  }
 
  private:
 

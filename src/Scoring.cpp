@@ -288,12 +288,9 @@ void Scoring::add_interaction
 }
 
 
-
-// returns max of site-site and non-specific interaction ranges
-// for interaction type it, if applicable
-double Scoring::get_interaction_range_for
-  ( core::ParticleType t1, core::ParticleType t2,
-     bool site_specific, bool non_specific) const
+IMP::PairScore const*
+Scoring::get_predicate_pair_score
+( core::ParticleType t1, core::ParticleType t2) const
 {
   // Get pair score
   core::ParticleTypes pts;
@@ -303,9 +300,23 @@ double Scoring::get_interaction_range_for
   t_map_pair_type_to_pair_score::const_iterator iter =
     interaction_pair_scores_.find(iid);
   if(iter == interaction_pair_scores_.end()){
+    return nullptr;
+  }
+  return iter->second;
+ }
+
+
+// returns max of site-site and non-specific interaction ranges
+// for interaction type it, if applicable
+double
+Scoring::get_interaction_range_for
+  ( core::ParticleType t1, core::ParticleType t2,
+     bool site_specific, bool non_specific) const
+{
+  IMP::PairScore const* ps = get_predicate_pair_score(t1, t2);
+  if(ps==nullptr){
     return 0; // when not defined then only repulsive force upon touching
   }
-  IMP::PairScore const* ps = iter->second;
   // Get ranges (assuming Sites or LinearInteraction pair scores)
   double range_ss = -1.0; // site-specific
   if(site_specific){
@@ -320,6 +331,28 @@ double Scoring::get_interaction_range_for
     if(lips) range_ns = lips->get_range_attraction();
   }
   return std::max(range_ss, range_ns);
+}
+
+int
+Scoring::get_number_of_site_site_interactions
+( ParticleIndex pi1, ParticleIndex pi2) const
+{
+  core::Typed t1(get_model(), pi1);
+  core::Typed t2(get_model(), pi2);
+  core::ParticleType pt1=t1.get_type();
+  core::ParticleType pt2=t2.get_type();
+  SitesPairScore const* ps =
+    dynamic_cast<SitesPairScore const*>
+    (get_predicate_pair_score(pt1, pt2));
+  if(ps==nullptr){
+    return 0; // when not defined or not sites pair score then only repulsive force upon touching
+  }
+  int ret(0);
+  ps->evaluate_site_contributions(get_model(),
+                                  ParticleIndexPair(pi1, pi2),
+                                  nullptr,
+                                  &ret);
+  return ret;
 }
 
 

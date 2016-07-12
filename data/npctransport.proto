@@ -309,6 +309,8 @@ message Statistics {
     optional float avg_fraction_bound_particles_i=14;
     optional float avg_fraction_bound_particles_ii=15;
     optional float misc_stats_period_ns=16;
+    optional float off_i_stats_period_ns=17;
+    optional float off_ii_stats_period_ns=18;
   }
   message InteractionStats {
     required string type0=1;

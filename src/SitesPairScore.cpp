@@ -76,33 +76,16 @@ ModelObjectsTemp SitesPairScore::do_get_inputs(
   return IMP::get_particles(m, pis);
 }
 
-// the sites of each particle are transformed to a common frame of reference
-// (using the reference frame of each particle), and the site-specific
-// attraction, and the inter-particle non specific attraction and repulsion
-// are evaluated and summed.
-inline double SitesPairScore::evaluate_index(Model *m,
-                                             const ParticleIndexPair &pip,
-                                             DerivativeAccumulator *da) const {
+double
+SitesPairScore::evaluate_site_contributions
+(Model *m,
+ const ParticleIndexPair &pip,
+ DerivativeAccumulator *da,
+ int* n_contacts_accumulator
+ ) const
+{
   IMP_OBJECT_LOG;
 
-  // I. evaluate non-specific attraction and repulsion between
-  //    parent particles before computing for specific sites :
-  double non_specific_score = P::evaluate_index(m, pip, da);
-  LinearInteractionPairScore::EvaluationCache const&
-    lips_cache= P::get_evaluation_cache();
-
-  // II. Return if parent particles are out of site-specific interaction range
-  //     using cache to avoid some redundant calcs
-  double const& distance2= lips_cache.particles_delta_squared;
-  IMP_LOG(PROGRESS, "distance2 " << distance2
-          << " ; distance upper-bound " << ubound_distance2_ <<  std::endl);
-  if (distance2 > ubound_distance2_) {
-    IMP_LOG(PROGRESS, "Sites contribution is 0.0 and non-specific score is "
-            << non_specific_score << std::endl);
-    return non_specific_score;
-  }
-
-  // III. evaluate site-specific contributions :
   // bring sites_ to the frame of reference of nn_sites_ and nn_
   ParticleIndex pi0 = pip[0];
   ParticleIndex pi1 = pip[1];
@@ -122,16 +105,17 @@ inline double SitesPairScore::evaluate_index(Model *m,
     for(unsigned int j = 0 ; j < sites1_.size(); ++j) {
       algebra::Vector3D g1 = rbi1.tr.get_transformed(sites1_[j].get_center());
       IMP_LOG_PROGRESS( "Evaluating sites at global coordinates: " << g0 << " ; " << g1 << std::endl );
+      double cur_score;
       if(is_orientational_score_)
         {
-          sum +=
+          cur_score =
             internal::evaluate_pair_of_sites(params_,
-                                          rbi0, rbi1,
-                                          g0, g1,
-                                          da);
-      } else
+                                             rbi0, rbi1,
+                                             g0, g1,
+                                             da);
+        } else
         { // old score
-          sum +=
+          cur_score =
             internal::evaluate_one_site_3(params_.k,
                                           params_.r,
                                           rbi0, rbi1,
@@ -139,14 +123,47 @@ inline double SitesPairScore::evaluate_index(Model *m,
                                           g0, g1,
                                           da);
         }
+      sum += cur_score;
+      if(n_contacts_accumulator){
+        (*n_contacts_accumulator) += (cur_score!=0.0);
+      }
       IMP_LOG_PROGRESS( "Sum " << sum << std::endl);
     }
   }
-  IMP_LOG(PROGRESS,
-          "Sites contribution is " << sum <<
-          " and non-specific soft sphere contribution is " << non_specific_score
-          << std::endl);
-  return sum + non_specific_score;
+  return sum;
+}
+
+// the sites of each particle are transformed to a common frame of reference
+// (using the reference frame of each particle), and the site-specific
+// attraction, and the inter-particle non specific attraction and repulsion
+// are evaluated and summed.
+inline double
+SitesPairScore::evaluate_index
+(Model *m,
+ const ParticleIndexPair &pip,
+ DerivativeAccumulator *da) const {
+  IMP_OBJECT_LOG;
+
+  // I. evaluate non-specific attraction and repulsion between
+  //    parent particles before computing for specific sites :
+  double non_specific_score = P::evaluate_index(m, pip, da);
+  LinearInteractionPairScore::EvaluationCache const&
+    lips_cache= P::get_evaluation_cache();
+
+  // II. Return if parent particles are out of site-specific interaction range
+  //     using cache to avoid some redundant calcs
+  double const& distance2= lips_cache.particles_delta_squared;
+  IMP_LOG(PROGRESS, "distance2 " << distance2
+          << " ; distance upper-bound " << ubound_distance2_ <<  std::endl);
+  if (distance2 > ubound_distance2_) {
+    IMP_LOG(PROGRESS, "Sites contribution is 0.0 and non-specific score is "
+            << non_specific_score << std::endl);
+    return non_specific_score;
+  }
+
+  double site_score=evaluate_site_contributions(m, pip, da);
+  // III. evaluate site-specific contributions :
+  return site_score + non_specific_score;
 }
 
 // Restraints SitesPairScore::do_create_current_decomposition(

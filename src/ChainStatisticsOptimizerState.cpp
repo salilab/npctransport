@@ -45,6 +45,10 @@ double ChainStatisticsOptimizerState::get_dt() const {
 }
 
 double ChainStatisticsOptimizerState::get_correlation_time() const {
+  bool IS_DISABLED=true; // DISABLE FOR NOW CAUSE TIME CONSUMING
+  if(IS_DISABLED){
+    return std::numeric_limits<double>::infinity();
+  }
   double sum= 0;
   int n= 0;
   for (unsigned int i= 0; i < positions_.size(); ++i) {
