@@ -15,6 +15,8 @@ function_name_exceptions= \
         'BipartitePairsStatisticsOptimizerState.get_average_on_per_unbound_I_per_ns',
         'BipartitePairsStatisticsOptimizerState.get_on_II_stats_period_ns',
         'BipartitePairsStatisticsOptimizerState.get_on_I_stats_period_ns',
+        'BipartitePairsStatisticsOptimizerState.get_off_II_stats_period_ns',
+        'BipartitePairsStatisticsOptimizerState.get_off_I_stats_period_ns',
         'assign_ranges',
         'initialize_positions',
         'make_unordered_particle_index_pair'

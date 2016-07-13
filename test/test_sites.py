@@ -14,6 +14,12 @@ class ConeTests(IMP.test.TestCase):
         its first site are not too far or too close to all other
         rbs or their first sites.
         '''
+        for rb in rbs:
+            tr= IMP.algebra.get_random_vector_in(bb)
+            r= IMP.algebra.get_random_rotation_3d()
+            trans= IMP.algebra.Transformation3D(r, tr)
+            rb.set_reference_frame(IMP.algebra.ReferenceFrame3D(trans))
+
         for i in range(len(rbs)):
             ok=False
             failures=0
@@ -24,7 +30,8 @@ class ConeTests(IMP.test.TestCase):
                 rbs[i].set_reference_frame(IMP.algebra.ReferenceFrame3D(trans))
                 ok=True
                 for orb, s in zip(rbs[0:i], sites[0:i]):
-                    if failures>200:
+                    if failures>500:
+#                        print ("RETRYING RANDOMIZE")
                         return self._randomize(rbs, sites, bb) # retry
                     d= IMP.core.get_distance(IMP.core.XYZR(rbs[i]),
                                              IMP.core.XYZR(orb))
@@ -35,9 +42,9 @@ class ConeTests(IMP.test.TestCase):
                     sp=rbs[i].get_reference_frame().get_global_coordinates(sites[i][0].get_center())
                     spo= orb.get_reference_frame().get_global_coordinates(s[0].get_center())
                     ds= IMP.algebra.get_distance(sp, spo)
-                    print("i=",i, "d=", d, "dsites=", ds)
                     if ds > (radius/2.0):
-                        failures+=1
+                        failures+=1*ds/(radius/2.0)
+#                        print("i=",i, "d=", d, "dsites=", ds, "failures", failures)
                         ok=False
 
     def _show(self, rbs, sites, w):

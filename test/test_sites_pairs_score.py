@@ -50,7 +50,7 @@ def print_info(ps, site0, site1):
         rb=IMP.core.RigidBody(p)
         gForce=[xyz.get_derivative(ii) for ii in range(3)]
         lTorque=rb.get_torque()
-        gTorque=rb.get_reference_frame().get_global_coordinates(lTorque)-xyz.get_coordinates()               
+        gTorque=rb.get_reference_frame().get_global_coordinates(lTorque)-xyz.get_coordinates()
         if(p_serial==0):
             lSite=site0.get_center()
         else:
@@ -69,7 +69,7 @@ class Tests(IMP.test.TestCase):
                "repulsive-k", soft_sphere_k, "[kCal/mol/A]",
                "dT", dt)
         print("dG-site:", site_range*site_k, "[kCal/mol]")
-        nsteps = math.ceil(50E+6 / dt);
+        nsteps = math.ceil(25E+6 / dt);
         if(IMP.get_check_level() >= IMP.USAGE):
             nsteps /= 250
         m= IMP.Model()
@@ -106,7 +106,7 @@ class Tests(IMP.test.TestCase):
         w= IMP.npctransport.add_hierarchies_with_sites(f, ds)
         sos= IMP.rmf.SaveOptimizerState(m, f)
 #        bd.add_optimizer_state(sos)
-        sos.set_period(1000)
+        sos.set_period(10000)
         max_delta = 0.75 * site_range
         sos.update_always()
         for x_ds1,estimated_score in [
@@ -120,7 +120,7 @@ class Tests(IMP.test.TestCase):
 #            print ("P0", ds[0])
 #            print ("P1", ds[1])
             init_score =  bd.get_scoring_function().evaluate(False)
-            print("Score for sphere-distance ", abs(x_ds1)-2*radius, 
+            print("Score for sphere-distance ", abs(x_ds1)-2*radius,
                   "A and site-distance", abs(x_ds1-2*radius),
                   "A is: %.2f vs. expected: %.2f" % (init_score, estimated_score)
                   )
@@ -142,10 +142,10 @@ class Tests(IMP.test.TestCase):
     def test_one(self):
         """Check interaction score repulsion for glue test"""
         IMP.set_log_level(IMP.SILENT)
-        dt=IMP.npctransport.get_time_step(1, 
-                                          k_nonrot, 
-                                          radius, 
-                                          nonspec_range,  
+        dt=IMP.npctransport.get_time_step(1,
+                                          k_nonrot,
+                                          radius,
+                                          nonspec_range,
                                           0.025)
         print("TEST ONE dt=", dt)
         ntrials=3
@@ -178,7 +178,7 @@ class Tests(IMP.test.TestCase):
                [IMP.algebra.Vector3D(0, 0,-radius)])
         rs=[]
         for p in [(0,1), (1,2), (0,2)]:
-            ps= IMP.npctransport.SitesPairScore(site_range, site_k, 
+            ps= IMP.npctransport.SitesPairScore(site_range, site_k,
                                                 0.0, 0.0,
                                                 nonspec_range, nonspec_k, soft_sphere_k,
                                                 IMP.npctransport.get_spheres_from_vectors(sites[p[0]], 0.0),
@@ -202,10 +202,10 @@ class Tests(IMP.test.TestCase):
     def test_two(self):
         """Check two interactions"""
         IMP.set_log_level(IMP.SILENT)
-        dt=IMP.npctransport.get_time_step(1, 
-                                          k_nonrot, 
-                                          radius, 
-                                          nonspec_range,  
+        dt=IMP.npctransport.get_time_step(1,
+                                          k_nonrot,
+                                          radius,
+                                          nonspec_range,
                                           0.1)
         self._test_two(site_range=site_range, site_k=k_nonrot,
                        nonspec_range=nonspec_range, nonspec_k=nonspec_k,
@@ -225,7 +225,7 @@ class Tests(IMP.test.TestCase):
                                            .5*radius, d[1])
         rs=[]
         for p in [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)]:
-            ps= IMP.npctransport.SitesPairScore(site_range, site_k, 
+            ps= IMP.npctransport.SitesPairScore(site_range, site_k,
                                                 0.0, 0.0,
                                                 nonspec_range, nonspec_k, soft_sphere_k,
                                                 IMP.npctransport.get_spheres_from_vectors(sites[p[0]], 0.0),
@@ -401,7 +401,7 @@ class Tests(IMP.test.TestCase):
                 self.assertAlmostEqual(init_score, s, delta = 0.001)
             print_info(ps,sites0[0],sites1[0])
             sos.update_always()
-    
+
         xyzrs[1].set_coordinates(IMP.algebra.Vector3D(1.5*radius+0.5*site_range,0,0))
         sos.set_period(math.ceil(nsteps/100000))
         for i in range(10):
@@ -419,7 +419,7 @@ class Tests(IMP.test.TestCase):
         self.assertAlmostEqual(distance, 1.5*radius, delta =max_delta)
         self.assertLess(final_score, -0.001)
 
-        
+
     def test_one_sliding(self):
         """Check interaction score repulsion for glue test, sliding
         """
@@ -442,7 +442,7 @@ class Tests(IMP.test.TestCase):
                                        sigma2_max_deg=sigma2_max_deg,
                                        nonspec_range=nonspec_range,
                                        nonspec_k=nonspec_k,
-                                       soft_sphere_k=soft_sphere_k, 
+                                       soft_sphere_k=soft_sphere_k,
                                        dt=dt, ntrial=i)
                 return
             except AssertionError:
