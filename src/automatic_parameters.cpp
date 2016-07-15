@@ -264,7 +264,7 @@ int get_statistics_interval_in_frames
   double time_step,
   double default_value_ns)
 {
-  double ns = default_value_ns;
+  double ns(default_value_ns);
   if(a.has_statistics_interval_ns()) {
     ns = a.statistics_interval_ns() ;
   }
