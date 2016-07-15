@@ -1,4 +1,4 @@
-do_**
+/**
  *  \file BipartitePairsStatisticsOptimizerState.cpp
  *  \brief description.
  *
@@ -173,6 +173,12 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
       double n_bounds_II_before = bounds_II_.size();
       double n_unbounds_I_before = n_particles_I_ - n_bounds_I_before;
       double n_unbounds_II_before = n_particles_II_ - n_bounds_II_before;
+      IMP_LOG(PROGRESS,
+                 "lostI " << n_bounds_I_lost
+              << " gainedI " << n_bounds_I_gained
+              << " lostII " << n_bounds_II_lost
+              << " gainedII " << n_bounds_II_gained
+              << std::endl);
       // OFF
       if(  n_contacts_before > 0 )
         {
