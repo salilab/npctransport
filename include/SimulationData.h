@@ -16,7 +16,7 @@
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/SingletonContainer.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
-#include <IMP/container/DynamicListSingletonContainer.h>
+//#include <IMP/container/DynamicListSingletonContainer.h>
 #include <IMP/container/PairContainerSet.h>
 #include <IMP/container/PredicatePairsRestraint.h>
 #include <IMP/core/pair_predicates.h>
@@ -35,8 +35,6 @@
 #include "Statistics.h"
 #include "npctransport_proto.fwd.h"
 #include <string>
-
-
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -104,7 +102,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   PointerMember <IMP::npctransport::Statistics >
     statistics_;
 
-  bool is_statististics_activated_;
+  bool is_statistics_activated_;
 
   // all beads in the simulation (=fine-level particles)
   Particles beads_;

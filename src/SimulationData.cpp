@@ -74,7 +74,7 @@ SimulationData::SimulationData(std::string prev_output_file, bool quick,
   bd_(nullptr),
   scoring_(nullptr),
   statistics_(nullptr),
-  is_statististics_activated_(false),
+  is_statistics_activated_(false),
   rmf_file_name_(rmf_file_name),
   is_save_restraints_to_rmf_(true)
 {
@@ -666,12 +666,11 @@ atom::BrownianDynamics
 }
 
 void SimulationData::activate_statistics(){
-  {
-    if(is_statististics_activated_=false){
+    if(is_statistics_activated_==false){
       get_statistics()->add_optimizer_states( get_bd() );
-      is_statististics_activated_=true;
+      is_statistics_activated_=true;
     }
-}
+  }
 
 ParticlesTemp
 SimulationData::get_optimizable_beads()
