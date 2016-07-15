@@ -1,5 +1,6 @@
 %import "RMF.i"
 %import "IMP_kernel.i"
+%import "IMP_core.i"
 %import "IMP_score_functor.i"
 %{
 #include <RMF.h>
@@ -36,6 +37,7 @@ IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
 IMP_SWIG_VALUE(IMP::npctransport, SitesPairScoreParameters, SitesPairScoreParametersList);
 //IMP_SWIG_VALUE(IMP::npctransport, LinearInteraction, LinearInteractions);
 IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
+//IMP_SWIG_VALUE_INSTANCE(IMP::npctransport, InteractionType, std::pair, InteractionTypes);
 
 %apply unsigned int { boost::uint32_t }
 %apply unsigned long long { boost::uint64_t }
@@ -79,6 +81,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %pythoncode %{
 try:
   from .npctransport_pb2 import *
+  import google.protobuf
 except ImportError:
   print("no protobuf support in python")
 from ._configuration import *

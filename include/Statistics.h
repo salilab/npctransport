@@ -208,6 +208,9 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   }
 #endif
 
+  std::string get_output_file_name() const{
+    return output_file_name_;
+  }
 
  private:
 

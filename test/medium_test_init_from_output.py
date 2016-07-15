@@ -124,7 +124,8 @@ class Tests(IMP.test.TestCase):
         test_util.make_simple_cfg(
             config,
             is_slab_on=True,
-            n_particles_factor=1.5)
+            n_particles_factor=1.5,
+            is_obstacles=True)
         rt_output = self.get_tmp_file_name("round_trip_output.pb")
         print("RT output: ", rt_output)
         sd = self.run_from_config(config, rt_output)

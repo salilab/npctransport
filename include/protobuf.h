@@ -38,8 +38,8 @@ IMPNPCTRANSPORTEXPORT void show_ranges(std::string fname);
    as the log base for each ranged field, such that e.g. iterating over the
    range [1..8] with 3 steps and base 2 will be enumerated as (1,4,8)
 
-   @param fname input file name
-   @param output output filename
+   @param fname input_config_fname configuration file name
+   @param output output_assignment_fname assignment file name
    @param work_unit the index of combination of range values to be used. If the
                     total of possible combinations of all fields with ranges is
    k,
@@ -60,7 +60,7 @@ IMPNPCTRANSPORTEXPORT void show_ranges(std::string fname);
 */
 // Each range field also has .steps and .base field.
 IMPNPCTRANSPORTEXPORT int assign_ranges(
-    std::string fname, std::string output, unsigned int work_unit,
+    std::string input_config_fname, std::string output_assignment_fname, unsigned int work_unit,
     bool show_steps,
     boost::uint64_t random_seed  // do not use boost::uint64_t cause of SWIG
     );

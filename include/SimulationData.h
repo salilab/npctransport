@@ -104,6 +104,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   PointerMember <IMP::npctransport::Statistics >
     statistics_;
 
+  bool is_statististics_activated_;
+
   // all beads in the simulation (=fine-level particles)
   Particles beads_;
 
@@ -245,6 +247,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  atom::BrownianDynamics *get_bd(bool recreate = false);
 
   //! activates Brownian Dynamics statistics tracking
+ //! by adding all appropraite optimizer states, if they weren't already
   void activate_statistics();
 
   /** returns the requested fraction of time for taking statistics */

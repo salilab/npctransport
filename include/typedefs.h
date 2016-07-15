@@ -19,16 +19,24 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 //! an interaction that involves particles of two types
 typedef std::pair<IMP::core::ParticleType, IMP::core::ParticleType>
     InteractionType;
+IMP_VALUES(InteractionType, InteractionTypes);
 
-#ifndef SWIG
+//! convenience method for creating and interaction type in swig
+inline IMPNPCTRANSPORTEXPORT
+InteractionType make_ordered_interaction_type(IMP::core::ParticleType t0,
+                                              IMP::core::ParticleType t1)
+{
+  return InteractionType(t0,t1);
+}
+
 //! an interaction type canonized to (t0,t1) s.t. t0 >= t1,
 //! so order doesn't matter
-inline InteractionType make_unordered_interaction_type(IMP::core::ParticleType t0,
+inline IMPNPCTRANSPORTEXPORT
+InteractionType make_unordered_interaction_type(IMP::core::ParticleType t0,
                                                 IMP::core::ParticleType t1)
 {
   return (t0 >= t1) ? InteractionType(t0,t1) : InteractionType(t1,t0);
 }
-#endif
 
 
 //! ParticleIndexPair canonized to (pi0',pi1') s.t. pi0' >= pi1'

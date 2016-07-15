@@ -74,6 +74,7 @@ SimulationData::SimulationData(std::string prev_output_file, bool quick,
   bd_(nullptr),
   scoring_(nullptr),
   statistics_(nullptr),
+  is_statististics_activated_(false),
   rmf_file_name_(rmf_file_name),
   is_save_restraints_to_rmf_(true)
 {
@@ -665,7 +666,11 @@ atom::BrownianDynamics
 }
 
 void SimulationData::activate_statistics(){
-    get_statistics()->add_optimizer_states( get_bd() );
+  {
+    if(is_statististics_activated_=false){
+      get_statistics()->add_optimizer_states( get_bd() );
+      is_statististics_activated_=true;
+    }
 }
 
 ParticlesTemp

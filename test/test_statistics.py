@@ -4,22 +4,11 @@ import IMP.test
 import IMP.npctransport
 import IMP.container
 import math
+from test_util import *
 
-radius=5
+radius=10.0
 
 class Tests(IMP.test.TestCase):
-    def _create_diffusing_particle(self, m, radius= 10.0):
-        """creates a particle that is decorated with RigidBody,
-        RigidBodyDiffusion and XYZR coordinates
-
-        m - model
-        """
-        p= IMP.Particle(m)
-        d= IMP.core.XYZR.setup_particle(p)
-        d.set_radius( radius )
-        IMP.core.RigidBody.setup_particle(p, IMP.algebra.ReferenceFrame3D())
-        dd= IMP.atom.RigidBodyDiffusion.setup_particle(p)
-        return p
 
     def test_repulsion(self):
         """Check diffusion coefficient estimation"""
@@ -33,7 +22,7 @@ class Tests(IMP.test.TestCase):
             n_cycles=500000
             delta_factor = 0.1
         m= IMP.Model()
-        p= self._create_diffusing_particle(m)
+        p= create_diffusing_rb_particle(m, radius)
         IMP.core.XYZR(p).set_coordinates_are_optimized(True)
         dt=1000
         bd= IMP.atom.BrownianDynamics(m)
@@ -58,7 +47,7 @@ class Tests(IMP.test.TestCase):
         if IMP.build!= "fast":
           self.skipTest("Only run in fast mode")
         m= IMP.Model()
-        p= self._create_diffusing_particle(m)
+        p= create_diffusing_rb_particle(m, radius)
         IMP.core.RigidBody(p).set_coordinates_are_optimized(True)
         dd= IMP.atom.RigidBodyDiffusion(p)
         nD=dd.get_rotational_diffusion_coefficient()
@@ -102,7 +91,7 @@ class Tests(IMP.test.TestCase):
         if IMP.build!= "fast":
           self.skipTest("Only run in fast mode")
         m= IMP.Model()
-        p= self._create_diffusing_particle(m)
+        p= create_diffusing_rb_particle(m, radius)
         p_rb= IMP.core.RigidBody(p)
         p_rb.set_coordinates([0,0,0])
         p_rb.set_coordinates_are_optimized(True)
