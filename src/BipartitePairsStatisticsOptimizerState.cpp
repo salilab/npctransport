@@ -1,4 +1,4 @@
-/**
+do_**
  *  \file BipartitePairsStatisticsOptimizerState.cpp
  *  \brief description.
  *
@@ -256,6 +256,8 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
             IMP_LOG(PROGRESS, "Stats time:"
                     << " misc " << std::setprecision(3) << stats_time_ns_
                   << " / off " << std::setprecision(3) << off_stats_time_ns_
+                  << " / offI " << std::setprecision(3) << off_I_stats_time_ns_
+                  << " / offII " << std::setprecision(3) << off_II_stats_time_ns_
                     << " / on " << std::setprecision(3) << on_stats_time_ns_
                     << " / onI " << std::setprecision(3) << on_I_stats_time_ns_
                     << " / onII " << std::setprecision(3) << on_II_stats_time_ns_
