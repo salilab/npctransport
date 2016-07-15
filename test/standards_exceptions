@@ -19,5 +19,7 @@ function_name_exceptions= \
         'BipartitePairsStatisticsOptimizerState.get_off_I_stats_period_ns',
         'assign_ranges',
         'initialize_positions',
-        'make_unordered_particle_index_pair'
+        'make_unordered_particle_index_pair',
+        'make_ordered_interaction_type',
+        'make_unordered_interaction_type'
         ]
