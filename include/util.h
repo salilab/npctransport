@@ -19,6 +19,7 @@ Simulate an fg and a kap interacting
 #include <IMP/algebra/Transformation3D.h>
 #include "typedefs.h"
 #include <IMP/base_types.h>
+#include <algorithm>
 #include <string>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
