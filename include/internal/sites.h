@@ -205,13 +205,13 @@ double evaluate_pair_of_sites
   double kFactor1=get_k_factor(cosSigma1, spsp.cosSigma1_max);
   double kFactor2=get_k_factor(cosSigma2, spsp.cosSigma2_max);
   double kFactor=kFactor1*kFactor2;
-  IMP_LOG_VERBOSE('kFactor1 ' << kFactor1 <<
-		  ' kFactor2 ' << kFactor2);
+  IMP_LOG_VERBOSE("kFactor1 " << kFactor1 <<
+		  " kFactor2 " << kFactor2);
   double u_1D, derivR_1D; // energy and derivative before factoring k
   double rbSphereDist=gRB1RB2.get_magnitude()-rbi1.radius-rbi2.radius;
   u_1D=get_U_1D(rbSphereDist, spsp, derivR_1D);
   double score=kFactor*u_1D;
-  IMP_LOG_VERBOSE('score ' << score);
+  IMP_LOG_VERBOSE("score " << score);
 
   // III. Apply force to rigid bodies if derivative accumulator is active
   if(da){
@@ -220,7 +220,7 @@ double evaluate_pair_of_sites
     Vector3D gDerivR_on_RB1=derivR*gUnitRB1RB2;
     IMP::core::XYZ(rbi1.rb).add_to_derivatives( gDerivR_on_RB1, *da);  // action
     IMP::core::XYZ(rbi2.rb).add_to_derivatives(-gDerivR_on_RB1, *da); // reaction
-    IMP_LOG_VERBOSE('global translation derivative on first rb ' << gDerivR_on_RB1);
+    IMP_LOG_VERBOSE("global translation derivative on first rb " << gDerivR_on_RB1);
     // Add torque:
     // (note it is assumed that the opposing torque is
     // dissipated in water, so no action/reaction between RB1 and RB2)
@@ -235,7 +235,7 @@ double evaluate_pair_of_sites
       Vector3D gTorque_on_RB1=fS1*gRotSigma1;
       Vector3D lTorque_on_RB1=rbi1.irot.get_rotated(gTorque_on_RB1);
       rbi1.rb.add_to_torque(lTorque_on_RB1, *da);
-      IMP_LOG_VERBOSE('global torque on first rb ' << lTorque_on_RB1);
+      IMP_LOG_VERBOSE("global torque on first rb " << lTorque_on_RB1);
     }
     if(kFactor2>0.0 && kFactor2<0.99999){ // within attraction range
       Vector3D tmp2 = get_vector_product(gUnitRB2Site2,gUnitRB2RB1);
@@ -248,7 +248,7 @@ double evaluate_pair_of_sites
       Vector3D gTorque_on_RB2=fS2*gRotSigma2;
       Vector3D lTorque_on_RB2=rbi2.irot.get_rotated(gTorque_on_RB2);
       rbi2.rb.add_to_torque(lTorque_on_RB2, *da);
-      IMP_LOG_VERBOSE('global torque on second rb ' << lTorque_on_RB2);
+      IMP_LOG_VERBOSE("global torque on second rb " << lTorque_on_RB2);
     }
     /* Vector3D lTorque_on_RB1=rbi1.irot.get_rotated(gTorque_on_RB1-gTorque_on_RB2); // action */
     /* Vector3D lTorque_on_RB2=rbi2.irot.get_rotated(gTorque_on_RB2-gTorque_on_RB1); //reaction */

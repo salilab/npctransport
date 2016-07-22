@@ -21,7 +21,7 @@ Simulate an fg and a kap interacting
 #include <IMP/base_types.h>
 #include <algorithm>
 #include <string>
-
+#include <boost/algorithm/cxx11/is_sorted.hpp>
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 /** returns particles with optimizable coordinates from particles */
@@ -125,11 +125,11 @@ inline boost::tuple<unsigned int, unsigned int>
 {
   t_ordered_set lost, gained;
   IMP_USAGE_CHECK
-    (std::is_sorted(old.begin(), old.end()),
-     'get_n_lost_and_gained() is expecting an ordered set only');
+    (boost::algorithm::is_sorted(old.begin(), old.end()),
+     "get_n_lost_and_gained() is expecting an ordered set only");
   IMP_USAGE_CHECK
-    (std::is_sorted(cur.begin(), cur.end()),
-     'get_n_lost_and_gained() is expecting an ordered set only');
+    (boost::algorithm::is_sorted(cur.begin(), cur.end()),
+     "get_n_lost_and_gained() is expecting an ordered set only");
   std::set_difference(old.begin(), old.end(), cur.begin(), cur.end(),
                       std::inserter(lost, lost.begin()) );
   std::set_difference(cur.begin(), cur.end(), old.begin(), old.end(),
