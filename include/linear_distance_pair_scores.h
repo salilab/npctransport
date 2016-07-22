@@ -52,10 +52,11 @@ inline double do_evaluate_index(Model *m, const ParticleIndexPair &pp,
     m->add_to_coordinate_derivatives(pp[1], -deriv, *da);
     IMP_LOG(TERSE, "Distance: " << shifted_length << "\nscore: " << score
                                 << "\nderiv: " << deriv << std::endl);
-  } else {
-    IMP_LOG(TERSE, "Distance: " << shifted_length << "\nscore: " << score
-                                << std::endl);
   }
+  IMP_CHECK_CODE ( else {
+      IMP_LOG(TERSE, "Distance: " << shifted_length << "\nscore: " << score
+              << std::endl);
+    } );
   return score;
 }
 

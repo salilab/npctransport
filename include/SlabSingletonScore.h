@@ -153,29 +153,29 @@ SlabSingletonScore::evaluate_indexes(Model *m, const ParticleIndexes &pis,
                                 unsigned int upper_bound) const
 {
   double ret = 0;
+  // Direct access to pertinent attributes:
   algebra::Sphere3D const* spheres_table=
     m->access_spheres_data();
   algebra::Sphere3D* sphere_derivatives_table=
     m->access_sphere_derivatives_data();
   IMP::internal::BoolAttributeTableTraits::Container const& is_optimizable_table=
     m->access_optimizeds_data(core::XYZ::get_coordinate_key(0)); // use only x coordinate as indicator
-
-  return ret;
-  // *****************
+  // Evaluate and sum score and derivative for all particles:
   for (unsigned int i = lower_bound; i < upper_bound; ++i) {
     int pi_index=pis[i].get_index();
-    IMP_IF_CHECK(USAGE_AND_INTERNAL) { // verify fast access backdoor produces correct results
-      IMP::core::XYZR d(m, pis[i]);
-      algebra::Sphere3D s=spheres_table[pi_index];
-      IMP_INTERNAL_CHECK(d.get_coordinates_are_optimized() == is_optimizable_table[pis[i]],
-                         "optimable table inconsistent with d.get_coordinates_are_optimized for particle " << d);
-      IMP_INTERNAL_CHECK((d.get_coordinates() - s.get_center()).get_magnitude()<.001,
-                         "Different coords for particle " << d << " *** "
-                         << d.get_coordinates() << " vs. " << s.get_center());
-      IMP_INTERNAL_CHECK(d.get_radius() == s.get_radius(),
-                         "Different radii for particle " << d << " *** "
-                         << d.get_radius() << " vs. " << s.get_radius());
-    }
+    // Check attributes have valid valies:
+    IMP_CHECK_CODE( {
+        IMP::core::XYZR d(m, pis[i]);
+        algebra::Sphere3D s=spheres_table[pi_index];
+        IMP_INTERNAL_CHECK(d.get_coordinates_are_optimized() == is_optimizable_table[pis[i]],
+                           "optimable table inconsistent with d.get_coordinates_are_optimized for particle " << d);
+        IMP_INTERNAL_CHECK((d.get_coordinates() - s.get_center()).get_magnitude()<.001,
+                           "Different coords for particle " << d << " *** "
+                           << d.get_coordinates() << " vs. " << s.get_center());
+        IMP_INTERNAL_CHECK(d.get_radius() == s.get_radius(),
+                           "Different radii for particle " << d << " *** "
+                           << d.get_radius() << " vs. " << s.get_radius());
+      } ); // IMP_CHECK_CODE
     if(!is_optimizable_table[pis[i]]) {
       continue;
     }
