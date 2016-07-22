@@ -19,7 +19,7 @@ class Tests(IMP.test.TestCase):
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
         assign_file='tmp.pb'
-        cfg=test_util.make_simple_cfg(n_particles_factor=1)
+        cfg=test_util.make_simple_cfg(is_slab_on=False, n_particles_factor=1)
         cfg.box_side.lower=35
         cfg.time_step_factor.lower=8
         cfg.statistics_interval_ns=0.01
