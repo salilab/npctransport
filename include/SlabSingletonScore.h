@@ -251,7 +251,7 @@ SlabSingletonScore::get_displacement_vector(const algebra::Vector3D &v) const {
     double R = std::sqrt(R2);
     double dR = R - radius_;  // displacement on [x,y] direction
     if (dR + aH < .5 * thickness_) {
-      std::cout << "ring or tunnel" << std::endl;
+      IMP_LOG_PROGRESS("ring or tunnel" << std::endl);
       if (R2 < .00001) {  // at origin
         return std::make_pair(radius_, algebra::Vector3D(0, 0, 1));
       } else {
