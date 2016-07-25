@@ -192,8 +192,11 @@ bell-shaped spline
 inline
 double evaluate_pair_of_sites
 ( SitesPairScoreParameters const& spsp,
-  RigidBodyInfo& rbi1, RigidBodyInfo& rbi2,
-  algebra::Vector3D& gSite1, algebra::Vector3D& gSite2,
+  RigidBodyInfo const& rbi1, RigidBodyInfo const& rbi2,
+  algebra::Vector3D const& gSite2,
+  algebra::Vector3D const& gUnitRB1RB2, double distRB1RB2,
+  algebra::Vector3D const& gRotSigma1,
+  double kFactor1, double dKFactor1,
   DerivativeAccumulator *da,
   algebra::Sphere3D *sphere_derivatives_table,
   double **torques_tables)
@@ -202,23 +205,23 @@ double evaluate_pair_of_sites
   using IMP::algebra::Sphere3D;
 
   // I. Pre-computations:
-  Vector3D gRB1= rbi1.tr.get_translation();
-  Vector3D gRB2= rbi2.tr.get_translation();
- // update coordinates
-  Vector3D gUnitRB1RB2= gRB2-gRB1;// TODO: can be cached for multiple sites
-  double distRB1RB2= get_magnitude_and_normalize_in_place(gUnitRB1RB2); // TODO can be cached for multiple sites
+  //  Vector3D const& gRB1= rbi1.tr.get_translation(); // cached now
+  Vector3D const& gRB2= rbi2.tr.get_translation();
+  // Vector3D gUnitRB1RB2= gRB2-gRB1;// cached now
+  // double distRB1RB2= get_magnitude_and_normalize_in_place(gUnitRB1RB2); // cached now
   Vector3D gUnitRB2RB1= -gUnitRB1RB2;
-  Vector3D gUnitRB1Site1 = (gSite1-gRB1)*rbi1.iradius;
+  // Vector3D gUnitRB1Site1 = (gSite1-gRB1)*rbi1.iradius; // cached now
   Vector3D gUnitRB2Site2 = (gSite2-gRB2)*rbi2.iradius;
-  double cosSigma1 = gUnitRB1Site1*gUnitRB1RB2;
+  // double cosSigma1 = gUnitRB1Site1*gUnitRB1RB2; // cached now
   double cosSigma2 = gUnitRB2Site2*gUnitRB2RB1;
-  if(cosSigma1<spsp.cosSigma1_max || cosSigma2<spsp.cosSigma2_max){
+  if(//cosSigma1<spsp.cosSigma1_max || // cached now
+     cosSigma2<spsp.cosSigma2_max){
     // equivalent to sigma>sigma_max, so out of range
     return 0;
   }
 
   // II. Energy computations:
-  double kFactor1=get_k_factor(cosSigma1, spsp.cosSigma1_max);
+  // double kFactor1=get_k_factor(cosSigma1, spsp.cosSigma1_max); // cached now
   double kFactor2=get_k_factor(cosSigma2, spsp.cosSigma2_max);
   double kFactor=kFactor1*kFactor2;
   IMP_LOG_VERBOSE("kFactor1 " << kFactor1 <<
@@ -237,20 +240,20 @@ double evaluate_pair_of_sites
     //    IMP::core::XYZ(rbi1.rb).add_to_derivatives( gDerivR_on_RB1, *da);  // action
     //bin/ IMP::core::XYZ(rbi2.rb).add_to_derivatives(-gDerivR_on_RB1, *da); // reaction
     for(unsigned int i=0; i<3; i++){
-      double deriv_rb1_i=(*da)(gDerivR_on_RB1[i]);
-      sphere_derivatives_table[rbi1.pi.get_index()][i]+= deriv_rb1_i; // action (+)
-      sphere_derivatives_table[rbi2.pi.get_index()][i]-= deriv_rb1_i; // opposite reaction (0)
+      double gDerivR_on_RB1_i=(*da)(gDerivR_on_RB1[i]);
+      sphere_derivatives_table[rbi1.pi.get_index()][i]+= gDerivR_on_RB1_i; // action (+)
+      sphere_derivatives_table[rbi2.pi.get_index()][i]-= gDerivR_on_RB1_i; // opposite reaction (0)
     }
     IMP_LOG_VERBOSE("global translation derivative on first rb " << gDerivR_on_RB1);
     // Add torque:
     // (note it is assumed that the opposing torque is
     // dissipated in water, so no action/reaction between RB1 and RB2)
     if(kFactor1>0.0 && kFactor1<0.99999){ // within attraction range
-      Vector3D gRotSigma1 = get_vector_product(gUnitRB1Site1,gUnitRB1RB2);
-      double absSinSigma1 = get_magnitude_and_normalize_in_place(gRotSigma1);
+      // Vector3D gRotSigma1 = get_vector_product(gUnitRB1Site1,gUnitRB1RB2);
+      // double absSinSigma1 = get_magnitude_and_normalize_in_place(gRotSigma1);
       IMP_USAGE_CHECK(absSinSigma1>0.00001,
 		      "abs(sinSigma) is expected to be positive within attraction force range" );
-      double dKFactor1=get_derivative_k_factor(absSinSigma1, spsp.cosSigma1_max);
+      // double dKFactor1=get_derivative_k_factor(absSinSigma1, spsp.cosSigma1_max);
       double fS1=-u_1D*dKFactor1*kFactor2;
       Vector3D gTorque_on_RB1=fS1*gRotSigma1;
       Vector3D lTorque_on_RB1=rbi1.irot.get_rotated(gTorque_on_RB1);

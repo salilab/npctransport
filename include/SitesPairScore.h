@@ -388,23 +388,58 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
                     << "RBI1.tr " << rbi1.tr << std::endl);
   // sum over specific interactions between all pairs of sites:
   double sum = 0;
-  for (unsigned int i = 0; i < sites0_.size(); ++i) {
-    algebra::Vector3D g0 = rbi0.tr.get_transformed(sites0_[i].get_center());
-    for(unsigned int j = 0 ; j < sites1_.size(); ++j) {
-      algebra::Vector3D g1 = rbi1.tr.get_transformed(sites1_[j].get_center());
-      IMP_LOG_PROGRESS( "Evaluating sites at global coordinates: " << g0 << " ; " << g1 << std::endl );
-      double cur_score;
-      if(is_orientational_score_)
-        {
-          cur_score =
-            internal::evaluate_pair_of_sites(params_,
-                                             rbi0, rbi1,
-                                             g0, g1,
-                                             da,
-                                             sphere_derivatives_table,
-                                             torques_tables);
-        } else
-        { // old score
+  if(is_orientational_score_){
+    // Pre-compute a few variables that do not depend on either both sites or on site1
+    algebra::Vector3D const& gRB0= rbi0.tr.get_translation();
+    algebra::Vector3D const& gRB1= rbi1.tr.get_translation();
+    algebra::Vector3D gUnitRB0RB1= gRB1-gRB0;
+    double distRB0RB1= get_magnitude_and_normalize_in_place(gUnitRB0RB1); // distance between centers
+    for (unsigned int i = 0; i < sites0_.size(); ++i) {
+      algebra::Vector3D gSite0 = rbi0.tr.get_transformed(sites0_[i].get_center());
+      algebra::Vector3D gUnitRB0Site0= (gSite0-gRB0)*rbi0.iradius;
+      double cosSigma0 = gUnitRB0Site0*gUnitRB0RB1;
+      if(cosSigma0 < params_.cosSigma1_max) { // not in range... - note the indexing is not an error - sigma0 is equivalent to params_.sigma1
+        continue;
+      }
+      double kFactor0=internal::get_k_factor(cosSigma0, params_.cosSigma1_max); // note the indexing is not an error - sigma0 is equivalent to params_.sigma1
+      algebra::Vector3D gRotSigma0;
+      double dKFactor0;
+      if(da){
+        gRotSigma0 = get_vector_product(gUnitRB0Site0,gUnitRB0RB1);
+        double absSinSigma0 = get_magnitude_and_normalize_in_place(gRotSigma0);
+        dKFactor0=internal::get_derivative_k_factor(absSinSigma0, params_.cosSigma1_max);
+      }
+      for(unsigned int j = 0 ; j < sites1_.size(); ++j) {
+        algebra::Vector3D gSite1 = rbi1.tr.get_transformed(sites1_[j].get_center());
+        IMP_LOG_PROGRESS( "Evaluating sites at global coordinates: " << gSite0
+                          << " ; " << gSite1 << std::endl );
+        double cur_score;
+        cur_score =
+          internal::evaluate_pair_of_sites(params_,
+                                           rbi0, rbi1,
+                                           gSite1,
+                                           gUnitRB0RB1, distRB0RB1,
+                                           gRotSigma0,
+                                           kFactor0, dKFactor0,
+                                           da,
+                                           sphere_derivatives_table,
+                                           torques_tables);
+        sum += cur_score;
+        if(n_contacts_accumulator){
+          (*n_contacts_accumulator) += (cur_score!=0.0);
+        }
+      } // j
+    } // i
+  } // is_orientational_score_
+  else
+    {
+      for (unsigned int i = 0; i < sites0_.size(); ++i) {
+        algebra::Vector3D g0 = rbi0.tr.get_transformed(sites0_[i].get_center());
+        for(unsigned int j = 0 ; j < sites1_.size(); ++j) {
+          algebra::Vector3D g1 = rbi1.tr.get_transformed(sites1_[j].get_center());
+          IMP_LOG_PROGRESS( "Evaluating sites at global coordinates: " << g0 << " ; " << g1 << std::endl );
+          double cur_score;
+          // old score
           cur_score =
             internal::evaluate_one_site_3(params_.k,
                                           params_.r,
@@ -414,14 +449,15 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
                                           da,
                                           sphere_derivatives_table,
                                           torques_tables);
-        }
-      sum += cur_score;
-      if(n_contacts_accumulator){
-        (*n_contacts_accumulator) += (cur_score!=0.0);
-      }
-      IMP_LOG_PROGRESS( "Sum " << sum << std::endl);
+
+          sum += cur_score;
+          if(n_contacts_accumulator){
+            (*n_contacts_accumulator) += (cur_score!=0.0);
+          }
+        }// j
+      }// i
     }
-  }
+  IMP_LOG_PROGRESS( "Sum " << sum << std::endl);
   return sum;
 }
 
