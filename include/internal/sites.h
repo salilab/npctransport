@@ -251,8 +251,6 @@ double evaluate_pair_of_sites
     if(kFactor1>0.0 && kFactor1<0.99999){ // within attraction range
       // Vector3D gRotSigma1 = get_vector_product(gUnitRB1Site1,gUnitRB1RB2);
       // double absSinSigma1 = get_magnitude_and_normalize_in_place(gRotSigma1);
-      IMP_USAGE_CHECK(absSinSigma1>0.00001,
-		      "abs(sinSigma) is expected to be positive within attraction force range" );
       // double dKFactor1=get_derivative_k_factor(absSinSigma1, spsp.cosSigma1_max);
       double fS1=-u_1D*dKFactor1*kFactor2;
       Vector3D gTorque_on_RB1=fS1*gRotSigma1;
@@ -266,8 +264,6 @@ double evaluate_pair_of_sites
     if(kFactor2>0.0 && kFactor2<0.99999){ // within attraction range
       Vector3D gRotSigma2 = get_vector_product(gUnitRB2Site2,gUnitRB2RB1);
       double absSinSigma2 = get_magnitude_and_normalize_in_place(gRotSigma2);
-      IMP_USAGE_CHECK(absSinSigma2>0.00001,
-		      "abs(sinSigma2) is expected to be positive within attraction force range" );
       double dKFactor2=get_derivative_k_factor(absSinSigma2, spsp.cosSigma2_max);
       double fS2=-u_1D*kFactor1 *dKFactor2;
       Vector3D gTorque_on_RB2=fS2*gRotSigma2;

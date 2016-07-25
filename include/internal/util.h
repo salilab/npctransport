@@ -37,21 +37,27 @@ inline Iterator is_sorted_until (Iterator first, Iterator last) {
 
   typedef std::less<value_type> c;
 
-  return is_sorted_until(first, last, c());
+  return IMP::npctransport::internal::is_sorted_until(first, last, c());
 }
 
 //! from boost - just to support various problematic distributions
 template<class Iterator, class Comp>
   inline bool is_sorted (Iterator first, Iterator last, Comp c) {
-  return is_sorted_until(first, last, c) == last;
+  return IMP::npctransport::internal::is_sorted_until(first, last, c) == last;
 }
 
 //! from boost - just to support various problematic distributions
 template<class Iterator>
 inline bool is_sorted (Iterator first, Iterator last) {
-  return is_sorted_until(first, last) == last;
+  return IMP::npctransport::internal::is_sorted_until(first, last) == last;
 }
 
+//! from boost - just to support various problematic distributions
+template<class Container>
+inline bool is_sorted (Container c) {
+  return
+    IMP::npctransport::internal::is_sorted(c.begin(), c.end());
+}
 
 
 
