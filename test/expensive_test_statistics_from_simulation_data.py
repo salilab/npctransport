@@ -107,19 +107,21 @@ class Tests(IMP.test.TestCase):
             if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
                 return
             if is_orientational:
-                self.assertAlmostEqual(koff_i,2.21,delta=0.45)
-                self.assertAlmostEqual(kon_i,1.15,delta=0.25)
-                self.assertAlmostEqual(koff_ii,1.76,delta=0.35)
-                self.assertAlmostEqual(kon_ii,2.16,delta=0.45)
-                self.assertAlmostEqual(fb_i,0.34,delta=0.11)
-                self.assertAlmostEqual(fb_ii,0.55,delta=0.15)
+                DELTA_FACTOR=0.5
+                self.assertAlmostEqual(koff_i,2.21,delta=0.45*DELTA_FACTOR)
+                self.assertAlmostEqual(kon_i,1.15,delta=0.25*DELTA_FACTOR)
+                self.assertAlmostEqual(koff_ii,1.76,delta=0.35*DELTA_FACTOR)
+                self.assertAlmostEqual(kon_ii,2.16,delta=0.45*DELTA_FACTOR)
+                self.assertAlmostEqual(fb_i,0.34,delta=0.11*DELTA_FACTOR)
+                self.assertAlmostEqual(fb_ii,0.55,delta=0.15*DELTA_FACTOR)
             else:
-                self.assertAlmostEqual(koff_i,1.81,delta=0.35)
-                self.assertAlmostEqual(kon_i,0.75,delta=0.2)
-                self.assertAlmostEqual(koff_ii,1.41,delta=0.3)
-                self.assertAlmostEqual(kon_ii,1.61,delta=0.33)
-                self.assertAlmostEqual(fb_i,0.285,delta=0.1)
-                self.assertAlmostEqual(fb_ii,0.524,delta=0.15)
+                DELTA_FACTOR=0.5
+                self.assertAlmostEqual(koff_i,1.81,delta=0.35*DELTA_FACTOR)
+                self.assertAlmostEqual(kon_i,0.75,delta=0.2*DELTA_FACTOR)
+                self.assertAlmostEqual(koff_ii,1.41,delta=0.3*DELTA_FACTOR)
+                self.assertAlmostEqual(kon_ii,1.61,delta=0.33*DELTA_FACTOR)
+                self.assertAlmostEqual(fb_i,0.285,delta=0.1*DELTA_FACTOR)
+                self.assertAlmostEqual(fb_ii,0.524,delta=0.15*DELTA_FACTOR)
         return;
 
 
@@ -168,7 +170,7 @@ class Tests(IMP.test.TestCase):
         else:
             print("FAST MODE")
             n_cycles=100000
-            n_trials= 50
+            n_trials= 200
             short_init_factor= 0.1
         print("-- Non-orientational --")
         self._test_interaction_stats(n_cycles,short_init_factor,

@@ -72,10 +72,12 @@ inline double evaluate_one_site_3
   RigidBodyInfo& rbi0, RigidBodyInfo& rbi1,
   const algebra::Sphere3D &l0, const algebra::Sphere3D &l1,
   algebra::Vector3D& g0, algebra::Vector3D& g1,
-  DerivativeAccumulator *da)
+  DerivativeAccumulator *da,
+  algebra::Sphere3D *sphere_derivatives_table,
+  double **torques_tables)
 {
   static const double MIN_D = .001;
-  algebra::VectorD<3> gD = g0 - g1;
+  algebra::Vector3D gD = g0 - g1;
   double d = subtract_sphere_radii_from_distance_vector(gD, l0.get_radius(), l1.get_radius());
   d = std::abs(d);
   if (d > range) return 0;
@@ -84,15 +86,27 @@ inline double evaluate_one_site_3
   //  double d = d2 * id;
   double score = -k * (range - d);
   if (da) {
+    // RB0:
     algebra::Vector3D gderiv0 = (k * id) * gD;
     algebra::Vector3D lderiv0 = rbi0.irot.get_rotated(gderiv0);
-    rbi0.rb.add_to_derivatives(lderiv0, gderiv0, l0.get_center(),
-                               rbi0.tr.get_rotation(),*da);
+    //core::RigidBody(rbi0.pi).add_to_derivatives(lderiv0, gderiv0, l0.get_center(),
+    //                                           rbi0.tr.get_rotation(),*da); // TODO: swith to internal tables access?
+    algebra::Vector3D torque0 = algebra::get_vector_product(l0.get_center(), lderiv0);
+    for (unsigned int i = 0; i < 3; ++i) {
+      sphere_derivatives_table[rbi0.pi.get_index()][i]+= (*da)(gderiv0[i]);
+      torques_tables[i][rbi0.pi.get_index()]+= (*da)(torque0[i]);
+    }
+    // RB1:
     algebra::Vector3D gderiv1 = -gderiv0;
     algebra::Vector3D lderiv1 = rbi1.irot.get_rotated(gderiv1);
-    rbi1.rb.add_to_derivatives(lderiv1, gderiv1, l1.get_center(),
-                               rbi1.tr.get_rotation(),*da);
-  }
+    //    core::RigidBody(rbi1.pi).add_to_derivatives(lderiv1, gderiv1, l1.get_center(),
+    //                                           rbi1.tr.get_rotation(),*da);
+    algebra::Vector3D torque1 = algebra::get_vector_product(l1.get_center(), lderiv1);
+    for (unsigned int i = 0; i < 3; ++i) {
+      sphere_derivatives_table[rbi1.pi.get_index()][i]+= (*da)(gderiv1[i]);
+      torques_tables[i][rbi1.pi.get_index()]+= (*da)(torque1[i]);
+    }
+  } // if (da)
   return score;
 }
 
@@ -180,18 +194,20 @@ double evaluate_pair_of_sites
 ( SitesPairScoreParameters const& spsp,
   RigidBodyInfo& rbi1, RigidBodyInfo& rbi2,
   algebra::Vector3D& gSite1, algebra::Vector3D& gSite2,
-  DerivativeAccumulator *da)
+  DerivativeAccumulator *da,
+  algebra::Sphere3D *sphere_derivatives_table,
+  double **torques_tables)
 {
   using IMP::algebra::Vector3D;
   using IMP::algebra::Sphere3D;
 
   // I. Pre-computations:
-  Vector3D gRB1=rbi1.rb.get_coordinates();
-  Vector3D gRB2=rbi2.rb.get_coordinates();
+  Vector3D gRB1= rbi1.tr.get_translation();
+  Vector3D gRB2= rbi2.tr.get_translation();
  // update coordinates
-  Vector3D gRB1RB2 = gRB2-gRB1;
-  Vector3D gUnitRB1RB2 = gRB1RB2.get_unit_vector();
-  Vector3D gUnitRB2RB1 = -gUnitRB1RB2;
+  Vector3D gUnitRB1RB2= gRB2-gRB1;// TODO: can be cached for multiple sites
+  double distRB1RB2= get_magnitude_and_normalize_in_place(gUnitRB1RB2); // TODO can be cached for multiple sites
+  Vector3D gUnitRB2RB1= -gUnitRB1RB2;
   Vector3D gUnitRB1Site1 = (gSite1-gRB1)*rbi1.iradius;
   Vector3D gUnitRB2Site2 = (gSite2-gRB2)*rbi2.iradius;
   double cosSigma1 = gUnitRB1Site1*gUnitRB1RB2;
@@ -208,7 +224,7 @@ double evaluate_pair_of_sites
   IMP_LOG_VERBOSE("kFactor1 " << kFactor1 <<
 		  " kFactor2 " << kFactor2);
   double u_1D, derivR_1D; // energy and derivative before factoring k
-  double rbSphereDist=gRB1RB2.get_magnitude()-rbi1.radius-rbi2.radius;
+  double rbSphereDist=distRB1RB2-rbi1.radius-rbi2.radius;
   u_1D=get_U_1D(rbSphereDist, spsp, derivR_1D);
   double score=kFactor*u_1D;
   IMP_LOG_VERBOSE("score " << score);
@@ -218,36 +234,45 @@ double evaluate_pair_of_sites
     // Add translational force:
     double derivR=kFactor*derivR_1D;
     Vector3D gDerivR_on_RB1=derivR*gUnitRB1RB2;
-    IMP::core::XYZ(rbi1.rb).add_to_derivatives( gDerivR_on_RB1, *da);  // action
-    IMP::core::XYZ(rbi2.rb).add_to_derivatives(-gDerivR_on_RB1, *da); // reaction
+    //    IMP::core::XYZ(rbi1.rb).add_to_derivatives( gDerivR_on_RB1, *da);  // action
+    //bin/ IMP::core::XYZ(rbi2.rb).add_to_derivatives(-gDerivR_on_RB1, *da); // reaction
+    for(unsigned int i=0; i<3; i++){
+      double deriv_rb1_i=(*da)(gDerivR_on_RB1[i]);
+      sphere_derivatives_table[rbi1.pi.get_index()][i]+= deriv_rb1_i; // action (+)
+      sphere_derivatives_table[rbi2.pi.get_index()][i]-= deriv_rb1_i; // opposite reaction (0)
+    }
     IMP_LOG_VERBOSE("global translation derivative on first rb " << gDerivR_on_RB1);
     // Add torque:
     // (note it is assumed that the opposing torque is
     // dissipated in water, so no action/reaction between RB1 and RB2)
     if(kFactor1>0.0 && kFactor1<0.99999){ // within attraction range
-      Vector3D tmp1 = get_vector_product(gUnitRB1Site1,gUnitRB1RB2);
-      double absSinSigma1 = tmp1.get_magnitude();
+      Vector3D gRotSigma1 = get_vector_product(gUnitRB1Site1,gUnitRB1RB2);
+      double absSinSigma1 = get_magnitude_and_normalize_in_place(gRotSigma1);
       IMP_USAGE_CHECK(absSinSigma1>0.00001,
 		      "abs(sinSigma) is expected to be positive within attraction force range" );
-      Vector3D gRotSigma1=tmp1/absSinSigma1; // rotation axis about RB1 that brings site1 towards the RB1-RB2 axis
       double dKFactor1=get_derivative_k_factor(absSinSigma1, spsp.cosSigma1_max);
       double fS1=-u_1D*dKFactor1*kFactor2;
       Vector3D gTorque_on_RB1=fS1*gRotSigma1;
       Vector3D lTorque_on_RB1=rbi1.irot.get_rotated(gTorque_on_RB1);
-      rbi1.rb.add_to_torque(lTorque_on_RB1, *da);
+      //rbi1.rb.add_to_torque(lTorque_on_RB1, *da);
+      for(unsigned int i=0; i<3; i++){
+        torques_tables[i][rbi1.pi.get_index()]+= (*da)(lTorque_on_RB1[i]);
+      }
       IMP_LOG_VERBOSE("global torque on first rb " << lTorque_on_RB1);
     }
     if(kFactor2>0.0 && kFactor2<0.99999){ // within attraction range
-      Vector3D tmp2 = get_vector_product(gUnitRB2Site2,gUnitRB2RB1);
-      double absSinSigma2 = tmp2.get_magnitude();
+      Vector3D gRotSigma2 = get_vector_product(gUnitRB2Site2,gUnitRB2RB1);
+      double absSinSigma2 = get_magnitude_and_normalize_in_place(gRotSigma2);
       IMP_USAGE_CHECK(absSinSigma2>0.00001,
 		      "abs(sinSigma2) is expected to be positive within attraction force range" );
-      Vector3D gRotSigma2=tmp2/absSinSigma2; // rotation axis about RB2 that brings site2 towards the RB2-RB1 axis
       double dKFactor2=get_derivative_k_factor(absSinSigma2, spsp.cosSigma2_max);
       double fS2=-u_1D*kFactor1 *dKFactor2;
       Vector3D gTorque_on_RB2=fS2*gRotSigma2;
       Vector3D lTorque_on_RB2=rbi2.irot.get_rotated(gTorque_on_RB2);
-      rbi2.rb.add_to_torque(lTorque_on_RB2, *da);
+      //      rbi2.rb.add_to_torque(lTorque_on_RB2, *da);
+      for(unsigned int i=0; i<3; i++){
+        torques_tables[i][rbi2.pi.get_index()]+= (*da)(lTorque_on_RB2[i]);
+      }
       IMP_LOG_VERBOSE("global torque on second rb " << lTorque_on_RB2);
     }
     /* Vector3D lTorque_on_RB1=rbi1.irot.get_rotated(gTorque_on_RB1-gTorque_on_RB2); // action */

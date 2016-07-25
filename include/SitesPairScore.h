@@ -34,6 +34,7 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+
 /** \brief  Apply a function to the distance between two particles with
             a set of specific binding sites
 
@@ -60,7 +61,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   double ubound_distance2_;
 
   //! Cache:
-  typedef IMP_KERNEL_SMALL_UNORDERED_MAP<ParticleIndex,internal::RigidBodyInfo>
+  typedef IMP_KERNEL_LARGE_UNORDERED_MAP<ParticleIndex,internal::RigidBodyInfo>
     t_particles_rb_cache;
   mutable t_particles_rb_cache particles_rb_cache_;
   mutable bool is_cache_active_;
@@ -135,15 +136,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   virtual double evaluate_indexes(Model *m, const ParticleIndexPairs &p,
                                   DerivativeAccumulator *da,
                                   unsigned int lower_bound,
-                                  unsigned int upper_bound) const IMP_FINAL {
-    activate_cache();
-    double ret=0.0;
-    for (unsigned int i = lower_bound; i < upper_bound; ++i) {
-      ret += evaluate_index(m, p[i], da);
-    }
-    deactivate_cache();
-    return ret;
-  }
+                                  unsigned int upper_bound) const IMP_FINAL;
 
   //! evaluated indexes for the range from lower_bound to upper_bound
   //! in p, if score>max then return max value of double
@@ -168,6 +161,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   */
   virtual double evaluate_index(Model *m, const ParticleIndexPair &p,
                                 DerivativeAccumulator *da) const IMP_OVERRIDE;
+
 #ifndef SWIG
   /**
      EvaluatE all site-site interactions
@@ -185,12 +179,37 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
              pip in model m.
   */
   double
-    evaluate_site_contributions
-    (Model *m,
+    evaluate_site_contributions_with_internal_tables
+    (algebra::Sphere3D const* spheres_table,
+     double const**quaternions_tables,
+     algebra::Sphere3D *sphere_derivatives_table,
+     double **torques_tables,
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
      int* n_contacts_accumulator = nullptr
      ) const;
+
+  /**
+     EvaluatE all site-site interactions
+     for evaluate_index() for the pair pip in model m. If da is not nullptr,
+     it accumulated appropriate derivatives. If n_contacts_accumulator>=0,
+     then the number of individual contacts found is asscumulated there.
+
+     @param m the model
+     @param pip the pair of particle indexes in m
+     @param da optional accumulator for force and torque derivatives
+     @param n_contacts_accumulator optional pointer to accumulator for number of
+           individual contacts.
+
+     @return the site-site contributions for the score for the pair
+             pip in model m.
+  */
+  double evaluate_site_contributions
+    (Model* m,
+     const ParticleIndexPair &pip,
+     DerivativeAccumulator *da,
+     int* n_contacts_accumulator = nullptr) const;
+
 #endif
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
@@ -213,12 +232,27 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
 
  private:
 
+  /** evaluate the score for the pair of model particle indexes in p,
+      updating score derivatives to da, and using internal attribute
+      tables in Model
+  */
+  inline double evaluate_index_with_internal_tables
+    ( Model* m,
+      algebra::Sphere3D const* spheres_table,
+      double const **quaternions_tables,
+      algebra::Sphere3D *sphere_derivatives_table,
+      double **torques_tables,
+      const ParticleIndexPair &p,
+      DerivativeAccumulator *da) const;
 
   // gets the rigid body information (e.g., translation, inverse rotation)
   // associated with particle m.pi, possibly from cache (depending on internal
   // cache definitions)
   inline internal::RigidBodyInfo
-    get_rigid_body_info(Model* m, ParticleIndex pi) const;
+    get_rigid_body_info
+    (algebra::Sphere3D const* spheres_table,
+     double const** quaternions_tables,
+     ParticleIndex pi) const;
 
  private:
   // sets the sites associated with each partner to sites0
@@ -243,26 +277,223 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
 
 };
 
-internal::RigidBodyInfo
-SitesPairScore::get_rigid_body_info
-(Model* m, ParticleIndex pi) const
+//!
+inline double
+SitesPairScore::evaluate_index
+(Model *m, const ParticleIndexPair &p,
+ DerivativeAccumulator *da) const{
+  // get internal tables:
+  algebra::Sphere3D const* spheres_table=
+    m->access_spheres_data();
+  double const* quaternions_tables[4];
+  for(unsigned int i = 0; i < 4; i++){
+    quaternions_tables[i]=
+      core::RigidBody::access_quaternion_i_data(m, i);
+  }
+  algebra::Sphere3D* sphere_derivatives_table=
+    m->access_sphere_derivatives_data();
+  double* torques_tables[3];
+  for(unsigned int i = 0; i < 3; i++){
+    torques_tables[i]=
+      core::RigidBody::access_torque_i_data(m, i);
+  }
+  // evaluate:
+  return evaluate_index_with_internal_tables(m,
+                                             spheres_table,
+                                             quaternions_tables,
+                                             sphere_derivatives_table,
+                                             torques_tables,
+                                             p,
+                                             da);
+}
+
+
+
+
+/**
+   the sites of each particle are transformed to a common frame of reference
+   (using the reference frame of each particle), and the site-specific
+   attraction, and the inter-particle non specific attraction and repulsion
+   are evaluated and summed.
+*/
+inline double
+SitesPairScore::evaluate_index_with_internal_tables
+( Model* m,
+  algebra::Sphere3D const* spheres_table,
+ double const** quaternions_tables,
+ algebra::Sphere3D *sphere_derivatives_table,
+ double **torques_tables,
+ const ParticleIndexPair &pip,
+ DerivativeAccumulator *da) const {
+  IMP_OBJECT_LOG;
+
+  // I. evaluate non-specific attraction and repulsion between
+  //    parent particles before computing for specific sites :
+  double non_specific_score = P::evaluate_index(m, pip, da);
+  LinearInteractionPairScore::EvaluationCache const&
+    lips_cache= P::get_evaluation_cache();
+
+  // II. Return if parent particles are out of site-specific interaction range
+  //     using cache to avoid some redundant calcs
+  double const& distance2= lips_cache.particles_delta_squared;
+  IMP_LOG(PROGRESS, "distance2 " << distance2
+          << " ; distance upper-bound " << ubound_distance2_ <<  std::endl);
+  if (distance2 > ubound_distance2_) {
+    IMP_LOG(PROGRESS, "Sites contribution is 0.0 and non-specific score is "
+            << non_specific_score << std::endl);
+    return non_specific_score;
+  }
+
+  double site_score=evaluate_site_contributions_with_internal_tables
+    (spheres_table,
+     quaternions_tables,
+     sphere_derivatives_table,
+     torques_tables,
+     pip, da);
+  // III. evaluate site-specific contributions :
+  return site_score + non_specific_score;
+}
+
+#ifndef SWIG
+
+//!
+inline double
+SitesPairScore::evaluate_site_contributions_with_internal_tables
+( algebra::Sphere3D const* spheres_table,
+  double const**quaternions_tables,
+  algebra::Sphere3D *sphere_derivatives_table,
+  double **torques_tables,
+  const ParticleIndexPair &pip,
+  DerivativeAccumulator *da,
+  int* n_contacts_accumulator
+  ) const
 {
-  IMP_USAGE_CHECK(core::RigidBody::get_is_setup(m, pi),
-                  "PI " << pi.get_index() << " not a rigid body");
+  IMP_OBJECT_LOG;
+
+  // bring sites_ to the frame of reference of nn_sites_ and nn_
+  ParticleIndex pi0 = pip[0];
+  ParticleIndex pi1 = pip[1];
+  // get rbi0/1 from cache, update if needed
+  internal::RigidBodyInfo rbi0 = get_rigid_body_info(spheres_table,
+                                                     quaternions_tables,
+                                                     pi0);
+  internal::RigidBodyInfo rbi1 = get_rigid_body_info(spheres_table,
+                                                     quaternions_tables,
+                                                     pi1);
+  IMP_LOG_PROGRESS( "RBI0.pi " << rbi0.pi
+                    << " RB0.cache_id " << rbi0.cache_id
+                    << "RBI0.tr " << rbi0.tr << std::endl);
+  IMP_LOG_PROGRESS( "RBI1.cache_id " << rbi1.cache_id
+                    << "RBI1.pi " << rbi1.pi
+                    << "RBI1.tr " << rbi1.tr << std::endl);
+  // sum over specific interactions between all pairs of sites:
+  double sum = 0;
+  for (unsigned int i = 0; i < sites0_.size(); ++i) {
+    algebra::Vector3D g0 = rbi0.tr.get_transformed(sites0_[i].get_center());
+    for(unsigned int j = 0 ; j < sites1_.size(); ++j) {
+      algebra::Vector3D g1 = rbi1.tr.get_transformed(sites1_[j].get_center());
+      IMP_LOG_PROGRESS( "Evaluating sites at global coordinates: " << g0 << " ; " << g1 << std::endl );
+      double cur_score;
+      if(is_orientational_score_)
+        {
+          cur_score =
+            internal::evaluate_pair_of_sites(params_,
+                                             rbi0, rbi1,
+                                             g0, g1,
+                                             da,
+                                             sphere_derivatives_table,
+                                             torques_tables);
+        } else
+        { // old score
+          cur_score =
+            internal::evaluate_one_site_3(params_.k,
+                                          params_.r,
+                                          rbi0, rbi1,
+                                          sites0_[i], sites1_[j],
+                                          g0, g1,
+                                          da,
+                                          sphere_derivatives_table,
+                                          torques_tables);
+        }
+      sum += cur_score;
+      if(n_contacts_accumulator){
+        (*n_contacts_accumulator) += (cur_score!=0.0);
+      }
+      IMP_LOG_PROGRESS( "Sum " << sum << std::endl);
+    }
+  }
+  return sum;
+}
+
+
+//!
+inline double
+SitesPairScore::evaluate_site_contributions
+(Model* m,
+ const ParticleIndexPair &pip,
+ DerivativeAccumulator *da,
+ int* n_contacts_accumulator) const
+{
+  // Get internal tables
+  algebra::Sphere3D const* spheres_table=
+    m->access_spheres_data();
+  double const* quaternions_tables[4];
+  for(unsigned int i = 0; i < 4; i++){
+    quaternions_tables[i]=
+      core::RigidBody::access_quaternion_i_data(m, i);
+  }
+  algebra::Sphere3D* sphere_derivatives_table=
+    m->access_sphere_derivatives_data();
+  double* torques_tables[3];
+  for(unsigned int i = 0; i < 3; i++){
+    torques_tables[i]=
+      core::RigidBody::access_torque_i_data(m, i);
+  }
+  // evaluate:
+  return evaluate_site_contributions_with_internal_tables
+    (spheres_table,
+     quaternions_tables,
+     sphere_derivatives_table,
+     torques_tables,
+     pip,
+     da,
+     n_contacts_accumulator);
+}
+
+#endif // ifndef SWIG
+
+//!
+inline internal::RigidBodyInfo
+SitesPairScore::get_rigid_body_info
+(algebra::Sphere3D const* spheres_table,
+ double const **quaternions_tables,
+ ParticleIndex pi) const
+{
+  // TODO: add usage check that it has valid quaternions
+  //  IMP_USAGE_CHECK(core::RigidBody::get_is_setup(m, pi),
+  //                "PI " << pi.get_index() << " not a rigid body");
   if(is_cache_active_){
     std::pair<t_particles_rb_cache::iterator, bool>
       p = particles_rb_cache_.insert
       (std::make_pair(pi, internal::RigidBodyInfo()));
     internal::RigidBodyInfo& rbi_cached = p.first->second;
-    bool const rbi_was_in_cache = !p.second;
-    if(!rbi_was_in_cache || rbi_cached.cache_id != cur_cache_id_)
+    bool const rbi_in_cache = !p.second;
+    if(!rbi_in_cache ||
+       rbi_cached.cache_id != cur_cache_id_) // = cached version is outdated
       {
-        rbi_cached.set_particle(m, pi, cur_cache_id_);
+        rbi_cached.set_particle(spheres_table,
+                                quaternions_tables,
+                                pi,
+                                cur_cache_id_);
       }
     return rbi_cached;
-  } else {
-    return internal::RigidBodyInfo(m, pi, INVALID_CACHE_ID);
   }
+  else // if is_cache_active_
+    {
+      return internal::RigidBodyInfo(spheres_table,
+                                     quaternions_tables,
+                                     pi, INVALID_CACHE_ID);
+    }
 }
 
 
