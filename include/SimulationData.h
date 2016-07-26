@@ -396,7 +396,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   // TODO: this is not the true value - the true one might depend on the
   //       specific range of each interaction type, so range_ is more
   //       like an upper bound
-  double get_site_display_radius(core::ParticleType) const { return range_ / 2; }
+  double get_site_display_radius(core::ParticleType) const { return std::max(range_ / 2, 6.0); }
 
   //! Return the maximum number of minutes the simulation can run
   /** Or 0 for no limit. */
