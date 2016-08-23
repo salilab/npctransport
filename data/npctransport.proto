@@ -264,6 +264,7 @@ message Statistics {
     optional int32 n_z1=6;
     optional int32 n_z2=7;
     optional int32 n_z3=8;
+    optional float diffusion_coefficient=10;
   }
   message FGStats {
     optional double volume=1 [default=0];

@@ -428,23 +428,31 @@ void Statistics::update
   unsigned int zr_hist[4][3]={{0},{0},{0},{0}};
   update_fg_stats(stats, nf_new, zr_hist);
 
+  std::map<IMP::core::ParticleType, double> type_to_diffusion_coefficeint_map; // to be used for floater order params
   // Floaters general body stats
   for (BodyStatisticsOSsMap::iterator
          it = floaters_stats_map_.begin() ;
        it != floaters_stats_map_.end(); it++)
     {
-      unsigned int i = find_or_add_floater_of_type( stats, it->first );
+      unsigned int i= find_or_add_floater_of_type( stats, it->first );
       BodyStatisticsOptimizerStates& bsos = it->second;
-      for (unsigned int j = 0; j < bsos.size(); j++)
+      int n_particles_type_i = bsos.size();
+      type_to_diffusion_coefficeint_map[it->first]=0.0;
+      int nf_weighted = nf * n_particles_type_i; // number of particle frames
+      for (unsigned int j= 0; j < n_particles_type_i; j++)
         {
-          int cnf = (nf) * bsos.size() + j; // each old frame is for size particles
-          UPDATE_AVG(cnf, nf_new,  // TODO: is nf_new correct? I think so
-                     *stats->mutable_floaters(i), diffusion_coefficient,
-                     bsos[j]->get_diffusion_coefficient());
-          UPDATE_AVG(cnf, nf_new,  // TODO: is nf_new correct? I think so
-                     *stats->mutable_floaters(i), correlation_time,
-                     bsos[j]->get_correlation_time());
+          double dc_j= bsos[j]->get_diffusion_coefficient();
+          UPDATE_AVG(nf_weighted, nf_new,
+                     *stats->mutable_floaters(i),
+                     diffusion_coefficient, dc_j);
+          type_to_diffusion_coefficeint_map[it->first]+=
+            dc_j/n_particles_type_i;
+          double ct_j= bsos[j]->get_correlation_time();
+          UPDATE_AVG(nf_weighted, nf_new,
+                     *stats->mutable_floaters(i),
+                     correlation_time, ct_j);
           bsos[j]->reset();
+          nf_weighted++;
         } // for j
       // Recreate z-r histogram based on retrieved zr_hist:
       ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
@@ -535,6 +543,8 @@ void Statistics::update
             frc->set_n_z2(n_z2);
             frc->set_n_z3(n_z3);
           }
+        frc->set_diffusion_coefficient
+          (type_to_diffusion_coefficeint_map[*it]);
       } // for(it)
 
   // update statistics gathered on interaction rates

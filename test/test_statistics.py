@@ -38,14 +38,18 @@ class Tests(IMP.test.TestCase):
         bd.optimize(n_cycles)
         Dout= os.get_diffusion_coefficient()
         Din= IMP.atom.RigidBodyDiffusion(p).get_diffusion_coefficient()
-        print(Dout, Din)
+        print("Estimated vs. actual D_translation: %.2e %.2e" % (Dout, Din))
         self.assertAlmostEqual(Dout, Din,
                                delta=delta_factor*Din)
     def test_rot(self):
         """Check rigid body correlation time"""
+        IS_DISABLED=True
+        if IS_DISABLED:
+            self.skipTest("Rotational diffusion coefficient stats are temporarily disabled")
         print("TEST_ROT")
-        if IMP.build!= "fast":
-          self.skipTest("Only run in fast mode")
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL or IMP.build != "release":
+            print("HI")
+            self.skipTest("Only run in fast mode")
         m= IMP.Model()
         p= create_diffusing_rb_particle(m, radius)
         IMP.core.RigidBody(p).set_coordinates_are_optimized(True)
@@ -56,6 +60,7 @@ class Tests(IMP.test.TestCase):
             , dd.get_diffusion_coefficient())
         dt=100000
         bd= IMP.atom.BrownianDynamics(m)
+        bd.set_scoring_function([IMP.RestraintSet(m, "empty set")])
         bd.set_maximum_time_step(dt)
         os= IMP.npctransport.BodyStatisticsOptimizerState(p)
         num_steps=1000
@@ -67,7 +72,7 @@ class Tests(IMP.test.TestCase):
         cor_out= os.get_correlation_time()
         Din= dd.get_rotational_diffusion_coefficient()
         Dout=1.0/(2.0*cor_out)
-        print(Dout, Din, cor_out)
+        print("Estimated vs. actual D_rotation: %.2e %.2e" % (Dout, Din), "Correlation: ", cor_out)
         self.assertAlmostEqual(Dout, Din, delta=.5*Dout)
     def _create_magnet_restraint(self, m, p, magnet_coordinates):
         """
