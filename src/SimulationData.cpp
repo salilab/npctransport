@@ -11,8 +11,8 @@
 #include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesGeometry.h>
-#include <IMP/npctransport/SlabGeometry.h>
-#include <IMP/npctransport/SlabSingletonScore.h>
+#include <IMP/npctransport/SlabWithCylindricalPoreGeometry.h>
+#include <IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h>
 #include <IMP/npctransport/ParticleFactory.h>
 // #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/protobuf.h>
@@ -517,7 +517,7 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
     if(with_restraints && false) {
       IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_slab_restraint()));
     }
-    IMP_NEW(SlabWireGeometry, slab_geometry,
+    IMP_NEW(SlabWithCylindricalPoreWireGeometry, slab_geometry,
             (slab_thickness_, tunnel_radius_, box_side_));
     IMP::rmf::add_static_geometries(fh, slab_geometry->get_components());
   }
@@ -577,7 +577,7 @@ void SimulationData::dump_geometry() {
   if (slab_is_on_) {
     //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
     //w->add_geometry(cyl_geom);
-     IMP_NEW(SlabWireGeometry, slab_geometry,
+     IMP_NEW(SlabWithCylindricalPoreWireGeometry, slab_geometry,
              (slab_thickness_ /* h */ ,
               tunnel_radius_ /* r */,
               box_side_ /* w */) );
@@ -759,7 +759,7 @@ void SimulationData::write_geometry(std::string out) {
     w->add_geometry(bbg);
   }
   if (slab_is_on_) {
-    IMP_NEW(SlabWireGeometry, slab_geometry,
+    IMP_NEW(SlabWithCylindricalPoreWireGeometry, slab_geometry,
             (slab_thickness_, tunnel_radius_, box_side_));
     w->add_geometry(slab_geometry);
     //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));

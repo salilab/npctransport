@@ -1,5 +1,5 @@
 /**
- *  \file SlabSingletonScore.h
+ *  \file SlabWithCylindricalPoreSingletonScore.h
  *  \brief XXXXXXXXXXXXXX
  *
  *  Copyright 2007-8 Sali Lab. All rights reserved.
@@ -23,22 +23,18 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
     or fully within slab radius from the origin in the [X,Y] plane
     // TODO: verify documentation
  */
-class IMPNPCTRANSPORTEXPORT SlabSingletonScore : public SingletonScore {
+class IMPNPCTRANSPORTEXPORT SlabWithCylindricalPoreSingletonScore : public SingletonScore {
   double thickness_;  // thichness of slab
-
   double radius_;  // radius of slab cylinder
-
   double k_;  // coefficient for violation of slab constraint
-
   double top_;  // top of slab on z-axis
-
   double bottom_;  // bottom of slab on x-axis
-
   double midZ_;  // (top + bottom) / 2, for caching some calculations
 
  public:
-  //! Get the individual particles from the passed SingletonContainer
-  SlabSingletonScore(double thickness, double radius, double k);
+  //! Constructs a slab with specified thickness and a cylindrical
+  //! pore of specified radius and repulsive force constant k
+  SlabWithCylindricalPoreSingletonScore(double thickness, double radius, double k);
 
   algebra::Vector3D get_displacement_direction(
       const algebra::Vector3D &v) const {
@@ -100,8 +96,8 @@ class IMPNPCTRANSPORTEXPORT SlabSingletonScore : public SingletonScore {
     return ret;
   }
 
-  //  IMP_SINGLETON_SCORE_METHODS(SlabSingletonScore);
-  IMP_OBJECT_METHODS(SlabSingletonScore);
+  //  IMP_SINGLETON_SCORE_METHODS(SlabWithCylindricalPoreSingletonScore);
+  IMP_OBJECT_METHODS(SlabWithCylindricalPoreSingletonScore);
 
  private:
   // evaluate slab for specified sphere. Return 0 if ball
@@ -112,7 +108,7 @@ class IMPNPCTRANSPORTEXPORT SlabSingletonScore : public SingletonScore {
   //                         is used to store the computed displacement vector from
   //                         the surface of the z-axis aligned cylinder to
   //                         the center of s. Ignore if score is zero.
-  double evaluate_sphere
+  inline double evaluate_sphere
     (algebra::Sphere3D s,
      algebra::Vector3D* out_displacement) const;
 
@@ -126,8 +122,9 @@ class IMPNPCTRANSPORTEXPORT SlabSingletonScore : public SingletonScore {
       const algebra::Vector3D &v) const;
 };
 
+//
 inline double
-SlabSingletonScore::evaluate_index
+SlabWithCylindricalPoreSingletonScore::evaluate_index
 (Model *m,
  const ParticleIndex pi,
  DerivativeAccumulator *da) const
@@ -146,8 +143,9 @@ SlabSingletonScore::evaluate_index
   return score;
 }
 
+//
 inline double
-SlabSingletonScore::evaluate_indexes(Model *m, const ParticleIndexes &pis,
+SlabWithCylindricalPoreSingletonScore::evaluate_indexes(Model *m, const ParticleIndexes &pis,
                                 DerivativeAccumulator *da,
                                 unsigned int lower_bound,
                                 unsigned int upper_bound) const
@@ -195,10 +193,12 @@ SlabSingletonScore::evaluate_indexes(Model *m, const ParticleIndexes &pis,
   return ret;
 }
 
-
-inline double
-SlabSingletonScore::evaluate_sphere(algebra::Sphere3D s,
-                                    algebra::Vector3D* out_displacement) const {
+//
+double
+SlabWithCylindricalPoreSingletonScore::evaluate_sphere
+(algebra::Sphere3D s,
+ algebra::Vector3D* out_displacement) const
+{
   double const x=s[0];
   double const y=s[1];
   double const z=s[2];
@@ -232,35 +232,33 @@ SlabSingletonScore::evaluate_sphere(algebra::Sphere3D s,
   return score;
 }
 
-
-
 // computes the distance and displacement vector of v
 // from the surface of a z-axis aligned cylinder
 //
 // @return <distance, a vector pointing out>,
 //         negative distance should mean v is inside the cylinder
 inline std::pair<double, algebra::Vector3D>
-SlabSingletonScore::get_displacement_vector(const algebra::Vector3D &v) const {
-  double R2 = square(v[0]) + square(v[1]);  // r^2 for [x,y] projection
-  double H = v[2] - midZ_;  // thickness on z-axis from cyl origin
-  IMP_LOG_PROGRESS( H << " " << R2 << " for " << v << std::endl);
-  if (R2 > square(radius_) ||
+SlabWithCylindricalPoreSingletonScore::get_displacement_vector(const algebra::Vector3D &v) const {
+  double dXY2 = square(v[0]) + square(v[1]);  // r^2 for [x,y] projection
+  double dZ = v[2] - midZ_;  // thickness on z-axis from cyl origin
+  IMP_LOG_PROGRESS( dZ << " " << dXY2 << " for " << v << std::endl);
+  if (dXY2 > square(radius_) ||
       (v[2] <= top_ && v[2] >= bottom_)) {  // = either inside cylinder, or
                                             // [x,y] outside cyl_radius
-    double aH = std::abs(H);  // absolute distance from cyl origin
-    double R = std::sqrt(R2);
-    double dR = R - radius_;  // displacement on [x,y] direction
-    if (dR + aH < .5 * thickness_) {
+    double abs_dZ = std::abs(dZ);
+    double abs_dXY = std::sqrt(dXY2);
+    double dR = abs_dXY - radius_;  // displacement on [x,y] direction (positive = outside cylinder interior)
+    if (dR + abs_dZ < .5 * thickness_) {
       IMP_LOG_PROGRESS("ring or tunnel" << std::endl);
-      if (R2 < .00001) {  // at origin
+      if (dXY2 < .00001) {  // at origin
         return std::make_pair(radius_, algebra::Vector3D(0, 0, 1));
       } else {
         algebra::Vector3D rv(-v[0], -v[1], 0);
-        return std::make_pair(radius_ - R, rv.get_unit_vector());
+        return std::make_pair(radius_ - abs_dXY, rv.get_unit_vector());
       }
     } else {
       IMP_LOG_PROGRESS("in or out of slab" << std::endl);
-      if (H > 0) {
+      if (dZ > 0) {
         return std::make_pair(v[2] - top_, algebra::Vector3D(0, 0, 1));
       } else {
         return std::make_pair(bottom_ - v[2], algebra::Vector3D(0, 0, -1));
@@ -268,9 +266,9 @@ SlabSingletonScore::get_displacement_vector(const algebra::Vector3D &v) const {
     }
   } else {  // = outside cylinder && [x,y] within cyl_radius
     IMP_LOG_PROGRESS("channel" << std::endl);
-    if (R2 < .00001) {  // at origin
+    if (dXY2 < .00001) {  // at origin
       IMP_LOG_PROGRESS("in center " << std::endl);
-      if (H > 0) {
+      if (dZ > 0) {
         return std::make_pair(v[2] - top_, algebra::Vector3D(0, 0, 1));
       } else {
         return std::make_pair(bottom_ - v[2], algebra::Vector3D(0, 0, -1));
@@ -278,7 +276,7 @@ SlabSingletonScore::get_displacement_vector(const algebra::Vector3D &v) const {
     }
     algebra::Vector3D rim =
         algebra::Vector3D(v[0], v[1], 0).get_unit_vector() * radius_;
-    if (H > 0) {
+    if (dZ > 0) {
       rim[2] = top_;
     } else {
       rim[2] = bottom_;

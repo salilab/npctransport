@@ -17,7 +17,7 @@ d.set_radius(10)
 d.set_coordinates_are_optimized(True)
 IMP.atom.Diffusion.setup_particle(p)
 IMP.atom.Mass.setup_particle(p, 1)
-slabss= IMP.npctransport.SlabSingletonScore(height, radius, k)
+slabss= IMP.npctransport.SlabWithCylindricalPoreSingletonScore(height, radius, k)
 r= IMP.core.SingletonRestraint(m, slabss, p.get_index(), "slab")
 bb= IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(-100, -100, -100),
                               IMP.algebra.Vector3D(100, 100, 100))
@@ -29,7 +29,7 @@ nm=IMP.create_temporary_file_name("slab", ".rmf")
 rmf= RMF.create_rmf_file(nm)
 IMP.rmf.add_hierarchies(rmf, [p])
 bbg= IMP.display.BoundingBoxGeometry(bb)
-sg= IMP.npctransport.SlabWireGeometry(height, radius, 100)
+sg= IMP.npctransport.SlabWithCylindricalPoreWireGeometry(height, radius, 100)
 sg.set_was_used(True);
 sgs= sg.get_components()
 # silliness we have to do for now

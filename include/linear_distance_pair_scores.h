@@ -63,7 +63,7 @@ inline double do_evaluate_index(Model *m, const ParticleIndexPair &pp,
 /**
    A soft linear repulsive score between two spheres.
    If the spheres penetrate each other, the score is
-   ( k_ * [penetration-magnitude] ), otherwise the score is 0.
+   ( k_ * [penetration-magnitude] kcal/mol), otherwise the score is 0.
  */
 class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
  private:

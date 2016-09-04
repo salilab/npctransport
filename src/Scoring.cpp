@@ -11,7 +11,7 @@
 #include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
-#include <IMP/npctransport/SlabSingletonScore.h>
+#include <IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h>
 #include <IMP/npctransport/ZBiasSingletonScore.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/typedefs.h>
@@ -225,7 +225,7 @@ void Scoring::add_interaction
   if (idata.has_interaction_k()) {
     base_k = idata.interaction_k().value();
   }
-  double interaction_k = base_k * interaction_k_factors_.find(type0)->second  
+  double interaction_k = base_k * interaction_k_factors_.find(type0)->second
                                 * interaction_k_factors_.find(type1)->second;
   double base_range = interaction_range_;
   if (idata.has_interaction_range()) {
@@ -528,7 +528,7 @@ Restraint * Scoring::create_slab_restraint
 {
   particles.set_name_if_default("CreateStabRestraintInput%1%");
   // Add cylinder restraint
-  IMP_NEW(SlabSingletonScore, slab_score,
+  IMP_NEW(SlabWithCylindricalPoreSingletonScore, slab_score,
           (slab_thickness_ /* h */, tunnel_radius_ /*r*/, excluded_volume_k_));
   return
     container::create_restraint(slab_score.get(),

@@ -38,7 +38,7 @@ class ConeTests(IMP.test.TestCase):
         d.set_radius(radius)
         bb= IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       IMP.algebra.Vector3D(boxw,boxw,boxw))
-        slabss= IMP.npctransport.SlabSingletonScore(slab_height, slab_radius, 1)
+        slabss= IMP.npctransport.SlabWithCylindricalPoreSingletonScore(slab_height, slab_radius, 1)
         self.assertEqual(slabss.get_bottom_z(),-0.5*slab_height);
         self.assertEqual(slabss.get_top_z(),+0.5*slab_height);
         r= IMP.core.SingletonRestraint(m, slabss, p.get_index(), "slab")
@@ -48,7 +48,7 @@ class ConeTests(IMP.test.TestCase):
         w= IMP.display.PymolWriter(self.get_tmp_file_name("slabss.pym"))
         w.set_frame(0)
         g=IMP.core.XYZRGeometry(d)
-        sg= IMP.npctransport.SlabWireGeometry(slab_height, slab_radius, boxw)
+        sg= IMP.npctransport.SlabWithCylindricalPoreWireGeometry(slab_height, slab_radius, boxw)
         w.add_geometry([g, sg])
         cg= IMP.core.SteepestDescent(m)
         cg.set_scoring_function(r)

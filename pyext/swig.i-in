@@ -14,11 +14,12 @@ IMP_SWIG_OBJECT(IMP::npctransport, Statistics, StatisticsList);
 IMP_SWIG_OBJECT(IMP::npctransport, SimulationData, SimulationDatas);
 IMP_SWIG_OBJECT(IMP::npctransport, SitesGeometry, SitesGeometries);
 IMP_SWIG_OBJECT(IMP::npctransport, TypedSitesGeometry, TypedSitesGeometries);
-IMP_SWIG_OBJECT(IMP::npctransport, SlabSingletonScore, SlabSingletonScores);
+IMP_SWIG_OBJECT(IMP::npctransport, SlabWithCylindricalPoreSingletonScore, SlabWithCylindricalPoreSingletonScores);
+IMP_SWIG_OBJECT(IMP::npctransport, SlabWithToroidalPoreSingletonScore, SlabWithToroidalPoreSingletonScores);
 IMP_SWIG_OBJECT(IMP::npctransport, ExcludeZRangeSingletonScore, ExcludeZRangeSingletonScores);
 IMP_SWIG_OBJECT(IMP::npctransport, ZBiasSingletonScore, ZBiasSingletonScores);
-IMP_SWIG_OBJECT(IMP::npctransport, SlabWireGeometry, SlabWireGeometries);
-IMP_SWIG_OBJECT(IMP::npctransport, SlabSurfaceGeometry, SlabSurfaceGeometries);
+IMP_SWIG_OBJECT(IMP::npctransport, SlabWithCylindricalPoreWireGeometry, SlabWithCylindricalPoreWireGeometries);
+IMP_SWIG_OBJECT(IMP::npctransport, SlabWithCylindricalPoreSurfaceGeometry, SlabWithCylindricalPoreSurfaceGeometries);
 IMP_SWIG_OBJECT(IMP::npctransport, LinearSoftSpherePairScore, LinearSoftSpherePairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, FunctorLinearSoftSpherePairScore, FunctorLinearSoftSpherePairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, LinearInteractionPairScore, LinearInteractionPairScores);
@@ -64,10 +65,11 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %include "IMP/npctransport/rmf_links.h"
 %include "IMP/npctransport/Transporting.h"
 %include "IMP/npctransport/protobuf.h"
-%include "IMP/npctransport/SlabSingletonScore.h"
+%include "IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h"
+%include "IMP/npctransport/SlabWithToroidalPoreSingletonScore.h"
 %include "IMP/npctransport/ExcludeZRangeSingletonScore.h"
 %include "IMP/npctransport/ZBiasSingletonScore.h"
-%include "IMP/npctransport/SlabGeometry.h"
+%include "IMP/npctransport/SlabWithCylindricalPoreGeometry.h"
 %include "IMP/npctransport/BodyStatisticsOptimizerState.h"
 %include "IMP/npctransport/ParticleTransportStatisticsOptimizerState.h"
 %include "IMP/npctransport/ChainStatisticsOptimizerState.h"

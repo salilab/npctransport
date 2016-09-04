@@ -436,7 +436,7 @@ void Statistics::update
     {
       unsigned int i= find_or_add_floater_of_type( stats, it->first );
       BodyStatisticsOptimizerStates& bsos = it->second;
-      int n_particles_type_i = bsos.size();
+      unsigned int n_particles_type_i = bsos.size();
       type_to_diffusion_coefficeint_map[it->first]=0.0;
       int nf_weighted = nf * n_particles_type_i; // number of particle frames
       for (unsigned int j= 0; j < n_particles_type_i; j++)

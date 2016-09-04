@@ -15,7 +15,6 @@
 #include "npctransport_proto.fwd.h"
 #include "Parameter.h"
 // #include "SimulationData.h"
-#include "SlabSingletonScore.h"
 
 #include <IMP/Model.h>
 #include <IMP/PairContainer.h>

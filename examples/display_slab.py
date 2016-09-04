@@ -22,7 +22,7 @@ d.set_coordinates_are_optimized(True)
 IMP.atom.Mass.setup_particle(p, 1)
 IMP.atom.Hierarchy.setup_particle(p)
 
-slabss= IMP.npctransport.SlabSingletonScore(height, radius, 1)
+slabss= IMP.npctransport.SlabWithCylindricalPoreSingletonScore(height, radius, 1)
 r= IMP.core.SingletonRestraint(m, slabss, pi, "slab")
 r.set_log_level(IMP.WARNING)
 nm=IMP.create_temporary_file_name("display_slab", ".pym")
@@ -31,7 +31,7 @@ if use_rmf:
     rnm=IMP.create_temporary_file_name("display_slab", ".rmf")
     rmf= RMF.create_rmf_file(rnm)
     #IMP.rmf.add_hierarchies(rmf, [p])
-sg= IMP.npctransport.SlabWireGeometry(height, radius, 100)
+sg= IMP.npctransport.SlabWithCylindricalPoreWireGeometry(height, radius, 100)
 sg.set_was_used(True);
 if use_rmf:
     sg.set_color(IMP.display.Color(0,1,0))
