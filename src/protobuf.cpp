@@ -103,7 +103,7 @@ namespace {
   //
   // @param name the name to be given to the range (range.name),
   //             only if it is a direct child of current message.
-  // @param message the config message
+  // @param in_message the config message
   // @param out_message the message to which constand and 'degenerate' range
   //                    messages are written (in the same hierarchy as in message)
   //                    In addition, range.m (message field) of each range
@@ -118,78 +118,86 @@ namespace {
   //         <name>, if the range belong directly to the message).
   //
 
-  Ranges get_ranges(std::string name, const Message* message,
+  Ranges get_ranges(std::string name, const Message* in_message,
                     Message* out_message) {
     std::string contextname = (std::string("get_ranges: ") + name);
     IMP::CreateLogContext gr(contextname.c_str());
-    const Reflection* r(message->GetReflection());
+    const Reflection* in_r(in_message->GetReflection());
     const Reflection* out_r(out_message->GetReflection());
-    /*IMP_LOG(VERBOSE, "Inspecting " << name << " "
-      << message->GetTypeName() << std::endl);*/
-    /*std::cout << "inspecting " << name << " " << message->GetTypeName()
-      << std::endl;*/
+    IMP_LOG(VERBOSE,"Inspecting in message " << name << " "
+      << in_message->GetTypeName() << std::endl);
     Ranges ret;
-    const Descriptor* d(message->GetDescriptor());
+    const Descriptor* in_d(in_message->GetDescriptor());
     const Descriptor* out_d(out_message->GetDescriptor());
-    const FieldDescriptor* lfd(d->FindFieldByName("lower"));
-    const FieldDescriptor* ufd(d->FindFieldByName("upper"));
-    if (lfd && ufd) {  // current message directly contains range
-      if (r->HasField(*message, ufd)) {
+    const FieldDescriptor* lfd(in_d->FindFieldByName("lower"));
+    const FieldDescriptor* ufd(in_d->FindFieldByName("upper"));
+    if (lfd && ufd) {
+      // Handle message that directly contains range (actual or degenerate):
+      if (in_r->HasField(*in_message, ufd)) {
+        // Actual range from lower to upper:
         IMP_LOG(VERBOSE, "Found range " << name << std::endl);
         Range cur;
-        const FieldDescriptor* sfd(d->FindFieldByName("steps"));
-        const FieldDescriptor* bfd(d->FindFieldByName("base"));
+        const FieldDescriptor* sfd(in_d->FindFieldByName("steps"));
+        const FieldDescriptor* bfd(in_d->FindFieldByName("base"));
         cur.name = name;
-        cur.lb = get_value(r, message, lfd);
-        cur.ub = get_value(r, message, ufd);
+        cur.lb = get_value(in_r, in_message, lfd);
+        cur.ub = get_value(in_r, in_message, ufd);
         if (lfd->type() == FieldDescriptor::TYPE_INT32) {
           cur.base = 1;  // evenly spaced
         } else {
-          cur.base = r->GetDouble(*message, bfd);
+          cur.base = in_r->GetDouble(*in_message, bfd);
         }
-        cur.steps = r->GetInt32(*message, sfd);
+        cur.steps = in_r->GetInt32(*in_message, sfd);
         cur.m = out_message;
         ret.push_back(cur);
         // IMP_LOG(VERBOSE, "Ret is " << IMP::Showable(ret) << std::endl);
       } else {
+        // Degenerate range with a single value (=lower):
         IMP_LOG(VERBOSE, "Found value " << name << std::endl);
         const FieldDescriptor* out_lfd(out_d->FindFieldByName("value"));
-        set_value(out_r, out_message, out_lfd, get_value(r, message, lfd));
+        set_value(out_r, out_message, out_lfd, get_value(in_r, in_message, lfd));
       }
-    } else {  // recursively look for descendent messages with ranges
-      for (int i = 0; i < d->field_count(); ++i) {
-        const FieldDescriptor* fd(d->field(i));
-        const FieldDescriptor* out_fd(out_d->FindFieldByName(fd->name()));
-        IMP_INTERNAL_CHECK(out_fd, "No field named " << fd->name());
-        if (fd->type() == FieldDescriptor::TYPE_MESSAGE) {
-          if (fd->is_repeated()) {
-            int sz = r->FieldSize(*message, fd);
+    } else { // message does not directly contain a range
+      // Recursively look for descendent messages with ranges:
+      for (int i = 0; i < in_d->field_count(); ++i) {
+        const FieldDescriptor* in_fd(in_d->field(i));
+        if(!in_fd->is_repeated()){
+          if(!in_r->HasField(*in_message, in_fd)){
+            continue; // skip unset field
+          }
+        }
+        const FieldDescriptor* out_fd(out_d->FindFieldByName(in_fd->name()));
+        IMP_INTERNAL_CHECK(out_fd, "No field named " << in_fd->name()
+                           << " in assignment message");
+        if (in_fd->type() == FieldDescriptor::TYPE_MESSAGE) {
+          if (in_fd->is_repeated()) {
+            int sz = in_r->FieldSize(*in_message, in_fd);
             for (int i = 0; i < sz; ++i) {
               ret +=
-                get_ranges(fd->name(), &r->GetRepeatedMessage(*message, fd, i),
+                get_ranges(in_fd->name(), &in_r->GetRepeatedMessage(*in_message, in_fd, i),
                            out_r->AddMessage(out_message, out_fd));
               // IMP_LOG(VERBOSE, "Got " << IMP::Showable(ret) << std::endl);
             }
-          } else {
-            ret += get_ranges(fd->name(), &r->GetMessage(*message, fd),
+          } else { // not repeated:
+            ret += get_ranges(in_fd->name(), &in_r->GetMessage(*in_message, in_fd),
                               out_r->MutableMessage(out_message, out_fd));
             // IMP_LOG(VERBOSE, "Got " << IMP::Showable(ret) << std::endl);
           }
-        } else {
+        } else { // not a message:
           if (out_fd) {
-            IMP_LOG(VERBOSE, "Found constant " << fd->name() << std::endl);
+            IMP_LOG(VERBOSE, "Found constant " << in_fd->name() << std::endl);
             if (out_fd->type() == FieldDescriptor::TYPE_STRING) {
-                if (fd->is_repeated()) {
-                int sz = r->FieldSize(*message, fd);
+              if (in_fd->is_repeated()) {
+                int sz = in_r->FieldSize(*in_message, in_fd);
                 for(int i = 0; i < sz; ++i) {
-                  std::string str=r->GetRepeatedString(*message, fd, i);
+                  std::string str= in_r->GetRepeatedString(*in_message, in_fd, i);
                   out_r->AddString(out_message, out_fd, str);
                 }
-              } else {
-                out_r->SetString(out_message, out_fd, r->GetString(*message, fd));
+              } else { // not a repeated string:
+                out_r->SetString(out_message, out_fd, in_r->GetString(*in_message, in_fd));
               }
-            } else {
-              set_value(out_r, out_message, out_fd, get_value(r, message, fd));
+            } else { // not a string:
+              set_value(out_r, out_message, out_fd, get_value(in_r, in_message, in_fd));
             }
           }
         }
@@ -270,7 +278,8 @@ namespace {
 namespace {
 
   //! set default value of protobuf message 'prefix' to passed dafault value
-#define SET_DEFAULT(prefix, default_value)                              \
+  //! the value must be positive (otherwise default value is used)
+#define SET_DEFAULT_POSITIVE_FLOAT(prefix, default_value)                              \
   {                                                                     \
     bool has_value = ( *prefix ).has_value();                           \
     bool invalid_value = has_value ? ( *prefix ).value() <= 0.0 : true; \
@@ -286,15 +295,15 @@ namespace {
       ::npctransport_proto::Assignment_FGAssignment* mfg =
         assign.mutable_fgs(i);
       if(mfg->is_tamd()){
-        SET_DEFAULT(mfg->mutable_tamd_t_factor_coeff(), 1.0);
-        SET_DEFAULT(mfg->mutable_tamd_t_factor_base(), 1.0);
-        SET_DEFAULT(mfg->mutable_tamd_f_factor_coeff(), 1.0);
-        SET_DEFAULT(mfg->mutable_tamd_f_factor_base(), 1.0);
-        SET_DEFAULT(mfg->mutable_tamd_k(), 1.0);
+        SET_DEFAULT_POSITIVE_FLOAT(mfg->mutable_tamd_t_factor_coeff(), 1.0);
+        SET_DEFAULT_POSITIVE_FLOAT(mfg->mutable_tamd_t_factor_base(), 1.0);
+        SET_DEFAULT_POSITIVE_FLOAT(mfg->mutable_tamd_f_factor_coeff(), 1.0);
+        SET_DEFAULT_POSITIVE_FLOAT(mfg->mutable_tamd_f_factor_base(), 1.0);
+        SET_DEFAULT_POSITIVE_FLOAT(mfg->mutable_tamd_k(), 1.0);
       } // if mfg->is_tamd
     } // for
   }
-#undef SET_DEFAULT
+#undef SET_DEFAULT_POSITIVE_FLOAT
 }; // anonymous namespace
 
 
@@ -314,7 +323,7 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
   npctransport_proto::Output output;
   npctransport_proto::Assignment& assignment = *output.mutable_assignment();
   output.mutable_statistics(); // create if not there
-  SetLogState sls(WARNING);
+  //  SetLogState sls(WARNING);
   Ranges ranges = get_ranges("all", &config, &assignment);
   /*for (unsigned int i=0; i< ranges.size(); ++i) {
     std::cout << ranges[i].lb << " " << ranges[i].ub << " " << ranges[i].steps
@@ -353,9 +362,9 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
     ( get_statistics_interval_in_frames(assignment, time_step) );
   assignment.set_output_statistics_interval_frames
     ( get_output_statistics_interval_in_frames(assignment, time_step) );
-
   assignment.set_range(get_close_pairs_range(assignment));
   assignment.set_random_seed(random_seed);
+
   set_default_tamd_options(assignment);
   std::fstream out(ofname.c_str(), std::ios::out | std::ios::binary);
   if (!out) {

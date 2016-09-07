@@ -53,20 +53,22 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()
-#define GET_ASSIGNMENT_DEF(name, default_value)          \
-  {                                             \
-  if(pb_assignment.has_##name() )               \
-    { name##_ = pb_assignment.name().value(); }  \
-  else                                          \
-    { name##_ = default_value; }                \
+#define GET_ASSIGNMENT_DEF(name, default_value)                         \
+  {                                                                     \
+    if(!pb_assignment.has_##name() )                                    \
+      {                                                                 \
+        pb_mutable_assignment->mutable_##name()                         \
+          ->set_value(default_value);                                   \
+      }                                                                 \
+    name##_ = pb_assignment.name().value();                             \
   }
 #define GET_VALUE(name) name##_ = pb_assignment.name()
-#define GET_VALUE_DEF(name, default_value)          \
-  {                                             \
-  if(pb_assignment.has_##name() )               \
-    { name##_ = pb_assignment.name(); }         \
-  else                                          \
-    { name##_ = default_value; }                \
+#define GET_VALUE_DEF(name, default_value)              \
+  {                                                     \
+    if(!pb_assignment.has_##name() )                    \
+      { pb_mutable_assignment                           \
+          ->set_##name(default_value); }                \
+    name##_ = pb_assignment.name();                     \
   }
 
 SimulationData::SimulationData(std::string prev_output_file, bool quick,
@@ -101,6 +103,8 @@ void SimulationData::initialize(std::string prev_output_file,
   pb_data.mutable_statistics(); // create it if not there
   const ::npctransport_proto::Assignment &
       pb_assignment= pb_data.assignment();
+  ::npctransport_proto::Assignment*
+      pb_mutable_assignment= pb_data.mutable_assignment();
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
   GET_ASSIGNMENT(slab_thickness);
@@ -195,9 +199,9 @@ void SimulationData::initialize(std::string prev_output_file,
     }
 
   get_bd()->set_current_time( initial_simulation_time_ns_ );
-  pb_data.mutable_assignment()->add_imp_module_version
+  pb_mutable_assignment->add_imp_module_version
     ( IMP::get_module_version() );
-  pb_data.mutable_assignment()->add_npc_module_version
+  pb_mutable_assignment->add_npc_module_version
     ( IMP::npctransport::get_module_version() );
   std::ofstream outf(new_output_file.c_str(), std::ios::binary);
   pb_data.SerializeToOstream(&outf);

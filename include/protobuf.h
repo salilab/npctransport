@@ -28,10 +28,11 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 IMPNPCTRANSPORTEXPORT void show_ranges(std::string fname);
 
 /**
-   reads the protobuf message in [fname], which may contain submessages with
+   reads the protobuf message in [input_config_fname], which may contain submessages with
    ranges of values (indicated by presence of .upper and .lower fields, with
    .steps possible steps for each such field). The output is a message with
-   the [work_unit]th possible combination of these ranges, to the file [ofname].
+   the [work_unit]'th possible combination of these ranges, to the file
+   [output_assignment_fname].
 
    Note: the range values are enumerated as if they lie on a grid with
    log-evenly distributed axis-aligned grid points, using the .base field
@@ -54,8 +55,7 @@ IMPNPCTRANSPORTEXPORT void show_ranges(std::string fname);
                       generator for this simulation
 
    @throw IMP::ValueException if any of the values in the configuration
-   file
-              are in conflict (e.g., simulation time and maximal number of
+   file are in conflict (e.g., simulation time and maximal number of
    frames)
 */
 // Each range field also has .steps and .base field.
