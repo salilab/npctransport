@@ -12,7 +12,9 @@
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesGeometry.h>
 #include <IMP/npctransport/SlabWithCylindricalPoreGeometry.h>
+#include <IMP/npctransport/SlabWithToroidalPoreGeometry.h>
 #include <IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h>
+#include <IMP/npctransport/SlabWithToroidalPoreSingletonScore.h>
 #include <IMP/npctransport/ParticleFactory.h>
 // #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/protobuf.h>
@@ -28,6 +30,7 @@
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/log.h>
+#include <IMP/internal/units.h>
 #include <IMP/core/HarmonicUpperBound.h>
 #include <IMP/core/pair_predicates.h>
 #include <IMP/core/RestraintsScoringFunction.h>
@@ -117,6 +120,7 @@ void SimulationData::initialize(std::string prev_output_file,
   GET_VALUE_DEF(fg_anchor_inflate_factor, 1.0);
   GET_VALUE_DEF(are_floaters_on_one_slab_side, false);
   GET_VALUE_DEF(is_exclude_floaters_from_slab_initially, false);
+  GET_ASSIGNMENT_DEF(temperature_k, strip_units(IMP::internal::DEFAULT_TEMPERATURE));
   initial_simulation_time_ns_ = 0.0; // default
   if (pb_data.has_statistics()) {
     if (pb_data.statistics().has_bd_simulation_time_ns()) {
@@ -513,12 +517,18 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
     IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
     IMP::rmf::add_static_geometries(fh, display::Geometries(1, bbg));
   }
-  if (s->get_has_slab()) {
+  if (get_has_slab()) {
     if(with_restraints && false) {
       IMP::rmf::add_restraints(fh, RestraintsTemp(1, s->get_slab_restraint()));
     }
-    IMP_NEW(SlabWithCylindricalPoreWireGeometry, slab_geometry,
-            (slab_thickness_, tunnel_radius_, box_side_));
+    IMP::Pointer<display::Geometry> slab_geometry;
+    if(get_is_slab_with_cylindrical_pore()){
+      slab_geometry = new SlabWithCylindricalPoreWireGeometry
+        (slab_thickness_, tunnel_radius_, box_side_);
+    } else {
+      slab_geometry = new SlabWithToroidalPoreWireGeometry
+        (slab_thickness_, tunnel_radius_, box_side_);
+    }
     IMP::rmf::add_static_geometries(fh, slab_geometry->get_components());
   }
 }
@@ -577,11 +587,15 @@ void SimulationData::dump_geometry() {
   if (slab_is_on_) {
     //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
     //w->add_geometry(cyl_geom);
-     IMP_NEW(SlabWithCylindricalPoreWireGeometry, slab_geometry,
-             (slab_thickness_ /* h */ ,
-              tunnel_radius_ /* r */,
-              box_side_ /* w */) );
-     w->add_geometry( slab_geometry );
+    IMP::Pointer<display::Geometry> slab_geometry;
+    if(get_is_slab_with_cylindrical_pore()) {
+      slab_geometry= new SlabWithCylindricalPoreWireGeometry
+        (slab_thickness_, tunnel_radius_, box_side_);
+    } else {
+      slab_geometry= new SlabWithToroidalPoreWireGeometry
+        (slab_thickness_, tunnel_radius_, box_side_);
+    }
+    w->add_geometry( slab_geometry );
   }
 }
 
@@ -656,6 +670,7 @@ atom::BrownianDynamics
     bd_->set_current_time(0.0);
     bd_->set_scoring_function
       ( get_scoring()->get_scoring_function() );
+    bd_->set_temperature(temperature_k_);
     //#ifdef _OPENMP
     if (dump_interval_frames_ > 0 && !get_rmf_file_name().empty()) {
       bd_->add_optimizer_state(get_rmf_sos_writer());
@@ -745,7 +760,7 @@ void SimulationData::write_geometry(std::string out) {
     IMP_NEW(display::RestraintGeometry, rsg, (s->get_bounding_box_restraint()));
     w->add_geometry(rsg);
   }
-  if (s->get_has_slab()) {
+  if (get_has_slab()) {
     IMP_NEW(display::RestraintGeometry, slab_rsg, (s->get_slab_restraint()));
     w->add_geometry(slab_rsg);
   }
@@ -759,8 +774,14 @@ void SimulationData::write_geometry(std::string out) {
     w->add_geometry(bbg);
   }
   if (slab_is_on_) {
-    IMP_NEW(SlabWithCylindricalPoreWireGeometry, slab_geometry,
-            (slab_thickness_, tunnel_radius_, box_side_));
+    IMP::Pointer<display::Geometry> slab_geometry;
+    if(get_is_slab_with_cylindrical_pore()) {
+      slab_geometry= new SlabWithCylindricalPoreWireGeometry
+        (slab_thickness_, tunnel_radius_, box_side_);
+    } else {
+      slab_geometry= new SlabWithToroidalPoreWireGeometry
+        (slab_thickness_, tunnel_radius_, box_side_);
+    }
     w->add_geometry(slab_geometry);
     //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
     //w->add_geometry(cyl_geom);
@@ -787,11 +808,14 @@ double SimulationData::get_box_size() const{
 }
 
 algebra::Cylinder3D SimulationData::get_cylinder() const {
-  IMP_USAGE_CHECK(get_has_slab(), "no slab defined - no cylinder");
+  IMP_USAGE_CHECK(get_is_slab_with_cylindrical_pore(),
+                  "no slab with cylidrical pore defined");
   algebra::Vector3D pt(0, 0, slab_thickness_ / 2.0);
   algebra::Segment3D seg(pt, -pt);
   return algebra::Cylinder3D(seg, tunnel_radius_);
 }
+
+
 #undef GET_ASSIGNMENT
 #undef GET_ASSIGNMENT_DEF
 #undef GET_VALUE

@@ -11,18 +11,19 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 SlabWithToroidalPoreSingletonScore::SlabWithToroidalPoreSingletonScore
-(double radius, double bottom, double top, double k) :
-  bottom_(bottom),
-  top_(top),
-  midZ_((top+bottom)/2.0),
+(double slab_bottom, double slab_top, double radius, double k) :
+  bottom_(slab_bottom),
+  top_(slab_top),
+  midZ_((slab_top+slab_bottom)/2.0),
   R_(radius),
-  r_((top-bottom)/2.0),
+  r_((slab_top-slab_bottom)/2.0),
   k_(k)
 {}
 
 SlabWithToroidalPoreSingletonScore::SlabWithToroidalPoreSingletonScore
-    (double radius, double thickness, double k) :
-      SlabWithToroidalPoreSingletonScore(radius, -thickness, thickness, k)
+(double slab_thickness, double radius, double k) :
+  SlabWithToroidalPoreSingletonScore
+  (-slab_thickness, slab_thickness, radius, k)
 {}
 
 ModelObjectsTemp

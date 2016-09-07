@@ -12,6 +12,7 @@
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
 #include <IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h>
+#include <IMP/npctransport/SlabWithToroidalPoreSingletonScore.h>
 #include <IMP/npctransport/ZBiasSingletonScore.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/typedefs.h>
@@ -69,7 +70,6 @@ Scoring::Scoring
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
   GET_ASSIGNMENT(slab_thickness);
-  GET_ASSIGNMENT(slab_is_on);
   GET_ASSIGNMENT(box_is_on);
   GET_ASSIGNMENT(interaction_k);
   GET_ASSIGNMENT(interaction_range);
@@ -93,7 +93,7 @@ Scoring::get_scoring_function(bool update)
     if (box_is_on_) {
       rs.push_back(get_bounding_box_restraint(update));
     }
-    if (slab_is_on_) {
+    if (get_sd()->get_has_slab()) {
       rs.push_back(get_slab_restraint(update));
     }
     rs += get_z_bias_restraints();
@@ -136,7 +136,7 @@ Scoring::get_custom_scoring_function
   if (box_is_on_) {
     rs.push_back( create_bounding_box_restraint( beads ) );
   }
-  if (slab_is_on_) {
+  if (get_sd()->get_has_slab()) {
     rs.push_back( create_slab_restraint( beads ) );
   }
   rs += get_custom_restraints(); // TODO: this is problematic cause not restricted to beads - need to decide
@@ -186,7 +186,8 @@ Scoring::get_bounding_box_restraint(bool update)
 Restraint *
 Scoring::get_slab_restraint(bool update)
 {
-  IMP_USAGE_CHECK(slab_is_on_, "slab is not on - can't get restraint");
+  IMP_USAGE_CHECK(get_sd()->get_has_slab(),
+                  "slab is not on - can't get restraint");
   if (update || !slab_restraint_) {
     slab_restraint_ =
       create_slab_restraint( get_sd()->get_beads() );
@@ -526,14 +527,18 @@ Restraint* Scoring::create_bounding_box_restraint
 Restraint * Scoring::create_slab_restraint
 ( SingletonContainerAdaptor particles)  const
 {
-  particles.set_name_if_default("CreateStabRestraintInput%1%");
-  // Add cylinder restraint
-  IMP_NEW(SlabWithCylindricalPoreSingletonScore, slab_score,
-          (slab_thickness_ /* h */, tunnel_radius_ /*r*/, excluded_volume_k_));
-  return
-    container::create_restraint(slab_score.get(),
-                                particles.get(),
-                                "bounding slab");
+  particles.set_name_if_default("CreateSlabRestraintInput%1%");
+  IMP::Pointer<IMP::SingletonScore> slab_score;
+  if (get_sd()->get_is_slab_with_cylindrical_pore()) {
+    slab_score=new SlabWithCylindricalPoreSingletonScore
+      (slab_thickness_, tunnel_radius_, excluded_volume_k_);
+  } else {
+    slab_score=new SlabWithToroidalPoreSingletonScore
+      (slab_thickness_, tunnel_radius_, excluded_volume_k_);
+  }
+  return container::create_restraint(slab_score.get(),
+                                     particles.get(),
+                                     "bounding slab");
 }
 
 void Scoring::add_z_bias_restraint

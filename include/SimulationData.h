@@ -45,7 +45,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   Parameter<double> tunnel_radius_;
   Parameter<double> slab_thickness_;
   Parameter<bool> box_is_on_;
-  Parameter<bool> slab_is_on_;
+  Parameter<int> slab_is_on_;
   Parameter<int> number_of_trials_;
   Parameter<int> number_of_frames_;
   Parameter<int> dump_interval_frames_;
@@ -64,6 +64,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
  // time when simulation has started for this process
   Parameter<double> initial_simulation_time_ns_;
+  Parameter<double> temperature_k_;
 
  public:
   /** returns the maximal interaction range between particles */
@@ -422,10 +423,20 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   double get_box_size() const;
 
+
+  //* returns true if a slab is defnied */
+  bool get_has_slab() const { return slab_is_on_!=0; }
+
+    /** returns true if a slab is defined and has a cylindrical pore */
+  bool get_is_slab_with_cylindrical_pore() const
+  { return slab_is_on_==1; }
+
+  /** returns true if a slab is defined and has a toroidal pore */
+  bool get_is_slab_with_toroidal_pore() const
+  { return slab_is_on_==2; }
+
   // get the cylinder in the slab for this simulation
   algebra::Cylinder3D get_cylinder() const;
-
-  bool get_has_slab() const { return slab_is_on_; }
 
   bool get_has_bounding_box() const { return box_is_on_; }
 

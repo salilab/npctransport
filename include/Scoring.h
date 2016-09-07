@@ -48,7 +48,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   Parameter<double> tunnel_radius_;
   Parameter<double> slab_thickness_;
   Parameter<bool> box_is_on_;
-  Parameter<bool> slab_is_on_;
   Parameter<double> interaction_k_;
   Parameter<double> interaction_range_;
   Parameter<double> backbone_k_;
@@ -434,10 +433,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   // returns true if a bounding box restraint is defined */
   bool get_has_bounding_box() const
   { return box_is_on_; }
-
-  /** returns true if a slab restraint is defined */
-  bool get_has_slab() const
-  { return slab_is_on_; }
 
   /** returns the default spring constant between consecutive beads
       in a chain of beads - this is used for chains whose k

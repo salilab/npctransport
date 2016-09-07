@@ -93,7 +93,7 @@ message Configuration {
   required IntRange box_is_on=8;
   required FloatRange slab_thickness=9;
   required FloatRange tunnel_radius=10;
-  required IntRange slab_is_on=11;
+  required IntRange slab_is_on=11; // 0=no; 1=cylinder; 2=torus with major radius tunnel_radius and minor radius 0.5*slab_thickness
   required FloatRange slack=12;
   required int32 number_of_trials=13;
   required double maximal_number_of_frames=14;
@@ -116,7 +116,8 @@ message Configuration {
   optional FloatRange time_step_wave_factor=30; // if >1.001, use a wave function for time step that allows going beyond formal maximal step in waves
   optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
   optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
-  // n=32
+  optional FloatRange temperature_k=33; // simulation temperature
+  // n=33
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -205,7 +206,7 @@ message Assignment {
   required IntAssignment box_is_on=8;
   required FloatAssignment slab_thickness=9;
   required FloatAssignment tunnel_radius=10;
-  required IntAssignment slab_is_on=11;
+  required IntAssignment slab_is_on=11; // 0=no; 1=cylinder; 2=torus with major radius tunnel_radius and minor radius 0.5*slab_thickness
   required FloatAssignment slack=12;
   required int32 number_of_trials=13;
   required double maximal_number_of_frames=14;
@@ -236,7 +237,8 @@ message Assignment {
   repeated string npc_module_version=39; // repeated - once for each restart
   optional double output_statistics_interval_ns=40 [default=100]; // update interval of statistics file (including order params) in ns
   optional int32 output_statistics_interval_frames=41 [default=100000]; // update interval of statistics file (including order params) in frames
-  // n=41
+  optional FloatAssignment temperature_k=42; // simulation temperatureaa
+  // n=42
 }
 
 message Statistics {

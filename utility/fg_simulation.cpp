@@ -135,6 +135,7 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
   using atom::Hierarchy;
   using atom::Hierarchies;
 
+  // TODO: add torus support
   IMP::algebra::Cylinder3D cyl = sd.get_cylinder();
   Hierarchies chain_roots = sd.get_fg_chain_roots();
   // compute the relative radius in which particles would be positioned
@@ -272,7 +273,7 @@ int main(int argc, char* argv[]) {
     }
     color_fgs(*sd);
     Restraints initialization_restraints;
-    if (sd->get_scoring()->get_has_slab() &&
+    if (sd->get_has_slab() &&
         sd->get_is_exclude_floaters_from_slab_initially()) {
       // if has slab, exclude from channel initially
       IMP::Pointer<IMP::Restraint> r =

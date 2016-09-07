@@ -37,13 +37,13 @@ public:
      the z=0 plane, from z=-0.5*thickness to z=+0.5*thickness.
 
       @param radius outer radius of the torus
-      @param thickness vertical thickness of slab. The
+      @param slab_thickness vertical thickness of slab. The
              minor radius of the pore torus equals half
              the slab thickness.
       @param the slab repulsive force constant in kcal/mol/A
   */
   SlabWithToroidalPoreSingletonScore
-    (double radius, double thickness, double k);
+    (double slab_thickness, double radius, double k);
 
   //! Constructs a slab from z=bottom to z=top with a toroidal pore
   /**
@@ -52,13 +52,13 @@ public:
       The minor radius of the pore torus equals half the slab
       thickness, or 0.5*(top-bottom)
 
+      @param slab_bottom bottom z coordinate of slab
+      @param slab_top top z coordinate of slab
       @param radius outer radius of the torus
-      @param bottom bottom z coordinate of slab
-      @param top top z coordinate of slab
-      @param the slab repulsive force constant in kcal/mol/A
+      @param k the slab repulsive force constant in kcal/mol/A
   */
   SlabWithToroidalPoreSingletonScore
-    (double radius, double bottom, double top, double k);
+    (double slab_bottom, double slab_top, double radius, double k);
 
 
   /** returns the lowest slab z coordinate */
