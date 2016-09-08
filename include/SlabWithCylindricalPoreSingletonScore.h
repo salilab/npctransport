@@ -161,7 +161,7 @@ SlabWithCylindricalPoreSingletonScore::evaluate_indexes(Model *m, const Particle
   // Evaluate and sum score and derivative for all particles:
   for (unsigned int i = lower_bound; i < upper_bound; ++i) {
     int pi_index=pis[i].get_index();
-    // Check attributes have valid valies:
+    // Check attributes have valid values:
     IMP_CHECK_CODE( {
         IMP::core::XYZR d(m, pis[i]);
         algebra::Sphere3D s=spheres_table[pi_index];
@@ -211,7 +211,7 @@ SlabWithCylindricalPoreSingletonScore::evaluate_sphere
   double const y2=y*y;
   double const R=radius_-sr;
   double const R2=R*R;
-  // early abort if [x,y] within cylinder radius
+  // early abort if [x,y] within cylinder perimeter
   if (x2+y2 < R2) {
     return 0;
   }
@@ -243,12 +243,11 @@ SlabWithCylindricalPoreSingletonScore::get_displacement_vector(const algebra::Ve
   double dZ = v[2] - midZ_;  // thickness on z-axis from cyl origin
   IMP_LOG_PROGRESS( dZ << " " << dXY2 << " for " << v << std::endl);
   if (dXY2 > square(radius_) ||
-      (v[2] <= top_ && v[2] >= bottom_)) {  // = either inside cylinder, or
-                                            // [x,y] outside cyl_radius
+      (v[2] <= top_ && v[2] >= bottom_)) {  //  inside vertical slab boundaries and pore perimeter on x,y plane OR outside pore perimeter in any vertical poisition
     double abs_dZ = std::abs(dZ);
     double abs_dXY = std::sqrt(dXY2);
-    double dR = abs_dXY - radius_;  // displacement on [x,y] direction (positive = outside cylinder interior)
-    if (dR + abs_dZ < .5 * thickness_) {
+    double dR = abs_dXY - radius_;  // displacement on [x,y] direction (positive = outside pore perimeter on x,y plane)
+    if (dR + abs_dZ < .5 * thickness_) { // in a cones from (0,0,.5thickness) to (0,.5thicness,0)
       IMP_LOG_PROGRESS("ring or tunnel" << std::endl);
       if (dXY2 < .00001) {  // at origin
         return std::make_pair(radius_, algebra::Vector3D(0, 0, 1));
@@ -256,7 +255,7 @@ SlabWithCylindricalPoreSingletonScore::get_displacement_vector(const algebra::Ve
         algebra::Vector3D rv(-v[0], -v[1], 0);
         return std::make_pair(radius_ - abs_dXY, rv.get_unit_vector());
       }
-    } else {
+    } else { // possibly in the pore but out of the 'double-cone diamond'
       IMP_LOG_PROGRESS("in or out of slab" << std::endl);
       if (dZ > 0) {
         return std::make_pair(v[2] - top_, algebra::Vector3D(0, 0, 1));
@@ -264,9 +263,9 @@ SlabWithCylindricalPoreSingletonScore::get_displacement_vector(const algebra::Ve
         return std::make_pair(bottom_ - v[2], algebra::Vector3D(0, 0, -1));
       }
     }
-  } else {  // = outside cylinder && [x,y] within cyl_radius
+  } else {  // = outside slab boundaries AND insider pore perimeter on x,y plane
     IMP_LOG_PROGRESS("channel" << std::endl);
-    if (dXY2 < .00001) {  // at origin
+    if (dXY2 < .00001) {  // at central axis
       IMP_LOG_PROGRESS("in center " << std::endl);
       if (dZ > 0) {
         return std::make_pair(v[2] - top_, algebra::Vector3D(0, 0, 1));

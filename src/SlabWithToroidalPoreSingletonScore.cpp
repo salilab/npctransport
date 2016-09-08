@@ -18,12 +18,17 @@ SlabWithToroidalPoreSingletonScore::SlabWithToroidalPoreSingletonScore
   R_(radius),
   r_((slab_top-slab_bottom)/2.0),
   k_(k)
-{}
+{
+  IMP_LOG_PROGRESS("Constructing a slab with toroidal pore singleton score"
+                   << " from z=" << bottom_ << " to z=" << top_
+                   << "; major radius " << R_ << "; k=" << k
+                   << std::endl);
+}
 
 SlabWithToroidalPoreSingletonScore::SlabWithToroidalPoreSingletonScore
 (double slab_thickness, double radius, double k) :
   SlabWithToroidalPoreSingletonScore
-  (-slab_thickness, slab_thickness, radius, k)
+  (-0.5*slab_thickness, 0.5*slab_thickness, radius, k)
 {}
 
 ModelObjectsTemp
