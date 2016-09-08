@@ -55,21 +55,36 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()
 #define GET_ASSIGNMENT_DEF(name, default_value)                         \
   {                                                                     \
-    if(!pb_assignment.has_##name() )                                    \
-      {                                                                 \
-        pb_mutable_assignment->mutable_##name()                         \
-          ->set_value(default_value);                                   \
-      }                                                                 \
-    name##_ = pb_assignment.name().value();                             \
-  }
+     if(!pb_assignment.has_##name() )                                    \
+       {                                                                 \
+         pb_mutable_assignment->mutable_##name()                         \
+           ->set_value(default_value);                                   \
+       }                                                                 \
+     name##_ = pb_assignment.name().value();                             \
+   }
 #define GET_VALUE(name) name##_ = pb_assignment.name()
-#define GET_VALUE_DEF(name, default_value)              \
-  {                                                     \
-    if(!pb_assignment.has_##name() )                    \
-      { pb_mutable_assignment                           \
-          ->set_##name(default_value); }                \
-    name##_ = pb_assignment.name();                     \
+#define GET_VALUE_DEF(name, default_value)               \
+  {                                                      \
+    if(!pb_assignment.has_##name() )                     \
+      { pb_mutable_assignment                            \
+          ->set_##name(default_value); }                 \
+    name##_ = pb_assignment.name();                      \
   }
+
+//  #define GET_ASSIGNMENT_DEF(name, default_value) \
+//   {                                             \
+//     if(pb_assignment.has_##name() )              \
+//       { name##_ = pb_assignment.name().value(); }       \
+//     else                                                \
+//       { name##_ = default_value; }                      \
+//   }
+// #define GET_VALUE_DEF(name, default_value)      \
+//   {                                             \
+//     if(pb_assignment.has_##name() )             \
+//       { name##_ = pb_assignment.name(); }       \
+//     else                                        \
+//       { name##_ = default_value; }              \
+//   }
 
 SimulationData::SimulationData(std::string prev_output_file, bool quick,
                                std::string rmf_file_name,
@@ -119,7 +134,7 @@ void SimulationData::initialize(std::string prev_output_file,
   GET_VALUE_DEF(output_statistics_interval_frames,10000);
   GET_ASSIGNMENT(statistics_fraction);
   GET_VALUE(time_step);
-  GET_ASSIGNMENT_DEF(time_step_wave_factor, 1.0);
+  GET_ASSIGNMENT_DEF(time_step_wave_factor, 0.0);
   GET_VALUE(maximum_number_of_minutes);
   GET_VALUE_DEF(fg_anchor_inflate_factor, 1.0);
   GET_VALUE_DEF(are_floaters_on_one_slab_side, false);
@@ -157,6 +172,7 @@ void SimulationData::initialize(std::string prev_output_file,
       IMP_ALWAYS_CHECK(pb_assignment.fgs(i).type() != "",
                        "FG should've been assigned a valued type,"
                        " possiblu thru protobuf.h", ValueException);
+      pb_mutable_assignment->mutable_fgs(i)->site_relative_distance(); // initiate it with default value for backward compatability
       create_fgs(pb_assignment.fgs(i));
     }
   for (int i = 0; i < pb_assignment.floaters_size(); ++i)
@@ -169,6 +185,7 @@ void SimulationData::initialize(std::string prev_output_file,
       IMP_USAGE_CHECK( pb_assignment.floaters(i).type() != "",
                        "Floater should've been assigned a type"
                        << " thru protobuf.h");
+      pb_mutable_assignment->mutable_floaters(i)->site_relative_distance(); // initiate it with default value for backward compatability
       create_floaters(pb_assignment.floaters(i),
                       display::get_display_color(i));
     }

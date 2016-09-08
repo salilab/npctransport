@@ -163,11 +163,19 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
     double R1(-1.0);
     for(int ii=0; ii<a.floaters_size(); ii++){
       if(a.floaters(ii).type()==type0){
+        if(a.floaters(ii).interactions().value()==0){
+          range=0.0; // skip
+          continue;
+        }
         k*=a.floaters(ii).interaction_k_factor().value();
         range*=a.floaters(ii).interaction_range_factor().value();
         R0=a.floaters(ii).radius().value();
       }
       if(a.floaters(ii).type()==type1){
+        if(a.floaters(ii).interactions().value()==0){
+          range=0.0; // skip
+          continue;
+        }
         k*=a.floaters(ii).interaction_k_factor().value();
         range*=a.floaters(ii).interaction_range_factor().value();
         R1=a.floaters(ii).radius().value();
@@ -175,11 +183,19 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
     }
     for(int ii=0; ii<a.fgs_size(); ii++){
       if(a.fgs(ii).type()==type0){
+        if(a.fgs(ii).interactions().value()==0){
+          range=0.0; // skip
+          continue;
+        }
         k*=a.fgs(ii).interaction_k_factor().value();
         range*=a.fgs(ii).interaction_range_factor().value();
         R0=a.fgs(ii).radius().value();
       }
       if(a.fgs(ii).type()==type1){
+        if(a.fgs(ii).interactions().value()==0){
+          range=0.0; // skip
+          continue;
+        }
         k*=a.fgs(ii).interaction_k_factor().value();
         range*=a.fgs(ii).interaction_range_factor().value();
         R1=a.fgs(ii).radius().value();
@@ -194,7 +210,7 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
         is_orientational=true;
       }
     }
-    if(is_orientational){
+    if(is_orientational && range > 0.0){
       IMP_USAGE_CHECK(R0>0.0 && R1>0.0,
                       "R0 or R1 could not be found for type0 or type1");
       k*=0.5*range; // the maximal k for this interction
@@ -208,7 +224,11 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
     } // if is_orientation
     if(range>0.0 && k>0.0) {
       max_k=std::max(max_k, k);
+      std::cout << "interaction " << i
+                << " update range from "
+                << min_range;
       min_range=std::min(min_range, range);
+      std::cout << " to " << min_range << std::endl;
     }
   } // for interactions(i)
 
