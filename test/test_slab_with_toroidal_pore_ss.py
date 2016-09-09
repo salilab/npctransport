@@ -12,14 +12,14 @@ radius=1
 #random.uniform(1,12)
 #random.uniform(radius+2, radius+15)
 slab_thickness=5
-slab_radius=5+2*0.5*slab_thickness
-r_distortion=0.5 # ration between horizontal minor radius and vertical minor radius (semiaxes) - 1.0 is a ring toroid, >1.0 is a circular torus made of a horizontally elongated ellipse, and <1.0 is made of a vertically elongated ellipse
+r_distortion=2 # ration between horizontal minor radius and vertical minor radius (semiaxes) - 1.0 is a ring toroid, >1.0 is a circular torus made of a horizontally elongated ellipse, and <1.0 is made of a vertically elongated ellipse
 rv=0.5*slab_thickness # vertical minor radius (semi-axis)
 rh=rv*r_distortion # horizontal minor radius (semi-axis)
+slab_radius=5+rh
 rv2=rv**2
 rh2=rh**2
 #random.uniform(5,30)
-boxw= 2*max([1*slab_radius,slab_thickness])
+boxw= 2*max([1.1*slab_radius,slab_thickness])
 
 ##
 def get_surface_distance_from_axis_aligned_ellipsoid(sphere, origin, rv, rh):
@@ -96,12 +96,12 @@ class ConeTests(IMP.test.TestCase):
         bb= IMP.algebra.BoundingBox3D(0.5*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       0.5*IMP.algebra.Vector3D(boxw,boxw,boxw))
         slabss= IMP.npctransport.SlabWithToroidalPoreSingletonScore \
-                (slab_thickness, slab_radius, 1)
+                (slab_thickness, slab_radius, 1, rh)
         slabss.set_log_level(IMP.SILENT)
         self.assertEqual(slabss.get_bottom_z(),-0.5*slab_thickness);
         self.assertEqual(slabss.get_top_z(),+0.5*slab_thickness);
         r= IMP.core.SingletonRestraint(m, slabss, p.get_index(), "slab")
-        while out_slab(p, ALLOWED_OVERLAP=-0.5):
+        while out_slab(p, ALLOWED_OVERLAP=0.5):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
         print("Penetrating slab: ", d.get_coordinates())
         pym_fname="tmp.pym" #self.get_tmp_file_name("slabss.pym")
@@ -117,16 +117,18 @@ class ConeTests(IMP.test.TestCase):
         cg.set_scoring_function(r)
         cg.set_log_level(IMP.SILENT)
         f=1
-        for i in range(0,1000):
-            s=cg.optimize(1)
-            if(i % 1 == 0):
-                w.set_frame(f)
-                f=f+1
-                w.add_geometry([g, sg])
+        for i in range(0,100):
+            s=cg.optimize(10)
+            w.set_frame(f)
+            f=f+1
+            w.add_geometry([g, sg])
             print(i, d.get_coordinates())
             if s==0:
+                self.assert_(out_slab(d, ALLOWED_OVERLAP=0.0))
                 break
+            else:
+                self.assert_(not out_slab(d, ALLOWED_OVERLAP=0.0))
         print(d.get_coordinates())
-        self.assert_(out_slab(d, ALLOWED_OVERLAP=0.05))
+
 if __name__ == '__main__':
     IMP.test.main()
