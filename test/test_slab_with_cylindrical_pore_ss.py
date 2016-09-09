@@ -8,11 +8,11 @@ import random
 
 radius=1
 #random.uniform(1,12)
-slab_radius=3
+slab_radius=5
 #random.uniform(radius+2, radius+15)
-slab_height=5
+slab_height=3
 #random.uniform(5,30)
-boxw= max([1.5*slab_radius,slab_height])
+boxw= 2*max([3*slab_radius,slab_height])
 def out_slab(p):
     ''' verify particle p is out of slab.
         p is assumed to be decorated by XYZR '''
@@ -36,16 +36,18 @@ class ConeTests(IMP.test.TestCase):
         d= IMP.core.XYZR.setup_particle(p)
         d.set_coordinates_are_optimized(True)
         d.set_radius(radius)
-        bb= IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
-                                      IMP.algebra.Vector3D(boxw,boxw,boxw))
+        bb= IMP.algebra.BoundingBox3D(0.5*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
+                                      0.5*IMP.algebra.Vector3D(boxw,boxw,boxw))
+        bb_half= IMP.algebra.BoundingBox3D(0.25*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
+                                      0.25*IMP.algebra.Vector3D(boxw,boxw,boxw))
         slabss= IMP.npctransport.SlabWithCylindricalPoreSingletonScore(slab_height, slab_radius, 1)
         self.assertEqual(slabss.get_bottom_z(),-0.5*slab_height);
         self.assertEqual(slabss.get_top_z(),+0.5*slab_height);
         r= IMP.core.SingletonRestraint(m, slabss, p.get_index(), "slab")
         while out_slab(p):
-            d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
+            d.set_coordinates(IMP.algebra.get_random_vector_in(bb_half))
         print(d.get_coordinates())
-        w= IMP.display.PymolWriter(self.get_tmp_file_name("slabss.pym"))
+        w= IMP.display.PymolWriter("tmp.pym") #self.get_tmp_file_name("slabss.pym"))
         w.set_frame(0)
         g=IMP.core.XYZRGeometry(d)
         sg= IMP.npctransport.SlabWithCylindricalPoreWireGeometry(slab_height, slab_radius, boxw)
@@ -53,8 +55,8 @@ class ConeTests(IMP.test.TestCase):
         cg= IMP.core.SteepestDescent(m)
         cg.set_scoring_function(r)
         cg.set_log_level(IMP.VERBOSE)
-        for i in range(0,100):
-            s=cg.optimize(10)
+        for i in range(0,1000):
+            s=cg.optimize(1)
             w.set_frame(i+1)
             w.add_geometry([g, sg])
             if s==0:
