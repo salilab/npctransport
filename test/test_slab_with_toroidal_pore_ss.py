@@ -12,10 +12,37 @@ radius=1
 #random.uniform(1,12)
 #random.uniform(radius+2, radius+15)
 slab_thickness=5
-slab_radius=5+0.5*slab_thickness
+slab_radius=5+2*0.5*slab_thickness
+r_distortion=0.5 # ration between horizontal minor radius and vertical minor radius (semiaxes) - 1.0 is a ring toroid, >1.0 is a circular torus made of a horizontally elongated ellipse, and <1.0 is made of a vertically elongated ellipse
+rv=0.5*slab_thickness # vertical minor radius (semi-axis)
+rh=rv*r_distortion # horizontal minor radius (semi-axis)
+rv2=rv**2
+rh2=rh**2
 #random.uniform(5,30)
 boxw= 2*max([1*slab_radius,slab_thickness])
 
+##
+def get_surface_distance_from_axis_aligned_ellipsoid(sphere, origin, rv, rh):
+    '''
+    return the distance between the surface of specified sphere and
+    the surface of an axis aligned ellipsoid with vertical semi-axis rv and
+    horizontal semi-axis rh, centered at origin.
+
+    If the sphere penetrates the ellipsoid by some distance d, returns -d.
+    '''
+    EPS=0.000001
+    v=sphere.get_center()-origin
+    dXY2= v[0]**2+v[1]**2
+    dZ2 = v[2]**2
+    #    theta = atan(dXY/(dZ+EPS))
+    dv2= dXY2 + dZ2 + EPS
+    sinTheta2=dXY2/dv2
+    cosTheta2=dZ2/dv2
+    cur_r = math.sqrt(rv2*cosTheta2 + rh2*sinTheta2)
+    dv=math.sqrt(dv2)
+    return dv-cur_r-sphere.get_radius()
+
+##
 def out_slab(p, ALLOWED_OVERLAP=0.0):
     '''
     verify that spherical (XYZR) particle p is out of slab with
@@ -26,35 +53,35 @@ def out_slab(p, ALLOWED_OVERLAP=0.0):
     '''
     EPS=0.000001
     R=slab_radius # major radius of torus
-    r=0.5*slab_thickness # minor radius of torus
     d= IMP.core.XYZR(p)
-    print("out_slab begins: ", d,R,r)
+    print("out_slab begins: ", d,R,rv, rh)
     xyz= d.get_coordinates()
-    if xyz[2] - d.get_radius() + ALLOWED_OVERLAP > r:
+    if xyz[2] - d.get_radius() + ALLOWED_OVERLAP > rv:
         print("Above slab")
         return True
-    if xyz[2] + d.get_radius() - ALLOWED_OVERLAP < -r:
+    if xyz[2] + d.get_radius() - ALLOWED_OVERLAP < -rv:
         print("Below slab")
         return True
-    print("In slab vertically")
+    print("In slab vertically (but still might be in pore)")
     xy0= IMP.algebra.Vector3D(xyz[0], xyz[1], 0.0)
     rxy0= xy0.get_magnitude()
     print("xy0", xy0, "magnitude", rxy0)
     if rxy0 + d.get_radius() > R:
-        print("Out of outer radius perimeter (for entire sphere)")
+        print("Sphere overlaps slab outside the torus major radius")
         return False
-    print("Inside outer radius perimeter")
     if(rxy0>EPS):
         xy0_major= xy0 * ( R / rxy0 ) # same direction as xy0 but on major radius
     else:
         xy0_major=IMP.algebra.Vector3D(0, R, 0.0)
     print("xy0_major", xy0_major)
-    distance= (xyz - xy0_major).get_magnitude()
-    print("Distance", distance)
-    is_overlap = (distance - d.get_radius() <= r - ALLOWED_OVERLAP)
-    print("Is_overlap", is_overlap)
+    distance = get_surface_distance_from_axis_aligned_ellipsoid \
+               (d.get_sphere(), xy0_major, rv, rh)
+    print("Sphere surface distance to torus", distance)
+    is_overlap = (distance + ALLOWED_OVERLAP < 0)
+    print("Is overlapping slab somewhere within torus major radius? ", is_overlap)
     return not is_overlap
 
+##
 class ConeTests(IMP.test.TestCase):
     def test_slab_singleton_score(self):
         """Check slab singleton score"""
@@ -81,7 +108,10 @@ class ConeTests(IMP.test.TestCase):
         w= IMP.display.PymolWriter(pym_fname)
         w.set_frame(0)
         g=IMP.core.XYZRGeometry(d)
-        sg= IMP.npctransport.SlabWithToroidalPoreWireGeometry(slab_thickness, slab_radius, boxw)
+        sg= IMP.npctransport.SlabWithToroidalPoreWireGeometry(slab_thickness,
+                                                              slab_radius,
+                                                              rh,
+                                                              boxw)
         w.add_geometry([g, sg])
         cg= IMP.core.SteepestDescent(m)
         cg.set_scoring_function(r)
@@ -89,7 +119,7 @@ class ConeTests(IMP.test.TestCase):
         f=1
         for i in range(0,1000):
             s=cg.optimize(1)
-            if(i % 10 == 0):
+            if(i % 1 == 0):
                 w.set_frame(f)
                 f=f+1
                 w.add_geometry([g, sg])

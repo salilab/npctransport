@@ -20,13 +20,42 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-SlabWithToroidalPoreWireGeometry::SlabWithToroidalPoreWireGeometry(double slab_height, double major_radius, double slab_length)
-  : Geometry("SlabWithToroidalPore"), r_(slab_height/2.0), R_(major_radius), slab_length_(slab_length) {}
+//! Slab with specified height from top to bottom, slab_length x slab_length area,
+//! and an elliptic toroidal pore of specified major radius,
+//! slab_height/2.0 vertical semi-axis, specified horizontal semi-axis
+SlabWithToroidalPoreWireGeometry
+::SlabWithToroidalPoreWireGeometry
+(double slab_height,
+ double major_radius,
+ double horizontal_semiaxis,
+ double slab_length)
+  : Geometry("SlabWithToroidalPore"),
+    rv_(slab_height/2.0),
+    rh_(horizontal_semiaxis),
+    R_(major_radius),
+    slab_length_(slab_length)
+{}
 
-display::Geometries SlabWithToroidalPoreWireGeometry::get_components() const {
+//
+SlabWithToroidalPoreWireGeometry
+::SlabWithToroidalPoreWireGeometry
+(double slab_height,
+ double major_radius,
+ double slab_length)
+  : Geometry("SlabWithToroidalPore"),
+    rv_(slab_height/2.0),
+    rh_(slab_height/2.0),
+    R_(major_radius),
+    slab_length_(slab_length)
+{}
+
+//
+display::Geometries
+SlabWithToroidalPoreWireGeometry
+::get_components() const
+{
   display::Geometries ret;
-
-  // add trimmed toroidal pore
+  // Add trimmed toroidal pore:
   const int n1= 30;
   const int n2= 10;
   for (int i= 1; i <= n1; ++i) { // major radius
@@ -36,12 +65,12 @@ display::Geometries SlabWithToroidalPoreWireGeometry::get_components() const {
     double theta1= 2 * IMP::PI * f1;
     algebra::Vector3D v00(R_ * sin(theta),
                           R_ * cos(theta),
-                          r_);
+                          rv_);
     for (int j= 0; j <= n2; ++j) { // minor radius
       double g= static_cast<double>(j) / n2;
       double omega= IMP::PI * g;
-      double dZ= r_ * cos(omega);
-      double dXY= R_ - r_ * sin(omega);
+      double dZ= rv_ * cos(omega);
+      double dXY= R_ - rh_ * sin(omega);
       algebra::Vector3D v10(dXY * sin(theta),
                            dXY * cos(theta),
                            dZ);
@@ -63,13 +92,12 @@ display::Geometries SlabWithToroidalPoreWireGeometry::get_components() const {
       }
     } // j
   }  // i
-
-  // add top and bottom slab rectangles:
+  // Add top and bottom slab rectangles:
   for(int sign=-1; sign<=1; sign+=2){
-    algebra::Vector3D vNE(0.5*slab_length_, 0.5*slab_length_, sign*r_);
-    algebra::Vector3D vNW(-0.5*slab_length_, 0.5*slab_length_, sign*r_);
-    algebra::Vector3D vSW(-0.5*slab_length_, -0.5*slab_length_, sign*r_);
-    algebra::Vector3D vSE(0.5*slab_length_, -0.5*slab_length_, sign*r_);
+    algebra::Vector3D vNE(0.5*slab_length_, 0.5*slab_length_, sign*rv_);
+    algebra::Vector3D vNW(-0.5*slab_length_, 0.5*slab_length_, sign*rv_);
+    algebra::Vector3D vSW(-0.5*slab_length_, -0.5*slab_length_, sign*rv_);
+    algebra::Vector3D vSE(0.5*slab_length_, -0.5*slab_length_, sign*rv_);
     ret.push_back(new display::SegmentGeometry(algebra::Segment3D(vNE, vNW))); // slab bottom face
     ret.push_back(new display::SegmentGeometry(algebra::Segment3D(vNW, vSW))); // slab bottom face
     ret.push_back(new display::SegmentGeometry(algebra::Segment3D(vSW, vSE))); // slab bottom face

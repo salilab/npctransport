@@ -10,29 +10,34 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-SlabWithToroidalPoreSingletonScore::SlabWithToroidalPoreSingletonScore
-(double slab_bottom, double slab_top, double radius, double k) :
-  bottom_(slab_bottom),
-  top_(slab_top),
-  midZ_((slab_top+slab_bottom)/2.0),
+SlabWithToroidalPoreSingletonScore
+::SlabWithToroidalPoreSingletonScore
+(double slab_thickness, double radius, double k, double horizontal_minor_radius)
+  :
+  midZ_(0.0),
   R_(radius),
-  r_((slab_top-slab_bottom)/2.0),
-  k_(k)
-{
-  IMP_LOG_PROGRESS("Constructing a slab with toroidal pore singleton score"
-                   << " from z=" << bottom_ << " to z=" << top_
-                   << "; major radius " << R_ << "; k=" << k
-                   << std::endl);
-}
+  rv_(0.5*slab_thickness),
+  rh_(horizontal_minor_radius),
+  k_(k),
+  bottom_(midZ_-rv_),
+  top_(midZ_+rv_)
+{}
 
-SlabWithToroidalPoreSingletonScore::SlabWithToroidalPoreSingletonScore
+SlabWithToroidalPoreSingletonScore
+::SlabWithToroidalPoreSingletonScore
 (double slab_thickness, double radius, double k) :
-  SlabWithToroidalPoreSingletonScore
-  (-0.5*slab_thickness, 0.5*slab_thickness, radius, k)
+  midZ_(0.0),
+  R_(radius),
+  rv_(0.5*slab_thickness),
+  rh_(rv_),
+  k_(k),
+  bottom_(midZ_-rv_),
+  top_(midZ_+rv_)
 {}
 
 ModelObjectsTemp
-SlabWithToroidalPoreSingletonScore::do_get_inputs
+SlabWithToroidalPoreSingletonScore
+::do_get_inputs
 (Model *m, const ParticleIndexes &pis) const
 {
   return IMP::get_particles(m, pis);

@@ -22,44 +22,46 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class IMPNPCTRANSPORTEXPORT SlabWithToroidalPoreSingletonScore : public SingletonScore
 {
-  double bottom_;  // bottom of slab on x-axis
-  double top_;  // top of slab on z-axis
-  double midZ_;  // (top + bottom) / 2, for caching some calculations
-  double R_;
-  double r_;
-  double k_;
+  double midZ_;  // vertical center of slab
+  double R_; // torus major radius
+  double rv_; // vertical minor radius (ellipse vertical semi-axis), equals half slab thickness
+  double rh_; // horizontal minor radius (ellipse horizontal semi-axis)
+  double k_; // repulsion constant in kcal/mol/A
+  double bottom_; // bottom z - for caching
+  double top_; // top z - for caching
 
 public:
   //! Constructs a horizontal slab with a toroidal pore,
   //! centered at the z=0 plane
   /**
-     Constructs a horizontal slab with a toroidal pore, centered at
+     Constructs a horizontal slab with a ring toroidal pore, centered at
      the z=0 plane, from z=-0.5*thickness to z=+0.5*thickness.
 
       @param radius outer radius of the torus
       @param slab_thickness vertical thickness of slab. The
              minor radius of the pore torus equals half
              the slab thickness.
-      @param the slab repulsive force constant in kcal/mol/A
+      @param k the slab repulsive force constant in kcal/mol/A
   */
   SlabWithToroidalPoreSingletonScore
     (double slab_thickness, double radius, double k);
 
-  //! Constructs a slab from z=bottom to z=top with a toroidal pore
+  //! Constructs a horizontal slab with a toroidal pore,
+  //! centered at the z=0 plane
   /**
-      Constructs a slab with a toroidal pore, parallel to the plane z=0
-      and running from z=bottom to z=top.
-      The minor radius of the pore torus equals half the slab
-      thickness, or 0.5*(top-bottom)
+     Constructs a horizontal slab with a toroidal pore, centered at
+     the z=0 plane, from z=-0.5*thickness to z=+0.5*thickness, with
+     possibly unequal vertical and horizontal minor radii (with a minor ellipse)
 
-      @param slab_bottom bottom z coordinate of slab
-      @param slab_top top z coordinate of slab
-      @param radius outer radius of the torus
-      @param k the slab repulsive force constant in kcal/mol/A
+     @param radius outer radius of the torus
+     @param slab_thickness vertical thickness of slab. The
+            verical minor radius of the pore torus equals half
+           the slab thickness.
+     @param k the slab repulsive force constant in kcal/mol/A
+     @param horizontal_minor_radius the horizontal semi-axis of the minor ellipse
   */
   SlabWithToroidalPoreSingletonScore
-    (double slab_bottom, double slab_top, double radius, double k);
-
+    (double slab_thickness, double radius, double k, double horizontal_minor_radius);
 
   /** returns the lowest slab z coordinate */
   double get_bottom_z() { return bottom_; }
@@ -115,17 +117,41 @@ public:
 
 
  private:
-  // return shortest distance needed to move the sphere in order to
-  // remove an overlap between the sphere and the slab surface.
-  // Return 0 if ball does not penetrate slab.
+
+  /**
+     Computes the penetration depth between the specified sphere and an
+     axis aligned ellipsoid defined by the torus vertical minor radius and
+     horizontal minor radius, centered at the specified origin.
+     Optionally stores a normalized translation vector in *out_translation
+
+     @param sphere Sphere for which the distance is computed
+     @param origin Ellipsoid origin (a point on the major circle of the torus)
+     @param out_translation A pointer to the normalized translation
+            vector for removing the sphere out of the ellipsoid is
+            stored in *out_translation, if it is not a null pointer.
+            (0,0,0) is stored for 0 overlap.
+
+     @return The penetration depth or 0 when the sphere does not overlap with
+             the ellipsoid.
+  */
+  inline double
+    get_sphere_ellipsoid_penetration_depth
+    (algebra::Sphere3D const& sphere,
+     algebra::Vector3D const& origin,
+     algebra::Vector3D* out_translation) const;
+
+  // returns the penetration depth D of a sphere relative to the porus slab surface,
+  // or 0 if the sphere and the slab do not overlap.
   //
   // @param s the sphere to evaluate
-  // @param out_displacement if not null and the returned score is positive, *out_displacement
-  //                         is used to store the normalized displacement vector for removing
-  //                         the overlap between the sphere and the slab (or 0,0,0 if no overlap)
-  inline double get_sphere_penetration
+  // @param out_translation if not null, *out_translation
+  //                         is used to store the output normalized displacement vector for removing
+  //                         the sphere out of the slab (or 0,0,0 if no overlap)
+  //                         In other words, D*out_translation be the shortest displacement vector
+  //                         needed to remove the sphere out of the slab.
+  inline double get_sphere_penetration_depth
     (algebra::Sphere3D s,
-     algebra::Vector3D* out_displacement) const;
+     algebra::Vector3D* out_translation) const;
 
 
   IMP_OBJECT_METHODS(SlabWithToroidalPoreSingletonScore);
@@ -142,7 +168,7 @@ SlabWithToroidalPoreSingletonScore::evaluate_index
   IMP::core::XYZR d(m, pi);
   if (!d.get_coordinates_are_optimized()) return false;
   algebra::Vector3D displacement;
-  double score=get_sphere_penetration(d.get_sphere(),
+  double score=get_sphere_penetration_depth(d.get_sphere(),
                                da ? &displacement : nullptr);
   IMP_LOG_TERSE("sphere " << d << " score " << score);
   if(da && score>0.0){
@@ -193,7 +219,7 @@ SlabWithToroidalPoreSingletonScore::evaluate_indexes
       continue;
     }
     algebra::Vector3D displacement;
-    double cur_score = get_sphere_penetration(spheres_table[pi_index],
+    double cur_score = get_sphere_penetration_depth(spheres_table[pi_index],
                                         da ? &displacement : nullptr);
     IMP_LOG_TERSE("SlabWithToroidalPore singleton score for sphere / displacement "
             << spheres_table[pi_index] << " is " << cur_score << " / "
@@ -211,12 +237,47 @@ SlabWithToroidalPoreSingletonScore::evaluate_indexes
   return ret;
 }
 
-// return - distance to nearest surface point
-// out_displacement - a vector pointing to the nearest surface point
+// sphere - sphere for which the distance is computed
+// origin - ellipsoid origin (a point on the major circle of the torus)
 double
-SlabWithToroidalPoreSingletonScore::get_sphere_penetration
+SlabWithToroidalPoreSingletonScore::
+get_sphere_ellipsoid_penetration_depth
+(algebra::Sphere3D const& sphere,
+ algebra::Vector3D const& origin,
+ algebra::Vector3D* out_translation) const
+{
+  const double eps= 1e-9;
+  algebra::Vector3D v(sphere.get_center()-origin);
+  double dXY2= v[0]*v[0]+v[1]*v[1];
+  double dZ2= v[2]*v[2];
+  double dv2= dXY2 + dZ2 + eps;
+  // theta = atan(dXY/dZ) = asin(dXY/dv) = acos(dZ/dv)
+  double sinTheta2= dXY2/dv2;
+  double cosTheta2= dZ2/dv2;
+  double cur_r= std::sqrt(rv_*rv_*cosTheta2 + rh_*rh_*sinTheta2);
+  double dv=std::sqrt(dv2);
+  double surface_distance= dv - sphere.get_radius() - cur_r;
+  if(surface_distance>=0 ){
+    if(out_translation){
+      (*out_translation)=IMP::algebra::Vector3D(0,0,0);
+    }
+    return 0;
+  }
+  // Overlap:
+  if(out_translation){
+    (*out_translation)= v.get_unit_vector();
+  }
+  return -surface_distance; // penetration is negative the 'distance'
+
+
+}
+
+// return - distance to nearest surface point
+// out_translation - a normalized vector pointing to the nearest surface point
+double
+SlabWithToroidalPoreSingletonScore::get_sphere_penetration_depth
 (algebra::Sphere3D sphere,
- algebra::Vector3D* out_displacement) const
+ algebra::Vector3D* out_translation) const
 {
   double const x=sphere[0];
   double const y=sphere[1];
@@ -228,8 +289,8 @@ SlabWithToroidalPoreSingletonScore::get_sphere_penetration
   bool is_below_bottom=sphere_dz_bottom<0;
   if(is_above_top || is_below_bottom) {
     // early abort I - above or below slab
-    if(out_displacement){
-      (*out_displacement)=IMP::algebra::Vector3D(0,0,0);
+    if(out_translation){
+      (*out_translation)=IMP::algebra::Vector3D(0,0,0);
     }
     return 0;
   }
@@ -238,56 +299,27 @@ SlabWithToroidalPoreSingletonScore::get_sphere_penetration
   double abs_sphere_dz =
     is_closer_to_top ? -sphere_dz_top : sphere_dz_bottom; // d_z is the mianimal vertical change in z that brings s either fully above or fully below the slab
   if (d_xy2 > R_*R_) {
-      // early about II - radially outside torus major radius R
-    if(out_displacement){
-      (*out_displacement)=IMP::algebra::Vector3D(0,0,is_closer_to_top?+1:-1);
+      // early about II - radially outside torus major circle of radius R
+    if(out_translation){
+      (*out_translation)=IMP::algebra::Vector3D(0,0,is_closer_to_top?+1:-1);
     }
     return abs_sphere_dz;
   }
   double d_xy = std::sqrt(d_xy2);
-  if(d_xy+sr < R_-r_){
-    // early abort III - radially close to central axis (less than R-r)
-    if(out_displacement){
-      (*out_displacement)=IMP::algebra::Vector3D(0,0,0);
-    }
-    return 0;
-  }
-  // IV. In slab vertically + radially between R-r and R relative to central axis
+  // IV. In slab vertically + radially within torus major circle of radius R
   const double eps = 1e-9;
-  double dR_x, dR_y;
-  if ( d_xy > eps )
-  {
-    // (dR_x,dR_y) is the vector from the nearest point on the center line of the torus to (x,y) (projected on z=0)
-    dR_x = x - x*(R_/d_xy);
-    dR_y = y - y*(R_/d_xy);
+  double ret;
+  if (d_xy>eps) {
+    double scale= R_/d_xy;
+    IMP::algebra::Vector3D origin(x*scale, y*scale, midZ_);
+    ret= get_sphere_ellipsoid_penetration_depth
+      (sphere, origin, out_translation );
+  } else {
+    IMP::algebra::Vector3D origin(R_, 0.0, midZ_);
+    ret= get_sphere_ellipsoid_penetration_depth
+      (sphere, origin, out_translation );
   }
-  else
-  {
-    dR_x = x - R_;
-    dR_y = y;
-  }
-  double dR_z = z-midZ_;
-  double dR = std::sqrt(dR_z*dR_z + dR_x*dR_x + dR_y*dR_y); // magnitude of vector from nearest point on the torus central line (radius R circle on z=0)
-  double sphere_penetration= r_ + sphere.get_radius() - dR;
-  // No overlap:
-  if(sphere_penetration<=0.0){
-    if(out_displacement){
-      (*out_displacement)=IMP::algebra::Vector3D(0,0,0);
-    }
-    return 0;
-  }
-  // Overlap:
-  if(out_displacement){
-    if ( dR > eps )
-      {
-        (*out_displacement)= IMP::algebra::Vector3D(dR_x,dR_y,dR_z)/dR;
-      }
-    else
-      {
-        (*out_displacement)= IMP::algebra::Vector3D(dR_x,dR_y,dR_z)/eps;
-      }
-  }
-  return sphere_penetration;
+  return ret;
 }
 
 
