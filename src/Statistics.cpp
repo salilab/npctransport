@@ -363,6 +363,7 @@ void Statistics
     return;
   }
   const float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
+  bool is_z_symmetric= (get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
   std::pair<ParticleTypeZRDistributionMap::iterator, bool> it_pair;
   it_pair.first= particle_type_zr_distribution_map_.find(pt);
@@ -370,8 +371,10 @@ void Statistics
   if(it_pair.first==particle_type_zr_distribution_map_.end()) {
     float z_max =  get_sd()->get_box_size() / 2.0; // get_z_distribution_top();
     float r_max =  get_sd()->get_box_size() / std::sqrt(2.0); // get_r_distribution_max();
-    unsigned int nz= std::floor(z_max/GRID_RESOLUTION_ANGSTROMS)+5; // +5 for slack
-    unsigned int nr= std::floor(r_max/GRID_RESOLUTION_ANGSTROMS)+5; // +5 for slack
+    unsigned int nz=
+      (1 + !is_z_symmetric) * (std::floor(z_max/GRID_RESOLUTION_ANGSTROMS) + 5); // +5 for slack
+    unsigned int nr=
+      std::floor(r_max/GRID_RESOLUTION_ANGSTROMS)+5; // +5 for slack
     ParticleTypeZRDistributionMap::value_type vt =
       std::make_pair(pt,
                      std::vector<std::vector<int> >
@@ -382,10 +385,14 @@ void Statistics
   ParticleTypeZRDistributionMap::iterator& it=it_pair.first;
   //update distribution
   core::XYZ xyz(p);
-  float z = std::abs(xyz.get_z());
-  float r = std::sqrt( std::pow(xyz.get_x(),2) +
+  float z= xyz.get_z();
+  if(is_z_symmetric){
+    z= std::abs(z);
+  }
+  float r= std::sqrt( std::pow(xyz.get_x(),2) +
                         std::pow(xyz.get_y(),2) );
-  unsigned int zz= std::floor(z/GRID_RESOLUTION_ANGSTROMS);
+  unsigned int zz= std::floor(z/GRID_RESOLUTION_ANGSTROMS)
+    + (nz/2)*(!is_z_symmetric);
   unsigned int rr= std::floor(r/GRID_RESOLUTION_ANGSTROMS);
   IMP_INTERNAL_CHECK(zz < it->second.size() &&
                      rr < it->second[0].size(),

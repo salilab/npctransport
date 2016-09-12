@@ -308,17 +308,17 @@ namespace {
 
 
 // see documentation in .h file
-int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
+int assign_ranges(std::string ifname, std::string ofname, unsigned int work_unit,
                   bool show_steps, boost::uint64_t random_seed) {
   IMP_FUNCTION_LOG;
-  std::fstream in(fname.c_str(), std::ios::in | std::ios::binary);
+  std::fstream in(ifname.c_str(), std::ios::in | std::ios::binary);
   if (!in) {\
-    IMP_THROW("Could not open file " << fname, IOException);
+    IMP_THROW("Could not open file " << ifname, IOException);
   }
   ::npctransport_proto::Configuration config;
   bool success = config.ParseFromIstream(&in);
   if (!success) {
-    IMP_THROW("Unable to read from protobuf " << fname, IOException);
+    IMP_THROW("Unable to read from protobuf " << ifname, IOException);
   }
   npctransport_proto::Output output;
   npctransport_proto::Assignment& assignment = *output.mutable_assignment();
@@ -331,7 +331,7 @@ int assign_ranges(std::string fname, std::string ofname, unsigned int work_unit,
               }*/
   int ret = 0;
   if (ranges.empty()) {
-    IMP_WARN("No message with value ranges detected for file '" << fname
+    IMP_WARN("No message with value ranges detected for file '" << ifname
              << "' - this is probably fine" << std::endl);
   } else {
     Floats values;

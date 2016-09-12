@@ -48,8 +48,8 @@
 #include <IMP/rmf/atom_io.h>
 #include <IMP/rmf/frames.h>
 #include <numeric>
-
 #include <set>
+
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()
@@ -120,6 +120,7 @@ void SimulationData::initialize(std::string prev_output_file,
       pb_assignment= pb_data.assignment();
   ::npctransport_proto::Assignment*
       pb_mutable_assignment= pb_data.mutable_assignment();
+  GET_ASSIGNMENT_DEF(output_npctransport_version, 1.0); // old configuration files that don't have output version should be treated as version 1.0
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
   GET_ASSIGNMENT(slab_thickness);

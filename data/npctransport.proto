@@ -117,7 +117,8 @@ message Configuration {
   optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
   optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
   optional FloatRange temperature_k=33; // simulation temperature
-  // n=33
+  optional double output_npctransport_version=34 [default=2.0]; // a version number of npctransport by which to create output files
+  // n=34
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -237,8 +238,9 @@ message Assignment {
   repeated string npc_module_version=39; // repeated - once for each restart
   optional double output_statistics_interval_ns=40 [default=100]; // update interval of statistics file (including order params) in ns
   optional int32 output_statistics_interval_frames=41 [default=100000]; // update interval of statistics file (including order params) in frames
-  optional FloatAssignment temperature_k=42; // simulation temperatureaa
-  // n=42
+  optional FloatAssignment temperature_k=42; // simulation temperature
+  optional double output_npctransport_version=43; // a version number for npctransport by which to interpret output file that contains this assignment
+  // n=44
 }
 
 message Statistics {

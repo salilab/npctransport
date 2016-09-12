@@ -38,9 +38,12 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+#define IMPNPCTRANSPORT_VERSION 2.0
+
 class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  private:
   // params
+  Parameter<double> output_npctransport_version_;
   Parameter<double> box_side_;
   Parameter<double> tunnel_radius_;
   Parameter<double> slab_thickness_;
@@ -67,6 +70,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   Parameter<double> temperature_k_;
 
  public:
+  double get_output_npctransport_version() const { return output_npctransport_version_; }
+
   /** returns the maximal interaction range between particles */
   double get_range() const { return range_; }
 
