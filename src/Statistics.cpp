@@ -363,7 +363,8 @@ void Statistics
     return;
   }
   const float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
-  bool is_z_symmetric= (get_output_npctransport_version() < 2.0);
+  bool is_z_symmetric=
+    (get_sd()->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
   std::pair<ParticleTypeZRDistributionMap::iterator, bool> it_pair;
   it_pair.first= particle_type_zr_distribution_map_.find(pt);
@@ -391,6 +392,7 @@ void Statistics
   }
   float r= std::sqrt( std::pow(xyz.get_x(),2) +
                         std::pow(xyz.get_y(),2) );
+  unsigned int nz= it->second.size();
   unsigned int zz= std::floor(z/GRID_RESOLUTION_ANGSTROMS)
     + (nz/2)*(!is_z_symmetric);
   unsigned int rr= std::floor(r/GRID_RESOLUTION_ANGSTROMS);

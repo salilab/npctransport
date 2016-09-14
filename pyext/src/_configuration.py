@@ -28,6 +28,8 @@ def create_range(field, lb, ub=None, steps=5, base=2):
 
 def set_default_configuration(config):
     """Set the defaults for the configuration"""
+    default_version=config.output_npctransport_version
+    config.output_npctransport_version=default_version
     config.interaction_k.lower=1
     config.interaction_range.lower=5
     config.backbone_k.lower=5
