@@ -239,14 +239,14 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
                                 weighted_time_ns);
         on_II_stats_time_ns_ += weighted_time_ns;
       }
-      double n_missing_contacts_before =
-        n_possible_contacts_ - n_contacts_before;
+      //      double n_missing_contacts_before =
+      //  n_possible_contacts_ - n_contacts_before;
+      int n_missing_contacts_before= // simplifying assumption: each pair of particles can form at most a single site-site contact - if not true, this measure is skewed
+        (n_sites_I_ - n_contacts_before)
+        * (n_sites_II_ - n_contacts_before);
       if( n_missing_contacts_before > 0 )
         {
 
-          int n_missing_contacts_before= // simplifying assumption: each pair of particles can form at most a single site-site contact - if not true, this measure is skewed
-            (n_sites_I_ - n_contacts_before)
-            * (n_sites_II_ - n_contacts_before);
           //          double n_missing_contacts_before =
           //   n_possible_contacts_ - n_contacts_before;
           double weighted_time_ns =
