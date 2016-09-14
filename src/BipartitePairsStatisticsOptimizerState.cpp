@@ -66,6 +66,10 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
 
   n_possible_contacts_ =
     get_maximal_number_of_unordered_pairs(particlesI, particlesII);
+  n_sites_I_= n_particles_I_ *
+    statistics_manager_->get_sd()->get_sites(interaction_type_.first).size();
+  n_sites_II_= n_particles_II_ *
+    statistics_manager_->get_sd()->get_sites(interaction_type_.second).size();
 
   // TODO: do we want to add consecutive pair filter for fg chains?
   reset(); // make sure all counters are 0
@@ -239,9 +243,14 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
         n_possible_contacts_ - n_contacts_before;
       if( n_missing_contacts_before > 0 )
         {
-          double n_missing_contacts_before =
-            n_possible_contacts_ - n_contacts_before;
-          double weighted_time_ns = n_missing_contacts_before * elapsed_time_ns;
+
+          int n_missing_contacts_before= // simplifying assumption: each pair of particles can form at most a single site-site contact - if not true, this measure is skewed
+            (n_sites_I_ - n_contacts_before)
+            * (n_sites_II_ - n_contacts_before);
+          //          double n_missing_contacts_before =
+          //   n_possible_contacts_ - n_contacts_before;
+          double weighted_time_ns =
+            n_missing_contacts_before * elapsed_time_ns;
           double on_per_missing_contact_per_ns =
             n_contacts_gained / weighted_time_ns;
           update_weighted_average(avg_on_per_missing_contact_per_ns_,

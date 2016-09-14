@@ -82,13 +82,16 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   double avg_on_per_unbound_II_per_ns_;
   double avg_on_per_missing_contact_per_ns_;
 
-  // total number of all (bound) particles in each group after last udpate()
+  // Total number of all (bound) particles in each group after last udpate():
   unsigned int n_particles_I_;
   unsigned int n_particles_II_;
   unsigned int n_bounds_I_;
   unsigned int n_bounds_II_;
+  // Total number of sites on particles of type I and II:
+  unsigned int n_sites_I_;
+  unsigned int n_sites_II_;
 
-  // theoretical number of possible (unordered) contacts between particles
+  // Theoretical number of possible (unordered) contacts between particles:
   unsigned int n_possible_contacts_;
 
  public:
