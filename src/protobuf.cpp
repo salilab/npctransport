@@ -142,11 +142,11 @@ namespace {
         cur.name = name;
         cur.lb = get_value(in_r, in_message, lfd);
         cur.ub = get_value(in_r, in_message, ufd);
-        if (lfd->type() == FieldDescriptor::TYPE_INT32) {
-          cur.base = 1;  // evenly spaced
-        } else {
-          cur.base = in_r->GetDouble(*in_message, bfd);
-        }
+        //        if (lfd->type() == FieldDescriptor::TYPE_INT32) {
+        //   cur.base = 1;  // evenly spaced
+        //} else {
+        cur.base = in_r->GetDouble(*in_message, bfd);
+        //}
         cur.steps = in_r->GetInt32(*in_message, sfd);
         cur.m = out_message;
         ret.push_back(cur);
