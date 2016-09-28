@@ -2,7 +2,7 @@
 
 #env.IMPModuleTest()
 
-spelling_exceptions=['avro','rmf','cpc','predr','optimizable','zr','protobuf']
+spelling_exceptions=['avro','rmf','cpc','predr','optimizable','zr','protobuf','npctransport']
 show_exceptions=['timer']
 value_object_exceptions=['timer','LinearInteraction']
 function_name_exceptions= \
