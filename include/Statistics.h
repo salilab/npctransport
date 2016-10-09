@@ -81,15 +81,17 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
     ParticleTransportStatisticsOSsMap;
   ParticleTransportStatisticsOSsMap floaters_transport_stats_map_;
 
+#ifndef SWIG
   // distributions
   typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,
     std::vector< std::vector<int> > >
     ParticleTypeZRDistributionMap;
   ParticleTypeZRDistributionMap particle_type_zr_distribution_map_;
   typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,
-    std::vector< std::vector<std::vector<int>> > >
+    std::vector< std::vector< std::vector<int> > > >
     ParticleTypeXYZDistributionMap;
   ParticleTypeXYZDistributionMap particle_type_xyz_distribution_map_;
+#endif
 
   // statistics about entire FG chains, for each FG type
   typedef IMP_KERNEL_LARGE_UNORDERED_MAP<core::ParticleType, ChainStatisticsOptimizerStates>
