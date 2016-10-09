@@ -119,7 +119,8 @@ message Configuration {
   optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
   optional FloatRange temperature_k=33; // simulation temperature
   optional double output_npctransport_version=34 [default=2.0]; // a version number of npctransport by which to create output files
-  // n=34
+  optional int32 is_xyz_hist_stats=35 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
+    // n=35
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -241,6 +242,7 @@ message Assignment {
   optional int32 output_statistics_interval_frames=41 [default=100000]; // update interval of statistics file (including order params) in frames
   optional FloatAssignment temperature_k=42; // simulation temperature
   optional double output_npctransport_version=43; // a version number for npctransport by which to interpret output file that contains this assignment
+  optional int32 is_xyz_hist_stats=44 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
   // n=44
 }
 
@@ -251,6 +253,10 @@ message Statistics {
   message Ints_list { // list of list of ints
           repeated Ints ints_list=1;
   }
+  message Ints_lists { // 3D matrix of ints
+          repeated Ints_list ints_lists= 1;
+  }
+
   message FGOrderParams {
     required double time_ns=1;
     required double volume=2;
@@ -284,7 +290,8 @@ message Statistics {
     optional double local_diffusion_coefficient=8 [default=0];
     optional string type=9; // type name, e.g. "fg_nsp1"
     repeated FGOrderParams order_params=10;
-    optional  Ints_list zr_hist=11; // histogram of z (dimenion 1) and r (dimension 2) coordinates
+    optional  Ints_list zr_hist=11; // histogram of z (dimenion 1) and r (dimension 2) coordinates (or z,y,x if is_xyz_hist_stats)
+    optional  Ints_lists xyz_hist=12; // histogram of x,y,z (dimension 0, 1 and 2, resp.)
   }
   message FloatStats {
     //    optional double site_interactions_per_floater=1 [default=0]; // number of site interactions per floater
@@ -297,7 +304,8 @@ message Statistics {
     repeated double transport_time_points_ns=8; // records the time points of transports in simulation time (TODO: assuming single trial?)
     optional string type=9; // type name, e.g. "kap121"
     repeated FloaterOrderParams order_params=10;
-    optional  Ints_list zr_hist=11; // histogram of z (dimenion 1) and r (dimension 2) coordinates
+    optional  Ints_list zr_hist=11; // histogram of z (dimenion 1) and r (dimension 2) coordinates (or z,y,x if is_xyz_hist_stats)
+    optional  Ints_lists xyz_hist=12; // histogram of x,y,z (dimension 0, 1 and 2, resp.)
   }
   message InteractionOrderParams{
     required float time_ns=1;

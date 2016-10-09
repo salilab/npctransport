@@ -15,6 +15,7 @@
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/container/ListSingletonContainer.h>
 #include <IMP/npctransport/Statistics.h>
+#include <IMP/npctransport/SimulationData.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BodyStatisticsOptimizerState::BodyStatisticsOptimizerState
@@ -84,7 +85,11 @@ BodyStatisticsOptimizerState
   if (statistics_manager_ == nullptr){
     return;
   }
-  statistics_manager_->update_particle_type_zr_distribution_map(p_);
+  if(statistics_manager_->get_sd()->get_is_xyz_hist_stats()){
+    statistics_manager_->update_particle_type_xyz_distribution_map(p_);
+  } else {
+    statistics_manager_->update_particle_type_zr_distribution_map(p_);
+  }
 }
 
 

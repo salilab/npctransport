@@ -64,6 +64,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
                                                // anchors of FG nups.
   Parameter<int> is_exclude_floaters_from_slab_initially_;
   Parameter<double> are_floaters_on_one_slab_side_;
+  Parameter<int> is_xyz_hist_stats_;
 
  // time when simulation has started for this process
   Parameter<double> initial_simulation_time_ns_;
@@ -80,13 +81,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   /** returns whether should exclude floaters from slab during initialization */
   bool get_is_exclude_floaters_from_slab_initially()
-  {return is_exclude_floaters_from_slab_initially_; }
+  { return is_exclude_floaters_from_slab_initially_; }
 
   /** returns whether should exclude floaters from one slab side,
       if excluded at all
   */
   bool get_are_floaters_on_one_slab_side()
-  {return are_floaters_on_one_slab_side_;}
+  { return are_floaters_on_one_slab_side_;}
+
+  bool get_is_xyz_hist_stats()
+  { return is_xyz_hist_stats_; }
 
   /** returns the simulation angular d factor */
   double get_angular_d_factor() const

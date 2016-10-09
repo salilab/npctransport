@@ -86,6 +86,10 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
     std::vector< std::vector<int> > >
     ParticleTypeZRDistributionMap;
   ParticleTypeZRDistributionMap particle_type_zr_distribution_map_;
+  typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,
+    std::vector< std::vector<std::vector<int>> > >
+    ParticleTypeXYZDistributionMap;
+  ParticleTypeXYZDistributionMap particle_type_xyz_distribution_map_;
 
   // statistics about entire FG chains, for each FG type
   typedef IMP_KERNEL_LARGE_UNORDERED_MAP<core::ParticleType, ChainStatisticsOptimizerStates>
@@ -152,12 +156,21 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
 
   /**
      updates the map of z-r distribtions of particle coordinates
-     with p's binned position counts (z is absolute vertical location,
-     r is distance from pore axis)
+     with p's binned position counts (if z-symmetry flag is on,
+     z is absolute vertical location; r is distance from pore axis)
 
      Comment: assume a pore geometry, no checks made that it is so
    */
   void update_particle_type_zr_distribution_map(Particle* p);
+
+    /**
+     updates the map of x-y-z distribtions of particle coordinates
+     with p's binned position counts (if z-symmetry flag is on,
+     z is absolute vertical location)
+
+     Comment: assume a pore geometry, no checks made that it is so
+   */
+  void update_particle_type_xyz_distribution_map(Particle* p);
 
 
   /**

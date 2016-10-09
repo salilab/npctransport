@@ -335,23 +335,45 @@ void Statistics::update_fg_stats
       }
 
       // Recreate z-r histogram based on retrieved zr_hist:
-      ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
-        particle_type_zr_distribution_map_.find(type_i);
-      if(ptzrdm_it != particle_type_zr_distribution_map_.end())
-        {
-          ParticleTypeZRDistributionMap::mapped_type zr_hist=
-            ptzrdm_it->second;
-          stats->mutable_fgs(i)->clear_zr_hist();
-          for(unsigned int ii=0; ii < zr_hist.size(); ii++)
-            {
-              ::npctransport_proto::Statistics_Ints* zii_r_hist=
-                stats->mutable_fgs(i)->mutable_zr_hist()->add_ints_list();
-              for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++)
-                {
-                  zii_r_hist->add_ints(zr_hist[ii][jj]);
-                }
-            }
-        }
+      if(get_sd()->get_is_xyz_hist_stats()){
+        // Recreate z-y-x histogram based on retrieved xyz_hist:
+        ParticleTypeXYZDistributionMap::const_iterator ptxyzdm_it=
+          particle_type_xyz_distribution_map_.find(type_i);
+        if(ptxyzdm_it != particle_type_xyz_distribution_map_.end()) {
+          ParticleTypeXYZDistributionMap::mapped_type xyz_hist=
+            ptxyzdm_it->second;
+          stats->mutable_fgs(i)->clear_xyz_hist();
+          for(unsigned int ii=0; ii < xyz_hist.size(); ii++) {
+            ::npctransport_proto::Statistics_Ints_list* xii_yz_hist=
+              stats->mutable_fgs(i)->mutable_xyz_hist()->add_ints_lists();
+            for(unsigned int jj=0; jj < xyz_hist[ii].size(); jj++) {
+              ::npctransport_proto::Statistics_Ints* xii_yjj_z_hist=
+                xii_yz_hist->add_ints_list();
+              for(unsigned int kk=0; kk < xyz_hist[ii][jj].size(); kk++) {
+                xii_yjj_z_hist->add_ints(xyz_hist[ii][jj][kk]);
+              } // for kk
+            } // for jj
+          } // for ii
+        } //if ptxyzdm_it
+      } else {
+        ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
+          particle_type_zr_distribution_map_.find(type_i);
+        if(ptzrdm_it != particle_type_zr_distribution_map_.end())
+          {
+            ParticleTypeZRDistributionMap::mapped_type zr_hist=
+              ptzrdm_it->second;
+            stats->mutable_fgs(i)->clear_zr_hist();
+            for(unsigned int ii=0; ii < zr_hist.size(); ii++)
+              {
+                ::npctransport_proto::Statistics_Ints* zii_r_hist=
+                  stats->mutable_fgs(i)->mutable_zr_hist()->add_ints_list();
+                for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++)
+                  {
+                    zii_r_hist->add_ints(zr_hist[ii][jj]);
+                  } // for jj
+              } // for ii
+          } // if ptzed_it
+      } // if is_xyz_hist
     } // for it (fg type)
 }
 
@@ -362,7 +384,7 @@ void Statistics
   if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
     return;
   }
-  const float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
+  float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
   bool is_z_symmetric=
     (get_sd()->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
@@ -386,23 +408,75 @@ void Statistics
   ParticleTypeZRDistributionMap::iterator& it=it_pair.first;
   //update distribution
   core::XYZ xyz(p);
+  float x= xyz.get_x();
+  float y= xyz.get_x();
   float z= xyz.get_z();
   if(is_z_symmetric){
     z= std::abs(z);
   }
-  float r= std::sqrt( std::pow(xyz.get_x(),2) +
-                        std::pow(xyz.get_y(),2) );
+  float r= std::sqrt( x*x+y*y);
   unsigned int nz= it->second.size();
   unsigned int zz= std::floor(z/GRID_RESOLUTION_ANGSTROMS)
     + (nz/2)*(!is_z_symmetric);
   unsigned int rr= std::floor(r/GRID_RESOLUTION_ANGSTROMS);
-  IMP_INTERNAL_CHECK(zz < it->second.size() &&
-                     rr < it->second[0].size(),
-                  "zz=" <<  zz << " >= " << it->second.size()
-                  << " or r=" << rr << " >= " << it->second[0].size()
-                   << " ;  z=" << z << " r=" << r);
   it->second[zz][rr]++;
 }
+
+void Statistics
+::update_particle_type_xyz_distribution_map
+( Particle* p )
+{
+  if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
+    return;
+  }
+  float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
+  bool is_z_symmetric=
+    (get_sd()->get_output_npctransport_version() < 2.0);
+  core::ParticleType pt( core::Typed(p).get_type() );
+  std::pair<ParticleTypeXYZDistributionMap::iterator, bool> it_pair;
+  it_pair.first= particle_type_xyz_distribution_map_.find(pt);
+  // add distribution table if needed
+  if(it_pair.first==particle_type_xyz_distribution_map_.end()) {
+    float box_half =  get_sd()->get_box_size() / 2.0; // get_z_distribution_top();
+    unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS) + 5; // +5 for slack
+    unsigned int nx= 2 * half_n_max;
+    unsigned int ny= 2 * half_n_max;
+    unsigned int nz= (1 + !is_z_symmetric) * half_n_max;
+    ParticleTypeXYZDistributionMap::value_type vt =
+      std::make_pair
+      (pt,
+       std::vector< std::vector< std::vector<int>> >
+       (nx, std::vector<std::vector<int>>
+        (ny, std::vector<int>(nz,0)) ) );
+    it_pair=particle_type_xyz_distribution_map_.insert(vt);
+    IMP_USAGE_CHECK(it_pair.second, "type " << pt << " already exists");
+  }
+  ParticleTypeXYZDistributionMap::iterator& it=it_pair.first;
+  //update distribution
+  core::XYZ xyz(p);
+  float x= xyz.get_x();
+  float y= xyz.get_x();
+  float z= xyz.get_z();
+  if(is_z_symmetric){
+    z= std::abs(z);
+  }
+  unsigned int nx= it->second.size();
+  unsigned int ny= nx;
+  unsigned int nz= nx;
+  unsigned int xx= std::floor(x/GRID_RESOLUTION_ANGSTROMS) + nx/2;
+  unsigned int yy= std::floor(y/GRID_RESOLUTION_ANGSTROMS) + ny/2;
+  unsigned int zz= std::floor(z/GRID_RESOLUTION_ANGSTROMS)
+    + (nz/2)*(!is_z_symmetric);
+  IMP_INTERNAL_CHECK(xx < it->second.size() &&
+                     yy < it->second[0].size() &&
+                     zz < it->second[0][0].size(),
+                     "xx=" <<  zz << " >= " << it->second.size()
+                     << " or yy=" << yy << " >= " << it->second[0].size()
+                     << " or zz=" << xx << " >= " << it->second[0][0].size()
+                     << " ;  x=" << x << " y=" << y << " z=" << z);
+  it->second[xx][yy][zz]++;
+}
+
 
 
 // @param nf_new number of new frames accounted for in this statistics update
@@ -463,9 +537,30 @@ void Statistics::update
           bsos[j]->reset();
           nf_weighted++;
         } // for j
-      // Recreate z-r histogram based on retrieved zr_hist:
-      ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
-        particle_type_zr_distribution_map_.find(it->first);
+      if(get_sd()->get_is_xyz_hist_stats()){
+        // Recreate z-y-x histogram based on retrieved xyz_hist:
+        ParticleTypeXYZDistributionMap::const_iterator ptxyzdm_it=
+          particle_type_xyz_distribution_map_.find(it->first);
+        if(ptxyzdm_it != particle_type_xyz_distribution_map_.end()) {
+          ParticleTypeXYZDistributionMap::mapped_type xyz_hist=
+            ptxyzdm_it->second;
+          stats->mutable_floaters(i)->clear_xyz_hist();
+          for(unsigned int ii=0; ii < xyz_hist.size(); ii++) {
+            ::npctransport_proto::Statistics_Ints_list* xii_yz_hist=
+              stats->mutable_floaters(i)->mutable_xyz_hist()->add_ints_lists();
+            for(unsigned int jj=0; jj < xyz_hist[ii].size(); jj++) {
+              ::npctransport_proto::Statistics_Ints* xii_yjj_z_hist=
+                xii_yz_hist->add_ints_list();
+              for(unsigned int kk=0; kk < xyz_hist[ii][jj].size(); kk++) {
+                xii_yjj_z_hist->add_ints(xyz_hist[ii][jj][kk]);
+              } // for kk
+            } // for jj
+          } // for ii
+        } //if ptxyzdm_it
+      } else { // if/else is_xyz_hist_stats
+        // Recreate z-r histogram based on retrieved zr_hist:
+        ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
+          particle_type_zr_distribution_map_.find(it->first);
         if(ptzrdm_it != particle_type_zr_distribution_map_.end()) {
           ParticleTypeZRDistributionMap::mapped_type zr_hist=
             ptzrdm_it->second;
@@ -475,9 +570,10 @@ void Statistics::update
               stats->mutable_floaters(i)->mutable_zr_hist()->add_ints_list();
             for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++) {
               zii_r_hist->add_ints(zr_hist[ii][jj]);
-            }
-          }
-        }
+            } // for jj
+          } // for ii
+        } //if ptzrdm_it
+      } // if/else is_xyz_hist_stats
     } // for it
 
   // Floaters avg number of transports per particle
