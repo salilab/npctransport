@@ -6,6 +6,7 @@ import IMP.rmf
 from IMP.npctransport import *
 import sys
 import IMP.display
+import numpy as np
 
 def clone_rmf_static(in_name,out_name):
     return in_file, out_file
@@ -24,6 +25,13 @@ def has_depth_with_site(root, i):
 
 
 def _add_nodes(node, cf, cdf, tf, types, radius, color, depth=0):
+    '''
+    node - rmf node to scan
+    cf - cylinder factory
+    cdf - colored factory
+    tf - typed factory
+    types - list of type names for which to apply method
+    '''
     children = node.get_children()
     ret = []
     #print "inspecting", node.get_name()
@@ -32,12 +40,12 @@ def _add_nodes(node, cf, cdf, tf, types, radius, color, depth=0):
     if has_depth_with_site(node, 3) and tf.get_is(children[0]):
         tf_type = tf.get(children[0]).get_type_name()
         if (tf_type in types):
-            print tf_type, "is of right type"
+            #            print tf_type, "is of right type"
             for i in range(0, len(children) - 1):
                 cyl = node.add_child("cylinder", RMF.GEOMETRY)
                 cdf.get(cyl).set_static_rgb_color(RMF.Vector3(color[0],color[1],color[2]))
                 ret.append((cyl, children[i], children[i+1]))
-                print "adding for", ret[-1], "depth", depth, "d3under?", has_depth_with_site(node, 3)
+                #                print "adding for", ret[-1], "depth", depth, "d3under?", has_depth_with_site(node, 3)
                 cf.get(cyl).set_radius(radius)
     for c in children:
         ret += _add_nodes(c, cf, cdf, tf, types, radius, color, depth+1)
@@ -58,6 +66,40 @@ def _set_cylinder(cylinder_descriptor, cf, ipf):
     coords_list= [RMF.Vector3(cep0), RMF.Vector3(cep1)]
 #    coords=[[cep0[0], cep1[0]], [cep0[1], cep1[1]], [cep0[2], cep1[2]]]
     cf.get(nh).set_frame_coordinates_list(coords_list)
+
+
+def _smooth(node, tf, rff, xyz_dict, n=10, is_write=True):
+    '''
+    node - node being scanned
+    tf - typed factory
+    rff - reference frame factory
+#    bf - ball factory
+    xyz_dict - dictinory from node ids to list of up to n xyz coordinates
+    n - smoothing window size
+    '''
+    if tf.get_is(node) and rff.get_is(node):
+#        print "Smoothing", node.get_id(), node.get_name(), node.get_type(), n
+        node_id= node.get_id()
+        rf= rff.get(node)
+        xyz= np.array([t for t in rf.get_frame_translation()])
+        if not node_id in xyz_dict:
+            xyz_dict[node_id]= [xyz]
+        else:
+            xyz_dict[node_id].append(xyz)
+        if len(xyz_dict[node_id])>n:
+            xyz_dict[node_id]= xyz_dict[node_id][-n:]
+        smooth_xyz= np.mean(xyz_dict[node_id],axis=0)
+        if is_write:
+            # print "xyz", xyz
+            # print "XYZ_LIST", xyz_dict[node_id]
+            # print "smooth_xyz", smooth_xyz
+            # print len(smooth_xyz)
+            rf.set_frame_translation(
+                RMF.Vector3(smooth_xyz[0],
+                            smooth_xyz[1],
+                            smooth_xyz[2]))
+    for c in node.get_children():
+        _smooth(c, tf, rff, xyz_dict, n)
 
 
 def _recolor(node, tf, cf, types, color):
@@ -130,6 +172,10 @@ def main():
     IMP.add_float_flag("site_radius", 2, "The radius of the sites.")
     IMP.add_bool_flag("recolor_fgs", "recolor fg nup chains")
     IMP.add_bool_flag("recolor_floats", "recolor floating (diffusing) molecules")
+    IMP.add_int_flag("smooth_n_frames", 1,
+                     "smooth by averaging over a window of specified frames (but retaining the same number of expected frames")
+    IMP.add_int_flag("skip_n_frames", 1,
+                     "skip every n frames of output")
     IMP.setup_from_argv(sys.argv, "Prettify a movie")
     in_fname= IMP.get_string_flag("input_rmf")
     out_fname= IMP.get_string_flag("output_rmf")
@@ -163,19 +209,36 @@ def main():
         rgb = [color.get_red(), color.get_green(), color.get_blue()]
         cylinders += _add_nodes(out_fh.get_root_node(), cf, cdf, tf, [type], radius, rgb) # fg_color
         if(IMP.get_bool_flag("recolor_fgs")):
-            print "Recoloring",type, rgb
+            #            print "Recoloring",type, rgb
             _recolor(out_fh.get_root_node(), tf, cdf, [type], rgb) # fg_color
     # Clone and modify per-frame information:
-    for f in in_fh.get_frames():
-        print("cloning frame", f)
+    smooth_xyz_dict={}
+    smooth_n_frames=IMP.get_int_flag("smooth_n_frames")
+    skip_n_frames=IMP.get_int_flag("skip_n_frames")
+    for f_id, f in enumerate(in_fh.get_frames()):
+        is_write= f_id % skip_n_frames == 0
+        #        print("cloning frame", f)
         in_fh.set_current_frame(f)
+        if not is_write:
+            _smooth(in_fh.get_root_node(),
+                    tf,
+                    rff,
+                    smooth_xyz_dict,
+                    n=smooth_n_frames,
+                    is_write=False)
+            continue
         out_fh.add_frame(in_fh.get_name(f), in_fh.get_type(f))
         RMF.clone_loaded_frame(in_fh, out_fh)
+        _smooth(out_fh.get_root_node(),
+                tf,
+                rff,
+                smooth_xyz_dict,
+                n=smooth_n_frames,
+                is_write=True)
         for c in cylinders:
             _set_cylinder(c, cf, rff)
-#        if(IMP.get_bool_flag("recolor_floats")):
-#            _recolor(out_fh.get_root_node(), tf, cdf, floater_types[0:1], kap_color)
-#            _recolor(out_fh.get_root_node(), tf, cdf, floater_types[1:], crap_color)
-#    if i >= 3: break # DEBUG ONLY
+        DEBUG=False
+        if DEBUG and f_id >= 200*skip_n_frames:
+            break
 
 main()
