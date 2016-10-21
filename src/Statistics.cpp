@@ -36,6 +36,9 @@
 
 #include <IMP/npctransport/internal/npctransport.pb.h>
 
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <fcntl.h>
+
 bool no_save_rmf_to_output = false;
 IMP::AddBoolFlag  no_save_rmf_to_output_adder
 ( "no_save_rmf_to_output",
@@ -384,7 +387,7 @@ void Statistics
   if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
     return;
   }
-  float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
+  float GRID_RESOLUTION_ANGSTROMS= 10.0; // resolution of zr grid
   bool is_z_symmetric=
     (get_sd()->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
@@ -429,7 +432,8 @@ void Statistics
   if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
     return;
   }
-  float GRID_RESOLUTION_ANGSTROMS=10.0; // resolution of zr grid
+  float GRID_RESOLUTION_ANGSTROMS=10; // resolution of zr grid
+  float CROP_FACTOR=0.5; // crop 0.5*Crop x 2 on each dimension (e.g. for box size of 200, only include -50 to +50 and not -100 to +100 on each dimension)
   bool is_z_symmetric=
     (get_sd()->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
@@ -438,7 +442,7 @@ void Statistics
   // add distribution table if needed
   if(it_pair.first==particle_type_xyz_distribution_map_.end()) {
     float box_half =  get_sd()->get_box_size() / 2.0; // get_z_distribution_top();
-    unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS) + 5; // +5 for slack
+    unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS*CROP_FACTOR) + 5; // +5 for slack
     unsigned int nx= 2 * half_n_max;
     unsigned int ny= 2 * half_n_max;
     unsigned int nz= (1 + !is_z_symmetric) * half_n_max;
@@ -455,26 +459,30 @@ void Statistics
   //update distribution
   core::XYZ xyz(p);
   float x= xyz.get_x();
-  float y= xyz.get_x();
+  float y= xyz.get_y();
   float z= xyz.get_z();
   if(is_z_symmetric){
     z= std::abs(z);
   }
   unsigned int nx= it->second.size();
-  unsigned int ny= nx;
-  unsigned int nz= nx;
-  unsigned int xx= std::floor(x/GRID_RESOLUTION_ANGSTROMS) + nx/2;
-  unsigned int yy= std::floor(y/GRID_RESOLUTION_ANGSTROMS) + ny/2;
-  unsigned int zz= std::floor(z/GRID_RESOLUTION_ANGSTROMS)
-    + (nz/2)*(!is_z_symmetric);
+  unsigned int ny= it->second[0].size();
+  unsigned int nz= it->second[0][0].size();
+  unsigned int xx=
+    std::floor(x/GRID_RESOLUTION_ANGSTROMS) + nx/2;
+  unsigned int yy=
+    std::floor(y/GRID_RESOLUTION_ANGSTROMS) + ny/2;
+  unsigned int zz=
+    std::floor(z/GRID_RESOLUTION_ANGSTROMS) + (nz/2)*(!is_z_symmetric);
   IMP_INTERNAL_CHECK(xx < it->second.size() &&
                      yy < it->second[0].size() &&
                      zz < it->second[0][0].size(),
-                     "xx=" <<  zz << " >= " << it->second.size()
+                     "xx=" <<  x << " >= " << it->second.size()
                      << " or yy=" << yy << " >= " << it->second[0].size()
-                     << " or zz=" << xx << " >= " << it->second[0][0].size()
+                     << " or zz=" << yy << " >= " << it->second[0][0].size()
                      << " ;  x=" << x << " y=" << y << " z=" << z);
-  it->second[xx][yy][zz]++;
+  if(xx<nx && yy < ny && zz<nz){
+    it->second[xx][yy][zz]++;
+  }
 }
 
 
@@ -487,9 +495,21 @@ void Statistics::update
   IMP_OBJECT_LOG;
   ::npctransport_proto::Output output;
 
-  std::ifstream inf(output_file_name_.c_str(), std::ios::binary);
-  output.ParseFromIstream(&inf);
-  inf.close();
+  //  std::ifstream inf(output_file_name_.c_str(), std::ios::binary);
+  //  output.ParseFromIstream(&inf);
+  //  inf.close();
+  bool read(false);
+  int fd=open(output_file_name_.c_str(), O_RDONLY);
+  if(fd!=-1){
+    google::protobuf::io::FileInputStream fis(fd);
+    google::protobuf::io::CodedInputStream cis(&fis);
+    cis.SetTotalBytesLimit(500000000,200000000);
+    read=output.ParseFromCodedStream(&cis);
+    close(fd);
+  }
+  IMP_ALWAYS_CHECK(read,
+                   "Failed updating statistics to " << output_file_name_.c_str() << std::endl,
+                   IMP::IOException);
   ::npctransport_proto::Statistics* stats = output.mutable_statistics();
   int nf = stats->number_of_frames();
   if (is_stats_reset_) {  // stats was just reset
@@ -537,7 +557,7 @@ void Statistics::update
           bsos[j]->reset();
           nf_weighted++;
         } // for j
-      if(get_sd()->get_is_xyz_hist_stats()){
+      if(get_sd()->get_is_xyz_hist_stats() and false){ // TODO: floaters are disabled for xyz for now to save space - perhaps add it later
         // Recreate z-y-x histogram based on retrieved xyz_hist:
         ParticleTypeXYZDistributionMap::const_iterator ptxyzdm_it=
           particle_type_xyz_distribution_map_.find(it->first);

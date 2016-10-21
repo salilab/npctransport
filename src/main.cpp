@@ -53,6 +53,9 @@
 
 #include <IMP/npctransport/protobuf.h>
 
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <fcntl.h>
+
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 boost::int64_t work_unit = -1;
 IMP::AddIntFlag work_unitadder
@@ -188,9 +191,19 @@ namespace {
       std::cout << "Restart simulation from " << restart << std::endl;
     ::npctransport_proto::Output prev_output;
     // copy to new file to avoid modifying input file
-    std::ifstream file(restart.c_str(), std::ios::binary);
-    bool read = prev_output.ParseFromIstream(&file);
-    IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << restart,
+    //std::ifstream file(restart.c_str(), std::ios::binary);
+    //bool read = prev_output.ParseFromIstream(&file);
+    bool read(false);
+    int fd= open(restart.c_str(), O_RDONLY);
+    if(fd!=-1){
+      google::protobuf::io::FileInputStream fis(fd);
+      google::protobuf::io::CodedInputStream cis(&fis);
+      cis.SetTotalBytesLimit(500000000,200000000);
+      read= prev_output.ParseFromCodedStream(&cis);
+      close(fd);
+    }
+
+    IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << restart << " file descriptor " << fd,
                      IMP::ValueException);
     prev_output.mutable_assignment()->set_random_seed(actual_seed);
     std::ofstream outf(output.c_str(), std::ios::binary);

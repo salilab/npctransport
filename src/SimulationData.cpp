@@ -50,6 +50,9 @@
 #include <numeric>
 #include <set>
 
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <fcntl.h>
+
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()
@@ -109,12 +112,20 @@ void SimulationData::initialize(std::string prev_output_file,
                                 bool quick) {
   m_ = new Model("NPC model %1%");
   ::npctransport_proto::Output pb_data;
-  std::ifstream file(prev_output_file.c_str(), std::ios::binary);
-  bool read = pb_data.ParseFromIstream(&file);
-  if (!read) {
-    IMP_THROW("Unable to read data from protobuf" << prev_output_file,
-              IOException);
+  //  std::ifstream file(prev_output_file.c_str(), std::ios::binary);
+  //  bool read = pb_data.ParseFromIstream(&file);
+  bool read(false);
+  int fd= open(prev_output_file.c_str(), O_RDONLY);
+  if(fd!=-1){
+    google::protobuf::io::FileInputStream fis(fd);
+    google::protobuf::io::CodedInputStream cis(&fis);
+    cis.SetTotalBytesLimit(500000000,200000000);
+    read= pb_data.ParseFromCodedStream(&cis);
+    close(fd);
   }
+  IMP_ALWAYS_CHECK(read,
+                   "Unable to read data from protobuf" << prev_output_file,
+                   IMP::IOException);
   pb_data.mutable_statistics(); // create it if not there
   const ::npctransport_proto::Assignment &
       pb_assignment= pb_data.assignment();
