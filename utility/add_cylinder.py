@@ -215,6 +215,7 @@ def main():
     smooth_xyz_dict={}
     smooth_n_frames=IMP.get_int_flag("smooth_n_frames")
     skip_n_frames=IMP.get_int_flag("skip_n_frames")
+    print "Skip interval:", skip_n_frames, "frames"
     for f_id, f in enumerate(in_fh.get_frames()):
         is_write= f_id % skip_n_frames == 0
         #        print("cloning frame", f)
@@ -227,6 +228,7 @@ def main():
                     n=smooth_n_frames,
                     is_write=False)
             continue
+        print "Adding frame", f_id
         out_fh.add_frame(in_fh.get_name(f), in_fh.get_type(f))
         RMF.clone_loaded_frame(in_fh, out_fh)
         _smooth(out_fh.get_root_node(),
