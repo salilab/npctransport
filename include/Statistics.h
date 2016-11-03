@@ -27,6 +27,7 @@
 #include <IMP/rmf/SaveOptimizerState.h>
 #include <IMP/Pointer.h>
 #include <IMP/set_map_macros.h>
+#include <RMF/HDF5/File.h>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "io.h"
@@ -233,7 +234,8 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   //! nf_new additional frames
   void update_fg_stats( ::npctransport_proto::Statistics* pStats,
                         unsigned int nf_new,
-                        unsigned int zr_hist[4][3]);
+                        unsigned int zr_hist[4][3],
+                        RMF::HDF5::File hdf5_file);
 
 
 

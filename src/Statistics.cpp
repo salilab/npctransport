@@ -28,6 +28,7 @@
 #include <IMP/core/generic.h>
 #include <IMP/display/LogOptimizerState.h>
 #include <IMP/rmf/frames.h>
+#include <RMF/HDF5/File.h>
 
 #include <numeric>
 #include <set>
@@ -39,6 +40,25 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <fcntl.h>
+
+// struct Int32TraitsBase : RMF::HDF5::IntTraitsBase {
+//   // typedef int Type;
+//   // typedef std::vector<int> Types;
+//   // static const bool BatchOperations = true;
+//   // static int get_index() { return 0; }
+//   // static const Type& get_null_value() {
+//   //   static Type null = std::numeric_limits<int>::max();
+//   //   return null;
+//   // }
+//   // static bool get_is_null_value(Type t) { return t == get_null_value(); }
+//   // static hid_t get_hdf5_fill_type() { return H5T_NATIVE_INT; }
+//   static hid_t get_hdf5_disk_type() { return H5T_STD_I32LE; }
+//   // static hid_t get_hdf5_memory_type() { return H5T_NATIVE_INT; }
+//   // static const Type& get_fill_value() { return get_null_value(); }
+//   // static std::string get_name() { return "int32"; }
+// };
+
+// struct Int32Traits : RMF::HDF5::SimpleTraits<Int32TraitsBase> {};
 
 bool no_save_rmf_to_output = false;
 IMP::AddBoolFlag  no_save_rmf_to_output_adder
@@ -225,8 +245,19 @@ OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
 void Statistics::update_fg_stats
 ( ::npctransport_proto::Statistics* stats,
   unsigned int nf_new,
-  unsigned int zr_hist[4][3])
+  unsigned int zr_hist[4][3],
+  RMF::HDF5::File hdf5_file)
 {
+  RMF::HDF5::Group hdf5_fg_xyz_hist_group;
+  static const std::string  FG_XYZ_GROUP("fg_xyz_hist");
+  if(hdf5_file.get_has_child(FG_XYZ_GROUP)){
+    IMP_ALWAYS_CHECK(hdf5_file.get_child_is_group(FG_XYZ_GROUP),
+                     FG_XYZ_GROUP << " is supposed to be an HDF5 group",
+                     ValueException);
+    hdf5_fg_xyz_hist_group= hdf5_file.get_child_group(FG_XYZ_GROUP);
+  } else {
+    hdf5_fg_xyz_hist_group= hdf5_file.add_child_group(FG_XYZ_GROUP);
+  }
   int nf = stats->number_of_frames();
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
     ->get_bd()->get_current_time() / FS_IN_NS;
@@ -340,22 +371,42 @@ void Statistics::update_fg_stats
 
       // Recreate z-r histogram based on retrieved zr_hist:
       if(get_sd()->get_is_xyz_hist_stats()){
+        stats->mutable_fgs(i)->clear_xyz_hist();
         // Recreate z-y-x histogram based on retrieved xyz_hist:
         ParticleTypeXYZDistributionMap::const_iterator ptxyzdm_it=
           particle_type_xyz_distribution_map_.find(type_i);
         if(ptxyzdm_it != particle_type_xyz_distribution_map_.end()) {
           ParticleTypeXYZDistributionMap::mapped_type xyz_hist=
             ptxyzdm_it->second;
-          stats->mutable_fgs(i)->clear_xyz_hist();
-          for(unsigned int ii=0; ii < xyz_hist.size(); ii++) {
-            ::npctransport_proto::Statistics_Ints_list* xii_yz_hist=
-              stats->mutable_fgs(i)->mutable_xyz_hist()->add_ints_lists();
-            for(unsigned int jj=0; jj < xyz_hist[ii].size(); jj++) {
-              ::npctransport_proto::Statistics_Ints* xii_yjj_z_hist=
-                xii_yz_hist->add_ints_list();
-              for(unsigned int kk=0; kk < xyz_hist[ii][jj].size(); kk++) {
-                xii_yjj_z_hist->add_ints(xyz_hist[ii][jj][kk]);
-              } // for kk
+          // retrieve or create dataset in hdf5
+          RMF::HDF5::DataSetD<RMF::HDF5::IntTraits, 3> ds_xyz;
+          std::string s_type_i= type_i.get_string();
+          if(hdf5_fg_xyz_hist_group.get_has_child(s_type_i)) {
+            ds_xyz= hdf5_fg_xyz_hist_group.get_child_data_set
+              < RMF::HDF5::IntTraits,3 > (s_type_i);
+          }else{
+            RMF::HDF5::DataSetCreationPropertiesD
+              < RMF::HDF5::IntTraits,3 > dscp;
+            RMF_HDF5_CALL(H5Pset_deflate(dscp.get_handle(), 1));
+            //            dscp.set_compression( RMF::HDF5::SLIB_COMPRESSION );
+            ds_xyz= hdf5_fg_xyz_hist_group.add_child_data_set
+              < RMF::HDF5::IntTraits,3 > (s_type_i, dscp);
+          }
+          // set size (override any existing settings):
+          unsigned int d0(0), d1(0), d2(0);
+          d0= xyz_hist.size();
+          if(d0>0){
+            d1= xyz_hist[0].size();
+            if(d1>0){
+              d2= xyz_hist[0][0].size();
+            }
+          }
+          ds_xyz.set_size(RMF::HDF5::DataSetIndexD<3>(d0,d1,d2));
+          // store hist:
+          for(unsigned int ii=0; ii < d0; ii++) {
+            for(unsigned int jj=0; jj < d1; jj++) {
+              ds_xyz.set_row(RMF::HDF5::DataSetIndexD<2>(ii,jj),
+                             xyz_hist[ii][jj]);
             } // for jj
           } // for ii
         } //if ptxyzdm_it
@@ -511,6 +562,8 @@ void Statistics::update
   IMP_ALWAYS_CHECK(read,
                    "Failed updating statistics to " << output_file_name_.c_str() << std::endl,
                    IMP::IOException);
+  RMF::HDF5::File hdf5_file= RMF::HDF5::create_file(output_file_name_ + ".hdf5");
+
   ::npctransport_proto::Statistics* stats = output.mutable_statistics();
   int nf = stats->number_of_frames();
   if (is_stats_reset_) {  // stats was just reset
@@ -530,7 +583,7 @@ void Statistics::update
     ->get_bd()->get_current_time() / FS_IN_NS;
 
   unsigned int zr_hist[4][3]={{0},{0},{0},{0}};
-  update_fg_stats(stats, nf_new, zr_hist);
+  update_fg_stats(stats, nf_new, zr_hist, hdf5_file);
 
   std::map<IMP::core::ParticleType, double> type_to_diffusion_coefficeint_map; // to be used for floater order params
   // Floaters general body stats
