@@ -122,7 +122,8 @@ def _resize_sites(node, bf, nr):
 
 def _get_fg_and_floater_types(ref_output):
     fg_types = []
-    floater_types = []
+    kap_types= []
+    inert_types= []
     output = None
     try:
         if(ref_output <> ""):
@@ -147,23 +148,27 @@ def _get_fg_and_floater_types(ref_output):
                                 "Nup145N_8copies_2_chimera",
                                 "Nup1_8copies",
                                 "Nup60_8copies"]
-        for i in range(0, get_number_of_types_of_float()):
-            floater_types.append( get_type_of_float(i).get_string() )
+        #        for i in range(0, get_number_of_types_of_float()):
+        #           floater_types.append( get_type_of_float(i).get_string() )
     else:
         a = output.assignment
         for fg in a.fgs:
             fg_types.append(fg.type)
             print "Added fg type", fg.type
         for floater in a.floaters:
-            floater_types.append(floater.type)
+            if(floater.interactions.value>0):
+                kap_types.append(floater.type)
+            else:
+                inert_types.append(floater.type)
     print "FGs:", fg_types
-    print "Floaters:", floater_types
-    return fg_types, floater_types
+    print "Kaps:", kap_types
+    print "Interts:", inert_types
+    return fg_types, kap_types, inert_types
 
 
 fg_color=[255.0/255, 204.0/255 , 102.0/255]
-kap_color=[128.0/255, 0, 64.0/255]
-crap_color=[70.0/255, 90.0/255, 220.0/255]
+kap_color=[220.0/255, 0, 64.0/255]
+inert_color=[70.0/255, 80.0/255, 220.0/255]
 def main():
     IMP.add_string_flag("input_rmf", "", "The input RMF file.")
     IMP.add_string_flag("output_rmf", "", "The output RMF file in which to add cylinders.")
@@ -195,12 +200,12 @@ def main():
     bf = RMF.BallFactory(out_fh)
     cdf = RMF.ColoredFactory(out_fh)
     ipf = RMF.IntermediateParticleFactory(out_fh)
-    fg_types, floater_types = _get_fg_and_floater_types( ref_output )
+    fg_types, kap_types, inert_types = _get_fg_and_floater_types( ref_output )
 #    out_fh.set_current_frame(RMF.ALL_FRAMES)
     # Modify static information:
     if(IMP.get_bool_flag("recolor_floats")):
-        _recolor(out_fh.get_root_node(), tf, cdf, floater_types[0:1], kap_color)
-        _recolor(out_fh.get_root_node(), tf, cdf, floater_types[1:], crap_color)
+        _recolor(out_fh.get_root_node(), tf, cdf, kap_types, kap_color)
+        _recolor(out_fh.get_root_node(), tf, cdf, inert_types, inert_color)
 
     _resize_sites(out_fh.get_root_node(), bf, IMP.get_float_flag("site_radius"))
     cylinders = []
