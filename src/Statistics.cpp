@@ -242,6 +242,61 @@ OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
   return ret;
 }
 
+
+bool
+Statistics::update_xyz_distribution_to_hdf5
+(RMF::HDF5::Group hdf5_group,
+ core::ParticleType p_type){
+  // Recreate z-y-x histogram based on retrieved xyz_hist:
+  ParticleTypeXYZDistributionMap::const_iterator ptxyzdm_it=
+    particle_type_xyz_distribution_map_.find(p_type);
+  if(ptxyzdm_it != particle_type_xyz_distribution_map_.end()) {
+    ParticleTypeXYZDistributionMap::mapped_type xyz_hist=
+      ptxyzdm_it->second;
+    // retrieve or create dataset in hdf5
+    RMF::HDF5::DataSetD<RMF::HDF5::IntTraits, 3> ds_xyz;
+    std::string s_type= p_type.get_string();
+    std::cout << "Outputing stats for " << s_type << std::endl;
+    RMF::HDF5::IntTraits::Type fill_value(0);
+    if(hdf5_group.get_has_child(s_type)) {
+      ds_xyz= hdf5_group.get_child_data_set
+        < RMF::HDF5::IntTraits,3 > (s_type);
+      std::cout << "Warning - hist for " << s_type
+                << " already exists but it was not expected to" << std::endl;
+    }else{
+      RMF::HDF5::DataSetCreationPropertiesD
+        < RMF::HDF5::IntTraits,3 > dscp;
+      RMF_HDF5_CALL(H5Pset_deflate(dscp.get_handle(), 1)); // compression
+      dscp.set_custom_fill_value(&fill_value);
+      ds_xyz= hdf5_group.add_child_data_set
+        < RMF::HDF5::IntTraits,3 > (s_type, dscp);
+    }
+    // set size (override any existing settings):
+    boost::uint_fast8_t& d0= xyz_distribution_sizes_.d0;
+    boost::uint_fast8_t& d1= xyz_distribution_sizes_.d1;
+    boost::uint_fast8_t& d2= xyz_distribution_sizes_.d2;
+    ds_xyz.set_size(RMF::HDF5::DataSetIndexD<3>(d0,d1,d2));
+    // set non-zero values:
+    for(t_sparse_3d_matrix::iterator iter_ii= xyz_hist.begin();
+        iter_ii != xyz_hist.end(); iter_ii++){
+      boost::uint_fast8_t ii= iter_ii->first;
+      for(t_sparse_3d_matrix::mapped_type::iterator iter_jj= iter_ii->second.begin();
+          iter_jj != iter_ii->second.end(); iter_jj++){
+        boost::uint_fast8_t jj= iter_jj->first;
+        for(t_sparse_3d_matrix::mapped_type::mapped_type::iterator iter_kk= iter_jj->second.begin();
+            iter_kk != iter_jj->second.end(); iter_kk++){
+          boost::uint_fast8_t kk= iter_kk->first;
+          RMF::HDF5::DataSetIndexD<3> iijjkk(ii,jj,kk);
+          ds_xyz.set_value(iijjkk, iter_kk->second);
+        } // iter_kk
+      } // iter_jj
+    } // iter_ii
+    std::cout << "Finished outputing stats for " << s_type << std::endl;
+    return true;
+  } //if ptxyzdm_it
+  return false;
+}
+
 void Statistics::update_fg_stats
 ( ::npctransport_proto::Statistics* stats,
   unsigned int nf_new,
@@ -372,44 +427,8 @@ void Statistics::update_fg_stats
       // Recreate z-r histogram based on retrieved zr_hist:
       if(get_sd()->get_is_xyz_hist_stats()){
         stats->mutable_fgs(i)->clear_xyz_hist();
-        // Recreate z-y-x histogram based on retrieved xyz_hist:
-        ParticleTypeXYZDistributionMap::const_iterator ptxyzdm_it=
-          particle_type_xyz_distribution_map_.find(type_i);
-        if(ptxyzdm_it != particle_type_xyz_distribution_map_.end()) {
-          ParticleTypeXYZDistributionMap::mapped_type xyz_hist=
-            ptxyzdm_it->second;
-          // retrieve or create dataset in hdf5
-          RMF::HDF5::DataSetD<RMF::HDF5::IntTraits, 3> ds_xyz;
-          std::string s_type_i= type_i.get_string();
-          if(hdf5_fg_xyz_hist_group.get_has_child(s_type_i)) {
-            ds_xyz= hdf5_fg_xyz_hist_group.get_child_data_set
-              < RMF::HDF5::IntTraits,3 > (s_type_i);
-          }else{
-            RMF::HDF5::DataSetCreationPropertiesD
-              < RMF::HDF5::IntTraits,3 > dscp;
-            RMF_HDF5_CALL(H5Pset_deflate(dscp.get_handle(), 1));
-            //            dscp.set_compression( RMF::HDF5::SLIB_COMPRESSION );
-            ds_xyz= hdf5_fg_xyz_hist_group.add_child_data_set
-              < RMF::HDF5::IntTraits,3 > (s_type_i, dscp);
-          }
-          // set size (override any existing settings):
-          unsigned int d0(0), d1(0), d2(0);
-          d0= xyz_hist.size();
-          if(d0>0){
-            d1= xyz_hist[0].size();
-            if(d1>0){
-              d2= xyz_hist[0][0].size();
-            }
-          }
-          ds_xyz.set_size(RMF::HDF5::DataSetIndexD<3>(d0,d1,d2));
-          // store hist:
-          for(unsigned int ii=0; ii < d0; ii++) {
-            for(unsigned int jj=0; jj < d1; jj++) {
-              ds_xyz.set_row(RMF::HDF5::DataSetIndexD<2>(ii,jj),
-                             xyz_hist[ii][jj]);
-            } // for jj
-          } // for ii
-        } //if ptxyzdm_it
+        update_xyz_distribution_to_hdf5(hdf5_fg_xyz_hist_group,
+                                        type_i);
       } else {
         ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
           particle_type_zr_distribution_map_.find(type_i);
@@ -489,26 +508,26 @@ void Statistics
   bool is_z_symmetric=
     (get_sd()->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
+  // retrieve, add distribution table if needed
   std::pair<ParticleTypeXYZDistributionMap::iterator, bool> it_pair;
   it_pair.first= particle_type_xyz_distribution_map_.find(pt);
-  // add distribution table if needed
   if(it_pair.first==particle_type_xyz_distribution_map_.end()) {
-    float box_half =  get_sd()->get_box_size() / 2.0; // get_z_distribution_top();
-    unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS*CROP_FACTOR) + 5; // +5 for slack
-    unsigned int nx= 2 * half_n_max;
-    unsigned int ny= 2 * half_n_max;
-    unsigned int nz= (1 + !is_z_symmetric) * half_n_max;
     ParticleTypeXYZDistributionMap::value_type vt =
       std::make_pair
-      (pt,
-       std::vector< std::vector< std::vector<int>> >
-       (nx, std::vector<std::vector<int>>
-        (ny, std::vector<int>(nz,0)) ) );
+      (pt, t_sparse_3d_matrix());
     it_pair=particle_type_xyz_distribution_map_.insert(vt);
     IMP_USAGE_CHECK(it_pair.second, "type " << pt << " already exists");
   }
   ParticleTypeXYZDistributionMap::iterator& it=it_pair.first;
   //update distribution
+  float box_half =  get_sd()->get_box_size() / 2.0; // get_z_distribution_top();
+  unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS*CROP_FACTOR) + 5; // +5 for slack
+  unsigned int nx= 2 * half_n_max;
+  unsigned int ny= 2 * half_n_max;
+  unsigned int nz= (1 + !is_z_symmetric) * half_n_max;
+  xyz_distribution_sizes_.d0= nx; // TODO: cap with maximal value of d0, which is (or used to be) uint8
+  xyz_distribution_sizes_.d1= ny;
+  xyz_distribution_sizes_.d2= nz;
   core::XYZ xyz(p);
   float x= xyz.get_x();
   float y= xyz.get_y();
@@ -516,24 +535,15 @@ void Statistics
   if(is_z_symmetric){
     z= std::abs(z);
   }
-  unsigned int nx= it->second.size();
-  unsigned int ny= it->second[0].size();
-  unsigned int nz= it->second[0][0].size();
   unsigned int xx=
     std::floor(x/GRID_RESOLUTION_ANGSTROMS) + nx/2;
   unsigned int yy=
     std::floor(y/GRID_RESOLUTION_ANGSTROMS) + ny/2;
   unsigned int zz=
     std::floor(z/GRID_RESOLUTION_ANGSTROMS) + (nz/2)*(!is_z_symmetric);
-  IMP_INTERNAL_CHECK(xx < it->second.size() &&
-                     yy < it->second[0].size() &&
-                     zz < it->second[0][0].size(),
-                     "xx=" <<  x << " >= " << it->second.size()
-                     << " or yy=" << yy << " >= " << it->second[0].size()
-                     << " or zz=" << yy << " >= " << it->second[0][0].size()
-                     << " ;  x=" << x << " y=" << y << " z=" << z);
   if(xx<nx && yy < ny && zz<nz){
     it->second[xx][yy][zz]++;
+    //    std::cout<<"xx "<<xx<<" yy "<<yy<<" zz "<<zz<<" = "<<it->second[xx][yy][zz]<<std::endl;
   }
 }
 
@@ -563,6 +573,17 @@ void Statistics::update
                    "Failed updating statistics to " << output_file_name_.c_str() << std::endl,
                    IMP::IOException);
   RMF::HDF5::File hdf5_file= RMF::HDF5::create_file(output_file_name_ + ".hdf5");
+  RMF::HDF5::Group hdf5_floater_xyz_hist_group;
+  static const std::string  FLOATER_XYZ_GROUP("floater_xyz_hist");
+  if(hdf5_file.get_has_child(FLOATER_XYZ_GROUP)){
+    IMP_ALWAYS_CHECK(hdf5_file.get_child_is_group(FLOATER_XYZ_GROUP),
+                     FLOATER_XYZ_GROUP << " is supposed to be an HDF5 group",
+                     ValueException);
+    hdf5_floater_xyz_hist_group= hdf5_file.get_child_group(FLOATER_XYZ_GROUP);
+  } else {
+    hdf5_floater_xyz_hist_group= hdf5_file.add_child_group(FLOATER_XYZ_GROUP);
+  }
+
 
   ::npctransport_proto::Statistics* stats = output.mutable_statistics();
   int nf = stats->number_of_frames();
@@ -611,26 +632,9 @@ void Statistics::update
           bsos[j]->reset();
           nf_weighted++;
         } // for j
-      if(get_sd()->get_is_xyz_hist_stats() and false){ // TODO: floaters are disabled for xyz for now to save space - perhaps add it later
-        // Recreate z-y-x histogram based on retrieved xyz_hist:
-        ParticleTypeXYZDistributionMap::const_iterator ptxyzdm_it=
-          particle_type_xyz_distribution_map_.find(it->first);
-        if(ptxyzdm_it != particle_type_xyz_distribution_map_.end()) {
-          ParticleTypeXYZDistributionMap::mapped_type xyz_hist=
-            ptxyzdm_it->second;
-          stats->mutable_floaters(i)->clear_xyz_hist();
-          for(unsigned int ii=0; ii < xyz_hist.size(); ii++) {
-            ::npctransport_proto::Statistics_Ints_list* xii_yz_hist=
-              stats->mutable_floaters(i)->mutable_xyz_hist()->add_ints_lists();
-            for(unsigned int jj=0; jj < xyz_hist[ii].size(); jj++) {
-              ::npctransport_proto::Statistics_Ints* xii_yjj_z_hist=
-                xii_yz_hist->add_ints_list();
-              for(unsigned int kk=0; kk < xyz_hist[ii][jj].size(); kk++) {
-                xii_yjj_z_hist->add_ints(xyz_hist[ii][jj][kk]);
-              } // for kk
-            } // for jj
-          } // for ii
-        } //if ptxyzdm_it
+      if(get_sd()->get_is_xyz_hist_stats()){ // TODO: floaters are disabled for xyz for now to save space - perhaps add it later
+        update_xyz_distribution_to_hdf5(hdf5_floater_xyz_hist_group,
+                                        it->first);
       } else { // if/else is_xyz_hist_stats
         // Recreate z-r histogram based on retrieved zr_hist:
         ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=

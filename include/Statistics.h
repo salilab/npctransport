@@ -1,5 +1,5 @@
 /**
- *  \file npctransport/Statistics.h
+1;95;0c *  \file npctransport/Statistics.h
  *  \brief statistics and order parameters about the simulations
  *         that is associated with a SimulationData object
  *
@@ -41,6 +41,7 @@
 
 #include <boost/timer.hpp>
 #include "boost/tuple/tuple.hpp"
+#include <boost/utility/value_init.hpp>
 #include <string>
 
 #ifdef SWIG
@@ -88,10 +89,22 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
     std::vector< std::vector<int> > >
     ParticleTypeZRDistributionMap;
   ParticleTypeZRDistributionMap particle_type_zr_distribution_map_;
+  typedef std::unordered_map< boost::uint_fast8_t,
+    std::unordered_map< boost::uint_fast8_t,
+    std::unordered_map< boost::uint_fast8_t,
+    boost::value_initialized<unsigned int> > > >
+    t_sparse_3d_matrix;
   typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,
-    std::vector< std::vector< std::vector<int> > > >
+    t_sparse_3d_matrix >
+    //    std::vector< std::vector< std::vector<int> > > >
     ParticleTypeXYZDistributionMap;
   ParticleTypeXYZDistributionMap particle_type_xyz_distribution_map_;
+  struct t_size_3d_matrix{
+      boost::uint_fast8_t d0;
+      boost::uint_fast8_t d1;
+      boost::uint_fast8_t d2;
+  };
+  t_size_3d_matrix xyz_distribution_sizes_;
 #endif
 
   // statistics about entire FG chains, for each FG type
@@ -229,6 +242,13 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   }
 
  private:
+
+  //! update the xyz distribution of type p_type to a dataset in
+  //! hdf5_group, with name p_type.get_string()
+  bool update_xyz_distribution_to_hdf5
+    (RMF::HDF5::Group hdf5_group,
+     core::ParticleType p_type);
+
 
   //! updates pStats with all statistics related to fgs, averaged over
   //! nf_new additional frames
