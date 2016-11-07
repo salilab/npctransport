@@ -30,6 +30,7 @@
 #include <RMF/HDF5/File.h>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
+#include <boost/cstdint.hpp>
 #include "io.h"
 #include "BodyStatisticsOptimizerState.h"
 #include "ParticleTransportStatisticsOptimizerState.h"
@@ -89,9 +90,10 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
     std::vector< std::vector<int> > >
     ParticleTypeZRDistributionMap;
   ParticleTypeZRDistributionMap particle_type_zr_distribution_map_;
-  typedef std::unordered_map< boost::uint_fast8_t,
-    std::unordered_map< boost::uint_fast8_t,
-    std::unordered_map< boost::uint_fast8_t,
+  typedef std::unordered_map
+    < typename boost::uint_fast8_t,
+    std::unordered_map< typename boost::uint_fast8_t,
+    std::unordered_map< typename boost::uint_fast8_t,
     boost::value_initialized<unsigned int> > > >
     t_sparse_3d_matrix;
   typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,

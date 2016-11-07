@@ -114,6 +114,7 @@ void optimize_balls(const ParticlesTemp &ps,
   // ramp temperature, particles radii, bond lengths, reset TAMD if needed
   // relax the configuration, repeat
   double bd_temperature_orig = bd->get_temperature();
+  double bd_time_step_orig = bd->get_maximum_time_step();
   for (double ramp_level = 0; ramp_level <= 1.0 ; ramp_level += 0.1) {
     boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> > tmp_set_radii
       ( new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()] );
@@ -124,12 +125,16 @@ void optimize_balls(const ParticlesTemp &ps,
     double radius_factor = ramp_level;
     double rest_length_factor =
       is_rest_length_scaling ? (.7 + .3 * ramp_level) : 1.0;
-    // rescale particles radii temporarily
+    // rescale particles radii temporarily for diffusing particles
     for (unsigned int j = 0; j < ps.size(); ++j) {
-      tmp_set_radii[j].reset(
-          new ScopedSetFloatAttribute
-          (ps[j], core::XYZR::get_radius_key(),
-           core::XYZR(ps[j]).get_radius() * radius_factor));
+      core::XYZR xyzr(ps[j]);
+      if(!xyzr.get_coordinates_are_optimized()){
+        continue;
+      }
+      double scaled_radius= xyzr.get_radius() * radius_factor;
+      tmp_set_radii[j].reset
+        ( new ScopedSetFloatAttribute
+          (ps[j], core::XYZR::get_radius_key(), scaled_radius) );
     }
     // rescale bond length + TAMD (if needed ) temporarily for all chains
     for (unsigned int j = 0; j < chains.size(); ++j) {
@@ -155,6 +160,10 @@ void optimize_balls(const ParticlesTemp &ps,
           (1.5 - (10*ramp_level + k_simanneal / 5.0) / 11.0) * bd_temperature_orig;
         IMP::npctransport::internal::BDSetTemporaryTemperatureRAII
           bd_set_temporary_temperature(bd, temperature);
+        double time_step =
+          (6 - 5*(10*ramp_level + k_simanneal / 5.0) / 11.0) * bd_time_step_orig;
+        IMP::npctransport::internal::BDSetTemporaryTimeStepRAII
+          bd_set_temporary_time_step(bd, time_step);
         bool done = false;
         IMP_OMP_PRAGMA(parallel num_threads(3)) {
           IMP_OMP_PRAGMA(single) {
@@ -163,9 +172,10 @@ void optimize_balls(const ParticlesTemp &ps,
             int actual_n_bd_cycles =
               std::ceil(n_bd_cycles * short_init_factor) ;
             double e_bd = bd->optimize( actual_n_bd_cycles );
-            IMP_LOG(PROGRESS, "Energy after bd is " << e_bd <<
+            std::cout <<  // IMP_LOG(PROGRESS,
+                    "Energy after bd is " << e_bd <<
                     " at ramp level " << ramp_level << ", "
-                    << k_simanneal << std::endl);
+                      << k_simanneal << std::endl; // );
             if (debug) {
               std::ostringstream oss;
               oss << "Init after " << ramp_level << " " << k_simanneal;

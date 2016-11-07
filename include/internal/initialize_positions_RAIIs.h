@@ -214,6 +214,39 @@ class OptimizerSetTemporaryScoringFunctionRAII: public RAII {
       } );
 };
 
+/** An RAII class for temporarily changing the time step
+    of a BrownianDynamics object
+*/
+  class BDSetTemporaryTimeStepRAII : public RAII {
+
+  double orig_time_step_;
+    PointerMember
+    < IMP::atom::BrownianDynamics > bd_;
+  bool was_set_;
+
+ public:
+  IMP_RAII
+  ( BDSetTemporaryTimeStepRAII,
+      (IMP::atom::BrownianDynamics* bd, double time_step),
+      { //Initialize
+        was_set_ = false;
+      },
+      { // Set
+        was_set_ = true;
+        bd_ = bd;
+        orig_time_step_ = bd_->get_maximum_time_step();
+        bd_->set_maximum_time_step(time_step);
+      },
+      { // Reset
+        if(was_set_){
+          bd_->set_maximum_time_step(orig_time_step_);
+        }
+      },
+      { // Show
+      } );
+};
+
+
 /** An RAII class for temporarily setting the optimization stsate of particles
 */
 class TemporarySetOptimizationStateRAII: public RAII {
