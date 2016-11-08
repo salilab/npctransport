@@ -126,14 +126,22 @@ double short_init_factor = 1.0;
 AddFloatFlag short_init_adder
 ( "short_init_factor",
   "Run an abbreviated version of system initialization, which takes"
-  " a fraction of a full initialization, in the range (0.0..1.0]"
-  " [default=1.0]",
+  " the specified fraction of a full initialization (or more if >1.0)"
+  " [default=1.0]"
+  " Note: initialization does not run in restart mode, unless --force_initialization_on_restart"
+  " flag is specified explicitly",
   &short_init_factor);
+bool is_force_initialization_on_restart= false;
+IMP::AddBoolFlag is_force_initialization_on_restart_adder
+( "force_initialization_on_restart",
+  "Force re-initalization on restart, but without randomizing positions"
+  " (essentially, relaxation from specified starting position)",
+  &is_force_initialization_on_restart);
 double short_sim_factor = 1.0;
 AddFloatFlag short_sim_adder
 ( "short_sim_factor",
   "Run an abbreviated version of the simulation, which takes"
-  " a fraction of a full simulation (or more if >1.0)"
+  " the specified fraction of a full simulation (or more if >1.0)"
   " [default=1.0]",
   &short_sim_factor);
 bool no_save_restraints_to_rmf = false;
@@ -278,8 +286,8 @@ namespace {
 // program command line parameters
 IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   IMP_NPC_PARSE_OPTIONS(argc, argv);
-  IMP_ALWAYS_CHECK( short_init_factor <= 1.0 && short_init_factor > 0,
-                    "short_init_factor must be in the range (0..1.0]",
+  IMP_ALWAYS_CHECK( short_init_factor > 0,
+                    "short_init_factor must be positive",
                     IMP::ValueException );
   IMP_OMP_PRAGMA(critical)
   std::cout << "Random seed is " << IMP::get_random_seed() << std::endl;
@@ -309,7 +317,8 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   const int max_frames_per_chunk = sd->get_output_statistics_interval_frames();
   /** initial optimization and equilibration needed unless starting
       from another output file or rmf file */
-  bool is_initial_optimization = restart.empty() && init_rmffile.empty();
+  bool is_initial_optimization = (restart.empty() && init_rmffile.empty()) ||
+    is_force_initialization_on_restart;;
   bool is_BD_equilibration = is_initial_optimization;
   bool is_BD_full_run = !initialize_only;
 
@@ -330,7 +339,8 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
     if (is_initial_optimization) {
       sd->switch_suspend_rmf(true);
       std::cout << "Doing initial coordinates optimization..." << std::endl;
-      initialize_positions(sd, init_restraints, verbose, short_init_factor);
+      initialize_positions(sd, init_restraints, verbose, short_init_factor,
+                           is_force_initialization_on_restart);
 
       sd->get_bd()->set_current_time(0.0);
       sd->get_statistics()->reset_statistics_optimizer_states();

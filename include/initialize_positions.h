@@ -32,12 +32,16 @@ IMPNPCTRANSPORTEXPORT
    @param short_init_factor a factor between >0 and 1 for decreasing
                             the number of optimization cycles at each
                             round
+   @param is_disable_randomize if true, do not initially randomize particle positions,
+                               essentially performing an extended relaxation from
+                               the starting coordinates
  */
 void initialize_positions(SimulationData *sd,
                           const RestraintsTemp &extra_restraints =
                               RestraintsTemp(),
                           bool debug = false,
-                          double short_init_factor = 1.0);
+                          double short_init_factor = 1.0,
+                          bool is_disable_randomize = false);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

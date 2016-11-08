@@ -125,12 +125,12 @@ void optimize_balls(const ParticlesTemp &ps,
     double radius_factor = ramp_level;
     double rest_length_factor =
       is_rest_length_scaling ? (.7 + .3 * ramp_level) : 1.0;
-    // rescale particles radii temporarily for diffusing particles
+    // rescale particles radii temporarily
     for (unsigned int j = 0; j < ps.size(); ++j) {
       core::XYZR xyzr(ps[j]);
-      if(!xyzr.get_coordinates_are_optimized()){
-        continue;
-      }
+      //      if(!xyzr.get_coordinates_are_optimized()){
+      //  continue;
+      //}
       double scaled_radius= xyzr.get_radius() * radius_factor;
       tmp_set_radii[j].reset
         ( new ScopedSetFloatAttribute
@@ -157,11 +157,11 @@ void optimize_balls(const ParticlesTemp &ps,
     for (int k_simanneal = 0; k_simanneal < 5; ++k_simanneal)
       {
         double temperature =
-          (1.5 - (10*ramp_level + k_simanneal / 5.0) / 11.0) * bd_temperature_orig;
+          (2.5 - 2 * (10*ramp_level + k_simanneal / 5.0) / 11.0) * bd_temperature_orig;
         IMP::npctransport::internal::BDSetTemporaryTemperatureRAII
           bd_set_temporary_temperature(bd, temperature);
         double time_step =
-          (6 - 5*(10*ramp_level + k_simanneal / 5.0) / 11.0) * bd_time_step_orig;
+          (22 - 21 * (10*ramp_level + k_simanneal / 5.0) / 11.0) * bd_time_step_orig;
         IMP::npctransport::internal::BDSetTemporaryTimeStepRAII
           bd_set_temporary_time_step(bd, time_step);
         bool done = false;
@@ -226,13 +226,16 @@ void print_fgs(IMP::npctransport::SimulationData &sd) {
 void initialize_positions(SimulationData *sd,
                           const RestraintsTemp &extra_restraints,
                           bool debug,
-                          double short_init_factor) {
+                          double short_init_factor,
+                          bool is_disable_randomize) {
   IMP_FUNCTION_LOG;
   sd->set_was_used(true);
   IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
                    "short init factor should be in range (0,1]",
                    IMP::ValueException);
-  randomize_particles(sd->get_beads(), sd->get_box());
+  if(!is_disable_randomize){
+    randomize_particles(sd->get_beads(), sd->get_box());
+  }
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
   }
@@ -268,12 +271,30 @@ void initialize_positions(SimulationData *sd,
   typedef boost::unordered_set<core::ParticleType> ParticleTypeSet;
   ParticleTypeSet const& types = sd->get_fg_types();
   ParticlesTemp cur_particles = obstacles;
+  ParticlesTemp beads = sd->get_beads(); // that should include obstacles
   for(ParticleTypeSet::const_iterator
         it = types.begin(); it != types.end(); it++)
     {
       atom::Hierarchy cur_fg_root =  sd->get_root_of_type(*it);
       ParticlesTemp cur_fg_beads = atom::get_leaves( cur_fg_root );
       cur_particles += cur_fg_beads;
+      // pin all other particles:
+      std::sort(beads.begin(), beads.end());
+      std::sort(cur_particles.begin(), cur_particles.end());
+      ParticlesTemp other_particles;
+      std::set_difference(beads.begin(), beads.end(),
+                          cur_particles.begin(), cur_particles.end(),
+                          std::inserter(other_particles,
+                                        other_particles.begin()) );
+      boost::ptr_vector<
+        IMP::npctransport::internal::TemporarySetOptimizationStateRAII> pin_others_particles;
+      atom::Hierarchies chains = sd->get_fg_chain_roots();
+      for (unsigned int i = 0; i < other_particles.size(); ++i) {
+        pin_others_particles.push_back
+          ( new IMP::npctransport::internal::TemporarySetOptimizationStateRAII
+            (other_particles[i], false) );
+      }
+      // optimize
       IMP_LOG(VERBOSE, "Optimizing " <<  cur_particles.size()
                << " particles of type " << *it);
       ParticlesTemp cur_non_optimizable_beads =
@@ -297,7 +318,7 @@ void initialize_positions(SimulationData *sd,
       IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
         set_temporary_scoring_function( sd->get_bd(), sf );
       optimize_balls(cur_particles,
-                     false /*is_scale_rest_length*/,
+                     true /*is_scale_rest_length*/,
                      sd->get_rmf_sos_writer(),
                      sd->get_bd(),
                      sd->get_scoring()->get_fg_chains(),
@@ -307,11 +328,10 @@ void initialize_positions(SimulationData *sd,
     }
   {
     // optimize everything now
-    ParticlesTemp beads = sd->get_beads(); // that should include obstacles
-    ParticlesTemp non_optimizable_beads =
-      get_non_optimizable_particles( beads );
-    ParticlesTemp optimizable_beads =
-      get_optimizable_particles( beads );
+  ParticlesTemp non_optimizable_beads =
+    get_non_optimizable_particles( beads );
+  ParticlesTemp optimizable_beads =
+    get_optimizable_particles( beads );
     Pointer<ScoringFunction> sf =
       sd->get_scoring()->get_custom_scoring_function
       ( extra_restraints,
@@ -321,7 +341,7 @@ void initialize_positions(SimulationData *sd,
     IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
       set_temporary_scoring_function( sd->get_bd(), sf );
     optimize_balls(sd->get_beads(),
-                   false /*scale rest length*/,
+                   true /*scale rest length*/,
                    sd->get_rmf_sos_writer(),
                    sd->get_bd(),
                    sd->get_scoring()->get_fg_chains(),
