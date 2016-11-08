@@ -78,7 +78,6 @@ def _smooth(node, tf, rff, xyz_dict, n=10, is_write=True):
     n - smoothing window size
     '''
     if tf.get_is(node) and rff.get_is(node):
-#        print "Smoothing", node.get_id(), node.get_name(), node.get_type(), n
         node_id= node.get_id()
         rf= rff.get(node)
         xyz= np.array([t for t in rf.get_frame_translation()])
@@ -223,29 +222,31 @@ def main():
     print "Skip interval:", skip_n_frames, "frames"
     for f_id, f in enumerate(in_fh.get_frames()):
         is_write= f_id % skip_n_frames == 0
-        #        print("cloning frame", f)
         in_fh.set_current_frame(f)
         if not is_write:
-            _smooth(in_fh.get_root_node(),
+            if(smooth_n_frames>1):
+                _smooth(in_fh.get_root_node(),
+                        tf,
+                        rff,
+                        smooth_xyz_dict,
+                        n=smooth_n_frames,
+                        is_write=False)
+            print("skipping frame", f, f_id)
+            continue
+        print("cloning frame", f, f_id)
+        out_fh.add_frame(in_fh.get_name(f), in_fh.get_type(f))
+        RMF.clone_loaded_frame(in_fh, out_fh)
+        if(smooth_n_frames>1):
+            _smooth(out_fh.get_root_node(),
                     tf,
                     rff,
                     smooth_xyz_dict,
                     n=smooth_n_frames,
-                    is_write=False)
-            continue
-        print "Adding frame", f_id
-        out_fh.add_frame(in_fh.get_name(f), in_fh.get_type(f))
-        RMF.clone_loaded_frame(in_fh, out_fh)
-        _smooth(out_fh.get_root_node(),
-                tf,
-                rff,
-                smooth_xyz_dict,
-                n=smooth_n_frames,
-                is_write=True)
+                    is_write=True)
         for c in cylinders:
             _set_cylinder(c, cf, rff)
         DEBUG=False
-        if DEBUG and f_id >= 200*skip_n_frames:
+        if DEBUG and f_id >= 5*skip_n_frames:
             break
 
 main()

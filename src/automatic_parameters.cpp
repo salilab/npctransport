@@ -272,10 +272,9 @@ int get_number_of_frames(const ::npctransport_proto::Assignment& a,
 int get_dump_interval_in_frames(const ::npctransport_proto::Assignment& a,
                                 double time_step) {
   int ret = get_frames_from_ns(a.dump_interval_ns(), time_step);
-  IMP_LOG(VERBOSE, "dump interval = " << ret << " frames, "
+  std::cout << "dump interval = " << ret << " frames, "
             << a.dump_interval_ns() << " ns, time step " << time_step
-            << std::endl);
-  ;
+            << std::endl;
   return ret;
 }
 
@@ -289,10 +288,10 @@ int get_statistics_interval_in_frames
     ns = a.statistics_interval_ns() ;
   }
   int ret = get_frames_from_ns(ns, time_step);
-  IMP_LOG(PROGRESS, "stats interval = "
-          << ret  << " frames, converted from "
+  std::cout << "stats interval = "
+            << ret  << " frames, converted from "
             << ns << " ns, time step " << time_step
-            << std::endl);
+            << std::endl;
   return ret;
 }
 
@@ -306,11 +305,10 @@ int get_output_statistics_interval_in_frames
     ns = a.output_statistics_interval_ns() ;
   }
   int ret = get_frames_from_ns(ns, time_step);
-  IMP_LOG(PROGRESS, "output stats interval = "
-          << ret  << " frames, converted from "
-          << ns << " ns, time step " << time_step
-          << std::endl
-          );
+  std::cout << "output stats interval = "
+            << ret  << " frames, converted from "
+            << ns << " ns, time step " << time_step
+            << std::endl;
   return ret;
 }
 
