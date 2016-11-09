@@ -28,9 +28,6 @@
 #include <IMP/Pointer.h>
 #include <IMP/set_map_macros.h>
 #include <RMF/HDF5/File.h>
-#include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
-#include <boost/cstdint.hpp>
 #include "io.h"
 #include "BodyStatisticsOptimizerState.h"
 #include "ParticleTransportStatisticsOptimizerState.h"
@@ -43,6 +40,9 @@
 #include <boost/timer.hpp>
 #include "boost/tuple/tuple.hpp"
 #include <boost/utility/value_init.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
+#include <stdint.h>
 #include <string>
 
 #ifdef SWIG
@@ -90,10 +90,9 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
     std::vector< std::vector<int> > >
     ParticleTypeZRDistributionMap;
   ParticleTypeZRDistributionMap particle_type_zr_distribution_map_;
-  typedef std::unordered_map
-    < typename boost::uint_fast8_t,
-    std::unordered_map< typename boost::uint_fast8_t,
-    std::unordered_map< typename boost::uint_fast8_t,
+  typedef IMP_KERNEL_LARGE_UNORDERED_MAP< uint_fast8_t,
+    IMP_KERNEL_LARGE_UNORDERED_MAP< uint_fast8_t,
+    IMP_KERNEL_LARGE_UNORDERED_MAP< uint_fast8_t,
     boost::value_initialized<unsigned int> > > >
     t_sparse_3d_matrix;
   typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,
@@ -102,9 +101,9 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
     ParticleTypeXYZDistributionMap;
   ParticleTypeXYZDistributionMap particle_type_xyz_distribution_map_;
   struct t_size_3d_matrix{
-      boost::uint_fast8_t d0;
-      boost::uint_fast8_t d1;
-      boost::uint_fast8_t d2;
+    uint_fast8_t d0;
+    uint_fast8_t d1;
+    uint_fast8_t d2;
   };
   t_size_3d_matrix xyz_distribution_sizes_;
 #endif
