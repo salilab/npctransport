@@ -161,7 +161,7 @@ def _get_fg_and_floater_types(ref_output):
                 inert_types.append(floater.type)
     print "FGs:", fg_types
     print "Kaps:", kap_types
-    print "Interts:", inert_types
+    print "Inerts:", inert_types
     return fg_types, kap_types, inert_types
 
 
