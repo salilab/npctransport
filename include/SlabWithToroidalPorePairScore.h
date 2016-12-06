@@ -37,10 +37,6 @@ public:
      Constructs a horizontal slab with a ring toroidal pore, centered at
      the z=0 plane, from z=-0.5*thickness to z=+0.5*thickness.
 
-      @param radius outer radius of the torus
-      @param slab_thickness vertical thickness of slab. The
-             minor radius of the pore torus equals half
-             the slab thickness.
       @param k the slab repulsive force constant in kcal/mol/A
   */
   SlabWithToroidalPoreSingletonScore
