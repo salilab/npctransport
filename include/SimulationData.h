@@ -32,21 +32,23 @@
 #include "io.h"
 #include "Parameter.h"
 #include "Scoring.h"
+#include "SlabWithPore.h"
 #include "Statistics.h"
 #include "npctransport_proto.fwd.h"
 #include <string>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-#define IMPNPCTRANSPORT_VERSION 2.0
+// Version 2.5 - turned slab into a particle
+#define IMPNPCTRANSPORT_VERSION 2.5
 
 class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  private:
   // params
   Parameter<double> output_npctransport_version_;
   Parameter<double> box_side_;
-  Parameter<double> tunnel_radius_;
-  Parameter<double> slab_thickness_;
+  Parameter<double> tunnel_radius_; // note this is the initial radius
+  Parameter<double> slab_thickness_; // note this is the initial thickness
   Parameter<bool> box_is_on_;
   Parameter<int> slab_is_on_;
   Parameter<int> number_of_trials_;
@@ -122,6 +124,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   // the root of the model hierarchy
   PointerMember<Particle> root_;
+
+  // Membrane slab, if exists
+  PointerMember<Particle> slab_particle_; 
 
   // fg types  - a list of all fg/floater/obstacle types that were
   // added via create_fgs/floaters/obstacles(), so far
@@ -444,6 +449,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   bool get_is_slab_with_toroidal_pore() const
   { return slab_is_on_==2; }
 
+  Particle* get_slab_particle() {
+    return slab_particle_.get();
+  }
+
   // get the cylinder in the slab for this simulation
   algebra::Cylinder3D get_cylinder() const;
 
@@ -535,9 +544,15 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   atom::Hierarchy get_root() const { return atom::Hierarchy(root_); }
 
-  double get_slab_thickness() const { return slab_thickness_; }
+  double get_slab_thickness() const {
+    SlabWithPore swp(get_slab_particle());
+    return swcp.get_thickness();
+  }
 
-  double get_tunnel_radius() const { return tunnel_radius_; }
+  double get_tunnel_radius() const {
+    SlabWithPore swp(get_slab_particle());
+    return swcp.get_radius();
+  }
 
   display::Geometry *get_static_geometry();
 

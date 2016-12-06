@@ -1,17 +1,17 @@
 /**
- *  \file SlabWithToroidalPoreSingletonScore.cpp
+ *  \file SlabWithToroidalPorePairScore.cpp
  *  \brief a score for a slab with a toroidal pore
  *
  *  Copyright 2006-15 Sali Lab. All rights reserved.
  *
  */
 
-#include "IMP/npctransport/SlabWithToroidalPoreSingletonScore.h"
+#include "IMP/npctransport/SlabWithToroidalPorePairScore.h"
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-SlabWithToroidalPoreSingletonScore
-::SlabWithToroidalPoreSingletonScore
+SlabWithToroidalPorePairScore
+::SlabWithToroidalPorePairScore
 (double slab_thickness, double radius, double k, double horizontal_minor_radius)
   :
   midZ_(0.0),
@@ -23,9 +23,9 @@ SlabWithToroidalPoreSingletonScore
   top_(midZ_+rv_)
 {}
 
-SlabWithToroidalPoreSingletonScore
-::SlabWithToroidalPoreSingletonScore
-(double slab_thickness, double radius, double k) :
+SlabWithToroidalPorePairScore
+::SlabWithToroidalPorePairScore
+(double k) :
   midZ_(0.0),
   R_(radius),
   rv_(0.5*slab_thickness),
@@ -36,7 +36,7 @@ SlabWithToroidalPoreSingletonScore
 {}
 
 ModelObjectsTemp
-SlabWithToroidalPoreSingletonScore
+SlabWithToroidalPorePairScore
 ::do_get_inputs
 (Model *m, const ParticleIndexes &pis) const
 {
