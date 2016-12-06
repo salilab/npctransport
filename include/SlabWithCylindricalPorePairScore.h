@@ -219,7 +219,7 @@ SlabWithCylindricalPorePairScore::evaluate_indexes(Model *m, const ParticleIndex
         sphere_derivatives_table[pi_index][j] += (*da)(derivative_vector[j]);
       }
       algebra::Sphere3D& s=spheres_table[pi_index];
-      radial_displacement+= displacement[0]*s[0] + displacement[1]*s[1]; // displacement of d from the cylinder wall, projected on the radial vector from the pore center towards the sphere on the x,y plane // TODO: assumes slab origin at 0,0,0 - perhaps in the future extend to general case
+      radial_displacement+= displacement[0]*s[0] + displacement[1]*s[1]; // displacement of d from the cylinder wall, projected on the radial vector from the pore center towards the sphere on the x,y plane // TODO: assumes slab origin at 0,0,0 - perhaps in דthe future extend to general case
     }
   }
 
