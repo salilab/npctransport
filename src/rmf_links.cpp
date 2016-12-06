@@ -11,6 +11,7 @@
 
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/core/rigid_bodies.h>
+#include <IMP/npctransport/SlabWithPore.h>
 #include <IMP/npctransport/Transporting.h>
 #include <IMP/core/XYZ.h>
 #include <IMP/check_macros.h>
@@ -28,6 +29,10 @@ HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
   n_entries_bottom_key_ =
       fh.get_key<RMF::IntTraits>(npc_cat, "n entries bottom");
   n_entries_top_key_ = fh.get_key<RMF::IntTraits>(npc_cat, "n entries top");
+  pore_radius_key_ =
+    fh.get_key<RMF::FloatTraits>(npc_cat,"pore_radius");
+  pore_radius_is_optimized_key_ =
+    fh.get_key<RMF::IntTraits>(npc_cat,"pore_radius_is_optimized");
   RMF::Category imp_cat = fh.get_category("imp");
   coordinates_are_optimized_key_ =
     fh.get_key<RMF::IntTraits>(imp_cat,"coordinates_are_optimized");
@@ -78,6 +83,17 @@ void HierarchyWithSitesLoadLink::do_load_hierarchy(
       xyz.set_coordinates_are_optimized
         ( nh.get_static_value( coordinates_are_optimized_key_ ) );
     }
+    if (nh.get_has_value(pore_radius_is_optimized_key_)) {
+      IMP_ALWAYS_CHECK(SlabWithPore::get_is_setup(m, pi),
+                       "pore radius related attributes are only valid"
+                       " for SlabWithPore decorated particles",
+                       IMP::ValueException);
+      SlabWithPore swp(m, pi);
+      swp.set_pore_radius
+        ( nh.get_static_value( pore_radius_key_) );
+      swp.set_pore_radius_is_optimized
+        ( nh.get_static_value( pore_radius_is_optimized_key_ ) );
+    }
   }
 }
 
@@ -113,6 +129,10 @@ HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh)
   n_entries_bottom_key_ =
       fh.get_key<RMF::IntTraits>(npc_cat, "n entries bottom");
   n_entries_top_key_ = fh.get_key<RMF::IntTraits>(npc_cat, "n entries top");
+  pore_radius_key_ =
+    fh.get_key<RMF::FloatTraits>(npc_cat,"pore_radius");
+  pore_radius_is_optimized_key_ =
+    fh.get_key<RMF::IntTraits>(npc_cat,"pore_radius_is_optimized");
   RMF::Category imp_cat = fh.get_category("imp");
   coordinates_are_optimized_key_ =
     fh.get_key<RMF::IntTraits>(imp_cat,"coordinates_are_optimized");
@@ -186,6 +206,11 @@ void HierarchyWithSitesSaveLink::do_save_hierarchy(Model *m,
       core::XYZ xyz(m, p);
       n.set_static_value(coordinates_are_optimized_key_,
                          xyz.get_coordinates_are_optimized());
+    }
+    if (SlabWithPore::get_is_setup(m, p)) {
+      SlabWithPore swp(m, p);
+      n.set_value(pore_radius_key_, swp.get_pore_radius());
+      n.set_value(pore_radius_is_optimized_key_, swp.get_pore_radius_is_optimized());
     }
   }
 }

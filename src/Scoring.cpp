@@ -20,6 +20,7 @@
 
 #include <IMP/base_types.h>
 #include <IMP/container_macros.h>
+#include <IMP/container/AllBipartitePairContainer.h>
 #include <IMP/algebra/vector_generators.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
@@ -256,7 +257,7 @@ void Scoring::add_interaction
     pts1.push_back(type0);
     pts1.push_back(type1);
     int interaction_id1 = get_ordered_type_pair_predicate()->get_value(pts1);
-    IMP_NEW(npctransport::SitesPairScore, ps1,
+    IMP_NEW(npctransp<ort::SitesPairScore, ps1,
             (interaction_range, interaction_k,
 	     sigma0, sigma1,
              nonspecific_range_,
@@ -533,20 +534,20 @@ Restraint * Scoring::create_slab_restraint
 ( SingletonContainerAdaptor particles)  const
 {
   particles.set_name_if_default("CreateSlabRestraintInput%1%");
-  IMP::Pointer<IMP::SingletonScore> slab_score;
+  IMP::Pointer<IMP::PairScore> slab_score;
   if (get_sd()->get_is_slab_with_cylindrical_pore()) {
-    slab_score=new SlabWithCylindricalPoreSingletonScore
-      (get_sd()->get_slab_thickness(),
-       get_sd()->get_tunnel_radius(),
-       excluded_volume_k_);
+    slab_score =new SlabWithCylindricalPoreSingletonScore
+      (excluded_volume_k_);
   } else {
-    slab_score=new SlabWithToroidalPoreSingletonScore
-      (get_sd()->get_slab_thickness(),
-       get_sd()->get_tunnel_radius(),
-       excluded_volume_k_);
+    slab_score =new SlabWithToroidalPoreSingletonScore
+      (excluded_volume_k_);
   }
+  IMP::Particles slab_particles;
+  slab_particles.push_back( get_sd()->get_slab_particle() );
+  IMP_NEW(container::AllBipartitePairContainer, abpc,
+	  (slab_particles.get(), particles.get()) );
   return container::create_restraint(slab_score.get(),
-                                     particles.get(),
+				     abpc,
                                      "bounding slab");
 }
 
