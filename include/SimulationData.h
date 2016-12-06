@@ -126,7 +126,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   PointerMember<Particle> root_;
 
   // Membrane slab, if exists (mutable but is expected to be accessed only from get_slab_particle()
-  PointerMember<Particle> slab_particle_;
+  mutable PointerMember<Particle> slab_particle_;
 
   // fg types  - a list of all fg/floater/obstacle types that were
   // added via create_fgs/floaters/obstacles(), so far

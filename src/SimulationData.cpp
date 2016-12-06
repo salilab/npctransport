@@ -237,6 +237,20 @@ void SimulationData::initialize(std::string prev_output_file,
   for (int i = 0; i < pb_assignment.obstacles_size(); ++i) {
     create_obstacles(pb_assignment.obstacles(i));
   }
+  if(get_has_slab()){ // TODO: at some point, obstacles should be the children of slab (cause in some sense, they refine it)
+    slab_particle_ = new Particle(get_model(), "Slab");
+    if(get_is_slab_with_cylindrical_pore()){
+      SlabWithCylindricalPore::setup_particle(slab_particle_,
+					      slab_thickness_
+					      tunnel_radius_);
+    } else{
+      SlabWithToroidalPore::setup_particle(slab_particle_,
+					   slab_thickness_
+					   tunnel_radius_);
+    }
+    atom::Hierarchy::setup_particle(slab_particle_);
+    get_root().add_child( slab_particle_ );
+  }
 
   IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
   for (int i = 0; i < pb_assignment.interactions_size(); ++i) {
