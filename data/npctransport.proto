@@ -118,7 +118,7 @@ message Configuration {
   optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
   optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
   optional FloatRange temperature_k=33; // simulation temperature
-  optional double output_npctransport_version=34 [default=2.0]; // a version number of npctransport by which to create output files
+  optional double output_npctransport_version=34 [default=2.5]; // a version number of npctransport by which to create output files
   optional int32 is_xyz_hist_stats=35 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
     // n=35
 }
