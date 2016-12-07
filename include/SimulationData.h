@@ -125,7 +125,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   // the root of the model hierarchy
   PointerMember<Particle> root_;
 
-  // Membrane slab, if exists
+  // Membrane slab, if exists (mutable but is expected to be accessed only from get_slab_particle()
   PointerMember<Particle> slab_particle_;
 
   // fg types  - a list of all fg/floater/obstacle types that were
@@ -149,6 +149,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   bool is_save_restraints_to_rmf_;
 
  private:
+
+  //! initialize slab_particle_ based on current parameters
+  void create_slab_particle();
 
   /**
      Adds the FG Nup chains to the model hierarchy,
@@ -449,7 +452,15 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   bool get_is_slab_with_toroidal_pore() const
   { return slab_is_on_==2; }
 
+  /** returns the slab particle, initializing it based on current parameters
+      if needed
+   */
   Particle* get_slab_particle() const{
+    if(!slab_particle_ && get_has_slab()){
+      // Const cast below - cause the initialization of slab_particle_ is transparent when
+      // using get_slab_particle(), and it should only be accessed from this method
+      const_cast<SimulationData*>(this)->create_slab_particle();
+    }
     return slab_particle_.get();
   }
 
@@ -545,11 +556,15 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   atom::Hierarchy get_root() const { return atom::Hierarchy(root_); }
 
   double get_slab_thickness() const {
+    IMP_USAGE_CHECK(get_slab_particle() != nullptr && get_has_slab(),
+                    "invalid slab - can't get thickness");
     SlabWithPore swp(get_slab_particle());
     return swp.get_thickness();
   }
 
   double get_pore_radius() const {
+    IMP_USAGE_CHECK(get_slab_particle() != nullptr && get_has_slab(),
+                    "invalid slab - can't get pore radius");
     SlabWithPore swp(get_slab_particle());
     return swp.get_pore_radius();
   }

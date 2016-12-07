@@ -28,11 +28,11 @@ def out_slab(p):
     print(rxz, slab_radius-radius, c[2], slab_height/2.0+radius)
     return False
 class ConeTests(IMP.test.TestCase):
-    def test_slab_singleton_score(self):
-        """Check slab singleton score"""
+    def test_slab_pair_score(self):
+        """Check slab pair score"""
         print("radius", radius, "slab radius", slab_radius, "slab_height", slab_height)
         m= IMP.Model()
-        p= IMP.Particle(m)
+        p= IMP.Particle(m,"diffuser")
         d= IMP.core.XYZR.setup_particle(p)
         d.set_coordinates_are_optimized(True)
         d.set_radius(radius)
@@ -40,14 +40,24 @@ class ConeTests(IMP.test.TestCase):
                                       0.5*IMP.algebra.Vector3D(boxw,boxw,boxw))
         bb_half= IMP.algebra.BoundingBox3D(0.25*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       0.25*IMP.algebra.Vector3D(boxw,boxw,boxw))
-        slabss= IMP.npctransport.SlabWithCylindricalPoreSingletonScore(slab_height, slab_radius, 1)
-        self.assertEqual(slabss.get_bottom_z(),-0.5*slab_height);
-        self.assertEqual(slabss.get_top_z(),+0.5*slab_height);
-        r= IMP.core.SingletonRestraint(m, slabss, p.get_index(), "slab")
+        p_slab= IMP.Particle(m, "slab")
+        slab_orig= IMP.npctransport.SlabWithCylindricalPore.setup_particle \
+                   (p_slab, slab_height, slab_radius)
+        self.assert_(IMP.npctransport.SlabWithPore.get_is_setup(p_slab))
+        # test cast to slab
+        slab= IMP.npctransport.SlabWithPore(p_slab)
+        self.assertEqual(slab.get_pore_radius(),slab_radius)
+        self.assertEqual(slab.get_thickness(),slab_height);
+        slabps= IMP.npctransport.SlabWithCylindricalPorePairScore(1.0)
+        r= IMP.core.PairRestraint(m, slabps, [p_slab.get_index(), p.get_index()], "slab")
+        score_init= slabps.evaluate_index(m,
+                                          [p_slab.get_index(), p.get_index()],
+                                          IMP.DerivativeAccumulator(1.0))
+        self.assertEqual(score_init,0.0)
         while out_slab(p):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb_half))
         print(d.get_coordinates())
-        w= IMP.display.PymolWriter("tmp.pym") #self.get_tmp_file_name("slabss.pym"))
+        w= IMP.display.PymolWriter("tmp.pym") #self.get_tmp_file_name("slabps.pym"))
         w.set_frame(0)
         g=IMP.core.XYZRGeometry(d)
         sg= IMP.npctransport.SlabWithCylindricalPoreWireGeometry(slab_height, slab_radius, boxw)

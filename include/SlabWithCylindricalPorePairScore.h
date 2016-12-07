@@ -42,17 +42,13 @@ SlabWithCylindricalPorePairScore : public PairScore {
   //! pore of specified radius and repulsive force constant k
   SlabWithCylindricalPorePairScore(double k);
 
- private:
+  //! returns the direction vector for the displacmenet of point v relative to the pore walls of slab
   algebra::Vector3D get_displacement_direction
-    (const algebra::Vector3D &v) const
-    {
-      return get_displacement_vector(v).second;
-    }
+    (SlabWithCylindricalPore const& slab, const algebra::Vector3D &v) const;
 
-  double get_displacement_magnitude(const algebra::Vector3D &v) const
-  {
-    return get_displacement_vector(v).first;
-  }
+  //! returns the displacmenet magnitude of point v relative to the pore walls of slab
+  double get_displacement_magnitude
+    (SlabWithCylindricalPore const&slab, const algebra::Vector3D &v) const;
 
  public:
   //! evaluate score for particle pi in model m. If da is not null,
