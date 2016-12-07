@@ -82,8 +82,12 @@ class Tests(IMP.test.TestCase):
         and sites + identical timers and Transporting porperties
         """
         # check beads refframes
+#        print(len(sd1.get_beads()),len(sd2.get_beads()))
         for p, pp in zip(sd1.get_beads(),
                          sd2.get_beads()):
+#            print(p,pp)
+#            print(IMP.core.XYZR(p))
+#            print(IMP.core.XYZR(pp))
             self.assert_((IMP.core.XYZ(p).get_coordinates()
                           - IMP.core.XYZ(pp).get_coordinates()).get_magnitude() < .0001)
             q0 = IMP.core.RigidBody(

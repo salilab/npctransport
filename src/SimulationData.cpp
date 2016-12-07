@@ -94,6 +94,12 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 //   }
 
 #define SLAB_TYPE_STRING "slab"
+namespace {
+  bool is_slab_particle(Particle* p)
+  {
+    return SlabWithPore::get_is_setup(p);
+  }
+};
 
 SimulationData::SimulationData(std::string prev_output_file, bool quick,
                                std::string rmf_file_name,
@@ -199,7 +205,7 @@ void SimulationData::initialize(std::string prev_output_file,
     core::Typed::setup_particle( get_slab_particle(),
                                  core::ParticleType(SLAB_TYPE_STRING));
 
-    get_root().add_child( h_slab_particle );
+    //    get_root().add_child( h_slab_particle );
   }
   for (int i = 0; i < pb_assignment.fgs_size(); ++i)
     {
@@ -547,8 +553,6 @@ ParticlesTemp SimulationData::get_obstacle_particles() const
 }
 
 
-
-
 // Behold and beware: this method assumes that the hierarchy in the RMF file
 // was constructed in the same way as the hierarchy within this SimulationData
 // object. Use with great caution, otherwise unexpected results may arise
@@ -556,18 +560,15 @@ void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
                                                    int frame) {
   f.set_current_frame( RMF::FrameID(f.get_number_of_frames() - 1) );
   // RMF::show_hierarchy_with_values(f.get_root_node());
-  ParticlesTemp linked_particles;
-  for(unsigned int i= 0; i<get_root().get_number_of_children(); i++){
-     // in old versions (<2.5) - skip slab particle
-    if(get_output_npctransport_version()<2.5){
-      Particle* p= get_root().get_child(i).get_particle();
-      if(core::Typed(p).get_type()==core::ParticleType(SLAB_TYPE_STRING)){
-        continue;
-      }
-      linked_particles.push_back(p);
-    }
+  ParticlesTemp linked_particles  = get_root().get_children();
+  if(get_output_npctransport_version()<2.5){
+    // slab particles not supported in earlier versions
+    std::remove_if(linked_particles.begin(),
+                   linked_particles.end(),
+                   is_slab_particle);
   }
   link_hierarchies_with_sites(f, linked_particles);
+  //  link_hierarchies_with_sites(f, get_root().get_children());
   if (frame == -1) {
     IMP_LOG(VERBOSE, "Loading from last frame of RMF file with "
               << f.get_number_of_frames() << " frames" << std::endl);
