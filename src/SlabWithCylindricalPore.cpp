@@ -10,14 +10,14 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-void 
+void
 SlabWithCylindricalPore::do_setup_particle(IMP::Model* m,
 					   ParticleIndex pi,
-					   double thickness, 
+					   double thickness,
 					   double radius)
 {
-  SlabWithPore::do_setup_particle(m, pi, thickness, radius);
-  m->add_attribute(get_cylindrical_pore_key(), pi, true, false);
+  SlabWithPore::setup_particle(m, pi, thickness, radius);
+  m->add_attribute(get_cylindrical_pore_key(), pi, true);
 }
 
 IntKey SlabWithCylindricalPore::get_cylindrical_pore_key(){

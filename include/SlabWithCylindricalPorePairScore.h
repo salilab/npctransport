@@ -9,6 +9,7 @@
 #define IMPNPCTRANSPORT_SLAB_PAIR_SCORE_H
 
 #include "npctransport_config.h"
+#include "SlabWithCylindricalPore.h"
 #include <IMP/check_macros.h>
 #include <IMP/PairScore.h>
 #include <IMP/pair_macros.h>
@@ -17,49 +18,48 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 //! XXXX
-/** An origin centered slab with a tunnel in the vertical direction,
+/** An origin centered slab with a pore in the vertical direction,
     for z = [-0.5*thickness_...0.5*thickness_]
     Returns 0 for all particles fully beyond z range
     or fully within slab radius from the origin in the [X,Y] plane
     // TODO: verify documentation
  */
-class IMPNPCTRANSPORTEXPORT SlabWithCylindricalPorePairScore : public PairScore {
-  double thickness_;  // thichness of slab
-  double pore_radius_;  // radius of slab cylinder
+class IMPNPCTRANSPORTEXPORT
+SlabWithCylindricalPorePairScore : public PairScore {
+ private:
   double k_;  // coefficient for violation of slab constraint in kcal/mol/A
-  double top_;  // top of slab on z-axis
-  double bottom_;  // bottom of slab on x-axis
-  double midZ_;  // (top + bottom) / 2, for caching some calculations
+
+  // cache variables (therefore, all are mutable, as they are only used for performence purposes)
+  mutable double thickness_;  // thichness of slab
+  mutable double pore_radius_;  // radius of slab cylinder
+  mutable double top_;  // top of slab on z-axis
+  mutable double bottom_;  // bottom of slab on x-axis
+  mutable double midZ_;  // (top + bottom) / 2, for caching some calculations
+  mutable bool is_pore_radius_optimized_;
 
  public:
   //! Constructs a slab with specified thickness and a cylindrical
   //! pore of specified radius and repulsive force constant k
   SlabWithCylindricalPorePairScore(double k);
 
+ private:
   algebra::Vector3D get_displacement_direction
     (const algebra::Vector3D &v) const
     {
       return get_displacement_vector(v).second;
     }
-  
+
   double get_displacement_magnitude(const algebra::Vector3D &v) const
   {
     return get_displacement_vector(v).first;
   }
 
-  /** returns the lowest slab z coordinate */
-  double get_bottom_z()
-  { return bottom_; }
-
-  /** returns the highest slab z coordinate */
-  double get_top_z()
-  { return top_; }
-
+ public:
   //! evaluate score for particle pi in model m. If da is not null,
   //! use it to accumulate derivatives in model.
   virtual double evaluate_index
     (Model *m,
-     ParticleIndexPair& pip,
+     const ParticleIndexPair& pip,
      DerivativeAccumulator *da) const IMP_OVERRIDE;
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
@@ -71,7 +71,7 @@ class IMPNPCTRANSPORTEXPORT SlabWithCylindricalPorePairScore : public PairScore 
   //! in model.
   virtual double evaluate_indexes
     (Model *m,
-     const ParticleIndexePairs &pis,
+     const ParticleIndexPairs &pips,
      DerivativeAccumulator *da,
      unsigned int lower_bound,
      unsigned int upper_bound) const IMP_FINAL;
@@ -128,17 +128,20 @@ class IMPNPCTRANSPORTEXPORT SlabWithCylindricalPorePairScore : public PairScore 
 
   // update internal variables holding slab params for fast access
   // based on decorated particle swp
-  void update_slab_params
-    (SlabWithCylindricalPore slab);
+  void update_cached_slab_params
+    (SlabWithCylindricalPore slab) const;
 };
 
-inline void update_slab_params
-(SlabWithCylindricalPore slab){
+inline void
+SlabWithCylindricalPorePairScore::update_cached_slab_params
+(SlabWithCylindricalPore slab) const
+{
   //TODO: support slabs with non-zero x,y,z origin
-  top_= slab_.get_thickness()/2.0;
-  bottom_= -top_;
-  mid_= 0;
-  pore_radius_= slab_.get_pore_radius();
+  thickness_= slab.get_thickness();
+  top_= 0.5*thickness_;
+  bottom_= -0.5*thickness_;
+  midZ_= 0;
+  pore_radius_= slab.get_pore_radius();
   is_pore_radius_optimized_= slab.get_pore_radius_is_optimized();
 }
 
@@ -146,17 +149,17 @@ inline void update_slab_params
 inline double
 SlabWithCylindricalPorePairScore::evaluate_index
 (Model *m,
- const ParticleIndexPair pip,
+ const ParticleIndexPair& pip,
  DerivativeAccumulator *da) const
 {
   IMP_OBJECT_LOG;
-  IMP::core::SlabWithCylindricalPore slab(m, pip[0]);
-  update_slab_params(slab);
+  SlabWithCylindricalPore slab(m, pip[0]);
+  update_cached_slab_params(slab);
   IMP::core::XYZR d(m, pip[1]);
-  if (!d.get_coordinates_are_optimized()) 
+  algebra::Sphere3D d_sphere( d.get_sphere() );
+  if (!d.get_coordinates_are_optimized())
     return false;
   algebra::Vector3D displacement;
-  algebra::Sphere3D d_sphere&= d.get_sphere();
   double score=evaluate_sphere(d_sphere,
                                da ? &displacement : nullptr);
   if(da && score>0.0){
@@ -164,8 +167,8 @@ SlabWithCylindricalPorePairScore::evaluate_index
     IMP_LOG(PROGRESS, "result in " << score << " and " << derivative_vector << std::endl);
     d.add_to_derivatives(derivative_vector, *da);
     if(is_pore_radius_optimized_){
-      double radial_displacement= displacement[0]*d_sphere[0]+displacement[1]*d_sphere[1]; // displacement of d from the cylinder wall, projected on the radial vector from the pore center towards the sphere on the x,y plane // TODO: assumes slab origin at 0,0,0 - perhaps in the future extend to general case
-      slab.add_to_pore_radius_derivatives(k_*radial_displacement);
+      double radial_displacement= displacement[0]*d_sphere[0]+displacement[1]*d_sphere[1]; // TODO: assumes slab origin at 0,0,0 - perhaps in the future extend to general case
+      slab.add_to_pore_radius_derivative(k_*radial_displacement, *da);
     }
   }
   return score;
@@ -173,30 +176,39 @@ SlabWithCylindricalPorePairScore::evaluate_index
 
 //
 inline double
-SlabWithCylindricalPorePairScore::evaluate_indexes(Model *m, const ParticleIndexes &pis,
-                                DerivativeAccumulator *da,
-                                unsigned int lower_bound,
-                                unsigned int upper_bound) const
+SlabWithCylindricalPorePairScore::evaluate_indexes
+(Model *m,
+ const ParticleIndexPairs &pips,
+ DerivativeAccumulator *da,
+ unsigned int lower_bound,
+ unsigned int upper_bound) const
 {
-  double ret = 0.;
-  double radial_displacement= 0.; // sum of displacements relative to pore radius
-  IMP::core::SlabWithCylindricalPore slab(m, pip[0]);
-  update_slab_params(slab);
-  // Direct access to pertinent attributes:
+  if(upper_bound<lower_bound){
+    return 0.0;
+  }
+  double ret(0.0);
+  double radial_displacements(0.0); // sum of pore radius displacemnets
   algebra::Sphere3D const* spheres_table=
     m->access_spheres_data();
   algebra::Sphere3D* sphere_derivatives_table=
     m->access_sphere_derivatives_data();
   IMP::internal::BoolAttributeTableTraits::Container const& is_optimizable_table=
     m->access_optimizeds_data(core::XYZ::get_coordinate_key(0)); // use only x coordinate as indicator
+  ParticleIndex slab_pi(pips[lower_bound][0]);
+  SlabWithCylindricalPore slab(m, slab_pi); // TODO: do this only in first round
+  update_cached_slab_params(slab);
   // Evaluate and sum score and derivative for all particles:
   for (unsigned int i = lower_bound; i < upper_bound; ++i) {
-    int pi_index=pis[i].get_index();
+    ParticleIndex pi( pips[i][1]);
+    int pi_index=pi.get_index();
     // Check attributes have valid values:
     IMP_CHECK_CODE( {
-        IMP::core::XYZR d(m, pis[i]);
+        IMP_INTERNAL_CHECK(pips[i][0]==slab_pi,
+                           "All particles are assumed to be evaluated against"
+                           " the same slab");
+        IMP::core::XYZR d(m, pi);
         algebra::Sphere3D s=spheres_table[pi_index];
-        IMP_INTERNAL_CHECK(d.get_coordinates_are_optimized() == is_optimizable_table[pis[i]],
+        IMP_INTERNAL_CHECK(d.get_coordinates_are_optimized() == is_optimizable_table[pi],
                            "optimable table inconsistent with d.get_coordinates_are_optimized for particle " << d);
         IMP_INTERNAL_CHECK((d.get_coordinates() - s.get_center()).get_magnitude()<.001,
                            "Different coords for particle " << d << " *** "
@@ -205,7 +217,7 @@ SlabWithCylindricalPorePairScore::evaluate_indexes(Model *m, const ParticleIndex
                            "Different radii for particle " << d << " *** "
                            << d.get_radius() << " vs. " << s.get_radius());
       } ); // IMP_CHECK_CODE
-    if(!is_optimizable_table[pis[i]]) {
+    if(!is_optimizable_table[pi]) {
       continue;
     }
     algebra::Vector3D displacement;
@@ -218,15 +230,13 @@ SlabWithCylindricalPorePairScore::evaluate_indexes(Model *m, const ParticleIndex
       for(unsigned int j=0; j<3; j++) {
         sphere_derivatives_table[pi_index][j] += (*da)(derivative_vector[j]);
       }
-      algebra::Sphere3D& s=spheres_table[pi_index];
-      radial_displacement+= displacement[0]*s[0] + displacement[1]*s[1]; // displacement of d from the cylinder wall, projected on the radial vector from the pore center towards the sphere on the x,y plane // TODO: assumes slab origin at 0,0,0 - perhaps in דthe future extend to general case
+      algebra::Sphere3D const& s=spheres_table[pi_index];
+      radial_displacements+= displacement[0]*s[0] + displacement[1]*s[1];// TODO: assumes slab origin at 0,0,0 - perhaps in דthe future extend to general case
     }
   }
-
-  if(da && radial_derivative>0.0 && is_pore_radius_optimized_){
-    slab.add_to_pore_radius_derivative(k_ * radial_displacement);
+  if(da && is_pore_radius_optimized_){
+    slab.add_to_pore_radius_derivative(k_ * radial_displacements, *da);
   }
-
   return ret;
 }
 
@@ -285,7 +295,7 @@ SlabWithCylindricalPorePairScore::get_displacement_vector(const algebra::Vector3
     double abs_dXY = std::sqrt(dXY2);
     double dR = abs_dXY - pore_radius_;  // displacement on [x,y] direction (positive = outside pore perimeter on x,y plane)
     if (dR + abs_dZ < .5 * thickness_) { // in a cones from (0,0,.5thickness) to (0,.5thicness,0)
-      IMP_LOG_PROGRESS("ring or tunnel" << std::endl);
+      IMP_LOG_PROGRESS("ring or pore" << std::endl);
       if (dXY2 < .00001) {  // at origin
         return std::make_pair(pore_radius_, algebra::Vector3D(0, 0, 1));
       } else {

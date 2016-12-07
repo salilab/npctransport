@@ -48,13 +48,13 @@ namespace {
     Vector<algebra::Plane3D> slab;
     slab.push_back(algebra::Plane3D(height, algebra::Vector3D(0, 0, 1)));
     slab.push_back(algebra::Plane3D(height, algebra::Vector3D(0, 0, -1)));
-    Vector<algebra::Plane3D> tunnel;
+    Vector<algebra::Plane3D> pore;
     unsigned int npoints = 40;
     for (unsigned int i = 0; i < npoints; ++i) {
       double f = 2.0 * i * PI / (npoints - 1.0);
       double x = std::cos(f);
       double y = std::sin(f);
-      tunnel.push_back(algebra::Plane3D((radius), algebra::Vector3D(x, y, 0)));
+      pore.push_back(algebra::Plane3D((radius), algebra::Vector3D(x, y, 0)));
     }
 
     algebra::Plane3Ds empty;
@@ -63,7 +63,7 @@ namespace {
 
     algebra::Vector3D c = algebra::get_ones_vector_d<3>() * width / 2.0;
     algebra::BoundingBox3D bb(-c, c);
-    return cgal::internal::get_polyhedron_indexed_facets(bb, slab, tunnel);
+    return cgal::internal::get_polyhedron_indexed_facets(bb, slab, pore);
   }
 
     bool less_vector3D_lexigoraphically

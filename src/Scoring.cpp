@@ -11,8 +11,8 @@
 #include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
-#include <IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h>
-#include <IMP/npctransport/SlabWithToroidalPoreSingletonScore.h>
+#include <IMP/npctransport/SlabWithCylindricalPorePairScore.h>
+#include <IMP/npctransport/SlabWithToroidalPorePairScore.h>
 #include <IMP/npctransport/ZBiasSingletonScore.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/typedefs.h>
@@ -257,7 +257,7 @@ void Scoring::add_interaction
     pts1.push_back(type0);
     pts1.push_back(type1);
     int interaction_id1 = get_ordered_type_pair_predicate()->get_value(pts1);
-    IMP_NEW(npctransp<ort::SitesPairScore, ps1,
+    IMP_NEW(npctransport::SitesPairScore, ps1,
             (interaction_range, interaction_k,
 	     sigma0, sigma1,
              nonspecific_range_,
@@ -536,18 +536,19 @@ Restraint * Scoring::create_slab_restraint
   particles.set_name_if_default("CreateSlabRestraintInput%1%");
   IMP::Pointer<IMP::PairScore> slab_score;
   if (get_sd()->get_is_slab_with_cylindrical_pore()) {
-    slab_score =new SlabWithCylindricalPoreSingletonScore
+    slab_score =new SlabWithCylindricalPorePairScore
       (excluded_volume_k_);
   } else {
-    slab_score =new SlabWithToroidalPoreSingletonScore
+    slab_score =new SlabWithToroidalPorePairScore
       (excluded_volume_k_);
   }
-  IMP::Particles slab_particles;
+  IMP::ParticlesTemp slab_particles;
   slab_particles.push_back( get_sd()->get_slab_particle() );
   IMP_NEW(container::AllBipartitePairContainer, abpc,
-	  (slab_particles.get(), particles.get()) );
+	  (slab_particles,
+           particles.get()) );
   return container::create_restraint(slab_score.get(),
-				     abpc,
+				     abpc.get(),
                                      "bounding slab");
 }
 
@@ -579,7 +580,7 @@ const
   // restrict restraint to be over tunnel if applicable
   double R = std::numeric_limits<double>::max();
   if (get_sd()->get_has_slab()) {
-    R = get_sd()->get_tunnel_radius();
+    R = get_sd()->get_pore_radius(); // TODO: incompatible with dynamic pore radius
   }
   IMP_NEW(ZBiasSingletonScore, zbsc, (k, R) );
   return
