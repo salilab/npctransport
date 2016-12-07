@@ -10,6 +10,9 @@ radius=20
 k=100
 
 m= IMP.Model()
+p_slab= IMP.Particle(m, "slab")
+slab= IMP.npctransport.SlabWithCylindricalPore.setup_particle \
+      (p_slab, height, radius)
 p= IMP.Particle(m)
 IMP.atom.Hierarchy.setup_particle(p)
 d=IMP.core.XYZR.setup_particle(p)
@@ -17,8 +20,8 @@ d.set_radius(10)
 d.set_coordinates_are_optimized(True)
 IMP.atom.Diffusion.setup_particle(p)
 IMP.atom.Mass.setup_particle(p, 1)
-slabss= IMP.npctransport.SlabWithCylindricalPoreSingletonScore(height, radius, k)
-r= IMP.core.SingletonRestraint(m, slabss, p.get_index(), "slab")
+slabps= IMP.npctransport.SlabWithCylindricalPorePairScore(k)
+r= IMP.core.PairRestraint(m, slabps, [p_slab.get_index(),p.get_index()], "slab")
 bb= IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(-100, -100, -100),
                               IMP.algebra.Vector3D(100, 100, 100))
 bbss= IMP.core.BoundingBox3DSingletonScore(IMP.core.HarmonicUpperBound(0,10),

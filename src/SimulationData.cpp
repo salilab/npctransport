@@ -29,6 +29,7 @@
 #include <IMP/algebra/vector_generators.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
+#include <IMP/atom/Mass.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/log.h>
@@ -91,6 +92,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 //     else                                        \
 //       { name##_ = default_value; }              \
 //   }
+
+#define SLAB_TYPE_STRING "slab"
 
 SimulationData::SimulationData(std::string prev_output_file, bool quick,
                                std::string rmf_file_name,
@@ -180,6 +183,24 @@ void SimulationData::initialize(std::string prev_output_file,
   root_->add_attribute(get_simulation_data_key(), this);
   atom::Hierarchy hr = atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
+  if(get_has_slab()){
+    // TODO: at some point, obstacles should be the children of slab (cause in some sense, they refine it)
+    atom::Hierarchy h_slab_particle=
+      atom::Hierarchy::setup_particle( get_slab_particle() );
+    // TODO: XYZR is fake - just to make it compatible with atom hierarchy (note pore radius is a different attribute than 'radius')
+    core::XYZ::setup_particle( get_slab_particle(),
+                               algebra::Vector3D(0,0,0) );
+    core::XYZR d=
+      core::XYZR::setup_particle( get_slab_particle(),
+                                  0.0 );
+    d.set_coordinates_are_optimized(false);
+    atom::Mass::setup_particle( get_slab_particle(),
+                                1.0 );
+    core::Typed::setup_particle( get_slab_particle(),
+                                 core::ParticleType(SLAB_TYPE_STRING));
+
+    get_root().add_child( h_slab_particle );
+  }
   for (int i = 0; i < pb_assignment.fgs_size(); ++i)
     {
       // verify type first
@@ -209,21 +230,6 @@ void SimulationData::initialize(std::string prev_output_file,
     }
   for (int i = 0; i < pb_assignment.obstacles_size(); ++i) {
     create_obstacles(pb_assignment.obstacles(i));
-  }
-  if(get_has_slab()){ // TODO: at some point, obstacles should be the children of slab (cause in some sense, they refine it)
-    slab_particle_ = new Particle(get_model(), "Slab");
-    if(get_is_slab_with_cylindrical_pore()){
-      SlabWithCylindricalPore::setup_particle(slab_particle_,
-					      slab_thickness_,
-					      tunnel_radius_);
-    } else{
-      SlabWithToroidalPore::setup_particle(slab_particle_,
-					   slab_thickness_,
-					   tunnel_radius_);
-    }
-    atom::Hierarchy h_slab_particle_=
-      atom::Hierarchy::setup_particle(slab_particle_);
-    get_root().add_child( h_slab_particle_ );
   }
 
   IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
@@ -257,6 +263,22 @@ void SimulationData::initialize(std::string prev_output_file,
   pb_data.SerializeToOstream(&outf);
 }
 
+
+void
+SimulationData::create_slab_particle()
+{
+  slab_particle_=
+    new Particle(get_model(), SLAB_TYPE_STRING);
+  if(get_is_slab_with_cylindrical_pore()){
+    SlabWithCylindricalPore::setup_particle(slab_particle_,
+                                            slab_thickness_,
+                                            tunnel_radius_);
+  } else{
+    SlabWithToroidalPore::setup_particle(slab_particle_,
+                                         slab_thickness_,
+                                         tunnel_radius_);
+  }
+}
 
 /**
    Adds the FG Nup chains to the model hierarchy,
@@ -534,7 +556,18 @@ void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
                                                    int frame) {
   f.set_current_frame( RMF::FrameID(f.get_number_of_frames() - 1) );
   // RMF::show_hierarchy_with_values(f.get_root_node());
-  link_hierarchies_with_sites(f, get_root().get_children());
+  ParticlesTemp linked_particles;
+  for(unsigned int i= 0; i<get_root().get_number_of_children(); i++){
+     // in old versions (<2.5) - skip slab particle
+    if(get_output_npctransport_version()<2.5){
+      Particle* p= get_root().get_child(i).get_particle();
+      if(core::Typed(p).get_type()==core::ParticleType(SLAB_TYPE_STRING)){
+        continue;
+      }
+      linked_particles.push_back(p);
+    }
+  }
+  link_hierarchies_with_sites(f, linked_particles);
   if (frame == -1) {
     IMP_LOG(VERBOSE, "Loading from last frame of RMF file with "
               << f.get_number_of_frames() << " frames" << std::endl);

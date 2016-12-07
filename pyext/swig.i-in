@@ -74,6 +74,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/SlabWithPore.h"
 %include "IMP/npctransport/SlabWithCylindricalPore.h"
 %include "IMP/npctransport/SlabWithToroidalPore.h"
+
 %include "IMP/npctransport/SlabWithCylindricalPorePairScore.h"
 %include "IMP/npctransport/SlabWithToroidalPorePairScore.h"
 %include "IMP/npctransport/ExcludeZRangeSingletonScore.h"

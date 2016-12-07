@@ -16,8 +16,8 @@ SlabWithPore::do_setup_particle(IMP::Model* m,
 				double thickness,
 				double pore_radius)
 {
-  m->add_attribute(get_thickness_key(), pi, thickness, false);
-  m->add_attribute(get_pore_radius_key(), pi, pore_radius, false);
+  m->add_attribute(get_thickness_key(), pi, thickness, false/*is_optimizable*/);
+  m->add_attribute(get_pore_radius_key(), pi, pore_radius, true/*is_optimizable*/);
 }
 
 FloatKey SlabWithPore::get_thickness_key() {
