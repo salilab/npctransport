@@ -6,6 +6,7 @@
  *
  */
 
+#include <IMP/npctransport/BrownianDynamicsTAMDWithSlabSupport.h>
 #include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/ParticleFactory.h>
 #include <IMP/npctransport/protobuf.h>
@@ -13,8 +14,8 @@
 #include <IMP/npctransport/SitesGeometry.h>
 #include <IMP/npctransport/SlabWithCylindricalPoreGeometry.h>
 #include <IMP/npctransport/SlabWithToroidalPoreGeometry.h>
-#include <IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h>
-#include <IMP/npctransport/SlabWithToroidalPoreSingletonScore.h>
+#include <IMP/npctransport/SlabWithCylindricalPorePairScore.h>
+#include <IMP/npctransport/SlabWithToroidalPorePairScore.h>
 #include <IMP/npctransport/SlabWithCylindricalPore.h>
 #include <IMP/npctransport/SlabWithToroidalPore.h>
 #include <IMP/npctransport/ParticleFactory.h>
@@ -26,7 +27,6 @@
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/npctransport/util.h>
 #include <IMP/algebra/vector_generators.h>
-#include <IMP/atom/BrownianDynamicsTAMD.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/estimates.h>
@@ -214,15 +214,16 @@ void SimulationData::initialize(std::string prev_output_file,
     slab_particle_ = new Particle(get_model(), "Slab");
     if(get_is_slab_with_cylindrical_pore()){
       SlabWithCylindricalPore::setup_particle(slab_particle_,
-					      slab_thickness_
+					      slab_thickness_,
 					      tunnel_radius_);
     } else{
       SlabWithToroidalPore::setup_particle(slab_particle_,
-					   slab_thickness_
+					   slab_thickness_,
 					   tunnel_radius_);
     }
-    atom::Hierarchy::setup_particle(slab_particle_);
-    get_root().add_child( slab_particle_ );
+    atom::Hierarchy h_slab_particle_=
+      atom::Hierarchy::setup_particle(slab_particle_);
+    get_root().add_child( h_slab_particle_ );
   }
 
   IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
@@ -577,10 +578,10 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
     IMP::Pointer<display::Geometry> slab_geometry;
     if(get_is_slab_with_cylindrical_pore()){
       slab_geometry = new SlabWithCylindricalPoreWireGeometry
-        (get_slab_thickness(), get_tunnel_radius(), box_side_);
+        (get_slab_thickness(), get_pore_radius(), box_side_);
     } else {
       slab_geometry = new SlabWithToroidalPoreWireGeometry
-	(get_slab_thickness(), get_tunnel_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     }
     IMP::rmf::add_static_geometries(fh, slab_geometry->get_components());
   }
@@ -643,10 +644,10 @@ void SimulationData::dump_geometry() {
     IMP::Pointer<display::Geometry> slab_geometry;
     if(get_is_slab_with_cylindrical_pore()) {
       slab_geometry= new SlabWithCylindricalPoreWireGeometry
-	(get_slab_thickness(), get_tunnel_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     } else {
       slab_geometry= new SlabWithToroidalPoreWireGeometry
-	(get_slab_thickness(), get_tunnel_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     }
     w->add_geometry( slab_geometry );
   }
@@ -717,7 +718,7 @@ atom::BrownianDynamics
 (bool recreate)
 {
   if (!bd_ || recreate) {
-    bd_ = new atom::BrownianDynamicsTAMD(m_, "BD_tamd%1%", time_step_wave_factor_);
+    bd_ = new BrownianDynamicsTAMDWithSlabSupport(m_, "BD_tamd_slab%1%", time_step_wave_factor_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_ / 4);
     bd_->set_current_time(0.0);
@@ -830,10 +831,10 @@ void SimulationData::write_geometry(std::string out) {
     IMP::Pointer<display::Geometry> slab_geometry;
     if(get_is_slab_with_cylindrical_pore()) {
       slab_geometry= new SlabWithCylindricalPoreWireGeometry
-	(get_slab_thickness(), get_tunnel_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     } else {
       slab_geometry= new SlabWithToroidalPoreWireGeometry
-	(get_slab_thickness(), get_tunnel_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     }
     w->add_geometry(slab_geometry);
     //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
@@ -865,7 +866,7 @@ algebra::Cylinder3D SimulationData::get_cylinder() const {
                   "no slab with cylidrical pore defined");
   algebra::Vector3D pt(0, 0, get_slab_thickness() / 2.0);
   algebra::Segment3D seg(pt, -pt);
-  return algebra::Cylinder3D(seg, get_tunnel_radius());
+  return algebra::Cylinder3D(seg, get_pore_radius());
 }
 
 

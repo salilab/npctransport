@@ -32,7 +32,7 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
       The slab is parallel to the x,y plain from z=-0.5*thickness to
       z=0.5*thickness, and the central axis of the pore lies on the
       origin.
- 
+
       @param m the model
       @param pi the particle index
       @param thickness slab thickness
@@ -40,7 +40,7 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
   */
   static void do_setup_particle(IMP::Model* m,
                                 ParticleIndex pi,
-				double thickness, 
+				double thickness,
 				double pore_radius);
 
 
@@ -50,19 +50,19 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
 
   /** Decorate a particle that represents a slab (e.g. nuclear
       envelope) with specified thickness and a cylindrical pore of
-      specified pore_radius. 
+      specified pore_radius.
 
       The slab is parallel to the x,y plain from z=-0.5*thickness to
       z=0.5*thickness, and the central axis of the pore lies on the
       origin.
- 
+
       @param m the model
       @param pi the particle index
       @param thickness slab thickness
       @param pore_radius pore radius
   */
-  IMP_DECORATOR_SETUP_2(SlabWithPore,  
-			double, thickness, 
+  IMP_DECORATOR_SETUP_2(SlabWithPore,
+			double, thickness,
 			double, pore_radius);
 
   //! Return true if the particle is an instance of SlabWithPore
@@ -84,7 +84,7 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
   }
 
   //! get cylindrical pore radius
-  double get_pore_radius() const { 
+  double get_pore_radius() const {
     return get_particle()->get_value(get_pore_radius_key());
   }
 
@@ -93,7 +93,7 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
     get_particle()->set_value(get_pore_radius_key(), r);
   }
 
-  //! add v to the derivative of the cylindrical pore radius, 
+  //! add v to the derivative of the cylindrical pore radius,
   //! using derivative accumulator d
   void add_to_pore_radius_derivative(double v, DerivativeAccumulator &d) {
     get_particle()->add_to_derivative(get_pore_radius_key(), v, d);
@@ -106,9 +106,9 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
   void set_pore_radius_is_optimized(bool tf) const {
     get_particle()->set_is_optimized(get_pore_radius_key(), tf);
   }
-  
+
   //! Get the decorator key for is_last_entry_from_top
-  static IntKey get_thickness_key();
+  static FloatKey get_thickness_key();
 
   //! Get the key for the pore radius.
   static FloatKey get_pore_radius_key();

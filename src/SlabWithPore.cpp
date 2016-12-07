@@ -10,14 +10,14 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-void 
+void
 SlabWithPore::do_setup_particle(IMP::Model* m,
 				ParticleIndex pi,
-				double thickness, 
-				double radius)
+				double thickness,
+				double pore_radius)
 {
   m->add_attribute(get_thickness_key(), pi, thickness, false);
-  m->add_attribute(get_radius_key(), pi, r, false);
+  m->add_attribute(get_pore_radius_key(), pi, pore_radius, false);
 }
 
 FloatKey SlabWithPore::get_thickness_key() {
@@ -33,7 +33,7 @@ FloatKey SlabWithPore::get_pore_radius_key() {
 void SlabWithPore::show(std::ostream &out) const {
   out << "SlabWithPore thickness="
       << get_thickness()
-      << " ; radius=" << get_radius();
+      << " ; radius=" << get_pore_radius();
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

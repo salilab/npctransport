@@ -126,7 +126,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   PointerMember<Particle> root_;
 
   // Membrane slab, if exists
-  PointerMember<Particle> slab_particle_; 
+  PointerMember<Particle> slab_particle_;
 
   // fg types  - a list of all fg/floater/obstacle types that were
   // added via create_fgs/floaters/obstacles(), so far
@@ -449,7 +449,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   bool get_is_slab_with_toroidal_pore() const
   { return slab_is_on_==2; }
 
-  Particle* get_slab_particle() {
+  Particle* get_slab_particle() const{
     return slab_particle_.get();
   }
 
@@ -546,12 +546,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   double get_slab_thickness() const {
     SlabWithPore swp(get_slab_particle());
-    return swcp.get_thickness();
+    return swp.get_thickness();
   }
 
-  double get_tunnel_radius() const {
+  double get_pore_radius() const {
     SlabWithPore swp(get_slab_particle());
-    return swcp.get_radius();
+    return swp.get_pore_radius();
   }
 
   display::Geometry *get_static_geometry();
