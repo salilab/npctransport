@@ -12,9 +12,9 @@ radius=1
 #random.uniform(1,12)
 #random.uniform(radius+2, radius+15)
 slab_thickness=5
-r_distortion=2 # ration between horizontal minor radius and vertical minor radius (semiaxes) - 1.0 is a ring toroid, >1.0 is a circular torus made of a horizontally elongated ellipse, and <1.0 is made of a vertically elongated ellipse
+r_h2v_ratio=2 # ration between horizontal minor radius and vertical minor radius (semiaxes) - 1.0 is a ring toroid, >1.0 is a circular torus made of a horizontally elongated ellipse, and <1.0 is made of a vertically elongated ellipse
 rv=0.5*slab_thickness # vertical minor radius (semi-axis)
-rh=rv*r_distortion # horizontal minor radius (semi-axis)
+rh=rv*r_h2v_ratio # horizontal minor radius (semi-axis)
 slab_radius=5+rh
 rv2=rv**2
 rh2=rh**2
@@ -95,16 +95,33 @@ class ConeTests(IMP.test.TestCase):
         d.set_radius(radius)
         bb= IMP.algebra.BoundingBox3D(0.5*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       0.5*IMP.algebra.Vector3D(boxw,boxw,boxw))
-        slabss= IMP.npctransport.SlabWithToroidalPoreSingletonScore \
-                (slab_thickness, slab_radius, 1, rh)
-        slabss.set_log_level(IMP.SILENT)
-        self.assertEqual(slabss.get_bottom_z(),-0.5*slab_thickness);
-        self.assertEqual(slabss.get_top_z(),+0.5*slab_thickness);
-        r= IMP.core.SingletonRestraint(m, slabss, p.get_index(), "slab")
+        p_slab= IMP.Particle(m, "slab")
+        IMP.npctransport.SlabWithToroidalPore.setup_particle \
+              (p_slab, slab_thickness, slab_radius, r_h2v_ratio)
+        self.assert_(IMP.npctransport.SlabWithToroidalPore.get_is_setup(p_slab))
+        # test cast to slab with pore
+        slab= IMP.npctransport.SlabWithToroidalPore(p_slab)
+        self.assertEqual(slab.get_pore_radius(),
+                         slab_radius)
+        self.assertEqual(slab.get_thickness(),
+                         slab_thickness);
+        self.assertEqual(slab.get_minor_radius_h2v_aspect_ratio(),
+                         r_h2v_ratio)
+        self.assertEqual(slab.get_vertical_minor_radius(),
+                         rv);
+        self.assertEqual(slab.get_horizontal_minor_radius(),
+                         rh);
+        slabps= IMP.npctransport.SlabWithToroidalPorePairScore \
+                (1.0)
+        slabps.set_log_level(IMP.SILENT)
+        r= IMP.core.PairRestraint(m,
+                                  slabps,
+                                  [p_slab.get_index(),p.get_index()],
+                                  "slab")
         while out_slab(p, ALLOWED_OVERLAP=0.5):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
         print("Penetrating slab: ", d.get_coordinates())
-        pym_fname="tmp.pym" #self.get_tmp_file_name("slabss.pym")
+        pym_fname="tmp.pym" #self.get_tmp_file_name("slabps.pym")
         w= IMP.display.PymolWriter(pym_fname)
         w.set_frame(0)
         g=IMP.core.XYZRGeometry(d)

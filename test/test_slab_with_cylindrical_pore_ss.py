@@ -41,9 +41,9 @@ class ConeTests(IMP.test.TestCase):
         bb_half= IMP.algebra.BoundingBox3D(0.25*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       0.25*IMP.algebra.Vector3D(boxw,boxw,boxw))
         p_slab= IMP.Particle(m, "slab")
-        slab_orig= IMP.npctransport.SlabWithCylindricalPore.setup_particle \
-                   (p_slab, slab_height, slab_radius)
-        self.assert_(IMP.npctransport.SlabWithPore.get_is_setup(p_slab))
+        IMP.npctransport.SlabWithCylindricalPore.setup_particle \
+            (p_slab, slab_height, slab_radius)
+        self.assert_(IMP.npctransport.SlabWithCylindricalPore.get_is_setup(p_slab))
         # test cast to slab
         slab= IMP.npctransport.SlabWithPore(p_slab)
         self.assertEqual(slab.get_pore_radius(),slab_radius)
