@@ -147,8 +147,8 @@ SlabWithToroidalPorePairScore::update_cached_slab_params
   bottom_= -0.5*thickness;
   midZ_= 0;
   R_= slab.get_pore_radius(); // major radius
-  rh_= 0.5*thickness; // minor horizontal radius
-  rv_= 0.5*thickness; // minor vertical radius
+  rh_= slab.get_horizontal_minor_radius();
+  rv_= slab.get_vertical_minor_radius();
   is_pore_radius_optimized_= slab.get_pore_radius_is_optimized();
 }
 
