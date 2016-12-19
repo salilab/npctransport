@@ -67,9 +67,6 @@ Scoring::Scoring
   IMP_ALWAYS_CHECK(owner_sd_ != nullptr,
                    "Must have non-null owner simulation data",
                    IMP::ValueException);
-  GET_ASSIGNMENT(box_side);
-  GET_ASSIGNMENT(tunnel_radius);
-  GET_ASSIGNMENT(slab_thickness);
   GET_ASSIGNMENT(box_is_on);
   GET_ASSIGNMENT(interaction_k);
   GET_ASSIGNMENT(interaction_range);
@@ -306,6 +303,14 @@ Scoring::get_predicate_pair_score
   return iter->second;
  }
 
+IMP::PairScore*
+Scoring::get_predicate_pair_score
+( core::ParticleType t1, core::ParticleType t2)
+{
+  PairScore const* ret_value= get_predicate_pair_score(t1, t2);
+  return const_cast<PairScore*>(ret_value);
+ }
+
 
 // returns max of site-site and non-specific interaction ranges
 // for interaction type it, if applicable
@@ -531,10 +536,14 @@ Restraint * Scoring::create_slab_restraint
   IMP::Pointer<IMP::SingletonScore> slab_score;
   if (get_sd()->get_is_slab_with_cylindrical_pore()) {
     slab_score=new SlabWithCylindricalPoreSingletonScore
-      (slab_thickness_, tunnel_radius_, excluded_volume_k_);
+      (get_sd()->get_slab_thickness(),
+       get_sd()->get_tunnel_radius(),
+       excluded_volume_k_);
   } else {
     slab_score=new SlabWithToroidalPoreSingletonScore
-      (slab_thickness_, tunnel_radius_, excluded_volume_k_);
+      (get_sd()->get_slab_thickness(),
+       get_sd()->get_tunnel_radius(),
+       excluded_volume_k_);
   }
   return container::create_restraint(slab_score.get(),
                                      particles.get(),

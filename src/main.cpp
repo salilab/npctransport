@@ -150,6 +150,11 @@ IMP::AddBoolFlag no_save_restraints_to_rmf_adder
   "whether not to save restraints to rmf conformations and final rms,"
   " if either is applicable",
   &no_save_restraints_to_rmf);
+bool is_inflate_kap28;
+IMP::AddBoolFlag is_inflate_kap28_adder
+( "inflate_kap28",
+  "whether to inflate kap28 to radius of 150 nm + double the box size + switch it to having 16 interaction sites",
+  &is_inflate_kap28);
 
 
 namespace {
@@ -375,6 +380,52 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       // }
       sd->get_bd()->set_current_time(0.0);
       std::cout << "Equilibration finished succesfully" << std::endl;
+    }
+    if( is_inflate_kap28 ) {
+      std::cout << "inflating kap28, etc." << std::endl;
+      sd->set_box_size(sd->get_box_size()*2.5);
+      ParticlesTemp beads=sd->get_beads();
+      core::XYZRs kap28s;
+      core::ParticleType kap28_type("kap28");
+      for(unsigned int i=0; i<beads.size(); i++){
+        core::Typed typed_pi(beads[i]);
+        if(typed_pi.get_type() == kap28_type){
+          kap28s.push_back(core::XYZR(beads[i]));
+          continue;
+        }
+      }
+      algebra::Sphere3Ds orig_sites=
+        sd->get_sites(kap28_type);
+      algebra::Sphere3Ds inflated_sites=
+        sd->get_sites(kap28_type);
+      double delta=0.025;
+      for(double r=28.00; r<154.0; r+= delta){
+        for(unsigned int i=0; i<kap28s.size(); i++){
+          kap28s[i].set_radius(r);
+          for(unsigned int j=0; j<inflated_sites.size(); j++){
+            algebra::Vector3D orig_site=
+              orig_sites[j].get_center();
+            inflated_sites[j]._set_center(orig_site * r / 28.0);
+          }
+          sd->set_sites(kap28_type, inflated_sites);
+          // Update all interactions involving type:
+          // TODO: update score straight  from simulationData->set_sites() via Scoring,
+          //       instead of from here
+          ParticleTypeSet const& fg_types = sd->get_fg_types();
+          for(ParticleTypeSet::const_iterator it=fg_types.begin();
+              it!=fg_types.end(); it++){
+            SitesPairScore* ps1=
+              dynamic_cast<SitesPairScore*>(sd->get_scoring()->get_predicate_pair_score(kap28_type, *it));
+            IMP_ALWAYS_CHECK(ps1 != nullptr, "ps1 is not SitesPairScore", IMP::ValueException);
+            ps1->set_sites0(inflated_sites);
+            SitesPairScore* ps2=
+              dynamic_cast<SitesPairScore*>(sd->get_scoring()->get_predicate_pair_score(*it, kap28_type));
+            IMP_ALWAYS_CHECK(ps2 != nullptr, "ps2 is not SitesPairScore", IMP::ValueException);
+            ps1->set_sites1(inflated_sites);
+          }
+        }
+        sd->get_bd()->optimize(1);
+      }
     }
     if (is_BD_full_run) {
       timer.restart();

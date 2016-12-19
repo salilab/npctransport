@@ -44,9 +44,6 @@ class SimulationData;
 class IMPNPCTRANSPORTEXPORT Scoring: public Object
 {
  private:
-  Parameter<double> box_side_;
-  Parameter<double> tunnel_radius_;
-  Parameter<double> slab_thickness_;
   Parameter<bool> box_is_on_;
   Parameter<double> interaction_k_;
   Parameter<double> interaction_range_;
@@ -319,6 +316,8 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
 
 
+
+
   /***************************************************************/
   /***************************** Creators ************************/
   /***************************************************************/
@@ -452,6 +451,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   //! returns the pair score for particles of types t1 and t2   */
   IMP::PairScore const* get_predicate_pair_score
     ( core::ParticleType t1, core::ParticleType t2) const;
+
+  //! returns the pair score for particles of types t1 and t2   */
+  IMP::PairScore* get_predicate_pair_score
+    ( core::ParticleType t1, core::ParticleType t2);
+
 
   /** @return maximal actual interaction range (normalized by
       range factors) for a given interaction type, as set by
@@ -599,8 +603,6 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
     return FGChains(chains_set_.begin(), chains_set_.end());
   }
 #endif
-
-  double get_slab_thickness() const { return slab_thickness_; }
 
   double get_range() const { return range_; }
 

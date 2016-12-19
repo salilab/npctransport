@@ -842,6 +842,10 @@ double SimulationData::get_box_size() const{
   return box_side_;
 }
 
+void SimulationData::set_box_size(double box_size) {
+  box_side_= box_size;
+}
+
 algebra::Cylinder3D SimulationData::get_cylinder() const {
   IMP_USAGE_CHECK(get_is_slab_with_cylindrical_pore(),
                   "no slab with cylidrical pore defined");

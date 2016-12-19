@@ -254,11 +254,26 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      double const** quaternions_tables,
      ParticleIndex pi) const;
 
- private:
+ public:
   // sets the sites associated with each partner to sites0
   // and sites1, respectively (in local reference frame)
   void set_sites(const algebra::Sphere3Ds &sites0,
-                 const algebra::Sphere3Ds &sites1);
+                 const algebra::Sphere3Ds &sites1){
+    sites0_= sites0;
+    sites1_= sites1;
+  }
+
+  // sets the sites associated with the first partner
+  // (in local reference frame)
+  void set_sites0(const algebra::Sphere3Ds &sites0){
+    sites0_= sites0;
+  }
+
+  // sets the sites associated with the first partner
+  // (in local reference frame)
+  void set_sites1(const algebra::Sphere3Ds &sites1){
+    sites1_= sites1;
+  }
 
  private:
   // maintain a cache for evaluate_index() till call to deactivate_cache()
