@@ -148,6 +148,8 @@ void SimulationData::initialize(std::string prev_output_file,
   GET_VALUE_DEF(output_npctransport_version, 1.0); // old configuration files that don't have output version should be treated as version 1.0
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
+  GET_ASSIGNMENT_DEF(tunnel_radius_k, -1.0);
+  GET_ASSIGNMENT_DEF(pore_anchored_beads_k, -1.0);
   GET_ASSIGNMENT(slab_thickness);
   GET_ASSIGNMENT(slab_is_on);
   GET_ASSIGNMENT(box_is_on);
@@ -337,7 +339,11 @@ void SimulationData::create_fgs
       core::XYZR d(chain->get_bead(0));
       d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
       d.set_radius(d.get_radius() * fg_anchor_inflate_factor_); // inflate
-      d.set_coordinates_are_optimized(false);
+      if (tunnel_radius_k>0 && pore_anchored_beads_k>0){
+        get_scoring()->add_anchor_bead(d);
+      }else{
+        d.set_coordinates_are_optimized(false);
+      }
     }
     // add stats on chain
     get_statistics()->add_fg_chain_stats( chain );
