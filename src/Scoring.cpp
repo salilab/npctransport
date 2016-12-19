@@ -68,9 +68,6 @@ Scoring::Scoring
   IMP_ALWAYS_CHECK(owner_sd_ != nullptr,
                    "Must have non-null owner simulation data",
                    IMP::ValueException);
-  GET_ASSIGNMENT(box_side);
-  GET_ASSIGNMENT(tunnel_radius);
-  GET_ASSIGNMENT(slab_thickness);
   GET_ASSIGNMENT(box_is_on);
   GET_ASSIGNMENT(interaction_k);
   GET_ASSIGNMENT(interaction_range);
@@ -305,6 +302,14 @@ Scoring::get_predicate_pair_score
     return nullptr;
   }
   return iter->second;
+ }
+
+IMP::PairScore*
+Scoring::get_predicate_pair_score
+( core::ParticleType t1, core::ParticleType t2)
+{
+  PairScore const* ret_value= get_predicate_pair_score(t1, t2);
+  return const_cast<PairScore*>(ret_value);
  }
 
 

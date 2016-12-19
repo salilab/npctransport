@@ -440,6 +440,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   double get_box_size() const;
 
+  void set_box_size(double box_size);
 
   //* returns true if a slab is defnied */
   bool get_has_slab() const { return slab_is_on_!=0; }
