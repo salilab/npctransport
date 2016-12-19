@@ -47,8 +47,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   // params
   Parameter<double> output_npctransport_version_;
   Parameter<double> box_side_;
-  Parameter<double> tunnel_radius_; // note this is the initial radius
-  Parameter<double> slab_thickness_; // note this is the initial thickness
+  Parameter<double> tunnel_radius_; // note this is the initial pore radius (major radius if toroidal pore)
+  Parameter<double> tunnel_radius_k_; // k for harmonic restraint on pore radius
+  Parameter<double> pore_anchored_beads_k_; // k for harmonic restraint on beads anchored to pore
+  Parameter<double> slab_thickness_; // note this is the initial thickness (also minor vertical radius if toroidal pore)
   Parameter<bool> box_is_on_;
   Parameter<int> slab_is_on_;
   Parameter<int> number_of_trials_;
