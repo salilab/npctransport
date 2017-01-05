@@ -1,7 +1,7 @@
 /**
  * \file avro_cat.cpp
  * \brief Dumps all protobufs in an avro archive
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2017 IMP Inventors. All rights reserved.
  */
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>

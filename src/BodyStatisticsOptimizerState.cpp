@@ -2,7 +2,7 @@
  *  \file io.cpp
  *  \brief description.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2017 IMP Inventors. All rights reserved.
  *
  */
 

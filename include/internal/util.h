@@ -2,7 +2,7 @@
  *  \file util.h
  *  \brief Misceleneous internal utility functions
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2017 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_INTERNAL_UTIL_H

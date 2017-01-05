@@ -2,7 +2,7 @@
 # * \file fg_simulation.cpp
 # * \brief Simulate an fg and a kap interacting
 #
-# * Copyright 2007-2012 IMP Inventors. All rights reserved.
+# * Copyright 2007-2017 IMP Inventors. All rights reserved.
 # */
 
 #include <IMP/npctransport/npctransport_config.h>

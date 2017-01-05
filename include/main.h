@@ -2,7 +2,7 @@
  *  \file main.h
  *  \brief Helper functions for executable .cpp files
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2017 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_MAIN_H

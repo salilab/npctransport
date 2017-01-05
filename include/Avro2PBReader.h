@@ -3,7 +3,7 @@
  *  \brief an iterator that reads npctransport protobuf output files one by one
  *         from a list of avro files (used mainly as a wrapper for python usage)
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2017 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_AVRO2PB_READER_H

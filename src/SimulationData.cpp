@@ -2,7 +2,7 @@
  *  \file SimulationData.cpp
  *  \brief description.
  *
- *  Copyright 2007-2013 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2017 IMP Inventors. All rights reserved.
  *
  */
 
