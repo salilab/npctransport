@@ -307,7 +307,7 @@ IMP::PairScore*
 Scoring::get_predicate_pair_score
 ( core::ParticleType t1, core::ParticleType t2)
 {
-  PairScore const* ret_value= get_predicate_pair_score(t1, t2);
+  PairScore const* ret_value= ((Scoring const*)(this))->get_predicate_pair_score(t1, t2);
   return const_cast<PairScore*>(ret_value);
  }
 

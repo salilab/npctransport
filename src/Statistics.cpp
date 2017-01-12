@@ -32,6 +32,7 @@
 #include <RMF/HDF5/Group.h>
 #include <RMF/HDF5/DataSetD.h>
 
+#include <algorithm>
 #include <numeric>
 #include <set>
 #include <math.h>
@@ -460,7 +461,7 @@ void Statistics
   if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
     return;
   }
-  float GRID_RESOLUTION_ANGSTROMS= 10.0; // resolution of zr grid
+  const float GRID_RESOLUTION_ANGSTROMS= 10.0; // resolution of zr grid
   bool is_z_symmetric=
     (get_sd()->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
@@ -505,8 +506,9 @@ void Statistics
   if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
     return;
   }
-  float GRID_RESOLUTION_ANGSTROMS=10; // resolution of zr grid
-  float CROP_FACTOR=0.5; // crop 0.5*Crop x 2 on each dimension (e.g. for box size of 200, only include -50 to +50 and not -100 to +100 on each dimension)
+  const float GRID_RESOLUTION_ANGSTROMS=10; // resolution of zr grid
+  const float CROP_FACTOR=0.5; // crop 0.5*Crop x 2 on each dimension (e.g. for box size of 200, only include -50 to +50 and not -100 to +100 on each dimension
+  const double MAX_CROP=1000.0;
   bool is_z_symmetric=
     (get_sd()->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
@@ -522,7 +524,7 @@ void Statistics
   }
   ParticleTypeXYZDistributionMap::iterator& it=it_pair.first;
   //update distribution
-  float box_half =  get_sd()->get_box_size() / 2.0; // get_z_distribution_top();
+  float box_half =  std::min(get_sd()->get_box_size() / 2.0, MAX_CROP); // get_z_distribution_top();
   unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS*CROP_FACTOR) + 5; // +5 for slack
   unsigned int nx= 2 * half_n_max;
   unsigned int ny= 2 * half_n_max;

@@ -20,6 +20,8 @@
 #include <IMP/ScoringFunction.h>
 #include <IMP/Model.h>
 #include <IMP/core/rigid_bodies.h>
+#include <IMP/atom/Diffusion.h>
+#include <IMP/atom/estimates.h>
 
 //#include <IMP/algebra.h>
 //#include <IMP/core.h>
@@ -50,6 +52,7 @@
 #include <cmath>
 #include <iostream>
 #include <ctime>
+
 
 #include <IMP/npctransport/protobuf.h>
 
@@ -314,6 +317,160 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
   return sd.release();
 }
 
+//! remove nup42 and its anchors (also from obstacles)
+void remove_Nup42(SimulationData* sd){
+  Model* m= sd->get_model();
+  // remove all diffusing Nup42 beads:
+  {
+    std::cout << "Removing Nup42 diffusing beads" << std::endl;
+    ParticlesTemp beads=sd->get_beads();
+    core::ParticleType Nup42_type("Nup42");
+    for(unsigned int i=0; i<beads.size(); i++){
+      core::Typed typed_pi(beads[i]);
+      if(typed_pi.get_type() == Nup42_type){
+        //        m->remove_particle(beads[i]->get_index());
+        core::XYZ xyz(beads[i]);
+        if(xyz.get_z()<500.0){
+          xyz.set_z(xyz.get_z()+2000.0);
+        }
+      }
+    }
+  }
+  // remove all obstacles close to center - these are Nup42 anchors:
+  {
+    ParticlesTemp obstacles= sd->get_obstacle_particles();
+    for(unsigned int i=0; i<obstacles.size(); i++){
+      core::XYZ xyz(obstacles[i]);
+      double r2=std::pow(xyz.get_x(),2.0)+std::pow(xyz.get_y(),2.0);
+      if(r2<200*200 && xyz.get_z()<500.0){
+        std::cout << "Moving Nup42 obstacle at " << xyz.get_coordinates() << std::endl;
+        //        m->remove_particle(obstacles[i]->get_index());
+        xyz.set_z(xyz.get_z()+2000.0);
+      }
+    }
+  }
+}
+
+//! inflate floater of specified type to new_radius
+void inflate_floater
+(SimulationData* sd, const std::string floater_name, const float new_radius){
+  std::cout << "inflating " << floater_name << " to "
+            << new_radius << " A" << std::endl;
+  ParticlesTemp beads=sd->get_beads();
+  core::XYZRs floaters;
+  core::ParticleType floater_type(floater_name);
+  double cur_radius(-1.0);
+  for(unsigned int i=0; i<beads.size(); i++){
+    core::Typed typed_pi(beads[i]);
+    if(typed_pi.get_type() == floater_type){
+      core::XYZR xyzr(beads[i]);
+      floaters.push_back(xyzr);
+      if(floaters.size()==1){
+        cur_radius= xyzr.get_radius();
+        std::cout << "Current radius = " << cur_radius << std::endl;
+      } else {
+        IMP_ALWAYS_CHECK(cur_radius==xyzr.get_radius(),
+                         "inconsistent radii for same particle type",
+                         IMP::UsageException);
+      }
+    }
+  } // for i
+  algebra::Sphere3Ds orig_sites=
+    sd->get_sites(floater_type);
+  algebra::Sphere3Ds inflated_sites=
+    sd->get_sites(floater_type);
+  ParticleTypeSet const& fg_types = sd->get_fg_types();
+  std::cout << "Inflating begins" << std::endl;
+  double delta;
+  if(new_radius > cur_radius){
+    delta= 0.05;
+  }else{
+    delta= -0.05;
+  }
+  for(double r=cur_radius;
+      std::abs(r-new_radius)>0.5*std::abs(delta);
+      r+= delta){
+    std::cout << "Inflating sites to radius = " << r
+              << " score "
+              << sd->get_bd()->get_scoring_function()->evaluate(false)
+              << std::endl;
+    for(unsigned int j=0; j<inflated_sites.size(); j++){
+      algebra::Vector3D orig_site=
+        orig_sites[j].get_center();
+      inflated_sites[j]._set_center(orig_site * r / cur_radius);
+    }
+    for(unsigned int i=0; i<floaters.size(); i++){
+      floaters[i].set_radius(r);
+      atom::RigidBodyDiffusion rbd(beads[i]);
+      rbd.set_diffusion_coefficient // TODO: we assumed d_factor=1, need to adjust if it isn't
+        (atom::get_einstein_diffusion_coefficient(r));
+      rbd.set_rotational_diffusion_coefficient
+        (atom::get_einstein_rotational_diffusion_coefficient(r)
+         * sd->get_angular_d_factor());
+      sd->set_sites(floater_type, inflated_sites);
+      // Update all interactions involving type:
+      // TODO: update score straight  from simulationData->set_sites() via Scoring,
+      //       instead of from here
+      for(ParticleTypeSet::const_iterator it=fg_types.begin();
+          it!=fg_types.end(); it++){
+        SitesPairScore* ps1=
+          dynamic_cast<SitesPairScore*>(sd->get_scoring()->get_predicate_pair_score(floater_type, *it));
+        IMP_ALWAYS_CHECK(ps1 != nullptr, "ps1 is not SitesPairScore", IMP::ValueException);
+        ps1->set_sites0(inflated_sites);
+        SitesPairScore* ps2=
+          dynamic_cast<SitesPairScore*>(sd->get_scoring()->get_predicate_pair_score(*it, floater_type));
+        IMP_ALWAYS_CHECK(ps2 != nullptr, "ps2 is not SitesPairScore", IMP::ValueException);
+        ps1->set_sites1(inflated_sites);
+      }
+    } // i
+    sd->get_bd()->optimize(50);
+    // if(conformations_rmf_sos && (std::abs(r-std::round(r))<0.001)){
+    //   conformations_rmf_sos->update_always("Inflating");
+    // }
+  } // r
+  // Update output file (read, find floater, update radius):
+  bool read(false);
+  int fd= open(output.c_str(), O_RDONLY);
+  google::protobuf::io::FileInputStream fis(fd);
+  google::protobuf::io::CodedInputStream cis(&fis);
+  cis.SetTotalBytesLimit(500000000,200000000);
+  ::npctransport_proto::Output new_output;
+  read= new_output.ParseFromCodedStream(&cis);
+  close(fd);
+  IMP_ALWAYS_CHECK(read, "Couldn't read output file " << output << " file descriptor " << fd,
+                   IMP::ValueException);
+  ::npctransport_proto::Assignment* pb_assignment = new_output.mutable_assignment();
+  for (int i = 0; i < pb_assignment->floaters_size(); ++i) {
+    ::npctransport_proto::Assignment_FloaterAssignment* f_data=
+      pb_assignment->mutable_floaters(i);
+    if(f_data->type() == floater_name){
+      f_data->mutable_radius()->set_value(new_radius);
+      break;
+    }
+  }
+  std::ofstream outf(output.c_str(), std::ios::binary);
+  new_output.SerializeToOstream(&outf);
+}
+
+void reset_box_size(SimulationData* sd, double box_size){
+  sd->set_box_size(box_size);
+  // Update output file:
+  bool read(false);
+  int fd= open(output.c_str(), O_RDONLY);
+  google::protobuf::io::FileInputStream fis(fd);
+  google::protobuf::io::CodedInputStream cis(&fis);
+  cis.SetTotalBytesLimit(500000000,200000000);
+  ::npctransport_proto::Output new_output;
+  read= new_output.ParseFromCodedStream(&cis);
+  close(fd);
+  IMP_ALWAYS_CHECK(read, "Couldn't read output file " << output << " file descriptor " << fd,
+                   IMP::ValueException);
+  ::npctransport_proto::Assignment* pb_assignment = new_output.mutable_assignment();
+  pb_assignment->mutable_box_side()->set_value(box_size);
+  std::ofstream outf(output.c_str(), std::ios::binary);
+  new_output.SerializeToOstream(&outf);
+}
+
 //  Run simulation using preconstructed SimulationData object sd,
 //  with ad-hoc init restratins init_restraints
 void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
@@ -382,50 +539,23 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       std::cout << "Equilibration finished succesfully" << std::endl;
     }
     if( is_inflate_kap28 ) {
-      std::cout << "inflating kap28, etc." << std::endl;
-      sd->set_box_size(sd->get_box_size()*2.5);
-      ParticlesTemp beads=sd->get_beads();
-      core::XYZRs kap28s;
-      core::ParticleType kap28_type("kap28");
-      for(unsigned int i=0; i<beads.size(); i++){
-        core::Typed typed_pi(beads[i]);
-        if(typed_pi.get_type() == kap28_type){
-          kap28s.push_back(core::XYZR(beads[i]));
-          continue;
-        }
+      sd->switch_suspend_rmf(true);
+      reset_box_size(sd, sd->get_box_size()*3.0);
+      sd->get_bd()->set_scoring_function // update scoring function with new box size
+      ( sd->get_scoring()->get_scoring_function(true) );
+      remove_Nup42(sd);
+      inflate_floater(sd, "kap16", 14.0);
+      inflate_floater(sd, "kap18", 14.0);
+      //      inflate_floater(sd, "kap20", 14.0);
+      inflate_floater(sd, "kap22", 30.0);
+      inflate_floater(sd, "kap24", 40.0);
+      inflate_floater(sd, "kap26", 75.0);
+      inflate_floater(sd, "kap28", 150.0);
+      if(!conformations.empty()){
+        sd->set_rmf_file("INFLATED_"+conformations,
+                         !no_save_restraints_to_rmf);
       }
-      algebra::Sphere3Ds orig_sites=
-        sd->get_sites(kap28_type);
-      algebra::Sphere3Ds inflated_sites=
-        sd->get_sites(kap28_type);
-      double delta=0.025;
-      for(double r=28.00; r<154.0; r+= delta){
-        for(unsigned int i=0; i<kap28s.size(); i++){
-          kap28s[i].set_radius(r);
-          for(unsigned int j=0; j<inflated_sites.size(); j++){
-            algebra::Vector3D orig_site=
-              orig_sites[j].get_center();
-            inflated_sites[j]._set_center(orig_site * r / 28.0);
-          }
-          sd->set_sites(kap28_type, inflated_sites);
-          // Update all interactions involving type:
-          // TODO: update score straight  from simulationData->set_sites() via Scoring,
-          //       instead of from here
-          ParticleTypeSet const& fg_types = sd->get_fg_types();
-          for(ParticleTypeSet::const_iterator it=fg_types.begin();
-              it!=fg_types.end(); it++){
-            SitesPairScore* ps1=
-              dynamic_cast<SitesPairScore*>(sd->get_scoring()->get_predicate_pair_score(kap28_type, *it));
-            IMP_ALWAYS_CHECK(ps1 != nullptr, "ps1 is not SitesPairScore", IMP::ValueException);
-            ps1->set_sites0(inflated_sites);
-            SitesPairScore* ps2=
-              dynamic_cast<SitesPairScore*>(sd->get_scoring()->get_predicate_pair_score(*it, kap28_type));
-            IMP_ALWAYS_CHECK(ps2 != nullptr, "ps2 is not SitesPairScore", IMP::ValueException);
-            ps1->set_sites1(inflated_sites);
-          }
-        }
-        sd->get_bd()->optimize(1);
-      }
+      sd->switch_suspend_rmf(false);
     }
     if (is_BD_full_run) {
       timer.restart();
