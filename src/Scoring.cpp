@@ -257,7 +257,7 @@ void Scoring::add_interaction
     pts1.push_back(type0);
     pts1.push_back(type1);
     int interaction_id1 = get_ordered_type_pair_predicate()->get_value(pts1);
-    IMP_NEW(npctransp<ort::SitesPairScore, ps1,
+    IMP_NEW(npctransport::SitesPairScore, ps1,
             (interaction_range, interaction_k,
 	     sigma0, sigma1,
              nonspecific_range_,

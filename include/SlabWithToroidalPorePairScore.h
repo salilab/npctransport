@@ -21,7 +21,8 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-class IMPNPCTRANSPORTEXPORT SlabWithToroidalPorePairScore : public PairScore
+class IMPNPCTRANSPORTEXPORT SlabWithToroidalPorePairScore
+: public PairScore
 {
   double k_; // repulsion constant in kcal/mol/A
 

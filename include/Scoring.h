@@ -593,6 +593,14 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   IMP::Restraints get_custom_restraints() const
     { return custom_restraints_; }
 
+  /**
+     add anchor bead to scoring function
+   */
+  void add_anchor_bead(IMP::Particle* p){
+    // TODO: implement and add all necessary support
+    IMP_NOT_IMPLEMENTED;
+  }
+
 #ifndef SWIG
   /**
      returns pointers to the collection of the FG Chains stored in

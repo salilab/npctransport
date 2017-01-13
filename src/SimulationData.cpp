@@ -243,15 +243,16 @@ void SimulationData::initialize(std::string prev_output_file,
     slab_particle_ = new Particle(get_model(), "Slab");
     if(get_is_slab_with_cylindrical_pore()){
       SlabWithCylindricalPore::setup_particle(slab_particle_,
-					      slab_thickness_
+					      slab_thickness_,
 					      tunnel_radius_);
     } else{
       SlabWithToroidalPore::setup_particle(slab_particle_,
-					   slab_thickness_
+					   slab_thickness_,
 					   tunnel_radius_);
     }
-    atom::Hierarchy::setup_particle(slab_particle_);
-    get_root().add_child( slab_particle_ );
+    atom::Hierarchy h_slab_particle=
+      atom::Hierarchy::setup_particle(slab_particle_);
+    get_root().add_child( h_slab_particle );
   }
 
   IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
@@ -339,7 +340,7 @@ void SimulationData::create_fgs
       core::XYZR d(chain->get_bead(0));
       d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
       d.set_radius(d.get_radius() * fg_anchor_inflate_factor_); // inflate
-      if (tunnel_radius_k>0 && pore_anchored_beads_k>0){
+      if (tunnel_radius_k_>0 && pore_anchored_beads_k_>0){
         get_scoring()->add_anchor_bead(d);
       }else{
         d.set_coordinates_are_optimized(false);
