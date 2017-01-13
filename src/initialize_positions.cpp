@@ -172,10 +172,10 @@ void optimize_balls(const ParticlesTemp &ps,
             int actual_n_bd_cycles =
               std::ceil(n_bd_cycles * short_init_factor) ;
             double e_bd = bd->optimize( actual_n_bd_cycles );
-            std::cout <<  // IMP_LOG(PROGRESS,
+            IMP_LOG(PROGRESS,
                     "Energy after bd is " << e_bd <<
                     " at ramp level " << ramp_level << ", "
-                      << k_simanneal << std::endl; // );
+                    << k_simanneal << std::endl);
             if (debug) {
               std::ostringstream oss;
               oss << "Init after " << ramp_level << " " << k_simanneal;

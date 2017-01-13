@@ -224,11 +224,7 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
     } // if is_orientation
     if(range>0.0 && k>0.0) {
       max_k=std::max(max_k, k);
-      std::cout << "interaction " << i
-                << " update range from "
-                << min_range;
       min_range=std::min(min_range, range);
-      std::cout << " to " << min_range << std::endl;
     }
   } // for interactions(i)
 
