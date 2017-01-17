@@ -16,49 +16,34 @@
 #include <IMP/check_macros.h>
 //#include <IMP/benchmark/Profiler.h>
 #include <IMP/npctransport/initialize_positions.h>
-#include <IMP/rmf/frames.h>
-#include <IMP/ScoringFunction.h>
-#include <IMP/Model.h>
-#include <IMP/core/rigid_bodies.h>
-#include <IMP/atom/Diffusion.h>
-#include <IMP/atom/estimates.h>
-
-//#include <IMP/algebra.h>
-//#include <IMP/core.h>
-//#include <IMP/atom.h>
-//#include <IMP/display.h>
-//#include <IMP/rmf.h>
-//#include <IMP.h>
-#include <IMP/container.h>
-#include <IMP/CreateLogContext.h>
-#include <IMP/random.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/internal/boost_main.h>
 #include <IMP/npctransport.h>
-//#include <IMP/benchmark/Profiler.h>
-
-// use the example code for now to work bugs out of it
-//#include <IMP/example/creating_restraints.h>
-//#include <IMP/example/randomizing.h>
-//#include <IMP/example/counting.h>
-//#include <IMP/example/optimizing.h>
-
+#include <IMP/npctransport/protobuf.h>
+#include <IMP/rmf/frames.h>
+#include <IMP/core/rigid_bodies.h>
+#include <IMP/atom/Diffusion.h>
+#include <IMP/atom/estimates.h>
+#include <IMP/container.h>
+#include <IMP/CreateLogContext.h>
+#include <IMP/random.h>
 #include <IMP/nullptr.h>
 #include <IMP/nullptr_macros.h>
 #include <IMP/check_macros.h>
 #include <IMP/exception.h>
-#include <boost/cstdint.hpp>
-#include <numeric>
-#include <cmath>
-#include <iostream>
-#include <ctime>
-
-
-#include <IMP/npctransport/protobuf.h>
+#include <IMP/ScoringFunction.h>
+#include <IMP/Model.h>
 
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/io/coded_stream.h>
+
 #include <fcntl.h>
+#include <boost/cstdint.hpp>
+#include <algorithm>
+#include <cmath>
+#include <ctime>
+#include <iostream>
+#include <numeric>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 boost::int64_t work_unit = -1;
@@ -158,7 +143,11 @@ IMP::AddBoolFlag is_inflate_kap28_adder
 ( "inflate_kap28",
   "whether to inflate kap28 to radius of 150 nm + double the box size + switch it to having 16 interaction sites",
   &is_inflate_kap28);
-
+double kap_interaction_k_factor = 1.0;
+AddFloatFlag kap_interaction_k_factor_adder
+( "kap_interaction_k_factor",
+  "increase kap interaction factor by said ratio relative to input configuration/restart file, and update to output file",
+  &kap_interaction_k_factor );
 
 namespace {
   /*********************************** internal functions
@@ -188,6 +177,25 @@ namespace {
     }
   }
 
+  void adjust_kap_stickiness
+  ( ::npctransport_proto::Assignment* pb_assignment );
+
+  inline void adjust_kap_stickiness
+  ( ::npctransport_proto::Assignment* pb_assignment )
+  {
+    for (int i = 0; i < pb_assignment->floaters_size(); ++i) {
+      ::npctransport_proto::Assignment_FloaterAssignment* f_data=
+        pb_assignment->mutable_floaters(i);
+      std::string prefix("kap");
+      if( std::mismatch(prefix.begin(),prefix.end(), f_data->type().begin()).first ==
+          prefix.end() ) { // = if "kap" is a prefix of f_data->type
+        double new_k_factor=
+          f_data->interaction_k_factor().value() * kap_interaction_k_factor;
+        f_data->mutable_interaction_k_factor()->set_value( new_k_factor );
+      }
+    }
+  }
+
   /** writes the output assignment file based on the configuration parameters
       either assign a new work unit from a configuration file, or restart
       from a previous output file
@@ -196,22 +204,27 @@ namespace {
       to be saved in the output file
   */
   inline void write_output_based_on_flags(boost::uint64_t actual_seed) {
+    std::string prev_output_fname;
     if (restart.empty()) {
       int num = IMP::npctransport::assign_ranges(configuration, output, work_unit,
-                                               show_steps, actual_seed);
+                                                 show_steps, actual_seed);
       if (show_number_of_work_units) {
-      IMP_OMP_PRAGMA(critical)
-        std::cout << "work units " << num << std::endl;
-    }
+        IMP_OMP_PRAGMA(critical)
+          std::cout << "work units " << num << std::endl;
+      }
+      prev_output_fname= output;
     } else {  // resart.empty()
-    IMP_OMP_PRAGMA(critical)
-      std::cout << "Restart simulation from " << restart << std::endl;
+      prev_output_fname= restart;
+      IMP_OMP_PRAGMA(critical)
+        std::cout << "Restart simulation from " << restart << std::endl;
+    }
+
     ::npctransport_proto::Output prev_output;
     // copy to new file to avoid modifying input file
     //std::ifstream file(restart.c_str(), std::ios::binary);
     //bool read = prev_output.ParseFromIstream(&file);
     bool read(false);
-    int fd= open(restart.c_str(), O_RDONLY);
+    int fd= open(prev_output_fname.c_str(), O_RDONLY);
     if(fd!=-1){
       google::protobuf::io::FileInputStream fis(fd);
       google::protobuf::io::CodedInputStream cis(&fis);
@@ -219,13 +232,15 @@ namespace {
       read= prev_output.ParseFromCodedStream(&cis);
       close(fd);
     }
-
     IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << restart << " file descriptor " << fd,
                      IMP::ValueException);
-    prev_output.mutable_assignment()->set_random_seed(actual_seed);
+    ::npctransport_proto::Assignment* pb_assignment = prev_output.mutable_assignment();
+    adjust_kap_stickiness(pb_assignment);
+    if(!restart.empty()) {
+      pb_assignment->set_random_seed(actual_seed);
+    }
     std::ofstream outf(output.c_str(), std::ios::binary);
     prev_output.SerializeToOstream(&outf);
-    }
   }
 
   /**
