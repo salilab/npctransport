@@ -565,11 +565,37 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
     return swp.get_thickness();
   }
 
-  double get_pore_radius() const {
+  //! returns te current tunnel radius
+  double get_tunnel_radius() const {
     IMP_USAGE_CHECK(get_slab_particle() != nullptr && get_has_slab(),
                     "invalid slab - can't get pore radius");
     SlabWithPore swp(get_slab_particle());
     return swp.get_pore_radius();
+  }
+
+  //! alias to get_tunnel_radius
+    double get_pore_radius() const{
+    return get_tunnel_radius();
+  }
+
+  //! returns the force coefficient for keeping the tunnel radius in
+  //! equilibrium (radius is dynamic only if this coefficient is positive)
+  double get_tunnel_radius_k() const {
+    return tunnel_radius_k_;
+  }
+
+  //! alias to get_tunnel_radius_k
+  double get_pore_radius_k() const {
+    return get_tunnel_radius_k();
+  }
+
+  //! returns true if pore radius can change dynamically
+  bool get_is_pore_radius_dynamic() const {
+    return get_has_slab() && get_tunnel_radius_k()>0.0;
+  }
+
+  double get_pore_anchored_beads_k() const {
+    return pore_anchored_beads_k_;
   }
 
   display::Geometry *get_static_geometry();

@@ -2,7 +2,7 @@
  *  \file IMP/npctransport/SlabWithCylindricalPore.h
  *  \brief A decorator for a particle that's a slab with a cylindrical pore.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2017 IMP Inventors. All rights reserved.
  *
  */
 
@@ -33,7 +33,7 @@ class IMPNPCTRANSPORTEXPORT SlabWithCylindricalPore
       The slab is parallel to the x,y plain from z=-0.5*thickness to
       z=0.5*thickness, and the central axis of the pore lies on the
       origin.
- 
+
       @param m the model
       @param pi the particle index
       @param thickness slab thickness
@@ -41,8 +41,8 @@ class IMPNPCTRANSPORTEXPORT SlabWithCylindricalPore
   */
   static void do_setup_particle(IMP::Model* m,
                                 ParticleIndex pi,
-				double thickness, 
-				double radius);  
+				double thickness,
+				double radius);
 
 
  public:
@@ -51,19 +51,19 @@ class IMPNPCTRANSPORTEXPORT SlabWithCylindricalPore
 
   /** Decorate a particle that represents a slab (e.g. nuclear
       envelope) with specified thickness and a cylindrical pore of
-      specified radius. 
+      specified radius.
 
       The slab is parallel to the x,y plain from z=-0.5*thickness to
       z=0.5*thickness, and the central axis of the pore lies on the
       origin.
- 
+
       @param m the model
       @param pi the particle index
       @param thickness slab thickness
       @param radius pore radius
   */
-  IMP_DECORATOR_SETUP_2(SlabWithCylindricalPore,  
-			double, thickness, 
+  IMP_DECORATOR_SETUP_2(SlabWithCylindricalPore,
+			double, thickness,
 			double, radius);
 
   //! Return true if the particle is an instance of SlabWithCylindricalPore

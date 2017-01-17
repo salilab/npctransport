@@ -206,8 +206,7 @@ void SimulationData::initialize(std::string prev_output_file,
                                 1.0 );
     core::Typed::setup_particle( get_slab_particle(),
                                  core::ParticleType(SLAB_TYPE_STRING));
-
-    //    get_root().add_child( h_slab_particle );
+    //    get_root().add_child( h_slab_particle ); // TODO: include it as child of root? This may have unforeseen consequences
   }
   for (int i = 0; i < pb_assignment.fgs_size(); ++i)
     {
@@ -238,21 +237,6 @@ void SimulationData::initialize(std::string prev_output_file,
     }
   for (int i = 0; i < pb_assignment.obstacles_size(); ++i) {
     create_obstacles(pb_assignment.obstacles(i));
-  }
-  if(get_has_slab()){ // TODO: at some point, obstacles should be the children of slab (cause in some sense, they refine it)
-    slab_particle_ = new Particle(get_model(), "Slab");
-    if(get_is_slab_with_cylindrical_pore()){
-      SlabWithCylindricalPore::setup_particle(slab_particle_,
-					      slab_thickness_,
-					      tunnel_radius_);
-    } else{
-      SlabWithToroidalPore::setup_particle(slab_particle_,
-					   slab_thickness_,
-					   tunnel_radius_);
-    }
-    atom::Hierarchy h_slab_particle=
-      atom::Hierarchy::setup_particle(slab_particle_);
-    get_root().add_child( h_slab_particle );
   }
 
   IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
@@ -340,8 +324,9 @@ void SimulationData::create_fgs
       core::XYZR d(chain->get_bead(0));
       d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
       d.set_radius(d.get_radius() * fg_anchor_inflate_factor_); // inflate
-      if (tunnel_radius_k_>0 && pore_anchored_beads_k_>0){
-        get_scoring()->add_anchor_bead(d);
+      if (get_is_pore_radius_dynamic()
+          && pore_anchored_beads_k_>0) {
+        get_scoring()->add_restrained_anchor_bead(d); // TODO: think if problems might arise when restarting - if current radius of pore is updated in output file
       }else{
         d.set_coordinates_are_optimized(false);
       }
@@ -606,6 +591,7 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
   //       Scoring.cpp (for better encapsulation
   IMP_LOG(TERSE, "Setting up dump" << std::endl);
   Scoring* s=get_scoring();
+  std::cout << "Linking " << get_root().get_number_of_children() << " particles and their children" << std::endl;
   add_hierarchies_with_sites(fh, get_root().get_children());
   if(with_restraints) {
     IMP::rmf::add_restraints

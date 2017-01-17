@@ -95,6 +95,13 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   PointerMember
     <IMP::Restraint> slab_restraint_;
 
+  // scores on anchor resiudes
+  IMP::Restraints anchor_restraints_;
+
+  // pore radius restraint
+  PointerMember
+    <IMP::Restraint> pore_radius_restraint_;
+
   // a map from particle indexes of chain identifiers to corresponding
   // chain backbone restraints (see chain_ids_map)
   typedef boost::unordered_set
@@ -594,12 +601,16 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
     { return custom_restraints_; }
 
   /**
-     add anchor bead to scoring function
+     add anchor bead to scoring function, using current position of p
+     as equilibrium position relative to pore
+
+     @param p anchored particle
+
+     @note currently only cylindrical pore case is supported
    */
-  void add_anchor_bead(IMP::Particle* p){
-    // TODO: implement and add all necessary support
-    IMP_NOT_IMPLEMENTED;
-  }
+  void add_restrained_anchor_bead(IMP::Particle* p);
+
+  Restraint* get_pore_radius_restraint() const;
 
 #ifndef SWIG
   /**

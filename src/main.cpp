@@ -319,7 +319,6 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
 
 //! remove nup42 and its anchors (also from obstacles)
 void remove_Nup42(SimulationData* sd){
-  Model* m= sd->get_model();
   // remove all diffusing Nup42 beads:
   {
     std::cout << "Removing Nup42 diffusing beads" << std::endl;

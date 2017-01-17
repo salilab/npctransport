@@ -2,7 +2,7 @@
  *  \file IMP/npctransport/SlabWithToroidalPore.h
  *  \brief A decorator for a particle that's a slab with a toroidal pore.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2017 IMP Inventors. All rights reserved.
  *
  */
 

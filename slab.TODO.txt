@@ -1,29 +1,37 @@
 TODO:
 
-PoreRadiusSinglestonScore
-- typedef as IMP::core::AttributeSingletonScore<harmonic unary function relative to ideal pore radius>
-- a score on the pore radius equilibrium value, parameters: equilibrium radius, k
+Debugging:
+- test_slab_with_cylindrical_pore_ss.py
 
-CylidnricalPoreAnchorPairScore
-- evaluate_index(slab, particle) is a distance restraint on particle, relative to a location in spherical coordinates - fixed angle and z, at current pore radius. (linear or harmonic?) - pore radius derivative affected by projection of pulling force over radial axis; allow adding a shift relative to radius (+ = inside; - = outside, r=0 as minimum)
-
-ToroidalPoreAnchorPairScore
+AnchorToToroidalPorePairScore:
 - TBD
 
-Scoring
-- add slab restraint based on PoreRadiusSingleionScore if get_sd()->tunnel_radius_k>0
-- add add_to_anchor_restraint() method, with CylindricalPoreAnchorPairScore (or Toroidal TBD) on anchor points, if tunnel_radius_k>0, with shift defined based on initial shift (what happens upon restart?)
-
-
-Statistics?
+Statistics:
+- TBD
 
 BrownianDynamicsWithSlab - add slab parameter, that will be optimized (radius variable should be given fake diffusivity constant, and then be subjected to brownian motion, including applied forces)
 
 automatic_parameters.cpp
 - include tunnel_radius_k and anchor_k in step size calculations? (or assume it's slow relative to other motions?)
 
+TESTS - for all of the above
+
+RMF support:
+- TBD (need to take care of dynamic pore size mainly - quite a pain to display)
+
+Output file:
+- TBD (except statistics, updating latest radius?)
+
+Future options:
+- for efficiency - make a single restraint for Anchor to Cylindrical Pore Pair Score (by adding PoreAnchor decorator that includes normalized xy and pore radial d, also link this to RMF
+
 DONE:
 =====
+
+Scoring:
+- add add_restrained_anchor_bead() method, with AnchorToCylinderriclPairScore (or Toroidal TBD) on anchor points, if tunnel_radius_k>0, with shift defined based on initial shift (what happens upon restart?)
+- add slab restraint based on PoreRadiusSingleionScore if get_sd()->tunnel_radius_k>0
+- include pore radius restraint and anchor restraints in scoring function (probably both custom and non-custom)
 
 npctransport.proto
 - k for slab radius; if <=0 -> static slab radius (non-optimized)
@@ -32,3 +40,9 @@ Simulation data
 - read tunnel_radius_k
 - define CylindricalPoreAnchorPairScore (or Toroidal TBD) on anchor points, if tunnel_radius_k>0, with shift defined based on initial shift (what happens upon restart?)
 - call scoring to add restraints on anchors to pore if tunnel_radius_k>0 and anchor_k>0
+
+PoreRadiusSinglestonScore
+- a score on the pore radius equilibrium value, parameters: equilibrium radius, k
+
+AnchorToCylidnricalPorePairScore
+- evaluate_index(slab, particle) is a distance restraint on particle, relative to a location in spherical coordinates - fixed angle and z, at current pore radius. (harmonic) - pore radius derivative affected by projection of pulling force over radial axis; allow adding a shift relative to radius (+ = inside; - = outside, r=0 as minimum)

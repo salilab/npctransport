@@ -79,12 +79,12 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
 
   //! returns whether the particle last enetered the transport moiety from its
   //top
-  double get_thickness() const {
+  Float get_thickness() const {
     return get_particle()->get_value(get_thickness_key());
   }
 
   //! get cylindrical pore radius
-  double get_pore_radius() const {
+  Float get_pore_radius() const {
     return get_particle()->get_value(get_pore_radius_key());
   }
 

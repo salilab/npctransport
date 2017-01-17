@@ -17,6 +17,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, SitesGeometry, SitesGeometries);
 IMP_SWIG_OBJECT(IMP::npctransport, TypedSitesGeometry, TypedSitesGeometries);
 IMP_SWIG_OBJECT(IMP::npctransport, SlabWithCylindricalPorePairScore, SlabWithCylindricalPorePairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, SlabWithToroidalPorePairScore, SlabWithToroidalPorePairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, PoreRadiusSingletonScore, PoreRadiusSingletonScores);
 IMP_SWIG_OBJECT(IMP::npctransport, ExcludeZRangeSingletonScore, ExcludeZRangeSingletonScores);
 IMP_SWIG_OBJECT(IMP::npctransport, ZBiasSingletonScore, ZBiasSingletonScores);
 IMP_SWIG_OBJECT(IMP::npctransport, SlabWithCylindricalPoreWireGeometry, SlabWithCylindricalPoreWireGeometries);
@@ -74,13 +75,13 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/SlabWithPore.h"
 %include "IMP/npctransport/SlabWithCylindricalPore.h"
 %include "IMP/npctransport/SlabWithToroidalPore.h"
-
 %include "IMP/npctransport/SlabWithCylindricalPorePairScore.h"
 %include "IMP/npctransport/SlabWithToroidalPorePairScore.h"
-%include "IMP/npctransport/ExcludeZRangeSingletonScore.h"
-%include "IMP/npctransport/ZBiasSingletonScore.h"
 %include "IMP/npctransport/SlabWithCylindricalPoreGeometry.h"
 %include "IMP/npctransport/SlabWithToroidalPoreGeometry.h"
+%include "IMP/npctransport/PoreRadiusSingletonScore.h"
+%include "IMP/npctransport/ExcludeZRangeSingletonScore.h"
+%include "IMP/npctransport/ZBiasSingletonScore.h"
 %include "IMP/npctransport/BodyStatisticsOptimizerState.h"
 %include "IMP/npctransport/ParticleTransportStatisticsOptimizerState.h"
 %include "IMP/npctransport/ChainStatisticsOptimizerState.h"

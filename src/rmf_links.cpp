@@ -193,22 +193,23 @@ void HierarchyWithSitesSaveLink::do_setup_node(Model *m,
 void HierarchyWithSitesSaveLink::do_save_hierarchy(Model *m,
                                                    ParticleIndex root,
                                                    RMF::NodeHandle root_node) {
-  BOOST_FOREACH(ParticleIndex p, particles_.find(root)->second) {
+  BOOST_FOREACH(ParticleIndex pi, particles_.find(root)->second) {
     RMF::NodeHandle n = rmf::get_node_from_association(root_node.get_file(),
-                                                 m->get_particle(p));
-    if (Transporting::get_is_setup(m, p)) {
-      Transporting t(m, p);
+                                                 m->get_particle(pi));
+    if (Transporting::get_is_setup(m, pi)) {
+      Transporting t(m, pi);
       n.set_value(is_last_entry_from_top_key_, t.get_is_last_entry_from_top());
       n.set_value(n_entries_bottom_key_, t.get_n_entries_bottom());
       n.set_value(n_entries_top_key_, t.get_n_entries_top());
     }
-    if (core::XYZ::get_is_setup(m, p)) {
-      core::XYZ xyz(m, p);
+    if (core::XYZ::get_is_setup(m, pi)) {
+      core::XYZ xyz(m, pi);
+      std::cout << xyz.get_coordinates_are_optimized() << std::endl;
       n.set_static_value(coordinates_are_optimized_key_,
                          xyz.get_coordinates_are_optimized());
     }
-    if (SlabWithPore::get_is_setup(m, p)) {
-      SlabWithPore swp(m, p);
+    if (SlabWithPore::get_is_setup(m, pi)) {
+      SlabWithPore swp(m, pi);
       n.set_value(pore_radius_key_, swp.get_pore_radius());
       n.set_value(pore_radius_is_optimized_key_, swp.get_pore_radius_is_optimized());
     }

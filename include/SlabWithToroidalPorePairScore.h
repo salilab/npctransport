@@ -100,7 +100,8 @@ public:
   /**
      Computes the penetration depth between the specified sphere and an
      axis aligned ellipsoid defined by the torus vertical minor radius and
-     horizontal minor radius, centered at the specified origin.
+     horizontal minor radius, centered at the specified origin (based on
+     cached slab parameters)
      Optionally stores a normalized translation vector in *out_translation
 
      @param sphere Sphere for which the distance is computed
@@ -120,7 +121,8 @@ public:
      algebra::Vector3D* out_translation) const;
 
   // returns the penetration depth D of a sphere relative to the porus slab surface,
-  // or 0 if the sphere and the slab do not overlap.
+  // or 0 if the sphere and the slab do not overlap (based on cached slab
+  // parameters)
   //
   // @param s the sphere to evaluate
   // @param out_translation if not null, *out_translation

@@ -2,7 +2,7 @@
  *  \file SlabWithCylindricalPorePairScore.h
  *  \brief XXXXXXXXXXXXXX
  *
- *  Copyright 2007-8 Sali Lab. All rights reserved.
+ *  Copyright 2007-2017 Sali Lab. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_SLAB_PAIR_SCORE_H
@@ -51,8 +51,11 @@ SlabWithCylindricalPorePairScore : public PairScore {
     (SlabWithCylindricalPore const&slab, const algebra::Vector3D &v) const;
 
  public:
-  //! evaluate score for particle pi in model m. If da is not null,
-  //! use it to accumulate derivatives in model.
+  //! evaluate score for particle pair pip in model m
+  /** evaluate score for particle pair pip in model m, where the first particle
+      is assumed to be a cylindrical slab. If da is not null,
+      use it to accumulate derivatives in the model.
+  */
   virtual double evaluate_index
     (Model *m,
      const ParticleIndexPair& pip,
@@ -101,21 +104,24 @@ SlabWithCylindricalPorePairScore : public PairScore {
   IMP_OBJECT_METHODS(SlabWithCylindricalPorePairScore);
 
  private:
-  // evaluate slab for specified sphere. Return 0 if ball
-  // does not penetrate slab
+  // evaluate slab for specified sphere, based on most recent cached
+  // slab parameteres (/see update_cached_slab_params()).
+  // Return 0 if ball does not penetrate slab.
   //
   // @param s the sphere to evaluate
   // @param out_displacement if not null and the returned score is positive, *out_displacement
   //                         is used to store the computed displacement vector from
   //                         the surface of the z-axis aligned cylinder to
   //                         the center of s. Ignore if score is zero.
+  //
   inline double evaluate_sphere
     (algebra::Sphere3D s,
      algebra::Vector3D* out_displacement) const;
 
 
   // computes the displacement from the surface of the z-axis
-  // aligned cylinder to v
+  // aligned cylinder to v, based on the most recent cached
+  // slab parameters (/see update_cached_slab_params()).
   //
   // @return <distance, a vector pointing out>,
   //         negative distance means v is inside cylinder
@@ -123,7 +129,7 @@ SlabWithCylindricalPorePairScore : public PairScore {
       const algebra::Vector3D &v) const;
 
   // update internal variables holding slab params for fast access
-  // based on decorated particle swp
+  // based on decorated particle slab
   void update_cached_slab_params
     (SlabWithCylindricalPore slab) const;
 };
@@ -149,6 +155,8 @@ SlabWithCylindricalPorePairScore::evaluate_index
  DerivativeAccumulator *da) const
 {
   IMP_OBJECT_LOG;
+  IMP_USAGE_CHECK(SlabWithCylindricalPore::get_is_setup(m, pip[0]),
+                  "pip[0] is not a SlabWithCylindricalPore in evaluate_index()");
   SlabWithCylindricalPore slab(m, pip[0]);
   update_cached_slab_params(slab);
   IMP::core::XYZR d(m, pip[1]);
