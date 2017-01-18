@@ -6,7 +6,7 @@ import math
 import IMP.display
 import random
 
-debug=True
+debug=False
 radius=1
 #random.uniform(1,12)
 slab_pore_radius=5
@@ -59,15 +59,17 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
                 w.set_frame(i+1)
                 w.add_geometry([g, sg])
             if(debug):
-                print("Score=%.2f at i=%d" % (s,i), " d=", d.get_coordinates(),
+                print("Score=%.4f at i=%d" % (s,i), " d=", d.get_coordinates(),
                       " pore radius=",slab.get_pore_radius())
                 print("Derivative XYZ", IMP.core.XYZ(d).get_derivatives())
                 print("Pore Radius derivative",
                       slab.get_particle().get_derivative
                       ( IMP.npctransport.SlabWithPore.get_pore_radius_key() ) )
-            if s==0:
+            if abs(s-0)<0.01:
+                if(debug):
+                    print("*** BREAKING ***")
                 break
-        print("Final coordinates: ", d.get_coordinates(),  " score ", s)
+        print("Final coordinates: ", d.get_coordinates(),  " score ", s, "Pore radius", slab.get_pore_radius())
         self.assert_(out_slab(d,slab))
 
     def _initialize_model(self):
@@ -106,7 +108,6 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
 
     def test_slab_pair_score(self):
         """Check slab pair score"""
-        return
         self._initialize_model()
         d= self.d # diffusing particle
         slab= self.slab
@@ -148,27 +149,36 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
 
     def test_pore_radius_score_with_slab_pair_score(self):
         '''Test combination of pore radius and slab scores'''
-        print("Test 2")
-        global debug
-        old_debug=debug
-        debug=True
         self._initialize_model()
         m= self.m
         d=  self.d
         slab= self.slab
 
         # append pore radius score to existing restraint
-        prss=IMP.npctransport.PoreRadiusSingletonScore(slab_pore_radius, 10.0)
+        prss=IMP.npctransport.PoreRadiusSingletonScore(slab_pore_radius, 1.0)
         r_prss= IMP.core.SingletonRestraint(m,
                                             prss,
                                             slab.get_particle().get_index(),
                                             "pore radius score")
         self.opt.set_scoring_function(IMP.core.RestraintsScoringFunction([self.r, r_prss]))
+        slab.set_pore_radius_is_optimized(True)
         # optimize with new score
+        print("Testing with pore radius k= 1.0")
         d.set_coordinates([slab_pore_radius+radius,0,0.1])
         self._test_optimization('tmp5.pym')
-        #self.assertAlmostEqual(slab.get_pore_radius(), 6.01, delta=0.025)
-        debug=old_debug
+        self.assertAlmostEqual(slab.get_pore_radius(), 5.37, delta=0.025)
+        # optimize with larger k
+        print("Testing with pore radius k= 10.0")
+        prss.set_k (10.0)
+        d.set_coordinates([slab_pore_radius+radius,0,0.1])
+        self._test_optimization('tmp5.pym')
+        self.assertAlmostEqual(slab.get_pore_radius(), 5.04, delta=0.025)
+        # optimize with tiny k
+        print("Testing with pore radius k= 0.001")
+        prss.set_k (0.001)
+        d.set_coordinates([slab_pore_radius+radius,0,0.1])
+        self._test_optimization('tmp5.pym')
+        self.assertAlmostEqual(slab.get_pore_radius(), 6.02, delta=0.025)
 
 if __name__ == '__main__':
     IMP.test.main()

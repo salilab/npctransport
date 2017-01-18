@@ -78,7 +78,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/SlabWithToroidalPorePairScore.h"
 %include "IMP/npctransport/SlabWithCylindricalPoreGeometry.h"
 %include "IMP/npctransport/SlabWithToroidalPoreGeometry.h"
-# The following template is necessary for proper interpretation of class inheritence in PoreRadiusSingletonScore
+// The following template is necessary for proper interpretation of class inheritence in PoreRadiusSingletonScore
 %template(_GenericAttributeSingletonScoreForPoreRadus) IMP::core::GenericAttributeSingletonScore<IMP::core::Harmonic>;
 %include "IMP/npctransport/PoreRadiusSingletonScore.h"
 %include "IMP/npctransport/ExcludeZRangeSingletonScore.h"

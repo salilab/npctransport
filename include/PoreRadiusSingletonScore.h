@@ -39,6 +39,11 @@ public core::GenericAttributeSingletonScore<core::Harmonic>
                                          const ParticleIndexes &pis) const
     IMP_OVERRIDE;
 
+  //! set the coefficient of the score harmonic to k
+  void set_k(double k){
+    P::get_unary_function()->set_k(k);
+  }
+
 #ifdef SWIG
   IMP_SINGLETON_SCORE_METHODS(PoreRadiusSingletonScore);
   IMP_OBJECT_METHODS(PoreRadiusSingletonScore);
