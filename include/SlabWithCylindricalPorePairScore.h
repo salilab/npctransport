@@ -250,33 +250,35 @@ SlabWithCylindricalPorePairScore::evaluate_sphere
 (algebra::Sphere3D s,
  algebra::Vector3D* out_displacement) const
 {
-  double const x=s[0];
-  double const y=s[1];
-  double const z=s[2];
-  double const sr=s.get_radius();
+  IMP_OBJECT_LOG;
+  IMP_LOG(VERBOSE, "evaluate_sphere " << s << std::endl);
+  double const x= s[0];
+  double const y= s[1];
+  double const z= s[2];
+  double const sr= s.get_radius();
   // early abort if above or below slab
   if ((z-sr > top_) || (z+sr < bottom_)) {
     return 0;
   }
-  double const x2=x*x;
-  double const y2=y*y;
-  double const R=pore_radius_-sr;
-  double const R2=R*R;
+  double const x2= x*x;
+  double const y2= y*y;
+  double const R= pore_radius_-sr;
+  double const R2= R*R;
   // early abort if [x,y] within cylinder perimeter
   if (x2+y2 < R2) {
     return 0;
   }
   std::pair<double, algebra::Vector3D> dp = get_displacement_vector(s.get_center());
-  IMP_LOG(VERBOSE,
+  IMP_LOG(PROGRESS,
           "At point " << s.get_center() << " have distance " << dp.first
           << " and direction " << dp.second << std::endl);
   double const distance = dp.first;
   if (distance > sr) {
     return 0;
   }
-  double const score = k_ * (sr - distance); // must be positive score now
+  double const score= k_ * (sr - distance); // must be positive score now
   if(out_displacement){
-    *out_displacement = dp.second;
+    *out_displacement= dp.second;
     IMP_INTERNAL_CHECK(std::abs(out_displacement->get_magnitude() - 1) < .1,
                        "Not a unit vector");
   }

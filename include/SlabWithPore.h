@@ -37,6 +37,8 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
       @param pi the particle index
       @param thickness slab thickness
       @param pore_radius pore radius
+
+      @note the pore radius is initially not optimizable
   */
   static void do_setup_particle(IMP::Model* m,
                                 ParticleIndex pi,
@@ -60,6 +62,8 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
       @param pi the particle index
       @param thickness slab thickness
       @param pore_radius pore radius
+
+      @note the pore radius is initially not optimizable
   */
   IMP_DECORATOR_SETUP_2(SlabWithPore,
 			double, thickness,
