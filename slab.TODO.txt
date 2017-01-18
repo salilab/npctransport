@@ -1,20 +1,21 @@
 TODO:
 
-Debugging:
-- test_slab_with_cylindrical_pore_ss.py
-
 AnchorToToroidalPorePairScore:
 - TBD
 
 Statistics:
 - TBD
 
-BrownianDynamicsWithSlab - add slab parameter, that will be optimized (radius variable should be given fake diffusivity constant, and then be subjected to brownian motion, including applied forces)
+BrownianDynamicsTAMDWithSlabSupport.h/cpp
+- add slab parameter, that will be optimized (radius variable should be given fake diffusivity constant, and then be subjected to brownian motion, including applied forces)
 
 automatic_parameters.cpp
 - include tunnel_radius_k and anchor_k in step size calculations? (or assume it's slow relative to other motions?)
 
-TESTS - for all of the above
+TESTS -
+- SlabWithToroidalPorePairScore
+- AnchorToCylindricalPorePairScore
+- All other new features that were recently implemented (see below)
 
 RMF support:
 - TBD (need to take care of dynamic pore size mainly - quite a pain to display)
@@ -46,3 +47,8 @@ PoreRadiusSinglestonScore
 
 AnchorToCylidnricalPorePairScore
 - evaluate_index(slab, particle) is a distance restraint on particle, relative to a location in spherical coordinates - fixed angle and z, at current pore radius. (harmonic) - pore radius derivative affected by projection of pulling force over radial axis; allow adding a shift relative to radius (+ = inside; - = outside, r=0 as minimum)
+
+
+TESTS
+- updated SlabWithCylindricalPorePairScore
+- PoreRadiusSingletonScore
