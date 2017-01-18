@@ -34,6 +34,16 @@ public core::GenericAttributeSingletonScore<core::Harmonic>
   P(new core::Harmonic(mean, k),
     SlabWithPore::get_pore_radius_key())
     { }
+
+  virtual ModelObjectsTemp do_get_inputs(Model *m,
+                                         const ParticleIndexes &pis) const
+    IMP_OVERRIDE;
+
+#ifdef SWIG
+  IMP_SINGLETON_SCORE_METHODS(PoreRadiusSingletonScore);
+  IMP_OBJECT_METHODS(PoreRadiusSingletonScore);
+#endif
+
 };
 
 IMPNPCTRANSPORT_END_NAMESPACE
