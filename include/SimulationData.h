@@ -32,7 +32,6 @@
 #include "io.h"
 #include "Parameter.h"
 #include "Scoring.h"
-#include "SlabWithPore.h"
 #include "Statistics.h"
 #include "npctransport_proto.fwd.h"
 #include <string>
@@ -558,20 +557,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   atom::Hierarchy get_root() const { return atom::Hierarchy(root_); }
 
-  double get_slab_thickness() const {
-    IMP_USAGE_CHECK(get_slab_particle() != nullptr && get_has_slab(),
-                    "invalid slab - can't get thickness");
-    SlabWithPore swp(get_slab_particle());
-    return swp.get_thickness();
-  }
+  double get_slab_thickness() const;
 
   //! returns te current tunnel radius
-  double get_tunnel_radius() const {
-    IMP_USAGE_CHECK(get_slab_particle() != nullptr && get_has_slab(),
-                    "invalid slab - can't get pore radius");
-    SlabWithPore swp(get_slab_particle());
-    return swp.get_pore_radius();
-  }
+  double get_tunnel_radius() const;
 
   //! alias to get_tunnel_radius
     double get_pore_radius() const{

@@ -171,8 +171,10 @@ SlabWithCylindricalPorePairScore::evaluate_index
     IMP_LOG(PROGRESS, "result in " << score << " and " << derivative_vector << std::endl);
     d.add_to_derivatives(derivative_vector, *da);
     if(is_pore_radius_optimized_){
-      double radial_displacement= displacement[0]*d_sphere[0]+displacement[1]*d_sphere[1]; // TODO: assumes slab origin at 0,0,0 - perhaps in the future extend to general case
-      slab.add_to_pore_radius_derivative(k_*radial_displacement, *da);
+      // TODO: assume that the direction of a positive radial displacement vector is opposite to the sphere x,y vector - is this always true?
+      double radial_displacement_magnitude= // magnitude of the displacement vector projected on the x,y plane
+        std::sqrt(displacement[0]*displacement[0]+displacement[1]*displacement[1]); // TODO: currently we assume slab origin at 0,0,0 - perhaps in the future extend to general case
+      slab.add_to_pore_radius_derivative(-k_*radial_displacement_magnitude, *da);
     }
   }
   return score;
@@ -191,7 +193,7 @@ SlabWithCylindricalPorePairScore::evaluate_indexes
     return 0.0;
   }
   double ret(0.0);
-  double radial_displacements(0.0); // sum of pore radius displacemnets
+  double radial_displacements_magnitude(0.0); // sum of pore radius displacemnets
   algebra::Sphere3D const* spheres_table=
     m->access_spheres_data();
   algebra::Sphere3D* sphere_derivatives_table=
@@ -234,12 +236,13 @@ SlabWithCylindricalPorePairScore::evaluate_indexes
       for(unsigned int j=0; j<3; j++) {
         sphere_derivatives_table[pi_index][j] += (*da)(derivative_vector[j]);
       }
-      algebra::Sphere3D const& s=spheres_table[pi_index];
-      radial_displacements+= displacement[0]*s[0] + displacement[1]*s[1];// TODO: assumes slab origin at 0,0,0 - perhaps in דthe future extend to general case
+      // TODO: assume that the direction of a positive radial displacement vector is opposite to the sphere x,y vector - is this always true?
+      radial_displacements_magnitude+=
+        std::sqrt(displacement[0]*displacement[0] + displacement[1]*displacement[1]); // TODO: assumes slab origin at 0,0,0 - perhaps in דthe future extend to general case
     }
   }
   if(da && is_pore_radius_optimized_){
-    slab.add_to_pore_radius_derivative(k_ * radial_displacements, *da);
+    slab.add_to_pore_radius_derivative(-k_ * radial_displacements_magnitude, *da);
   }
   return ret;
 }

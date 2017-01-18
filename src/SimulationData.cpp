@@ -917,6 +917,25 @@ algebra::Cylinder3D SimulationData::get_cylinder() const {
   return algebra::Cylinder3D(seg, get_pore_radius());
 }
 
+double
+SimulationData::get_slab_thickness() const
+{
+  IMP_USAGE_CHECK(get_slab_particle() != nullptr && get_has_slab(),
+                  "invalid slab - can't get thickness");
+  SlabWithPore swp(get_slab_particle());
+  return swp.get_thickness();
+}
+
+//! returns te current tunnel radius
+double
+SimulationData::get_tunnel_radius() const
+{
+  IMP_USAGE_CHECK(get_slab_particle() != nullptr && get_has_slab(),
+                  "invalid slab - can't get pore radius");
+  SlabWithPore swp(get_slab_particle());
+  return swp.get_pore_radius();
+}
+
 
 #undef GET_ASSIGNMENT
 #undef GET_ASSIGNMENT_DEF
