@@ -286,9 +286,8 @@ SimulationData::create_slab_particle()
                                          tunnel_radius_,
                                          1.0); // TODO: add support for skewed toroids
   }
-  if(get_is_pore_radius_dynamic()){
-    SlabWithPore(slab_particle).set_pore_radius_is_optimized(true);
-  }
+  SlabWithPore(slab_particle_)
+    .set_pore_radius_is_optimized(get_is_pore_radius_dynamic());
 }
 
 /**
