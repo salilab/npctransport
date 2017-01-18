@@ -69,9 +69,7 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         print("Final coordinates: ", d.get_coordinates(),  " score ", s)
         self.assert_(out_slab(d,slab))
 
-
-    def test_slab_pair_score(self):
-        """Check slab pair score"""
+    def _initialize_model(self):
         print("radius", radius, "slab radius", slab_pore_radius, "slab_height", slab_height)
         m= IMP.Model()
         p= IMP.Particle(m,"diffuser")
@@ -104,6 +102,12 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         cg.set_scoring_function(r)
         cg.set_step_size(0.01)
         self.opt= cg
+
+    def test_slab_pair_score(self):
+        """Check slab pair score"""
+        self._initialize_model()
+        d= self.d # diffusing particle
+        slab= self.slab
 
         print("\n== (I) Testing non-optimizable pore radius ==")
 
