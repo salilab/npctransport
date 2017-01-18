@@ -71,7 +71,8 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
 
     def _initialize_model(self):
         print("radius", radius, "slab radius", slab_pore_radius, "slab_height", slab_height)
-        m= IMP.Model()
+        m=IMP.Model()
+        self.m= m
         p= IMP.Particle(m,"diffuser")
         d= IMP.core.XYZR.setup_particle(p)
         self.d= d
@@ -79,8 +80,6 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         d.set_radius(radius)
         bb= IMP.algebra.BoundingBox3D(0.5*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       0.5*IMP.algebra.Vector3D(boxw,boxw,boxw))
-        bb_half= IMP.algebra.BoundingBox3D(0.25*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
-                                      0.25*IMP.algebra.Vector3D(boxw,boxw,boxw))
         p_slab= IMP.Particle(m, "slab")
         IMP.npctransport.SlabWithCylindricalPore.setup_particle \
             (p_slab, slab_height, slab_pore_radius)
@@ -112,6 +111,8 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         print("\n== (I) Testing non-optimizable pore radius ==")
 
         print("\nTest from random position")
+        bb_half= IMP.algebra.BoundingBox3D(0.25*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
+                                           0.25*IMP.algebra.Vector3D(boxw,boxw,boxw))
         while out_slab(d,slab):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb_half))
         self._test_optimization('tmp.pym')
