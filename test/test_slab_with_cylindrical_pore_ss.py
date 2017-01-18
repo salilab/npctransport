@@ -31,13 +31,14 @@ def out_slab(p, slab):
 
 
 class CylindricalPoreSSTest(IMP.test.TestCase):
-    def _test_optimization(self, m, d, slab, opt, pymol_fname=None):
+    def _test_optimization(self, pymol_fname=None):
         '''
-        m - model
-        d - diffusing particle
-        opt - optimizer
+        pymol_fname - file name for output (stored in tmp if debug==True)
         '''
         debug=False
+        d= self.d # diffusing particle
+        slab= self.slab
+        opt= self.opt # optimizer
         if not debug:
             pymol_fname= self.get_tmp_file_name(pymol_fname)
         # Make pymol writer and geometries:
@@ -75,6 +76,7 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         m= IMP.Model()
         p= IMP.Particle(m,"diffuser")
         d= IMP.core.XYZR.setup_particle(p)
+        self.d= d
         d.set_coordinates_are_optimized(True)
         d.set_radius(radius)
         bb= IMP.algebra.BoundingBox3D(0.5*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
@@ -87,6 +89,7 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         self.assert_(IMP.npctransport.SlabWithCylindricalPore.get_is_setup(p_slab))
         # test cast to slab
         slab= IMP.npctransport.SlabWithPore(p_slab)
+        self.slab= slab
         self.assertEqual(slab.get_pore_radius(),slab_pore_radius)
         self.assertEqual(slab.get_thickness(),slab_height);
         slabps= IMP.npctransport.SlabWithCylindricalPorePairScore(1.0)
@@ -100,25 +103,26 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         cg= IMP.core.SteepestDescent(m)
         cg.set_scoring_function(r)
         cg.set_step_size(0.01)
+        self.opt= cg
 
         print("\n== (I) Testing non-optimizable pore radius ==")
 
         print("\nTest from random position")
         while out_slab(d,slab):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb_half))
-        self._test_optimization(m, d, slab, cg, 'tmp.pym')
+        self._test_optimization('tmp.pym')
         self.assert_(slab_pore_radius==slab.get_pore_radius())
 
         print("\nTest from vertical position")
         d.set_coordinates([slab_pore_radius+2*radius,0,0.4])
         self.assert_(not out_slab(d,slab))
-        self._test_optimization(m, d, slab, cg, 'tmp3.pym')
+        self._test_optimization('tmp3.pym')
         self.assert_(slab_pore_radius==slab.get_pore_radius())
 
         print("\nTest from horizontal position")
         d.set_coordinates([slab_pore_radius+radius,0,0])
         self.assert_(not out_slab(d,slab))
-        self._test_optimization(m, d, slab, cg, 'tmp2.pym')
+        self._test_optimization('tmp2.pym')
         self.assert_(slab_pore_radius==slab.get_pore_radius())
 
         print("\n== (II) Testing optimizable pore radius ==")
@@ -126,12 +130,12 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         slab.set_pore_radius_is_optimized(True)
         print("\nTest pore radius from vertical position")
         d.set_coordinates([slab_pore_radius+2*radius,0,0.4])
-        self._test_optimization(m, d, slab, cg, 'tmp4.pym')
+        self._test_optimization('tmp4.pym')
         self.assert_(slab_pore_radius==slab.get_pore_radius()) # vertical position shouldn't have affected pore radius
 
         print("\nTest pore radius from horizontal position")
         d.set_coordinates([slab_pore_radius+radius,0,0.1])
-        self._test_optimization(m, d, slab, cg, 'tmp5.pym')
+        self._test_optimization('tmp5.pym')
         self.assertAlmostEqual(slab.get_pore_radius(), 6.01, delta=0.025)
 
 if __name__ == '__main__':
