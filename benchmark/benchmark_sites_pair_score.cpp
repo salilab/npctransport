@@ -269,9 +269,8 @@ void test_ranges() {
 }
 
 int main(int, char **) {
-  if(IMP::get_check_level() >= IMP::USAGE
-     || IMP::get_is_quick_test()){
-    std::cout << "Skipping test because check level is greater or equal USAGE or run_quick_test flag is on"
+  if(IMP::get_check_level() >= IMP::USAGE){
+    std::cout << "Skipping test because check level is greater or equal USAGE"
               << std::endl;
     return 0;
   }
