@@ -126,7 +126,7 @@ SlabWithCylindricalPoreSurfaceGeometry::SlabWithCylindricalPoreSurfaceGeometry(d
                                          double width)
     : SurfaceMeshGeometry(get_mesh(height, radius, width), "SlabWithCylindricalPore")
 {
-  std::tie(vertices_, faces_) =
+  boost::tie(vertices_, faces_) =
     get_mesh(height, radius, width);
 }
 
