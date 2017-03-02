@@ -56,7 +56,7 @@ def _set_cylinder(cylinder_descriptor, cf, ipf):
     draws a cylinder between two nodes with refframes
     cylinder descriptor - tuple (cylinder_node, node1, node2)
     cf - cylinder factory
-    ipf - refframe factory
+    ipf - intermediate particle factory
     """
     nh = cylinder_descriptor[0]
     ep0 = cylinder_descriptor[1]
