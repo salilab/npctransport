@@ -6,6 +6,7 @@
  *
  */
 
+#include <IMP/npctransport/BrownianDynamicsTAMDWithSlabSupport.h>
 #include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/ParticleFactory.h>
 #include <IMP/npctransport/protobuf.h>
@@ -13,8 +14,10 @@
 #include <IMP/npctransport/SitesGeometry.h>
 #include <IMP/npctransport/SlabWithCylindricalPoreGeometry.h>
 #include <IMP/npctransport/SlabWithToroidalPoreGeometry.h>
-#include <IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h>
-#include <IMP/npctransport/SlabWithToroidalPoreSingletonScore.h>
+#include <IMP/npctransport/SlabWithCylindricalPorePairScore.h>
+#include <IMP/npctransport/SlabWithToroidalPorePairScore.h>
+#include <IMP/npctransport/SlabWithCylindricalPore.h>
+#include <IMP/npctransport/SlabWithToroidalPore.h>
 #include <IMP/npctransport/ParticleFactory.h>
 // #include <IMP/npctransport/particle_types.h>
 #include <IMP/npctransport/protobuf.h>
@@ -24,9 +27,9 @@
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/npctransport/util.h>
 #include <IMP/algebra/vector_generators.h>
-#include <IMP/atom/BrownianDynamicsTAMD.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
+#include <IMP/atom/Mass.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/Selection.h>
 #include <IMP/log.h>
@@ -90,6 +93,14 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 //       { name##_ = default_value; }              \
 //   }
 
+#define SLAB_TYPE_STRING "slab"
+namespace {
+  bool is_slab_particle(Particle* p)
+  {
+    return SlabWithPore::get_is_setup(p);
+  }
+};
+
 SimulationData::SimulationData(std::string prev_output_file, bool quick,
                                std::string rmf_file_name,
                                std::string new_output_file)
@@ -99,6 +110,8 @@ SimulationData::SimulationData(std::string prev_output_file, bool quick,
   scoring_(nullptr),
   statistics_(nullptr),
   is_statistics_activated_(false),
+  root_(nullptr),
+  slab_particle_(nullptr),
   rmf_file_name_(rmf_file_name),
   is_save_restraints_to_rmf_(true)
 {
@@ -135,6 +148,8 @@ void SimulationData::initialize(std::string prev_output_file,
   GET_VALUE_DEF(output_npctransport_version, 1.0); // old configuration files that don't have output version should be treated as version 1.0
   GET_ASSIGNMENT(box_side);
   GET_ASSIGNMENT(tunnel_radius);
+  GET_ASSIGNMENT_DEF(tunnel_radius_k, -1.0);
+  GET_ASSIGNMENT_DEF(pore_anchored_beads_k, -1.0);
   GET_ASSIGNMENT(slab_thickness);
   GET_ASSIGNMENT(slab_is_on);
   GET_ASSIGNMENT(box_is_on);
@@ -176,6 +191,23 @@ void SimulationData::initialize(std::string prev_output_file,
   root_->add_attribute(get_simulation_data_key(), this);
   atom::Hierarchy hr = atom::Hierarchy::setup_particle(root_);
   root_->set_name("root");
+  if(get_has_slab()){
+    // TODO: at some point, obstacles should be the children of slab (cause in some sense, they refine it)
+    atom::Hierarchy h_slab_particle=
+      atom::Hierarchy::setup_particle( get_slab_particle() );
+    // TODO: XYZR is fake - just to make it compatible with atom hierarchy (note pore radius is a different attribute than 'radius')
+    core::XYZ::setup_particle( get_slab_particle(),
+                               algebra::Vector3D(0,0,0) );
+    core::XYZR d=
+      core::XYZR::setup_particle( get_slab_particle(),
+                                  0.0 );
+    d.set_coordinates_are_optimized(false);
+    atom::Mass::setup_particle( get_slab_particle(),
+                                1.0 );
+    core::Typed::setup_particle( get_slab_particle(),
+                                 core::ParticleType(SLAB_TYPE_STRING));
+    //    get_root().add_child( h_slab_particle ); // TODO: include it as child of root? This may have unforeseen consequences
+  }
   for (int i = 0; i < pb_assignment.fgs_size(); ++i)
     {
       // verify type first
@@ -239,6 +271,25 @@ void SimulationData::initialize(std::string prev_output_file,
 }
 
 
+void
+SimulationData::create_slab_particle()
+{
+  slab_particle_=
+    new Particle(get_model(), SLAB_TYPE_STRING);
+  if(get_is_slab_with_cylindrical_pore()){
+    SlabWithCylindricalPore::setup_particle(slab_particle_,
+                                            slab_thickness_,
+                                            tunnel_radius_);
+  } else{
+    SlabWithToroidalPore::setup_particle(slab_particle_,
+                                         slab_thickness_,
+                                         tunnel_radius_,
+                                         1.0); // TODO: add support for skewed toroids
+  }
+  SlabWithPore(slab_particle_)
+    .set_pore_radius_is_optimized(get_is_pore_radius_dynamic());
+}
+
 /**
    Adds the FG Nup chains to the model hierarchy,
    based on the settings in data
@@ -275,7 +326,12 @@ void SimulationData::create_fgs
       core::XYZR d(chain->get_bead(0));
       d.set_coordinates(algebra::Vector3D(xyz.x(), xyz.y(), xyz.z()));
       d.set_radius(d.get_radius() * fg_anchor_inflate_factor_); // inflate
-      d.set_coordinates_are_optimized(false);
+      if (get_is_pore_radius_dynamic()
+          && pore_anchored_beads_k_>0) {
+        get_scoring()->add_restrained_anchor_bead(d); // TODO: think if problems might arise when restarting - if current radius of pore is updated in output file
+      }else{
+        d.set_coordinates_are_optimized(false);
+      }
     }
     // add stats on chain
     get_statistics()->add_fg_chain_stats( chain );
@@ -506,8 +562,6 @@ ParticlesTemp SimulationData::get_obstacle_particles() const
 }
 
 
-
-
 // Behold and beware: this method assumes that the hierarchy in the RMF file
 // was constructed in the same way as the hierarchy within this SimulationData
 // object. Use with great caution, otherwise unexpected results may arise
@@ -515,7 +569,15 @@ void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
                                                    int frame) {
   f.set_current_frame( RMF::FrameID(f.get_number_of_frames() - 1) );
   // RMF::show_hierarchy_with_values(f.get_root_node());
-  link_hierarchies_with_sites(f, get_root().get_children());
+  ParticlesTemp linked_particles  = get_root().get_children();
+  if(get_output_npctransport_version()<2.5){
+    // slab particles not supported in earlier versions
+    std::remove_if(linked_particles.begin(),
+                   linked_particles.end(),
+                   is_slab_particle);
+  }
+  link_hierarchies_with_sites(f, linked_particles);
+  //  link_hierarchies_with_sites(f, get_root().get_children());
   if (frame == -1) {
     IMP_LOG(VERBOSE, "Loading from last frame of RMF file with "
               << f.get_number_of_frames() << " frames" << std::endl);
@@ -531,6 +593,7 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
   //       Scoring.cpp (for better encapsulation
   IMP_LOG(TERSE, "Setting up dump" << std::endl);
   Scoring* s=get_scoring();
+  std::cout << "Linking " << get_root().get_number_of_children() << " particles and their children" << std::endl;
   add_hierarchies_with_sites(fh, get_root().get_children());
   if(with_restraints) {
     IMP::rmf::add_restraints
@@ -559,10 +622,10 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
     IMP::Pointer<display::Geometry> slab_geometry;
     if(get_is_slab_with_cylindrical_pore()){
       slab_geometry = new SlabWithCylindricalPoreWireGeometry
-        (slab_thickness_, tunnel_radius_, box_side_);
+        (get_slab_thickness(), get_pore_radius(), box_side_);
     } else {
       slab_geometry = new SlabWithToroidalPoreWireGeometry
-        (slab_thickness_, tunnel_radius_, box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     }
     IMP::rmf::add_static_geometries(fh, slab_geometry->get_components());
   }
@@ -625,10 +688,10 @@ void SimulationData::dump_geometry() {
     IMP::Pointer<display::Geometry> slab_geometry;
     if(get_is_slab_with_cylindrical_pore()) {
       slab_geometry= new SlabWithCylindricalPoreWireGeometry
-        (slab_thickness_, tunnel_radius_, box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     } else {
       slab_geometry= new SlabWithToroidalPoreWireGeometry
-        (slab_thickness_, tunnel_radius_, box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     }
     w->add_geometry( slab_geometry );
   }
@@ -699,7 +762,7 @@ atom::BrownianDynamics
 (bool recreate)
 {
   if (!bd_ || recreate) {
-    bd_ = new atom::BrownianDynamicsTAMD(m_, "BD_tamd%1%", time_step_wave_factor_);
+    bd_ = new BrownianDynamicsTAMDWithSlabSupport(m_, "BD_tamd_slab%1%", time_step_wave_factor_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_ / 4);
     bd_->set_current_time(0.0);
@@ -812,10 +875,10 @@ void SimulationData::write_geometry(std::string out) {
     IMP::Pointer<display::Geometry> slab_geometry;
     if(get_is_slab_with_cylindrical_pore()) {
       slab_geometry= new SlabWithCylindricalPoreWireGeometry
-        (slab_thickness_, tunnel_radius_, box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     } else {
       slab_geometry= new SlabWithToroidalPoreWireGeometry
-        (slab_thickness_, tunnel_radius_, box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_);
     }
     w->add_geometry(slab_geometry);
     //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
@@ -849,9 +912,28 @@ void SimulationData::set_box_size(double box_size) {
 algebra::Cylinder3D SimulationData::get_cylinder() const {
   IMP_USAGE_CHECK(get_is_slab_with_cylindrical_pore(),
                   "no slab with cylidrical pore defined");
-  algebra::Vector3D pt(0, 0, slab_thickness_ / 2.0);
+  algebra::Vector3D pt(0, 0, get_slab_thickness() / 2.0);
   algebra::Segment3D seg(pt, -pt);
-  return algebra::Cylinder3D(seg, tunnel_radius_);
+  return algebra::Cylinder3D(seg, get_pore_radius());
+}
+
+double
+SimulationData::get_slab_thickness() const
+{
+  IMP_USAGE_CHECK(get_slab_particle() != nullptr && get_has_slab(),
+                  "invalid slab - can't get thickness");
+  SlabWithPore swp(get_slab_particle());
+  return swp.get_thickness();
+}
+
+//! returns te current tunnel radius
+double
+SimulationData::get_tunnel_radius() const
+{
+  IMP_USAGE_CHECK(get_slab_particle() != nullptr && get_has_slab(),
+                  "invalid slab - can't get pore radius");
+  SlabWithPore swp(get_slab_particle());
+  return swp.get_pore_radius();
 }
 
 

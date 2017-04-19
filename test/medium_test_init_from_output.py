@@ -27,8 +27,9 @@ class Tests(IMP.test.TestCase):
         print("assigning parameter ranges from config into output", output)
         num = assign_ranges(config, output,
                             0, True, 10)
-        IMP.set_log_level(IMP.SILENT)
+        IMP.set_log_level(IMP.VERBOSE)
         sd = IMP.npctransport.SimulationData(output, False)
+        sd.set_log_level(IMP.VERBOSE)
         sd.set_rmf_file( self.get_tmp_file_name("out0.rmf"), False )
         print("BEFORE INIT", time.ctime())
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
@@ -37,7 +38,7 @@ class Tests(IMP.test.TestCase):
         else:
             short_init_factor = 0.01
             opt_cycles = 10000
-        sd.get_bd().set_log_level(IMP.SILENT)
+        sd.get_bd().set_log_level(IMP.VERBOSE)
         IMP.npctransport.initialize_positions(sd, [], False, short_init_factor)
         print("AFTER INIT", time.ctime())
         sd.activate_statistics()
@@ -82,8 +83,12 @@ class Tests(IMP.test.TestCase):
         and sites + identical timers and Transporting porperties
         """
         # check beads refframes
+#        print(len(sd1.get_beads()),len(sd2.get_beads()))
         for p, pp in zip(sd1.get_beads(),
                          sd2.get_beads()):
+#            print(p,pp)
+#            print(IMP.core.XYZR(p))
+#            print(IMP.core.XYZR(pp))
             self.assert_((IMP.core.XYZ(p).get_coordinates()
                           - IMP.core.XYZ(pp).get_coordinates()).get_magnitude() < .0001)
             q0 = IMP.core.RigidBody(

@@ -65,7 +65,7 @@ class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
     double r2 =  std::pow(d.get_x(), 2) + std::pow(d.get_y(), 2);
     if (r2 > max_r2_) {
       // nothing to add to derivatives( = 0);
-      return 0.0; // TODO: this is not smooth around tunnel edge - problem
+      return 0.0; // TODO: this is not smooth around pore edge - problem
     }
     double const& k = v_deriv_[2];
     double score = k * d.get_z();

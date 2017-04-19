@@ -1,5 +1,5 @@
 /**
- *  \file IMP/npctransport/SlabWithToroidalPoreSingletonScore.h
+ *  \file IMP/npctransport/SlabWithToroidalPorePairScore.h
  *  \brief a score for a slab with a toroidal pore
  *
 
@@ -7,73 +7,51 @@
  *
  */
 
-#ifndef IMPNPCTRANSPORT_SLAB_WITH_TOROIDAL_PORE_SINGLETON_SCORE_H
-#define IMPNPCTRANSPORT_SLAB_WITH_TOROIDAL_PORE_SINGLETON_SCORE_H
+#ifndef IMPNPCTRANSPORT_SLAB_WITH_TOROIDAL_PORE_PAIR_SCORE_H
+#define IMPNPCTRANSPORT_SLAB_WITH_TOROIDAL_PORE_PAIR_SCORE_H
 
 #include "npctransport_config.h"
+#include "SlabWithToroidalPore.h"
 #include <IMP/Model.h>
 #include <IMP/Pointer.h>
 #include <IMP/check_macros.h>
-#include <IMP/SingletonScore.h>
-#include <IMP/singleton_macros.h>
+#include <IMP/PairScore.h>
+#include <IMP/pair_macros.h>
 #include "IMP/core/XYZR.h"
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-class IMPNPCTRANSPORTEXPORT SlabWithToroidalPoreSingletonScore : public SingletonScore
+class IMPNPCTRANSPORTEXPORT SlabWithToroidalPorePairScore
+: public PairScore
 {
-  double midZ_;  // vertical center of slab
-  double R_; // torus major radius
-  double rv_; // vertical minor radius (ellipse vertical semi-axis), equals half slab thickness
-  double rh_; // horizontal minor radius (ellipse horizontal semi-axis)
   double k_; // repulsion constant in kcal/mol/A
-  double bottom_; // bottom z - for caching
-  double top_; // top z - for caching
+
+  // cached variables for currently evaluated slab (therefore, mutable):
+  mutable double top_; // top z - for caching
+  mutable double bottom_; // bottom z - for caching
+  mutable double midZ_;  // vertical center of slab
+  mutable double R_; // torus major radius
+  mutable double rh_; // horizontal minor radius (ellipse horizontal semi-axis)
+  mutable double rv_; // vertical minor radius (ellipse vertical semi-axis)
+  mutable bool is_pore_radius_optimized_;
 
 public:
   //! Constructs a horizontal slab with a toroidal pore,
   //! centered at the z=0 plane
   /**
-     Constructs a horizontal slab with a ring toroidal pore, centered at
-     the z=0 plane, from z=-0.5*thickness to z=+0.5*thickness.
+     Constructs a score over a horizontal slab with a ring toroidal pore
 
-      @param radius outer radius of the torus
-      @param slab_thickness vertical thickness of slab. The
-             minor radius of the pore torus equals half
-             the slab thickness.
-      @param k the slab repulsive force constant in kcal/mol/A
-  */
-  SlabWithToroidalPoreSingletonScore
-    (double slab_thickness, double radius, double k);
-
-  //! Constructs a horizontal slab with a toroidal pore,
-  //! centered at the z=0 plane
-  /**
-     Constructs a horizontal slab with a toroidal pore, centered at
-     the z=0 plane, from z=-0.5*thickness to z=+0.5*thickness, with
-     possibly unequal vertical and horizontal minor radii (with a minor ellipse)
-
-     @param radius outer radius of the torus
-     @param slab_thickness vertical thickness of slab. The
-            verical minor radius of the pore torus equals half
-           the slab thickness.
      @param k the slab repulsive force constant in kcal/mol/A
-     @param horizontal_minor_radius the horizontal semi-axis of the minor ellipse
   */
-  SlabWithToroidalPoreSingletonScore
-    (double slab_thickness, double radius, double k, double horizontal_minor_radius);
+  SlabWithToroidalPorePairScore
+    (double k);
 
-  /** returns the lowest slab z coordinate */
-  double get_bottom_z() { return bottom_; }
-
-  /** returns the highest slab z coordinate */
-  double get_top_z() { return top_; }
-
+ public:
   //! evaluate score for particle pi in model m. If da is not null,
   //! use it to accumulate derivatives in model.
   virtual double evaluate_index
     (Model *m,
-     ParticleIndex pi,
+     ParticleIndexPair const& pip,
      DerivativeAccumulator *da) const IMP_OVERRIDE;
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
@@ -85,7 +63,7 @@ public:
   //! in model.
   virtual double evaluate_indexes
     (Model *m,
-     const ParticleIndexes &pis,
+     const ParticleIndexPairs &pips,
      DerivativeAccumulator *da,
      unsigned int lower_bound,
      unsigned int upper_bound) const IMP_FINAL;
@@ -101,7 +79,7 @@ public:
   */
   double evaluate_if_good_indexes
     ( Model *m,
-      const ParticleIndexes &p,
+      const ParticleIndexPairs &p,
       DerivativeAccumulator *da,
       double max,
       unsigned int lower_bound,
@@ -115,13 +93,15 @@ public:
     return ret;
   }
 
+  IMP_OBJECT_METHODS(SlabWithToroidalPorePairScore);
 
  private:
 
   /**
      Computes the penetration depth between the specified sphere and an
      axis aligned ellipsoid defined by the torus vertical minor radius and
-     horizontal minor radius, centered at the specified origin.
+     horizontal minor radius, centered at the specified origin (based on
+     cached slab parameters)
      Optionally stores a normalized translation vector in *out_translation
 
      @param sphere Sphere for which the distance is computed
@@ -141,7 +121,8 @@ public:
      algebra::Vector3D* out_translation) const;
 
   // returns the penetration depth D of a sphere relative to the porus slab surface,
-  // or 0 if the sphere and the slab do not overlap.
+  // or 0 if the sphere and the slab do not overlap (based on cached slab
+  // parameters)
   //
   // @param s the sphere to evaluate
   // @param out_translation if not null, *out_translation
@@ -153,20 +134,42 @@ public:
     (algebra::Sphere3D s,
      algebra::Vector3D* out_translation) const;
 
-
-  IMP_OBJECT_METHODS(SlabWithToroidalPoreSingletonScore);
+  // update internal variables holding slab params for fast access
+  // based on decorated particle swp
+  void update_cached_slab_params
+    (SlabWithToroidalPore slab) const;
 };
+
+inline void
+SlabWithToroidalPorePairScore::update_cached_slab_params
+(SlabWithToroidalPore slab) const
+{
+  //TODO: support slabs with non-zero x,y,z origin
+  double thickness= slab.get_thickness();
+  top_= 0.5*thickness;
+  bottom_= -0.5*thickness;
+  midZ_= 0;
+  R_= slab.get_pore_radius(); // major radius
+  rh_= slab.get_horizontal_minor_radius();
+  rv_= slab.get_vertical_minor_radius();
+  is_pore_radius_optimized_= slab.get_pore_radius_is_optimized();
+}
+
 
 //
 inline double
-SlabWithToroidalPoreSingletonScore::evaluate_index
+SlabWithToroidalPorePairScore::evaluate_index
 (Model *m,
- const ParticleIndex pi,
+ const ParticleIndexPair& pip,
  DerivativeAccumulator *da) const
 {
   IMP_OBJECT_LOG;
-  IMP::core::XYZR d(m, pi);
-  if (!d.get_coordinates_are_optimized()) return false;
+  SlabWithToroidalPore slab(m, pip[0]);
+  update_cached_slab_params(slab);
+  IMP::core::XYZR d(m, pip[1]);
+  if (!d.get_coordinates_are_optimized())
+    return false;
+  algebra::Sphere3D d_sphere( d.get_sphere() );
   algebra::Vector3D displacement;
   double score=get_sphere_penetration_depth(d.get_sphere(),
                                da ? &displacement : nullptr);
@@ -175,23 +178,31 @@ SlabWithToroidalPoreSingletonScore::evaluate_index
     algebra::Vector3D derivative_vector = -k_*displacement;
     IMP_LOG_TERSE(" derivative vector " << derivative_vector);
     d.add_to_derivatives(derivative_vector, *da);
+    if(is_pore_radius_optimized_){
+      double radial_displacement= displacement[0]*d_sphere[0]+displacement[1]*d_sphere[1]; // TODO: assumes slab origin at 0,0,0 - perhaps in the future extend to general case
+      slab.add_to_pore_radius_derivative(k_*radial_displacement, *da);
+    }
+
   }
-  IMP_LOG_TERSE(std::endl);
   return score;
 }
 
 //
 inline double
-SlabWithToroidalPoreSingletonScore::evaluate_indexes
+SlabWithToroidalPorePairScore::evaluate_indexes
     (Model *m,
-     const ParticleIndexes &pis,
+     const ParticleIndexPairs &pips,
      DerivativeAccumulator *da,
      unsigned int lower_bound,
      unsigned int upper_bound) const
 {
   IMP_LOG_TERSE("SlabWithToroidalPore singleton - evaluate indexes"
           << std::endl);
-  double ret = 0;
+  if(upper_bound<lower_bound){
+    return 0.0;
+  }
+  double ret(0.0);
+    double radial_displacements(0.0); // sum of pore radius displacemnets
   algebra::Sphere3D const* spheres_table=
     m->access_spheres_data();
   algebra::Sphere3D* sphere_derivatives_table=
@@ -199,14 +210,22 @@ SlabWithToroidalPoreSingletonScore::evaluate_indexes
   IMP::internal::BoolAttributeTableTraits::Container const&
     is_optimizable_table= m->access_optimizeds_data
     (core::XYZ::get_coordinate_key(0)); // x is indicator
+  ParticleIndex slab_pi(pips[lower_bound][0]);
+  SlabWithToroidalPore slab(m, slab_pi); // TODO: do this only in first round
+  update_cached_slab_params(slab);
+
   // Evaluate and sum score and derivative for all particles:
   for (unsigned int i = lower_bound; i < upper_bound; ++i) {
-    int pi_index=pis[i].get_index();
+    ParticleIndex pi( pips[i][1]);
+    int pi_index=pi.get_index();
     // Check attributes have valid values:
     IMP_CHECK_CODE( {
-        IMP::core::XYZR d(m, pis[i]);
+        IMP_INTERNAL_CHECK(pips[i][0]==slab_pi,
+                           "All particles are assumed to be evaluated against"
+                           " the same slab");
+        IMP::core::XYZR d(m, pi);
         algebra::Sphere3D s=spheres_table[pi_index];
-        IMP_INTERNAL_CHECK(d.get_coordinates_are_optimized() == is_optimizable_table[pis[i]],
+        IMP_INTERNAL_CHECK(d.get_coordinates_are_optimized() == is_optimizable_table[pi],
                            "optimable table inconsistent with d.get_coordinates_are_optimized for particle " << d);
         IMP_INTERNAL_CHECK((d.get_coordinates() - s.get_center()).get_magnitude()<.001,
                            "Different coords for particle " << d << " *** "
@@ -215,7 +234,7 @@ SlabWithToroidalPoreSingletonScore::evaluate_indexes
                            "Different radii for particle " << d << " *** "
                            << d.get_radius() << " vs. " << s.get_radius());
       } ); // IMP_CHECK_CODE
-    if(!is_optimizable_table[pis[i]]) {
+    if(!is_optimizable_table[pi]) {
       continue;
     }
     algebra::Vector3D displacement;
@@ -231,16 +250,21 @@ SlabWithToroidalPoreSingletonScore::evaluate_indexes
       for(unsigned int j=0; j<3; j++) {
         sphere_derivatives_table[pi_index][j] += (*da)(derivative_vector[j]);
       }
+      algebra::Sphere3D const& s=spheres_table[pi_index];
+      radial_displacements+= displacement[0]*s[0] + displacement[1]*s[1]; // TODO: assumes slab origin at 0,0,0 - perhaps in דthe future extend to general case
+
     }
   }
-
+  if(da && is_pore_radius_optimized_){
+    slab.add_to_pore_radius_derivative(k_ * radial_displacements, *da);
+  }
   return ret;
 }
 
 // sphere - sphere for which the distance is computed
 // origin - ellipsoid origin (a point on the major circle of the torus)
 double
-SlabWithToroidalPoreSingletonScore::
+SlabWithToroidalPorePairScore::
 get_sphere_ellipsoid_penetration_depth
 (algebra::Sphere3D const& sphere,
  algebra::Vector3D const& origin,
@@ -275,7 +299,7 @@ get_sphere_ellipsoid_penetration_depth
 // return - distance to nearest surface point
 // out_translation - a normalized vector pointing to the nearest surface point
 double
-SlabWithToroidalPoreSingletonScore::get_sphere_penetration_depth
+SlabWithToroidalPorePairScore::get_sphere_penetration_depth
 (algebra::Sphere3D sphere,
  algebra::Vector3D* out_translation) const
 {
@@ -326,4 +350,4 @@ SlabWithToroidalPoreSingletonScore::get_sphere_penetration_depth
 
 IMPNPCTRANSPORT_END_NAMESPACE
 
-#endif /* IMPNPCTRANSPORT_SLAB_WITH_TOROIDAL_PORE_SINGLETON_SCORE_H */
+#endif /* IMPNPCTRANSPORT_SLAB_WITH_TOROIDAL_PORE_PAIR_SCORE_H */

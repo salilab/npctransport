@@ -11,8 +11,10 @@
 #include <IMP/npctransport/FGChain.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
-#include <IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h>
-#include <IMP/npctransport/SlabWithToroidalPoreSingletonScore.h>
+#include <IMP/npctransport/SlabWithCylindricalPorePairScore.h>
+#include <IMP/npctransport/SlabWithToroidalPorePairScore.h>
+#include <IMP/npctransport/AnchorToCylindricalPorePairScore.h>
+#include <IMP/npctransport/PoreRadiusSingletonScore.h>
 #include <IMP/npctransport/ZBiasSingletonScore.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/typedefs.h>
@@ -20,6 +22,7 @@
 
 #include <IMP/base_types.h>
 #include <IMP/container_macros.h>
+#include <IMP/container/AllBipartitePairContainer.h>
 #include <IMP/algebra/vector_generators.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
@@ -46,6 +49,7 @@
 #include <numeric>
 #include <limits>
 #include <set>
+#include <string>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name) name##_ = data.name().value()
@@ -92,6 +96,10 @@ Scoring::get_scoring_function(bool update)
     }
     if (get_sd()->get_has_slab()) {
       rs.push_back(get_slab_restraint(update));
+      if(get_sd()->get_is_pore_radius_dynamic()){
+        rs += anchor_restraints_;
+        rs.push_back(this->get_pore_radius_restraint());
+      }
     }
     rs += get_z_bias_restraints();
     rs += get_custom_restraints();
@@ -135,6 +143,10 @@ Scoring::get_custom_scoring_function
   }
   if (get_sd()->get_has_slab()) {
     rs.push_back( create_slab_restraint( beads ) );
+    if(get_sd()->get_is_pore_radius_dynamic()){
+      rs += anchor_restraints_; //TODO: is issue that may include unoptimized anchor beads?)
+      rs.push_back(this->get_pore_radius_restraint());
+    }
   }
   rs += get_custom_restraints(); // TODO: this is problematic cause not restricted to beads - need to decide
   PairContainer* cpc = create_close_beads_container
@@ -533,20 +545,21 @@ Restraint * Scoring::create_slab_restraint
 ( SingletonContainerAdaptor particles)  const
 {
   particles.set_name_if_default("CreateSlabRestraintInput%1%");
-  IMP::Pointer<IMP::SingletonScore> slab_score;
+  IMP::Pointer<IMP::PairScore> slab_score;
   if (get_sd()->get_is_slab_with_cylindrical_pore()) {
-    slab_score=new SlabWithCylindricalPoreSingletonScore
-      (get_sd()->get_slab_thickness(),
-       get_sd()->get_tunnel_radius(),
-       excluded_volume_k_);
+    slab_score =new SlabWithCylindricalPorePairScore
+      (excluded_volume_k_);
   } else {
-    slab_score=new SlabWithToroidalPoreSingletonScore
-      (get_sd()->get_slab_thickness(),
-       get_sd()->get_tunnel_radius(),
-       excluded_volume_k_);
+    slab_score =new SlabWithToroidalPorePairScore
+      (excluded_volume_k_);
   }
+  IMP::ParticlesTemp slab_particles;
+  slab_particles.push_back( get_sd()->get_slab_particle() );
+  IMP_NEW(container::AllBipartitePairContainer, abpc,
+	  (slab_particles,
+           particles.get()) );
   return container::create_restraint(slab_score.get(),
-                                     particles.get(),
+				     abpc.get(),
                                      "bounding slab");
 }
 
@@ -578,13 +591,79 @@ const
   // restrict restraint to be over tunnel if applicable
   double R = std::numeric_limits<double>::max();
   if (get_sd()->get_has_slab()) {
-    R = get_sd()->get_tunnel_radius();
+    R = get_sd()->get_pore_radius(); // TODO: incompatible with dynamic pore radius
   }
   IMP_NEW(ZBiasSingletonScore, zbsc, (k, R) );
   return
     container::create_restraint(zbsc.get(),
                                 ps.get(),
                                 "z-bias potential");
+}
+
+/**
+   add anchor bead to scoring function
+*/
+void
+Scoring::add_restrained_anchor_bead
+(IMP::Particle* p)
+{
+  Model* m= get_model();
+  ParticleIndex pi= p->get_index();
+  IMP_ALWAYS_CHECK(IMP::core::XYZ::get_is_setup(m, pi),
+                       "anchor bead must be an initialized XYZ particle",
+                       IMP::ValueException);
+  if(get_sd()->get_is_slab_with_cylindrical_pore()){
+    ParticleIndex pi_slab= get_sd()->get_slab_particle()->get_index();
+    IMP_ALWAYS_CHECK(SlabWithCylindricalPore::get_is_setup(m, pi_slab),
+                     "slab expected to have been setup as cylindrical pore"
+                     " at this point",
+                     IMP::ValueException);
+    SlabWithCylindricalPore slab(m, pi_slab);
+    core::XYZ xyz(m, pi);
+    IMP_NEW(AnchorToCylidnricalPorePairScore, atcp_ps,
+            (slab, xyz.get_coordinates(), get_sd()->get_pore_anchored_beads_k()) );
+    IMP_NEW(container::ListSingletonContainer,
+            lsc1,
+            (m, IMP::ParticleIndexes(1,pi_slab))
+            );
+    IMP_NEW(container::ListSingletonContainer,
+            lsc2,
+            (m, IMP::ParticleIndexes(1,pi))
+            );
+    IMP_NEW(container::AllBipartitePairContainer,
+            abpc,
+            (lsc1.get(), lsc2.get())
+            );
+    Pointer<Restraint> r= create_restraint(atcp_ps.get(),
+                                           abpc.get());
+    anchor_restraints_.push_back(r);
+  }
+  else
+    {
+      // TODO: support toroidal case; also no pore case?
+      IMP_NOT_IMPLEMENTED;
+    }
+}
+
+Restraint*
+Scoring::get_pore_radius_restraint() const
+{
+  Model* m= get_model();
+  ParticleIndex pi_slab= get_sd()->get_slab_particle()->get_index();
+  IMP_ALWAYS_CHECK(get_sd()->get_has_slab() &&
+                   SlabWithPore::get_is_setup(m, pi_slab),
+                   "Pore radius restraint should only be created when there's a pore",
+                   ValueException);
+  IMP_NEW(PoreRadiusSingletonScore,
+          prss,
+          (get_sd()->get_pore_radius(),
+           get_sd()->get_pore_radius_k())
+          );
+  IMP_NEW(container::ListSingletonContainer,
+          lsc,
+          (m, ParticleIndexes(1, pi_slab)) );
+  return create_restraint(prss.get(),
+                          lsc.get());//                          "pore radius");
 }
 
 

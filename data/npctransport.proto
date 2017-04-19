@@ -118,9 +118,11 @@ message Configuration {
   optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
   optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
   optional FloatRange temperature_k=33; // simulation temperature
-  optional double output_npctransport_version=34 [default=2.0]; // a version number of npctransport by which to create output files
+  optional double output_npctransport_version=34 [default=2.5]; // a version number of npctransport by which to create output files
   optional int32 is_xyz_hist_stats=35 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
-    // n=35
+  optional FloatRange tunnel_radius_k=36; // (Version 2.5+) if <=0, static radius, otherwise, k force constant for tunnel radius restraint
+  optional FloatRange pore_anchored_beads_k=37; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
+    // n=37
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -243,7 +245,9 @@ message Assignment {
   optional FloatAssignment temperature_k=42; // simulation temperature
   optional double output_npctransport_version=43; // a version number for npctransport by which to interpret output file that contains this assignment
   optional int32 is_xyz_hist_stats=44 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
-  // n=44
+  optional FloatAssignment tunnel_radius_k=45; // (Version 2.5+) if <=0, static radius, otherwise, k for tunnel radius restraint
+  optional FloatAssignment pore_anchored_beads_k=46; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
+  // n=46
 }
 
 message Statistics {

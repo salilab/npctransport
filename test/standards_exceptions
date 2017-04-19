@@ -21,5 +21,8 @@ function_name_exceptions= \
         'initialize_positions',
         'make_unordered_particle_index_pair',
         'make_ordered_interaction_type',
-        'make_unordered_interaction_type'
+        'make_unordered_interaction_type',
+        'BrownianDynamicsTAMDWithSlabSupport.set_use_stochastic_runge_kutta',
+        'BrownianDynamicsTAMDWithSlabSupport.simulate',
+        'BrownianDynamicsTAMDWithSlabSupport.simulate_wave'
         ]

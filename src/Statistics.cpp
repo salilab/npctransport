@@ -145,11 +145,11 @@ void Statistics::add_floater_stats
           (p, this, statistics_interval_frames_));
   floaters_stats_map_[type].push_back(bsos);
   if (get_sd()->get_has_slab() )
-    {  // only if has tunnel
+    {  // only if has pore
       IMP_NEW(ParticleTransportStatisticsOptimizerState, ptsos,
               (p,
-               -0.5 * get_sd()->get_slab_thickness(),  // tunnel bottom
-               0.5 * get_sd()->get_slab_thickness(),  // tunnel top
+               -0.5 * get_sd()->get_slab_thickness(),  // pore bottom
+               0.5 * get_sd()->get_slab_thickness(),  // pore top
                this // statistics manager
                )
               );
@@ -980,7 +980,7 @@ double Statistics::get_z_distribution_top() const{
 double Statistics::get_r_distribution_max() const{
   if(get_sd()->get_has_slab())
     {
-      return  get_sd()->get_tunnel_radius();
+      return  get_sd()->get_pore_radius();
     }
   if(get_sd()->get_has_bounding_box())
     {

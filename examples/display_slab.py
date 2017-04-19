@@ -14,6 +14,10 @@ use_rmf=True
 
 m= IMP.Model()
 m.set_log_level(IMP.WARNING)
+p_slab= IMP.Particle(m, "slab")
+pi_slab= p_slab.get_index()
+slab= IMP.npctransport.SlabWithCylindricalPore.setup_particle \
+      (p_slab, height, radius)
 p= IMP.Particle(m)
 pi=p.get_index()
 d=IMP.core.XYZR.setup_particle(p)
@@ -22,8 +26,9 @@ d.set_coordinates_are_optimized(True)
 IMP.atom.Mass.setup_particle(p, 1)
 IMP.atom.Hierarchy.setup_particle(p)
 
-slabss= IMP.npctransport.SlabWithCylindricalPoreSingletonScore(height, radius, 1)
-r= IMP.core.SingletonRestraint(m, slabss, pi, "slab")
+slabps= IMP.npctransport.SlabWithCylindricalPorePairScore(1)
+#print(dir(slabps))
+r= IMP.core.PairRestraint(m, slabps, [pi_slab,pi], "slab")
 r.set_log_level(IMP.WARNING)
 nm=IMP.create_temporary_file_name("display_slab", ".pym")
 w= IMP.display.create_writer(nm)
@@ -72,9 +77,9 @@ if use_rmf:
 
 gs=[]
 for c in IMP.algebra.get_grid_interior_cover_by_spacing(bb, 5):
-    dv= slabss.get_displacement_direction(c)
+    dv= slabps.get_displacement_direction(slab,c)
     #.get_unit_vector()
-    dm= slabss.get_displacement_magnitude(c)
+    dm= slabps.get_displacement_magnitude(slab,c)
     #print c, dm, dv
     if dm > particle_radius:
         continue

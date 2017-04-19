@@ -10,12 +10,14 @@ IMP_CLANG_PRAGMA(diagnostic ignored "-Wc++11-long-long")
 IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
 // IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, Scoring, Scorings);
+IMP_SWIG_OBJECT(IMP::npctransport, BrownianDynamicsTAMDWithSlabSupport, BrownianDynamicsTAMDWithSlabSupports);
 IMP_SWIG_OBJECT(IMP::npctransport, Statistics, StatisticsList);
 IMP_SWIG_OBJECT(IMP::npctransport, SimulationData, SimulationDatas);
 IMP_SWIG_OBJECT(IMP::npctransport, SitesGeometry, SitesGeometries);
 IMP_SWIG_OBJECT(IMP::npctransport, TypedSitesGeometry, TypedSitesGeometries);
-IMP_SWIG_OBJECT(IMP::npctransport, SlabWithCylindricalPoreSingletonScore, SlabWithCylindricalPoreSingletonScores);
-IMP_SWIG_OBJECT(IMP::npctransport, SlabWithToroidalPoreSingletonScore, SlabWithToroidalPoreSingletonScores);
+IMP_SWIG_OBJECT(IMP::npctransport, SlabWithCylindricalPorePairScore, SlabWithCylindricalPorePairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, SlabWithToroidalPorePairScore, SlabWithToroidalPorePairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, PoreRadiusSingletonScore, PoreRadiusSingletonScores);
 IMP_SWIG_OBJECT(IMP::npctransport, ExcludeZRangeSingletonScore, ExcludeZRangeSingletonScores);
 IMP_SWIG_OBJECT(IMP::npctransport, ZBiasSingletonScore, ZBiasSingletonScores);
 IMP_SWIG_OBJECT(IMP::npctransport, SlabWithCylindricalPoreWireGeometry, SlabWithCylindricalPoreWireGeometries);
@@ -39,6 +41,9 @@ IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
 IMP_SWIG_VALUE(IMP::npctransport, SitesPairScoreParameters, SitesPairScoreParametersList);
 //IMP_SWIG_VALUE(IMP::npctransport, LinearInteraction, LinearInteractions);
 IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
+IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithPore, SlabWithPores);
+IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithCylindricalPore, SlabWithCylindricalPores);
+IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPores);
 //IMP_SWIG_VALUE_INSTANCE(IMP::npctransport, InteractionType, std::pair, InteractionTypes);
 
 %apply unsigned int { boost::uint32_t }
@@ -46,13 +51,13 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 
 %include "IMP_npctransport.Parameter.i"
 %include "IMP/npctransport/typedefs.h"
-
 %include "IMP/npctransport/linear_distance_pair_scores.h"
 %include "IMP/npctransport/functor_linear_distance_pair_scores_typedefs.h"
+// The following templates are necessary for proper interpreation of class inheritence in linear_distance_pair_scores.h
 %template(_DistancePairScoreForLinearSoftSphere) IMP::score_functor::DistancePairScore<IMP::npctransport::LinearSoftSphereScore>;
 %template(_DistancePairScoreForLinearInteraction) IMP::score_functor::DistancePairScore<IMP::npctransport::LinearInteractionScore>;
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"
-
+%include "IMP/npctransport/BrownianDynamicsTAMDWithSlabSupport.h"
 %include "IMP/npctransport/SitesPairScoreParameters.h"
 %include "IMP/npctransport/SitesGeometry.h"
 %include "IMP/npctransport/SitesPairScore.h"
@@ -66,12 +71,18 @@ IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 %include "IMP/npctransport/rmf_links.h"
 %include "IMP/npctransport/Transporting.h"
 %include "IMP/npctransport/protobuf.h"
-%include "IMP/npctransport/SlabWithCylindricalPoreSingletonScore.h"
-%include "IMP/npctransport/SlabWithToroidalPoreSingletonScore.h"
-%include "IMP/npctransport/ExcludeZRangeSingletonScore.h"
-%include "IMP/npctransport/ZBiasSingletonScore.h"
+%include "IMP/npctransport/SlabWithPore.h"
+%include "IMP/npctransport/SlabWithCylindricalPore.h"
+%include "IMP/npctransport/SlabWithToroidalPore.h"
+%include "IMP/npctransport/SlabWithCylindricalPorePairScore.h"
+%include "IMP/npctransport/SlabWithToroidalPorePairScore.h"
 %include "IMP/npctransport/SlabWithCylindricalPoreGeometry.h"
 %include "IMP/npctransport/SlabWithToroidalPoreGeometry.h"
+// The following template is necessary for proper interpretation of class inheritence in PoreRadiusSingletonScore
+%template(_GenericAttributeSingletonScoreForPoreRadus) IMP::core::GenericAttributeSingletonScore<IMP::core::Harmonic>;
+%include "IMP/npctransport/PoreRadiusSingletonScore.h"
+%include "IMP/npctransport/ExcludeZRangeSingletonScore.h"
+%include "IMP/npctransport/ZBiasSingletonScore.h"
 %include "IMP/npctransport/BodyStatisticsOptimizerState.h"
 %include "IMP/npctransport/ParticleTransportStatisticsOptimizerState.h"
 %include "IMP/npctransport/ChainStatisticsOptimizerState.h"

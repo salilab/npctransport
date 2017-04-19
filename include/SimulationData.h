@@ -38,15 +38,18 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
-#define IMPNPCTRANSPORT_VERSION 2.0
+// Version 2.5 - turned slab into a particle
+#define IMPNPCTRANSPORT_VERSION 2.5
 
 class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  private:
   // params
   Parameter<double> output_npctransport_version_;
   Parameter<double> box_side_;
-  Parameter<double> tunnel_radius_;
-  Parameter<double> slab_thickness_;
+  Parameter<double> tunnel_radius_; // note this is the initial pore radius (major radius if toroidal pore)
+  Parameter<double> tunnel_radius_k_; // k for harmonic restraint on pore radius
+  Parameter<double> pore_anchored_beads_k_; // k for harmonic restraint on beads anchored to pore
+  Parameter<double> slab_thickness_; // note this is the initial thickness (also minor vertical radius if toroidal pore)
   Parameter<bool> box_is_on_;
   Parameter<int> slab_is_on_;
   Parameter<int> number_of_trials_;
@@ -123,6 +126,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   // the root of the model hierarchy
   PointerMember<Particle> root_;
 
+  // Membrane slab, if exists (mutable but is expected to be accessed only from get_slab_particle()
+  mutable PointerMember<Particle> slab_particle_;
+
   // fg types  - a list of all fg/floater/obstacle types that were
   // added via create_fgs/floaters/obstacles(), so far
   //! a set of particle types
@@ -144,6 +150,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   bool is_save_restraints_to_rmf_;
 
  private:
+
+  //! initialize slab_particle_ based on current parameters
+  void create_slab_particle();
 
   /**
      Adds the FG Nup chains to the model hierarchy,
@@ -445,6 +454,18 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   bool get_is_slab_with_toroidal_pore() const
   { return slab_is_on_==2; }
 
+  /** returns the slab particle, initializing it based on current parameters
+      if needed
+   */
+  Particle* get_slab_particle() const{
+    if(!slab_particle_ && get_has_slab()){
+      // Const cast below - cause the initialization of slab_particle_ is transparent when
+      // using get_slab_particle(), and it should only be accessed from this method
+      const_cast<SimulationData*>(this)->create_slab_particle();
+    }
+    return slab_particle_.get();
+  }
+
   // get the cylinder in the slab for this simulation
   algebra::Cylinder3D get_cylinder() const;
 
@@ -536,9 +557,35 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   atom::Hierarchy get_root() const { return atom::Hierarchy(root_); }
 
-  double get_slab_thickness() const { return slab_thickness_; }
+  double get_slab_thickness() const;
 
-  double get_tunnel_radius() const { return tunnel_radius_; }
+  //! returns te current tunnel radius
+  double get_tunnel_radius() const;
+
+  //! alias to get_tunnel_radius
+    double get_pore_radius() const{
+    return get_tunnel_radius();
+  }
+
+  //! returns the force coefficient for keeping the tunnel radius in
+  //! equilibrium (radius is dynamic only if this coefficient is positive)
+  double get_tunnel_radius_k() const {
+    return tunnel_radius_k_;
+  }
+
+  //! alias to get_tunnel_radius_k
+  double get_pore_radius_k() const {
+    return get_tunnel_radius_k();
+  }
+
+  //! returns true if pore radius can change dynamically
+  bool get_is_pore_radius_dynamic() const {
+    return get_has_slab() && get_tunnel_radius_k()>0.0;
+  }
+
+  double get_pore_anchored_beads_k() const {
+    return pore_anchored_beads_k_;
+  }
 
   display::Geometry *get_static_geometry();
 
