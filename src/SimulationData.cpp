@@ -169,6 +169,7 @@ void SimulationData::initialize(std::string prev_output_file,
   GET_VALUE_DEF(is_exclude_floaters_from_slab_initially, false);
   GET_ASSIGNMENT_DEF(temperature_k, strip_units(IMP::internal::DEFAULT_TEMPERATURE));
   GET_VALUE_DEF(is_xyz_hist_stats, false)
+  GET_VALUE_DEF(is_backbone_harmonic, false);
   initial_simulation_time_ns_ = 0.0; // default
   if (pb_data.has_statistics()) {
     if (pb_data.statistics().has_bd_simulation_time_ns()) {

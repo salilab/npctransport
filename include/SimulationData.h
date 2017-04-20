@@ -55,6 +55,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   Parameter<int> number_of_trials_;
   Parameter<int> number_of_frames_;
   Parameter<int> dump_interval_frames_;
+  Parameter<bool> is_backbone_harmonic_;
   Parameter<double> angular_d_factor_;
   Parameter<double> range_;
   Parameter<double> statistics_fraction_;

@@ -26,6 +26,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class SimulationData;
+class Scoring;
 
 /**
    a chain with a root
@@ -42,12 +43,13 @@ public:
   // the restraint on the chain bonds
   PointerMember<Restraint> bonds_restraint_;
 
-  // the score acting on consecutive chain beads in bonds_restraint_
-  PointerMember<LinearWellPairScore> bonds_score_;
+  // chain bond force coefficient in kcal/mol/A or kcal/mol/A^2
+  // (depending on whether the bond is linear or harmonic)
+  double backbone_k_;
 
-  // container for consecutive (bonded) chain beads
-  PointerMember<container::ExclusiveConsecutivePairContainer>
-    bead_pairs_;
+  // the rest length of a bond in the chain relative to the
+  // sum of the radii of the bonded spheres
+  double rest_length_factor_;
 
 
  private:
@@ -58,7 +60,7 @@ public:
     /** recreate the bonds restraint for the chain beads based on the
         current chain topology
     */
-  void update_bonds_restraint();
+  void update_bonds_restraint(Scoring const* scoring_manager);
 
  public:
 
@@ -81,11 +83,11 @@ public:
    : Object(name),
     root_(root),
     bonds_restraint_(nullptr),
-    bead_pairs_(nullptr)
+    backbone_k_(backbone_k),
+    rest_length_factor_(rest_length_factor)
       {
         IMP_USAGE_CHECK(rest_length_factor>0.0, "bonds rest length factor" <<
                         " should be positive");
-        bonds_score_ = new LinearWellPairScore(rest_length_factor, backbone_k);
       }
 
     atom::Hierarchy get_root() const
@@ -143,14 +145,7 @@ public:
 
       @note assumes that the chain has a valid root whose leaves are beads
   */
-  virtual Restraints get_chain_restraints() {
-    // TODO: add support for a dynamic chain?
-    IMP_USAGE_CHECK(root_, "Chain not initialized");
-    if(!bonds_restraint_){ // TODO: fix for dynamic chain topology?
-      update_bonds_restraint();
-    }
-    return Restraints(1,bonds_restraint_);
-  }
+  virtual Restraints get_chain_restraints(Scoring const* scoring_manager);
 
     /** set the equilibrium distance factor between consecutive beads
         relative to the sum of their radii
@@ -162,7 +157,7 @@ public:
     */
   void set_rest_length_factor(double rlf){
     IMP_USAGE_CHECK(rlf>0.0, "bonds rest length factor should be positive");
-      bonds_score_->set_rest_length_factor(rlf);
+    rest_length_factor_= rlf;
   }
 
     /** set the force constant between consecutive chain beads
@@ -173,18 +168,18 @@ public:
         \see LinearWellPairScore
      */
   void set_backbone_k(double k) {
-      bonds_score_->set_k(k);
+    backbone_k_= k;
   }
 
   //! get the equilibrium distance factor between consecutive beads relative
   //! to the sum of their radii
-  double get_rest_length_factor(){
-    return bonds_score_->get_rest_length_factor();
+  double get_rest_length_factor() const{
+    return rest_length_factor_;
   }
 
   //! get the force constant between consecutive chain beads
-  double get_backbone_k() {
-    return bonds_score_->get_k();
+  double get_backbone_k() const {
+    return backbone_k_;
   }
 
   IMP_OBJECT_METHODS(FGChain);

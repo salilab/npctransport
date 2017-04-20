@@ -11,7 +11,6 @@
 #include "npctransport_config.h"
 
 #include "FGChain.h"
-#include "linear_distance_pair_scores.h"
 #include "npctransport_proto.fwd.h"
 #include "Parameter.h"
 // #include "SimulationData.h"
@@ -48,6 +47,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   Parameter<double> interaction_k_;
   Parameter<double> interaction_range_;
   Parameter<double> backbone_k_;
+  Parameter<bool> is_backbone_harmonic_;
   Parameter<double> slack_;
   Parameter<double> nonspecific_k_;
   Parameter<double> nonspecific_range_;
@@ -445,6 +445,16 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
       is non-positive
   */
   double get_default_backbone_k() const { return backbone_k_; }
+
+  //! Create a backbone bond score according to class flags
+  /** create a backbone bond score with specified rest_length_factor
+      (relative to sum of spheres radii) and backbone k. The score
+      type is according to the class flags - either a linear or
+      harmonic potential, with k in units of kcal/mol/A or kcal/mol/A^2,
+      respectively
+  */
+  PairScore* create_backbone_score
+    (double rest_length_factor, double backbone_k) const;
 
   /** returns the constant force applied by overlapping spheres on each
       other

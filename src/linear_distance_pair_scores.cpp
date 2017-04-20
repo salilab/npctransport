@@ -1,6 +1,6 @@
 /**
- *  \file DistancePairScore.cpp
- *  \brief A Score on the distance between a pair of particles.
+ *  \file linear_distance_pair_scores.cpp
+ *  \brief Linear scores on the distance between a pair of particles.
  *
  *  Copyright 2007-2017 IMP Inventors. All rights reserved.
  */

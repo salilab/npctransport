@@ -9,6 +9,8 @@
 #include <IMP/npctransport/Scoring.h>
 
 #include <IMP/npctransport/FGChain.h>
+#include <IMP/npctransport/linear_distance_pair_scores.h>
+#include <IMP/npctransport/harmonic_distance_pair_scores.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesPairScore.h>
 #include <IMP/npctransport/SlabWithCylindricalPorePairScore.h>
@@ -52,12 +54,12 @@
 #include <string>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
-#define GET_ASSIGNMENT(name) name##_ = data.name().value()
-#define GET_VALUE(name) name##_ = data.name()
+#define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()
+#define GET_VALUE(name) name##_ = pb_assignment.name()
 
 Scoring::Scoring
 (SimulationData* owner_sd,
- const ::npctransport_proto::Assignment &data)
+ const ::npctransport_proto::Assignment &pb_assignment)
 : Object("Scoring%1%"),
   owner_sd_(owner_sd),
   //  is_updating_particles_(false),
@@ -75,6 +77,7 @@ Scoring::Scoring
   GET_ASSIGNMENT(interaction_k);
   GET_ASSIGNMENT(interaction_range);
   GET_ASSIGNMENT(backbone_k);
+  GET_VALUE(is_backbone_harmonic);
   GET_ASSIGNMENT(slack);
   GET_ASSIGNMENT(nonspecific_k);
   GET_ASSIGNMENT(nonspecific_range);
@@ -297,6 +300,16 @@ void Scoring::add_interaction
   }
 }
 
+IMP::PairScore*
+Scoring::create_backbone_score
+(double rest_length_factor, double backbone_k) const
+{
+  if(is_backbone_harmonic_){
+    return new HarmonicWellPairScore(rest_length_factor, backbone_k);
+  } else {
+    return new LinearWellPairScore(rest_length_factor, backbone_k);
+  }
+}
 
 IMP::PairScore const*
 Scoring::get_predicate_pair_score
@@ -418,7 +431,7 @@ Scoring::get_chain_restraints_on
             if( chains_found.find(chain) == chains_found.end() )
             {
               chains_found.insert(chain);
-              R += chain->get_chain_restraints();
+              R += chain->get_chain_restraints(this);
             }
           }
       }
@@ -434,7 +447,7 @@ Scoring::get_all_chain_restraints() const
         it != chains_set_.end(); it++)
     {
       FGChain* chain = it->get();
-      R += chain->get_chain_restraints();
+      R += chain->get_chain_restraints(this);
     }
   return R;
 }
@@ -686,6 +699,7 @@ Model * Scoring::get_model() const {
 
 
 #undef GET_ASSIGNMENT
+#undef GET_ASSIGNMENT_DEF
 #undef GET_VALUE
-
+#undef GET_VALUE_DEF
 IMPNPCTRANSPORT_END_NAMESPACE

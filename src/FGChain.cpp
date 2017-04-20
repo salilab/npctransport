@@ -7,6 +7,7 @@
  */
 
 #include <IMP/npctransport/FGChain.h>
+#include <IMP/npctransport/Scoring.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/internal/TAMDChain.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
@@ -49,7 +50,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 /***************** FGChain methods ************/
 
 //!  create the bonds restraint for the chain beads
-void FGChain::update_bonds_restraint()
+void FGChain::update_bonds_restraint(Scoring const* scoring_manager)
 {
   // TODO: this currently cannot work for more than two calls cause of
   // ExclusiveConsecutivePairContainer - will need to switch to
@@ -60,18 +61,32 @@ void FGChain::update_bonds_restraint()
                     "bonds restraint is supposed to become invalidated so it"
                   " shouldn't be owned by anyone else at this point");
       bonds_restraint_ = nullptr; // invalidate to release old bead_pairs
-      IMP_USAGE_CHECK(!bead_pairs_->get_is_shared(),
-                    "bead pairs consecutive pair container must be destroyed"
-                    " before it is updated so it cannot be owned by others");
-      bead_pairs_ = nullptr; // invalidate to destruct
   }
-  bead_pairs_ = new IMP::container::ExclusiveConsecutivePairContainer
-    (get_root().get_model(),
-     IMP::get_indexes(this->get_beads()),
-     "Bonds %1% " + name + " consecutive pairs");
+  IMP::Pointer<IMP::PairScore> bonds_score=
+    scoring_manager->create_backbone_score(rest_length_factor_,
+                                           backbone_k_);
+  IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer,
+          bead_pairs,
+          ( get_root().get_model(),
+            IMP::get_indexes(this->get_beads()),
+            "Bonds %1% " + name + " consecutive pairs" )
+          );
   bonds_restraint_ = container::create_restraint
-    ( bonds_score_.get(), bead_pairs_.get(),  "Bonds " + name  );
+    ( bonds_score.get(), bead_pairs.get(),  "Bonds " + name  );
 }
+
+Restraints
+FGChain::get_chain_restraints
+(Scoring const* scoring_manager)
+{
+  // TODO: add support for a dynamic chain?
+  IMP_USAGE_CHECK(root_, "Chain not initialized");
+  if(!bonds_restraint_){ // TODO: fix for dynamic chain topology?
+    update_bonds_restraint(scoring_manager);
+  }
+  return Restraints(1,bonds_restraint_);
+}
+
 
 
 /******************  internal utility methods ***************/

@@ -122,7 +122,8 @@ message Configuration {
   optional int32 is_xyz_hist_stats=35 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
   optional FloatRange tunnel_radius_k=36; // (Version 2.5+) if <=0, static radius, otherwise, k force constant for tunnel radius restraint
   optional FloatRange pore_anchored_beads_k=37; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
-    // n=37
+  optional int32 is_backbone_harmonic=38 [default=0]; // whether backbone is an harmonic or linear potential
+    // n=38
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -162,6 +163,7 @@ message Assignment {
     optional double site_relative_distance=17 [default=1.0]; // distance of sites from center relative to particle radius
     optional double site_radius=18 [default=0.0]; // radius around site at which maximal interaction is felt
     repeated string type_suffix_list=19; // list of suffixes appended to the end of the type field in corresponding chain particles. The list length is, assumed to be either 0 (=ignore) or the number of chain particles. Set to "" for particles that should not be modified. This enables customization of the interaction properties of different chain particles. Note that 'interaction_k_factor', 'interaction_range_factor', 'd_factor', 'interactions' fields are all ignored for particles whose suffix is not "".
+    optional double backbone_k_factor=20 [default=1.0];
   };
   message FloaterAssignment {
     required IntAssignment number=1;
@@ -247,7 +249,8 @@ message Assignment {
   optional int32 is_xyz_hist_stats=44 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
   optional FloatAssignment tunnel_radius_k=45; // (Version 2.5+) if <=0, static radius, otherwise, k for tunnel radius restraint
   optional FloatAssignment pore_anchored_beads_k=46; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
-  // n=46
+  optional int32 is_backbone_harmonic=47 [default=1]; // whether backbone is an harmonic or linear potential
+  // n=47
 }
 
 message Statistics {

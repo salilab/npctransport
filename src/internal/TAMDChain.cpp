@@ -6,6 +6,7 @@
  */
 
 #include <IMP/npctransport/internal/TAMDChain.h>
+#include <IMP/npctransport/Scoring.h>
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/atom/CenterOfMass.h>
@@ -27,12 +28,12 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 
 /********************* TAMDChain methods ****************/
 
-Restraints TAMDChain::get_chain_restraints()
+Restraints TAMDChain::get_chain_restraints(Scoring const* scoring_manager)
 {
   IMP_USAGE_CHECK( is_initialized,
                    "TAMD chain must be initialized by restraint generation");
   Restraints ret = tamd_restraints_;
-  ret += FGChain::get_chain_restraints();
+  ret += FGChain::get_chain_restraints(scoring_manager);
   return ret;
 }
 

@@ -90,7 +90,8 @@ class TAMDChain : public npctransport::FGChain{
 
       \see FGChain::get_chain_restraints
   */
-  virtual Restraints get_chain_restraints() IMP_OVERRIDE;
+  virtual Restraints get_chain_restraints
+    (Scoring const* scoring_manager) IMP_OVERRIDE;
 
   //! get TAMD images of centroids in the hierarchy
   /**
