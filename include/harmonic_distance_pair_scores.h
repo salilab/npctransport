@@ -9,6 +9,7 @@
 #define IMPNPCTRANSPORT_HARMONIC_DISTANCE_PAIR_SCORES_H
 
 #include "npctransport_config.h"
+#include <IMP/compiler_macros.h>
 #include <IMP/PairScore.h>
 #include <IMP/pair_macros.h>
 #include <IMP/core/XYZR.h>
@@ -45,7 +46,7 @@ inline double do_evaluate_index_harmonic(Model *m, const ParticleIndexPair &pp,
   double shifted_length = delta_length - x0;
   double score = 0.5 * k * shifted_length * shifted_length;
   static const double MIN_DISTANCE = .00001;
-  if (likely( da && delta_length > MIN_DISTANCE )) { // Profiling note on use of likely(): in BD simulations, the simulation bottleneck is when da is true, and the spring is likely out of equilibrium
+  if (IMP_LIKELY( da && delta_length > MIN_DISTANCE )) { // Profiling note on use of likely(): in BD simulations, the simulation bottleneck is when da is true, and the spring is likely out of equilibrium
     algebra::Vector3D deriv = (k * shifted_length / delta_length) * delta;  // deriv magnitude is k*shifted_length
     m->add_to_coordinate_derivatives(pp[0], deriv, *da);
     m->add_to_coordinate_derivatives(pp[1], -deriv, *da);
