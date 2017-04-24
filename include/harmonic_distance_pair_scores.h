@@ -29,8 +29,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
    @param[in] pp    a pair of particle indices for fast access through internal
                     model methods
    @param[in,out] da accumulator for score derivatives to be updated
-   @param[in] delta a vector that represents the displacement between the
-                    two particles
+   @param[in] delta a vector from pp[1] to pp[0]
    @param delta_length the cached length of delta, assumed correct, and required
                        for faster calculation
    @param x0        resting distance (where score = 0)
@@ -107,12 +106,8 @@ inline double HarmonicWellPairScore::evaluate_index(
   algebra::Vector3D delta = s0.get_center() - s1.get_center();
   double delta_length_2 = delta.get_squared_magnitude();
   double delta_length = std::sqrt(delta_length_2);
-  if (delta_length > x0) {  // attractive regime
-    return  // k_ > 0 = get spheres closer
-        do_evaluate_index_harmonic(m, pp, da, delta, delta_length, x0, k_);
-  } else {  // -k_ < 0 = keep spheres apart
-    return do_evaluate_index_harmonic(m, pp, da, delta, delta_length, x0, -k_);
-  }
+  return  // k_ > 0 = get spheres closer
+    do_evaluate_index_harmonic(m, pp, da, delta, delta_length, x0, k_);
 }
 #endif
 
