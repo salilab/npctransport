@@ -6,6 +6,7 @@
  *
  */
 
+#include <IMP/npctransport/RelaxingSpring.h>
 #include <IMP/npctransport/rmf_links.h>
 #include <IMP/npctransport/util.h>
 
@@ -97,12 +98,12 @@ void HierarchyWithSitesLoadLink::do_load_hierarchy(
         ( nh.get_static_value( pore_radius_is_optimized_key_ ) );
     }
     if (nh.get_has_value(rest_length_key_)) {
-      IMP_ALWAYS_CHECK(Spring::get_is_setup(m, pi),
+      IMP_ALWAYS_CHECK(RelaxingSpring::get_is_setup(m, pi),
                        "rest length attribute is only valid"
-                       " for Spring decorated particles",
+                       " for RelaxingSpring decorated particles",
                        IMP::ValueException);
-      Spring swp(m, pi);
-      swp.set_rest_length(
+      RelaxingSpring swp(m, pi);
+      swp.set_rest_length
         ( nh.get_value( rest_length_key_) );
     }
   }
@@ -226,8 +227,8 @@ void HierarchyWithSitesSaveLink::do_save_hierarchy(Model *m,
       n.set_value(pore_radius_key_, swp.get_pore_radius());
       n.set_value(pore_radius_is_optimized_key_, swp.get_pore_radius_is_optimized());
     }
-    if (Spring::get_is_setup(m, pi)) {
-      Spring s(m, pi);
+    if (RelaxingSpring::get_is_setup(m, pi)) {
+      RelaxingSpring s(m, pi);
       n.set_value(rest_length_key_, s.get_rest_length());
     }
   }

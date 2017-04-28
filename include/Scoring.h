@@ -446,7 +446,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   */
   double get_default_backbone_k() const { return backbone_k_; }
 
-  bool get_is_backbone_harominc() const { return is_backbone_harmonic_; }
+  bool get_is_backbone_harmonic() const { return is_backbone_harmonic_; }
 
   //! Create a backbone bond restraint over beads according to class flags
   /** create a backbone bond restraint with specified rest_length_factor
@@ -457,7 +457,10 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
       spring.
   */
   Restraint* create_backbone_restraint
-    (double rest_length_factor, double backbone_k, ParticlesTemp beads) const;
+    (double rest_length_factor,
+     double backbone_k,
+     ParticlesTemp beads,
+     std::string name) const;
 
   /** returns the constant force applied by overlapping spheres on each
       other

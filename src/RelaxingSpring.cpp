@@ -22,47 +22,49 @@ RelaxingSpring::do_setup_particle
   double equilibrium_rest_length,
   double rest_length_diffusion_coefficient )
 {
-  m->add_attribute(get_bonded_particle_0_key(), pi, 
+  m->add_attribute(get_bonded_particle_0_key(), pi,
 		   bonded_pi0);
-  m->add_attribute(get_bonded_particle_1_key(), pi, 
+  m->add_attribute(get_bonded_particle_1_key(), pi,
 		   bonded_pi1);
-  m->add_attribute(get_equilibrium_rest_length_key(), pi, 
+  m->add_attribute(get_equilibrium_rest_length_key(), pi,
 		   equilibrium_rest_length);
-  m->add_attribute(get_rest_length_key(), pi, 
+  m->add_attribute(get_rest_length_key(), pi,
 		   equilibrium_rest_length); // initially equal by default
-  m->add_attribute(get_rest_length_diffusion_coefficient_key(), pi, 
+  m->add_attribute(get_rest_length_diffusion_coefficient_key(), pi,
 		   rest_length_diffusion_coefficient);
 }
 
-ParticleIndexKey get_bonded_particle_0_key() const{
+ParticleIndexKey
+RelaxingSpring::get_bonded_particle_0_key(){
   static ParticleIndexKey pik("npctransport.spring bonded particle 0");
   return pik;
 }
 
-ParticleIndexKey get_bonded_particle_1_key() const{
+ParticleIndexKey
+RelaxingSpring::get_bonded_particle_1_key(){
   static ParticleIndexKey pik("npctransport.spring bonded particle 1");
   return pik;
 }
 
 FloatKey
-RelaxingSpring::get_equilibrium_rest_length_key() const
+RelaxingSpring::get_equilibrium_rest_length_key()
 {
   static FloatKey fk("npctransport.spring equilibrium rest_length key");
   return fk;
 }
 
 FloatKey
-RelaxingSpring::get_rest_length_key() const
+RelaxingSpring::get_rest_length_key()
 {
   static FloatKey fk("npctransport.spring rest_length key");
   return fk;
 }
 
 FloatKey
-RelaxingSpring::get_rest_length_diffusion_coefficient_key() const
+RelaxingSpring::get_rest_length_diffusion_coefficient_key()
 {
   static FloatKey fk("npctransport.spring rest length diffusion coefficient key");
-  return fg;
+  return fk;
 }
 
 void

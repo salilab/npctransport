@@ -13,6 +13,7 @@
 #include "npctransport_config.h"
 #include <IMP/Decorator.h>
 #include <IMP/decorator_macros.h>
+#include <IMP/Particle.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -22,44 +23,48 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
  */
 
 class IMPNPCTRANSPORTEXPORT
-RelaxingSpring : public Decorator()
+RelaxingSpring : public Decorator
 {
   /** Decorate a spring particle that connects two particles
-      in no particular order
+      in no particular order, with a dynamic rest length
+      that may relax towards some equilibrium value
 
       @param m the model
       @param pi the particle index
       @param bonded_pi0 particle on first side of spring
       @param bonded_pi1 particle on second side of spring
       @param equilibrium_rest_length the rest length of the spring at equilibrium
-      @param rest_length the instantaneous rest length of the spring
+      @param rest_length_diffusion_coefficient the diffusion coefficient for the rest length
   */
   static void do_setup_particle(IMP::Model* m,
                                 ParticleIndex pi,
                                 ParticleIndex bonded_pi0,
                                 ParticleIndex bonded_pi1,
                                 double equilibrium_rest_length,
-                                double rest_length);
+                                double rest_length_diffusion_coefficient);
 
 
  public:
   IMP_DECORATOR_METHODS(RelaxingSpring, Decorator);
 
 
-  /** Decorate a spring particke connecting two particles
+  /** Decorate a spring particle that connects two particles
+      in no particular order, with a dynamic rest length
+      that may relax towards some equilibrium value
 
       @param m the model
       @param pi the particle index
       @param bonded_pi0 particle on first side of spring
       @param bonded_pi1 particle on second side of spring
       @param equilibrium_rest_length the rest length of the spring at equilibrium
-      @param rest_length the instantaneous rest length of the spring
-  */
+      @param rest_length_diffusion_coefficient the diffusion
+             coefficient for the rest length
+       */
   IMP_DECORATOR_SETUP_4(RelaxingSpring,
-                        ParticleIndex bonded_pi0,
-                        ParticleIndex bonded_pi1,
+                        ParticleIndex, bonded_pi0,
+                        ParticleIndex, bonded_pi1,
                         double, equilibrium_rest_length,
-                        double, rest_length);
+                        double, rest_length_diffusion_coefficient);
 
   //! Return true if the particle is an instance of an Transporting
   static bool get_is_setup(Model *m, ParticleIndex pi) {
@@ -68,33 +73,44 @@ RelaxingSpring : public Decorator()
       && m->get_has_attribute(get_rest_length_key(), pi);
   }
 
-  ParticleIndexKey get_bonded_particle_0_key() const;
+  static ParticleIndexKey get_bonded_particle_0_key();
 
-  ParticleIndexKey get_bonded_particle_1_key() const;
+  static ParticleIndexKey get_bonded_particle_1_key();
 
   //! get decorator key for spring equilibrium rest length
-  static FloatKey get_equilibrium_rest_length_key() const;
+  static FloatKey get_equilibrium_rest_length_key();
 
   //! get decorator key for spring rest length
-  static FloatKey get_rest_length_key() const;
+  static FloatKey get_rest_length_key();
 
   //! get decorator key for diffusion coefficient of rest length
-  static FloatKey get_rest_length_diffusion_coefficient_key() const;
+  static FloatKey get_rest_length_diffusion_coefficient_key();
 
-  ParticleIndex get_bonded_particle_0() const{
-    return (get_particle()->get_value(get_bonded_particle_0_key()));
+  Particle* get_bonded_particle_0() const{
+    Particle* this_p= get_particle();
+    return this_p->get_value(get_bonded_particle_0_key());
   }
 
-  ParticleIndex get_bonded_particle_1() const{
-    return (get_particle()->get_value(get_bonded_particle_1_key()));
+  Particle* get_bonded_particle_1() const{
+    Particle* this_p= get_particle();
+    return this_p->get_value(get_bonded_particle_1_key());
   }
 
-  IMP_DECORATOR_GET_SET(equilibrium_rest_length, 
-			get_equilibrium_rest_length_key(), 
+  ParticleIndex get_bonded_particle_index_0() const{
+    return get_bonded_particle_0()->get_index();
+  }
+
+  ParticleIndex get_bonded_particle_index_1() const{
+    return get_bonded_particle_1()->get_index();
+  }
+
+
+  IMP_DECORATOR_GET_SET(equilibrium_rest_length,
+			get_equilibrium_rest_length_key(),
 			Float, Float);
 
-  IMP_DECORATOR_GET_SET(rest_length, 
-			get_rest_length_key(), 
+  IMP_DECORATOR_GET_SET(rest_length,
+			get_rest_length_key(),
 			Float, Float);
 
   IMP_DECORATOR_GET_SET(rest_length_diffusion_coefficient,
@@ -102,7 +118,7 @@ RelaxingSpring : public Decorator()
 			Float, Float);
 
   void add_to_rest_length_derivative
-    ( double d, DerivativeAccumulator* da ) 
+    ( double d, DerivativeAccumulator& da )
   {
     get_model()->add_to_derivative( get_rest_length_key(),
 				    get_particle_index(),

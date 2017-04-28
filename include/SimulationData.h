@@ -353,7 +353,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
    */
   ParticlesTemp get_non_optimizable_beads();
 
-  bool get_is_backbone_harominc() const 
+  bool get_is_backbone_harmonic() const
   { return is_backbone_harmonic_; }
 
   /** get time from which simulation begins */
