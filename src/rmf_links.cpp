@@ -36,6 +36,8 @@ HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
   RMF::Category imp_cat = fh.get_category("imp");
   coordinates_are_optimized_key_ =
     fh.get_key<RMF::IntTraits>(imp_cat,"coordinates_are_optimized");
+  rest_length_key_ =
+    fh.get_key<RMF::FloatTraits>(imp_cat,"rest_length");
 }
 
 void HierarchyWithSitesLoadLink::do_load_hierarchy(
@@ -94,6 +96,15 @@ void HierarchyWithSitesLoadLink::do_load_hierarchy(
       swp.set_pore_radius_is_optimized
         ( nh.get_static_value( pore_radius_is_optimized_key_ ) );
     }
+    if (nh.get_has_value(rest_length_key_)) {
+      IMP_ALWAYS_CHECK(Spring::get_is_setup(m, pi),
+                       "rest length attribute is only valid"
+                       " for Spring decorated particles",
+                       IMP::ValueException);
+      Spring swp(m, pi);
+      swp.set_rest_length(
+        ( nh.get_value( rest_length_key_) );
+    }
   }
 }
 
@@ -136,6 +147,8 @@ HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh)
   RMF::Category imp_cat = fh.get_category("imp");
   coordinates_are_optimized_key_ =
     fh.get_key<RMF::IntTraits>(imp_cat,"coordinates_are_optimized");
+  rest_length_key_ =
+    fh.get_key<RMF::FloatTraits>(imp_cat,"rest_length");
 }
 
 void HierarchyWithSitesSaveLink::add_sites_to_node
@@ -212,6 +225,10 @@ void HierarchyWithSitesSaveLink::do_save_hierarchy(Model *m,
       SlabWithPore swp(m, pi);
       n.set_value(pore_radius_key_, swp.get_pore_radius());
       n.set_value(pore_radius_is_optimized_key_, swp.get_pore_radius_is_optimized());
+    }
+    if (Spring::get_is_setup(m, pi)) {
+      Spring s(m, pi);
+      n.set_value(rest_length_key_, s.get_rest_length());
     }
   }
 }

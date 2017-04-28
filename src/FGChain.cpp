@@ -7,6 +7,7 @@
  */
 
 #include <IMP/npctransport/FGChain.h>
+#include <IMP/npctransport/RelaxingSpring.h>
 #include <IMP/npctransport/Scoring.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/internal/TAMDChain.h>
@@ -62,17 +63,10 @@ void FGChain::update_bonds_restraint(Scoring const* scoring_manager)
                   " shouldn't be owned by anyone else at this point");
       bonds_restraint_ = nullptr; // invalidate to release old bead_pairs
   }
-  IMP::Pointer<IMP::PairScore> bonds_score=
-    scoring_manager->create_backbone_score(rest_length_factor_,
-                                           backbone_k_);
-  IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer,
-          bead_pairs,
-          ( get_root().get_model(),
-            IMP::get_indexes(this->get_beads()),
-            "Bonds %1% " + name + " consecutive pairs" )
-          );
-  bonds_restraint_ = container::create_restraint
-    ( bonds_score.get(), bead_pairs.get(),  "Bonds " + name  );
+  bonds_restraint_ = 
+    scoring_manager->create_backbone_restraint(rest_length_factor_,
+					       backbone_k_,
+					       this->get_beads());
 }
 
 Restraints
@@ -193,15 +187,31 @@ FGChain* create_fg_chain
     ret_chain=
       internal::create_tamd_chain(pf, n, d, T_factors, F_factors, Ks);
   } else {
+    // Non-TAMD:
     Particles P;
-    for (int i = 0; i < n; ++i) {
+    for (int i= 0; i<n; i++) {
       P.push_back( pf->create() );
-    }
+    }    
     std::string root_name = type.get_string(); // + " chain_root";
     Particle* root = atom::Hierarchy::setup_particle
       ( new Particle( sd->get_model(), root_name ), P );
     core::Typed::setup_particle( root, type );
     ret_chain = new FGChain(root);
+    if(sd->get_is_backbone_haromonic()){
+      // set springs between consecutive chain beads from "from" beads
+      double rest_length= fg_data.rest_length_factor().value()*radius;
+      double tau_ns(150.0); // TODO: set this parameter properly
+      double tau_fs(tau_ns*1e+6)
+      double rest_length_diffusion_coefficient= std::pow(0.5*rest_length, 2.0)/(tau_fs); // diffuse by 0.5xrest_length per tau
+	for (int i= 0; i<n-1; i++) {
+	RelaxingSpring::setup_particle
+	  (P[i], 
+	   P[i].get_index(),
+	   P[i+1].get_index(),
+	   rest_length,
+	   rest_length_diffusion_coefficient); // TODO: set this parameter properly
+      }
+    }
   }
 
   // update individual particle types if specified

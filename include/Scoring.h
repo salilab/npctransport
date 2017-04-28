@@ -446,15 +446,18 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   */
   double get_default_backbone_k() const { return backbone_k_; }
 
-  //! Create a backbone bond score according to class flags
-  /** create a backbone bond score with specified rest_length_factor
-      (relative to sum of spheres radii) and backbone k. The score
+  bool get_is_backbone_harominc() const { return is_backbone_harmonic_; }
+
+  //! Create a backbone bond restraint over beads according to class flags
+  /** create a backbone bond restraint with specified rest_length_factor
+      (relative to sum of spheres radii) and backbone k over beads. The restraint score
       type is according to the class flags - either a linear or
       harmonic potential, with k in units of kcal/mol/A or kcal/mol/A^2,
-      respectively
+      respectively, with the harmonic potential corresponding to a relaxing
+      spring.
   */
-  PairScore* create_backbone_score
-    (double rest_length_factor, double backbone_k) const;
+  Restraint* create_backbone_restraint
+    (double rest_length_factor, double backbone_k, ParticlesTemp beads) const;
 
   /** returns the constant force applied by overlapping spheres on each
       other

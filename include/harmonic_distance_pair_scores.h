@@ -20,7 +20,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 /**
-   Evaluates a linear pair potential, such that score = k * (delta_length - x0)
+   Evaluates a linear pair potential, such that force = k * (delta_length - x0)
    is returned.
    Also, updates the derivative vectors of the particles in the model m.
 

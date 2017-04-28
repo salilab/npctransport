@@ -301,13 +301,39 @@ void Scoring::add_interaction
 }
 
 IMP::PairScore*
-Scoring::create_backbone_score
-(double rest_length_factor, double backbone_k) const
+Scoring::create_backbone_restraint
+(double rest_length_factor, double backbone_k, ParticlesTemp beads) const
 {
   if(is_backbone_harmonic_){
-    return new HarmonicWellPairScore(rest_length_factor, backbone_k);
+    // Harmonic with relaxing spring
+    INP_NEW( HarmonicSpringSingletonScore, bonds_score,
+	     (backbone_k, backbone_k) );
+    ParticleIndexes pis;
+    for(unsigned int i= 0; i<beads.size()-1; i++){
+      pis.push_back(beads[i].get_index());
+      IMP_USAGE_CHECK(RelaxingSpring::get_is_setup(get_model(), beads[i]),
+		      "if backbone is harmonic spring, all chain beads should be"
+		      " decorated with RelaxingSpring except for the tail");
+      // TODO: update rest length and backbone k of springs or leave as is? For now, this is handled in FGChain
+      IMP_NEW(IMP::containter::ListSingletonContainer,
+	      springs,
+	      (get_model(), pis));
+      return container::create_restraint
+	( bonds_score.get(); springs.get(), "Spring bonds " + name );	          
+    }
+    return container::creat
   } else {
-    return new LinearWellPairScore(rest_length_factor, backbone_k);
+    // Linear
+    IMP_NEW( LinearWellPairScore, bonds_score,
+	     (rest_length_factor, backbone_k) );
+    IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer,
+	    bead_pairs,
+	    ( get_model(),
+	      IMP::get_indexes(beads),
+	      "Bonds %1% " + name + " consecutive pairs" )
+	    );
+    return container::create_restraint
+      ( bonds_score.get(), bead_pairs.get(),  "Bonds " + name  );
   }
 }
 

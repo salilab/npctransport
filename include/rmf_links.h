@@ -30,6 +30,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   // Slab decorator related keys:
   RMF::FloatKey pore_radius_key_;
   RMF::IntKey pore_radius_is_optimized_key_;
+  // Spring decorator keys
+  RMF::FloatKey rest_length_key_;
 
   boost::unordered_map<ParticleIndex, ParticleIndexes> particles_;
 
@@ -80,6 +82,8 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
   // Slab decorator related keys:
   RMF::FloatKey pore_radius_key_;
   RMF::IntKey pore_radius_is_optimized_key_;
+  // Spring decorator keys
+  RMF::FloatKey rest_length_key_;
 
   boost::unordered_map<ParticleIndex, ParticleIndexes> particles_;
 
