@@ -316,7 +316,7 @@ Scoring::create_backbone_restraint
     ParticleIndexes pis;
     for(unsigned int i= 0; i<beads.size()-1; i++){
       pis.push_back(beads[i]->get_index());
-      IMP_USAGE_CHECK(RelaxingSpring::get_is_setup(get_model(), beads[i]),
+      IMP_USAGE_CHECK(RelaxingSpring::get_is_setup(beads[i]),
 		      "if backbone is harmonic spring, all chain beads should be"
 		      " decorated with RelaxingSpring except for the tail");
     }
