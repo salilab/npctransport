@@ -28,7 +28,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, FunctorLinearSoftSpherePairScore, FunctorLine
 IMP_SWIG_OBJECT(IMP::npctransport, LinearInteractionPairScore, LinearInteractionPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, FunctorLinearInteractionPairScore, FunctorLinearInteractionPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, LinearWellPairScore, LinearWellPairScores);
-IMP_SWIG_OBJECT(IMP::npctransport, HarmonicWellPairScore, HarmonicWellPairScores);
+IMP_SWIG_OBJECT(IMP::npctransport, HarmonicSpringSingletonScore, HarmonicSpringSingletonScores);
 IMP_SWIG_OBJECT(IMP::npctransport, HierarchyWithSitesSaveLink, HierarchyWithSitesSaveLinks);
 IMP_SWIG_OBJECT(IMP::npctransport, HierarchyWithSitesLoadLink, HierarchyWithSitesLoadLinks);
 IMP_SWIG_OBJECT(IMP::npctransport, ChainStatisticsOptimizerState, ChainStatisticsptimizerStates);
@@ -44,6 +44,7 @@ IMP_SWIG_VALUE(IMP::npctransport, SitesPairScoreParameters, SitesPairScoreParame
 IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithPore, SlabWithPores);
 IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithCylindricalPore, SlabWithCylindricalPores);
+IMP_SWIG_DECORATOR(IMP::npctransport, RelaxingSpring, RelaxingSprings);
 IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPores);
 //IMP_SWIG_VALUE_INSTANCE(IMP::npctransport, InteractionType, std::pair, InteractionTypes);
 
@@ -53,7 +54,8 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP_npctransport.Parameter.i"
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
-%include "IMP/npctransport/harmonic_distance_pair_scores.h"
+%include "IMP/npctransport/RelaxingSpring.h"
+%include "IMP/npctransport/HarmonicSpringSingletonScore.h"
 %include "IMP/npctransport/functor_linear_distance_pair_scores_typedefs.h"
 // The following templates are necessary for proper interpreation of class inheritence in linear_distance_pair_scores.h
 %template(_DistancePairScoreForLinearSoftSphere) IMP::score_functor::DistancePairScore<IMP::npctransport::LinearSoftSphereScore>;

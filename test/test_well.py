@@ -37,7 +37,7 @@ class ConeTests(IMP.test.TestCase):
         k = 20
         ps= IMP.npctransport.LinearWellPairScore(rest_length_factor, k)
         r= IMP.core.PairRestraint(m, ps, dsi)
-        bd= IMP.atom.BrownianDynamics(m)
+        bd= IMP.atom.BrownianDynamicsTAMD(m)
         bd.set_maximum_time_step(100)
         bd.set_scoring_function([r])
         f= RMF.create_rmf_file(self.get_tmp_file_name("well.rmf"))

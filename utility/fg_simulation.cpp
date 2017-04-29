@@ -8,6 +8,8 @@
 //#include <IMP/npctransport/npctransport_config.h>
 #include <IMP/npctransport/main.h>
 #include <IMP/npctransport/FGChain.h>
+#include <IMP/npctransport/SimulationData.h> // DEBUG
+#include <IMP/npctransport/HarmonicSpringSingletonScore.h> // DEBUG
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/algebra/Vector2D.h>
 #include <IMP/algebra/Vector3D.h>
@@ -258,6 +260,8 @@ int main(int argc, char* argv[]) {
   try {
     IMP::Pointer<npctransport::SimulationData> sd =
         npctransport::startup(argc, argv);
+    IMP::Pointer<npctransport::HarmonicSpringSingletonScore> s=
+      new npctransport::HarmonicSpringSingletonScore(1,1); // DEBUG
     //print_fgs(*sd, IMP::TERSE);
     if (surface_anchoring) {
       IMP_ALWAYS_CHECK(cylinder_nlayers == 0,

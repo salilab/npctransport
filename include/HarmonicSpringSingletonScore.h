@@ -1,5 +1,5 @@
 /**
- *  \file HarmonicSpringSingletonScore.h
+ *  \file HarmonicSpringSingletonScoren.h
  *  \brief Harmonic scores on the spring between a pair of particles.
  *         The spring resting length is dynamic
  *  Copyright 2007-2017 IMP Inventors. All rights reserved.
@@ -48,8 +48,10 @@ class IMPNPCTRANSPORTEXPORT HarmonicSpringSingletonScore
 	      The force equals k2*dX where dX=|(rest_length)-(equilibrium length)|
      @param name the name of the score
    */
-  HarmonicSpringSingletonScore(double k1, double k2,
-                      std::string name = "HarmonicIDSingletonScore%1%");
+  HarmonicSpringSingletonScore
+    ( double k1,
+      double k2,
+      std::string name = "HarmonicSpringSingletonScore%1%");
 
   void set_k1(double k1)
   { k1_ = k1; }
@@ -63,10 +65,14 @@ class IMPNPCTRANSPORTEXPORT HarmonicSpringSingletonScore
   double get_k2() const
   { return k2_; }
 
-  double evaluate_index(Model *m, const ParticleIndex pi,
-                        DerivativeAccumulator *da) const IMP_OVERRIDE;
+  virtual double
+    evaluate_index
+    (Model *m,
+     ParticleIndex pi,
+     DerivativeAccumulator *da) const IMP_OVERRIDE;
 
-  ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis) const;
+  virtual ModelObjectsTemp
+    do_get_inputs(Model *m, const ParticleIndexes &pis) const IMP_OVERRIDE;
 
   IMP_SINGLETON_SCORE_METHODS(HarmonicSpringSingletonScore);
 
@@ -79,7 +85,7 @@ class IMPNPCTRANSPORTEXPORT HarmonicSpringSingletonScore
 inline double
 HarmonicSpringSingletonScore
 ::evaluate_index
-( Model *m, const ParticleIndex pi, DerivativeAccumulator *da) const
+( Model *m, ParticleIndex pi, DerivativeAccumulator *da) const
 {
   IMP_OBJECT_LOG;
 
