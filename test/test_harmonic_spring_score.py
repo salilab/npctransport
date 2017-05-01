@@ -8,10 +8,24 @@ import RMF
 import math
 import numpy
 import pandas
+import time
+import random
 
 radius=7
 
 class ConeTests(IMP.test.TestCase):
+    def test_harmonic_spring_score(self):
+        ntrials=3
+        for i in range(ntrials):
+            try:
+                print("Try #", i)
+                self._test_harmonic_spring_score()
+                return
+            except:
+                print("EXCEPTION CAUGHT Try #", i)
+                f= RMF.create_rmf_file(self.get_tmp_file_name("tmp%d.rmf" % i)) # just to force a flush
+                if i+1==ntrials:
+                    raise
     def _create_diffuser(self, m):
         p= IMP.Particle(m)
         d= IMP.core.XYZR.setup_particle(p)
@@ -28,7 +42,7 @@ class ConeTests(IMP.test.TestCase):
         for d in ds:
             g= IMP.core.XYZRGeometry(d);
             w.add_geometry(g)
-    def test_harmonic_spring_score(self):
+    def _test_harmonic_spring_score(self):
         """Check linear well"""
         m= IMP.Model()
         T=298
@@ -57,7 +71,7 @@ class ConeTests(IMP.test.TestCase):
         bd.set_maximum_time_step(1000)
         bd.set_scoring_function([r])
         bd.set_temperature(T)
-        f= RMF.create_rmf_file(self.get_tmp_file_name("well.rmf"))
+        f= RMF.create_rmf_file(self.get_tmp_file_name("well%d.rmf" % int(random.random()*1000)))
         # TODO: note that if ds would have contained sites, we would
         # need to switch to npctransport::add_hierarchies_with_sites(),
         # perhaps worth switching anyway?
@@ -109,9 +123,11 @@ class ConeTests(IMP.test.TestCase):
         print("corr at tau_ns: %.3f" % Rp.autocorr(i))
         self.assertAlmostEqual(Rp.autocorr(i),
                                math.exp(-1),
-                               delta=0.08)
+                               delta=0.04)
 #        for i in range(len(R)):
 #            print (T[i],Rp.autocorr(i))
+
+
 
 if __name__ == '__main__':
     IMP.test.main()
