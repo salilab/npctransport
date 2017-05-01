@@ -6,8 +6,10 @@ import IMP.container
 import IMP.rmf
 import RMF
 import math
+import numpy
+import pandas
 
-radius=5
+radius=7
 
 class ConeTests(IMP.test.TestCase):
     def _create_diffuser(self, m):
@@ -29,28 +31,32 @@ class ConeTests(IMP.test.TestCase):
     def test_harmonic_spring_score(self):
         """Check linear well"""
         m= IMP.Model()
+        T=298
         m.set_log_level(IMP.SILENT)
         ds= [self._create_diffuser(m) for i in range(0,2)]
         dsi=[x.get_particle_index() for x in ds]
         ds[1].set_coordinates(IMP.algebra.Vector3D(0,2*radius,0))
-        rest_length_factor = 1.0
-        k = 20
+        rest_length_factor = 1.75
+        k = 0.5 # kcal/mol/A^2
         rest_length=rest_length_factor*radius*2.0
-        tau_ns= 100
+        tau_ns= 1
         tau_fs= tau_ns*(1E+6)
-        D_A2_per_fs= (0.5*rest_length_factor)**2/tau_fs
-        IMP.npctransport.RelaxingSpring.setup_particle \
+        #        D_A2_per_fs= (0.5*rest_length)**2/tau_fs
+        D_A2_per_fs= IMP.atom.get_kt(T)/tau_fs/k
+        print ("D [A^2/fs]", D_A2_per_fs, "D particle", IMP.atom.Diffusion(m,dsi[0]).get_diffusion_coefficient())
+        rs= IMP.npctransport.RelaxingSpring.setup_particle \
             (m,
              dsi[0],
              dsi[0],
              dsi[1],
              rest_length,
              D_A2_per_fs)
-        ss= IMP.npctransport.HarmonicSpringSingletonScore(k, k)
+        ss= IMP.npctransport.HarmonicSpringSingletonScore(20*k, k)
         r= IMP.core.SingletonRestraint(m, ss, dsi[0])
         bd= IMP.npctransport.BrownianDynamicsTAMDWithSlabSupport(m)
-        bd.set_maximum_time_step(100)
+        bd.set_maximum_time_step(1000)
         bd.set_scoring_function([r])
+        bd.set_temperature(T)
         f= RMF.create_rmf_file(self.get_tmp_file_name("well.rmf"))
         # TODO: note that if ds would have contained sites, we would
         # need to switch to npctransport::add_hierarchies_with_sites(),
@@ -60,10 +66,52 @@ class ConeTests(IMP.test.TestCase):
         w= IMP.rmf.SaveOptimizerState(m, f)
         w.set_period(100) # set this to one only for debugging
         bd.add_optimizer_state(w)
-        bd.optimize(1000)
-        dist= IMP.core.get_distance(ds[0], ds[1])
-        print(dist)
-        self.assertAlmostEqual(dist, 0, delta=radius)
+        Edist=0.0
+        Erest=0.0
+        n=0.0
+        inner=50*tau_ns
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
+            outer=10
+        else:
+            outer=10000
+        T=[0]
+        D=[IMP.core.get_distance(ds[0], ds[1])]
+        R=[rs.get_rest_length()]
+        for i in range(outer):
+#            print("%.1f [ns]\t" % (bd.get_current_time()*1E-6),end='')
+            bd.optimize(inner)
+            dist= IMP.core.get_distance(ds[0], ds[1])
+            rest_length= rs.get_rest_length()
+            T.append(bd.get_current_time()*1E-6)
+            D.append(dist)
+            R.append(rest_length)
+            n0= n
+            n= n+1
+            Edist= (Edist*n0+dist)/n
+            Erest= (Erest*n0+rest_length)/n
+#            print(dist, " ", rest_length)
+        print("Edist %.2f" % Edist, "Erest %.2f" % Erest, "Eq-rest %.2f" % rs.get_equilibrium_rest_length())
+        ExpectedDelta= 0.5 + math.sqrt(3/k/(bd.get_current_time()/tau_fs)) # delta scales with sqrt(3/k) for k in kcal/mol/A^2 beause the spring energy 0.5*k*R^2 is in the order of [kB]T, or ~0.6 kcal/mol, so 0.3*k*[kB]T should be on the order of [kB]T. The mean will converge with simulation time, but the order of [kB]T is a safe margin
+        print("ExpectedDelta", ExpectedDelta)
+        self.assertAlmostEqual(Erest,
+                               rs.get_equilibrium_rest_length(),
+                               delta=ExpectedDelta)
+
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
+            return
+
+            # Check that relaxation time is indeed on the order of tau
+        # = autocorrelation decays exponentially with time/tau
+        Rp= pandas.Series(R)
+        dT_fs= inner*bd.get_maximum_time_step()
+        i= int(round(tau_fs/dT_fs))
+        print("i", i, "tau_fs/dT_fs", tau_fs/dT_fs, "tau_ns", tau_ns, "dT_ns", dT_fs*1E-6)
+        print("corr at tau_ns: %.3f" % Rp.autocorr(i))
+        self.assertAlmostEqual(Rp.autocorr(i),
+                               math.exp(-1),
+                               delta=0.08)
+#        for i in range(len(R)):
+#            print (T[i],Rp.autocorr(i))
 
 if __name__ == '__main__':
     IMP.test.main()
