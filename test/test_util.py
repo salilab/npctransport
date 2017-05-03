@@ -171,3 +171,23 @@ def test_protobuf_installed(test_class):
             ' python installation, see documentation of pip.'
         test_class.fail(msg)
 #    test_class.assertTrue(protobuf_installed)
+
+def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
+    """
+        Optimizes sd->bd() in nchunks iterations, writing statistics at
+        the end of each iteration
+        """
+    dT_fs= sd.get_bd().get_maximum_time_step()
+    fs_per_chunk= ns_per_chunk*1E+6
+    nframes_per_chunk= int(round(fs_per_chunk/dT_fs))
+    nframes_per_chunk= max(nframes_per_chunk, 1)
+    sim_time_fs= sim_time_ns*1E+6
+    nframes= int(round(sim_time_fs/dT_fs))
+    nframes= max(nframes, 1)
+    timer = IMP.npctransport.create_boost_timer()
+    nframes_left = nframes
+    while(nframes_left > 0):
+        nframes_per_chunk = min(nframes_per_chunk, nframes_left)
+        sd.get_bd().optimize( nframes_per_chunk )
+        sd.get_statistics().update( timer, nframes - nframes_per_chunk ) # TODO: timer?
+        nframes_left = nframes_left - nframes_per_chunk

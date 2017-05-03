@@ -602,7 +602,7 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
   //       Scoring.cpp (for better encapsulation
   IMP_LOG(TERSE, "Setting up dump" << std::endl);
   Scoring* s=get_scoring();
-  std::cout << "Linking " << get_root().get_number_of_children() << " particles and their children" << std::endl;
+  //  std::cout << "Linking " << get_root().get_number_of_children() << " particles and their children" << std::endl;
   add_hierarchies_with_sites(fh, get_root().get_children());
   if(with_restraints) {
     IMP::rmf::add_restraints
