@@ -218,7 +218,6 @@ void HierarchyWithSitesSaveLink::do_save_hierarchy(Model *m,
     }
     if (core::XYZ::get_is_setup(m, pi)) {
       core::XYZ xyz(m, pi);
-      std::cout << xyz.get_coordinates_are_optimized() << std::endl;
       n.set_static_value(coordinates_are_optimized_key_,
                          xyz.get_coordinates_are_optimized());
     }
