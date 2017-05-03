@@ -13,6 +13,7 @@
 #include <IMP/npctransport/internal/TAMDChain.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 
+#include <IMP/atom/constants.h>
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/atom/CenterOfMass.h>
@@ -201,9 +202,9 @@ FGChain* create_fg_chain
     if(sd->get_is_backbone_harmonic()){
       // set springs between consecutive chain beads from "from" beads
       double rest_length= fg_data.rest_length_factor().value()*radius;
-      double tau_ns(150.0); // TODO: set this parameter properly
-      double tau_fs(tau_ns*1e+6);
-      double rest_length_diffusion_coefficient= std::pow(0.5*rest_length, 2.0)/(tau_fs); // diffuse by 0.5xrest_length per tau
+      double tau_fs(sd->get_backbone_tau_ns()*1e+6);
+      double rest_length_diffusion_coefficient=
+        atom::get_kt(sd->get_temperature_k())/(tau_fs*sd->get_scoring()->get_default_backbone_k()); // diffuse by kT/K per tau
       for (int i= 0; i<n-1; i++) {
 	RelaxingSpring::setup_particle
 	  (P[i],

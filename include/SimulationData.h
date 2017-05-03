@@ -39,7 +39,8 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 // Version 2.5 - turned slab into a particle
-#define IMPNPCTRANSPORT_VERSION 2.5
+// Version 3.0 - added harmonic bond with proper tau
+#define IMPNPCTRANSPORT_VERSION 3.0
 
 class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  private:
@@ -56,6 +57,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   Parameter<int> number_of_frames_;
   Parameter<int> dump_interval_frames_;
   Parameter<bool> is_backbone_harmonic_;
+  Parameter<double> backbone_tau_ns_;
   Parameter<double> angular_d_factor_;
   Parameter<double> range_;
   Parameter<double> statistics_fraction_;
@@ -355,6 +357,13 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   bool get_is_backbone_harmonic() const
   { return is_backbone_harmonic_; }
+
+  double get_backbone_tau_ns() const {
+    return backbone_tau_ns_;
+  }
+
+  double get_temperature_k() const
+  { return temperature_k_; }
 
   /** get time from which simulation begins */
   double get_initial_simulation_time_ns() const

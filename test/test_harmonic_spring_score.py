@@ -71,7 +71,10 @@ class ConeTests(IMP.test.TestCase):
         bd.set_maximum_time_step(1000)
         bd.set_scoring_function([r])
         bd.set_temperature(T)
-        f= RMF.create_rmf_file(self.get_tmp_file_name("well%d.rmf" % int(random.random()*1000)))
+        rmf_fname= self.get_tmp_file_name("well%d.rmf" % int(random.random()*1000))
+        rmf_fname= "test.rmf"
+        print(rmf_fname)
+        f= RMF.create_rmf_file(rmf_fname)
         # TODO: note that if ds would have contained sites, we would
         # need to switch to npctransport::add_hierarchies_with_sites(),
         # perhaps worth switching anyway?

@@ -123,7 +123,8 @@ message Configuration {
   optional FloatRange tunnel_radius_k=36; // (Version 2.5+) if <=0, static radius, otherwise, k force constant for tunnel radius restraint
   optional FloatRange pore_anchored_beads_k=37; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
   optional int32 is_backbone_harmonic=38 [default=0]; // whether backbone is an harmonic or linear potential
-    // n=38
+  optional FloatRange backbone_tau_ns=39; // backbone relaxation time for two beads connected by a harmonic spring (relevant only is is_backbone_harmonic is true)
+    // n=39
 }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -250,7 +251,8 @@ message Assignment {
   optional FloatAssignment tunnel_radius_k=45; // (Version 2.5+) if <=0, static radius, otherwise, k for tunnel radius restraint
   optional FloatAssignment pore_anchored_beads_k=46; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
   optional int32 is_backbone_harmonic=47 [default=1]; // whether backbone is an harmonic or linear potential
-  // n=47
+  optional FloatAssignment backbone_tau_ns=48; // (version 3.0+) backbone relaxation time for two beads connected by a harmonic spring (relevant only is is_backbone_harmonic is true)
+  // n=48
 }
 
 message Statistics {
