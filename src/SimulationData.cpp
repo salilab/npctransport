@@ -32,6 +32,7 @@
 #include <IMP/atom/Mass.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/Selection.h>
+#include <IMP/compiler_macros.h>
 #include <IMP/log.h>
 #include <IMP/internal/units.h>
 #include <IMP/core/HarmonicUpperBound.h>
@@ -55,8 +56,13 @@
 
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/io/coded_stream.h>
+#if defined(_MSC_VER)
+#include <io.h>
+#else
 #include <fcntl.h>
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()
@@ -129,13 +135,14 @@ void SimulationData::initialize(std::string prev_output_file,
   //  std::ifstream file(prev_output_file.c_str(), std::ios::binary);
   //  bool read = pb_data.ParseFromIstream(&file);
   bool read(false);
-  int fd= open(prev_output_file.c_str(), O_RDONLY);
+  int fd= IMP_C_OPEN(prev_output_file.c_str(),
+                     IMP_C_OPEN_FLAG(O_RDONLY));
   if(fd!=-1){
     google::protobuf::io::FileInputStream fis(fd);
     google::protobuf::io::CodedInputStream cis(&fis);
     cis.SetTotalBytesLimit(500000000,200000000);
     read= pb_data.ParseFromCodedStream(&cis);
-    close(fd);
+    IMP_C_CLOSE(fd);
   }
   IMP_ALWAYS_CHECK(read,
                    "Unable to read data from protobuf" << prev_output_file,

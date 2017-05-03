@@ -52,6 +52,13 @@
 #include <limits>
 #include <set>
 #include <string>
+#if defined(_MSC_VER)
+#include <io.h>
+#else
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 #define GET_ASSIGNMENT(name) name##_ = pb_assignment.name().value()

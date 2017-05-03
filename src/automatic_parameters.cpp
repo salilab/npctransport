@@ -10,8 +10,12 @@
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic push
 #endif
+#if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
 #include "npctransport.pb.h"
+
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic pop
 #endif
