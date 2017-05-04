@@ -7,9 +7,13 @@ import IMP.rmf
 import RMF
 import math
 import numpy
-import pandas
 import time
 import random
+HAS_PANDAS=False
+try:
+    import pandas
+except:
+    HAS_PANDAS=True
 
 radius=7
 
@@ -116,8 +120,11 @@ class ConeTests(IMP.test.TestCase):
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             return
 
-            # Check that relaxation time is indeed on the order of tau
+        # Check that relaxation time is indeed on the order of tau
         # = autocorrelation decays exponentially with time/tau
+        global HAS_PANDAS
+        if not HAS_PANDAS:
+            return
         Rp= pandas.Series(R)
         dT_fs= inner*bd.get_maximum_time_step()
         i= int(round(tau_fs/dT_fs))
