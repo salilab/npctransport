@@ -55,7 +55,6 @@ class ConeTests(IMP.test.TestCase):
         rest_length=rest_length_factor*radius*2.0
         tau_ns= 1
         tau_fs= tau_ns*(1E+6)
-        #        D_A2_per_fs= (0.5*rest_length)**2/tau_fs
         D_A2_per_fs= IMP.atom.get_kt(T)/tau_fs/k
         print ("D [A^2/fs]", D_A2_per_fs, "D particle", IMP.atom.Diffusion(m,dsi[0]).get_diffusion_coefficient())
         rs= IMP.npctransport.RelaxingSpring.setup_particle \

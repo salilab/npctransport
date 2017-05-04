@@ -43,10 +43,10 @@
 #include <ctime>
 #include <iostream>
 #include <numeric>
+#include <fcntl.h>
 #if defined(_MSC_VER)
 #include <io.h>
 #else
-#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif

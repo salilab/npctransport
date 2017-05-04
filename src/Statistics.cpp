@@ -43,10 +43,10 @@
 
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/io/coded_stream.h>
+#include <fcntl.h>
 #if defined(_MSC_VER)
 #include <io.h>
 #else
-#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
