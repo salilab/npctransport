@@ -172,6 +172,7 @@ def test_protobuf_installed(test_class):
         test_class.fail(msg)
 #    test_class.assertTrue(protobuf_installed)
 
+
 def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
     """
         Optimizes sd->bd() in nchunks iterations, writing statistics at
@@ -186,8 +187,15 @@ def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
     nframes= max(nframes, 1)
     timer = IMP.npctransport.create_boost_timer()
     nframes_left = nframes
+    R=[]
     while(nframes_left > 0):
         nframes_per_chunk = min(nframes_per_chunk, nframes_left)
         sd.get_bd().optimize( nframes_per_chunk )
+        ps=sd.get_beads()
+        rs= IMP.npctransport.RelaxingSpring(ps[0])
+#        print("%.3f [ns]  %.1f [A] REST_LENGTH" %
+#              (sd.get_bd().get_current_time()*1E-6, rs.get_rest_length()) )
+        R.append(rs.get_rest_length())
         sd.get_statistics().update( timer, nframes - nframes_per_chunk ) # TODO: timer?
         nframes_left = nframes_left - nframes_per_chunk
+    return R

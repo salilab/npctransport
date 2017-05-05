@@ -71,10 +71,12 @@ void
 RelaxingSpring::show
 ( std::ostream &out ) const
 {
-  out << "RelaxingSpring equilibrium_rest_length = "
+  out << "RelaxingSpring equilibrium rest length = "
       << get_equilibrium_rest_length()
-      << " ; rest_length = "
-      << get_rest_length();
+      << "; rest length = "
+      << get_rest_length()
+      << "; rest length diffusion_coefficient = "
+      << get_rest_length_diffusion_coefficient();
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE

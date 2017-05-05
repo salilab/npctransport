@@ -201,8 +201,8 @@ FGChain* create_fg_chain
     ret_chain = new FGChain(root);
     if(sd->get_is_backbone_harmonic()){
       // set springs between consecutive chain beads from "from" beads
-      double rest_length= fg_data.rest_length_factor().value()*radius;
-      double tau_fs(sd->get_backbone_tau_ns()*1e+6);
+      double rest_length= fg_data.rest_length_factor().value() * (radius*2.0);
+      double tau_fs(sd->get_backbone_tau_ns()*(1e+6));
       double rest_length_diffusion_coefficient=
         atom::get_kt(sd->get_temperature_k())/(tau_fs*sd->get_scoring()->get_default_backbone_k()); // diffuse by kT/K per tau
       for (int i= 0; i<n-1; i++) {

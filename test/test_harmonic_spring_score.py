@@ -9,13 +9,23 @@ import math
 import numpy
 import time
 import random
-HAS_PANDAS=False
-try:
-    import pandas
-except:
-    HAS_PANDAS=True
+import test_util
 
 radius=7
+
+def do_particles_report(m, pis):
+    for pi in pis:
+        print("Particle index",pi)
+        if IMP.core.XYZR.get_is_setup(m, pi):
+            xyzr= IMP.core.XYZR(m, pi)
+            print("XYZR", xyzr)
+        if IMP.atom.Diffusion.get_is_setup(m, pi):
+            d= IMP.atom.Diffusion(m, pi)
+            print("Diffusion", d)
+        if IMP.npctransport.RelaxingSpring.get_is_setup(m, pi):
+            rs= IMP.npctransport.RelaxingSpring(m, pi)
+            print("RelaxingSpring:", rs)
+
 
 class ConeTests(IMP.test.TestCase):
     def test_harmonic_spring_score(self):
@@ -52,7 +62,7 @@ class ConeTests(IMP.test.TestCase):
         T=298
         m.set_log_level(IMP.SILENT)
         ds= [self._create_diffuser(m) for i in range(0,2)]
-        dsi=[x.get_particle_index() for x in ds]
+        pis=[x.get_particle_index() for x in ds]
         ds[1].set_coordinates(IMP.algebra.Vector3D(0,2*radius,0))
         rest_length_factor = 1.75
         k = 0.5 # kcal/mol/A^2
@@ -60,16 +70,16 @@ class ConeTests(IMP.test.TestCase):
         tau_ns= 1
         tau_fs= tau_ns*(1E+6)
         D_A2_per_fs= IMP.atom.get_kt(T)/tau_fs/k
-        print ("D [A^2/fs]", D_A2_per_fs, "D particle", IMP.atom.Diffusion(m,dsi[0]).get_diffusion_coefficient())
+        print ("D [A^2/fs]", D_A2_per_fs, "D particle", IMP.atom.Diffusion(m,pis[0]).get_diffusion_coefficient())
         rs= IMP.npctransport.RelaxingSpring.setup_particle \
             (m,
-             dsi[0],
-             dsi[0],
-             dsi[1],
+             pis[0],
+             pis[0],
+             pis[1],
              rest_length,
              D_A2_per_fs)
         ss= IMP.npctransport.HarmonicSpringSingletonScore(20*k, k)
-        r= IMP.core.SingletonRestraint(m, ss, dsi[0])
+        r= IMP.core.SingletonRestraint(m, ss, pis[0])
         bd= IMP.npctransport.BrownianDynamicsTAMDWithSlabSupport(m)
         bd.set_maximum_time_step(1000)
         bd.set_scoring_function([r])
@@ -97,6 +107,7 @@ class ConeTests(IMP.test.TestCase):
         T=[0]
         D=[IMP.core.get_distance(ds[0], ds[1])]
         R=[rs.get_rest_length()]
+        do_particles_report(m, pis)
         for i in range(outer):
 #            print("%.1f [ns]\t" % (bd.get_current_time()*1E-6),end='')
             bd.optimize(inner)
@@ -122,8 +133,10 @@ class ConeTests(IMP.test.TestCase):
 
         # Check that relaxation time is indeed on the order of tau
         # = autocorrelation decays exponentially with time/tau
-        global HAS_PANDAS
-        if not HAS_PANDAS:
+        try:
+            import pandas
+        except ImportError:
+            print("WARNING: pandas module not installed, skipping autocorrelation test")
             return
         Rp= pandas.Series(R)
         dT_fs= inner*bd.get_maximum_time_step()
