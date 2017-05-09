@@ -362,7 +362,7 @@ void Statistics::update_fg_stats
             UPDATE_AVG(cnf, nf_new, *stats->mutable_fgs(i),
                        chain_diffusion_coefficient,
                        cs_i[j]->get_diffusion_coefficient());
-            Floats df = cs_i[j]->get_diffusion_coefficients();
+            Floats df = cs_i[j]->get_local_diffusion_coefficients();
             UPDATE_AVG(cnf, nf_new, *stats->mutable_fgs(i),
                        local_diffusion_coefficient,
                        std::accumulate(df.begin(), df.end(), 0.0) / df.size());

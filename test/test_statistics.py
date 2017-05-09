@@ -167,7 +167,7 @@ class Tests(IMP.test.TestCase):
         v=1.0/(2.0*Dout)
         print("Corr1, Corr2, rot_dif_coeff, v",  Dout, Dout2, Din, v)
         self.assertAlmostEqual(Dout, Dout2, delta=.1*Dout)
-        dfs= os.get_diffusion_coefficients()
+        dfs= os.get_local_diffusion_coefficients()
         print(dfs)
         for d in dfs:
             self.assertAlmostEqual(0, d, delta=.1)

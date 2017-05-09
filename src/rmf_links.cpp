@@ -38,7 +38,7 @@ HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
   coordinates_are_optimized_key_ =
     fh.get_key<RMF::IntTraits>(imp_cat,"coordinates_are_optimized");
   rest_length_key_ =
-    fh.get_key<RMF::FloatTraits>(imp_cat,"rest_length");
+    fh.get_key<RMF::FloatTraits>(npc_cat,"rest_length");
 }
 
 void HierarchyWithSitesLoadLink::do_load_hierarchy(
@@ -149,7 +149,7 @@ HierarchyWithSitesSaveLink::HierarchyWithSitesSaveLink(RMF::FileHandle fh)
   coordinates_are_optimized_key_ =
     fh.get_key<RMF::IntTraits>(imp_cat,"coordinates_are_optimized");
   rest_length_key_ =
-    fh.get_key<RMF::FloatTraits>(imp_cat,"rest_length");
+    fh.get_key<RMF::FloatTraits>(npc_cat,"rest_length");
 }
 
 void HierarchyWithSitesSaveLink::add_sites_to_node

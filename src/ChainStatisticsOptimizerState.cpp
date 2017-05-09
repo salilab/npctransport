@@ -75,7 +75,7 @@ double ChainStatisticsOptimizerState::get_correlation_time() const {
   return sum / n;
 }
 
-Floats ChainStatisticsOptimizerState::get_diffusion_coefficients() const {
+Floats ChainStatisticsOptimizerState::get_local_diffusion_coefficients() const {
   if (positions_.empty()) return Floats();
   Vector<algebra::Vector3Ds> displacements(
       positions_[0].size(), algebra::Vector3Ds(positions_.size() - 1));

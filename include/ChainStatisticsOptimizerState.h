@@ -53,8 +53,14 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
 
   double get_correlation_time() const;
 
-  Floats get_diffusion_coefficients() const;
+  //! returns a vector of diffusion coefficients
+  //! for each particle in the chain, computed in the local
+  //! reference frame of the chain (by locally aligning
+  //! the chain)
+  Floats get_local_diffusion_coefficients() const;
 
+  //! get an estimate of the diffusion coefficient
+  //! of the entire chain in A^2/fs units
   double get_diffusion_coefficient() const;
 
   //! returns the mean Rgyr of this chain
