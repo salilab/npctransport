@@ -6,14 +6,13 @@ import IMP.test
 import sys
 import math
 import test_util
-import unittest
 
 RADIUS= 7
 REST_LENGTH_FACTOR= 1.75
 TAU_NS= 1.0
 NS_PER_CHUNK= 0.5*TAU_NS
 
-class Tests(unittest.TestCase):
+class Tests(IMP.test.TestCase):
 
     def _do_particles_report(self, m, pis):
         global RADIUS
