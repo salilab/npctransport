@@ -23,7 +23,6 @@
 #include <IMP/npctransport.h>
 #include <IMP/base_types.h>
 #include <IMP/Pointer.h>
-#include <IMP/base_statistics.h>
 #include <IMP/Restraint.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/core/Typed.h>
