@@ -133,8 +133,6 @@ def _get_fg_and_floater_types(ref_output):
         print "Couldn't read '" + ref_output + "'"
         raise
     if(output == None):
-        for i in range(0, get_number_of_types_of_fg()):
-            fg_types.append( get_type_of_fg(i).get_string() )
         fg_types = fg_types + [ "Nup57_16copies_chimera",
                                 "Nup49_16copies",
                                 "Nsp1_16copies_1",
@@ -146,7 +144,9 @@ def _get_fg_and_floater_types(ref_output):
                                 "Nup145N_8copies_1_chimera",
                                 "Nup145N_8copies_2_chimera",
                                 "Nup1_8copies",
-                                "Nup60_8copies"]
+                                "Nup60_8copies",
+                                "Nsp1",
+                                "fg"]
         #        for i in range(0, get_number_of_types_of_float()):
         #           floater_types.append( get_type_of_float(i).get_string() )
     else:
