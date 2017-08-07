@@ -2,6 +2,7 @@ from __future__ import print_function
 from IMP.npctransport import *
 import sys
 import math
+import numpy as np
 
 def write_config_file(outfile, config):
     f=open(outfile, "wb")
@@ -177,6 +178,9 @@ def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
     """
         Optimizes sd->bd() in nchunks iterations, writing statistics at
         the end of each iteration
+
+        returns the rest lengths of the all chain bonds at the end of each chunk,
+        for bonds of RelaxingSpring type, based on their RMF values
         """
     dT_fs= sd.get_bd().get_maximum_time_step()
     fs_per_chunk= ns_per_chunk*1E+6
@@ -192,10 +196,12 @@ def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
         nframes_per_chunk = min(nframes_per_chunk, nframes_left)
         sd.get_bd().optimize( nframes_per_chunk )
         ps=sd.get_beads()
-        rs= IMP.npctransport.RelaxingSpring(ps[0])
-#        print("%.3f [ns]  %.1f [A] REST_LENGTH" %
-#              (sd.get_bd().get_current_time()*1E-6, rs.get_rest_length()) )
-        R.append(rs.get_rest_length())
+        cur_R=[]
+        for p in ps:
+            if IMP.npctransport.RelaxingSpring.get_is_setup(p):
+                rs= IMP.npctransport.RelaxingSpring(p)
+                cur_R.append(rs.get_rest_length())
+        R.append(cur_R)
         sd.get_statistics().update( timer, nframes - nframes_per_chunk ) # TODO: timer?
         nframes_left = nframes_left - nframes_per_chunk
-    return R
+    return np.array(R)
