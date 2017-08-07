@@ -84,6 +84,9 @@ message Configuration {
     optional FloatRange range_tangent_skew=7; // obsolete
     optional FloatRange range_sigma0_deg=8; // maximal angle around site0 with active attraction (0.0 for isotropic interaction between site-centers)
     optional FloatRange range_sigma1_deg=9; // maximal angle around site1 with active attraction (0.0 for isotropic interaction between site centers)
+    optional FloatRange nonspecific_range=10; // range in A of non-specific attraction between the two beads (outside interaction sites), overriding the default if specified
+    optional FloatRange nonspecific_k=11; // force constant in kcal/mol/A of non-specific attraction between the two beads (outside interaction sites), overriding the default if specified
+    optional FloatRange excluded_volume_k=12; // force constant in kcal/mol/A of excluded volume repulsion between the two beads overriding the default if specified
   };
 
   required FloatRange interaction_k=3; // default k for specific interactions
@@ -103,11 +106,11 @@ message Configuration {
   repeated ObstacleConfiguration obstacles=27;
   repeated Interaction interactions=17;
   required double dump_interval_ns=18; // 0 = every frame
-  required FloatRange nonspecific_range=19;
-  required FloatRange nonspecific_k=20;
+  required FloatRange nonspecific_range=19; //default range in A of non-specific interaction between pairs of beads
+  required FloatRange nonspecific_k=20; //default force coefficient in kcal/mol/A of non-specific interaction between pairs of beads
   required FloatRange angular_D_factor=21;
   required double statistics_interval_ns=22; // 0 = every frame
-  required FloatRange excluded_volume_k=23;
+  required FloatRange excluded_volume_k=23; // default force coefficient in kcal/mol/A of repulsion between pairs of beads
   required double simulation_time_ns=24;
   // percent of time in actual running (as opposed to equlibration):
   required FloatRange statistics_fraction=25;
@@ -203,6 +206,10 @@ message Assignment {
     optional FloatAssignment range_tangent_skew=7; // ske of range towards (or against) tangent direction, namely rangeT/rangeN (1 = no skew ; 0 = old algo for backward comp)
     optional FloatAssignment range_sigma0_deg=8; // maximal angle around site0 with active attraction (if not defined, then use isotropic interaction between site centers with constant k)
     optional FloatAssignment range_sigma1_deg=9; // maximal angle around site1 with active attraction (if not defined, then use isotropic interaction between site centers with constant k)
+    optional FloatAssignment nonspecific_range=10; // range in A of non-specific attraction between the two beads (outside interaction sites), overriding the default if specified
+    optional FloatAssignment nonspecific_k=11; // force constant in kcal/mol/A of non-specific attraction between the two beads (outside interaction sites), overriding the default if specified
+    optional FloatAssignment excluded_volume_k=12; // force constant in kcal/mol/A of excluded volume repulsion between the two beads overriding the default if specified
+
   };
   required int32 work_unit=1;
   required FloatAssignment interaction_k=3;
@@ -275,6 +282,8 @@ message Statistics {
     optional double mean_square_end_to_end_distance=6;
     optional double fraction_chains_bound=7;
     optional double floaters_per_interacting_chain=8;
+    optional double mean_bond_distance=9;
+    optional double mean_square_bond_distance=10;
   }
   message FloaterOrderParams {
     required double time_ns=1;

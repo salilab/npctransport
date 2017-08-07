@@ -249,7 +249,7 @@ void Scoring::add_interaction
                                 * interaction_k_factors_.find(type1)->second;
   double base_range = interaction_range_;
   if (idata.has_interaction_range()) {
-    base_range = idata.interaction_range().value();
+    base_range= idata.interaction_range().value();
   }
   double interaction_range =
       base_range * interaction_range_factors_.find(type0)->second *
@@ -260,14 +260,26 @@ void Scoring::add_interaction
     sigma0 = idata.range_sigma0_deg().value();
     sigma1 = idata.range_sigma1_deg().value();
   }
+  double nonspecific_k= nonspecific_k_;
+  if (idata.has_nonspecific_k()){
+    nonspecific_k= idata.nonspecific_k().value()
+  }
+  double nonspecific_range= nonspecific_range_;
+  if (idata.has_nonspecific_range()){
+    nonspecific_k= idata.nonspecific_range().value()
+  }
+  double excluded_volume_k= excluded_volume_k_;
+  if (idata.has_excluded_volume_k()){
+    excluded_volume_k= idata.excluded_volume_k().value();
+  }
   IMP_LOG(IMP::PROGRESS,
           "creating interaction "
 	  << idata.type0() << "," << idata.type1()
 	  << " effective_k = " << interaction_k
 	  << ", effective_range = " << interaction_range
 	  << ", sigma0/1 = " << sigma0 << "," << sigma1
-	  << ", nonspecific k = " << nonspecific_k_
-	  << ", nonspecific range = " << nonspecific_range_
+	  << ", nonspecific k = " << nonspecific_k
+	  << ", nonspecific range = " << nonspecific_range
 	  << ", excluded volume k = " << excluded_volume_k_
 	  << std::endl
           );
