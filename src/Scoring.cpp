@@ -262,11 +262,11 @@ void Scoring::add_interaction
   }
   double nonspecific_k= nonspecific_k_;
   if (idata.has_nonspecific_k()){
-    nonspecific_k= idata.nonspecific_k().value()
+    nonspecific_k= idata.nonspecific_k().value();
   }
   double nonspecific_range= nonspecific_range_;
   if (idata.has_nonspecific_range()){
-    nonspecific_k= idata.nonspecific_range().value()
+    nonspecific_k= idata.nonspecific_range().value();
   }
   double excluded_volume_k= excluded_volume_k_;
   if (idata.has_excluded_volume_k()){
@@ -280,7 +280,7 @@ void Scoring::add_interaction
 	  << ", sigma0/1 = " << sigma0 << "," << sigma1
 	  << ", nonspecific k = " << nonspecific_k
 	  << ", nonspecific range = " << nonspecific_range
-	  << ", excluded volume k = " << excluded_volume_k_
+	  << ", excluded volume k = " << excluded_volume_k
 	  << std::endl
           );
 
