@@ -23,6 +23,8 @@ ChainStatisticsOptimizerState::ChainStatisticsOptimizerState
     mean_rgyr2_(-1.0),
     mean_end_to_end_(-1.0),
     mean_end_to_end2_(-1.0),
+    mean_bond_distance_(-1.0),
+    mean_bond_distance2_(-1.0),
     n_(0)
 {
   set_period(periodicity);
@@ -35,6 +37,8 @@ void ChainStatisticsOptimizerState::reset() {
   mean_rgyr2_= -1.0;
   mean_end_to_end_= -1.0;
   mean_end_to_end2_= -1.0;
+  mean_bond_distance_= -1.0;
+  mean_bond_distance2_= -1.0;
   n_= 0; // resets mean statistics
   core::PeriodicOptimizerState::reset();
 }
@@ -121,7 +125,7 @@ void ChainStatisticsOptimizerState::do_update(unsigned int) {
   while (positions_.size() > 1000) {
     positions_.pop_front();
   }
-  // radius of gyration and end-to-end distance:
+  // radius of gyration and end-to-end distance of chain/bond:
   double w= 1.0/(++n_);
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
   double rgyr= atom::get_radius_of_gyration(ps_, false);
@@ -136,6 +140,17 @@ void ChainStatisticsOptimizerState::do_update(unsigned int) {
   double end_to_end2 = end_to_end*end_to_end;
   mean_end_to_end_=  w*end_to_end +  (1-w)*mean_end_to_end_;
   mean_end_to_end2_= w*end_to_end2 + (1-w)*mean_end_to_end2_;
+
+  double cur_mean_bond_distance(0.0);
+  double cur_mean_bond_distance2(0.0);
+  for(unsigned int i=1; i<ps_.size(); i++){
+    double distance_i= core::get_distance( core::XYZ(ps_[i-1]),
+                                           core::XYZ(ps_[i]) );
+    cur_mean_bond_distance+=  distance_i/(ps_.size()-1);
+    cur_mean_bond_distance2+= (distance_i*distance_i)/(ps_.size()-1);
+  }
+  mean_bond_distance_= w*cur_mean_bond_distance + (1-w)*mean_bond_distance_;
+  mean_bond_distance2_= w*cur_mean_bond_distance2 + (1-w)*mean_bond_distance2_;
 }
 
 

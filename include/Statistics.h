@@ -30,6 +30,7 @@
 #include <RMF/HDF5/File.h>
 #include "io.h"
 #include "BodyStatisticsOptimizerState.h"
+#include "GlobalStatisticsOptimizerState.h"
 #include "ParticleTransportStatisticsOptimizerState.h"
 #include "ChainStatisticsOptimizerState.h"
 #include "BipartitePairsStatisticsOptimizerState.h"
@@ -65,6 +66,8 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
 
   // the file to which simulation statistics are dumped:
   std::string output_file_name_;
+
+  IMP::PointerMember<GlobalStatisticsOptimizerState> global_stats_;
 
   // statistics about all fgs, per particle, per chain, per particle type
   typedef std::vector< BodyStatisticsOptimizerStates >

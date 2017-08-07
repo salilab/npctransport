@@ -108,6 +108,10 @@ Statistics::Statistics
   output_file_name_(output_file_name),
   is_stats_reset_(false)
 {
+  if(owner_sd){
+    global_stats_=
+      new GlobalStatisticsOptimizerState(this, statistics_interval_frames_);
+  }
 }
 
 
@@ -205,10 +209,10 @@ void Statistics::add_interaction_stats
 OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
 {
   if(o == nullptr) o = get_sd()->get_bd();
-  IMP_ALWAYS_CHECK( o, "null optimizer in add_optimizer_states()"
-                    " and get_sd()->get_bd() is invalid",
-                    ValueException);
+  IMP_ALWAYS_CHECK( o, "add_optimizer_states() require either a vaild input"
+                    " optimizer or a valid get_sd()->get_bd()",  ValueException);
   OptimizerStates ret;
+  ret.push_back(global_stats_);
   for (FGsBodyStatisticsOSsMap::iterator iter = fgs_bodies_stats_map_.begin();
        iter != fgs_bodies_stats_map_.end(); iter++)
     {
@@ -353,6 +357,8 @@ void Statistics::update_fg_stats
         double mean_square_radius_of_gyration=0.0;
         double mean_end_to_end_distance=0.0;
         double mean_square_end_to_end_distance=0.0;
+        double mean_bond_distance=0.0;
+        double mean_square_bond_distance=0.0;
         for (unsigned int j = 0; j < cs_i.size(); ++j)
           {
             unsigned int cnf = nf * cs_i.size() + j;
@@ -374,12 +380,18 @@ void Statistics::update_fg_stats
               cs_i[j]->get_mean_end_to_end_distance()/cs_i.size();
             mean_square_end_to_end_distance+=
               cs_i[j]->get_mean_square_end_to_end_distance()/cs_i.size();
+            mean_bond_distance+=
+              cs_i[j]->get_mean_bond_distance()/cs_i.size();
+            mean_square_bond_distance+=
+              cs_i[j]->get_mean_square_bond_distance()/cs_i.size();
             cs_i[j]->reset();
           } // for j (fg chain)
         UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i),
                    radius_of_gyration, mean_radius_of_gyration);
         UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i),
                    length, mean_end_to_end_distance);
+        UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i),
+                   length, mean_bond_distance);
         fgi_op->set_mean_radius_of_gyration
           (mean_radius_of_gyration);
         fgi_op->set_mean_square_radius_of_gyration
@@ -388,6 +400,10 @@ void Statistics::update_fg_stats
           (mean_end_to_end_distance);
         fgi_op->set_mean_square_end_to_end_distance
           (mean_square_end_to_end_distance);
+        fgi_op->set_mean_bond_distance
+          (mean_bond_distance);
+        fgi_op->set_mean_square_bond_distance
+          (mean_square_bond_distance);
       }
 
       // Additional chain stats from current snapshot:
@@ -818,12 +834,14 @@ void Statistics::update
     stats->set_number_of_frames(nf + nf_new);
     stats->set_bd_simulation_time_ns( sim_time_ns );
     double total_energy  =
-      get_sd()->get_bd()->get_scoring_function()->evaluate(false);
+      global_stats_->get_mean_energy();
+    // get_sd()->get_bd()->get_scoring_function()->evaluate(false);
     double energy_per_bead =
       total_energy / get_sd()->get_beads().size();
     UPDATE_AVG(nf, nf_new, (*stats), energy_per_particle,  // TODO: reset?
                // TODO: remove static beads from stats?
                energy_per_bead );
+    global_stats_->reset();
     ::npctransport_proto::Statistics_GlobalOrderParams*
         sgop = stats->add_global_order_params();
     sgop->set_time_ns(sim_time_ns);

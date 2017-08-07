@@ -38,6 +38,10 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
   double mean_end_to_end_;
   double mean_end_to_end2_;
 
+  // mean bond distance and its square since last reset
+  double mean_bond_distance_;
+  double mean_bond_distance2_;
+
   // number of samples over which means are computed
   int n_;
 
@@ -85,6 +89,18 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
   //! other chains)
   double get_mean_square_end_to_end_distance() const{
     return mean_end_to_end2_;
+  }
+
+    //! returns the mean bond distance of this chain
+  double get_mean_bond_distance() const{
+    return mean_bond_distance_;
+  }
+
+  //! returns the mean square bond distance, which can be used to compute
+  //! std-dev (but recorded separately so it could be averaged with
+  //! other chains)
+  double get_mean_square_bond_distance() const{
+    return mean_bond_distance2_;
   }
 
   /**
