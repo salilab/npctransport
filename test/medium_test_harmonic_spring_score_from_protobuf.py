@@ -33,7 +33,7 @@ class Tests(IMP.test.TestCase):
                                  RADIUS*2*REST_LENGTH_FACTOR)
 
 
-    def _create_cfg_file_with_fg_anchors(self, cfg_file):
+    def _create_cfg_file_with_fg_anchors(self, cfg_file, n_beads=2):
         '''
         Create a configuration file 'cfg_file' with anchors for fgs
 
@@ -61,7 +61,7 @@ class Tests(IMP.test.TestCase):
         config.temperature_k.lower=298
         fgs= IMP.npctransport.add_fg_type(config,
                                           type_name="my_fg",
-                                          number_of_beads=2, # 16, # 17 is real number for Nup49 ; 15 for Nup57
+                                          number_of_beads=n_beads, # 16, # 17 is real number for Nup49 ; 15 for Nup57
                                           number=1,
                                           radius=RADIUS,
                                           interactions=1,
@@ -73,19 +73,27 @@ class Tests(IMP.test.TestCase):
         f.close()
 
     def _analyze_run(self, output_file, R):
+        ''' R is the rest length distance data from the RMF file '''
         global TAU_NS
         global NS_PER_CHUNK
         f=open(output_file, "rb")
         output= IMP.npctransport.Output()
         output.ParseFromString(f.read())
         stats= output.statistics
+        B=[]
         E=[]
         T=[0.0]
         for fg in stats.fgs:
             for op in fg.order_params:
+                B.append(op.mean_bond_distance)
                 E.append(op.mean_end_to_end_distance)
                 T.append(op.time_ns)
-#                print(T[-1], E[-1])
+                # end-to-end and bond distances ought to be equal for two bead chains
+                if output.assignment.fgs[0].number_of_beads.value==2:
+                    self.assertEqual(op.mean_end_to_end_distance,
+                                     op.mean_bond_distance)
+                    self.assertEqual(op.mean_square_end_to_end_distance,
+                                     op.mean_square_bond_distance)
         try:
             import pandas
         except ImportError:
@@ -93,30 +101,34 @@ class Tests(IMP.test.TestCase):
             return
         i_tau= int(max(round(TAU_NS/NS_PER_CHUNK), 1))
         max_i= min(10*i_tau, len(E))
-        print("time[ns]  corr-particles  corr-rest-length")
+        print("time[ns]  corr-particles  corr-bond-rest-length")
         for i in range(max_i):
-             print("%8.3f  " % T[i], \
-                  "%10.3f  " % pandas.Series(E).autocorr(i), \
-                  "%10.3f  " % pandas.Series(R).autocorr(i))
+            mean_ACR=0.0
+            for j in range(R.shape[1]):
+                mean_ACR= mean_ACR+pandas.Series(R[:,j]).autocorr(i) / R.shape[1]
+            print("%8.3f  " % T[i], \
+                      "%10.3f  " % pandas.Series(B).autocorr(i), \
+                      "%10.3f  " % pandas.Series(E).autocorr(i), \
+                      "%10.3f  " % mean_ACR)
         if len(E)>i_tau:
             self.assertAlmostEqual(
-                pandas.Series(R).autocorr(i_tau),
+                pandas.Series(R[:,0]).autocorr(i_tau),
                 math.exp(-1),
                 delta=0.07)
         if len(E)>2*i_tau:
             self.assertAlmostEqual(
-                pandas.Series(R).autocorr(2*i_tau),
+                pandas.Series(R[:,0]).autocorr(2*i_tau),
                 math.exp(-2),
                 delta=0.07)
         if len(E)>5*i_tau:
             self.assertAlmostEqual(
-                pandas.Series(R).autocorr(5*i_tau),
+                pandas.Series(R[:,0]).autocorr(5*i_tau),
                 math.exp(-5),
                 delta=0.07)
 
 
 
-    def _test_harmonic_spring_score_from_protobuf(self):
+    def _test_harmonic_spring_score_from_protobuf(self, n_beads=2):
         '''
         Test that FG nups can be anchored properly through protobuf file
         '''
@@ -127,7 +139,7 @@ class Tests(IMP.test.TestCase):
         cfg_file = self.get_tmp_file_name("barak_config.pb")
 #        assign_file = self.get_tmp_file_name("barak_assign.pb")
         assign_file="output2.pb"
-        self._create_cfg_file_with_fg_anchors( cfg_file )
+        self._create_cfg_file_with_fg_anchors( cfg_file, n_beads )
         print("assigning parameter ranges from config")
         num=IMP.npctransport.assign_ranges( cfg_file, assign_file, 0, False, 10 );
         sd= IMP.npctransport.SimulationData(assign_file,
@@ -161,12 +173,34 @@ class Tests(IMP.test.TestCase):
 
         self._analyze_run(assign_file, R)
 
-    def test_harmonic_spring_score_from_protobuf(self):
+    def test_harmonic_spring_score_from_protobuf_two_beads(self):
+        '''
+        test harmonic spring score and statistics for FG chains
+        with two beads
+        '''
         ntrials=3
         for i in range(ntrials):
             try:
                 print("Try #", i)
-                self._test_harmonic_spring_score_from_protobuf()
+                self._test_harmonic_spring_score_from_protobuf(2)
+                return
+            except AssertionError as e:
+                print("EXCEPTION CAUGHT Try #", i)
+                print(e)
+                print("==\n\n")
+                if i+1==ntrials:
+                    raise
+
+    def test_harmonic_spring_score_from_protobuf_three_beads(self):
+        '''
+        test harmonic spring score and statistics for FG chains
+        with three beads
+        '''
+        ntrials=3
+        for i in range(ntrials):
+            try:
+                print("Try #", i)
+                self._test_harmonic_spring_score_from_protobuf(3)
                 return
             except AssertionError as e:
                 print("EXCEPTION CAUGHT Try #", i)
