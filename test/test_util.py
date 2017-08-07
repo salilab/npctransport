@@ -126,7 +126,7 @@ def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_
     ##############
 
     # dump to file
-    if (outfile <> None):
+    if outfile is not None:
         write_config_file(outfile, config)
     return config
 
