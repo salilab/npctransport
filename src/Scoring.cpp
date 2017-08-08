@@ -266,7 +266,7 @@ void Scoring::add_interaction
   }
   double nonspecific_range= nonspecific_range_;
   if (idata.has_nonspecific_range()){
-    nonspecific_k= idata.nonspecific_range().value();
+    nonspecific_range= idata.nonspecific_range().value();
   }
   double excluded_volume_k= excluded_volume_k_;
   if (idata.has_excluded_volume_k()){
@@ -291,11 +291,12 @@ void Scoring::add_interaction
     pts1.push_back(type1);
     int interaction_id1 = get_ordered_type_pair_predicate()->get_value(pts1);
     IMP_NEW(npctransport::SitesPairScore, ps1,
-            (interaction_range, interaction_k,
+            (interaction_range,
+             interaction_k,
 	     sigma0, sigma1,
-             nonspecific_range_,
-             nonspecific_k_,
-             excluded_volume_k_,
+             nonspecific_range,
+             nonspecific_k,
+             excluded_volume_k,
              get_sd()->get_sites(type0),
              get_sd()->get_sites(type1) )
             );
@@ -307,11 +308,12 @@ void Scoring::add_interaction
     pts2.push_back(type0);
     int interaction_id2 = get_ordered_type_pair_predicate()->get_value(pts2);
     IMP_NEW(npctransport::SitesPairScore, ps2,
-            (interaction_range, interaction_k,
+            (interaction_range,
+             interaction_k,
 	     sigma1, sigma0,
-             nonspecific_range_,
-             nonspecific_k_,
-             excluded_volume_k_,
+             nonspecific_range,
+             nonspecific_k,
+             excluded_volume_k,
              get_sd()->get_sites(type1),
              get_sd()->get_sites(type0) )
             );
