@@ -415,11 +415,29 @@ void SimulationData::create_floaters
   if (f_data.interactions().value() != 0)
     {
       int nsites = f_data.interactions().value();
+      IMP_ALWAYS_CHECK(f_data.site_coordinates_size() == nsites ||
+                       f_data.site_coordinates_size() == 0,
+                       "The number of sites in sites_coordinates_size() must equal "
+                       "the specified interactions number",
+                       IMP::ValueException);
+      if(f_data.site_coordinates_size() == 0) {
+        set_sites(type,
+                  nsites,
+                  f_data.radius().value() * f_data.site_relative_distance(),
+                  f_data.site_radius());
+      }else{
+        sites_[type]= algebra::Sphere3Ds();
+        for(unsigned int ii= 0; ii<nsites; ii++) {
+          ::npctransport_proto::Assignment_XYZ xyz =
+            f_data.site_coordinates(ii);
+          algebra::Vector3D site_ii_center(xyz.x(), xyz.y(), xyz.z());
+          algebra::Sphere3D site_ii(site_ii_center, f_data.site_radius());
+          sites_[type].push_back(site_ii);
+        }
+      }
       IMP_LOG(WARNING, nsites << " sites added " << std::endl);
-      set_sites(type, nsites,
-                f_data.radius().value() * f_data.site_relative_distance(),
-                f_data.site_radius());
     }
+
   // add type-specific scoring scale factors
   get_scoring()->set_interaction_range_factor
     ( type, f_data.interaction_range_factor().value());
