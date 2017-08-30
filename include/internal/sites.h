@@ -182,19 +182,24 @@ bell-shaped spline
     @param spsp parameters of sites pair score
     @param rbi1 - cached information on rigid body 1
     @param rbi2 - cached information on rigid body 2
-    @param lSite1 - site0 local coordinates + radius
-    @param lSite2 - site1 local coordinates + radius
-    @param gSite1 - site0 global coordinates
     @param gSite2 - site1 global coordinates
+    @param gUnitRB1RB2 - precomputed unit vector pointing from RB1 towards RB2, in global coordinates
+    @param distRB1RB2 - precomputed distance between centers of rb1 and rb2
+    @param gRotSigma1 -  precomputed rotation axis of sigma1
+    @param kFactor1 - precomputed scaling factor due to sigma1 vs. spsp.cosSigma1_max
+    @param dKFactor1 - the pre-computed sigma1 derivative of kFactor1
     @param da - accumulator for reweighting derivatives,
                 or null to disable force and torque computations
+    @param sphere_derivatives_table
+    @param torques_tables
     */
 inline
 double evaluate_pair_of_sites
 ( SitesPairScoreParameters const& spsp,
   RigidBodyInfo const& rbi1, RigidBodyInfo const& rbi2,
   algebra::Vector3D const& gSite2,
-  algebra::Vector3D const& gUnitRB1RB2, double distRB1RB2,
+  algebra::Vector3D const& gUnitRB1RB2,
+  double distRB1RB2,
   algebra::Vector3D const& gRotSigma1,
   double kFactor1, double dKFactor1,
   DerivativeAccumulator *da,
@@ -205,23 +210,16 @@ double evaluate_pair_of_sites
   using IMP::algebra::Sphere3D;
 
   // I. Pre-computations:
-  //  Vector3D const& gRB1= rbi1.tr.get_translation(); // cached now
   Vector3D const& gRB2= rbi2.tr.get_translation();
-  // Vector3D gUnitRB1RB2= gRB2-gRB1;// cached now
-  // double distRB1RB2= get_magnitude_and_normalize_in_place(gUnitRB1RB2); // cached now
   Vector3D gUnitRB2RB1= -gUnitRB1RB2;
-  // Vector3D gUnitRB1Site1 = (gSite1-gRB1)*rbi1.iradius; // cached now
   Vector3D gUnitRB2Site2 = (gSite2-gRB2)*rbi2.iradius;
-  // double cosSigma1 = gUnitRB1Site1*gUnitRB1RB2; // cached now
   double cosSigma2 = gUnitRB2Site2*gUnitRB2RB1;
-  if(//cosSigma1<spsp.cosSigma1_max || // cached now
-     cosSigma2<spsp.cosSigma2_max){
+  if(cosSigma2<spsp.cosSigma2_max){
     // equivalent to sigma>sigma_max, so out of range
     return 0;
   }
 
   // II. Energy computations:
-  // double kFactor1=get_k_factor(cosSigma1, spsp.cosSigma1_max); // cached now
   double kFactor2=get_k_factor(cosSigma2, spsp.cosSigma2_max);
   double kFactor=kFactor1*kFactor2;
   IMP_LOG_VERBOSE("kFactor1 " << kFactor1 <<
