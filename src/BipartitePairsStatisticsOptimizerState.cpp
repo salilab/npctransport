@@ -90,6 +90,34 @@ void BipartitePairsStatisticsOptimizerState::reset() {
   on_II_stats_time_ns_ = 0.0;
 }
 
+namespace {
+  typedef std::map<ParticleIndex, std::vector<unsigned int>>
+    t_occupied_sites_by_pi_map;
+
+  //! updates a map of occupied sites by map with new counts
+  //! of occupied sites for the specified particle index pi
+  void accumulate_occupied_sites_by_pi
+    (t_occupied_sites_by_pi_map& occupied_sites_by_pi,
+     ParticleIndex pi,
+     std::vector<unsigned int> new_occupied_sites)
+  {
+    if(occupied_sites.find(pi) == occupied_sites.end()) {
+      occupied_sites_by_pi[pi]= occupied_sites;
+    } else {
+      std::vector<unsigned int>& occupied_sites= occupied_sites_by_pi[pi];
+      IMP_USAGE_CHECK(occupied_sites.size()==new_occupied_sites.size(),
+                      "Expected occupied_sites and new_occupied_sites to have identical sizes");
+      std::transform(occupied_sites.begin(),
+                     occupied_sites.end(),
+                     new_occupied_sites.begin(),
+                     occupied_sites.begin(),
+                     std::plus<double>());
+
+      }
+    }
+  }
+}
+
 // count all the pairs that are currently in contact
 // and update stats
 void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
@@ -125,22 +153,36 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
   close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh
   t_particle_index_ordered_set new_bounds_I, new_bounds_II;
   t_particle_index_pair_ordered_set new_contacts; // more efficient if ordered set
+  double mean_occupied_sites0;
+  double mean_occupied_sites1;
+  std::map<ParticleIndex, std::vector<unsigned int>>
+    occupied_sites_by_pi;
   IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
                         close_bipartite_pair_container_,
                         {
                           ParticleIndexPair const& pip = _1;
                           core::XYZR s0(get_model(), pip[0]);
                           core::XYZR s1(get_model(), pip[1]);
-                          int num =
+                          unsigned int n_site_site_contacts;
+                          std::vector<unsigned int> occupied_sites0;
+                          std::vector<unsigned int> occupied_sites1;
+                          boost::tie(n_site_site_contacts,
+                                     occupied_sites0,
+                                     occupied_sites1)=
                             statistics_manager_->get_sd()->get_scoring()
-                            ->get_number_of_site_site_interactions
-                            (pip[0], pip[1] );
-                          if(num>0){
+                            ->get_site_interactions_statistics(pip[0], pip[1]);
+                          if(n_site_site_contacts>0){
                             new_bounds_I.insert(pip[0]);
                             new_bounds_II.insert(pip[1]);
                             new_contacts.insert
                               ( make_unordered_particle_index_pair( _1 ) );
                           }
+                          accumulate_occupied_sites_by_pi(occupied_sites_by_pi,
+                                                          pip[0],
+                                                          occupied_sites0);
+                          accumulate_occupied_sites_by_pi(occupied_sites_by_pi,
+                                                          pip[1],
+                                                          occupied_sites1);
                         });
   IMP_LOG(PROGRESS,
           new_bounds_I.size() << "/" << n_particles_I_

@@ -30,6 +30,7 @@
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/core/Typed.h>
 #include <IMP/core/RestraintsScoringFunction.h>
+#include "boost/tuple/tuple.hpp"
 
 #include <boost/timer.hpp>
 #include <string>
@@ -496,20 +497,36 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      bool site_specific = true,
      bool non_specific = false) const;
 
-  //! return number of site-site interaction that contribute
-  //! to the score between pi1 and pi2 in the model, based on their
-  //! current coordinates and their particle types
-  int get_number_of_site_site_interactions
-    ( ParticleIndex p1, ParticleIndex p2) const;
+  //! return various statistics about site-site interactions
+  //! between pi1 and pi2
+  /**
+     return a tuple with:
+     1) number of site-site interaction that contribute
+        to the score between pi1 and pi2 in the model, based on their
+         current coordinates and their particle types
+     2) vector of occupied pi1 sites counts (count # of interactions per site)
+     3) vector of occupied pi2 sites counts (count # of interactions per site)
+  */
+  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
+    get_site_interactions_statistics
+    ( ParticleIndex pi1, ParticleIndex pi2) const;
 
-  //! return number of site-site interaction that contribute
-  //! to the score between p1 and p2, based on their
-  //! current coordinates and their particle types
-  int get_number_of_site_site_interactions
+  //! return various statistics about site-site interactions
+  //! between p1 and p2
+  /**
+     return a tuple with:
+     1) number of site-site interaction that contribute
+        to the score between p1 and p2 in the model, based on their
+         current coordinates and their particle types
+     2) vector of occupied pi1 sites counts (count # of interactions per site)
+     3) vector of occupied pi2 sites counts (count # of interactions per site)
+  */
+  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
+    get_site_interactions_statistics
     ( Particle const* p1, Particle const* p2) const
   {
     return
-      get_number_of_site_site_interactions
+      get_site_interactions_statistics
       (p1->get_index(), p2->get_index());
   }
 

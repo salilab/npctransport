@@ -25,7 +25,7 @@
 #include <IMP/base_types.h>
 #include <IMP/container_macros.h>
 #include <IMP/container/AllBipartitePairContainer.h>
-#include <IMP/algebra/vector_generators.h>
+#include <IMP/algebrabra/vector_generators.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
@@ -52,6 +52,7 @@
 #include <limits>
 #include <set>
 #include <string>
+#include <boost/tuple/tuple.hpp>
 #if defined(_MSC_VER)
 #include <io.h>
 #else
@@ -415,8 +416,10 @@ Scoring::get_interaction_range_for
   return std::max(range_ss, range_ns);
 }
 
-int
-Scoring::get_number_of_site_site_interactions
+boost::tuple<unsigned int,
+             std::vector<unsigned int>,
+             std::vector<unsigned int>>
+Scoring::get_site_interactions_statistics
 ( ParticleIndex pi1, ParticleIndex pi2) const
 {
   core::Typed t1(get_model(), pi1);
@@ -429,12 +432,14 @@ Scoring::get_number_of_site_site_interactions
   if(ps==nullptr){
     return 0; // when not defined or not sites pair score then only repulsive force upon touching
   }
-  int ret(0);
+  boost::tuple<unsigned int,
+               std::vector<unsigned int>,
+               std::vector<unsigned int>> ret_value;
   ps->evaluate_site_contributions(get_model(),
                                   ParticleIndexPair(pi1, pi2),
                                   nullptr,
-                                  &ret);
-  return ret;
+                                  &ret_value);
+  return ret_value;
 }
 
 
