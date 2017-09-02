@@ -414,7 +414,7 @@ void SimulationData::create_floaters
   // add interaction sites to particles of this type:
   if (f_data.interactions().value() != 0)
     {
-      int nsites = f_data.interactions().value();
+      unsigned int nsites = f_data.interactions().value();
       IMP_ALWAYS_CHECK(f_data.site_coordinates_size() == nsites ||
                        f_data.site_coordinates_size() == 0,
                        "The number of sites in sites_coordinates_size() must equal "

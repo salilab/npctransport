@@ -17,8 +17,10 @@
 #include <IMP/pair_macros.h>
 #include <boost/unordered_set.hpp>
 
+#include <boost/tuple/tuple.hpp>
 #include <algorithm>
 #include <iterator>
+#include <numeric>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -92,31 +94,46 @@ void BipartitePairsStatisticsOptimizerState::reset() {
 
 namespace {
   typedef std::map<ParticleIndex, std::vector<unsigned int>>
-    t_occupied_sites_by_pi_map;
+    t_bound_sites_by_pi_map;
 
-  //! updates a map of occupied sites by map with new counts
-  //! of occupied sites for the specified particle index pi
-  void accumulate_occupied_sites_by_pi
-    (t_occupied_sites_by_pi_map& occupied_sites_by_pi,
+  //! updates a map of bound sites by map with new counts
+  //! of bound sites for the specified particle index pi
+  void accumulate_bound_sites_by_pi
+    (t_bound_sites_by_pi_map& bound_sites_by_pi,
      ParticleIndex pi,
-     std::vector<unsigned int> new_occupied_sites)
+     std::vector<unsigned int> new_bound_sites)
   {
-    if(occupied_sites.find(pi) == occupied_sites.end()) {
-      occupied_sites_by_pi[pi]= occupied_sites;
-    } else {
-      std::vector<unsigned int>& occupied_sites= occupied_sites_by_pi[pi];
-      IMP_USAGE_CHECK(occupied_sites.size()==new_occupied_sites.size(),
-                      "Expected occupied_sites and new_occupied_sites to have identical sizes");
-      std::transform(occupied_sites.begin(),
-                     occupied_sites.end(),
-                     new_occupied_sites.begin(),
-                     occupied_sites.begin(),
+    if(bound_sites_by_pi.find(pi) == bound_sites_by_pi.end()) {
+      bound_sites_by_pi[pi]= new_bound_sites;
+    }
+    else {
+      std::vector<unsigned int>& bound_sites= bound_sites_by_pi[pi];
+      IMP_USAGE_CHECK(bound_sites.size()==new_bound_sites.size(),
+                      "Expected bound_sites and new_bound_sites to have identical sizes");
+      std::transform(bound_sites.begin(),
+                     bound_sites.end(),
+                     new_bound_sites.begin(),
+                     bound_sites.begin(),
                      std::plus<double>());
-
-      }
     }
   }
-}
+
+  //! returns total number of bound sites (>=1 interactions)
+  //! for all particles in bound_sites_by_pi
+  unsigned int get_number_of_bound_sites
+  (t_bound_sites_by_pi_map const& bound_sites_by_pi){
+    unsigned int ret_value= 0;
+    for(t_bound_sites_by_pi_map::const_iterator iter= bound_sites_by_pi.begin();
+        iter!= bound_sites_by_pi.end();
+        iter++){
+      for(unsigned int i=0; i<iter->second.size(); i++){
+        ret_value+= (iter->second[i] > 0);
+      }
+    }
+    return ret_value;
+  }
+} //namespace {
+
 
 // count all the pairs that are currently in contact
 // and update stats
@@ -153,22 +170,20 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
   close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh
   t_particle_index_ordered_set new_bounds_I, new_bounds_II;
   t_particle_index_pair_ordered_set new_contacts; // more efficient if ordered set
-  double mean_occupied_sites0;
-  double mean_occupied_sites1;
   std::map<ParticleIndex, std::vector<unsigned int>>
-    occupied_sites_by_pi;
+    bound_sites_I_by_pi;
+  std::map<ParticleIndex, std::vector<unsigned int>>
+    bound_sites_II_by_pi;
   IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
                         close_bipartite_pair_container_,
                         {
                           ParticleIndexPair const& pip = _1;
-                          core::XYZR s0(get_model(), pip[0]);
-                          core::XYZR s1(get_model(), pip[1]);
                           unsigned int n_site_site_contacts;
-                          std::vector<unsigned int> occupied_sites0;
-                          std::vector<unsigned int> occupied_sites1;
+                          std::vector<unsigned int> bound_sites_I;
+                          std::vector<unsigned int> bound_sites_II;
                           boost::tie(n_site_site_contacts,
-                                     occupied_sites0,
-                                     occupied_sites1)=
+                                     bound_sites_I,
+                                     bound_sites_II)=
                             statistics_manager_->get_sd()->get_scoring()
                             ->get_site_interactions_statistics(pip[0], pip[1]);
                           if(n_site_site_contacts>0){
@@ -177,13 +192,18 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
                             new_contacts.insert
                               ( make_unordered_particle_index_pair( _1 ) );
                           }
-                          accumulate_occupied_sites_by_pi(occupied_sites_by_pi,
+                          accumulate_bound_sites_by_pi(bound_sites_I_by_pi,
                                                           pip[0],
-                                                          occupied_sites0);
-                          accumulate_occupied_sites_by_pi(occupied_sites_by_pi,
+                                                          bound_sites_I);
+                          accumulate_bound_sites_by_pi(bound_sites_II_by_pi,
                                                           pip[1],
-                                                          occupied_sites1);
+                                                          bound_sites_II);
                         });
+  unsigned int n_bound_sites_I= get_number_of_bound_sites(bound_sites_I_by_pi);
+  unsigned int n_bound_sites_II= get_number_of_bound_sites(bound_sites_II_by_pi);
+  double fraction_bound_sites_I= (n_sites_I_>0) ? n_bound_sites_I/ (n_sites_I_+.0) : 0.0;
+  double fraction_bound_sites_II= (n_sites_II_>0) ? n_bound_sites_II/ (n_sites_II_+.0) : 0.0;
+
   IMP_LOG(PROGRESS,
           new_bounds_I.size() << "/" << n_particles_I_
           << " bound-I(" << interaction_type_.first<< "); "
@@ -191,15 +211,22 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
           << " bound-II" << interaction_type_.second << "); "
           << new_contacts.size() << " contacts" << std::endl);
 
-  // Update avg_ncontacts_:
+  // Update avg_ncontacts_ and fraction_bound_sites_I/II:
   if(elapsed_time_ns>0)
     {
       update_weighted_average(avg_ncontacts_, // old
                               new_contacts.size(), // new
                               stats_time_ns_,
                               elapsed_time_ns);
+      update_weighted_average(avg_fraction_bound_sites_I_, // old
+                              fraction_bound_sites_I, // new
+                              stats_time_ns_,
+                              elapsed_time_ns);
+      update_weighted_average(avg_fraction_bound_sites_II_, // old
+                              fraction_bound_sites_II, // new
+                              stats_time_ns_,
+                              elapsed_time_ns);
     }
-
 
   // Update on-off rates:
   if(elapsed_time_ns > 0)

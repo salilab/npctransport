@@ -73,8 +73,10 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   t_particle_index_pair_ordered_set contacts_;
 
   // Average since last reset:
-  double avg_pct_bound_particles_I_; // particles in group I
-  double avg_pct_bound_particles_II_;  // particles in group II
+  double avg_pct_bound_particles_I_; // particles in group I (it is fraction, not pct)
+  double avg_pct_bound_particles_II_;  // particles in group II (it is fraction, not pct)
+  double avg_fraction_bound_sites_I_; // sites in group I
+  double avg_fraction_bound_sites_II_; // sites in group I
   double avg_off_per_contact_per_ns_;
   double avg_off_per_bound_I_per_ns_;
   double avg_off_per_bound_II_per_ns_;
@@ -172,7 +174,7 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
      returns the average fraction of particles from group I
      that are bound in each update round
   */
-  double get_average_percentage_bound_particles_1() const {
+  double get_average_fraction_bound_particles_I() const {
     return avg_pct_bound_particles_I_;
   }
 
@@ -180,10 +182,21 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
      returns the average fraction of particles from group II
      that are bound in each update round
   */
-  double get_average_percentage_bound_particles_2() const {
+  double get_average_fraction_bound_particles_II() const {
     return avg_pct_bound_particles_II_;
   }
 
+  //! returns the average fraction of particle sites from group I
+  //! thay are bound in each update round
+  double get_average_fraction_bound_particle_sites_I() const {
+    return avg_fraction_bound_sites_I_;
+  }
+
+  //! returns the average fraction of particle sites from group II
+  //! thay are bound in each update round
+  double get_average_fraction_bound_particle_sites_II() const {
+    return avg_fraction_bound_sites_II_;
+  }
 
   /**
      return the total number of particles in the first group

@@ -818,9 +818,13 @@ void Statistics::update
     siop->set_avg_contacts_per_particle_ii
       ( avg_contacts_num / n1 );
     siop->set_avg_fraction_bound_particles_i
-      ( bps_i->get_average_percentage_bound_particles_1());
+      ( bps_i->get_average_fraction_bound_particles_I());
     siop->set_avg_fraction_bound_particles_ii
-      ( bps_i->get_average_percentage_bound_particles_2());
+      ( bps_i->get_average_fraction_bound_particles_II());
+    siop->set_avg_fraction_bound_particle_sites_i
+      ( bps_i->get_average_fraction_bound_particles_I());
+    siop->set_avg_fraction_bound_particle_sites_ii
+      ( bps_i->get_average_fraction_bound_particle_sites_II());
     siop->set_misc_stats_period_ns
       ( bps_i->get_misc_stats_period_ns() );
     // reset till next udpate_statistics()
@@ -964,8 +968,9 @@ Statistics::get_interactions_and_interacting
       Pointer<FGChain> cur_chain= get_fg_chain(chain_roots[j]);
       Particles const& chain_particles = cur_chain->get_beads();
       for (unsigned int k = 0; k < chain_particles.size(); ++k) {
-        int num = get_sd()->get_scoring()
-          ->get_number_of_site_site_interactions
+        unsigned int num;
+        boost::tie(num, std::ignore, std::ignore)=
+          get_sd()->get_scoring()->get_site_interactions_statistics
           (floaters[i], chain_particles[k] );
         if (num > 0) {
           IMP_LOG(VERBOSE, "Found " << num

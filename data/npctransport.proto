@@ -349,6 +349,8 @@ message Statistics {
     optional float off_ii_stats_period_ns=18;
     optional float on_per_unbound_chain_i_per_unbound_chain_ii_per_ns=19;
     optional float off_per_bound_pair_of_chains=20;
+    optional float avg_fraction_bound_particle_sites_i=21;
+    optional float avg_fraction_bound_particle_sites_ii=22;
   }
   message InteractionStats {
     required string type0=1;

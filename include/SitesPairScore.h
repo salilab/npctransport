@@ -166,7 +166,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   /**
      EvaluatE all site-site interactions
      for evaluate_index() for the pair pip in model m. If da is not nullptr,
-     it accumulated appropriate derivatives. If n_contacts_accumulators is not null,
+     it accumulated appropriate derivatives. If contacts_accumulator is not null,
      then the number of individual contacts and occupied sites is asscumulated there.
 
      @param sphere_table An array storing of sphere coordinates by particle index
@@ -175,7 +175,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @param torque_tables An array of torques by particle index
      @param pip the pair of particle indexes in m
      @param da optional accumulator for force and torque derivatives
-     @param contacts_accumulators A pointer to a tuple of output values
+     @param contacts_accumulator A pointer to a tuple of output values
             [num-contacts, sites1-bound, sites1-bound].
             num-contacts is the total number of site-site contacts between pip.
             sites0-bound and sites1-bound are vectors of contact counts
@@ -194,19 +194,19 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
      boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
-     (*contacts_accumulators) = nullptr
+     (*contacts_accumulator) = nullptr
      ) const;
 
   /**
      EvaluatE all site-site interactions
      for evaluate_index() for the pair pip in model m. If da is not nullptr,
-     it accumulated appropriate derivatives. If n_contacts_accumulators is not null,
+     it accumulated appropriate derivatives. If contacts_accumulator is not null,
      then the number of individual contacts and occupied sites is asscumulated there.
 
      @param m the model
      @param pip the pair of particle indexes in m
      @param da optional accumulator for force and torque derivatives
-     @param contacts_accumulators A pointer to a tuple of output values
+     @param contacts_accumulator A pointer to a tuple of output values
             [num-contacts, sites1-bound, sites1-bound].
             num-contacts is the total number of site-site contacts between pip.
             sites0-bound and sites1-bound are vectors of contact counts
@@ -216,12 +216,14 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @return the site-site contributions for the score for the pair
              pip in model m.
   */
-  double evaluate_site_contributions
+  double
+    evaluate_site_contributions
     (Model* m,
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
      boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
-     (*contacts_accumulators) = nullptr) const;
+     (*contacts_accumulator)
+     ) const;
 
 #endif
 
@@ -395,8 +397,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
   DerivativeAccumulator *da,
   boost::tuple<unsigned int,
                std::vector<unsigned int>,
-               std::vector<unsigned int>>*
-  contacts_accumulator)
+               std::vector<unsigned int>>
+  * contacts_accumulator
   ) const
 {
   IMP_OBJECT_LOG;
@@ -404,7 +406,7 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
   static unsigned int n_contacts;
   static std::vector<unsigned int> occupied_sites0; // how many contacts at each site of particle 0
   static std::vector<unsigned int> occupied_sites1; // how many contacts at each site of particle 1
-  if(contacts_accumulators){
+  if(contacts_accumulator){
     n_contacts= 0;
     occupied_sites0.resize(sites0_.size());
     occupied_sites1.resize(sites1_.size());
@@ -467,7 +469,7 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
                                            sphere_derivatives_table,
                                            torques_tables);
         sum += cur_score;
-          if(contacts_accumulators && cur_score!=0.0){
+          if(contacts_accumulator && cur_score!=0.0){
             n_contacts++;
             occupied_sites0[i]++;
             occupied_sites1[i]++;
@@ -495,7 +497,7 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
                                           torques_tables);
 
           sum += cur_score;
-          if(contacts_accumulators && cur_score!=0.0){
+          if(contacts_accumulator && cur_score!=0.0){
             n_contacts++;
             occupied_sites0[i]++;
             occupied_sites1[i]++;
@@ -503,8 +505,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
         }// j
       }// i
     } // else
-  if(contacts_accumulators){
-    (*contacts_accumulators)=
+  if(contacts_accumulator){
+    (*contacts_accumulator)=
       boost::make_tuple(n_contacts,
                         occupied_sites0,
                         occupied_sites1);
@@ -522,7 +524,8 @@ SitesPairScore::evaluate_site_contributions
  const ParticleIndexPair &pip,
  DerivativeAccumulator *da,
  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
- (*contacts_accumulators) = nullptr) const;
+ (*contacts_accumulator)
+ ) const
 {
   // Get internal tables
   algebra::Sphere3D const* spheres_table=
@@ -547,7 +550,7 @@ SitesPairScore::evaluate_site_contributions
      torques_tables,
      pip,
      da,
-     contacts_accumulators);
+     contacts_accumulator);
 }
 
 #endif // ifndef SWIG

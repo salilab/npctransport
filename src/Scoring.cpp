@@ -25,7 +25,7 @@
 #include <IMP/base_types.h>
 #include <IMP/container_macros.h>
 #include <IMP/container/AllBipartitePairContainer.h>
-#include <IMP/algebrabra/vector_generators.h>
+#include <IMP/algebra/vector_generators.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
 #include <IMP/atom/Diffusion.h>
