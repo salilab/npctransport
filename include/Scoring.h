@@ -497,15 +497,16 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      bool site_specific = true,
      bool non_specific = false) const;
 
+#ifndef SWIG
   //! return various statistics about site-site interactions
   //! between pi1 and pi2
   /**
      return a tuple with:
-     1) number of site-site interaction that contribute
+     a - number of site-site interaction that contribute
         to the score between pi1 and pi2 in the model, based on their
          current coordinates and their particle types
-     2) vector of occupied pi1 sites counts (count # of interactions per site)
-     3) vector of occupied pi2 sites counts (count # of interactions per site)
+     b - vector of occupied pi1 sites counts (count number of interactions per site)
+     c - vector of occupied pi2 sites counts (count number of interactions per site)
   */
   boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
     get_site_interactions_statistics
@@ -515,11 +516,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   //! between p1 and p2
   /**
      return a tuple with:
-     1) number of site-site interaction that contribute
+     a) number of site-site interaction that contribute
         to the score between p1 and p2 in the model, based on their
          current coordinates and their particle types
-     2) vector of occupied pi1 sites counts (count # of interactions per site)
-     3) vector of occupied pi2 sites counts (count # of interactions per site)
+     b) vector of occupied pi1 sites counts (count number of interactions per site)
+     c) vector of occupied pi2 sites counts (count number of interactions per site)
   */
   boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
     get_site_interactions_statistics
@@ -529,6 +530,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
       get_site_interactions_statistics
       (p1->get_index(), p2->get_index());
   }
+#endif
 
 
   core::OrderedTypePairPredicate* get_ordered_type_pair_predicate()

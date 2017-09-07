@@ -822,7 +822,7 @@ void Statistics::update
     siop->set_avg_fraction_bound_particles_ii
       ( bps_i->get_average_fraction_bound_particles_II());
     siop->set_avg_fraction_bound_particle_sites_i
-      ( bps_i->get_average_fraction_bound_particles_I());
+      ( bps_i->get_average_fraction_bound_particle_sites_I());
     siop->set_avg_fraction_bound_particle_sites_ii
       ( bps_i->get_average_fraction_bound_particle_sites_II());
     siop->set_misc_stats_period_ns
