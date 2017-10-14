@@ -166,7 +166,7 @@ ParticleIndexes create_particles(Model *m, const BoundingBox3D &bb, int n) {
   }
   IMP_NEW(core::MonteCarlo, mc, (m));
   mc->set_optimizer_states(opt_states);
-  IMP_NEW(core::IncrementalScoringFunction, isf, (ps, rs));
+  IMP_NEW(core::IncrementalScoringFunction, isf, (m, pis, rs));
   {
     // set up MC
     mc->add_mover(create_serial_mover(m, pis));
