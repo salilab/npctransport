@@ -96,7 +96,7 @@ ParticleIndexes get_particle_indexes
 // if it does not exist, add it to s
 // @param s the statistics message for searching the fg
 // @param pt the type of fg to look for
-unsigned int find_or_add_fg_of_type(::npctransport_proto::Statistics* s,
+unsigned int find_or_add_fg_chain_of_type(::npctransport_proto::Statistics* s,
                                     IMP::core::ParticleType pt)
 {
   std::string type = pt.get_string();
@@ -114,6 +114,31 @@ unsigned int find_or_add_fg_of_type(::npctransport_proto::Statistics* s,
                   "bug - new floaters type should have been" << type);
   return n;
 }
+
+// finds the index of s->fg_beads() whose type equals pt.get_string()
+// if it does not exist, add it to s
+// @param s the statistics message for searching the fg
+// @param pt the type of fg to look for
+unsigned int find_or_add_fg_bead_of_type(::npctransport_proto::Statistics* s,
+                                         IMP::core::ParticleType pt)
+{
+  // TODO: works only for SimulationData.h version >=4.0 (=npctransport protobuf version>=4.0)
+  std::string type = pt.get_string();
+  // find fg with same type
+  unsigned int n = s->fg_beads_size();
+  for(unsigned int i=0 ; i < n ; i++){
+    if(s->fg_beads(i).type() == type){
+      return i;
+    }
+  }
+  // add new one if not found
+  ::npctransport_proto::Statistics_FGBeadStats* sfgbs = s->add_fg_beads();
+  sfgbs->set_type( type );
+  IMP_USAGE_CHECK(s->fg_beads(n).type() == type,
+                  "bug - new floaters type should have been" << type);
+  return n;
+}
+
 
 // finds the index of s->floaters() whose type equals pt.get_string()
 // if it does not exist, add it to s

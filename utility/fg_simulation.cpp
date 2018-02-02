@@ -21,6 +21,7 @@
 #include <IMP/exception.h>
 #include <IMP/enums.h>
 #include <IMP/npctransport.h>
+#include <IMP/nullptr.h>
 #include <IMP/base_types.h>
 #include <IMP/Pointer.h>
 #include <IMP/Restraint.h>
@@ -182,8 +183,8 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
   }
 }
 
-/**    returns all kap / crap particles in SimulationData */
-IMP::ParticlesTemp get_kaps_and_craps(IMP::npctransport::SimulationData& sd) {
+/**    returns all kap / inert particles in SimulationData */
+IMP::ParticlesTemp get_kaps_and_inerts(IMP::npctransport::SimulationData& sd) {
   using namespace IMP::npctransport;
 
   IMP::ParticlesTemp ret;
@@ -199,10 +200,10 @@ IMP::ParticlesTemp get_kaps_and_craps(IMP::npctransport::SimulationData& sd) {
   return ret;
 }
 
+//! return nullptr if no floaters exist
 IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
     IMP::npctransport::SimulationData& sd) {
   using namespace IMP;
-
   bool both_sides = ! sd.get_are_floaters_on_one_slab_side();
   double top = (sd.get_slab_thickness() / 2) * 1.5;  // *1.5 to get some slack
   double LARGE = 10000000;
@@ -210,10 +211,14 @@ IMP::Pointer<IMP::Restraint> get_exclude_from_channel_restraint(
   double k = 40.0;
   IMP_NEW(IMP::npctransport::ExcludeZRangeSingletonScore, score,
           (bottom, top, k));
-  IMP::ParticlesTemp particles = get_kaps_and_craps(sd);
-  IMP_NEW(container::SingletonsRestraint, sr,
-          (score, particles, "ExcludeZRangeRestraint"));
-  return sr;
+  IMP::ParticlesTemp particles = get_kaps_and_inerts(sd);
+  if(particles.size()>0){
+    IMP_NEW(container::SingletonsRestraint, sr,
+            (score, particles, "ExcludeZRangeRestraint"));
+    return sr;
+  } else {
+    return nullptr;
+  }
 }
 
   // // print the first atoms of all the fgs in sd
@@ -281,7 +286,9 @@ int main(int argc, char* argv[]) {
       // if has slab, exclude from channel initially
       IMP::Pointer<IMP::Restraint> r =
           get_exclude_from_channel_restraint(*sd);
-      initialization_restraints.push_back(r);
+      if(r != nullptr){
+        initialization_restraints.push_back(r);
+      }
     }
     //IMP_LOG(PROGRESS, initialization_restraints << std::endl);
     npctransport::do_main_loop(sd, initialization_restraints);

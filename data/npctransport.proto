@@ -121,7 +121,7 @@ message Configuration {
   optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
   optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
   optional FloatRange temperature_k=33; // simulation temperature
-  optional double output_npctransport_version=34 [default=2.5]; // a version number of npctransport by which to create output files
+  optional double output_npctransport_version=34 [default=4.0]; // a version number of npctransport by which to create output files
   optional int32 is_xyz_hist_stats=35 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
   optional FloatRange tunnel_radius_k=36; // (Version 2.5+) if <=0, static radius, otherwise, k force constant for tunnel radius restraint
   optional FloatRange pore_anchored_beads_k=37; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
@@ -303,15 +303,22 @@ message Statistics {
     optional double volume=1 [default=0];
     optional double length=2 [default=0];
     optional double radius_of_gyration=3 [default=0];
-    optional double particle_diffusion_coefficient=4 [default=0];
-    optional double particle_correlation_time=5 [default=0];
+    optional double particle_diffusion_coefficient=4 [default=0]; // Obsolete from version 4.0- moved to FGBodyStats
+    optional double particle_correlation_time=5 [default=0]; // Obsolete from version 4.0 - moved to FGBodyStats
     optional double chain_diffusion_coefficient=6 [default=0];
     optional double chain_correlation_time=7 [default=0];
     optional double local_diffusion_coefficient=8 [default=0];
     optional string type=9; // type name, e.g. "fg_nsp1"
     repeated FGOrderParams order_params=10;
-    optional  Ints_list zr_hist=11; // histogram of z (dimenion 1) and r (dimension 2) coordinates (or z,y,x if is_xyz_hist_stats)
-    optional  Ints_lists xyz_hist=12; // histogram of x,y,z (dimension 0, 1 and 2, resp.)
+    optional  Ints_list zr_hist=11; // Obsolete from version 4.0 - moved to FGBodyStats
+    optional  Ints_lists xyz_hist=12; // Obsolete from version 4.0 - moved to FGBodyStats
+  }
+  message FGBeadStats { // (version>=4.0)
+    optional double particle_diffusion_coefficient=1 [default=0];
+    optional double particle_correlation_time=2 [default=0];
+    optional string type=3; // type name, e.g. "fg_nsp1"
+    optional Ints_list zr_hist=4; // histogram of z (dimenion 1) and r(dimension 2) coordinates (or z,y,x if is_xyz_hist_stats)
+    optional Ints_lists xyz_hist=5; // histogram of x,y,z (dimension 0, 1 and 2, resp.)
   }
   message FloatStats {
     //    optional double site_interactions_per_floater=1 [default=0]; // number of site interactions per floater
@@ -366,7 +373,7 @@ message Statistics {
     required double energy=2;
     repeated Ints zr_hists=3;
   }
-  repeated FGStats fgs=1;
+  repeated FGStats fgs=1; // statistics about entire FG chain types
   repeated FloatStats floaters=2;
   optional double energy_per_particle=3 [default=0];
   optional int32 number_of_frames=4 [default=0]; // number of frames for which statistics were gathered
@@ -375,6 +382,7 @@ message Statistics {
   optional int32 interrupted=7 [default=0];
   optional double bd_simulation_time_ns=8 [default=0]; // number of ns in which BD simulation was running
   repeated GlobalOrderParams global_order_params=9;
+  repeated FGBeadStats fg_beads=10; // (version>=4.0) statistics about specific types of FG beads in a chain (e.g. Nsp1-FG124)
 }
 
 message Conformation {

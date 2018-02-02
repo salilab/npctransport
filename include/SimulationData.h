@@ -40,7 +40,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 // Version 2.5 - turned slab into a particle
 // Version 3.0 - added harmonic bond with proper tau
-#define IMPNPCTRANSPORT_VERSION 3.0
+// Version 4.0 - more properly handle various suffixes of FG chains (=different types of beads)
+#define IMPNPCTRANSPORT_VERSION 4.0
 
 class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  private:
@@ -132,10 +133,13 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   // Membrane slab, if exists (mutable but is expected to be accessed only from get_slab_particle()
   mutable PointerMember<Particle> slab_particle_;
 
-  // fg types  - a list of all fg/floater/obstacle types that were
-  // added via create_fgs/floaters/obstacles(), so far
-  //! a set of particle types
-  ParticleTypeSet fg_types_;
+  // fg bead types  - a set of all fg/floater/obstacle types that were
+  // added via create_fgs/floaters/obstacles(), including
+  // the suffixes of individual beads in a chain added to their chain root name
+  ParticleTypeSet fg_bead_types_;
+  // fg chain types - same as fg_bead_types but just for the root particles
+  // without the suffixes
+  ParticleTypeSet fg_chain_types_;
   ParticleTypeSet floater_types_;
   ParticleTypeSet obstacle_types_;
 
@@ -273,24 +277,46 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   /** returns the requested fraction of time for taking statistics */
   double get_statistics_fraction() const { return statistics_fraction_; }
 
-  /** returns true if particle type is of fg type
-      (that is, particle was added within create_fgs()
+  /** returns true if bead has an fg type
+      that is, particle was added within create_fgs()
   */
-  bool get_is_fg(ParticleIndex pi) const;
+  bool get_is_fg_bead(ParticleIndex pi) const;
 
 
   /** returns true if particle type is of fg type
       (that is, it is one of the types added via create_fgs())
   */
-  bool get_is_fg_type(core::ParticleType pt) const{
-    return fg_types_.find(pt) != fg_types_.end();
+  bool get_is_fg_bead(core::ParticleType pt) const{
+    return fg_bead_types_.find(pt) != fg_bead_types_.end();
+  }
+
+  /** returns true if particle has an fg chain type
+      that is, particle has the same type as the root of an
+      fg chain that was added via create_fgs()
+  */
+  bool get_is_fg_chain(ParticleIndex pi) const;
+
+
+  /** returns true if particle type is an fg cjaom type
+      (that is, it is one of the types of a chain added
+      via create_fgs())
+  */
+  bool get_is_fg_chain(core::ParticleType pt) const{
+    return fg_chain_types_.find(pt) != fg_chain_types_.end();
   }
 
 
-  /** return all the types of fgs that were added
-      via create_fgs() */
-  ParticleTypeSet const& get_fg_types() const {
-    return fg_types_;
+  /** return all the types of fg beads that were added
+      via create_fgs() inclding the suffix appended to their
+      chain type name */
+  ParticleTypeSet const& get_fg_bead_types() const {
+    return fg_bead_types_;
+  }
+
+  /** return all the types of fg chains that were added
+      via create_fgs(), i.e. the types of chain roots */
+  ParticleTypeSet const& get_fg_chain_types() const {
+    return fg_chain_types_;
   }
 
 

@@ -61,8 +61,18 @@ IMPNPCTRANSPORTEXPORT void get_protobuf_configuration_from_text
     @param pt the type of fg to look for
 */
 IMPNPCTRANSPORTEXPORT
-unsigned int find_or_add_fg_of_type(::npctransport_proto::Statistics* s,
+unsigned int find_or_add_fg_chain_of_type(::npctransport_proto::Statistics* s,
                                     IMP::core::ParticleType pt);
+
+/** finds the index of s.fg_beads() whose type equals pt.get_string()
+    if it does not exist, add it to s
+    @param s the statistics message for searching the fg
+    @param pt the type of fg to look for
+*/
+IMPNPCTRANSPORTEXPORT
+unsigned int find_or_add_fg_bead_of_type(::npctransport_proto::Statistics* s,
+                                         IMP::core::ParticleType pt);
+
 
 /** finds the index of s->floaters() whose type equals pt.get_string()
     if it does not exist, add it to s

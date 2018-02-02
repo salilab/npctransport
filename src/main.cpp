@@ -401,7 +401,7 @@ void inflate_floater
     sd->get_sites(floater_type);
   algebra::Sphere3Ds inflated_sites=
     sd->get_sites(floater_type);
-  ParticleTypeSet const& fg_types = sd->get_fg_types();
+  ParticleTypeSet const& fg_bead_types = sd->get_fg_bead_types();
   std::cout << "Inflating begins" << std::endl;
   double delta;
   if(new_radius > cur_radius){
@@ -433,8 +433,8 @@ void inflate_floater
       // Update all interactions involving type:
       // TODO: update score straight  from simulationData->set_sites() via Scoring,
       //       instead of from here
-      for(ParticleTypeSet::const_iterator it=fg_types.begin();
-          it!=fg_types.end(); it++){
+      for(ParticleTypeSet::const_iterator it=fg_bead_types.begin();
+          it!=fg_bead_types.end(); it++){
         SitesPairScore* ps1=
           dynamic_cast<SitesPairScore*>(sd->get_scoring()->get_predicate_pair_score(floater_type, *it));
         IMP_ALWAYS_CHECK(ps1 != nullptr, "ps1 is not SitesPairScore", IMP::ValueException);

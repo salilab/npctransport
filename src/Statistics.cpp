@@ -131,10 +131,7 @@ void Statistics::add_fg_chain_stats
   std::set<core::ParticleType> p_types_encountered;
   for (unsigned int k = 0; k < chain_beads.size(); ++k) {
     Particle* p = chain_beads[k];
-    core::ParticleType p_type = core::Typed(p).get_type();
-    //    IMP_ALWAYS_CHECK( chain_type == p_type,
-    //                  "All beads in chain must be of same type for now",
-    //                  ValueException);
+    core::ParticleType p_type = core::Typed(p).get_type(); // note individual types may differ from chain type (of root) - e.g. suffix list in protobuf
     if(p_types_encountered.find(p_type) == p_types_encountered.end()) {
       p_types_encountered.insert(p_type);
       fgs_bodies_stats_map_[p_type].push_back( BodyStatisticsOptimizerStates() );
@@ -331,28 +328,28 @@ void Statistics::update_fg_stats
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
     ->get_bd()->get_current_time() / FS_IN_NS;
 
-  // Go over all fg types:
-  ParticleTypeSet const &fgt = get_sd()->get_fg_types();
+  // Go over all fg chain types:
+  ParticleTypeSet const &fgct = get_sd()->get_fg_chain_types();
   for ( ParticleTypeSet::const_iterator
-          it = fgt.begin(); it != fgt.end(); it++ )
+          it = fgct.begin(); it != fgct.end(); it++ )
     {
-      core::ParticleType type_i = *it;
-      atom::Hierarchy root_i = get_sd()->get_root_of_type( type_i );
+      core::ParticleType chain_type_i = *it;
+      atom::Hierarchy root_i = get_sd()->get_root_of_type( chain_type_i );
       ParticlesTemp chains_i = root_i.get_children();
       if(chains_i.size() == 0)
         continue;
-      unsigned int i = find_or_add_fg_of_type( stats, type_i );
+      unsigned int i = find_or_add_fg_chain_of_type( stats, chain_type_i );
       npctransport_proto::Statistics_FGOrderParams*
         fgi_op = stats->mutable_fgs(i)->add_order_params();
       fgi_op->set_time_ns(sim_time_ns);
 
       // Average chain stats from optimizer state:
       {
-        IMP_USAGE_CHECK(chains_stats_map_.find(type_i)
+        IMP_USAGE_CHECK(chains_stats_map_.find(chain_type_i)
                         != chains_stats_map_.end(),
                         "type missing from stats");
         ChainStatisticsOptimizerStates& cs_i =
-          chains_stats_map_.find(type_i)->second;
+          chains_stats_map_.find(chain_type_i)->second;
         double mean_radius_of_gyration=0.0;
         double mean_square_radius_of_gyration=0.0;
         double mean_end_to_end_distance=0.0;
@@ -424,13 +421,21 @@ void Statistics::update_fg_stats
           } // for j (fg chain)
         fgi_op->set_volume(avg_volume);
       }
+    } // for it (fg_chain_type)
 
+  // Go over all fg body types:
+  ParticleTypeSet const &fgbt = get_sd()->get_fg_bead_types();
+  for ( ParticleTypeSet::const_iterator
+          it = fgbt.begin(); it != fgbt.end(); it++ )
+    {
+      core::ParticleType fg_bead_type_i= *it;
+      unsigned int i = find_or_add_fg_bead_of_type( stats, fg_bead_type_i );
       // FG average body stats from optimizer state:
       {
-        IMP_USAGE_CHECK(fgs_bodies_stats_map_.find(type_i) !=
+        IMP_USAGE_CHECK(fgs_bodies_stats_map_.find(fg_bead_type_i) !=
                         fgs_bodies_stats_map_.end(),
                         "type missing from stats");
-        FGsBodyStatisticsOSs& fbs_i = fgs_bodies_stats_map_.find(type_i)->second;
+        FGsBodyStatisticsOSs& fbs_i = fgs_bodies_stats_map_.find(fg_bead_type_i)->second;
         for (unsigned int j = 0; j < fbs_i.size(); ++j)
           {
             BodyStatisticsOptimizerStates& fbs_ij = fbs_i[j];
@@ -439,34 +444,33 @@ void Statistics::update_fg_stats
                 BodyStatisticsOptimizerState* fbs_ijk = fbs_ij[k];
                 unsigned int per_frame = fbs_i.size() * fbs_ij.size();
                 unsigned int cnf = (nf) * per_frame + j * fbs_ij.size() + k;
-                UPDATE_AVG(cnf, nf_new, *stats->mutable_fgs(i),
+                UPDATE_AVG(cnf, nf_new, *stats->mutable_fg_beads(i),
                            particle_correlation_time,
                            fbs_ijk->get_correlation_time());
-                UPDATE_AVG(cnf, nf_new, *stats->mutable_fgs(i),
+                UPDATE_AVG(cnf, nf_new, *stats->mutable_fg_beads(i),
                            particle_diffusion_coefficient,
                            fbs_ijk->get_diffusion_coefficient());
                 fbs_ijk->reset();
               } // for k
           } // for j
       }
-
-      // Recreate z-r histogram based on retrieved zr_hist:
+      // Recreate z-r histogram based on retrieved zr_hist for each type of FG bead (not chain):
       if(get_sd()->get_is_xyz_hist_stats()){
-        stats->mutable_fgs(i)->clear_xyz_hist();
+        stats->mutable_fg_beads(i)->clear_xyz_hist();
         update_xyz_distribution_to_hdf5(hdf5_fg_xyz_hist_group,
-                                        type_i);
+                                        fg_bead_type_i);
       } else {
         ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
-          particle_type_zr_distribution_map_.find(type_i);
+          particle_type_zr_distribution_map_.find(fg_bead_type_i);
         if(ptzrdm_it != particle_type_zr_distribution_map_.end())
           {
             ParticleTypeZRDistributionMap::mapped_type zr_hist=
               ptzrdm_it->second;
-            stats->mutable_fgs(i)->clear_zr_hist();
+            stats->mutable_fg_beads(i)->clear_zr_hist();
             for(unsigned int ii=0; ii < zr_hist.size(); ii++)
               {
                 ::npctransport_proto::Statistics_Ints* zii_r_hist=
-                  stats->mutable_fgs(i)->mutable_zr_hist()->add_ints_list();
+                  stats->mutable_fg_beads(i)->mutable_zr_hist()->add_ints_list();
                 for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++)
                   {
                     zii_r_hist->add_ints(zr_hist[ii][jj]);
@@ -474,7 +478,7 @@ void Statistics::update_fg_stats
               } // for ii
           } // if ptzed_it
       } // if is_xyz_hist
-    } // for it (fg type)
+    } // for it (fg bead type)
 }
 
 void Statistics

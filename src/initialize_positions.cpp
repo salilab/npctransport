@@ -269,7 +269,7 @@ void initialize_positions(SimulationData *sd,
   // (using RAII class OptimizerSetTemporaryScoringFunction)
   ParticlesTemp obstacles = sd->get_obstacle_particles();
   typedef boost::unordered_set<core::ParticleType> ParticleTypeSet;
-  ParticleTypeSet const& types = sd->get_fg_types();
+  ParticleTypeSet const& types = sd->get_fg_chain_types();
   ParticlesTemp cur_particles = obstacles;
   ParticlesTemp beads = sd->get_beads(); // that should include obstacles
   for(ParticleTypeSet::const_iterator
@@ -296,7 +296,7 @@ void initialize_positions(SimulationData *sd,
       }
       // optimize
       IMP_LOG(VERBOSE, "Optimizing " <<  cur_particles.size()
-               << " particles of type " << *it);
+               << " particles of chain type " << *it);
       ParticlesTemp cur_non_optimizable_beads =
         get_non_optimizable_particles( cur_particles);
       ParticlesTemp cur_optimizable_beads =

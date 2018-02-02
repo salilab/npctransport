@@ -51,6 +51,8 @@
 #include <RMF/FileConstHandle.h>
 #include <IMP/rmf/atom_io.h>
 #include <IMP/rmf/frames.h>
+#include <algorithm>
+#include <iterator>
 #include <numeric>
 #include <set>
 
@@ -308,27 +310,33 @@ void SimulationData::create_fgs
 {
   // Save type:
   IMP_ALWAYS_CHECK(fg_data.has_type(), "fg type missing in fg_data",
-                   ValueException)
-    core::ParticleType fg_type(fg_data.type());
-  IMP_ALWAYS_CHECK( fg_types_.find(fg_type) == fg_types_.end(),
+                   ValueException);
+  core::ParticleType fg_chain_type(fg_data.type());
+  IMP_ALWAYS_CHECK( fg_chain_types_.find(fg_chain_type) == fg_chain_types_.end(),
                     "Currently support only single insertion of each type,"
                     " can be fixed if needed in the future",
                     ValueException);
-  fg_types_.insert(fg_type);
+  fg_chain_types_.insert(fg_chain_type);
 
-  // Make main root:
+
+  // Make main root or all chains of this type:
   atom::Hierarchy chains_root =
     atom::Hierarchy::setup_particle(new IMP::Particle( get_model() ) );
-  core::Typed::setup_particle(chains_root, fg_type);
-  chains_root->set_name( fg_type.get_string() ); //+ " root" );
+  core::Typed::setup_particle(chains_root, fg_chain_type);
+  chains_root->set_name( fg_chain_type.get_string() ); //+ " root" );
   get_root().add_child(chains_root);
 
   // Add n chains:
+  Pointer<FGChain> representative_chain= nullptr;
   for (int j = 0; j < fg_data.number().value(); ++j) {
     Pointer<FGChain> chain= create_fg_chain
       (this, chains_root, fg_data, display::Color(.3, .3, .3));
-    beads_ += chain->get_beads(); // book keeping
-    // set chain j anchors by fg_data if specified
+    if(j==0){
+      representative_chain= chain;
+    }
+    // Beads book keeping:
+    beads_ += chain->get_beads();
+    // Set chain j anchors by fg_data if specified:
     if (fg_data.anchor_coordinates_size() > j) {
       ::npctransport_proto::Assignment_XYZ xyz =
         fg_data.anchor_coordinates(j);
@@ -346,22 +354,44 @@ void SimulationData::create_fgs
     get_statistics()->add_fg_chain_stats( chain );
   } // for j
 
-
-  // Add sites for this type:
-  if (fg_data.interactions().value() != 0) {
-    int nsites = fg_data.interactions().value();
-    set_sites(fg_type, nsites,
-              fg_data.radius().value() * fg_data.site_relative_distance(),
-              fg_data.site_radius());
+  // Register bead types from representative chain:
+  Particles representative_beads= representative_chain->get_beads();
+  ParticleTypeSet new_fg_bead_types;
+  ParticleTypeSet existing_fg_bead_types;
+  for(unsigned int k= 0; k<representative_beads.size(); k++){
+    new_fg_bead_types.insert(IMP::core::Typed(representative_beads[k]).get_type());
   }
+  std::set_intersection(new_fg_bead_types.begin(), new_fg_bead_types.end(),
+                        fg_bead_types_.begin(), fg_bead_types_.end(),
+                        std::inserter(existing_fg_bead_types,
+                                      existing_fg_bead_types.end()));
+  IMP_ALWAYS_CHECK(existing_fg_bead_types.size()==0,
+                   "Cannot add bead types that are already associated with"
+                   " a different chain type (check if chain type + suffix are equal,"
+                   "e.g. Nu+p=N+up)",
+                   ValueException);
 
-  // Add general scoring scale factors information to scoring:
-  get_scoring()->set_interaction_range_factor
-    ( fg_type,
-      fg_data.interaction_range_factor().value());
-  get_scoring()->set_interaction_k_factor
-    ( fg_type,
-      fg_data.interaction_k_factor().value());
+
+  // Add sites and general scoring scale factors information to scoring
+  // for each bead type in this chain type:
+  // NOTE: although they're all the same, use per bead type info so
+  //       can be differentiated in the future if need be
+  for( ParticleTypeSet::const_iterator it_type= new_fg_bead_types.begin();
+       it_type != new_fg_bead_types.end(); it_type++){
+    // Add sites for this type:
+    if (fg_data.interactions().value() != 0) {
+      int nsites = fg_data.interactions().value();
+      set_sites(*it_type, nsites,
+                fg_data.radius().value() * fg_data.site_relative_distance(),
+                fg_data.site_radius());
+    }
+    get_scoring()->set_interaction_range_factor
+      ( *it_type,
+        fg_data.interaction_range_factor().value());
+    get_scoring()->set_interaction_k_factor
+      ( *it_type,
+        fg_data.interaction_k_factor().value());
+  }
 
 }
 
@@ -414,7 +444,7 @@ void SimulationData::create_floaters
   // add interaction sites to particles of this type:
   if (f_data.interactions().value() != 0)
     {
-      unsigned int nsites = f_data.interactions().value();
+      int nsites = f_data.interactions().value();
       IMP_ALWAYS_CHECK(f_data.site_coordinates_size() == nsites ||
                        f_data.site_coordinates_size() == 0,
                        "The number of sites in sites_coordinates_size() must equal "
@@ -427,7 +457,7 @@ void SimulationData::create_floaters
                   f_data.site_radius());
       }else{
         sites_[type]= algebra::Sphere3Ds();
-        for(unsigned int ii= 0; ii<nsites; ii++) {
+        for(int ii= 0; ii<nsites; ii++) {
           ::npctransport_proto::Assignment_XYZ xyz =
             f_data.site_coordinates(ii);
           algebra::Vector3D site_ii_center(xyz.x(), xyz.y(), xyz.z());
@@ -539,15 +569,32 @@ Model *SimulationData::get_model() {
   return m_;
 }
 
-/** returns true if particle type is of fg type
+/** returns true if bead type is of fg type
     (that is, particle was added within ::create_fgs()
+     including bead specific suffix)
 */
-bool SimulationData::get_is_fg(ParticleIndex pi) const
+bool SimulationData::get_is_fg_bead(ParticleIndex pi) const
 {
   Model* m = get_model();
   if (core::Typed::get_is_setup(m,pi)) {
     core::ParticleType t = core::Typed(m,pi).get_type();
-    if (fg_types_.find( t ) != fg_types_.end() ) {
+    if (fg_bead_types_.find( t ) != fg_bead_types_.end() ) {
+      return true;
+    }
+  }
+  return false;
+ }
+
+/** returns true if chain type is of fg type
+    (that is, an fg chain with same root type
+    was added via ::create_fgs())
+*/
+bool SimulationData::get_is_fg_chain(ParticleIndex pi) const
+{
+  Model* m = get_model();
+  if (core::Typed::get_is_setup(m,pi)) {
+    core::ParticleType t = core::Typed(m,pi).get_type();
+    if (fg_chain_types_.find( t ) != fg_chain_types_.end() ) {
       return true;
     }
   }
@@ -562,7 +609,7 @@ atom::Hierarchies SimulationData::get_fg_chain_roots() const
       atom::Hierarchies ret;
       atom::Hierarchies C = get_root().get_children();
       for(unsigned int i =0 ; i < C.size(); i++) {
-        if( get_is_fg( C[i] ) ){
+        if( get_is_fg_chain( C[i] ) ){
            ret += C[i].get_children();
           }
       }
