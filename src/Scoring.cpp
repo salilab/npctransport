@@ -475,7 +475,7 @@ Scoring::get_chain_restraints_on
     ( SingletonContainer,
       bead_particles,
       {
-        if(get_sd()->get_is_fg_chain(_1) &&
+        if(get_sd()->get_is_fg_bead(_1) &&
            bead_to_chain_map_.find(_1) != bead_to_chain_map_.end())
           {
             FGChain* chain =

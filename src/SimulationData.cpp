@@ -364,12 +364,15 @@ void SimulationData::create_fgs
   std::set_intersection(new_fg_bead_types.begin(), new_fg_bead_types.end(),
                         fg_bead_types_.begin(), fg_bead_types_.end(),
                         std::inserter(existing_fg_bead_types,
-                                      existing_fg_bead_types.end()));
+                                      existing_fg_bead_types.end())
+                        );;
   IMP_ALWAYS_CHECK(existing_fg_bead_types.size()==0,
                    "Cannot add bead types that are already associated with"
                    " a different chain type (check if chain type + suffix are equal,"
                    "e.g. Nu+p=N+up)",
                    ValueException);
+  fg_bead_types_.insert(new_fg_bead_types.begin(),
+                        new_fg_bead_types.end());
 
 
   // Add sites and general scoring scale factors information to scoring

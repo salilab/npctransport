@@ -50,11 +50,11 @@ int number_of_particles = 40;
   //int step_size = 5;
 #endif
 
-void debug_print_location(std::string context, bool reset = false) {
-  static int ncall = 0;
-  if (reset) ncall = 0;
-  std::cout << "Here " << ncall++ << " in context " << context << std::endl;
-}
+// void debug_print_location(std::string context, bool reset = false) {
+//   static int ncall = 0;
+//   if (reset) ncall = 0;
+//   std::cout << "Here " << ncall++ << " in context " << context << std::endl;
+// }
 
 /**
    sites 1 1 0.2,                8.85e-04,           -1.3e+04
