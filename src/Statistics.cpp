@@ -973,7 +973,7 @@ Statistics::get_interactions_and_interacting
       Particles const& chain_particles = cur_chain->get_beads();
       for (unsigned int k = 0; k < chain_particles.size(); ++k) {
         unsigned int num;
-        boost::tie(num, std::ignore, std::ignore)=
+        boost::tie(num, boost::tuples::ignore, boost::tuples::ignore)=
           get_sd()->get_scoring()->get_site_interactions_statistics
           (floaters[i], chain_particles[k] );
         if (num > 0) {
