@@ -2,7 +2,7 @@
  *  \file automatic_parameters.h
  *  \brief description
  *
- *  Copyright 2007-2017 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2018 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_AUTOMATIC_PARAMETERS_H

@@ -3,7 +3,7 @@
 #/**
 # * \file fg_array.cpp
 # * \brief Simulate an fg and a kap interacting
-# * Copyright 2007-2017 IMP Inventors. All rights reserved.
+# * Copyright 2007-2018 IMP Inventors. All rights reserved.
 # */
 
 #define IMP_NPC_MAIN

@@ -2,7 +2,7 @@
  *  \file npctransport/Scoring.h
  *  \brief scoring associated with a SimulationData object
  *
- *  Copyright 2007-2017 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2018 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_SCORING_H

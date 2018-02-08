@@ -2,7 +2,7 @@
  *  \file linear_distance_pair_scores.cpp
  *  \brief Linear scores on the distance between a pair of particles.
  *
- *  Copyright 2007-2017 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2018 IMP Inventors. All rights reserved.
  */
 
 #include <IMP/npctransport/linear_distance_pair_scores.h>

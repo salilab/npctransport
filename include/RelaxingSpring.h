@@ -3,7 +3,7 @@
  *  \brief a spring between two diffusing particles whose resting length
  *         is relaxing towards some equilibrium value
  *
- *  Copyright 2007-2017 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2018 IMP Inventors. All rights reserved.
  *
  */
 

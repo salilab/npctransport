@@ -2,7 +2,7 @@
  *  \file IMP/atom/BrownianDynamicsTAMDWithSlabSupport.cpp
  *  \brief Simple molecular dynamics optimizer.
  *
- *  Copyright 2007-2016 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2018 IMP Inventors. All rights reserved.
  *
  */
 
