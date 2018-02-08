@@ -430,7 +430,10 @@ Scoring::get_site_interactions_statistics
     dynamic_cast<SitesPairScore const*>
     (get_predicate_pair_score(pt1, pt2));
   if(ps==nullptr){
-    return 0; // when not defined or not sites pair score then only repulsive force upon touching
+    // when not defined or not sites pair score then only repulsive force
+    // upon touching
+    std::vector<unsigned int> empty;
+    return boost::make_tuple(0, empty, empty);
   }
   boost::tuple<unsigned int,
                std::vector<unsigned int>,
