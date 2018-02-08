@@ -193,7 +193,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      double **torques_tables,
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
-     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
+     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
      (*contacts_accumulator) = nullptr
      ) const;
 
@@ -221,7 +221,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
     (Model* m,
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
-     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
+     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
      (*contacts_accumulator)
      ) const;
 
@@ -397,7 +397,7 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
   DerivativeAccumulator *da,
   boost::tuple<unsigned int,
                std::vector<unsigned int>,
-               std::vector<unsigned int>>
+               std::vector<unsigned int> >
   * contacts_accumulator
   ) const
 {
@@ -523,7 +523,7 @@ SitesPairScore::evaluate_site_contributions
 (Model* m,
  const ParticleIndexPair &pip,
  DerivativeAccumulator *da,
- boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
+ boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
  (*contacts_accumulator)
  ) const
 {

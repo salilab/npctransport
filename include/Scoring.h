@@ -508,7 +508,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      b - vector of occupied pi1 sites counts (count number of interactions per site)
      c - vector of occupied pi2 sites counts (count number of interactions per site)
   */
-  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
+  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
     get_site_interactions_statistics
     ( ParticleIndex pi1, ParticleIndex pi2) const;
 
@@ -522,7 +522,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      b) vector of occupied pi1 sites counts (count number of interactions per site)
      c) vector of occupied pi2 sites counts (count number of interactions per site)
   */
-  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>>
+  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
     get_site_interactions_statistics
     ( Particle const* p1, Particle const* p2) const
   {

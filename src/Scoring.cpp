@@ -418,7 +418,7 @@ Scoring::get_interaction_range_for
 
 boost::tuple<unsigned int,
              std::vector<unsigned int>,
-             std::vector<unsigned int>>
+             std::vector<unsigned int> >
 Scoring::get_site_interactions_statistics
 ( ParticleIndex pi1, ParticleIndex pi2) const
 {
@@ -437,7 +437,7 @@ Scoring::get_site_interactions_statistics
   }
   boost::tuple<unsigned int,
                std::vector<unsigned int>,
-               std::vector<unsigned int>> ret_value;
+               std::vector<unsigned int> > ret_value;
   ps->evaluate_site_contributions(get_model(),
                                   ParticleIndexPair(pi1, pi2),
                                   nullptr,

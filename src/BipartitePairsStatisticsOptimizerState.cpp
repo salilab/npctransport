@@ -93,7 +93,7 @@ void BipartitePairsStatisticsOptimizerState::reset() {
 }
 
 namespace {
-  typedef std::map<ParticleIndex, std::vector<unsigned int>>
+  typedef std::map<ParticleIndex, std::vector<unsigned int> >
     t_bound_sites_by_pi_map;
 
   //! updates a map of bound sites by map with new counts
@@ -170,9 +170,9 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
   close_bipartite_pair_container_->do_score_state_before_evaluate(); // refresh
   t_particle_index_ordered_set new_bounds_I, new_bounds_II;
   t_particle_index_pair_ordered_set new_contacts; // more efficient if ordered set
-  std::map<ParticleIndex, std::vector<unsigned int>>
+  std::map<ParticleIndex, std::vector<unsigned int> >
     bound_sites_I_by_pi;
-  std::map<ParticleIndex, std::vector<unsigned int>>
+  std::map<ParticleIndex, std::vector<unsigned int> >
     bound_sites_II_by_pi;
   IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
                         close_bipartite_pair_container_,
