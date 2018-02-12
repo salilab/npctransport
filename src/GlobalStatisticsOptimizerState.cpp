@@ -28,6 +28,7 @@ void GlobalStatisticsOptimizerState::reset() {
 }
 
 void GlobalStatisticsOptimizerState::do_update(unsigned int call_num) {
+  IMP_UNUSED(call_num);
   double energy=
     statistics_manager_->get_sd()->get_bd()
     ->get_scoring_function()->evaluate(false);

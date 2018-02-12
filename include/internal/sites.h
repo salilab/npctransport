@@ -185,9 +185,9 @@ bell-shaped spline
     @param gSite2 - site1 global coordinates
     @param gUnitRB1RB2 - precomputed unit vector pointing from RB1 towards RB2, in global coordinates
     @param distRB1RB2 - precomputed distance between centers of rb1 and rb2
-    @param gRotSigma1 -  precomputed rotation axis of sigma1
+    @param gRotSigma1 -  precomputed rotation axis of sigma1 (ignored if da is null)
     @param kFactor1 - precomputed scaling factor due to sigma1 vs. spsp.cosSigma1_max
-    @param dKFactor1 - the pre-computed sigma1 derivative of kFactor1
+    @param dKFactor1 - the pre-computed sigma1 derivative of kFactor1 (ignored if da is null)
     @param da - accumulator for reweighting derivatives,
                 or null to disable force and torque computations
     @param sphere_derivatives_table
