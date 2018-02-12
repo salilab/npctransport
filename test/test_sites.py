@@ -54,6 +54,8 @@ class ConeTests(IMP.test.TestCase):
 
     def test_sites_pair_score(self):
         """Check sites pair score"""
+        global radius
+
         print("Check sites pair score")
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
@@ -62,11 +64,11 @@ class ConeTests(IMP.test.TestCase):
         bb= IMP.algebra.get_cube_3d(15)
         s0=[IMP.algebra.Sphere3D(IMP.algebra.Vector3D(radius, 0, 0), 0.0)]
         s1=[IMP.algebra.Sphere3D(IMP.algebra.Vector3D(0, radius, 0), 0.0)]
-        r_sites = 1000
-        k_sites = 10
-        r_nonspec_atr = 0
-        k_nonspec_atr = 0
-        k_rep = 10
+        r_sites = 100 # site interaction range
+        k_sites = 10 # site interaction constant
+        r_nonspec_atr = 0 # nonspecific attraction range
+        k_nonspec_atr = 0 # nonspcific attraction constant
+        k_rep = 1 # repulsive attraction constant
         ps= IMP.npctransport.SitesPairScore(r_sites,k_sites,0.0,0.0,
                                             r_nonspec_atr, k_nonspec_atr, k_rep,
                                             s0, s1)
@@ -79,13 +81,15 @@ class ConeTests(IMP.test.TestCase):
         self._show([rb0, rb1], [s0, s1], w)
         cg= IMP.core.ConjugateGradients(m)
         cg.set_scoring_function(sf)
-        print("SCORE=",sf.evaluate(True))
+        print("Initial score:",sf.evaluate(True))
 
+        print("==\nRandomized rb0 and rb1:\n==")
         rb0.get_particle().show()
         rb1.get_particle().show()
 
-        cg.optimize(1000)
-        print("SCORE=",sf.evaluate(True))
+        for i in range(10):
+            cg.optimize(100)
+        print("==\nOptimized rb0 and rb1:\n==")
         rb0.get_particle().show()
         rb1.get_particle().show()
         w.set_frame(1)
@@ -95,7 +99,11 @@ class ConeTests(IMP.test.TestCase):
         s0g= rf0.get_global_coordinates(s0[0].get_center())
         s1g= rf1.get_global_coordinates(s1[0].get_center())
         d= IMP.algebra.get_distance(s0g, s1g)
-        print("Sites", s0g, s1g, "d=", d)
-        self.assert_(d < 1)
+        print("Optimized Sites:", s0g, s1g, "distance:", d)
+        score= sf.evaluate(True)
+        best_score_sites= -r_sites*k_sites
+        print("Optimized score: ",score)
+        self.assert_(d < 0.1)
+        self.assert_(score<0.99*best_score_sites and score>best_score_sites)
 if __name__ == '__main__':
     IMP.test.main()

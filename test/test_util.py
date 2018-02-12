@@ -152,8 +152,8 @@ def create_rb(m, radius):
     returns rigid body decorator
     '''
     p= IMP.Particle(m)
-    d= IMP.core.XYZR.setup_particle(p)
-    d.set_radius(radius)
+    xyzr= IMP.core.XYZR.setup_particle(p)
+    xyzr.set_radius(radius)
     rb= IMP.core.RigidBody.setup_particle(p, IMP.algebra.ReferenceFrame3D())
     rb.set_coordinates_are_optimized(True)
     return rb
