@@ -573,6 +573,7 @@ container::PredicatePairsRestraint
   IMP_NEW(container::PredicatePairsRestraint, predr,
           ( otpp_,
             pair_container ) );
+  predr->set_is_get_inputs_ignores_individual_scores(true);
   IMP_NEW(LinearSoftSpherePairScore, ssps, (get_excluded_volume_k()));
   predr->set_unknown_score(ssps.get());
   // add interaction scores with site-specific interactions
