@@ -13,7 +13,7 @@ class Tests(IMP.test.TestCase):
     a = IMP.npctransport.Avro2PBReader([in_avro])
     o = IMP.npctransport.Output()
     s = a.read_next()
-    while s != "": # while valid output
+    while len(s) > 0: # while valid output
       o.ParseFromString(s)
       rg = o.statistics.fgs[0].radius_of_gyration
 #     print rg

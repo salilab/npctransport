@@ -45,12 +45,17 @@ class IMPNPCTRANSPORTEXPORT Avro2PBReader {
   /** closes any open files */
   ~Avro2PBReader();
 
+#if defined(SWIG) || defined(IMP_SWIG_WRAPPER)
+  typedef std::string ByteBuffer;
+  ByteBuffer read_next();
+#else
   /**
      Read the next output entry into output and returns it
      as string. If no input is left, returns "" and invalidates
      this object.
   */
   std::string read_next();
+#endif
 
   //! returns true if there are still files to go over
   //! (though possibly no entries left in neither of them)

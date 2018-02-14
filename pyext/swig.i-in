@@ -51,6 +51,16 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %apply unsigned int { boost::uint32_t }
 %apply unsigned long long { boost::uint64_t }
 
+// Return value from Avro2PBReader::read_next() should be handled as an
+// array of bytes in Python 3, not a Unicode string
+%typemap(out) IMP::npctransport::Avro2PBReader::ByteBuffer {
+%#if PY_VERSION_HEX >= 0x03000000
+  $result = PyBytes_FromStringAndSize($1.data(), $1.size());
+%#else
+  $result = PyString_FromStringAndSize($1.data(), $1.size());
+%#endif
+}
+
 %include "IMP_npctransport.Parameter.i"
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
