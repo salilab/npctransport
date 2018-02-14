@@ -29,8 +29,8 @@ class IMPNPCTRANSPORTEXPORT HarmonicSpringSingletonScore
 : public SingletonScore
 {
  private:
-  double k1_;
-  double k2_;
+  double k1_; // see ctr
+  double k2_; // see ctr
 
  public:
   /**
@@ -53,15 +53,23 @@ class IMPNPCTRANSPORTEXPORT HarmonicSpringSingletonScore
       double k2,
       std::string name = "HarmonicSpringSingletonScore%1%");
 
+  //! sets the force constant to bring particles to the current rest length
+  //! in kcal/mol/A^2
   void set_k1(double k1)
   { k1_ = k1; }
 
+  //! returns the force constant to bring particles to the current rest length
+  //! in kcal/mol/A^2
   double get_k1() const
   { return k1_; }
 
+  //! sets the force constant to bring the current rest length to equilibrium
+  //! in kcal/mol/A^2
   void set_k2(double k2)
   { k2_ = k2; }
 
+  //! returns the force constant to bring the current rest length to equilibrium
+  //! in kcal/mol/A^2
   double get_k2() const
   { return k2_; }
 

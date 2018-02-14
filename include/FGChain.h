@@ -17,6 +17,7 @@
 //#include "internal/npctransport.pb.h"
 
 #include <IMP/atom/Hierarchy.h>
+#include <IMP/PairScore.h>
 #include <IMP/Object.h>
 #include <IMP/nullptr.h>
 #include <IMP/container/ConsecutivePairContainer.h>
@@ -42,6 +43,9 @@ public:
 
   // the restraint on the chain bonds
   PointerMember<Restraint> bonds_restraint_;
+
+  // the score used by bonds_restraint_; (has to be object cause pair score and singleton score do not derive from same class)
+  PointerMember<Object> bonds_score_;
 
   // chain bond force coefficient in kcal/mol/A or kcal/mol/A^2
   // (depending on whether the bond is linear or harmonic)
@@ -83,6 +87,7 @@ public:
    : Object(name),
     root_(root),
     bonds_restraint_(nullptr),
+    bonds_score_(nullptr),
     backbone_k_(backbone_k),
     rest_length_factor_(rest_length_factor)
       {
@@ -154,11 +159,10 @@ public:
               get_chain_restraints()
 
         \see LinearWellPairScore
+        \see HarmonicSpringSingletonScore
+        \see RelaxingSpring
     */
-  void set_rest_length_factor(double rlf){
-    IMP_USAGE_CHECK(rlf>0.0, "bonds rest length factor should be positive");
-    rest_length_factor_= rlf;
-  }
+  void set_rest_length_factor(double rlf);
 
     /** set the force constant between consecutive chain beads
 
@@ -167,9 +171,7 @@ public:
 
         \see LinearWellPairScore
      */
-  void set_backbone_k(double k) {
-    backbone_k_= k;
-  }
+  void set_backbone_k(double k);
 
   //! get the equilibrium distance factor between consecutive beads relative
   //! to the sum of their radii
@@ -187,9 +189,6 @@ public:
 
 IMP_OBJECTS(FGChain, FGChains);
 
-/******************  utility methods ***************/
-
-/******************  utility methods ***************/
 
 /******************  utility methods ***************/
 

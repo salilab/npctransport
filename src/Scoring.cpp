@@ -322,18 +322,20 @@ void Scoring::add_interaction
   }
 }
 
-IMP::Restraint*
+boost::tuple<IMP::Restraint*, Object*>
 Scoring::create_backbone_restraint
 (double rest_length_factor,
  double backbone_k,
  ParticlesTemp beads,
  std::string name) const
 {
+  Pointer<Restraint> r(nullptr);
+  Pointer<Object> bonds_score(nullptr); // for backward compatibility
   if(is_backbone_harmonic_){
     // Harmonic with relaxing spring
     IMP_NEW( HarmonicSpringSingletonScore,
-             bonds_score,
-	     (20.0 * backbone_k, // TODO: 20* is arbitrary - just to make the particles stick well to the ends of te spring. Need to think how to set a value that would also allow the particles to pull the spring and vice versa realistically
+             hsss,
+             (20.0 * backbone_k, // TODO: 20* is arbitrary - just to make the particles stick well to the ends of te spring. Need to think how to set a value that would also allow the particles to pull the spring and vice versa realistically
               backbone_k) );
     ParticleIndexes pis;
     for(unsigned int i= 0; i<beads.size()-1; i++){
@@ -342,25 +344,33 @@ Scoring::create_backbone_restraint
 		      "if backbone is harmonic spring, all chain beads should be"
 		      " decorated with RelaxingSpring except for the tail");
     }
-    // TODO: update rest length and backbone k of springs or leave as is? For now, this is handled in FGChain
+    // TODO: update rest length and backbone k of springs or leave as
+    // is? For now, this is handled in FGChain
     IMP_NEW(IMP::container::ListSingletonContainer,
             springs,
             (get_model(), pis));
-    return container::create_restraint
-      ( bonds_score.get(), springs.get(), "Spring bonds " + name );
+    r= container::create_restraint( hsss.get(),
+                                    springs.get(),
+                                    "Spring bonds " + name );
+    bonds_score= hsss;
   } else {
     // Linear
-    IMP_NEW( LinearWellPairScore, bonds_score,
-	     (rest_length_factor, backbone_k) );
+    IMP_NEW(LinearWellPairScore, lwps,
+            (rest_length_factor, backbone_k));
     IMP_NEW(IMP::container::ExclusiveConsecutivePairContainer,
 	    bead_pairs,
 	    ( get_model(),
 	      IMP::get_indexes(beads),
 	      "Bonds %1% " + name + " consecutive pairs" )
 	    );
-    return container::create_restraint
-      ( bonds_score.get(), bead_pairs.get(),  "Bonds " + name  );
+    r=  container::create_restraint( lwps.get(),
+                                     bead_pairs.get(),
+                                     "Bonds " + name  );
+    bonds_score= lwps;
   }
+  IMP_USAGE_CHECK(r != nullptr && bonds_score != nullptr,
+                  "Backbone restraint is expected to be constructed by now");
+  return boost::make_tuple(r.release(), bonds_score.release());
 }
 
 IMP::PairScore const*

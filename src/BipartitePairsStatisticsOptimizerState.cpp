@@ -137,7 +137,7 @@ namespace {
 
 // count all the pairs that are currently in contact
 // and update stats
-void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
+void BipartitePairsStatisticsOptimizerState::do_update(unsigned int call_num)
 {
   // Get simulation time and reset if needed:
   atom::Simulator* simulator =
@@ -191,6 +191,11 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int)
                             new_bounds_II.insert(pip[1]);
                             new_contacts.insert
                               ( make_unordered_particle_index_pair( _1 ) );
+                            if(call_num % 10 == 0) {
+                              //                              statistics_manager->get_fgs_markov_states->update_contact(pip[0],
+                              //                                                                                        pip[1],
+                              //                                                                                        new_time_ns)
+                            }
                           }
                           accumulate_bound_sites_by_pi(bound_sites_I_by_pi,
                                                           pip[0],

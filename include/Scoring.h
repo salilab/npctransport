@@ -39,6 +39,8 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class SimulationData;
+class LinearWellPairScore;
+class HarmonicSpringSingletonScore;
 //class FGChain;
 
 class IMPNPCTRANSPORTEXPORT Scoring: public Object
@@ -449,6 +451,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
   bool get_is_backbone_harmonic() const { return is_backbone_harmonic_; }
 
+#ifndef SWIG
   //! Create a backbone bond restraint over beads according to class flags
   /** create a backbone bond restraint with specified rest_length_factor
       (relative to sum of spheres radii) and backbone k over beads. The restraint score
@@ -456,12 +459,19 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
       harmonic potential, with k in units of kcal/mol/A or kcal/mol/A^2,
       respectively, with the harmonic potential corresponding to a relaxing
       spring.
+
+      returns both the restraint and the linear well pair score or harmonic
+      singleton score that is used in it (which one depends on the IMP version,
+      assigns nullptr to the other), as a pointer to a generic object (= common
+      ancestor class)
   */
-  Restraint* create_backbone_restraint
-    (double rest_length_factor,
-     double backbone_k,
-     ParticlesTemp beads,
-     std::string name) const;
+  boost::tuple< Restraint*, Object*>
+    create_backbone_restraint
+    ( double rest_length_factor,
+      double backbone_k,
+      ParticlesTemp beads,
+      std::string name) const;
+#endif
 
   /** returns the constant force applied by overlapping spheres on each
       other

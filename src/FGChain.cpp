@@ -7,6 +7,8 @@
  */
 
 #include <IMP/npctransport/FGChain.h>
+#include <IMP/npctransport/HarmonicSpringSingletonScore.h>
+#include <IMP/npctransport/linear_distance_pair_scores.h>
 #include <IMP/npctransport/RelaxingSpring.h>
 #include <IMP/npctransport/Scoring.h>
 #include <IMP/npctransport/SimulationData.h>
@@ -62,9 +64,10 @@ void FGChain::update_bonds_restraint(Scoring const* scoring_manager)
      IMP_USAGE_CHECK(!bonds_restraint_->get_is_shared(),
                     "bonds restraint is supposed to become invalidated so it"
                   " shouldn't be owned by anyone else at this point");
-      bonds_restraint_ = nullptr; // invalidate to release old bead_pairs
+      bonds_restraint_= nullptr; // invalidate to release old bead_pairs
+      bonds_score_= nullptr;
   }
-  bonds_restraint_ =
+  boost::tie(bonds_restraint_, bonds_score_) =
     scoring_manager->create_backbone_restraint(rest_length_factor_,
 					       backbone_k_,
 					       this->get_beads(),
@@ -82,6 +85,86 @@ FGChain::get_chain_restraints
   }
   return Restraints(1,bonds_restraint_);
 }
+
+//! update the rest length of the chain with rlf
+void
+FGChain::set_rest_length_factor
+(double rlf)
+{
+  IMP_USAGE_CHECK(rlf>0.0, "bonds rest length factor should be positive");
+  rest_length_factor_= rlf;
+  if(bonds_score_){
+    // this is ugly but just to support the old LinearWellPairScore properly
+    LinearWellPairScore* lwps=
+      dynamic_cast<LinearWellPairScore*>(bonds_score_.get());
+    if(lwps != nullptr) {
+      lwps->set_rest_length_factor(rlf);
+    }
+  }
+  if(get_beads().size()==0) {
+    return;
+  }
+  if(!RelaxingSpring::get_is_setup(get_bead(0))) {
+    return;
+  }
+  // If RelaxingSpring decorator (e.g. for harmonic spring score) -
+  // update decorator values - note this will affect even an existing scoring function
+  // unlike with the older LinearWellPairScore, which stored the rest length factor internally
+  unsigned int n(get_number_of_beads());
+  for(unsigned int i=0; i < n-1; i++){
+    IMP_USAGE_CHECK(core::XYZR::get_is_setup(get_bead(i)) &&
+                    core::XYZR::get_is_setup(get_bead(i+1)),
+                    "chain beads are expected to be decorated with XYZR");
+    IMP_USAGE_CHECK(RelaxingSpring::get_is_setup(get_bead(i)),
+                    "If first bead in chain is decorated with a relaxing"
+                    " spring, then all beads except last are");
+    core::XYZR xyzr_i(get_bead(i));
+    core::XYZR xyzr_ii(get_bead(i+1));
+    double sr= xyzr_i.get_radius()+xyzr_ii.get_radius();
+    double rest_length= rlf * sr;
+    RelaxingSpring rs_i(get_bead(i));
+    rs_i.set_equilibrium_rest_length(rest_length);
+  }
+}
+
+
+//! set the force constant between consecutive chain beads
+void FGChain::set_backbone_k(double k)
+{
+  backbone_k_= k;
+  // If score is already set, update it
+  if(bonds_score_){
+    // this is ugly but just to support the old LinearWellPairScore and the
+    // new HarmonicSpringSingletonScore scores properly - in a perfect world
+    // they derive from the same class with common set_backbone_k method
+    {
+      LinearWellPairScore* lwps=
+        dynamic_cast<LinearWellPairScore*>(bonds_score_.get());
+      if (lwps != nullptr) {
+        lwps->set_k(k);
+        return;
+      }
+    }
+    {
+      HarmonicSpringSingletonScore* hsss=
+        dynamic_cast<HarmonicSpringSingletonScore*>(bonds_score_.get());
+      if (hsss != nullptr) {
+        // k is interpreted as k2 (force to bring spring rest length
+        // to equilibrium) while maintaining the k1/k2 ratio constant
+        // where k1 is the actual force constant on particles away from
+        // rest length (which we generally assume to be tight)
+        IMP_USAGE_CHECK(hsss->get_k2()*hsss->get_k1() != 0,
+                        "expected the spring to already be set by now");
+        double k1_to_k2= hsss->get_k1()/hsss->get_k2();
+        hsss->set_k1(k1_to_k2 * k);
+        hsss->set_k2(k);
+        return;
+      }
+    }
+    IMP_USAGE_CHECK(false, "bonds_score_ type couldn't be determined");
+  }
+}
+
 
 
 
