@@ -115,7 +115,8 @@ class Tests(IMP.test.TestCase):
         bd1 = sd1.get_bd()
         bd2 = sd2.get_bd()
         self.assert_(bd2.get_current_time() > 0)
-        self.assert_(bd1.get_current_time() == bd2.get_current_time())
+        print("Current times:", bd1.get_current_time(), bd2.get_current_time())
+        self.assertAlmostEqual(bd1.get_current_time(), bd2.get_current_time(), delta=.01)
         # check Transporting
         self.assert_transporting_equal(sd1, sd2)
 
