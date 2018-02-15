@@ -19,15 +19,14 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+#ifndef SWIG
 /**
    Evaluates a linear pair potential, such that score = k * (delta_length - x0)
    is returned.
-   Also, updates the derivative vectors of the particles in the model m.
+   Also, updates the derivative vectors of the particles if da is not null.
 
-   @param[out] m    a model for the particles, in which particle derivatives are
-                    updated
-   @param[in] pp    a pair of particle indices for fast access through internal
-                    model methods
+   @param[out] d_xyzr0 pointer to derivative of particle 0
+   @param[out] d_xyzr1 pointer to derivative of particle 1
    @param[in,out] da accumulator for score derivatives to be updated
    @param[in] delta a vector that represents the displacement between the
                     two particles
@@ -39,7 +38,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
                     (assuming the lower the score the better).
    @return the score
  */
-inline double do_evaluate_index(Model *m, const ParticleIndexPair &pp,
+inline double do_evaluate_index(algebra::Sphere3D& d_xyzr0,
+                                algebra::Sphere3D& d_xyzr1,
                                 DerivativeAccumulator *da,
                                 const algebra::Vector3D &delta,
                                 double delta_length, double x0, double k) {
@@ -48,8 +48,8 @@ inline double do_evaluate_index(Model *m, const ParticleIndexPair &pp,
   static const double MIN_DISTANCE = .00001;
   if (da && delta_length > MIN_DISTANCE) {
     algebra::Vector3D deriv = k * delta / delta_length;  // deriv magnitude is k
-    m->add_to_coordinate_derivatives(pp[0], deriv, *da);
-    m->add_to_coordinate_derivatives(pp[1], -deriv, *da);
+    Model::add_to_coordinate_derivatives(d_xyzr0, deriv, *da);
+    Model::add_to_coordinate_derivatives(d_xyzr1, -deriv, *da);
     IMP_LOG(TERSE, "Distance: " << shifted_length << "\nscore: " << score
                                 << "\nderiv: " << deriv << std::endl);
   }
@@ -59,6 +59,7 @@ inline double do_evaluate_index(Model *m, const ParticleIndexPair &pp,
     } );
   return score;
 }
+#endif
 
 /**
    A soft linear repulsive score between two spheres.
@@ -70,6 +71,16 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
   // score potential coefficient (larger = stronger repulsion)
   double k_;
 
+ protected:
+  //! evaluates the soft linear repulsive score, for spheres s0 and s1,
+  //! outputtinf derivatives to ds0 and ds1 scaled by da, if da is not null
+  inline double evaluate_index
+    (algebra::Sphere3D const& s0,
+     algebra::Sphere3D const& s1,
+     algebra::Sphere3D& ds0,
+     algebra::Sphere3D& ds1,
+     DerivativeAccumulator *da) const;
+
  public:
 
   LinearSoftSpherePairScore(double k,
@@ -78,37 +89,109 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
   virtual double evaluate_index(Model *m, const ParticleIndexPair &p,
                                 DerivativeAccumulator *da) const IMP_OVERRIDE;
 
+  virtual double evaluate_indexes(Model *m,
+                                  const ParticleIndexPairs &pips,
+                                  DerivativeAccumulator *da,
+                                  unsigned int lower_bound,
+                                  unsigned int upper_bound) const IMP_OVERRIDE;
+
+  double evaluate_if_good_indexes
+    ( Model *m,
+      const ParticleIndexPairs &p,
+      DerivativeAccumulator *da,
+      double max, unsigned int lower_bound, unsigned int upper_bound) const
+  {
+    double ret = 0;
+    for (unsigned int i = lower_bound; i < upper_bound; ++i) {
+      ret += evaluate_if_good_index(m, p[i], da, max - ret);
+      if (ret > max) return std::numeric_limits<double>::max();
+    }
+    return ret;
+  }
+
+
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const;
 
   //! returns the k for sphere-sphere repulsion
   double get_k() const { return k_; }
 
-  IMP_PAIR_SCORE_METHODS(LinearSoftSpherePairScore);
   IMP_OBJECT_METHODS(LinearSoftSpherePairScore);
   ;
 };
 
 #ifndef IMP_DOXYGEN
-// evaluates the soft linear repulsive score, using the internal Model
-// indexing to access particles data (see Model/include/internal/)
-inline double LinearSoftSpherePairScore::evaluate_index(
-    Model *m, const ParticleIndexPair &pp, DerivativeAccumulator *da) const {
+
+//! evaluates the soft linear repulsive score, for spheres s0 and s1,
+//! outputtinf derivatives to ds0 and ds1 scaled by da, if da is not null
+inline double
+LinearSoftSpherePairScore::evaluate_index
+(algebra::Sphere3D const& s0,
+ algebra::Sphere3D const& s1,
+ algebra::Sphere3D& ds0,
+ algebra::Sphere3D& ds1,
+ DerivativeAccumulator *da) const
+{
   IMP_OBJECT_LOG;
-  // compuate distances into cached variables
   algebra::Vector3D delta =
-      m->get_sphere(pp[0]).get_center() - m->get_sphere(pp[1]).get_center();
+      s0.get_center() - s1.get_center();
   double delta_length_2 =
       delta.get_squared_magnitude();  // (work with sqr for efficiency)
   double x0 =
-      m->get_sphere(pp[0]).get_radius() + m->get_sphere(pp[1]).get_radius();
+      s0.get_radius() + s1.get_radius();
   double x0_2 = x0 * x0;
   bool not_penetrating = delta_length_2 > x0_2;
   if (not_penetrating) return 0;
   // penetrating spheres ; -k_ in order to get a repulsive score
   double delta_length = std::sqrt(delta_length_2);
-  return do_evaluate_index(m, pp, da, delta, delta_length, x0, -k_);
+  return do_evaluate_index(ds0, ds1, da,
+                           delta, delta_length, x0, -k_);
 }
+
+// evaluates the soft linear repulsive score, using the internal Model
+// indexing to access particles data (see Model/include/internal/)
+inline double
+LinearSoftSpherePairScore::evaluate_index
+( Model *m,
+  const ParticleIndexPair &pp,
+  DerivativeAccumulator *da) const
+{
+  IMP_OBJECT_LOG;
+  algebra::Sphere3D const& s0(m->get_sphere(pp[0]));
+  algebra::Sphere3D const& s1(m->get_sphere(pp[1]));
+  algebra::Sphere3D* d_xyzrs=
+    m->access_sphere_derivatives_data();
+  algebra::Sphere3D& ds0( d_xyzrs[pp[0].get_index()] );
+  algebra::Sphere3D& ds1( d_xyzrs[pp[1].get_index()] );
+  return evaluate_index(s0, s1, ds0, ds1,  da);
+}
+
+//! evaluate all index pairs between pis[lower_bound] and pis[upper_bound]
+//! and update their coordinate derivatives scaled by da, if da is not null
+inline double
+LinearSoftSpherePairScore::evaluate_indexes
+( Model *m,
+  const ParticleIndexPairs &pips,
+  DerivativeAccumulator *da,
+  unsigned int lower_bound,
+  unsigned int upper_bound ) const
+{
+  IMP_OBJECT_LOG;
+  algebra::Sphere3D const* xyzrs=
+      m->access_spheres_data();
+  algebra::Sphere3D* d_xyzrs=
+    m->access_sphere_derivatives_data();
+  double ret = 0;
+  for (unsigned int i = lower_bound; i < upper_bound; ++i) {
+    int i0(pips[i][0].get_index());
+    int i1(pips[i][1].get_index());
+    ret += evaluate_index( xyzrs[i0], xyzrs[i1],
+                           d_xyzrs[i0], d_xyzrs[i1],
+                           da);
+  }
+  return ret;
+}
+
 #endif
 
 /**
@@ -139,6 +222,16 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   // cache for reusable intermediate calcualtions of evaluate_infex
   mutable EvaluationCache cache_;
 
+ protected:
+  //! evaluates the linear interaction score, for spheres s0 and s1,
+  //! outputt derivatives to ds0 and ds1 scaled by da, if da is not null
+  inline double evaluate_index
+    (algebra::Sphere3D const& s0,
+     algebra::Sphere3D const& s1,
+     algebra::Sphere3D& ds0,
+     algebra::Sphere3D& ds1,
+     DerivativeAccumulator *da) const;
+
  public:
   /**
    The score is 0 if the spheres are beyond the attractive range.
@@ -168,24 +261,25 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   IMP_IMPLEMENT(double evaluate_index(Model *m, const ParticleIndexPair &p,
                                       DerivativeAccumulator *da) const
                 IMP_OVERRIDE);
-  IMP_IMPLEMENT_INLINE(double evaluate_if_good_index(Model *m,
-                                                     const ParticleIndexPair &p,
-                                                     DerivativeAccumulator *da,
-                                                     double max) const,
+  IMP_IMPLEMENT_INLINE(double evaluate_if_good_index
+                       ( Model *m,
+                         const ParticleIndexPair &p,
+                         DerivativeAccumulator *da,
+                         double max ) const,
                        {
-    IMP_UNUSED(max);
-    return evaluate_index(m, p, da);
-  });
-  virtual double evaluate_indexes(Model *m, const ParticleIndexPairs &p,
+                         IMP_UNUSED(max);
+                         return evaluate_index(m, p, da);
+                       }
+                       );
+
+  //! evaluate all index pairs between pips[lower_bound] and pis[upper_bound]
+  //! and update their coordinate derivatives scaled by da, if da is not null
+  virtual double evaluate_indexes(Model *m,
+                                  const ParticleIndexPairs &pips,
                                   DerivativeAccumulator *da,
                                   unsigned int lower_bound,
-                                  unsigned int upper_bound) const IMP_OVERRIDE {
-    double ret = 0;
-    for (unsigned int i = lower_bound; i < upper_bound; ++i) {
-      ret += evaluate_index(m, p[i], da);
-    }
-    return ret;
-  }
+                                  unsigned int upper_bound) const IMP_OVERRIDE;
+
   double evaluate_if_good_index(Model *m, const ParticleIndexPairs &p,
                                 DerivativeAccumulator *da, double max,
                                 unsigned int lower_bound,
@@ -197,6 +291,7 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
     }
     return ret;
   }
+
   ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis) const
       IMP_OVERRIDE;
 
@@ -214,20 +309,27 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
 };
 
 #ifndef IMP_DOXYGEN
-inline double LinearInteractionPairScore::evaluate_index(
-    Model *m, const ParticleIndexPair &pp, DerivativeAccumulator *da) const {
-  IMP_OBJECT_LOG;
 
-  // Associate intermediate variables with cache_, for further reuse:
+//! evaluates the linear interaction score, for spheres s0 and s1,
+//! outputt derivatives to ds0 and ds1 scaled by da, if da is not null
+inline double
+LinearInteractionPairScore::evaluate_index
+(algebra::Sphere3D const& s0,
+ algebra::Sphere3D const& s1,
+ algebra::Sphere3D& ds0,
+ algebra::Sphere3D& ds1,
+ DerivativeAccumulator *da) const
+{
+   // Associate intermediate variables with cache_, for further reuse:
   double &delta_length_2 = cache_.particles_delta_squared;
   double &x0 = cache_.sum_particles_radii;
   algebra::Vector3D delta =
-      m->get_sphere(pp[0]).get_center() - m->get_sphere(pp[1]).get_center();
+      s0.get_center() - s1.get_center();
   delta_length_2 = delta.get_squared_magnitude();
   IMP_LOG(PROGRESS,
           "LinearInteractionPairScore cached delta2 "
           << cache_.particles_delta_squared << std::endl);
-  x0 = m->get_sphere(pp[0]).get_radius() + m->get_sphere(pp[1]).get_radius();
+  x0 = s0.get_radius() + s1.get_radius();
   // Terminate immediately if very far, work with squares for speed
   // equivalent to [delta_length > x0 + attr_range]:
   if (delta_length_2 > std::pow(x0 + range_attr_, 2)) return 0;
@@ -235,13 +337,56 @@ inline double LinearInteractionPairScore::evaluate_index(
   double delta_length = std::sqrt(delta_length_2);
   if (delta_length > x0) {  // attractive regime
     return  // decreases with slope k_attr_ as spheres get closer
-        (do_evaluate_index(m, pp, da, delta, delta_length, x0, k_attr_) +
+      (do_evaluate_index(ds0, ds1, da,
+                         delta, delta_length, x0, k_attr_) +
          offset);
   } else {  // repulsive regime, may be negative for small penetration
-    return (do_evaluate_index(m, pp, da, delta, delta_length, x0, -k_rep_) +
+    return (do_evaluate_index(ds0, ds1, da,
+                              delta, delta_length, x0, -k_rep_) +
             offset);
   }
 }
+
+inline double
+LinearInteractionPairScore::evaluate_index
+( Model *m,
+  const ParticleIndexPair &pp,
+  DerivativeAccumulator *da) const
+{
+  IMP_OBJECT_LOG;
+  algebra::Sphere3D const& s0(m->get_sphere(pp[0]));
+  algebra::Sphere3D const& s1(m->get_sphere(pp[1]));
+  algebra::Sphere3D* d_xyzrs=
+    m->access_sphere_derivatives_data();
+  algebra::Sphere3D& ds0( d_xyzrs[pp[0].get_index()] );
+  algebra::Sphere3D& ds1( d_xyzrs[pp[1].get_index()] );
+  return evaluate_index(s0, s1, ds0, ds1, da);
+ }
+
+inline double
+LinearInteractionPairScore::evaluate_indexes
+( Model *m,
+  const ParticleIndexPairs &pips,
+  DerivativeAccumulator *da,
+  unsigned int lower_bound,
+  unsigned int upper_bound) const
+{
+  IMP_OBJECT_LOG;
+  algebra::Sphere3D const* xyzrs=
+      m->access_spheres_data();
+  algebra::Sphere3D* d_xyzrs=
+    m->access_sphere_derivatives_data();
+  double ret = 0;
+  for (unsigned int i = lower_bound; i < upper_bound; ++i) {
+    int i0(pips[i][0].get_index());
+    int i1(pips[i][1].get_index());
+    ret += evaluate_index( xyzrs[i0], xyzrs[i1],
+                           d_xyzrs[i0], d_xyzrs[i1],
+                           da);
+  }
+  return ret;
+}
+
 
 #endif
 
@@ -282,21 +427,31 @@ class IMPNPCTRANSPORTEXPORT LinearWellPairScore : public PairScore {
 };
 
 #ifndef IMP_DOXYGEN
-inline double LinearWellPairScore::evaluate_index(
-    Model *m, const ParticleIndexPair &pp, DerivativeAccumulator *da) const {
+inline double
+LinearWellPairScore::evaluate_index
+( Model *m,
+  const ParticleIndexPair &pp,
+  DerivativeAccumulator *da) const
+{
   IMP_OBJECT_LOG;
-
-  algebra::Sphere3D s0 = m->get_sphere(pp[0]);
-  algebra::Sphere3D s1 = m->get_sphere(pp[1]);
+  algebra::Sphere3D const& s0 = m->get_sphere(pp[0]);
+  algebra::Sphere3D const& s1 = m->get_sphere(pp[1]);
+    algebra::Sphere3D* d_xyzrs=
+    m->access_sphere_derivatives_data();
+  algebra::Sphere3D& ds0( d_xyzrs[pp[0].get_index()] );
+  algebra::Sphere3D& ds1( d_xyzrs[pp[1].get_index()] );
   double x0 = (s0.get_radius() + s1.get_radius()) * rest_length_factor_;
   algebra::Vector3D delta = s0.get_center() - s1.get_center();
   double delta_length_2 = delta.get_squared_magnitude();
   double delta_length = std::sqrt(delta_length_2);
   if (delta_length > x0) {  // attractive regime
     return  // k_ > 0 = get spheres closer
-        do_evaluate_index(m, pp, da, delta, delta_length, x0, k_);
-  } else {  // -k_ < 0 = keep spheres apart
-    return do_evaluate_index(m, pp, da, delta, delta_length, x0, -k_);
+      do_evaluate_index(ds0, ds1, da,
+                        delta, delta_length, x0, k_);
+  } else {
+    return// -k_ < 0 = keep spheres apart
+      do_evaluate_index(ds0, ds1, da,
+                        delta, delta_length, x0, -k_);
   }
 }
 #endif
