@@ -29,8 +29,8 @@ class Tests(IMP.test.TestCase):
                 rs= IMP.npctransport.RelaxingSpring(m, pi)
                 print("RelaxingSpring:", rs)
                 eq_rest_length= rs.get_equilibrium_rest_length()
-                self.assertEqual(eq_rest_length,
-                                 RADIUS*2*REST_LENGTH_FACTOR)
+                self.assertAlmostEqual(eq_rest_length,
+                                       RADIUS*2*REST_LENGTH_FACTOR, delta=1e-6)
 
 
     def _create_cfg_file_with_fg_anchors(self, cfg_file, n_beads=2):
@@ -90,10 +90,11 @@ class Tests(IMP.test.TestCase):
                 T.append(op.time_ns)
                 # end-to-end and bond distances ought to be equal for two bead chains
                 if output.assignment.fgs[0].number_of_beads.value==2:
-                    self.assertEqual(op.mean_end_to_end_distance,
-                                     op.mean_bond_distance)
-                    self.assertEqual(op.mean_square_end_to_end_distance,
-                                     op.mean_square_bond_distance)
+                    self.assertAlmostEqual(op.mean_end_to_end_distance,
+                                           op.mean_bond_distance, delta=1e-6)
+                    self.assertAlmostEqual(op.mean_square_end_to_end_distance,
+                                           op.mean_square_bond_distance,
+                                           delta=1e-6)
         try:
             import pandas
         except ImportError:
