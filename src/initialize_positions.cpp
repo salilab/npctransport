@@ -115,7 +115,7 @@ void optimize_balls(const ParticlesTemp &ps,
   // relax the configuration, repeat
   double bd_temperature_orig = bd->get_temperature();
   double bd_time_step_orig = bd->get_maximum_time_step();
-  for ( double ramp_level = 0.01;
+  for ( double ramp_level = 0.001;
         ramp_level < 1.01 ;
         ramp_level = 1.4*ramp_level+.01 )
     {
@@ -126,8 +126,8 @@ void optimize_balls(const ParticlesTemp &ps,
     boost::ptr_vector< internal::TAMDChainScaleKRAII >
       tmp_disable_tamd_k;
     double radius_factor = ramp_level;
-    double rest_length_factor = (1.0/radius_factor) * // radius_factor*rest_length ~ 1.0 (so bond length is not affected by temporary scaling down of balls, only by ramping if is_rest_length_scaling)
-      (is_rest_length_scaling ? (.7 + .3 * ramp_level) : 1.0);
+    double rest_length_factor = (1.0/radius_factor) * // radius_factor*rest_length ~ 1.0 (so bond length is not affected by temporary scaling down of balls, only by the outcome of is_rest_length_scaling)
+      (is_rest_length_scaling ? (2.0 - ramp_level) : 1.0);
     // rescale particles radii temporarily
     for (unsigned int j = 0; j < ps.size(); ++j) {
       core::XYZR xyzr(ps[j]);
