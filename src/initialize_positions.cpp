@@ -330,7 +330,7 @@ void initialize_positions(SimulationData *sd,
       update_tamd_particles_coords_from_refs( sd->get_root() );
     }
 
-  // Optimize with obstacles + FGs now:
+  // Optimize with inflated obstacles + FGs now:
   if(obstacles.size()>0 && cur_particles.size()>0) {
     cur_particles += obstacles;
     boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> >
@@ -338,7 +338,7 @@ void initialize_positions(SimulationData *sd,
     // inflate obstacles temporarily:
     for (unsigned int j = 0; j < obstacles.size(); ++j) {
       core::XYZR xyzr(obstacles[j]);
-      double scaled_radius= xyzr.get_radius() * 2.0;
+      double scaled_radius= xyzr.get_radius() * 3.0;
       tmp_set_radii[j].reset
         ( new ScopedSetFloatAttribute
           (obstacles[j], core::XYZR::get_radius_key(), scaled_radius) );
