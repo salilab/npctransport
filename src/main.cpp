@@ -232,7 +232,7 @@ namespace {
     //bool read = prev_output.ParseFromIstream(&file);
     bool read(false);
     int fd= IMP_C_OPEN(prev_output_fname.c_str(),
-                       IMP_C_OPEN_FLAG(O_RDONLY));
+                       IMP_C_OPEN_FLAG(O_RDONLY) | IMP_C_OPEN_BINARY);
     if(fd!=-1){
       google::protobuf::io::FileInputStream fis(fd);
       google::protobuf::io::CodedInputStream cis(&fis);
