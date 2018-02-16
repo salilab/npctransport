@@ -127,7 +127,7 @@ void optimize_balls(const ParticlesTemp &ps,
       tmp_disable_tamd_k;
     double radius_factor = ramp_level;
     double rest_length_factor = (1.0/radius_factor) * // radius_factor*rest_length ~ 1.0 (so bond length is not affected by temporary scaling down of balls, only by the outcome of is_rest_length_scaling)
-      (is_rest_length_scaling ? (2.0 - ramp_level) : 1.0);
+      (is_rest_length_scaling ? ( 2.0 - 4 * std::pow(ramp_level-0.5,2) ) : 1.0);
     // rescale particles radii temporarily
     for (unsigned int j = 0; j < ps.size(); ++j) {
       core::XYZR xyzr(ps[j]);
@@ -160,11 +160,11 @@ void optimize_balls(const ParticlesTemp &ps,
     for (int k_simanneal = 0; k_simanneal < 5; ++k_simanneal)
       {
         double temperature =
-          (2.5 - 2 * (10*ramp_level + k_simanneal / 5.0) / 11.0) * bd_temperature_orig;
+          (2.5 - 2 * (10*ramp_level + k_simanneal / 4.0) / 11.0) * bd_temperature_orig;
         IMP::npctransport::internal::BDSetTemporaryTemperatureRAII
           bd_set_temporary_temperature(bd, temperature);
         double time_step =
-          (22 - 21 * (10*ramp_level + k_simanneal / 5.0) / 11.0) * bd_time_step_orig;
+          (22 - 21 * (10*ramp_level + k_simanneal / 4.0) / 11.0) * bd_time_step_orig;
         IMP::npctransport::internal::BDSetTemporaryTimeStepRAII
           bd_set_temporary_time_step(bd, time_step);
         bool done = false;
@@ -338,7 +338,7 @@ void initialize_positions(SimulationData *sd,
     // inflate obstacles temporarily:
     for (unsigned int j = 0; j < obstacles.size(); ++j) {
       core::XYZR xyzr(obstacles[j]);
-      double scaled_radius= xyzr.get_radius() * 3.0;
+      double scaled_radius= xyzr.get_radius() * 2.0;
       tmp_set_radii[j].reset
         ( new ScopedSetFloatAttribute
           (obstacles[j], core::XYZR::get_radius_key(), scaled_radius) );
