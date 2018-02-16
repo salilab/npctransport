@@ -45,8 +45,7 @@ def _add_nodes(node, cf, cdf, tf, types, radius, color, depth=0):
 #        tf_type_matches= filter(lambda x : re.match(x, tf_type), types)
 #        assert(len(tf_type_matches)<=1) # something weird happen if matches more than one FG type
         if (tf_type in types):
-            print(tf_type,"matches")
-            print("First child type", tf.get(children[0]).get_type_name())
+#            print(tf_type,"matches")
             for i in range(0, len(children) - 1):
                 cyl = node.add_child("cylinder", RMF.GEOMETRY)
                 cdf.get(cyl).set_static_rgb_color(RMF.Vector3(color[0],color[1],color[2]))
