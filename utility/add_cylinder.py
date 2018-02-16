@@ -7,6 +7,7 @@ from IMP.npctransport import *
 import sys
 import IMP.display
 import numpy as np
+import re
 
 def clone_rmf_static(in_name,out_name):
     return in_file, out_file
@@ -38,14 +39,19 @@ def _add_nodes(node, cf, cdf, tf, types, radius, color, depth=0):
     if len(children)==0:
         return ret
     if has_depth_with_site(node, 3) and tf.get_is(children[0]):
-        tf_type = tf.get(children[0]).get_type_name()
+        # search for any node that begins with tf_type (e.g. Nup100 -> Nup100_anchor, Nup100s, etc.)
+#        tf_type = tf.get(children[0]).get_type_name()
+        tf_type= tf.get(node).get_type_name()
+#        tf_type_matches= filter(lambda x : re.match(x, tf_type), types)
+#        assert(len(tf_type_matches)<=1) # something weird happen if matches more than one FG type
         if (tf_type in types):
-            #            print tf_type, "is of right type"
+            print(tf_type,"matches")
+            print("First child type", tf.get(children[0]).get_type_name())
             for i in range(0, len(children) - 1):
                 cyl = node.add_child("cylinder", RMF.GEOMETRY)
                 cdf.get(cyl).set_static_rgb_color(RMF.Vector3(color[0],color[1],color[2]))
                 ret.append((cyl, children[i], children[i+1]))
-                #                print "adding for", ret[-1], "depth", depth, "d3under?", has_depth_with_site(node, 3)
+#                print "adding for", ret[-1], "depth", depth, "d3under?", has_depth_with_site(node, 3)
                 cf.get(cyl).set_radius(radius)
     for c in children:
         ret += _add_nodes(c, cf, cdf, tf, types, radius, color, depth+1)
@@ -208,13 +214,14 @@ def main():
 
     _resize_sites(out_fh.get_root_node(), bf, IMP.get_float_flag("site_radius"))
     cylinders = []
-    for i, type in enumerate(fg_types):
+    for i, fg_type in enumerate(fg_types):
         color = IMP.display.get_display_color(i)
         rgb = [color.get_red(), color.get_green(), color.get_blue()]
-        cylinders += _add_nodes(out_fh.get_root_node(), cf, cdf, tf, [type], radius, rgb) # fg_color
+        print("Checking fg type", fg_type)
+        cylinders += _add_nodes(out_fh.get_root_node(), cf, cdf, tf, [fg_type], radius, rgb) # fg_color
         if(IMP.get_bool_flag("recolor_fgs")):
-            #            print "Recoloring",type, rgb
-            _recolor(out_fh.get_root_node(), tf, cdf, [type], rgb) # fg_color
+            #            print "Recoloring",fg_type, rgb
+            _recolor(out_fh.get_root_node(), tf, cdf, [fg_type], rgb) # fg_color
     # Clone and modify per-frame information:
     smooth_xyz_dict={}
     smooth_n_frames=IMP.get_int_flag("smooth_n_frames")
