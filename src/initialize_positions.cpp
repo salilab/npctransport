@@ -79,9 +79,8 @@ namespace {
     @param ps particles over which to optimize
     @param is_rest_length_scaling if true - gradually increase the size of
                                   chains rest lengths during optimization
-    @param short_init_factor a factor between >0 and 1 for decreasing
-                             the number of optimization cycles at each
-                             round
+    @param short_init_factor a factor >0 and 1 for decreasing (or increasing if >1)
+                             the number of optimization cycles at each round
 */
 void optimize_balls(const ParticlesTemp &ps,
                     bool is_rest_length_scaling,
@@ -100,17 +99,19 @@ void optimize_balls(const ParticlesTemp &ps,
                      IMP::ValueException);
     IMP_ALWAYS_CHECK(bd, "bd optimizer unspecified",
                      IMP::ValueException);
-    IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
-                     "short init factor should be in range (0,1]",
+    IMP_ALWAYS_CHECK(short_init_factor > 0 ,
+                     "short init factor should be positive",
                      IMP::ValueException);
   }
   if(save)
     IMP_LOG(VERBOSE, "BEGIN o_b(): Saver has been called so far " <<
       save->get_number_of_updates() << std::endl);
 
+  ParticlesTemp ps_opt =
+    get_optimizable_particles( ps );
   IMP_LOG(PROGRESS, "optimize_balls for n_particles="
-          << ps.size() << std::endl);
-
+          << ps.size() <<
+          " " << ps_opt.size() << " optimizables" << std::endl);
   // ramp temperature, particles radii, bond lengths, reset TAMD if needed
   // relax the configuration, repeat
   double bd_temperature_orig = bd->get_temperature();
@@ -119,85 +120,81 @@ void optimize_balls(const ParticlesTemp &ps,
         ramp_level < 1.01 ;
         ramp_level = 1.4*ramp_level+.01 )
     {
-    boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> >
-      tmp_set_radii( new boost::scoped_ptr<ScopedSetFloatAttribute>[ps.size()] );
-    boost::ptr_vector< internal::FGChainScaleRestLengthRAII >
-      tmp_scale_rest_length;
-    boost::ptr_vector< internal::TAMDChainScaleKRAII >
-      tmp_disable_tamd_k;
-    double radius_factor = ramp_level;
-    double rest_length_factor = (1.0/radius_factor) * // radius_factor*rest_length ~ 1.0 (so bond length is not affected by temporary scaling down of balls, only by the outcome of is_rest_length_scaling)
-      (is_rest_length_scaling ? ( 2.0 - 4 * std::pow(ramp_level-0.5,2) ) : 1.0);
-    // rescale particles radii temporarily
-    for (unsigned int j = 0; j < ps.size(); ++j) {
-      core::XYZR xyzr(ps[j]);
-      //      if(!xyzr.get_coordinates_are_optimized()){
-      //  continue;
-      //}
-      double scaled_radius= xyzr.get_radius() * radius_factor;
-      tmp_set_radii[j].reset
-        ( new ScopedSetFloatAttribute
-          (ps[j], core::XYZR::get_radius_key(), scaled_radius) );
-    }
-    // rescale bond length + TAMD (if needed ) temporarily for all chains
-    for (unsigned int j = 0; j < chains.size(); ++j) {
-      //      std::cout<< "optimize balls CHAIN: " << chains[j] << std::endl;
-      tmp_scale_rest_length.push_back
-        ( new internal::FGChainScaleRestLengthRAII(chains[j],
-                                                   rest_length_factor) );
-      internal::TAMDChain* as_tamd =
-        dynamic_cast< internal::TAMDChain* >(chains[j].get());
-      if(as_tamd){
-        tmp_disable_tamd_k.push_back
-          ( new internal::TAMDChainScaleKRAII(as_tamd, 0.0) );
+      typedef boost::scoped_ptr<ScopedSetFloatAttribute> t_ptr_ScopedSetFloatAttribute;
+      boost::scoped_array<t_ptr_ScopedSetFloatAttribute>
+        tmp_set_radii( new t_ptr_ScopedSetFloatAttribute[ ps_opt.size() ] );
+      boost::ptr_vector< internal::FGChainScaleRestLengthRAII > tmp_scale_rest_length;
+      boost::ptr_vector< internal::TAMDChainScaleKRAII > tmp_disable_tamd_k;
+      double radius_factor = ramp_level;
+      double rest_length_factor = (1.0/radius_factor) * // radius_factor*rest_length ~ 1.0 (so bond length is not affected by temporary scaling down of balls, only by the outcome of is_rest_length_scaling)
+        (is_rest_length_scaling ? ( 2.0 - 4 * std::pow(ramp_level-0.5,2) ) : 1.0);
+      // rescale particles radii temporarily
+      for (unsigned int j = 0; j < ps_opt.size(); ++j) {
+        core::XYZR xyzr(ps_opt[j]);
+        double scaled_radius= xyzr.get_radius() * radius_factor;
+        tmp_set_radii[j].reset
+          ( new ScopedSetFloatAttribute
+            (ps_opt[j], core::XYZR::get_radius_key(), scaled_radius) );
       }
-    }
-    IMP_LOG(PROGRESS, "Optimizing with radii at " << radius_factor << " of full"
-            << " and length factor " << rest_length_factor << std::endl
-            << " energy before = "
-            << bd->get_scoring_function()->evaluate(false) << std::endl);
-
-    for (int k_simanneal = 0; k_simanneal < 5; ++k_simanneal)
-      {
-        double temperature =
-          (2.5 - 2 * (10*ramp_level + k_simanneal / 4.0) / 11.0) * bd_temperature_orig;
-        IMP::npctransport::internal::BDSetTemporaryTemperatureRAII
-          bd_set_temporary_temperature(bd, temperature);
-        double time_step =
-          (22 - 21 * (10*ramp_level + k_simanneal / 4.0) / 11.0) * bd_time_step_orig;
-        IMP::npctransport::internal::BDSetTemporaryTimeStepRAII
-          bd_set_temporary_time_step(bd, time_step);
-        bool done = false;
-        IMP_OMP_PRAGMA(parallel num_threads(3)) {
-          IMP_OMP_PRAGMA(single) {
-            int n_bd_cycles =
-              std::ceil(30 * (5 * ramp_level + 2) * std::sqrt((double)ps.size()));
-            int actual_n_bd_cycles =
-              std::ceil(n_bd_cycles * short_init_factor) ;
-            double e_bd = bd->optimize( actual_n_bd_cycles );
-            IMP_LOG(PROGRESS,
-                    "Energy after bd is " << e_bd <<
-                    " at ramp level " << ramp_level << ", "
-                    << k_simanneal << std::endl);
-            if (debug) {
-              std::ostringstream oss;
-              oss << "Init after " << ramp_level << " " << k_simanneal;
-              if (save) {
-                bd->get_scoring_function()->evaluate(false);
-                save->update_always(oss.str());
+      // rescale bond length + TAMD (if needed ) temporarily for all chains
+      for (unsigned int j = 0; j < chains.size(); ++j) {
+        //      std::cout<< "optimize balls CHAIN: " << chains[j] << std::endl;
+        tmp_scale_rest_length.push_back
+          ( new internal::FGChainScaleRestLengthRAII(chains[j],
+                                                     rest_length_factor) );
+        internal::TAMDChain* as_tamd =
+          dynamic_cast< internal::TAMDChain* >(chains[j].get());
+        if(as_tamd){
+          tmp_disable_tamd_k.push_back
+            ( new internal::TAMDChainScaleKRAII(as_tamd, 0.0) );
+        }
+      }
+      IMP_LOG(PROGRESS, "Optimizing with radii at " << radius_factor << " of full"
+              << " and length factor " << rest_length_factor << std::endl
+              << " energy before = "
+              << bd->get_scoring_function()->evaluate(false) << std::endl);
+      // Simanneal:
+      for (int k_simanneal = 0; k_simanneal < 5; ++k_simanneal)
+        {
+          double temperature =
+            (2.5 - 2 * (10*ramp_level + k_simanneal / 4.0) / 11.0) * bd_temperature_orig;
+          IMP::npctransport::internal::BDSetTemporaryTemperatureRAII
+            bd_set_temporary_temperature(bd, temperature);
+          double time_step =
+            (22 - 21 * (10*ramp_level + k_simanneal / 4.0) / 11.0) * bd_time_step_orig;
+          IMP::npctransport::internal::BDSetTemporaryTimeStepRAII
+            bd_set_temporary_time_step(bd, time_step);
+          bool done = false;
+          IMP_OMP_PRAGMA(parallel num_threads(3)) {
+            IMP_OMP_PRAGMA(single) {
+              int n_bd_cycles =
+                std::ceil(30 * (5 * ramp_level + 2) * std::sqrt((double)ps_opt.size()));
+              int actual_n_bd_cycles =
+                std::ceil(n_bd_cycles * short_init_factor) ;
+              double e_bd = bd->optimize( actual_n_bd_cycles );
+              IMP_LOG(PROGRESS,
+                      "Energy after bd is " << e_bd <<
+                      " at ramp level " << ramp_level << ", "
+                      << k_simanneal << std::endl);
+              if (debug) {
+                std::ostringstream oss;
+                oss << "Init after " << ramp_level << " " << k_simanneal;
+                if (save) {
+                  bd->get_scoring_function()->evaluate(false);
+                  save->update_always(oss.str());
+                }
+                IMP_LOG(VERBOSE, "updating RMF " << oss.str() << std::endl);
               }
-              IMP_LOG(VERBOSE, "updating RMF " << oss.str() << std::endl);
             }
           }
-        }
-        if (done) break;
-      }  // for k_simanneal
-  } // for i
-  std::cout << "Energy after optimize_balls() is " <<
-          bd->get_scoring_function()->evaluate(false) << std::endl;
+          if (done) break;
+        }  // for k_simanneal
+    } // for i
+  std::cout << "Energy after optimize_balls() using custom scoring function is " <<
+    bd->get_scoring_function()->evaluate(false) << std::endl;
   if(save)
     IMP_LOG(VERBOSE, "END o_b(): Saver has been called so far " <<
-      save->get_number_of_updates() << std::endl);
+            save->get_number_of_updates() << std::endl);
 }
 
 
@@ -273,14 +270,14 @@ void initialize_positions(SimulationData *sd,
   ParticlesTemp obstacles = sd->get_obstacle_particles();
   typedef boost::unordered_set<core::ParticleType> ParticleTypeSet;
   ParticleTypeSet const& fg_types = sd->get_fg_chain_types();
-  ParticlesTemp cur_particles; // = obstacles;
+  ParticlesTemp processed_fg_beads;
   ParticlesTemp beads = sd->get_beads(); // that should include obstacles
   for(ParticleTypeSet::const_iterator
         it = fg_types.begin(); it != fg_types.end(); it++)
     {
       atom::Hierarchy cur_fg_root =  sd->get_root_of_type(*it);
       ParticlesTemp cur_fg_beads = atom::get_leaves( cur_fg_root );
-      cur_particles += cur_fg_beads;
+      ParticlesTemp cur_particles = obstacles + cur_fg_beads;
       // pin all other particles:
       std::sort(beads.begin(), beads.end());
       std::sort(cur_particles.begin(), cur_particles.end());
@@ -328,17 +325,18 @@ void initialize_positions(SimulationData *sd,
                      PROGRESS,
                      debug, short_init_factor);
       update_tamd_particles_coords_from_refs( sd->get_root() );
+      processed_fg_beads += cur_fg_beads;
     }
 
   // Optimize with inflated obstacles + FGs now:
-  if(obstacles.size()>0 && cur_particles.size()>0) {
-    cur_particles += obstacles;
+  ParticlesTemp cur_particles = obstacles + processed_fg_beads;
+  if(cur_particles.size()>0) {
     boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> >
       tmp_set_radii( new boost::scoped_ptr<ScopedSetFloatAttribute>[obstacles.size()] );
     // inflate obstacles temporarily:
     for (unsigned int j = 0; j < obstacles.size(); ++j) {
       core::XYZR xyzr(obstacles[j]);
-      double scaled_radius= xyzr.get_radius() * 2.0;
+      double scaled_radius= xyzr.get_radius() * 1.5;
       tmp_set_radii[j].reset
         ( new ScopedSetFloatAttribute
           (obstacles[j], core::XYZR::get_radius_key(), scaled_radius) );
