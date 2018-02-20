@@ -1,5 +1,5 @@
 /**
-1;95;0c *  \file npctransport/Statistics.h
+ *  \file npctransport/Statistics.h
  *  \brief statistics and order parameters about the simulations
  *         that is associated with a SimulationData object
  *
