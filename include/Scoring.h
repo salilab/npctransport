@@ -43,6 +43,7 @@ class LinearWellPairScore;
 class HarmonicSpringSingletonScore;
 //class FGChain;
 
+//! Scoring associated with a SimulationData object
 class IMPNPCTRANSPORTEXPORT Scoring: public Object
 {
  private:

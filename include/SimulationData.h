@@ -43,6 +43,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 // Version 4.0 - more properly handle various suffixes of FG chains (=different types of beads)
 #define IMPNPCTRANSPORT_VERSION 4.0
 
+//! Store all parameters for a simulation
 class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  private:
   // params

@@ -21,6 +21,7 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+//! Score for a slab with a toroidal pore
 class IMPNPCTRANSPORTEXPORT SlabWithToroidalPorePairScore
 : public PairScore
 {

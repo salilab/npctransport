@@ -57,6 +57,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 class SimulationData; // fwd incomplete declaration
 
+//! Statistics and order parameters about the simulations
 class IMPNPCTRANSPORTEXPORT Statistics : public Object {
  private:
   UncheckedWeakPointer<SimulationData> owner_sd_;

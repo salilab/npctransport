@@ -18,6 +18,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 
+//! Score that biases particles to go down the Z axis
 class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
     : public SingletonScore {
  private:

@@ -19,6 +19,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 
+//! Factory that produces diffusing particles with specified attributes
 class IMPNPCTRANSPORTEXPORT ParticleFactory : public IMP::Object {
  public:
   /** The simulation data whose model is associated with new particle

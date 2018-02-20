@@ -21,11 +21,7 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 
-/* IMP_FUNCTOR_DISTANCE_PAIR_SCORE(FunctorLinearSoftSpherePairScore, */
-/*                                 LinearSoftSphereScore, */
-/*                                 (double k, */
-/*                                  std::string name="LinearSSPairScore%1%"),
- * (k)); */
+//! Score a pair of particles
 class FunctorLinearSoftSpherePairScore
     : public
 //#ifndef SWIG
@@ -48,6 +44,7 @@ class FunctorLinearSoftSpherePairScore
 
 typedef score_functor::SphereDistance<LinearInteraction> LinearInteractionScore;
 
+//! Score a pair of particles
 class FunctorLinearInteractionPairScore
     : public
 //#ifndef SWIG

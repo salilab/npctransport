@@ -17,6 +17,7 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+//! Load sites data from an RMF file
 class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
     : public rmf::HierarchyLoadLink {
   WeakPointer<SimulationData> sd_;
@@ -68,6 +69,7 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   static const char *get_name() {return "npctransport load";}
 };
 
+//! Save sites data to an RMF file
 class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
     : public rmf::HierarchySaveLink {
   WeakPointer<SimulationData> sd_;

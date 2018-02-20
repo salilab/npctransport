@@ -14,6 +14,7 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+//! Exclude particles from the given range of z coordinates
 class IMPNPCTRANSPORTEXPORT ExcludeZRangeSingletonScore
     : public SingletonScore {
  private:
