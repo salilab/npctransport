@@ -33,9 +33,11 @@ struct IMPNPCTRANSPORTEXPORT SitesPairScoreParameters {
   /** initiates structure based on passed range and k params 
 
       @param range range of attraction in A
-      @param k_coefficient k in units of [kCal/mol/A] or [kCal/mol/A^2] (for isotropic and anisotropic, respectively - isotropic when either sigma_max is 0.0)
-      @param sigma1_max maximal angle for site 1 [0.0 if isotropic interaction]
-      @param sigma2_max maximal angle for site 2 [0.0 if isotropic interaction]
+      @param k_coefficient k in units of kCal/mol/A or kCal/mol/A^2 (for
+             isotropic and anisotropic, respectively - isotropic when
+	     either sigma_max is 0.0)
+      @param sigma1_max maximal angle for site 1 (0.0 if isotropic interaction)
+      @param sigma2_max maximal angle for site 2 (0.0 if isotropic interaction)
    */
   SitesPairScoreParameters(double range, double k_coefficient, double sigma1_max_deg=0.0, double sigma2_max_deg=0.0)
   { 
