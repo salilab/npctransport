@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Add cylinders of a given radius to the passed file."""
+from __future__ import print_function
 import IMP
 import RMF
 import IMP.rmf
@@ -109,9 +110,35 @@ def _smooth(node, tf, rff, xyz_dict, n=10, is_write=True):
 def _recolor(node, tf, cf, types, color):
     children= node.get_children()
     if tf.get_is(node):
-        if tf.get(node).get_type_name() in types:
+        node_type_name= tf.get(node).get_type_name()
+        if node_type_name in types:
             cd= cf.get(node)
             cd.set_static_rgb_color(RMF.Vector3(color[0],color[1],color[2]))
+            subtypes=set()
+            for c in children:
+                if not tf.get_is(c):
+                    continue
+                c_type_name= tf.get(c).get_type_name()
+                if re.match(node_type_name, c_type_name):
+                    subtypes.add(c_type_name)
+            nst= len(subtypes)
+            subtype2color={}
+            for i, subtype in enumerate(subtypes):
+                scale= (i+1.0)/nst
+                subtype2color[subtype]= [scale*x for x in color]
+#                print("recolor", subtype, i, scale, subtype2color[subtype])
+#            print("subtype2color", subtype2color)
+            for c in children:
+                if not tf.get_is(c):
+                    continue
+                c_subtype= tf.get(c).get_type_name()
+#                print("Color", c_subtype, " in ", subtype2color[c_subtype])
+                _recolor(c,
+                         tf,
+                         cf,
+                         [c_subtype],
+                         subtype2color[c_subtype])
+            return
     for c in children:
 #        print "recolor",c,color
         _recolor(c, tf, cf, types, color)
@@ -135,7 +162,7 @@ def _get_fg_and_floater_types(ref_output):
             FILE=open(ref_output,"rb")
             output.ParseFromString(FILE.read())
     except:
-        print "Couldn't read '" + ref_output + "'"
+        print("Couldn't read '" + ref_output + "'")
         raise
     if(output == None):
         fg_types = fg_types + [ "Nup57_16copies_chimera",
@@ -158,15 +185,15 @@ def _get_fg_and_floater_types(ref_output):
         a = output.assignment
         for fg in a.fgs:
             fg_types.append(fg.type)
-            print "Added fg type", fg.type
+            print("Added fg type", fg.type)
         for floater in a.floaters:
             if(floater.interactions.value>0):
                 kap_types.append(floater.type)
             else:
                 inert_types.append(floater.type)
-    print "FGs:", fg_types
-    print "Kaps:", kap_types
-    print "Inerts:", inert_types
+    print("FGs:", fg_types)
+    print("Kaps:", kap_types)
+    print("Inerts:", inert_types)
     return fg_types, kap_types, inert_types
 
 
@@ -197,7 +224,7 @@ def main():
     RMF.clone_file_info(in_fh, out_fh)
     RMF.clone_hierarchy(in_fh, out_fh)
     RMF.clone_static_frame(in_fh, out_fh)
-    print "opened", in_fh.get_name()
+    print("opened", in_fh.get_name())
     cf = RMF.CylinderFactory(out_fh)
     rff = RMF.ReferenceFrameFactory(out_fh)
     tf = RMF.TypedFactory(out_fh)
@@ -225,7 +252,7 @@ def main():
     smooth_xyz_dict={}
     smooth_n_frames=IMP.get_int_flag("smooth_n_frames")
     skip_n_frames=IMP.get_int_flag("skip_n_frames")
-    print "Skip interval:", skip_n_frames, "frames"
+    print("Skip interval:", skip_n_frames, "frames")
     for f_id, f in enumerate(in_fh.get_frames()):
         is_write= f_id % skip_n_frames == 0
         in_fh.set_current_frame(f)
