@@ -11,6 +11,7 @@ RADIUS= 7
 REST_LENGTH_FACTOR= 1.75
 TAU_NS= 1.0
 NS_PER_CHUNK= 0.5*TAU_NS
+BACKBONE_K= 0.5
 
 class Tests(IMP.test.TestCase):
 
@@ -28,9 +29,19 @@ class Tests(IMP.test.TestCase):
             if IMP.npctransport.RelaxingSpring.get_is_setup(m, pi):
                 rs= IMP.npctransport.RelaxingSpring(m, pi)
                 print("RelaxingSpring:", rs)
-                eq_rest_length= rs.get_equilibrium_rest_length()
-                self.assertAlmostEqual(eq_rest_length,
-                                       RADIUS*2*REST_LENGTH_FACTOR, delta=1e-6)
+                eq_rest_length_factor= rs.get_equilibrium_rest_length_factor()
+                self.assertAlmostEqual(eq_rest_length_factor,
+                                       REST_LENGTH_FACTOR, delta=1e-6)
+                expected_rest_length= rs.get_equilibrium_rest_length_factor() * IMP.core.XYZR(m,pi).get_radius() * 2.0
+                actual_rest_length= rs.get_rest_length()
+                print("Equilibrium rest length expected", expected_rest_length, "A")
+                print("Actual rest length", actual_rest_length, "A")
+                allowed_delta= math.sqrt(3.0/BACKBONE_K) # delta G ~ BACKBONE_K*delta^2 kcal/mol, so bound at 3.0 kcal/mol
+                print("Allowed deviation within order of 3 kcal/mol", allowed_delta, "A")
+                self.assertAlmostEqual(expected_rest_length,
+                                       actual_rest_length,
+                                       delta= allowed_delta)
+
 
 
     def _create_cfg_file_with_fg_anchors(self, cfg_file, n_beads=2):
@@ -50,7 +61,7 @@ class Tests(IMP.test.TestCase):
         config.nonspecific_k.lower=.000075
         config.box_is_on.lower=1
         config.box_side.lower=10000
-        config.backbone_k.lower=0.5 # kcal/mol/A^2
+        config.backbone_k.lower=BACKBONE_K # kcal/mol/A^2
         config.excluded_volume_k.lower=2 # kcal/mol/A
         config.is_backbone_harmonic=1
         config.backbone_tau_ns.lower= TAU_NS
@@ -150,16 +161,22 @@ class Tests(IMP.test.TestCase):
 #                                            self.get_tmp_file_name("out.rmf"));
         # verify that anchors remain intact during optimization
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
-            short_init_factor=0.001
+            short_init_factor=0.0001
             print("short position initialization in non-fast mode")
         else:
             short_init_factor=1.0
         IMP.npctransport.initialize_positions(sd,[],False,short_init_factor)
 
-        print("Equilibrating")
+        print("Energy before optimization:",
+              sd.get_bd().get_scoring_function().evaluate(False))
+
+        print("Optimizing")
         print("dT %.1f fs" % sd.get_bd().get_maximum_time_step())
         sd.get_bd().optimize(100000)
         print()
+
+        print("Energy after optimization:",
+              sd.get_bd().get_scoring_function().evaluate(False))
 
         print("Report particles:")
         self._do_particles_report(sd.get_model(), sd.get_beads())

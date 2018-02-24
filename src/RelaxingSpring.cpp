@@ -10,6 +10,7 @@
 #include <IMP/npctransport/RelaxingSpring.h>
 #include <IMP/exception.h>
 #include <IMP/check_macros.h>
+#include <IMP/core/XYZR.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
@@ -19,17 +20,26 @@ RelaxingSpring::do_setup_particle
   ParticleIndex pi,
   ParticleIndex bonded_pi0,
   ParticleIndex bonded_pi1,
-  double equilibrium_rest_length,
+  double equilibrium_rest_length_factor,
   double rest_length_diffusion_coefficient )
 {
+  IMP_ALWAYS_CHECK(IMP::core::XYZR::get_is_setup(m, bonded_pi0) &&
+                   IMP::core::XYZR::get_is_setup(m, bonded_pi1),
+                   "can only bond particles that are of xyzr type",
+                   IMP::ValueException);
   m->add_attribute(get_bonded_particle_0_key(), pi,
 		   bonded_pi0);
   m->add_attribute(get_bonded_particle_1_key(), pi,
 		   bonded_pi1);
-  m->add_attribute(get_equilibrium_rest_length_key(), pi,
-		   equilibrium_rest_length);
+  m->add_attribute(get_equilibrium_rest_length_factor_key(), pi,
+		   equilibrium_rest_length_factor);
+  IMP::core::XYZR xyzr0(m, bonded_pi0);
+  IMP::core::XYZR xyzr1(m, bonded_pi1);
+  double r0= xyzr0.get_radius();
+  double r1= xyzr0.get_radius();
+  double init_rest_length= equilibrium_rest_length_factor * (r0+r1);
   m->add_attribute(get_rest_length_key(), pi,
-		   equilibrium_rest_length); // initially equal by default
+		   init_rest_length); // initially at equilibrium by default
   m->add_attribute(get_rest_length_diffusion_coefficient_key(), pi,
 		   rest_length_diffusion_coefficient);
 }
@@ -47,9 +57,9 @@ RelaxingSpring::get_bonded_particle_1_key(){
 }
 
 FloatKey
-RelaxingSpring::get_equilibrium_rest_length_key()
+RelaxingSpring::get_equilibrium_rest_length_factor_key()
 {
-  static FloatKey fk("npctransport.spring equilibrium rest_length key");
+  static FloatKey fk("npctransport.spring equilibrium rest length factor key");
   return fk;
 }
 
@@ -71,8 +81,8 @@ void
 RelaxingSpring::show
 ( std::ostream &out ) const
 {
-  out << "RelaxingSpring equilibrium rest length = "
-      << get_equilibrium_rest_length()
+  out << "RelaxingSpring equilibrium rest length factor = "
+      << get_equilibrium_rest_length_factor()
       << "; rest length = "
       << get_rest_length()
       << "; rest length diffusion_coefficient = "

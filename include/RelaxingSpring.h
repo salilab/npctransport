@@ -33,14 +33,14 @@ RelaxingSpring : public Decorator
       @param pi the particle index
       @param bonded_pi0 particle on first side of spring
       @param bonded_pi1 particle on second side of spring
-      @param equilibrium_rest_length the rest length of the spring at equilibrium
+      @param equilibrium_rest_length_factor the rest length factor of the spring at equilibrium (relative to sum of the radii of the bonded particles)
       @param rest_length_diffusion_coefficient the diffusion coefficient for the rest length
   */
   static void do_setup_particle(IMP::Model* m,
                                 ParticleIndex pi,
                                 ParticleIndex bonded_pi0,
                                 ParticleIndex bonded_pi1,
-                                double equilibrium_rest_length,
+                                double equilibrium_rest_length_factor,
                                 double rest_length_diffusion_coefficient);
 
 
@@ -56,20 +56,20 @@ RelaxingSpring : public Decorator
       @param pi the particle index
       @param bonded_pi0 particle on first side of spring
       @param bonded_pi1 particle on second side of spring
-      @param equilibrium_rest_length the rest length of the spring at equilibrium
+      @param equilibrium_rest_length_factor the rest length factor of the spring at equilibrium (relative to sum of the radii of the bonded particles)
       @param rest_length_diffusion_coefficient the diffusion
              coefficient for the rest length
        */
   IMP_DECORATOR_SETUP_4(RelaxingSpring,
                         ParticleIndex, bonded_pi0,
                         ParticleIndex, bonded_pi1,
-                        double, equilibrium_rest_length,
+                        double, equilibrium_rest_length_factor,
                         double, rest_length_diffusion_coefficient);
 
   //! Return true if the particle is an instance of an Transporting
   static bool get_is_setup(Model *m, ParticleIndex pi) {
     return
-      m->get_has_attribute(get_equilibrium_rest_length_key(), pi)
+      m->get_has_attribute(get_equilibrium_rest_length_factor_key(), pi)
       && m->get_has_attribute(get_rest_length_key(), pi);
   }
 
@@ -77,8 +77,8 @@ RelaxingSpring : public Decorator
 
   static ParticleIndexKey get_bonded_particle_1_key();
 
-  //! get decorator key for spring equilibrium rest length
-  static FloatKey get_equilibrium_rest_length_key();
+  //! get decorator key for spring equilibrium rest length factor
+  static FloatKey get_equilibrium_rest_length_factor_key();
 
   //! get decorator key for spring rest length
   static FloatKey get_rest_length_key();
@@ -105,8 +105,8 @@ RelaxingSpring : public Decorator
   }
 
 
-  IMP_DECORATOR_GET_SET(equilibrium_rest_length,
-			get_equilibrium_rest_length_key(),
+  IMP_DECORATOR_GET_SET(equilibrium_rest_length_factor,
+			get_equilibrium_rest_length_factor_key(),
 			Float, Float);
 
   IMP_DECORATOR_GET_SET(rest_length,

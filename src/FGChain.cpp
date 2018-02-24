@@ -112,18 +112,12 @@ FGChain::set_rest_length_factor
   // unlike with the older LinearWellPairScore, which stored the rest length factor internally
   unsigned int n(get_number_of_beads());
   for(unsigned int i=0; i < n-1; i++){
-    IMP_USAGE_CHECK(core::XYZR::get_is_setup(get_bead(i)) &&
-                    core::XYZR::get_is_setup(get_bead(i+1)),
-                    "chain beads are expected to be decorated with XYZR");
     IMP_USAGE_CHECK(RelaxingSpring::get_is_setup(get_bead(i)),
                     "If first bead in chain is decorated with a relaxing"
                     " spring, then all beads except last are");
-    core::XYZR xyzr_i(get_bead(i));
-    core::XYZR xyzr_ii(get_bead(i+1));
-    double sr= xyzr_i.get_radius()+xyzr_ii.get_radius();
-    double rest_length= rlf * sr;
+    //    std::cout << "FGChain::set_rest_length_factor setting rest length factor to " << rlf << std::endl;
     RelaxingSpring rs_i(get_bead(i));
-    rs_i.set_equilibrium_rest_length(rest_length);
+    rs_i.set_equilibrium_rest_length_factor(rlf);
   }
 }
 
@@ -284,7 +278,7 @@ FGChain* create_fg_chain
     ret_chain = new FGChain(root);
     if(sd->get_is_backbone_harmonic()){
       // set springs between consecutive chain beads from "from" beads
-      double rest_length= fg_data.rest_length_factor().value() * (radius*2.0);
+      double rest_length_factor(fg_data.rest_length_factor().value());
       double tau_fs(sd->get_backbone_tau_ns()*(1e+6));
       double rest_length_diffusion_coefficient=
         atom::get_kt(sd->get_temperature_k())/(tau_fs*sd->get_scoring()->get_default_backbone_k()); // diffuse by kT/K per tau
@@ -293,7 +287,7 @@ FGChain* create_fg_chain
 	  (P[i],
 	   P[i]->get_index(),
 	   P[i+1]->get_index(),
-	   rest_length,
+	   rest_length_factor,
 	   rest_length_diffusion_coefficient); // TODO: set this parameter properly
       }
     }

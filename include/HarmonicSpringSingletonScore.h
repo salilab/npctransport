@@ -110,7 +110,8 @@ HarmonicSpringSingletonScore
   double delta_length = std::sqrt(delta_length_2);
   double dDelta = delta_length - rest_delta_length; // positive if spring is extended, negative if compressed
   double scoreDelta = 2 * 0.5 * k1_ * dDelta * dDelta; // x2 because each particle applies force on the spring independently in this model of a relaxing spring
-  double eq_rest_length= s.get_equilibrium_rest_length();
+  double eq_rest_length= s.get_equilibrium_rest_length_factor()
+    * (s0.get_radius() + s1.get_radius());
   double dEq= rest_delta_length - eq_rest_length; // positive is rest length is stretched relative to equilibrium rest length
   double scoreEq = 0.5 * k2_ * dEq * dEq;
   bool is_tiny_rest_length= (rest_delta_length<0.1*eq_rest_length && rest_delta_length<1.0);
