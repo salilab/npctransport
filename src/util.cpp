@@ -39,7 +39,7 @@ void get_protobuf_configuration_from_text
   io::IstreamInputStream isis_txt(&ifs_txt);
   google::protobuf::TextFormat::Parse(&isis_txt, &config);
   ifs_txt.close();
-  std::ofstream ofs_pb(config_pb.c_str());
+  std::ofstream ofs_pb(config_pb.c_str(), std::ios::binary);
   config.SerializeToOstream(&ofs_pb);
   ofs_pb.close();
 }
