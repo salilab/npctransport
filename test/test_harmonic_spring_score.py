@@ -13,6 +13,7 @@ import test_util
 
 radius=7
 
+
 def do_particles_report(m, pis):
     for pi in pis:
         print("Particle index",pi)
@@ -135,12 +136,11 @@ class ConeTests(IMP.test.TestCase):
 
         # Check that relaxation time is indeed on the order of tau
         # = autocorrelation decays exponentially with time/tau
-        try:
-            import pandas
-        except ImportError:
-            print("WARNING: pandas module not installed, skipping autocorrelation test")
+        if not test_util.check_import_pandas_with_series_autocorr():
+            print("WARNING: pandas module not installed or too old, skipping autocorrelation test")
             return
-        Rp= pandas.Series(R)
+        import pandas as pd
+        Rp= pd.Series(R)
         dT_fs= inner*bd.get_maximum_time_step()
         i= int(round(tau_fs/dT_fs))
         print("i", i, "tau_fs/dT_fs", tau_fs/dT_fs, "tau_ns", tau_ns, "dT_ns", dT_fs*1E-6)

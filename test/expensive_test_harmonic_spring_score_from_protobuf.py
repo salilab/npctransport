@@ -106,35 +106,34 @@ class Tests(IMP.test.TestCase):
                     self.assertAlmostEqual(op.mean_square_end_to_end_distance,
                                            op.mean_square_bond_distance,
                                            delta=1e-6)
-        try:
-            import pandas
-        except ImportError:
-            print("WARNING: pandas module not installed, skipping autocorrelation test")
+        if not test_util.check_import_pandas_with_series_autocorr():
+            print("WARNING: pandas module not installed or too old, skipping autocorrelation test")
             return
+        import pandas as pd
         i_tau= int(max(round(TAU_NS/NS_PER_CHUNK), 1))
         max_i= min(10*i_tau, len(E))
         print("time[ns]  corr-particles  corr-bond-rest-length")
         for i in range(max_i):
             mean_ACR=0.0
             for j in range(R.shape[1]):
-                mean_ACR= mean_ACR+pandas.Series(R[:,j]).autocorr(i) / R.shape[1]
+                mean_ACR= mean_ACR+pd.Series(R[:,j]).autocorr(i) / R.shape[1]
             print("%8.3f  " % T[i], \
-                      "%10.3f  " % pandas.Series(B).autocorr(i), \
-                      "%10.3f  " % pandas.Series(E).autocorr(i), \
+                      "%10.3f  " % pd.Series(B).autocorr(i), \
+                      "%10.3f  " % pd.Series(E).autocorr(i), \
                       "%10.3f  " % mean_ACR)
         if len(E)>i_tau:
             self.assertAlmostEqual(
-                pandas.Series(R[:,0]).autocorr(i_tau),
+                pd.Series(R[:,0]).autocorr(i_tau),
                 math.exp(-1),
                 delta=0.07)
         if len(E)>2*i_tau:
             self.assertAlmostEqual(
-                pandas.Series(R[:,0]).autocorr(2*i_tau),
+                pd.Series(R[:,0]).autocorr(2*i_tau),
                 math.exp(-2),
                 delta=0.07)
         if len(E)>5*i_tau:
             self.assertAlmostEqual(
-                pandas.Series(R[:,0]).autocorr(5*i_tau),
+                pd.Series(R[:,0]).autocorr(5*i_tau),
                 math.exp(-5),
                 delta=0.07)
 

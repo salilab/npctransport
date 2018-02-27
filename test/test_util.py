@@ -205,3 +205,15 @@ def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
         sd.get_statistics().update( timer, nframes - nframes_per_chunk ) # TODO: timer?
         nframes_left = nframes_left - nframes_per_chunk
     return np.array(R)
+
+def check_import_pandas_with_series_autocorr():
+    '''
+    import pandas, return true if succesful and pandas.Series
+    has an autocorr() method, return false otherwise
+    '''
+    try:
+        import pandas as pd
+    except ImportError:
+        return False
+    autocorr_func = getattr(pd.Series, "autocorr", None)
+    return callable(autocorr_func)
