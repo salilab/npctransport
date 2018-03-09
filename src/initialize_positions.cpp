@@ -127,7 +127,7 @@ void optimize_balls(const ParticlesTemp &ps,
       boost::ptr_vector< internal::TAMDChainScaleKRAII > tmp_disable_tamd_k;
       double radius_factor = ramp_level;
       double rest_length_factor = (1.0/radius_factor) * // radius_factor*rest_length ~ 1.0 (so bond length is not affected by temporary scaling down of balls, only by the outcome of is_rest_length_scaling)
-        (is_rest_length_scaling ? ( 2.0 - 4 * std::pow(ramp_level-0.5,2) ) : 1.0);
+        (is_rest_length_scaling ? ( 0.25 + 0.75 * std::pow(ramp_level,0.75) ) : 1.0);
       // rescale particles radii temporarily
       for (unsigned int j = 0; j < ps_opt.size(); ++j) {
         core::XYZR xyzr(ps_opt[j]);
@@ -228,10 +228,11 @@ void initialize_positions(SimulationData *sd,
                           bool debug,
                           double short_init_factor,
                           bool is_disable_randomize) {
+  const bool is_rest_length_scaling(true);
   IMP_FUNCTION_LOG;
   sd->set_was_used(true);
-  IMP_ALWAYS_CHECK(short_init_factor > 0 && short_init_factor <= 1.0,
-                   "short init factor should be in range (0,1]",
+  IMP_ALWAYS_CHECK(short_init_factor > 0,
+                   "short init factor should be positive",
                    IMP::ValueException);
   if(!is_disable_randomize){
     randomize_particles(sd->get_beads(), sd->get_box());
@@ -317,8 +318,19 @@ void initialize_positions(SimulationData *sd,
           false /* no non-bonded attr potentials yet */);
       IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
         set_temporary_scoring_function( sd->get_bd(), sf );
+      // inflate obstacles temporarily:
+      boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> >
+        tmp_set_radii( new boost::scoped_ptr<ScopedSetFloatAttribute>[obstacles.size()] );
+      for (unsigned int j = 0; j < obstacles.size(); ++j) {
+        core::XYZR xyzr(obstacles[j]);
+        double scaled_radius= xyzr.get_radius() * 2.0;
+        tmp_set_radii[j].reset
+          ( new ScopedSetFloatAttribute
+            (obstacles[j], core::XYZR::get_radius_key(), scaled_radius) );
+      }
+
       optimize_balls(cur_particles,
-                     true /*is_scale_rest_length*/,
+                     is_rest_length_scaling,
                      sd->get_rmf_sos_writer(),
                      sd->get_bd(),
                      sd->get_scoring()->get_fg_chains(),
@@ -359,7 +371,7 @@ void initialize_positions(SimulationData *sd,
     IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
       set_temporary_scoring_function( sd->get_bd(), sf );
     optimize_balls(cur_particles,
-                   true /*is_scale_rest_length*/,
+                   is_rest_length_scaling,
                    sd->get_rmf_sos_writer(),
                    sd->get_bd(),
                    sd->get_scoring()->get_fg_chains(),
@@ -383,7 +395,7 @@ void initialize_positions(SimulationData *sd,
     IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
       set_temporary_scoring_function( sd->get_bd(), sf );
     optimize_balls(sd->get_beads(),
-                   true /*scale rest length*/,
+                   is_rest_length_scaling,
                    sd->get_rmf_sos_writer(),
                    sd->get_bd(),
                    sd->get_scoring()->get_fg_chains(),
