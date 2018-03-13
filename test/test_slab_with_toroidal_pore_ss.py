@@ -38,7 +38,7 @@ def get_surface_distance_from_axis_aligned_ellipsoid(sphere, origin, rv, rh):
     dv2= dXY2 + dZ2 + EPS
     sinTheta2=dXY2/dv2
     cosTheta2=dZ2/dv2
-    cur_r = math.sqrt(rv2*cosTheta2 + rh2*sinTheta2)
+    cur_r = math.sqrt(rv**2*cosTheta2 + rh**2*sinTheta2)
     dv=math.sqrt(dv2)
     return dv-cur_r-sphere.get_radius()
 
