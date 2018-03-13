@@ -122,19 +122,19 @@ void optimize_balls(const ParticlesTemp &ps,
     {
       typedef boost::scoped_ptr<ScopedSetFloatAttribute> t_ptr_ScopedSetFloatAttribute;
       boost::scoped_array<t_ptr_ScopedSetFloatAttribute>
-        tmp_set_radii( new t_ptr_ScopedSetFloatAttribute[ ps_opt.size() ] );
+        tmp_set_radii( new t_ptr_ScopedSetFloatAttribute[ ps.size() ] );
       boost::ptr_vector< internal::FGChainScaleRestLengthRAII > tmp_scale_rest_length;
       boost::ptr_vector< internal::TAMDChainScaleKRAII > tmp_disable_tamd_k;
       double radius_factor = ramp_level;
       double rest_length_factor = (1.0/radius_factor) * // radius_factor*rest_length ~ 1.0 (so bond length is not affected by temporary scaling down of balls, only by the outcome of is_rest_length_scaling)
-        (is_rest_length_scaling ? ( 0.05 + 0.95 * std::pow(ramp_level,0.75) ) : 1.0);
+        (is_rest_length_scaling ? ( 0.5 + 0.5 * std::pow(ramp_level,0.5) ) : 1.0);
       // rescale particles radii temporarily
-      for (unsigned int j = 0; j < ps_opt.size(); ++j) {
-        core::XYZR xyzr(ps_opt[j]);
+      for (unsigned int j = 0; j < ps.size(); ++j) {
+        core::XYZR xyzr(ps[j]);
         double scaled_radius= xyzr.get_radius() * radius_factor;
         tmp_set_radii[j].reset
           ( new ScopedSetFloatAttribute
-            (ps_opt[j], core::XYZR::get_radius_key(), scaled_radius) );
+            (ps[j], core::XYZR::get_radius_key(), scaled_radius) );
       }
       // rescale bond length + TAMD (if needed ) temporarily for all chains
       for (unsigned int j = 0; j < chains.size(); ++j) {
