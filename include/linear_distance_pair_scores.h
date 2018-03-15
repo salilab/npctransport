@@ -301,9 +301,18 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   //! returns the k for sphere-sphere attraction in kcal/mol/A units
   double get_k_attraction() const { return k_attr_; }
 
+  //! set k for sphere-sphere attraction in kcal/mol/A units
+  void set_k_attr(double k_attr) {
+    k_attr_= k_attr;
+  }
+
   //! returns the k for sphere-sphere repulsion in kcal/mol/A units
   double get_k_repulsion() const { return k_rep_; }
 
+  //! set k for sphere-sphere repulsion in kcal/mol/A units
+  void set_k_repulsion(double k_rep) {
+    k_rep_ = k_rep;
+  }
 
   IMP_OBJECT_METHODS(LinearInteractionPairScore);
 };
