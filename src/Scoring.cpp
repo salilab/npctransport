@@ -615,7 +615,7 @@ Restraint* Scoring::create_bounding_box_restraint
   // Add bounding box restraint
   // TODO: what does backbone_spring_k_ has to do
   //       with bounding box constraint?
-  IMP_NEW(core::HarmonicUpperBound, hub, (0, excluded_volume_k_));
+  IMP_NEW(core::HarmonicUpperBound, hub, (0, get_excluded_volume_k()));
   IMP_NEW(core::GenericBoundingBox3DSingletonScore<core::HarmonicUpperBound>,
           bbss, (hub.get(), get_sd()->get_box()));
   return
@@ -631,10 +631,10 @@ Restraint * Scoring::create_slab_restraint
   IMP::Pointer<IMP::PairScore> slab_score;
   if (get_sd()->get_is_slab_with_cylindrical_pore()) {
     slab_score =new SlabWithCylindricalPorePairScore
-      (excluded_volume_k_);
+      (get_excluded_volume_k());
   } else {
     slab_score =new SlabWithToroidalPorePairScore
-      (excluded_volume_k_);
+      (get_excluded_volume_k());
   }
   IMP::ParticlesTemp slab_particles;
   slab_particles.push_back( get_sd()->get_slab_particle() );
