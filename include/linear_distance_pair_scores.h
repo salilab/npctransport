@@ -302,7 +302,7 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   double get_k_attraction() const { return k_attr_; }
 
   //! set k for sphere-sphere attraction in kcal/mol/A units
-  void set_k_attr(double k_attr) {
+  void set_k_attraction(double k_attr) {
     k_attr_= k_attr;
   }
 
