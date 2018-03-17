@@ -52,9 +52,9 @@ SitesPairScore::SitesPairScore(double range, double k,
     "SitesPairScore %1%"),
   params_(range, k, sigma0_deg, sigma1_deg),
   sites0_(sites0),
-  sites1_(sites1),
-  is_cache_active_(false),
-  cur_cache_id_(INVALID_CACHE_ID)
+  sites1_(sites1) // ,
+  //  is_cache_active_(false),
+  //  cur_cache_id_(INVALID_CACHE_ID)
 {
   IMP_LOG_PROGRESS( "Setting up SitesPairScore with sites0 "
 		    << sites0_ << " sites1 " << sites1_ << std::endl);
@@ -95,7 +95,7 @@ SitesPairScore::evaluate_indexes
       core::RigidBody::access_torque_i_data(m, i);
   }
   // evaluate all idexes with rigid body info cache active:
-  activate_cache();
+  //   activate_cache();
   double ret = 0.0;
   for (unsigned int i = lower_bound; i < upper_bound; ++i) {
     ret += evaluate_index_with_internal_tables(m,
@@ -106,7 +106,7 @@ SitesPairScore::evaluate_indexes
                                                pis[i],
                                                da);
   }
-  deactivate_cache();
+  //   deactivate_cache();
   return ret;
 }
 

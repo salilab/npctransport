@@ -60,12 +60,12 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   //! based on the interaction range and list of sites
   double ubound_distance2_;
 
-  //! Cache:
-  typedef IMP_KERNEL_LARGE_UNORDERED_MAP<ParticleIndex,internal::RigidBodyInfo>
-    t_particles_rb_cache;
-  mutable t_particles_rb_cache particles_rb_cache_;
-  mutable bool is_cache_active_;
-  mutable unsigned int cur_cache_id_; // to keep track of caching rounds
+  // //! Cache:
+  //  typedef IMP_KERNEL_LARGE_UNORDERED_MAP<ParticleIndex,internal::RigidBodyInfo>
+  //  t_particles_rb_cache;
+  // mutable t_particles_rb_cache particles_rb_cache_;
+  // mutable bool is_cache_active_;
+  // mutable unsigned int cur_cache_id_; // to keep track of caching rounds
 
  public:
 
@@ -145,13 +145,13 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
       DerivativeAccumulator *da,
       double max, unsigned int lower_bound, unsigned int upper_bound) const
   {
-    activate_cache();
+    //    activate_cache();
     double ret = 0.0;
     for (unsigned int i = lower_bound; i < upper_bound; ++i) {
       ret += evaluate_if_good_index(m, p[i], da, max - ret);
       if (ret > max) return std::numeric_limits<double>::max();
     }
-    deactivate_cache();
+    //    deactivate_cache();
     return ret;
   }
 
@@ -291,18 +291,18 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   }
 
  private:
-  // maintain a cache for evaluate_index() till call to deactivate_cache()
-  inline void activate_cache() const
-  {
-    // (note: cache is mutable)
-    is_cache_active_ = true;  cur_cache_id_++;
-  }
+  /* // maintain a cache for evaluate_index() till call to deactivate_cache() */
+  /* inline void activate_cache() const */
+  /* { */
+  /*   // (note: cache is mutable) */
+  /*   is_cache_active_ = true;  cur_cache_id_++; */
+  /* } */
 
-  inline void deactivate_cache() const
-  {
-    // (note: cache is mutable)
-    is_cache_active_ = false;
-  }
+  /* inline void deactivate_cache() const */
+  /* { */
+  /*   // (note: cache is mutable) */
+  /*   is_cache_active_ = false; */
+  /* } */
 
 
 };
@@ -417,7 +417,7 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
   // bring sites_ to the frame of reference of nn_sites_ and nn_
   ParticleIndex pi0 = pip[0];
   ParticleIndex pi1 = pip[1];
-  // get rbi0/1 from cache, update if needed
+  // get rbi0/1 info, update if needed
   internal::RigidBodyInfo rbi0 = get_rigid_body_info(spheres_table,
                                                      quaternions_tables,
                                                      pi0);
@@ -565,28 +565,29 @@ SitesPairScore::get_rigid_body_info
   // TODO: add usage check that it has valid quaternions
   //  IMP_USAGE_CHECK(core::RigidBody::get_is_setup(m, pi),
   //                "PI " << pi.get_index() << " not a rigid body");
-  if(is_cache_active_){
-    std::pair<t_particles_rb_cache::iterator, bool>
-      p = particles_rb_cache_.insert
-      (std::make_pair(pi, internal::RigidBodyInfo()));
-    internal::RigidBodyInfo& rbi_cached = p.first->second;
-    bool const rbi_in_cache = !p.second;
-    if(!rbi_in_cache ||
-       rbi_cached.cache_id != cur_cache_id_) // = cached version is outdated
-      {
-        rbi_cached.set_particle(spheres_table,
-                                quaternions_tables,
-                                pi,
-                                cur_cache_id_);
-      }
-    return rbi_cached;
-  }
-  else // if is_cache_active_
-    {
-      return internal::RigidBodyInfo(spheres_table,
-                                     quaternions_tables,
-                                     pi, INVALID_CACHE_ID);
-    }
+  /* if(is_cache_active_){ */
+  /*   std::pair<t_particles_rb_cache::iterator, bool> */
+  /*     p = particles_rb_cache_.insert */
+  /*     (std::make_pair(pi, internal::RigidBodyInfo())); */
+  /*   internal::RigidBodyInfo& rbi_cached = p.first->second; */
+  /*   bool const rbi_in_cache = !p.second; */
+  /*   if(!rbi_in_cache || */
+  /*      rbi_cached.cache_id != cur_cache_id_) // = cached version is outdated */
+  /*     { */
+  /*       rbi_cached.set_particle(spheres_table, */
+  /*                               quaternions_tables, */
+  /*                               pi, */
+  /*                               cur_cache_id_); */
+  /*     } */
+  /*   return rbi_cached; */
+  /* } */
+  /* else // if is_cache_active_ */
+  /*   { */
+  return internal::RigidBodyInfo(spheres_table,
+                                 quaternions_tables,
+                                 pi,
+                                 INVALID_CACHE_ID);
+    /* } */
 }
 
 
