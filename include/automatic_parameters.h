@@ -19,8 +19,9 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 IMPNPCTRANSPORTEXPORT
 double get_close_pairs_range(double max_range, double max_range_factor);
 
-/** returns an upper bound on the contact range between any two particles in the
-    system */  // TODO: maybe different ranges for different pair types?
+/** returns an upper bound on the contact range (maximal sphere-sphere distance
+    that enables a contact) between any two particles in the
+    system */
 IMPNPCTRANSPORTEXPORT
 double get_close_pairs_range(const ::npctransport_proto::Assignment& config);
 

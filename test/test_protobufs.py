@@ -9,7 +9,7 @@ import math
 from test_util import *
 radius=5
 
-class ConeTests(IMP.test.TestCase):
+class ProtobufTests(IMP.test.TestCase):
     def _make_config(self, name):
         config= IMP.npctransport.Configuration()
         IMP.npctransport.set_default_configuration(config)

@@ -7,21 +7,19 @@
  */
 
 #include <IMP/npctransport/automatic_parameters.h>
+#include <IMP/atom/estimates.h>
+#include <IMP/exception.h>
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic push
 #endif
 #if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
-
 #include "npctransport.pb.h"
-
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic pop
 #endif
-
-#include <IMP/atom/estimates.h>
-#include <IMP/exception.h>
+#include <limits>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 using namespace IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE;
@@ -30,69 +28,120 @@ using namespace IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE;
 
 double get_close_pairs_range(double max_range, double max_range_factor) {
   // squared cause range factor is applied once for each interacting partner
-  return max_range * max_range_factor * max_range_factor;
+  double ret_value( max_range * max_range_factor * max_range_factor );
+  std::cout << " Close pairs range: " << ret_value << std::endl;
+  return ret_value;
 }
 
-double get_close_pairs_range(const ::npctransport_proto::Assignment& a) {
-  double max_range = a.interaction_range().value();
-  UPDATE_MAX(range, a.nonspecific_range);
-  for (int i = 0; i < a.interactions_size(); ++i) {
-    if (a.interactions(i).has_interaction_range()) {
-      double k=a.interactions(i).interaction_k().value();
-      double range=a.interactions(i).interaction_range().value();
-      // TODO: can support is_on, though it's rare
-      if(range>0.0 && k>0.0) {
-        // compute skewed range if needed
-	bool is_orientational=false;
-	if(a.interactions(i).has_range_sigma0_deg() &&
-	   a.interactions(i).has_range_sigma1_deg()) {
-	  if(a.interactions(i).range_sigma0_deg().value()!=0.0 &&
-	     a.interactions(i).range_sigma1_deg().value()!=0.0) {
-	    is_orientational=true;
-	  }
-	}
-	if(is_orientational){
-	  const double pi = 3.1415926535897;
-	  double range_sigma0_rad=a.interactions(i).range_sigma0_deg().value()*pi/180.0;
-	  double range_sigma1_rad=a.interactions(i).range_sigma1_deg().value()*pi/180.0;
-	  std::string type0=a.interactions(i).type0();
-	  std::string type1=a.interactions(i).type1();
-	  double R0=0.0;
-	  double R1=0.0;
-	  for(int ii=0; ii<a.floaters_size(); ii++){
-	    if(a.floaters(ii).type()==type0){
-	      R0=a.floaters(ii).radius().value();
-	    }
-	    if(a.floaters(ii).type()==type1){
-	      R1=a.floaters(ii).radius().value();
-	    }
-	  }
-	  for(int ii=0; ii<a.fgs_size(); ii++){
-	    if(a.fgs(ii).type()==type0){
-	      R0=a.fgs(ii).radius().value();
-	    }
-	    if(a.fgs(ii).type()==type1){
-	      R1=a.fgs(ii).radius().value();
-	    }
-	  }
-	  double chord0=2*R0*std::sin(range_sigma0_rad/2.0);
-	  double chord1=2*R1*std::sin(range_sigma1_rad/2.0);
-	  double chord=std::max(chord0,chord1);
-	  range=std::max(range, chord);
-        }
-        // udpate max range
-        max_range=std::max(max_range, range);
+namespace {
+  //! get radius of particle with named type
+  //! in assignment
+  //! (assuming only one particle type has that name!)
+  double get_radius_of_type
+  (const ::npctransport_proto::Assignment a,
+   std::string type)
+  {
+    for(int i=0; i<a.floaters_size(); i++){
+      if(a.floaters(i).type()==type){
+        return a.floaters(i).radius().value();
       }
     }
+    for(int i=0; i<a.fgs_size(); i++){
+      if(a.fgs(i).type()==type){
+        return a.fgs(i).radius().value();
+      }
+    }
+    for(int i=0; i<a.obstacles_size(); i++){
+      if(a.obstacles(i).type()==type){
+        return a.obstacles(i).radius().value();
+      }
+    }
+    return 0.0;
   }
-  double max_range_factor = 0.0001;
-  for (int i = 0; i < a.fgs_size(); ++i) {
-    UPDATE_MAX(range_factor, a.fgs(i).interaction_range_factor);
+
+  //! get range factor of particle with named type
+  //! in assignment
+  //! (assuming only one particle type has that name!)
+  double get_range_factor_of_type
+  (const ::npctransport_proto::Assignment a,
+   std::string type)
+  {
+    for(int i=0; i<a.floaters_size(); i++){
+      if(a.floaters(i).type()==type){
+        return a.floaters(i).interaction_range_factor().value();
+      }
+    }
+    for(int i=0; i<a.fgs_size(); i++){
+      if(a.fgs(i).type()==type){
+        return a.fgs(i).interaction_range_factor().value();
+      }
+    }
+    for(int i=0; i<a.obstacles_size(); i++){
+      if(a.obstacles(i).type()==type){
+        return a.obstacles(i).interaction_range_factor().value();
+      }
+    }
+    return 1.0;
   }
-  for (int i = 0; i < a.floaters_size(); ++i) {
-    UPDATE_MAX(range_factor, a.floaters(i).interaction_range_factor);
-  } // TODO: add obstacles?!
-  return get_close_pairs_range(max_range, max_range_factor);
+
+  double get_close_pairs_range_for_interaction
+  (const ::npctransport_proto::Assignment a, int interaction_id)
+  {
+    ::npctransport_proto::Assignment::InteractionAssignment interaction
+      (a.interactions(interaction_id));
+    std::string type0=interaction.type0();
+    std::string type1=interaction.type1();
+    double range_factor_0= get_range_factor_of_type(a, type0);
+    double range_factor_1= get_range_factor_of_type(a, type1);
+    if(!interaction.has_interaction_range()){
+      double default_range = a.interaction_range().value();
+      return default_range*range_factor_0*range_factor_1;
+      return 0.0;
+    }
+    double range=interaction.interaction_range().value();
+    {
+      bool is_on= interaction.is_on().value()>0;
+      double k=interaction.interaction_k().value();
+      double epsilon(std::numeric_limits<double>::epsilon());
+      if(range < epsilon || k < epsilon || !is_on)
+        {
+          return 0.0;
+        }
+    }
+    // Handle orientational case if needed (NOTE: THIS IS DISABLED CAUSE ORIENTATIONAL
+    // CASE MAY RESULT IN LONGER SITE-SITE INTERACTION RANGE BUT NOT SPHERE-SPHERE RANGE)
+    // bool is_orientational=false;
+    // if(interaction.has_range_sigma0_deg() &&
+    //    interaction.has_range_sigma1_deg()) {
+    //   is_orientational=
+    //     (interaction.range_sigma0_deg().value()!=0.0 &&
+    //      interaction.range_sigma1_deg().value()!=0.0);
+    // }
+    // if(is_orientational)
+    //   {
+    //     const double pi = 3.1415926535897;
+    //     double range_sigma0_rad=interaction.range_sigma0_deg().value()*pi/180.0;
+    //     double range_sigma1_rad=interaction.range_sigma1_deg().value()*pi/180.0;
+    //     double R0= get_radius_of_type(a, type0);
+    //     double R1= get_radius_of_type(a, type1);
+    //     double chord0=2*R0*std::sin(range_sigma0_rad/2.0);
+    //     double chord1=2*R1*std::sin(range_sigma1_rad/2.0);
+    //     double chord=std::max(chord0,chord1);
+    //     range=std::max(range, chord);
+    //   }
+    // TODO: do obstacles need special treatment?!
+    return range*range_factor_0*range_factor_1;
+  }
+}; // namespace {}
+
+double get_close_pairs_range(const ::npctransport_proto::Assignment& a) {
+  double max_range = std::numeric_limits<double>::epsilon();
+  UPDATE_MAX(range, a.nonspecific_range);
+  for (int i = 0; i < a.interactions_size(); ++i) {
+    max_range= std::max(max_range,
+                        get_close_pairs_range_for_interaction(a, i));
+  }
+  return max_range;
 }
 
 double get_time_step(double max_d_factor, double max_k, double min_radius, double min_range,

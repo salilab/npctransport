@@ -363,6 +363,8 @@ int assign_ranges(std::string ifname, std::string ofname, unsigned int work_unit
   assignment.set_output_statistics_interval_frames
     ( get_output_statistics_interval_in_frames(assignment, time_step) );
   assignment.set_range(get_close_pairs_range(assignment));
+  std::cout << "Close pair sphere-sphere distance range in A: "
+            << assignment.range() << std::endl;
   assignment.set_random_seed(random_seed);
 
   set_default_tamd_options(assignment);
