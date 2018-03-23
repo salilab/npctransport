@@ -87,6 +87,8 @@ message Configuration {
     optional FloatRange nonspecific_range=10; // range in A of non-specific attraction between the two beads (outside interaction sites), overriding the default if specified
     optional FloatRange nonspecific_k=11; // force constant in kcal/mol/A of non-specific attraction between the two beads (outside interaction sites), overriding the default if specified
     optional FloatRange excluded_volume_k=12; // force constant in kcal/mol/A of excluded volume repulsion between the two beads overriding the default if specified
+    repeated int32 active_sites0=13; // site ids of interaction sites on type 0, if empty - use all
+    repeated int32 active_sites1=14; // site ids of interaction sites on type 1, if empty - use all
   };
 
   required FloatRange interaction_k=3; // default k for specific interactions
@@ -211,7 +213,8 @@ message Assignment {
     optional FloatAssignment nonspecific_range=10; // range in A of non-specific attraction between the two beads (outside interaction sites), overriding the default if specified
     optional FloatAssignment nonspecific_k=11; // force constant in kcal/mol/A of non-specific attraction between the two beads (outside interaction sites), overriding the default if specified
     optional FloatAssignment excluded_volume_k=12; // force constant in kcal/mol/A of excluded volume repulsion between the two beads overriding the default if specified
-
+    repeated int32 active_sites0=13; // site ids of interaction sites on type 0, if empty - use all
+    repeated int32 active_sites1=14; // site ids of interaction sites on type 1, if empty - use all
   };
   required int32 work_unit=1;
   required FloatAssignment interaction_k=3;

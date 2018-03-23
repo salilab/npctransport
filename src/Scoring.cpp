@@ -285,7 +285,33 @@ void Scoring::add_interaction
 	  << std::endl
           );
 
-  // add the interaction restraint both for (t0,t1) and (t1,t0)  {
+  // get active sites (or all if no active sites specified)
+  algebra::Sphere3Ds sites0;
+  algebra::Sphere3Ds sites1;
+  {
+    const algebra::Sphere3Ds sites0_all( get_sd()->get_sites(type0) );
+    const algebra::Sphere3Ds sites1_all( get_sd()->get_sites(type1) );
+    int n0= idata.active_sites0_size();
+    int n1= idata.active_sites1_size();
+    if(n0>0){
+      for(int i=0; i<n0; i++){
+        int site_id= idata.active_sites0(i);
+        sites0.push_back(sites0_all[site_id]);
+      }
+    }else{
+      sites0= sites0_all;
+    }
+    if(n1>0){
+      for(int i=0; i<n1; i++){
+        int site_id= idata.active_sites1(i);
+        sites1.push_back(sites1_all[site_id]);
+      }
+    }else{
+      sites1= sites1_all;
+    }
+  }
+
+  // add the interaction restraint both for (t0,t1) and (t1,t0)
   {
     core::ParticleTypes pts1;
     pts1.push_back(type0);
@@ -298,8 +324,8 @@ void Scoring::add_interaction
              nonspecific_range,
              nonspecific_k,
              excluded_volume_k,
-             get_sd()->get_sites(type0),
-             get_sd()->get_sites(type1) )
+             sites0,
+             sites1)
             );
    interaction_pair_scores_[interaction_id1] = ps1;
   }
@@ -315,8 +341,8 @@ void Scoring::add_interaction
              nonspecific_range,
              nonspecific_k,
              excluded_volume_k,
-             get_sd()->get_sites(type1),
-             get_sd()->get_sites(type0) )
+             sites1,
+             sites0)
             );
     interaction_pair_scores_[interaction_id2] = ps2;
   }

@@ -93,6 +93,28 @@ namespace {
       return r->SetInt32(m, fd, v);
     }
   }
+  double get_repeated_value
+  (const Reflection* r, const Message* m,
+   const FieldDescriptor* fd,
+   int i)
+  {
+    if (fd->type() == FieldDescriptor::TYPE_DOUBLE) {
+      return r->GetRepeatedDouble(*m, fd, i);
+    } else {
+      return r->GetRepeatedInt32(*m, fd, i);
+    }
+  }
+  void add_repeated_value
+  (const Reflection* r, Message* m, const FieldDescriptor* fd,
+   double v)
+  {
+    if (fd->type() == FieldDescriptor::TYPE_DOUBLE) {
+      return r->AddDouble(m, fd, v);
+    } else {
+      return r->AddInt32(m, fd, v);
+    }
+  }
+
 
   // return a vector of ranges for any message that descends from the config
   // protobuf message <message> and contains a range of values
@@ -194,10 +216,20 @@ namespace {
                   out_r->AddString(out_message, out_fd, str);
                 }
               } else { // not a repeated string:
-                out_r->SetString(out_message, out_fd, in_r->GetString(*in_message, in_fd));
+                out_r->SetString(out_message, out_fd,
+                                 in_r->GetString(*in_message, in_fd));
               }
             } else { // not a string:
-              set_value(out_r, out_message, out_fd, get_value(in_r, in_message, in_fd));
+              if (in_fd->is_repeated()) {
+                int sz= in_r->FieldSize(*in_message, in_fd);
+                for(int i= 0; i<sz; ++i) {
+                  add_repeated_value(out_r, out_message, out_fd,
+                                     get_repeated_value(in_r, in_message, in_fd, i));
+                }
+              } else { // not a repeated field
+                set_value(out_r, out_message, out_fd,
+                          get_value(in_r, in_message, in_fd));
+              }
             }
           }
         }
