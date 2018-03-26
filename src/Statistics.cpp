@@ -358,6 +358,7 @@ void Statistics::update_fg_stats
         double mean_square_bond_distance=0.0;
         for (unsigned int j = 0; j < cs_i.size(); ++j)
           {
+            cs_i[j]->update_always();
             unsigned int cnf = nf * cs_i.size() + j;
             UPDATE_AVG(cnf, nf_new,
                        *stats->mutable_fgs(i), chain_correlation_time,
@@ -442,6 +443,7 @@ void Statistics::update_fg_stats
             for (unsigned int k = 0; k < fbs_ij.size(); ++k)
               {
                 BodyStatisticsOptimizerState* fbs_ijk = fbs_ij[k];
+                fbs_ij[k]->update_always();
                 unsigned int per_frame = fbs_i.size() * fbs_ij.size();
                 unsigned int cnf = (nf) * per_frame + j * fbs_ij.size() + k;
                 UPDATE_AVG(cnf, nf_new, *stats->mutable_fg_beads(i),
@@ -651,6 +653,7 @@ void Statistics::update
       int nf_weighted = nf * n_particles_type_i; // number of particle frames
       for (unsigned int j= 0; j < n_particles_type_i; j++)
         {
+          bsos[j]->update_always();
           double dc_j= bsos[j]->get_diffusion_coefficient();
           UPDATE_AVG(nf_weighted, nf_new,
                      *stats->mutable_floaters(i),
@@ -771,69 +774,70 @@ void Statistics::update
               << it->first << std::endl);
       unsigned int i = find_or_add_interaction_of_type( stats, it->first );
       BipartitePairsStatisticsOptimizerState* bps_i = it->second;
+      bps_i->update_always(); // force an update just to be sure info is not lost before resetting bps_i
       ::npctransport_proto::Statistics_InteractionStats *pOutStats_i =
           stats->mutable_interactions(i);
       // verify correct interaction type is stored
       InteractionType itype = bps_i->get_interaction_type();
       std::string s_type0 = itype.first.get_string();
       std::string s_type1 = itype.second.get_string();
-    if (std::string(pOutStats_i->type0()) != s_type0 ||
-        std::string(pOutStats_i->type1()) != s_type1) {
-      IMP_THROW("Incompatible interaction types in pOutStats_i ["
-                    << pOutStats_i->type0() << ", " << pOutStats_i->type1()
-                    << "] and bps_i " << s_type0 << ", " << s_type1 << "]"
-                    << std::endl,
-                ValueException);
+      if (std::string(pOutStats_i->type0()) != s_type0 ||
+          std::string(pOutStats_i->type1()) != s_type1) {
+        IMP_THROW("Incompatible interaction types in pOutStats_i ["
+                  << pOutStats_i->type0() << ", " << pOutStats_i->type1()
+                  << "] and bps_i " << s_type0 << ", " << s_type1 << "]"
+                  << std::endl,
+                  ValueException);
+      }
+      // some preparations
+      Int n0 = bps_i->get_number_of_particles_1();
+      Int n1 = bps_i->get_number_of_particles_2();
+      Float avg_contacts_num = bps_i->get_average_number_of_contacts();
+      // save the rest of the interactions info
+      npctransport_proto::Statistics_InteractionOrderParams*
+        siop = pOutStats_i->add_order_params();
+      siop->set_time_ns(sim_time_ns);
+      siop->set_avg_off_per_contact_per_ns
+        ( bps_i->get_average_off_per_contact_per_ns() );
+      siop->set_avg_off_per_bound_i_per_ns
+        ( bps_i->get_average_off_per_bound_I_per_ns() );
+      siop->set_avg_off_per_bound_ii_per_ns
+        ( bps_i->get_average_off_per_bound_II_per_ns() );
+      siop->set_off_stats_period_ns
+        ( bps_i->get_off_stats_period_ns() );
+      siop->set_off_i_stats_period_ns
+        ( bps_i->get_off_I_stats_period_ns() );
+      siop->set_off_ii_stats_period_ns
+        ( bps_i->get_off_II_stats_period_ns() );
+      siop->set_avg_on_per_missing_contact_per_ns
+        ( bps_i->get_average_on_per_missing_contact_per_ns() );
+      siop->set_on_stats_period_ns
+        ( bps_i->get_on_stats_period_ns() );
+      siop->set_avg_on_per_unbound_i_per_ns
+        ( bps_i->get_average_on_per_unbound_I_per_ns() );
+      siop->set_on_i_stats_period_ns
+        ( bps_i->get_on_I_stats_period_ns() );
+      siop->set_avg_on_per_unbound_ii_per_ns
+        ( bps_i->get_average_on_per_unbound_II_per_ns() );
+      siop->set_on_ii_stats_period_ns
+        ( bps_i->get_on_II_stats_period_ns() );
+      siop->set_avg_contacts_per_particle_i
+        ( avg_contacts_num / n0 );
+      siop->set_avg_contacts_per_particle_ii
+        ( avg_contacts_num / n1 );
+      siop->set_avg_fraction_bound_particles_i
+        ( bps_i->get_average_fraction_bound_particles_I());
+      siop->set_avg_fraction_bound_particles_ii
+        ( bps_i->get_average_fraction_bound_particles_II());
+      siop->set_avg_fraction_bound_particle_sites_i
+        ( bps_i->get_average_fraction_bound_particle_sites_I());
+      siop->set_avg_fraction_bound_particle_sites_ii
+        ( bps_i->get_average_fraction_bound_particle_sites_II());
+      siop->set_misc_stats_period_ns
+        ( bps_i->get_misc_stats_period_ns() );
+      // reset till next udpate_statistics()
+      bps_i->reset();
     }
-    // some preparations
-    Int n0 = bps_i->get_number_of_particles_1();
-    Int n1 = bps_i->get_number_of_particles_2();
-    Float avg_contacts_num = bps_i->get_average_number_of_contacts();
-    // save the rest of the interactions info
-    npctransport_proto::Statistics_InteractionOrderParams*
-      siop = pOutStats_i->add_order_params();
-    siop->set_time_ns(sim_time_ns);
-    siop->set_avg_off_per_contact_per_ns
-      ( bps_i->get_average_off_per_contact_per_ns() );
-    siop->set_avg_off_per_bound_i_per_ns
-      ( bps_i->get_average_off_per_bound_I_per_ns() );
-    siop->set_avg_off_per_bound_ii_per_ns
-      ( bps_i->get_average_off_per_bound_II_per_ns() );
-    siop->set_off_stats_period_ns
-      ( bps_i->get_off_stats_period_ns() );
-    siop->set_off_i_stats_period_ns
-      ( bps_i->get_off_I_stats_period_ns() );
-    siop->set_off_ii_stats_period_ns
-      ( bps_i->get_off_II_stats_period_ns() );
-    siop->set_avg_on_per_missing_contact_per_ns
-      ( bps_i->get_average_on_per_missing_contact_per_ns() );
-    siop->set_on_stats_period_ns
-      ( bps_i->get_on_stats_period_ns() );
-    siop->set_avg_on_per_unbound_i_per_ns
-      ( bps_i->get_average_on_per_unbound_I_per_ns() );
-    siop->set_on_i_stats_period_ns
-      ( bps_i->get_on_I_stats_period_ns() );
-    siop->set_avg_on_per_unbound_ii_per_ns
-      ( bps_i->get_average_on_per_unbound_II_per_ns() );
-    siop->set_on_ii_stats_period_ns
-      ( bps_i->get_on_II_stats_period_ns() );
-    siop->set_avg_contacts_per_particle_i
-      ( avg_contacts_num / n0 );
-    siop->set_avg_contacts_per_particle_ii
-      ( avg_contacts_num / n1 );
-    siop->set_avg_fraction_bound_particles_i
-      ( bps_i->get_average_fraction_bound_particles_I());
-    siop->set_avg_fraction_bound_particles_ii
-      ( bps_i->get_average_fraction_bound_particles_II());
-    siop->set_avg_fraction_bound_particle_sites_i
-      ( bps_i->get_average_fraction_bound_particle_sites_I());
-    siop->set_avg_fraction_bound_particle_sites_ii
-      ( bps_i->get_average_fraction_bound_particle_sites_II());
-    siop->set_misc_stats_period_ns
-      ( bps_i->get_misc_stats_period_ns() );
-    // reset till next udpate_statistics()
-    bps_i->reset();
-  }
 
   // GLOBALS:
   {
@@ -841,6 +845,7 @@ void Statistics::update
     stats->set_seconds_per_iteration(timer.elapsed());
     stats->set_number_of_frames(nf + nf_new);
     stats->set_bd_simulation_time_ns( sim_time_ns );
+    global_stats->update_always();
     double total_energy  =
       global_stats_->get_mean_energy();
     // get_sd()->get_bd()->get_scoring_function()->evaluate(false);
