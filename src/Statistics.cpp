@@ -845,7 +845,7 @@ void Statistics::update
     stats->set_seconds_per_iteration(timer.elapsed());
     stats->set_number_of_frames(nf + nf_new);
     stats->set_bd_simulation_time_ns( sim_time_ns );
-    global_stats->update_always();
+    global_stats_->update_always();
     double total_energy  =
       global_stats_->get_mean_energy();
     // get_sd()->get_bd()->get_scoring_function()->evaluate(false);
