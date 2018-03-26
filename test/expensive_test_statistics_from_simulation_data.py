@@ -39,7 +39,7 @@ class Tests(IMP.test.TestCase):
         return sd
 
     def _run_sd(self, sd, n_cycles):
-        assert(sd <> None)
+        assert(sd != None)
         IMP.set_log_level(IMP.SILENT)
         sd.get_bd().set_log_level(IMP.SILENT)
         time_step_fs=sd.get_bd().get_maximum_time_step()
