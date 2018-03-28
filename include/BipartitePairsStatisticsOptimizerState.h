@@ -115,11 +115,12 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
                               doing
   */
   BipartitePairsStatisticsOptimizerState
-    (WeakPointer<IMP::npctransport::Statistics> statistics_manager,
-     InteractionType interaction_type,  // TODO: remove this from class?
-                                        //       a bit ugly and ungeneral
-     const ParticlesTemp& particlesI, const ParticlesTemp& particlesII,
-     double contact_range = 1.0, double slack = 1.0);
+    ( IMP::npctransport::Statistics* statistics_manager,
+      InteractionType interaction_type,  // TODO: remove this from class?
+                                         //       a bit ugly and ungeneral
+      const ParticlesTemp& particlesI,
+      const ParticlesTemp& particlesII,
+      double contact_range = 1.0, double slack = 1.0);
 
   /**
      returns the particle types of the first and second group of particles,

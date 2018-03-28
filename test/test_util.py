@@ -202,7 +202,8 @@ def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
                 rs= IMP.npctransport.RelaxingSpring(p)
                 cur_R.append(rs.get_rest_length())
         R.append(cur_R)
-        sd.get_statistics().update( timer, nframes - nframes_per_chunk ) # TODO: timer?
+        if(sd.get_statistics().get_is_activated()):
+            sd.get_statistics().update( timer, nframes - nframes_per_chunk ) # TODO: timer?
         nframes_left = nframes_left - nframes_per_chunk
     return np.array(R)
 

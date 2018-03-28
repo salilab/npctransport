@@ -199,8 +199,9 @@ class Tests(IMP.test.TestCase):
         sd.write_geometry(pymol_file)
         n_good=0
         timer= IMP.npctransport.timer();
-        sd.get_statistics().reset_statistics_optimizer_states()
         sd.get_bd().set_current_time(0.0)
+        sd.activate_statistics()
+        sd.get_statistics().reset_statistics_optimizer_states()
         for i in range(n_iter):
             sd.get_bd().optimize(opt_cycles_frames)
             sd.get_statistics().update(timer,opt_cycles_frames)

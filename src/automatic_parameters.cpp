@@ -37,6 +37,7 @@ namespace {
   //! get radius of particle with named type
   //! in assignment
   //! (assuming only one particle type has that name!)
+  IMP_UNUSED_FUNCTION
   double get_radius_of_type
   (const ::npctransport_proto::Assignment a,
    std::string type)

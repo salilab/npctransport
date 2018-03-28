@@ -62,6 +62,9 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
  private:
   UncheckedWeakPointer<SimulationData> owner_sd_;
 
+  // Whether statistics gathering has been activated (= optimizer states added to optimizer)
+  bool is_activated_;
+
   // interval of simulation frames for gathering stats
   Parameter<int> statistics_interval_frames_;
 
@@ -171,7 +174,7 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
       @return the list of optimizer states that were added
 
       @note If called for more than one optimizer, only the last
-            optimizer will be guaranteed to work well
+            optimizer will be guaranteed to work well.
   */
   OptimizerStates add_optimizer_states(Optimizer* o = nullptr);
 
@@ -197,7 +200,12 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   /**
       opens / creates statistics protobuf file, and update it
       with appropriate statistics, using statistics file
-      originally specified in the constructor.
+      originally specified in the constructor, and based on statistics
+      gathered from the optimizer that was specified by
+      add_optimizer_states().
+
+      @throw UsageException If add_optimizer_states() was not called yet
+         (= get_is_activated() is false)
 
       @param timer the timer that was used to measure the time
                    that has elapsed for statistics
@@ -233,6 +241,12 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   /** return the SimulationData object that owns this ScoringFunction */
   SimulationData* get_sd() {
     return owner_sd_;
+  }
+
+  //! if true, statistics have been activated, so add_optimizer_states()
+  //! was called such that statistics are being tracked
+  bool get_is_activated(){
+    return is_activated_;
   }
 
 #ifndef SWIG

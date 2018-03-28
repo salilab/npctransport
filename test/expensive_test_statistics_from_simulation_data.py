@@ -39,7 +39,7 @@ class Tests(IMP.test.TestCase):
         return sd
 
     def _run_sd(self, sd, n_cycles):
-        assert(sd != None)
+        self.assertTrue(sd != None)
         IMP.set_log_level(IMP.SILENT)
         sd.get_bd().set_log_level(IMP.SILENT)
         time_step_fs=sd.get_bd().get_maximum_time_step()
@@ -179,6 +179,18 @@ class Tests(IMP.test.TestCase):
         print("-- Orientational --")
         self._test_interaction_stats(n_cycles,short_init_factor,
                                      n_trials,is_orientational=True)
+
+    def test_statistics_activation(self):
+        sd= self._make_sd(False)
+        timer = IMP.npctransport.create_boost_timer()
+        self.assertFalse( sd.get_statistics().get_is_activated() )
+        with self.assertRaises(IMP.UsageException):
+            sd.get_statistics().update( timer )
+        sd.activate_statistics()
+        self.assertTrue( sd.get_statistics().get_is_activated() )
+        sd.get_statistics().update( timer ) # should not throw an exception now
+
+
 
 
 if __name__ == '__main__':

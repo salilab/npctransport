@@ -120,8 +120,6 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   PointerMember <IMP::npctransport::Statistics >
     statistics_;
 
-  bool is_statistics_activated_;
-
   // all beads in the simulation (=fine-level particles)
   Particles beads_;
 

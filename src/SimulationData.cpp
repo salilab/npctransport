@@ -117,7 +117,6 @@ SimulationData::SimulationData(std::string prev_output_file, bool quick,
   bd_(nullptr),
   scoring_(nullptr),
   statistics_(nullptr),
-  is_statistics_activated_(false),
   root_(nullptr),
   slab_particle_(nullptr),
   rmf_file_name_(rmf_file_name),
@@ -856,11 +855,10 @@ atom::BrownianDynamics
 }
 
 void SimulationData::activate_statistics(){
-    if(is_statistics_activated_==false){
-      get_statistics()->add_optimizer_states( get_bd() );
-      is_statistics_activated_=true;
-    }
+  if(! get_statistics()->get_is_activated()) {
+    get_statistics()->add_optimizer_states( get_bd() );
   }
+}
 
 ParticlesTemp
 SimulationData::get_optimizable_beads()

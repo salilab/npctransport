@@ -20,18 +20,17 @@ class Tests(IMP.test.TestCase):
                           0, True, seed );
         print("num ranges %d" % num)
         sd = SimulationData( output_pb_file, False )
+        sd.activate_statistics()
         sd.set_rmf_file(output_rmf_file, False)
         sd.get_model().set_log_level( IMP.SILENT );
         print("Files are " + output_pb_file + \
               " and " + output_rmf_file)
         timer = IMP.npctransport.create_boost_timer()
         sd.get_bd().optimize( 1000 )
-        print("AAA")
-        # make sure final state is written
+        # make sure final state is written to rmf
         sd.get_rmf_sos_writer().update_always()
-        # make sure statistics with final rmf conformation is written
+        # write statistics and final rmf conformation
         sd.get_statistics().update( timer )
-        print("who")
         return sd
 
     def _get_bead_coords( self, p ):

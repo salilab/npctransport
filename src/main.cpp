@@ -588,7 +588,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
             "Before running (post equilibration)");
       }
       // now start initial stats and run the rest of the sim
-      sd->get_statistics()->update(timer, 0);
+      //sd->get_statistics()->update(timer, 0);
       bool ok = run_it(sd, nframes_run, timer, total_time,
                        false /* silent stats */, max_frames_per_chunk);
       if (!ok) {

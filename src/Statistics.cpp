@@ -104,6 +104,7 @@ Statistics::Statistics
   std::string output_file_name)
 : Object("Statistics%1%"),
   owner_sd_(owner_sd),
+  is_activated_(false),
   statistics_interval_frames_(statistics_interval_frames),
   output_file_name_(output_file_name),
   is_stats_reset_(false)
@@ -250,6 +251,7 @@ OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
       ret.push_back( iter->second ) ;
     }
   o->add_optimizer_states(ret);
+  is_activated_= true;
   return ret;
 }
 
@@ -257,7 +259,9 @@ OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
 bool
 Statistics::update_xyz_distribution_to_hdf5
 (RMF::HDF5::Group hdf5_group,
- core::ParticleType p_type){
+ core::ParticleType p_type)
+{
+  IMP_OBJECT_LOG;
   // Recreate z-y-x histogram based on retrieved xyz_hist:
   ParticleTypeXYZDistributionMap::const_iterator ptxyzdm_it=
     particle_type_xyz_distribution_map_.find(p_type);
@@ -314,6 +318,7 @@ void Statistics::update_fg_stats
   unsigned int zr_hist[4][3],
   RMF::HDF5::File hdf5_file)
 {
+  IMP_OBJECT_LOG;
   RMF::HDF5::Group hdf5_fg_xyz_hist_group;
   static const std::string  FG_XYZ_GROUP("fg_xyz_hist");
   if(hdf5_file.get_has_child(FG_XYZ_GROUP)){
@@ -487,6 +492,7 @@ void Statistics
 ::update_particle_type_zr_distribution_map
 ( Particle* p )
 {
+  IMP_OBJECT_LOG;
   if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
     return;
   }
@@ -532,6 +538,7 @@ void Statistics
 ::update_particle_type_xyz_distribution_map
 ( Particle* p )
 {
+  IMP_OBJECT_LOG;
   if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
     return;
   }
@@ -588,11 +595,10 @@ void Statistics::update
   unsigned int nf_new)
 {
   IMP_OBJECT_LOG;
+  IMP_ALWAYS_CHECK(get_is_activated(), // TODO: would we rather a usage/always check?
+                   "Cannot update a Statistics object that was not activated. Call Statistics::add_optimizer_states() first",
+                   IMP::UsageException);
   ::npctransport_proto::Output output;
-
-  //  std::ifstream inf(output_file_name_.c_str(), std::ios::binary);
-  //  output.ParseFromIstream(&inf);
-  //  inf.close();
   bool read(false);
   int fd=IMP_C_OPEN(output_file_name_.c_str(),
                     IMP_C_OPEN_FLAG(O_RDONLY) | IMP_C_OPEN_BINARY);

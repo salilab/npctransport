@@ -7,6 +7,7 @@
  */
 
 #include <IMP/npctransport/ChainStatisticsOptimizerState.h>
+#include <IMP/npctransport/enums.h>
 #include <IMP/algebra/geometric_alignment.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
@@ -16,23 +17,29 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 ChainStatisticsOptimizerState::ChainStatisticsOptimizerState
-( const ParticlesTemp& ps, unsigned int periodicity)
-  : P(ps[0]->get_model(), "ChainStatisticsOptimizerState%1%"),
-    ps_(ps),
-    mean_rgyr_(-1.0),
-    mean_rgyr2_(-1.0),
-    mean_end_to_end_(-1.0),
-    mean_end_to_end2_(-1.0),
-    mean_bond_distance_(-1.0),
-    mean_bond_distance2_(-1.0),
-    n_(0)
+( const ParticlesTemp& ps,
+  unsigned int periodicity )
+  :
+  P(ps[0]->get_model(), "ChainStatisticsOptimizerState%1%"),
+  ps_(ps),
+  mean_rgyr_(-1.0),
+  mean_rgyr2_(-1.0),
+  mean_end_to_end_(-1.0),
+  mean_end_to_end2_(-1.0),
+  mean_bond_distance_(-1.0),
+  mean_bond_distance2_(-1.0),
+  n_(0)
 {
+  IMP_OBJECT_LOG;
   set_period(periodicity);
   reset();
 }
 
-void ChainStatisticsOptimizerState::reset() {
+void ChainStatisticsOptimizerState::reset()
+{
+  IMP_OBJECT_LOG;
   positions_.clear();
+  times_ns_.clear();
   mean_rgyr_= -1.0;
   mean_rgyr2_= -1.0;
   mean_end_to_end_= -1.0;
@@ -48,7 +55,9 @@ double ChainStatisticsOptimizerState::get_dt() const {
       ->get_maximum_time_step();
 }
 
-double ChainStatisticsOptimizerState::get_correlation_time() const {
+double ChainStatisticsOptimizerState::get_correlation_time() const
+{
+  IMP_OBJECT_LOG;
   bool IS_DISABLED=true; // DISABLE FOR NOW CAUSE TIME CONSUMING
   if(IS_DISABLED){
     return std::numeric_limits<double>::infinity();
@@ -79,7 +88,10 @@ double ChainStatisticsOptimizerState::get_correlation_time() const {
   return sum / n;
 }
 
-Floats ChainStatisticsOptimizerState::get_local_diffusion_coefficients() const {
+Floats
+ChainStatisticsOptimizerState::get_local_diffusion_coefficients() const
+{
+  IMP_OBJECT_LOG;
   if (positions_.empty()) return Floats();
   Vector<algebra::Vector3Ds> displacements(
       positions_[0].size(), algebra::Vector3Ds(positions_.size() - 1));
@@ -100,32 +112,55 @@ Floats ChainStatisticsOptimizerState::get_local_diffusion_coefficients() const {
   return ret;
 }
 
-double ChainStatisticsOptimizerState::get_diffusion_coefficient() const {
-  if (positions_.empty()) return 0;
+double ChainStatisticsOptimizerState::get_diffusion_coefficient() const
+{
+  IMP_OBJECT_LOG;
+  // Checks:
+  unsigned int n= positions_.size();
+  IMP_USAGE_CHECK(times_ns_.size() == n,
+                  "Length of times and positions lists is expected to be equal");
+  if (n<2){
+    return 0;
+  }
+  if (times_ns_.front() - times_ns_.back() == 0.0) {
+    return 0;
+  }
+  // Compute displacement and dT vectors:
   algebra::Vector3Ds positions(positions_.size());
   for (unsigned int i= 0; i < positions_.size(); ++i) {
     positions[i] = std::accumulate(positions_[i].begin(), positions_[i].end(),
                                    algebra::get_zero_vector_d<3>()) /
                    positions_[i].size();
   }
-  algebra::Vector3Ds displacements(positions.size() - 1);
-  for (unsigned int i = 1; i < positions_.size(); ++i) {
+  algebra::Vector3Ds displacements(n - 1);
+  IMP::Floats dts(n - 1);
+  for (unsigned int i = 1; i < n; ++i) {
     displacements[i - 1] = positions[i] - positions[i - 1];
+    dts[i - 1]= times_ns_[i] - times_ns_[i-1];
   }
-  return atom::get_diffusion_coefficient(displacements,
-                                         get_period() * get_dt());
+  return atom::get_diffusion_coefficient
+    (displacements, dts); //  get_period() * get_dt());
 }
 
 void ChainStatisticsOptimizerState::do_update(unsigned int) {
+  IMP_OBJECT_LOG;
+  atom::Simulator* simulator =
+    dynamic_cast< atom::Simulator* >( get_optimizer() );
+  IMP_USAGE_CHECK( simulator, "Optimizer must be a simulator in order to use "
+                   "ChainStatisticsOptimizerState, for time stats" );
+  // Get positions and times from current round:
   algebra::Vector3Ds vs;
   for (unsigned int i= 0; i < ps_.size(); ++i) {
     vs.push_back(core::XYZ(ps_[i]).get_coordinates());
   }
+  double cur_time_ns = simulator->get_current_time() / FS_IN_NS;
+  times_ns_.push_back( cur_time_ns );
   positions_.push_back(vs);
   while (positions_.size() > 1000) {
+    times_ns_.pop_front();
     positions_.pop_front();
   }
-  // radius of gyration and end-to-end distance of chain/bond:
+  // Radius of gyration and end-to-end distance of chain/bond:
   double w= 1.0/(++n_);
 #ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
   double rgyr= atom::get_radius_of_gyration(ps_, false);

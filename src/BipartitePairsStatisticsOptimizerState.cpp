@@ -48,7 +48,7 @@ namespace {
 
 
 BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
-(  WeakPointer<IMP::npctransport::Statistics> statistics_manager,
+(  IMP::npctransport::Statistics* statistics_manager,
    InteractionType interaction_type,
    const ParticlesTemp& particlesI, const ParticlesTemp& particlesII,
    double contact_range, double slack
