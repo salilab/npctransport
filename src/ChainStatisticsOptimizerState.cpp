@@ -8,6 +8,7 @@
 
 #include <IMP/npctransport/ChainStatisticsOptimizerState.h>
 #include <IMP/npctransport/enums.h>
+#include <IMP/npctransport/util.h>
 #include <IMP/algebra/geometric_alignment.h>
 #include <IMP/atom/estimates.h>
 #include <IMP/atom/distance.h>
@@ -39,7 +40,7 @@ void ChainStatisticsOptimizerState::reset()
 {
   IMP_OBJECT_LOG;
   positions_.clear();
-  times_ns_.clear();
+  times_fs_.clear();
   mean_rgyr_= -1.0;
   mean_rgyr2_= -1.0;
   mean_end_to_end_= -1.0;
@@ -117,27 +118,33 @@ double ChainStatisticsOptimizerState::get_diffusion_coefficient() const
   IMP_OBJECT_LOG;
   // Checks:
   unsigned int n= positions_.size();
-  IMP_USAGE_CHECK(times_ns_.size() == n,
+  IMP_USAGE_CHECK(times_fs_.size() == n,
                   "Length of times and positions lists is expected to be equal");
   if (n<2){
     return 0;
   }
-  if (times_ns_.front() - times_ns_.back() == 0.0) {
+  if (times_fs_.front() - times_fs_.back() == 0.0) {
     return 0;
   }
-  // Compute displacement and dT vectors:
+  // Compute chain center-of-mass displacement and dT vectors:
   algebra::Vector3Ds positions(positions_.size());
   for (unsigned int i= 0; i < positions_.size(); ++i) {
     positions[i] = std::accumulate(positions_[i].begin(), positions_[i].end(),
                                    algebra::get_zero_vector_d<3>()) /
                    positions_[i].size();
   }
-  algebra::Vector3Ds displacements(n - 1);
-  IMP::Floats dts(n - 1);
-  for (unsigned int i = 1; i < n; ++i) {
-    displacements[i - 1] = positions[i] - positions[i - 1];
-    dts[i - 1]= times_ns_[i] - times_ns_[i-1];
-  }
+  algebra::Vector3Ds displacements;
+  displacements.reserve(n-1);
+  std::transform(positions.begin()+1, positions.end(),
+                 positions.begin(),
+                 std::back_inserter(displacements),
+                 std::minus<algebra::Vector3D>());
+  IMP::Floats dts;
+  dts.reserve(n-1);
+  std::transform(times_fs_.begin()+1, times_fs_.end(),
+                   times_fs_.begin(),
+                 std::back_inserter(dts),
+                 std::minus<double>());
   return atom::get_diffusion_coefficient
     (displacements, dts); //  get_period() * get_dt());
 }
@@ -153,11 +160,11 @@ void ChainStatisticsOptimizerState::do_update(unsigned int) {
   for (unsigned int i= 0; i < ps_.size(); ++i) {
     vs.push_back(core::XYZ(ps_[i]).get_coordinates());
   }
-  double cur_time_ns = simulator->get_current_time() / FS_IN_NS;
-  times_ns_.push_back( cur_time_ns );
+  double cur_time_fs = simulator->get_current_time();
+  times_fs_.push_back( cur_time_fs );
   positions_.push_back(vs);
   while (positions_.size() > 1000) {
-    times_ns_.pop_front();
+    times_fs_.pop_front();
     positions_.pop_front();
   }
   // Radius of gyration and end-to-end distance of chain/bond:

@@ -16,6 +16,7 @@
 #include <IMP/container/ListSingletonContainer.h>
 #include <IMP/npctransport/Statistics.h>
 #include <IMP/npctransport/SimulationData.h>
+#include <IMP/npctransport/enums.h>
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 BodyStatisticsOptimizerState::BodyStatisticsOptimizerState
@@ -30,6 +31,7 @@ BodyStatisticsOptimizerState::BodyStatisticsOptimizerState
 
 void BodyStatisticsOptimizerState::reset() {
   positions_.clear();
+  times_fs_.clear();
   core::PeriodicOptimizerState::reset();
 }
 
@@ -68,15 +70,44 @@ double BodyStatisticsOptimizerState::get_correlation_time() const {
   }
   return sum / n;
 }
+
+namespace{
+  struct subtract_translations {
+    algebra::Vector3D operator()(algebra::Transformation3D const &a,
+                                 algebra::Transformation3D const &b)
+    {
+      return a.get_translation() - b.get_translation();
+    }
+  };
+};
+
 double BodyStatisticsOptimizerState::get_diffusion_coefficient() const {
-  if (positions_.empty()) return 0;
-  algebra::Vector3Ds displacements(positions_.size() - 1);
-  for (unsigned int i = 1; i < positions_.size(); ++i) {
-    displacements[i - 1] =
-        positions_[i].get_translation() - positions_[i - 1].get_translation();
+    IMP_OBJECT_LOG;
+  // Checks:
+  unsigned int n= positions_.size();
+  IMP_USAGE_CHECK(times_fs_.size() == n,
+                  "Length of times and positions lists is expected to be equal");
+  if (n<2){
+    return 0;
   }
-  return atom::get_diffusion_coefficient(displacements,
-                                         get_period() * get_dt());
+  if (times_fs_.front() - times_fs_.back() == 0.0) {
+    return 0;
+  }
+  // Compute displacements and dT vectors:
+  algebra::Vector3Ds displacements;
+  displacements.reserve(n-1);
+  std::transform(positions_.begin()+1, positions_.end(),
+                 positions_.begin(),
+                 std::back_inserter(displacements),
+                 subtract_translations());
+  IMP::Floats dts;
+  dts.reserve(n-1);
+  std::transform(times_fs_.begin()+1, times_fs_.end(),
+                   times_fs_.begin(),
+                 std::back_inserter(dts),
+                 std::minus<double>());
+  return atom::get_diffusion_coefficient
+    (displacements, dts); //  get_period() * get_dt());
 }
 
 void
@@ -95,9 +126,14 @@ BodyStatisticsOptimizerState
 
 void BodyStatisticsOptimizerState::do_update(unsigned int) {
   this->update_particle_type_zr_distribution_map();
+  atom::Simulator* simulator =
+    dynamic_cast< atom::Simulator* >( get_optimizer() );
+  double cur_time_ns = simulator->get_current_time();
+  times_fs_.push_back( cur_time_ns );
   positions_.push_back(core::RigidBody(p_)
                            .get_reference_frame().get_transformation_to());
   while (positions_.size() > 1000) {
+    times_fs_.pop_front();
     positions_.pop_front();
   }
 }

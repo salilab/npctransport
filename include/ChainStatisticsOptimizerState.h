@@ -29,7 +29,7 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
 
   // time series of the positions of particles in the chain:
   std::deque<algebra::Vector3Ds> positions_;
-  std::deque<double> times_ns_;
+  std::deque<double> times_fs_;
 
   // mean radius-of-gyration and its square since last reset
   double mean_rgyr_;

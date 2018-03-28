@@ -29,7 +29,10 @@ class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
   typedef core::PeriodicOptimizerState P;
   Particle *p_;
   WeakPointer<IMP::npctransport::Statistics> statistics_manager_;
+
+  // time series of the positions of particles in the chain:
   std::deque<algebra::Transformation3D> positions_;
+  std::deque<double> times_fs_;
 
   Particle *get_particle() const { return p_; }
 
