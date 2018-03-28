@@ -23,6 +23,7 @@ GlobalStatisticsOptimizerState::GlobalStatisticsOptimizerState
 }
 
 void GlobalStatisticsOptimizerState::reset() {
+  P::reset();
   mean_energy_= std::numeric_limits<double>::max();
   n_= 0;
 }

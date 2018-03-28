@@ -36,6 +36,7 @@ ParticleTransportStatisticsOptimizerState::
 }
 
 void ParticleTransportStatisticsOptimizerState::reset() {
+  P::reset();
   n_transports_up_ = 0;
   n_transports_down_ = 0;
   transport_time_points_in_ns_.clear();

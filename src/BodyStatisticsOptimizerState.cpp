@@ -30,9 +30,9 @@ BodyStatisticsOptimizerState::BodyStatisticsOptimizerState
 }
 
 void BodyStatisticsOptimizerState::reset() {
+  P::reset();
   positions_.clear();
   times_fs_.clear();
-  core::PeriodicOptimizerState::reset();
 }
 
 double BodyStatisticsOptimizerState::get_dt() const {

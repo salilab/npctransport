@@ -39,6 +39,7 @@ ChainStatisticsOptimizerState::ChainStatisticsOptimizerState
 void ChainStatisticsOptimizerState::reset()
 {
   IMP_OBJECT_LOG;
+  P::reset();
   positions_.clear();
   times_fs_.clear();
   mean_rgyr_= -1.0;
