@@ -161,8 +161,10 @@ class Tests(IMP.test.TestCase):
         # verify that anchors remain intact during optimization
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             short_init_factor=0.0001
+            n_opt_cycles= 10
             print("short position initialization in non-fast mode")
         else:
+            n_opt_cycles=100000
             short_init_factor=1.0
         IMP.npctransport.initialize_positions(sd,[],False,short_init_factor)
 
@@ -171,7 +173,7 @@ class Tests(IMP.test.TestCase):
 
         print("Optimizing")
         print("dT %.1f fs" % sd.get_bd().get_maximum_time_step())
-        sd.get_bd().optimize(100000)
+        sd.get_bd().optimize(n_opt_cycles)
         print()
 
         print("Energy after optimization:",
@@ -196,17 +198,23 @@ class Tests(IMP.test.TestCase):
         with two beads
         '''
         ntrials=3
+        is_raise_on_fail= True
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
+            print("Checks mode - limited run for speed")
+            ntrials= 1
+            is_raise_on_fail= False
         for i in range(ntrials):
             try:
                 print("Try #", i)
                 self._test_harmonic_spring_score_from_protobuf(2)
                 return
             except AssertionError as e:
-                print("EXCEPTION CAUGHT Try #", i)
-                print(e)
-                print("==\n\n")
-                if i+1==ntrials:
-                    raise
+                if is_raise_on_fail:
+                    print("EXCEPTION CAUGHT Try #", i)
+                    print(e)
+                    print("==\n\n")
+                    if i+1==ntrials:
+                        raise
 
     def test_harmonic_spring_score_from_protobuf_three_beads(self):
         '''
@@ -214,17 +222,23 @@ class Tests(IMP.test.TestCase):
         with three beads
         '''
         ntrials=3
+        is_raise_on_fail= True
+        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
+            print("Checks mode - limited run for speed")
+            ntrials= 1
+            is_raise_on_fail= False
         for i in range(ntrials):
             try:
                 print("Try #", i)
                 self._test_harmonic_spring_score_from_protobuf(3)
                 return
             except AssertionError as e:
-                print("EXCEPTION CAUGHT Try #", i)
-                print(e)
-                print("==\n\n")
-                if i+1==ntrials:
-                    raise
+                if is_raise_on_fail:
+                    print("EXCEPTION CAUGHT Try #", i)
+                    print(e)
+                    print("==\n\n")
+                    if i+1==ntrials:
+                        raise
 
 
 if __name__ == '__main__':
