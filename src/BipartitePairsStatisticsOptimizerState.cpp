@@ -78,8 +78,6 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
 }
 
 void BipartitePairsStatisticsOptimizerState::reset() {
-  // note - time_ns will be updated in real time,
-  // but just in case, set it to 0 for now
   is_reset_ = true; // indicate, for next round of update
   if(statistics_manager_.get() != nullptr) {
     if(statistics_manager_->get_is_activated()) {

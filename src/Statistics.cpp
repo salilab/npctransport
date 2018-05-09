@@ -602,20 +602,20 @@ void Statistics::update
   bool read(false);
   int fd=IMP_C_OPEN(output_file_name_.c_str(),
                     IMP_C_OPEN_FLAG(O_RDONLY) | IMP_C_OPEN_BINARY);
-  if(fd!=-1){
-    google::protobuf::io::FileInputStream fis(fd);
-    google::protobuf::io::CodedInputStream cis(&fis);
-    cis.SetTotalBytesLimit(500000000,200000000);
-    read=output.ParseFromCodedStream(&cis);
-    IMP_C_CLOSE(fd);
-  }
+  if(fd!=-1) {
+      google::protobuf::io::FileInputStream fis(fd);
+      google::protobuf::io::CodedInputStream cis(&fis);
+      cis.SetTotalBytesLimit(500000000,200000000);
+      read=output.ParseFromCodedStream(&cis);
+      IMP_C_CLOSE(fd);
+    }
   IMP_ALWAYS_CHECK(read,
                    "Failed updating statistics to " << output_file_name_.c_str() << std::endl,
                    IMP::IOException);
   RMF::HDF5::File hdf5_file= RMF::HDF5::create_file(output_file_name_ + ".hdf5");
   RMF::HDF5::Group hdf5_floater_xyz_hist_group;
   static const std::string  FLOATER_XYZ_GROUP("floater_xyz_hist");
-  if(hdf5_file.get_has_child(FLOATER_XYZ_GROUP)){
+  if(hdf5_file.get_has_child(FLOATER_XYZ_GROUP)) {
     IMP_ALWAYS_CHECK(hdf5_file.get_child_is_group(FLOATER_XYZ_GROUP),
                      FLOATER_XYZ_GROUP << " is supposed to be an HDF5 group",
                      ValueException);
@@ -623,7 +623,6 @@ void Statistics::update
   } else {
     hdf5_floater_xyz_hist_group= hdf5_file.add_child_group(FLOATER_XYZ_GROUP);
   }
-
 
   ::npctransport_proto::Statistics* stats = output.mutable_statistics();
   int nf = stats->number_of_frames();
