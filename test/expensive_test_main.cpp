@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     // simulate
     IMP::npctransport::do_main_loop(sd, IMP::RestraintsTemp());
   }
-  catch (IMP::Exception e) {
+  catch (const IMP::Exception &e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 1;
   }
