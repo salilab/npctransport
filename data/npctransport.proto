@@ -75,6 +75,8 @@ message Configuration {
     required string type=8; // type name, e.g. "nup53"
   };
   message Interaction {
+    // is range_sigma_0/1 are positive, uses non-isotropic interaction mechanism, maximal energy drop of (0.25*k*range^2)
+    // if either of range_sigma_0/1 is zero, uses isotropic linear interaction, maximal energy drop of (k*range)
     required string type0=1; // site 0 type name, e.g., "fg_nsp1"
     required string type1=2; // site 1 type name, e.g., "kap121"
     required IntRange is_on=3;
