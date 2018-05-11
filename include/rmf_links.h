@@ -37,7 +37,9 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   boost::unordered_map<ParticleIndex, ParticleIndexes> particles_;
 
  protected:
-  /** link the specified rmf node to particle cur. In addition, load
+  /** Called by rmf::HierarchyLoadLink::add_link_recursive()
+
+      link the specified rmf node to particle cur. In addition, load
       the list of sites associated with the rmf node together with
       their coordinates (children of type RMF::Geometry decorated with
       RMF::BallConst) and associate them with the particle type of cur

@@ -249,14 +249,7 @@ void SimulationData::initialize(std::string prev_output_file,
     create_obstacles(pb_assignment.obstacles(i));
   }
 
-  IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
-  for (int i = 0; i < pb_assignment.interactions_size(); ++i) {
-    const ::npctransport_proto::Assignment_InteractionAssignment &
-        interaction_i = pb_assignment.interactions(i);
-    add_interaction(interaction_i);
-  }
-
-  // Load from RMF conformation (or conformation) if they exist in protobuf
+  // Load coordinates from RMF conformation (or conformation) if they exist in protobuf:
   if (pb_data.has_rmf_conformation())
     {
       IMP_LOG(VERBOSE, "Restarting from output file internal RMF conformation"
@@ -270,6 +263,14 @@ void SimulationData::initialize(std::string prev_output_file,
       IMP_LOG(VERBOSE, "Restarting from output file conformation" << std::endl);
       load_pb_conformation(pb_data.conformation(), get_beads(), sites_);
     }
+
+  // Add interactions:
+  IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
+  for (int i = 0; i < pb_assignment.interactions_size(); ++i) {
+    const ::npctransport_proto::Assignment_InteractionAssignment &
+        interaction_i = pb_assignment.interactions(i);
+    add_interaction(interaction_i);
+  }
 
   get_bd()->set_current_time( initial_simulation_time_ns_ );
   pb_mutable_assignment->add_imp_module_version
