@@ -26,6 +26,8 @@ Simulate an fg and a kap interacting
 //#include <boost/algorithm/cxx11/is_sorted.hpp>
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
+class SimulationData;
+
 /** returns particles with optimizable coordinates from particles */
 IMPNPCTRANSPORTEXPORT
 ParticlesTemp get_optimizable_particles
@@ -210,6 +212,26 @@ algebra::Sphere3Ds get_spheres_from_vectors
 IMPNPCTRANSPORTEXPORT
 algebra::Vector3Ds get_spheres_centers
 (algebra::Sphere3Ds const & spheres);
+
+
+//! Copy XYZ coordinates or RigidBody reference frame from src_p to
+//! trg_p, if it is decorated with XYZ or RigidBody. Do nothing
+//! otherwise.
+IMPNPCTRANSPORTEXPORT
+void copy_particle_reference_frame_if_applicable( Particle* src_p,
+                                                  Particle* trg_p );
+
+//! Copy XYZ coordinates or RigidBody reference frame from src_pi to trg_pi if applicable,
+//! and if src_pi and trg_pi are an atom hierarchy, proceed recursively to their children.
+//! If so, assumes identical topology of hierarchies for src_pi and trg_pi
+IMPNPCTRANSPORTEXPORT
+void copy_hierarchy_reference_frame_recursive( Particle* src_p,
+                                               Particle* trg_p );
+
+//! copy coordinates of src_sd to trg_sd for FG repeats only
+IMPNPCTRANSPORTEXPORT
+void copy_FGs_coordinates(SimulationData const* src_sd,
+                          SimulationData* trg_sd);
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

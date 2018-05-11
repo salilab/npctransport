@@ -6,6 +6,7 @@
 # */
 
 #include <IMP/npctransport/util.h>
+#include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/check_macros.h>
 #include <IMP/exception.h>
@@ -35,7 +36,7 @@ void get_protobuf_configuration_from_text
   npctransport_proto::Configuration config;
   std::ifstream ifs_txt(config_txt.c_str());
   IMP_ALWAYS_CHECK(ifs_txt, "File " << config_txt << " not found",
-                   IMP::IOException);
+                   IOException);
   io::IstreamInputStream isis_txt(&ifs_txt);
   google::protobuf::TextFormat::Parse(&isis_txt, &config);
   ifs_txt.close();
@@ -97,7 +98,7 @@ ParticleIndexes get_particle_indexes
 // @param s the statistics message for searching the fg
 // @param pt the type of fg to look for
 unsigned int find_or_add_fg_chain_of_type(::npctransport_proto::Statistics* s,
-                                    IMP::core::ParticleType pt)
+                                    core::ParticleType pt)
 {
   std::string type = pt.get_string();
   // find fg with same type
@@ -120,7 +121,7 @@ unsigned int find_or_add_fg_chain_of_type(::npctransport_proto::Statistics* s,
 // @param s the statistics message for searching the fg
 // @param pt the type of fg to look for
 unsigned int find_or_add_fg_bead_of_type(::npctransport_proto::Statistics* s,
-                                         IMP::core::ParticleType pt)
+                                         core::ParticleType pt)
 {
   // TODO: works only for SimulationData.h version >=4.0 (=npctransport protobuf version>=4.0)
   std::string type = pt.get_string();
@@ -145,7 +146,7 @@ unsigned int find_or_add_fg_bead_of_type(::npctransport_proto::Statistics* s,
 // @param s the statistics message for searching t
 // @param pt the type to look for
 unsigned int find_or_add_floater_of_type(::npctransport_proto::Statistics* s,
-                                         IMP::core::ParticleType pt)
+                                         core::ParticleType pt)
 {
   std::string type = pt.get_string();
   // find fg with same type
@@ -168,7 +169,7 @@ unsigned int find_or_add_floater_of_type(::npctransport_proto::Statistics* s,
 // @param s the statistics message for searching t
 // @param it the type to look for
 unsigned int find_or_add_interaction_of_type
-( ::npctransport_proto::Statistics* s, IMP::npctransport::InteractionType it)
+( ::npctransport_proto::Statistics* s, npctransport::InteractionType it)
 {
   using namespace IMP;
   unsigned int n = s->interactions_size();
@@ -209,5 +210,65 @@ algebra::Vector3Ds get_spheres_centers
   }
   return ret;
 }
+
+//! Copy XYZ coordinates or RigidBody reference frame from src_pi to
+//! trg_pi, if it is decorated with XYZ or RigidBody. Do nothing
+//! otherwise.
+void
+copy_particle_reference_frame_if_applicable( Particle*  src_p,
+                                             Particle* trg_p)
+{
+  if(core::RigidBody::get_is_setup(src_p)){
+    IMP_USAGE_CHECK(core::RigidBody::get_is_setup(trg_p),
+                    "Target is not RigidBody but source is");
+    core::RigidBody src_rb(src_p);
+    core::RigidBody trg_rb(trg_p);
+    trg_rb.set_reference_frame(src_rb.get_reference_frame());
+  }
+  else if(core::XYZ::get_is_setup(src_p)){
+    IMP_USAGE_CHECK(core::XYZ::get_is_setup(trg_p),
+                    "Target is not XYZ but source is");
+    core::XYZ src_xyz(src_p);
+    core::XYZ trg_xyz(trg_p);
+    trg_xyz.set_coordinates(src_xyz.get_coordinates());
+  }
+}
+
+//! Copy XYZ coordinates or RigidBody reference frame from src_pi to trg_pi if applicable,
+//! and if src_pi and trg_pi are an atom hierarchy, proceed recursively to their children.
+//! If so, assumes identical topology of hierarchies for src_pi and trg_pi
+void copy_hierarchy_reference_frame_recursive( Particle* src_p,
+                                               Particle* trg_p )
+{
+  copy_particle_reference_frame_if_applicable(src_p, trg_p);
+  if(atom::Hierarchy::get_is_setup(src_p)) {
+    IMP_USAGE_CHECK(atom::Hierarchy::get_is_setup(trg_p),
+                    "Cannot copy from a hierarchy to a non-hierarchy particle");
+    atom::Hierarchy src_h(src_p);
+    atom::Hierarchy trg_h(trg_p);
+    IMP_USAGE_CHECK(src_h.get_number_of_children() == trg_h.get_number_of_children(),
+                    "Copied hierarchies do not have the same topologies");
+    for(unsigned int i=0; i<src_h.get_number_of_children(); i++){
+      copy_hierarchy_reference_frame_recursive(src_h.get_child(i),
+                                               trg_h.get_child(i));
+    } // for
+  } // if
+}
+
+//! copy coordinates of src_sd to trg_sd for FG repeats only
+void
+copy_FGs_coordinates( SimulationData const* src_sd,
+                      SimulationData* trg_sd)
+{
+  atom::Hierarchies src_H= src_sd->get_fg_chain_roots();
+  atom::Hierarchies trg_H= trg_sd->get_fg_chain_roots();
+  IMP_USAGE_CHECK(src_H.size()==trg_H.size(),
+                  "Different number of FG chains or different model in source and target siumulation data - cannot copy");
+  for(unsigned int i=0; i<src_H.size(); i++){
+    copy_hierarchy_reference_frame_recursive(src_H[i].get_particle(),
+                                             trg_H[i].get_particle());
+  }
+}
+
 
 IMPNPCTRANSPORT_END_NAMESPACE
