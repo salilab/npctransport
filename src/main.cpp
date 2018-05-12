@@ -226,8 +226,8 @@ namespace {
   ( IMP::npctransport::SimulationData* target_sd, std::string ref_output_fname )
   {
     std::cout << "Loading FGs from " << ref_output_fname << std::endl;
-    IMP_NEW(SimulationData, source_sd, (ref_output_fname, false));
-    copy_FGs_coordinates(source_sd.get(), target_sd);
+    IMP_NEW(SimulationData, reference_sd, (ref_output_fname, false));
+    copy_FGs_coordinates(reference_sd.get(), target_sd);
   }
 
   /** writes the output assignment file based on the configuration parameters
