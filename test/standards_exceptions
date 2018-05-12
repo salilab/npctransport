@@ -28,5 +28,8 @@ function_name_exceptions= \
         'make_unordered_interaction_type',
         'BrownianDynamicsTAMDWithSlabSupport.set_use_stochastic_runge_kutta',
         'BrownianDynamicsTAMDWithSlabSupport.simulate',
-        'BrownianDynamicsTAMDWithSlabSupport.simulate_wave'
+        'BrownianDynamicsTAMDWithSlabSupport.simulate_wave',
+        'copy_FGs_coordinates',
+        'copy_hierarchy_reference_frame_recursive',
+        'copy_particle_reference_frame_if_applicable'
         ]

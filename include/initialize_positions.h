@@ -35,13 +35,17 @@ IMPNPCTRANSPORTEXPORT
    @param is_disable_randomize if true, do not initially randomize particle positions,
                                essentially performing an extended relaxation from
                                the starting coordinates
+   @param are_fgs_pre_initialized if true, do not try to pre-optimize FGs before adding diffusers
  */
-void initialize_positions(SimulationData *sd,
-                          const RestraintsTemp &extra_restraints =
-                              RestraintsTemp(),
-                          bool debug = false,
-                          double short_init_factor = 1.0,
-                          bool is_disable_randomize = false);
+void initialize_positions
+( SimulationData *sd,
+  const RestraintsTemp &extra_restraints =
+  RestraintsTemp(),
+  bool debug = false,
+  double short_init_factor = 1.0,
+  bool is_disable_randomize = false,
+  bool are_fgs_pre_initialized = false );
+
 
 IMPNPCTRANSPORT_END_NAMESPACE
 

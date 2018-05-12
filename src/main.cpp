@@ -15,11 +15,12 @@
 #include <IMP/exception.h>
 #include <IMP/check_macros.h>
 //#include <IMP/benchmark/Profiler.h>
-#include <IMP/npctransport/initialize_positions.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/internal/boost_main.h>
 #include <IMP/npctransport.h>
+#include <IMP/npctransport/initialize_positions.h>
 #include <IMP/npctransport/protobuf.h>
+#include <IMP/npctransport/util.h>
 #include <IMP/rmf/frames.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/atom/Diffusion.h>
@@ -55,35 +56,49 @@
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 boost::int64_t work_unit = -1;
 IMP::AddIntFlag work_unitadder
-( "work_unit", "The work unit",
+( "work_unit",
+  "The work unit",
   &work_unit);
 std::string configuration = "configuration.pb";
 IMP::AddStringFlag configuration_adder
-( "configuration", "input configuration file in protobuf format"
+( "configuration",
+  "input configuration file in protobuf format"
   " [default: %default]",
   &configuration);
 std::string output = "output.pb";
 IMP::AddStringFlag output_adder
-( "output", "output assignments and statistics file in protobuf format,"
+( "output",
+  "output assignments and statistics file in protobuf format,"
   " recording the assignment being executed"
   " [default: %default]",
   &output);
 std::string restart = "";
 IMP::AddStringFlag restart_adder
-( "restart", "output file of a previous run, from which to restart"
+( "restart",
+  "output file of a previous run, from which to restart"
   " this run (also initializing the final coordinates"
   " from this previous run, if they exist in the output"
   " file)"
   " [default: %default]",
   &restart);
+std::string restart_fgs_only = "";
+IMP::AddStringFlag restart_fgs_only_adder
+( "restart_fgs_only",
+  "output file of a previous run, from which to restart"
+  " only the FGs (but not diffusers). The system then goes through equilibration"
+  " with the new diffusers, but not the FGs"
+  " [default: %default]",
+  &restart_fgs_only);
 std::string conformations = "";
 IMP::AddStringFlag conformations_adder
-( "conformations", "RMF file for recording the conforomations along the "
+( "conformations",
+  "RMF file for recording the conforomations along the "
   " simulation [default: %default]",
   &conformations);
 std::string init_rmffile = "";
 IMP::AddStringFlag init_rmf_adder
-( "init_rmffile", "[OBSOLETE]"
+( "init_rmffile",
+  "[OBSOLETE]"
   " RMF file for initializing the simulation with its"
   " last frame (to continue a previous run). Note that"
   " this option overrides the coordinates specified in"
@@ -97,7 +112,8 @@ IMP::AddStringFlag final_conformations_adder
   &final_conformations);
 bool verbose = false;
 IMP::AddBoolFlag verbose_adder
-( "verbose", "Print more info during run",
+( "verbose",
+  "Print more info during run",
   &verbose);
 bool first_only = false;
 IMP::AddBoolFlag first_only_adder
@@ -201,6 +217,17 @@ namespace {
         f_data->mutable_interaction_k_factor()->set_value( new_k_factor );
       }
     }
+  }
+
+  //! Use output file specified in ref_output_fname to load
+  //! coordinates of FGs into target_sd. It is assumed that the FGs
+  //! from ref_output_fname have the same topology as in target_sd
+  void restart_fgs_from_reference_output_file
+  ( IMP::npctransport::SimulationData* target_sd, std::string ref_output_fname )
+  {
+    std::cout << "Loading FGs from " << ref_output_fname << std::endl;
+    IMP_NEW(SimulationData, source_sd, (ref_output_fname, false));
+    copy_FGs_coordinates(source_sd.get(), target_sd);
   }
 
   /** writes the output assignment file based on the configuration parameters
@@ -309,19 +336,21 @@ namespace {
     return true;
   }
 
-} // anonymous namespace
+};
+/****** END of anonymous namespace ********/
 
 /********************* public functions **********************/
 
 // initialize and return a simulation data object based on
 // program command line parameters
-IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
+IMP::npctransport::SimulationData *startup(int argc, char *argv[])
+{
   IMP_NPC_PARSE_OPTIONS(argc, argv);
   IMP_ALWAYS_CHECK( short_init_factor > 0,
                     "short_init_factor must be positive",
                     IMP::ValueException );
   IMP_OMP_PRAGMA(critical)
-  std::cout << "Random seed is " << IMP::get_random_seed() << std::endl;
+    std::cout << "Random seed is " << IMP::get_random_seed() << std::endl;
   IMP::Pointer<IMP::npctransport::SimulationData> sd;
   write_output_based_on_flags(IMP::get_random_seed());
   sd = new IMP::npctransport::SimulationData(output, IMP::run_quick_test);
@@ -330,18 +359,25 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[]) {
                      !no_save_restraints_to_rmf);
   }
   if (!init_rmffile.empty()) {
-    sd->initialize_positions_from_rmf(
-        RMF::open_rmf_file_read_only(init_rmffile), -1);
+    sd->initialize_positions_from_rmf
+      ( RMF::open_rmf_file_read_only(init_rmffile), -1);
     IMP_OMP_PRAGMA(critical)
+      std::cout
+      << "Initialize coordinates from last frame of an existing RMF file "
+      << init_rmffile << std::endl;
+  }
+  if (!restart_fgs_only.empty()) {
     std::cout
-        << "Initialize coordinates from last frame of an existing RMF file "
-        << init_rmffile << std::endl;
+      << "Initialize coordinates of FGs only from output file "
+      << restart_fgs_only << std::endl;
+    restart_fgs_from_reference_output_file(sd, restart_fgs_only);
   }
   return sd.release();
 }
 
 //! remove nup42 and its anchors (also from obstacles)
-void remove_Nup42(SimulationData* sd){
+void remove_Nup42(SimulationData* sd)
+{
   // remove all diffusing Nup42 beads:
   {
     std::cout << "Removing Nup42 diffusing beads" << std::endl;
@@ -524,7 +560,8 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       sd->switch_suspend_rmf(true);
       std::cout << "Doing initial coordinates optimization..." << std::endl;
       initialize_positions(sd, init_restraints, verbose, short_init_factor,
-                           is_force_initialization_on_restart);
+                           is_force_initialization_on_restart,
+                           !restart_fgs_only.empty());
 
       sd->get_bd()->set_current_time(0.0);
       sd->get_statistics()->reset_statistics_optimizer_states();
