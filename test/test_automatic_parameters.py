@@ -28,7 +28,7 @@ class ProtobufTests(IMP.test.TestCase):
         for fg_radius in fg_radii:
             fg= IMP.npctransport.add_fg_type \
                 ( config,
-                  type_name="fg{}".format(fg_radius),
+                  type_name="fg{0}".format(fg_radius),
                   radius=fg_radius,
                   number_of_beads= 10,
                   number= 1,
@@ -38,7 +38,7 @@ class ProtobufTests(IMP.test.TestCase):
         for kap_radius in kap_radii:
             kap= IMP.npctransport.add_float_type \
                  ( config,
-                   type_name="kap{}".format(kap_radius),
+                   type_name="kap{0}".format(kap_radius),
                    radius=kap_radius,
                    number= 1,
                    interactions= 4 )
