@@ -113,14 +113,15 @@ void color_fgs(IMP::npctransport::SimulationData& sd) {
       double f = i / (float)(n_chains - 1);  // spread in [0..1]
       color = display::get_jet_color(f);
     }
-    // apply color
+    // apply color (only to colored children)
     atom::Hierarchies children = core::get_all_descendants(chain_roots[i]);
     for (unsigned int j = 0; j < children.size(); j++) {
       if (Colored::get_is_setup(children[j])) {
         Colored(children[j]).set_color(color);
-      } else {
+      } /* // removed because shouldn't setup color if not already colored - results in issues with RMF linking
+          else {
         Colored::setup_particle(children[j], color);
-      }
+        }*/ //
     }
   }
 }

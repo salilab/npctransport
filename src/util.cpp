@@ -218,11 +218,13 @@ void
 copy_particle_reference_frame_if_applicable( Particle*  src_p,
                                              Particle* trg_p)
 {
+  IMP_LOG(VERBOSE, "Copying particle " << src_p << " to " << trg_p << std::endl);
   if(core::RigidBody::get_is_setup(src_p)){
     IMP_USAGE_CHECK(core::RigidBody::get_is_setup(trg_p),
                     "Target is not RigidBody but source is");
     core::RigidBody src_rb(src_p);
     core::RigidBody trg_rb(trg_p);
+    IMP_LOG(VERBOSE, "Copying rigid body " << src_rb << " to " << trg_rb << std::endl);
     trg_rb.set_reference_frame(src_rb.get_reference_frame());
   }
   else if(core::XYZ::get_is_setup(src_p)){
@@ -230,6 +232,7 @@ copy_particle_reference_frame_if_applicable( Particle*  src_p,
                     "Target is not XYZ but source is");
     core::XYZ src_xyz(src_p);
     core::XYZ trg_xyz(trg_p);
+    IMP_LOG(VERBOSE, "Copying xyz " << src_xyz << " to " << trg_xyz << std::endl);
     trg_xyz.set_coordinates(src_xyz.get_coordinates());
   }
 }
