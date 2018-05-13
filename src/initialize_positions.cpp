@@ -365,18 +365,21 @@ void initialize_positions(SimulationData *sd,
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
   }
-  // pin first link of fgs, if not already pinned
+  // pin first link of fgs, if not already pinned, or all fg beads if pre-initialized
   boost::ptr_vector<
     IMP::npctransport::internal::TemporarySetOptimizationStateRAII> chain_pins;
   atom::Hierarchies chains = sd->get_fg_chain_roots();
   for (unsigned int i = 0; i < chains.size(); ++i) {
-    if(are_fgs_pre_initialized){
-      break;
-    }
     Pointer<FGChain> chain = get_fg_chain(chains[i]);
-    chain_pins.push_back
-      ( new IMP::npctransport::internal::TemporarySetOptimizationStateRAII
-        (chain->get_bead(0), false) );
+    unsigned int n_pinned=0;
+    if(are_fgs_pre_initialized){
+      n_pinned= chain->get_number_of_beads();
+    }
+    for(unsigned int j= 0; j<n_pinned; j++){
+      chain_pins.push_back
+        ( new IMP::npctransport::internal::TemporarySetOptimizationStateRAII
+          (chain->get_bead(j), false) );
+    }
   }
 
   int dump_interval = sd->get_rmf_dump_interval_frames();

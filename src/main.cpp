@@ -25,6 +25,7 @@
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/atom/Diffusion.h>
 #include <IMP/atom/estimates.h>
+#include <IMP/atom/Hierarchy.h>
 #include <IMP/container.h>
 #include <IMP/CreateLogContext.h>
 #include <IMP/random.h>
@@ -227,7 +228,25 @@ namespace {
   {
     std::cout << "Loading FGs from " << ref_output_fname << std::endl;
     IMP_NEW(SimulationData, reference_sd, (ref_output_fname, false));
+    if(0){
+      atom::Hierarchy h_fg0_target=
+        target_sd->get_fg_chain_roots()[0].get_child(1);
+      atom::Hierarchy h_fg0_reference=
+        reference_sd->get_fg_chain_roots()[0].get_child(1);
+      std::cout << "Coordinates of second fg bead in target and referefnce before: "
+                << core::XYZ(h_fg0_target) << " "
+                << core::XYZ(h_fg0_reference) << std::endl;
+    }
     copy_FGs_coordinates(reference_sd.get(), target_sd);
+    if(0){
+      atom::Hierarchy h_fg0_target=
+        target_sd->get_fg_chain_roots()[0].get_child(1);
+      atom::Hierarchy h_fg0_reference=
+        reference_sd->get_fg_chain_roots()[0].get_child(1);
+      std::cout << "Coordinates of second fg bead in target and referefnce after: "
+                << core::XYZ(h_fg0_target) << " "
+                << core::XYZ(h_fg0_reference) << std::endl;
+    }
   }
 
   /** writes the output assignment file based on the configuration parameters
@@ -529,16 +548,22 @@ void reset_box_size(SimulationData* sd, double box_size){
   new_output.SerializeToOstream(&outf);
 }
 
-//  Run simulation using preconstructed SimulationData object sd,
-//  with ad-hoc init restratins init_restraints
+//!  Run simulation using preconstructed SimulationData object sd,
+//!  with ad-hoc init restratins init_restraints
 void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   using namespace IMP;
+  if(0){
+    std::cout << "Coordinates of second fg bead in start of do_main_loop(): "
+              << core::XYZ(sd->get_fg_chain_roots()[0].get_child(1))
+              << std::endl;
+  }
+
   sd->set_was_used( true );
   const int max_frames_per_chunk = sd->get_output_statistics_interval_frames();
   /** initial optimization and equilibration needed unless starting
       from another output file or rmf file */
   bool is_initial_optimization = (restart.empty() && init_rmffile.empty()) ||
-    is_force_initialization_on_restart;;
+    is_force_initialization_on_restart;
   bool is_BD_equilibration = is_initial_optimization;
   bool is_BD_full_run = !initialize_only;
 
@@ -559,9 +584,19 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
     if (is_initial_optimization) {
       sd->switch_suspend_rmf(true);
       std::cout << "Doing initial coordinates optimization..." << std::endl;
-      initialize_positions(sd, init_restraints, verbose, short_init_factor,
-                           is_force_initialization_on_restart,
+      bool is_disable_randomize=
+        is_force_initialization_on_restart || !restart_fgs_only.empty();
+      initialize_positions(sd,
+                           init_restraints,
+                           verbose,
+                           short_init_factor,
+                           is_disable_randomize,
                            !restart_fgs_only.empty());
+      if(0){
+        std::cout << "Coordinates of second fg bead in start after initialization: "
+                  << core::XYZ(sd->get_fg_chain_roots()[0].get_child(1))
+                  << std::endl;
+      }
 
       sd->get_bd()->set_current_time(0.0);
       sd->get_statistics()->reset_statistics_optimizer_states();
