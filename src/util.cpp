@@ -241,10 +241,10 @@ copy_particle_reference_frame_if_applicable( Particle*  src_p,
   if (RelaxingSpring::get_is_setup(src_p)) {
     RelaxingSpring src_rs(src_p);
     RelaxingSpring trg_rs(trg_p);
-    trg_rs.set_rest_length(src_rs.get_rest_length());
     std::cout << "Copying RelaxingSpring rest length " << src_rs.get_rest_length()
               << " overriding target value " << trg_rs.get_rest_length()
               << std::endl;
+    trg_rs.set_rest_length(src_rs.get_rest_length());
   }
 
 }
