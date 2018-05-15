@@ -87,7 +87,7 @@ IMP::AddStringFlag restart_fgs_only_adder
 ( "restart_fgs_only",
   "output file of a previous run, from which to restart"
   " only the FGs (but not diffusers). The system then goes through equilibration"
-  " with the new diffusers, but not the FGs"
+  " with the new diffusers, but not the FGs. The new diffusers are still randomized by default."
   " [default: %default]",
   &restart_fgs_only);
 std::string conformations = "";
@@ -585,7 +585,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       sd->switch_suspend_rmf(true);
       std::cout << "Doing initial coordinates optimization..." << std::endl;
       bool is_disable_randomize=
-        is_force_initialization_on_restart || !restart_fgs_only.empty();
+        is_force_initialization_on_restart; // if restarting, shouldn't randomize even if re-initializing cause want to preserve old starting point
       initialize_positions(sd,
                            init_restraints,
                            verbose,

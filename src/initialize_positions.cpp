@@ -359,8 +359,8 @@ void initialize_positions(SimulationData *sd,
   IMP_ALWAYS_CHECK(short_init_factor > 0,
                    "short init factor should be positive",
                    IMP::ValueException);
-  if(!is_disable_randomize){
-    randomize_particles(sd->get_beads(), sd->get_box());
+  if(!is_disable_randomize && !are_fgs_pre_initialized){
+    randomize_particles(sd->get_beads(), sd->get_box()); // randomize before FGs are frozen
   }
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
@@ -381,6 +381,10 @@ void initialize_positions(SimulationData *sd,
           (chain->get_bead(j), false) );
     }
   }
+  if(!is_disable_randomize && are_fgs_pre_initialized){
+    randomize_particles(sd->get_beads(), sd->get_box()); // randomize only now that FGs are frozen
+  }
+
 
   int dump_interval = sd->get_rmf_dump_interval_frames();
   if (sd->get_rmf_sos_writer()) {
