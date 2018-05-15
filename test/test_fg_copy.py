@@ -104,6 +104,21 @@ class FGCopyTests(IMP.test.TestCase):
         self.assertTrue(are_rigid_body_reference_frames_equal(src_rb, trg_rb))
 
 
+        # Relaxing Spring:
+        R=10.0
+        IMP.core.XYZR.setup_particle(m, src_p, R)
+        IMP.core.XYZR.setup_particle(m, trg_p, R)
+        src_rs= IMP.npctransport.RelaxingSpring.setup_particle(src_p, src_p, src_p, 1.0, 1.0);
+        trg_rs= IMP.npctransport.RelaxingSpring.setup_particle(trg_p, trg_p, trg_p, 1.0, 1.0);
+        trg_rs.set_rest_length(100.0)
+        self.assertAlmostEqual(src_rs.get_rest_length(), 20.0)
+        self.assertAlmostEqual(trg_rs.get_rest_length(), 100.0)
+        IMP.npctransport.copy_particle_reference_frame_if_applicable(src_p, trg_p)
+        self.assertAlmostEqual(src_rs.get_rest_length(), 20.0)
+        self.assertAlmostEqual(trg_rs.get_rest_length(), 20.0)
+
+
+
     def test_copy_fgs(self):
         test_util.test_protobuf_installed(self)
         config_fname = "./config_fg_copy.pb" # self.get_tmp_file_name("simple_cfg.pb")
