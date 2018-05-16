@@ -17,6 +17,7 @@
 //#include <IMP/benchmark/Profiler.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
 #include <IMP/npctransport/internal/boost_main.h>
+#include <IMP/npctransport/internal/initialize_positions_RAIIs.h>
 #include <IMP/npctransport.h>
 #include <IMP/npctransport/initialize_positions.h>
 #include <IMP/npctransport/protobuf.h>
@@ -228,25 +229,7 @@ namespace {
   {
     std::cout << "Loading FGs from " << ref_output_fname << std::endl;
     IMP_NEW(SimulationData, reference_sd, (ref_output_fname, false));
-    if(0){
-      atom::Hierarchy h_fg0_target=
-        target_sd->get_fg_chain_roots()[0].get_child(1);
-      atom::Hierarchy h_fg0_reference=
-        reference_sd->get_fg_chain_roots()[0].get_child(1);
-      std::cout << "Coordinates of second fg bead in target and referefnce before: "
-                << core::XYZ(h_fg0_target) << " "
-                << core::XYZ(h_fg0_reference) << std::endl;
-    }
     copy_FGs_coordinates(reference_sd.get(), target_sd);
-    if(0){
-      atom::Hierarchy h_fg0_target=
-        target_sd->get_fg_chain_roots()[0].get_child(1);
-      atom::Hierarchy h_fg0_reference=
-        reference_sd->get_fg_chain_roots()[0].get_child(1);
-      std::cout << "Coordinates of second fg bead in target and referefnce after: "
-                << core::XYZ(h_fg0_target) << " "
-                << core::XYZ(h_fg0_reference) << std::endl;
-    }
   }
 
   /** writes the output assignment file based on the configuration parameters
@@ -552,11 +535,6 @@ void reset_box_size(SimulationData* sd, double box_size){
 //!  with ad-hoc init restratins init_restraints
 void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
   using namespace IMP;
-  if(0){
-    std::cout << "Coordinates of second fg bead in start of do_main_loop(): "
-              << core::XYZ(sd->get_fg_chain_roots()[0].get_child(1))
-              << std::endl;
-  }
 
   sd->set_was_used( true );
   const int max_frames_per_chunk = sd->get_output_statistics_interval_frames();
@@ -592,12 +570,13 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
                            short_init_factor,
                            is_disable_randomize,
                            !restart_fgs_only.empty());
-      if(0){
-        std::cout << "Coordinates of second fg bead in start after initialization: "
-                  << core::XYZ(sd->get_fg_chain_roots()[0].get_child(1))
-                  << std::endl;
+      {
+        // do a short post-relaxation of the entire system at low temperature
+        IMP::npctransport::internal::BDSetTemporaryTemperatureRAII
+          bd_set_temporary_temperature(sd->get_bd(),
+                                       sd->get_bd()->get_temperature()*0.5);
+        sd->get_bd()->optimize(int(1000*short_init_factor));
       }
-
       sd->get_bd()->set_current_time(0.0);
       sd->get_statistics()->reset_statistics_optimizer_states();
       sd->switch_suspend_rmf(false);
@@ -652,6 +631,11 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       sd->switch_suspend_rmf(false);
     }
     if (is_BD_full_run) {
+      // TODO: force recreation of scoring function just as a hack - there seem to have been some problems in some rare cases with
+      // force field calculation after full initialization when loading FGs - not clear why, problem did not persist
+      // after restart (Barak, May 2018)
+      sd->get_bd()->set_scoring_function
+        ( sd->get_scoring()->get_scoring_function(true) );
       timer.restart();
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;
       if (conformations_rmf_sos) {
