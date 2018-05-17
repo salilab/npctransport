@@ -277,15 +277,6 @@ namespace {
       return ParticlesTemp(); // noting to optimize if no (optimizable) particles
     }
 
-    // switch local to sf till end of scope
-    Pointer<ScoringFunction> sf =
-      sd->get_scoring()->get_custom_scoring_function
-      ( extra_restraints,
-        get_particle_indexes(cur_non_optimizable_beads),
-        cur_optimizable_beads,
-        false /* no non-bonded attr potentials yet */);
-    IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
-      set_temporary_scoring_function( sd->get_bd(), sf );
     // inflate obstacles temporarily:
     boost::scoped_array<boost::scoped_ptr<ScopedSetFloatAttribute> >
       tmp_set_radii( new boost::scoped_ptr<ScopedSetFloatAttribute>[obstacles.size()] );
@@ -296,7 +287,15 @@ namespace {
         ( new ScopedSetFloatAttribute
           (obstacles[j], core::XYZR::get_radius_key(), scaled_radius) );
     }
-
+    // switch local to sf till end of scope
+    Pointer<ScoringFunction> sf =
+      sd->get_scoring()->get_custom_scoring_function
+      ( extra_restraints,
+        get_particle_indexes(cur_non_optimizable_beads),
+        cur_optimizable_beads,
+        false /* no non-bonded attr potentials yet */);
+    IMP::npctransport::internal::OptimizerSetTemporaryScoringFunctionRAII
+      set_temporary_scoring_function( sd->get_bd(), sf );
     optimize_balls(cur_particles,
                    is_rest_length_scaling,
                    sd->get_rmf_sos_writer(),
@@ -371,7 +370,7 @@ void initialize_positions(SimulationData *sd,
   atom::Hierarchies chains = sd->get_fg_chain_roots();
   for (unsigned int i = 0; i < chains.size(); ++i) {
     Pointer<FGChain> chain = get_fg_chain(chains[i]);
-    unsigned int n_pinned=0;
+    unsigned int n_pinned=1;
     if(are_fgs_pre_initialized){
       n_pinned= chain->get_number_of_beads();
     }
@@ -421,8 +420,8 @@ void initialize_positions(SimulationData *sd,
       processed_fg_beads += cur_fg_beads;
     }
   // Optimize with obstacles + all FGs:
-  ParticlesTemp cur_particles = obstacles + processed_fg_beads;
   if(cur_particles.size()>0 && !are_fgs_pre_initialized) {
+    ParticlesTemp cur_particles = obstacles + processed_fg_beads;
     initialize_positions_of_specific_beads(sd,
                                            cur_particles,
                                            extra_restraints,
