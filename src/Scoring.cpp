@@ -187,7 +187,7 @@ Scoring::get_predicates_pair_restraint
 {
   if(!predr_ || update){
     predr_ = create_predicates_pair_restraint
-      ( get_close_beads_container(), true /* attr restraints */ );
+      ( get_close_beads_container(update), true /* attr restraints */ );
   }
   return predr_;
 }
