@@ -576,6 +576,12 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
           bd_set_temporary_temperature(sd->get_bd(),
                                        sd->get_bd()->get_temperature()*0.5);
         sd->get_bd()->optimize(int(1000*short_init_factor));
+        // TODO: force recreation of scoring function just as a hack - there seem to have been some problems in some rare cases with
+        // force field calculation after full initialization when loading FGs - not clear why, problem did not persist
+        // after restart (Barak, May 2018)
+        sd->get_bd()->set_scoring_function
+          ( sd->get_scoring()->get_scoring_function(true) );
+
       }
       sd->get_bd()->set_current_time(0.0);
       sd->get_statistics()->reset_statistics_optimizer_states();
@@ -631,11 +637,6 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       sd->switch_suspend_rmf(false);
     }
     if (is_BD_full_run) {
-      // TODO: force recreation of scoring function just as a hack - there seem to have been some problems in some rare cases with
-      // force field calculation after full initialization when loading FGs - not clear why, problem did not persist
-      // after restart (Barak, May 2018)
-      sd->get_bd()->set_scoring_function
-        ( sd->get_scoring()->get_scoring_function(true) );
       timer.restart();
       std::cout << "Running for " << nframes_run << " frames..." << std::endl;
       if (conformations_rmf_sos) {
