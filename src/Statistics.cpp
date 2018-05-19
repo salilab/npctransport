@@ -581,7 +581,8 @@ void Statistics
     std::floor(y/GRID_RESOLUTION_ANGSTROMS) + ny/2;
   unsigned int zz=
     std::floor(z/GRID_RESOLUTION_ANGSTROMS) + (nz/2)*(!is_z_symmetric);
-  if(xx<nx && yy < ny && zz<nz){
+  if(xx<nx && yy < ny && zz<nz &&
+     xx>=0 && yy>=0 && zz>=0){
     it->second[xx][yy][zz]++;
     //    std::cout<<"xx "<<xx<<" yy "<<yy<<" zz "<<zz<<" = "<<it->second[xx][yy][zz]<<std::endl;
   }
