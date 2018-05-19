@@ -420,13 +420,15 @@ void initialize_positions(SimulationData *sd,
       processed_fg_beads += cur_fg_beads;
     }
   // Optimize with obstacles + all FGs:
-  if(cur_particles.size()>0 && !are_fgs_pre_initialized) {
+  {
     ParticlesTemp cur_particles = obstacles + processed_fg_beads;
-    initialize_positions_of_specific_beads(sd,
-                                           cur_particles,
-                                           extra_restraints,
-                                           debug,
-                                           short_init_factor*.5); // split with next step
+    if(cur_particles.size()>0 && !are_fgs_pre_initialized) {
+      initialize_positions_of_specific_beads(sd,
+                                             cur_particles,
+                                             extra_restraints,
+                                             debug,
+                                             short_init_factor*.5); // split with next step
+    }
   }
   // Final optimization of everything:
   initialize_positions_of_specific_beads(sd,
