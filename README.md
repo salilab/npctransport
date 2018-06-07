@@ -18,3 +18,10 @@ Building from source in a nutshell (see https://integrativemodeling.org/latest/d
 Versions:
 4.5
 - optimization of ball size used to define close pair range results in faster runs for larger particles
+
+fg_simulation: run NPC transport simulations {#fg_simulation_bin}
+============================================
+
+The `fg_simulation` command line tool can be used to run simulations of
+NPC FG repeat domains using this module. For an example of its use, see
+[our 2018 study in Nature](https://salilab.org/npc_fg_2018).
