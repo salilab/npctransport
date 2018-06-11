@@ -24,7 +24,7 @@ IMPNPCTRANSPORTEXPORT
    using dump interval `sd->get_rmf_dump_interval_frames() * 100`, or every
    frame in case that `debug` is true.
 
-   @param sd the simulationd data object containing diffusing particles
+   @param sd the SimulationData object containing diffusing particles
    @param extra_restraints a list of additional ad-hoc restraints that will be
                            used only throughout initialization
    @param debug if true, the initialization will dump much more output (e.g.

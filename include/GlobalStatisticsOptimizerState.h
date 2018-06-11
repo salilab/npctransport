@@ -31,8 +31,8 @@ class IMPNPCTRANSPORTEXPORT GlobalStatisticsOptimizerState
 
  public:
   /**
-     @param statistics_manager an optional statistical manager to which statistical udpates are sent
-                               (of e.g. zr-distribution that are colllectively gathered)
+     @param statistics_manager an optional statistical manager to which statistical updates are sent
+                               (of e.g. zr-distribution that are collectively gathered)
      @param periodicity frame interval for statistics, equiv. to set_period(1)
    */
   GlobalStatisticsOptimizerState

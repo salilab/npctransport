@@ -94,9 +94,9 @@ class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
 
   /**
      returns a list of all the simulation time points in nanoseconds
-     when a transport even has occured (according to the owner of this
+     when a transport even has occurred (according to the owner of this
      OptimizerState). An empty list is returned if no
-     transport events are known or if there was no owner when they occured
+     transport events are known or if there was no owner when they occurred
    */
   Floats const &get_transport_time_points_in_ns() const {
     return transport_time_points_in_ns_;

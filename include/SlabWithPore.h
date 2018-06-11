@@ -81,7 +81,7 @@ class IMPNPCTRANSPORTEXPORT SlabWithPore
                               thickness);
   }
 
-  //! returns whether the particle last enetered the transport moiety from its
+  //! returns whether the particle last entered the transport moiety from its
   //top
   Float get_thickness() const {
     return get_particle()->get_value(get_thickness_key());

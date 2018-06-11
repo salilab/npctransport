@@ -42,11 +42,11 @@ SlabWithCylindricalPorePairScore : public PairScore {
   //! pore of specified radius and repulsive force constant k
   SlabWithCylindricalPorePairScore(double k);
 
-  //! returns the direction vector for the displacmenet of point v relative to the pore walls of slab
+  //! returns the direction vector for the displacement of point v relative to the pore walls of slab
   algebra::Vector3D get_displacement_direction
     (SlabWithCylindricalPore const& slab, const algebra::Vector3D &v) const;
 
-  //! returns the displacmenet magnitude of point v relative to the pore walls of slab
+  //! returns the displacement magnitude of point v relative to the pore walls of slab
   double get_displacement_magnitude
     (SlabWithCylindricalPore const&slab, const algebra::Vector3D &v) const;
 

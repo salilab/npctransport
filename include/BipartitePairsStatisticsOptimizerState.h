@@ -23,7 +23,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 class Statistics;
 
 /** Track the interaction between pairs from one group of particles
-    with particles from another group, within some specified contat
+    with particles from another group, within some specified contact
     range
 */
 class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
@@ -188,13 +188,13 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   }
 
   //! returns the average fraction of particle sites from group I
-  //! thay are bound in each update round
+  //! that are bound in each update round
   double get_average_fraction_bound_particle_sites_I() const {
     return avg_fraction_bound_sites_I_;
   }
 
   //! returns the average fraction of particle sites from group II
-  //! thay are bound in each update round
+  //! that are bound in each update round
   double get_average_fraction_bound_particle_sites_II() const {
     return avg_fraction_bound_sites_II_;
   }

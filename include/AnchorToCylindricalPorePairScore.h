@@ -33,7 +33,7 @@ AnchorToCylidnricalPorePairScore : public PairScore
  public:
   /** Initialize a harmonic distance score between an anchor bead
       and an equilibrium reference point that is evaluated according to the specified
-      equlibrium values, relative to the cylindrical pore at the time of score
+      equilibrium values, relative to the cylindrical pore at the time of score
       evaluation.
 
       @param rot_angle equilibrium counter-clockwise angle of the anchor bead

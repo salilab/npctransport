@@ -161,7 +161,7 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   /** add statistics about interactions between particles of type 0 and 1
       (order does not matter)
 
-      @param type0 type of first intracting particles
+      @param type0 type of first interacting particles
       @param type1 type of other interacting particles
   */
   void add_interaction_stats
@@ -179,7 +179,7 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   OptimizerStates add_optimizer_states(Optimizer* o = nullptr);
 
   /**
-     updates the map of z-r distribtions of particle coordinates
+     updates the map of z-r distributions of particle coordinates
      with p's binned position counts (if z-symmetry flag is on,
      z is absolute vertical location; r is distance from pore axis)
 
@@ -188,7 +188,7 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   void update_particle_type_zr_distribution_map(Particle* p);
 
     /**
-     updates the map of x-y-z distribtions of particle coordinates
+     updates the map of x-y-z distributions of particle coordinates
      with p's binned position counts (if z-symmetry flag is on,
      z is absolute vertical location)
 

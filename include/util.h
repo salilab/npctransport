@@ -189,7 +189,7 @@ get_maximal_number_of_unordered_pairs(ParticlesTemp const& ps0,
 }
 
 #ifndef SWIG
-//! conver vectors to spheres of passed radius
+//! convert vectors to spheres of passed radius
 template<typename V3iter>
 algebra::Sphere3Ds get_spheres_from_vectors
 (V3iter first, V3iter  last, double radius)
@@ -203,7 +203,7 @@ algebra::Sphere3Ds get_spheres_from_vectors
 }
 #endif
 
-//! conver vectors to spheres of passed radius
+//! convert vectors to spheres of passed radius
 IMPNPCTRANSPORTEXPORT
 algebra::Sphere3Ds get_spheres_from_vectors
 (algebra::Vector3Ds const& vs, double radius);

@@ -76,7 +76,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      first and second particle, resp.).
 
      The interaction is composed of a non-specific interaction term
-     between the bead shperes, and the sum of interactions between
+     between the bead spheres, and the sum of interactions between
      specific interactions sites of each bead.
 
      If \sigma{0} and \sigma{1} are positive, the attractive force
@@ -96,11 +96,11 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      constant k, and the maximal interaction energy is instead:
        max\DELTA{U}_{site-site} = k * range [kCal/mol]
 
-     In addition to site-site interaction, theere is a constanct
+     In addition to site-site interaction, there is a constant
      attractive force k_nonspec_attraction between the sphere surfaces
      up to a range range_nonspec_attraction, with maximal energy
      contribution:
-       max\DELTA{U}_{non-specifiec} = 0.5 * k_nonspec_attraction * range_nonspec_attraction [kcal/mol]
+       max\DELTA{U}_{non-specific} = 0.5 * k_nonspec_attraction * range_nonspec_attraction [kcal/mol]
 
      Note that for a specific pair of particles, each particle might have
      a different reference frame (rigid body translation and rotation),
@@ -110,8 +110,8 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
                          of specific sites placed on particles
      @param k            Maximal site specific attraction coefficient (in
                          kcal/mol/A^2 when sigma0_deg and sigma1_deg are positive,
-                         or kcal/mol/A otherwise, i.e., for orientation-independent interacations)
-     @param sigma0_deg, sigma1_deg Maximal rotational range of sites 0 and 1, resepctively,
+                         or kcal/mol/A otherwise, i.e., for orientation-independent interactions)
+     @param sigma0_deg, sigma1_deg Maximal rotational range of sites 0 and 1, respectively,
                          on the particle surface, specified in degrees. If either is 0,
 			 the pair score between site centers is used with a constant k.
      @param range_nonspec_attraction  Range for non-specific attraction term

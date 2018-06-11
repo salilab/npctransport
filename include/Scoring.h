@@ -136,7 +136,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      @param[in]  owner_sd npc simulation data object that owns this scoring
                           object
      @param[out] data protobuf data with parameters for
-                      this assignment, used to parametrize
+                      this assignment, used to parameterize
                       the scoring function
    */
   Scoring(SimulationData* owner_sd,
@@ -314,7 +314,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      The restraint is symmetric, and applies to both (t0,t1) and (t1,t0).
 
      A SitesPairScore restraint means site-specific
-     attractive forces between surface bidning sites on each particle +
+     attractive forces between surface binding sites on each particle +
      non-specific attraction and soft repulsion between the entire particles.
 
      @param idata the protobuf data about the interaction (particle types,
@@ -391,7 +391,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
      @param beads beads on which to apply the constraint
 
-     @note this restraint is (supposed to) gurantee to be always
+     @note this restraint is (supposed to) guarantee to be always
            updated with the list inside the container
 
      @return a newly created box restraint
@@ -406,7 +406,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
      @param beads beads on which to apply the constraint
 
-     @note this restraint is (supposed to) gurantee to be always
+     @note this restraint is (supposed to) guarantee to be always
            updated with the list inside the container
 
      @return a newly created slab restraint

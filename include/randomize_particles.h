@@ -1,6 +1,6 @@
 /**
  *  \file IMP/npctransport/randomize_particles.h
- *  \brief Randomizing particles in a boudning volume
+ *  \brief Randomizing particles in a bounding volume
  *
  *  Copyright 2007-2018 IMP Inventors. All rights reserved.
  *

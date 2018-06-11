@@ -270,7 +270,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
  atom::BrownianDynamics *get_bd(bool recreate = false);
 
   //! activates Brownian Dynamics statistics tracking
- //! by adding all appropraite optimizer states, if they weren't already
+ //! by adding all appropriate optimizer states, if they weren't already
   void activate_statistics();
 
   /** returns the requested fraction of time for taking statistics */
@@ -296,7 +296,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   bool get_is_fg_chain(ParticleIndex pi) const;
 
 
-  /** returns true if particle type is an fg cjaom type
+  /** returns true if particle type is an fg chain type
       (that is, it is one of the types of a chain added
       via create_fgs())
   */
@@ -306,7 +306,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
 
   /** return all the types of fg beads that were added
-      via create_fgs() inclding the suffix appended to their
+      via create_fgs() including the suffix appended to their
       chain type name */
   ParticleTypeSet const& get_fg_bead_types() const {
     return fg_bead_types_;

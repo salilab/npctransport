@@ -29,10 +29,10 @@ class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
      Exclude particles from the range of z coordinates [bottom_..top_]
      with repulsive force constant k
 
-     @param k reuplsive force constant
+     @param k repulsive force constant
      @param max_r maximal distance from origin on x,y plane (radius
                   relative to pore axis) in which force is applied.
-                  if 0.0, no limiation
+                  if 0.0, no limitation
    */
  ZBiasSingletonScore
    ( double k,

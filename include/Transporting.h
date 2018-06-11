@@ -22,7 +22,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
  */
 class IMPNPCTRANSPORTEXPORT Transporting : public IMP::Decorator {
   /** Decorate a transporting particle, mainly for tracking transport
-      statistics (number of transorts, etc.).  It is assumed the
+      statistics (number of transports, etc.).  It is assumed the
       transport occurs along a z coordinate, and that the crossed barrier
       is bounded from top and bottom.
       The last tracked z is set to the z coordinate of p, initially,
@@ -45,7 +45,7 @@ class IMPNPCTRANSPORTEXPORT Transporting : public IMP::Decorator {
 
 
   /** Decorate a transporting particle, mainly for tracking transport
-      statistics (number of transorts, etc.).  It is assumed the
+      statistics (number of transports, etc.).  It is assumed the
       transport occurs along a z coordinate, and that the crossed barrier
       is bounded from top and bottom.
       The last tracked z is set to the z coordinate of p, initially,

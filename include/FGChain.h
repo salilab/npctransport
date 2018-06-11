@@ -138,7 +138,7 @@ public:
   { return get_beads().size(); }
 
   /**
-      Returns a restraint accosciated with internal interactions by this chain.
+      Returns a restraint associated with internal interactions by this chain.
       Once this method has been called once, it is assumed that the
       chain topology remains static (the behavior of the restraint
       if the chain topology changes is undefined, e.g. if beads are added)

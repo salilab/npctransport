@@ -81,8 +81,8 @@ IMPNPCTRANSPORTEXPORT
 int get_frames_from_ns(double ns, double time_step);
 
 /**
-   computes the number of frames needed to acheive simulation time
-   required in the confiugration time, with time step computed from
+   computes the number of frames needed to achieve simulation time
+   required in the configuration time, with time step computed from
    config.
 
    @param config the simulation parameters
