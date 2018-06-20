@@ -1,5 +1,0 @@
-binary="fg_simulation"
-extra_arguments=["--cylinder_nlayers", "4"]
-description=["""
-10000ns simulations of transport with certain parameters
-"""]
