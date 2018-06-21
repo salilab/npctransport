@@ -264,24 +264,32 @@ Statistics::remove_particle_type
   IMP::Pointer<Optimizer> optimizer= get_sd()->get_bd();
   // fg body stats:
   {
-    FGsBodyStatisticsOSs fbsos_list= fgs_bodies_stats_map_[pt];
-    IMP_FOREACH(BodyStatisticsOptimizerStates bsos, fbsos_list)
-      {
-        optimizer->remove_optimizer_states(bsos);
-      }
+    if(is_activated_){
+      FGsBodyStatisticsOSs fbsos_list= fgs_bodies_stats_map_[pt];
+      IMP_FOREACH(BodyStatisticsOptimizerStates bsos, fbsos_list)
+        {
+          optimizer->remove_optimizer_states(bsos);
+        }
+    }
     fgs_bodies_stats_map_.erase(pt);
   }
   // floaters stats:
-  optimizer->remove_optimizer_states(floaters_stats_map_[pt]);
+  if(is_activated_){
+    optimizer->remove_optimizer_states(floaters_stats_map_[pt]);
+  }
   floaters_stats_map_.erase(pt);
   // floaters transport stats:
-  optimizer->remove_optimizer_states(floaters_transport_stats_map_[pt]);
+  if(is_activated_){
+    optimizer->remove_optimizer_states(floaters_transport_stats_map_[pt]);
+  }
   floaters_transport_stats_map_.erase(pt);
   // particle distributions:
   particle_type_zr_distribution_map_.erase(pt);
   particle_type_xyz_distribution_map_.erase(pt);
   // chain stats:
-  optimizer->remove_optimizer_states(chains_stats_map_[pt]);
+  if(is_activated_){
+    optimizer->remove_optimizer_states(chains_stats_map_[pt]);
+  }
   chains_stats_map_.erase(pt);
   // interactions stats:
   InteractionTypes interaction_types_delete_list;
@@ -289,11 +297,13 @@ Statistics::remove_particle_type
               interaction_stats_map_)
     {
       InteractionType itype= iter.first;
-      BipartitePairsStatisticsOptimizerState* bpsos= iter.second;
-      if(itype.first==pt || itype.second==pt)
-        {
-          optimizer->remove_optimizer_state(bpsos);
-        }
+      if(is_activated_){
+        BipartitePairsStatisticsOptimizerState* bpsos= iter.second;
+        if(itype.first==pt || itype.second==pt)
+          {
+            optimizer->remove_optimizer_state(bpsos);
+          }
+      }
       interaction_types_delete_list.push_back(itype);
     }
   IMP_FOREACH(InteractionType itype, interaction_types_delete_list)
