@@ -296,6 +296,10 @@ void Scoring::add_interaction
     if(n0>0){
       for(int i=0; i<n0; i++){
         int site_id= idata.active_sites0(i);
+        IMP_ALWAYS_CHECK(site_id<sites0_all.size(),
+                         "Invalid active site id " << site_id
+                         << " for " << type0 << " interacting with " << type1
+                         << std::endl, IMP::ValueException);
         sites0.push_back(sites0_all[site_id]);
       }
     }else{
@@ -304,6 +308,10 @@ void Scoring::add_interaction
     if(n1>0){
       for(int i=0; i<n1; i++){
         int site_id= idata.active_sites1(i);
+        IMP_ALWAYS_CHECK(site_id<sites1_all.size(),
+                         "Invalid active site id " << site_id
+                         << " for " << type1 << " interacting with " << type0
+                         << std::endl, IMP::ValueException);
         sites1.push_back(sites1_all[site_id]);
       }
     }else{
