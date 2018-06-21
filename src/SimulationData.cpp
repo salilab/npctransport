@@ -550,6 +550,88 @@ void SimulationData::create_obstacles
     ( type, o_data.interaction_k_factor().value());
 }
 
+namespace {
+  struct True {
+    template <class T>
+    bool operator()(const T &) const {
+      return true;
+    }
+  };
+};
+
+//! remove particles of type pt from simulation, including all model
+//! particles, statistics and interactions associated with it
+void
+SimulationData::remove_particle_type
+(core::ParticleType pt)
+{
+  // Remove all statistics and scoring associations to pt
+  get_statistics()->remove_particle_type(pt);
+  get_scoring()->remove_particle_type(pt);
+
+  // Remove all particles of type pt from the hierarchy
+  atom::Hierarchy pt_root= get_root_of_type(pt);
+  {
+    atom::Hierarchy parent = pt_root.get_parent();
+    if (parent) {
+      parent.remove_child(pt_root);
+    }
+  }
+  ParticlesTemp pt_particles;
+  core::gather(pt_root,
+               True(),
+               std::back_inserter(pt_particles));
+  IMP_FOREACH(Particle* p, pt_particles) {
+    atom::Hierarchy h(p);
+    while (h.get_number_of_children() > 0) {
+      h.remove_child(h.get_child(h.get_number_of_children() - 1));
+    }
+  }
+  // Remove all particles of type pt from beads_
+  for(Particles::iterator iter=beads_.begin();
+      iter!=beads_.end(); ) {
+    Particle* p= *iter;
+    IMP_USAGE_CHECK(p->get_model() == get_model(),
+                    "Particle is expected to have same model as SimulationData");
+    IMP_USAGE_CHECK(core::Typed::get_is_setup(p),
+                    "all particles are expected to be typed");
+    core::ParticleType cur_type= core::Typed(p).get_type();
+    if(pt == cur_type){
+      iter= beads_.erase(iter);
+    } else {
+      iter++;
+    }
+  }
+  // Tear down all rigid bodies
+  IMP_FOREACH(Particle* p, pt_particles) {
+    IMP_USAGE_CHECK(p->get_model() == get_model(),
+                    "Particle is expected to have same model as SimulationData");
+    if(IMP::core::RigidBody::get_is_setup(p)){
+      IMP::core::RigidBody rb(p);
+      IMP::core::RigidBody::teardown_particle(rb);
+    }
+  }
+  // Remove all particles of type pt from the model
+  IMP_FOREACH(Particle* p, pt_particles) {
+    IMP_USAGE_CHECK(p->get_model() == get_model(),
+                    "Particle is expected to have same model as SimulationData");
+    p->get_model()->remove_particle(p->get_index());
+  }
+  // Remove other potential internal particle type associations
+  fg_bead_types_.erase(pt);
+  fg_chain_types_.erase(pt);
+  floater_types_.erase(pt);
+  obstacle_types_.erase(pt);
+  sites_.erase(pt);
+  ranges_.erase(pt);
+  // Refresh bd, scoring function, and rmf file
+  get_bd(true)->set_scoring_function
+    ( get_scoring()->get_scoring_function(true) );
+  set_rmf_file(get_rmf_file_name(),
+               is_save_restraints_to_rmf_);
+}
+
+
 void SimulationData::add_interaction
 ( const ::npctransport_proto::Assignment_InteractionAssignment & idata)
 {
@@ -839,16 +921,22 @@ atom::BrownianDynamics
 (bool recreate)
 {
   if (!bd_ || recreate) {
-    bd_ = new BrownianDynamicsTAMDWithSlabSupport(m_, "BD_tamd_slab%1%", time_step_wave_factor_);
+    bd_ = new BrownianDynamicsTAMDWithSlabSupport(m_,
+                                                  "BD_tamd_slab%1%",
+                                                  time_step_wave_factor_);
     bd_->set_maximum_time_step(time_step_);
     bd_->set_maximum_move(range_ / 4);
     bd_->set_current_time(0.0);
     bd_->set_scoring_function
-      ( get_scoring()->get_scoring_function() );
+      ( get_scoring()->get_scoring_function(recreate) );
     bd_->set_temperature(temperature_k_);
     //#ifdef _OPENMP
     if (dump_interval_frames_ > 0 && !get_rmf_file_name().empty()) {
       bd_->add_optimizer_state(get_rmf_sos_writer());
+    }
+    // reactivate statistics if was already activated earlier
+    if(get_statistics()->get_is_activated()) {
+      get_statistics()->add_optimizer_states( bd_ );
     }
     //#endif
   }

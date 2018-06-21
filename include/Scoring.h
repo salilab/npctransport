@@ -99,7 +99,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   PointerMember
     <IMP::Restraint> slab_restraint_;
 
-  // scores on anchor resiudes
+  // scores on anchor particles
   IMP::Restraints anchor_restraints_;
 
   // pore radius restraint
@@ -592,6 +592,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
       add_chain_restraints() so far
   */
   Restraints get_all_chain_restraints() const;
+
+  //! remove all scoring function elements related to particle type pt
+  //! NOTE: a few aspects of the scoring function do not support this function
+  //!       as of 2018-06-19 - namely anchor restraints and z coordinate bias
+  void remove_particle_type(core::ParticleType pt);
 
   /**
      adds a biasing potential for particles ps towards z, to the restraints

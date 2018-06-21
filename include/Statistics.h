@@ -132,6 +132,16 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
 
 
  public:
+
+  //! Remove all statistics related to particle type pt
+  /**
+   Removes statistics of particle type pt from all internal maps
+   and from the optimizer states of get_sd()->get_bd()
+
+   @param pt the particle type to be removed
+  */
+  void remove_particle_type(core::ParticleType pt);
+
   /**
      @param sd the sd that owns and uses this statistics object
      @param statistics_interval_frames the interval of simulation frames for gathering

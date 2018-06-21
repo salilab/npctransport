@@ -460,6 +460,10 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
     return maximum_number_of_minutes_;
   }
 
+  //! remove particle of type pt from simulation, including all
+  //! model particles, statistics and interactions associated with it
+  void remove_particle_type(core::ParticleType pt);
+
 // swig doesn't equate the two protobuf types
 #ifndef SWIG
   /**

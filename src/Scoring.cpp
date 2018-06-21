@@ -548,6 +548,44 @@ Scoring::get_all_chain_restraints() const
 }
 
 
+void
+Scoring::remove_particle_type
+(core::ParticleType pt)
+{
+  // I. Clean bead_to_chain_map_:
+  for( t_particle_index_to_fg_chain_map::iterator iter= bead_to_chain_map_.begin();
+       iter != bead_to_chain_map_.end(); ) {
+    IMP_USAGE_CHECK(core::Typed::get_is_setup(get_model(), iter->first),
+                    "all particles are expected to be typed");
+    core::ParticleType cur_type= core::Typed(get_model(), iter->first).get_type();
+    if(pt == cur_type){
+      bead_to_chain_map_.erase(iter++);
+    } else {
+      iter++;
+    }
+  }
+  // II. Clean chains_set_:
+  for( FGChainsSet::iterator iter= chains_set_.begin();
+       iter != chains_set_.end(); ) {
+    atom::Hierarchy h_root= (*iter)->get_root();
+    IMP_USAGE_CHECK(core::Typed::get_is_setup(get_model(),
+                                              h_root.get_particle_index()),
+                    "all particles are expected to be typed");
+    core::ParticleType cur_type= core::Typed(get_model(),
+                                       h_root.get_particle_index()).get_type();
+    if(pt == cur_type){
+      chains_set_.erase(iter++);
+    }else{
+      iter++;
+    }
+  }
+  // III. TODO: Clean interaction_pair_scors - actually not essential
+  // IV. TODO: remove also for z-bias partricles map
+  // V. TODO: remove also restrained anchor beads (complicated!)
+  // VI. force referesh of scoring function
+  get_scoring_function(true);
+}
+
 /***************************************************************/
 /***************************** Creators ************************/
 /***************************************************************/

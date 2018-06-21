@@ -256,6 +256,53 @@ OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
 }
 
 
+//! Remove particle type from all internal maps and optimizer states of optimizer**
+void
+Statistics::remove_particle_type
+(core::ParticleType pt)
+{
+  IMP::Pointer<Optimizer> optimizer= get_sd()->get_bd();
+  // fg body stats:
+  {
+    FGsBodyStatisticsOSs fbsos_list= fgs_bodies_stats_map_[pt];
+    IMP_FOREACH(BodyStatisticsOptimizerStates bsos, fbsos_list)
+      {
+        optimizer->remove_optimizer_states(bsos);
+      }
+    fgs_bodies_stats_map_.erase(pt);
+  }
+  // floaters stats:
+  optimizer->remove_optimizer_states(floaters_stats_map_[pt]);
+  floaters_stats_map_.erase(pt);
+  // floaters transport stats:
+  optimizer->remove_optimizer_states(floaters_transport_stats_map_[pt]);
+  floaters_transport_stats_map_.erase(pt);
+  // particle distributions:
+  particle_type_zr_distribution_map_.erase(pt);
+  particle_type_xyz_distribution_map_.erase(pt);
+  // chain stats:
+  optimizer->remove_optimizer_states(chains_stats_map_[pt]);
+  chains_stats_map_.erase(pt);
+  // interactions stats:
+  InteractionTypes interaction_types_delete_list;
+  IMP_FOREACH(BipartitePairsStatisticsOSMap::value_type& iter,
+              interaction_stats_map_)
+    {
+      InteractionType itype= iter.first;
+      BipartitePairsStatisticsOptimizerState* bpsos= iter.second;
+      if(itype.first==pt || itype.second==pt)
+        {
+          optimizer->remove_optimizer_state(bpsos);
+        }
+      interaction_types_delete_list.push_back(itype);
+    }
+  IMP_FOREACH(InteractionType itype, interaction_types_delete_list)
+    {
+      interaction_stats_map_.erase(itype);
+    }
+}
+
+
 bool
 Statistics::update_xyz_distribution_to_hdf5
 (RMF::HDF5::Group hdf5_group,
@@ -562,9 +609,9 @@ void Statistics
   //update distribution
   float box_half =  std::min(get_sd()->get_box_size() / 2.0, MAX_CROP); // get_z_distribution_top();
   unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS*CROP_FACTOR) + 5; // +5 for slack
-  unsigned int nx= 2 * half_n_max;
-  unsigned int ny= 2 * half_n_max;
-  unsigned int nz= (1 + !is_z_symmetric) * half_n_max;
+  int nx= 2 * half_n_max;
+  int ny= 2 * half_n_max;
+  int nz= (1 + !is_z_symmetric) * half_n_max;
   xyz_distribution_sizes_.d0= nx; // TODO: cap with maximal value of d0, which is (or used to be) uint8
   xyz_distribution_sizes_.d1= ny;
   xyz_distribution_sizes_.d2= nz;
@@ -575,11 +622,11 @@ void Statistics
   if(is_z_symmetric){
     z= std::abs(z);
   }
-  unsigned int xx=
+  int xx=
     std::floor(x/GRID_RESOLUTION_ANGSTROMS) + nx/2;
-  unsigned int yy=
+  int yy=
     std::floor(y/GRID_RESOLUTION_ANGSTROMS) + ny/2;
-  unsigned int zz=
+  int zz=
     std::floor(z/GRID_RESOLUTION_ANGSTROMS) + (nz/2)*(!is_z_symmetric);
   if(xx<nx && yy < ny && zz<nz &&
      xx>=0 && yy>=0 && zz>=0){
