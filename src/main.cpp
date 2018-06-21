@@ -91,6 +91,11 @@ IMP::AddStringFlag restart_fgs_only_adder
   " with the new diffusers, but not the FGs. The new diffusers are still randomized by default."
   " [default: %default]",
   &restart_fgs_only);
+std::string remove_fgs_with_prefix = "";
+IMP::AddStringFlag remove_fgs_with_prefix_adder
+( "remove_fgs_with_prefix",
+  "Removes all fgs whose type begins with specified prefix",
+  &remove_fgs_with_prefix);
 std::string conformations = "";
 IMP::AddStringFlag conformations_adder
 ( "conformations",
@@ -373,6 +378,9 @@ IMP::npctransport::SimulationData *startup(int argc, char *argv[])
       << "Initialize coordinates of FGs only from output file "
       << restart_fgs_only << std::endl;
     restart_fgs_from_reference_output_file(sd, restart_fgs_only);
+  }
+  if (!remove_fgs_with_prefix.empty()){
+    sd->remove_fgs_with_prefix(remove_fgs_with_prefix);
   }
   return sd.release();
 }
