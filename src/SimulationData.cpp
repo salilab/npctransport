@@ -568,23 +568,27 @@ SimulationData::remove_particle_type
   // Remove all statistics and scoring associations to pt
   get_statistics()->remove_particle_type(pt);
   get_scoring()->remove_particle_type(pt);
-
-  // Remove all particles of type pt from the hierarchy
-  atom::Hierarchy pt_root= get_root_of_type(pt);
+  // Identify all particles of type pt in hierarchy
+  ParticlesTemp pt_particles;
   {
-    atom::Hierarchy parent = pt_root.get_parent();
-    if (parent) {
-      parent.remove_child(pt_root);
+    ParticlesTemp all_particles;
+    core::gather(get_root(),
+                 True(),
+                 std::back_inserter(all_particles));
+    IMP_FOREACH(Particle* p, all_particles){
+      if(core::Typed::get_is_setup(p) &&
+         core::Typed(p).get_type() == pt){
+        pt_particles.push_back(p);
+      }
     }
   }
-  ParticlesTemp pt_particles;
-  core::gather(pt_root,
-               True(),
-               std::back_inserter(pt_particles));
+  // Remove all particles of type pt from the hierarchy
+  // by removing them from their parents
   IMP_FOREACH(Particle* p, pt_particles) {
     atom::Hierarchy h(p);
-    while (h.get_number_of_children() > 0) {
-      h.remove_child(h.get_child(h.get_number_of_children() - 1));
+    atom::Hierarchy parent = h.get_parent();
+    if (parent) {
+      parent.remove_child(h);
     }
   }
   // Remove all particles of type pt from beads_
@@ -602,7 +606,7 @@ SimulationData::remove_particle_type
       iter++;
     }
   }
-  // Tear down all rigid bodies
+  // Tear down all rigid bodies in pt_particles
   IMP_FOREACH(Particle* p, pt_particles) {
     IMP_USAGE_CHECK(p->get_model() == get_model(),
                     "Particle is expected to have same model as SimulationData");
@@ -629,6 +633,28 @@ SimulationData::remove_particle_type
     ( get_scoring()->get_scoring_function(true) );
   set_rmf_file(get_rmf_file_name(),
                is_save_restraints_to_rmf_);
+}
+
+void
+SimulationData::remove_fgs_with_prefix
+(std::string s_fg_type)
+{
+  // copying because deletion might cause fg_bead_types_ to change
+  ParticleTypeSet fg_types;
+  std::set_union(fg_bead_types_.begin(), fg_bead_types_.end(),
+                 fg_chain_types_.begin(), fg_chain_types_.end(),
+                 std::inserter(fg_types, fg_types.begin()) );
+  IMP_FOREACH(core::ParticleType pt, fg_types){
+    std::string s_cur_type= pt.get_string();
+    // match  = begins with s_fg_type, followed by an empty string or a non-digit
+    //  character
+    if(s_cur_type.compare(0, s_fg_type.size(), s_fg_type) == 0 &&
+       ( s_cur_type.size()==s_fg_type.size() ||
+         !isdigit(s_cur_type[s_fg_type.size()]) ) ) {
+      std::cout << "Removing FGs of type " << s_cur_type << std::endl;
+      remove_particle_type(pt);
+    }
+  }
 }
 
 

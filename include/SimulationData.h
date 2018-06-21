@@ -464,6 +464,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   //! model particles, statistics and interactions associated with it
   void remove_particle_type(core::ParticleType pt);
 
+  //! remove all FGs of specified type. Formally, remove any FG chain
+  //! if the prefix of its string representation matches s_fg_type
+  //! (= begins with s_fg_type, followed by an empty string or a non-digit
+  //!  character)
+  void remove_fgs_with_prefix(std::string s_fg_type);
+
 // swig doesn't equate the two protobuf types
 #ifndef SWIG
   /**
