@@ -133,6 +133,25 @@ namespace {
     // TODO: do obstacles need special treatment?!
     return range*range_factor_0*range_factor_1;
   }
+
+  //! returns true if type matches fg_assignment.type(), with
+  //! or without suffixes from fg_assignments's suffix list
+  bool is_fg_type_match
+  ( std::string type,
+    const ::npctransport_proto::Assignment_FGAssignment& fg_assignment)
+  {
+    std::string fg_type= fg_assignment.type();
+    if(type==fg_type){
+      return true;
+    }
+    for(int i=0; i<fg_assignment.type_suffix_list_size(); i++){
+      std::string fg_type_i= fg_type+fg_assignment.type_suffix_list(i);
+      if(type==fg_type_i){
+        return true;
+      }
+    }
+    return false;
+  }
 }; // namespace {}
 
 double get_close_pairs_range(const ::npctransport_proto::Assignment& a) {
@@ -215,6 +234,8 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
     std::string type1=a.interactions(i).type1();
     double R0(-1.0);
     double R1(-1.0);
+    bool is_found0= false;
+    bool is_found1= false;
     for(int ii=0; ii<a.floaters_size(); ii++){
       if(a.floaters(ii).type()==type0){
         if(a.floaters(ii).interactions().value()==0){
@@ -224,6 +245,7 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
         k*=a.floaters(ii).interaction_k_factor().value();
         range*=a.floaters(ii).interaction_range_factor().value();
         R0=a.floaters(ii).radius().value();
+        is_found0= true;
       }
       if(a.floaters(ii).type()==type1){
         if(a.floaters(ii).interactions().value()==0){
@@ -233,10 +255,11 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
         k*=a.floaters(ii).interaction_k_factor().value();
         range*=a.floaters(ii).interaction_range_factor().value();
         R1=a.floaters(ii).radius().value();
+        is_found1= true;
       }
     }
     for(int ii=0; ii<a.fgs_size(); ii++){
-      if(a.fgs(ii).type()==type0){
+      if(is_fg_type_match(type0, a.fgs(ii))){
         if(a.fgs(ii).interactions().value()==0){
           range=0.0; // skip
           continue;
@@ -244,8 +267,9 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
         k*=a.fgs(ii).interaction_k_factor().value();
         range*=a.fgs(ii).interaction_range_factor().value();
         R0=a.fgs(ii).radius().value();
+        is_found0= true;
       }
-      if(a.fgs(ii).type()==type1){
+      if(is_fg_type_match(type1, a.fgs(ii))){
         if(a.fgs(ii).interactions().value()==0){
           range=0.0; // skip
           continue;
@@ -253,7 +277,15 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
         k*=a.fgs(ii).interaction_k_factor().value();
         range*=a.fgs(ii).interaction_range_factor().value();
         R1=a.fgs(ii).radius().value();
+        is_found1= true;
       }
+    }
+    if(!is_found0 || !is_found1){
+      std::cout << "get_time_step() - ignoring interaction "
+                << type0 << "-" << type1
+                << " since no particles of one these types are defined"
+                << std::endl;
+      continue;
     }
     // compute skewed range if needed
     bool is_orientational=false;
@@ -264,10 +296,11 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
         is_orientational=true;
       }
     }
-    if(is_orientational && range > 0.0){
+    if(is_orientational && range > 0.0 && is_found0 && is_found1){
       IMP_USAGE_CHECK(R0>0.0 && R1>0.0,
-                      "R0 or R1 could not be found for type0 or type1");
-      k*=0.5*range; // the maximal k for this interction
+                      "R0 or R1 could not be found for type " << type0
+                      " or type " << type1 << std::endl);
+      k*=0.5*range; // the maximal force for this interction
       const double pi = 3.1415926535897;
       double range_sigma0_rad=a.interactions(i).range_sigma0_deg().value()*pi/180.0;
       double range_sigma1_rad=a.interactions(i).range_sigma1_deg().value()*pi/180.0;
