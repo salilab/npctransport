@@ -232,6 +232,11 @@ Scoring::get_slab_restraint(bool update)
 void Scoring::add_interaction
 ( const ::npctransport_proto::Assignment_InteractionAssignment &idata)
 {
+  if(idata.is_on().value()==0){
+    std::cout << "Skipping disabled interaction between " << idata.type0()
+              << " and " << idata.type1() << std::endl;
+    return;
+  }
   // extract interaction params
   core::ParticleType type0(idata.type0());
   core::ParticleType type1(idata.type1());
@@ -295,7 +300,7 @@ void Scoring::add_interaction
     int n1= idata.active_sites1_size();
     if(n0>0){
       for(int i=0; i<n0; i++){
-        int site_id= idata.active_sites0(i);
+        unsigned int site_id= idata.active_sites0(i);
         IMP_ALWAYS_CHECK(site_id<sites0_all.size(),
                          "Invalid active site id " << site_id
                          << " for " << type0 << " interacting with " << type1
@@ -307,7 +312,7 @@ void Scoring::add_interaction
     }
     if(n1>0){
       for(int i=0; i<n1; i++){
-        int site_id= idata.active_sites1(i);
+        unsigned int site_id= idata.active_sites1(i);
         IMP_ALWAYS_CHECK(site_id<sites1_all.size(),
                          "Invalid active site id " << site_id
                          << " for " << type1 << " interacting with " << type0
