@@ -6,11 +6,10 @@
  *
  */
 
+// IMP headers:
 #include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/automatic_parameters.h>
 #include <IMP/npctransport/internal/npctransport.pb.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/message.h>
 #include <IMP/SingletonContainer.h>
 #include <IMP/utility.h>
 #include <IMP/algebra/GridD.h>
@@ -18,9 +17,23 @@
 #include <IMP/algebra/grid_storages.h>
 #include <IMP/CreateLogContext.h>
 #include <IMP/SetLogState.h>
+// Protobuf headers:
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/message.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/io/coded_stream.h>
+// C++ and boost headers:
 #include <boost/scoped_ptr.hpp>
 #include <fstream>
 #include <iostream>
+#include <fcntl.h>
+#if defined(_MSC_VER)
+#include <io.h>
+#else
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 using namespace ::google::protobuf;
@@ -526,6 +539,25 @@ void save_pb_conformation
         }
     }
 }
+
+//! load file output_fname into protobuf output object output
+bool load_output_protobuf
+(std::string output_fname,
+ ::npctransport_proto::Output& output)
+{
+  bool is_ok(false);
+  int fd=IMP_C_OPEN(output_fname.c_str(),
+                    IMP_C_OPEN_FLAG(O_RDONLY) | IMP_C_OPEN_BINARY);
+  if(fd!=-1) {
+    google::protobuf::io::FileInputStream fis(fd);
+    google::protobuf::io::CodedInputStream cis(&fis);
+    cis.SetTotalBytesLimit(500000000,200000000);
+    is_ok=output.ParseFromCodedStream(&cis);
+    IMP_C_CLOSE(fd);
+  }
+  return is_ok;
+}
+
 
 
 IMPNPCTRANSPORT_END_NAMESPACE

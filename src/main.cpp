@@ -260,21 +260,11 @@ namespace {
         std::cout << "Restart simulation from " << restart << std::endl;
     }
 
-    ::npctransport_proto::Output prev_output;
     // copy to new file to avoid modifying input file
-    //std::ifstream file(restart.c_str(), std::ios::binary);
-    //bool read = prev_output.ParseFromIstream(&file);
-    bool read(false);
-    int fd= IMP_C_OPEN(prev_output_fname.c_str(),
-                       IMP_C_OPEN_FLAG(O_RDONLY) | IMP_C_OPEN_BINARY);
-    if(fd!=-1){
-      google::protobuf::io::FileInputStream fis(fd);
-      google::protobuf::io::CodedInputStream cis(&fis);
-      cis.SetTotalBytesLimit(500000000,200000000);
-      read= prev_output.ParseFromCodedStream(&cis);
-      IMP_C_CLOSE(fd);
-    }
-    IMP_ALWAYS_CHECK(read, "Couldn't read restart file " << restart << " file descriptor " << fd,
+    ::npctransport_proto::Output prev_output;
+    bool is_read= load_output_protobuf(prev_output_fname, prev_output);
+    IMP_ALWAYS_CHECK(is_read, "Couldn't read previous output file "
+                     << prev_output_fname,
                      IMP::ValueException);
     ::npctransport_proto::Assignment* pb_assignment = prev_output.mutable_assignment();
     adjust_kap_stickiness(pb_assignment);
@@ -497,15 +487,9 @@ void inflate_floater
     // }
   } // r
   // Update output file (read, find floater, update radius):
-  bool read(false);
-  int fd= open(output.c_str(), O_RDONLY);
-  google::protobuf::io::FileInputStream fis(fd);
-  google::protobuf::io::CodedInputStream cis(&fis);
-  cis.SetTotalBytesLimit(500000000,200000000);
   ::npctransport_proto::Output new_output;
-  read= new_output.ParseFromCodedStream(&cis);
-  close(fd);
-  IMP_ALWAYS_CHECK(read, "Couldn't read output file " << output << " file descriptor " << fd,
+  bool is_read= load_output_protobuf(output, new_output);
+  IMP_ALWAYS_CHECK(is_read, "Couldn't read output file " << output,
                    IMP::ValueException);
   ::npctransport_proto::Assignment* pb_assignment = new_output.mutable_assignment();
   for (int i = 0; i < pb_assignment->floaters_size(); ++i) {
@@ -523,15 +507,10 @@ void inflate_floater
 void reset_box_size(SimulationData* sd, double box_size){
   sd->set_box_size(box_size);
   // Update output file:
-  bool read(false);
-  int fd= open(output.c_str(), O_RDONLY);
-  google::protobuf::io::FileInputStream fis(fd);
-  google::protobuf::io::CodedInputStream cis(&fis);
-  cis.SetTotalBytesLimit(500000000,200000000);
   ::npctransport_proto::Output new_output;
-  read= new_output.ParseFromCodedStream(&cis);
-  close(fd);
-  IMP_ALWAYS_CHECK(read, "Couldn't read output file " << output << " file descriptor " << fd,
+  bool is_read= load_output_protobuf(output, new_output);
+  IMP_ALWAYS_CHECK(is_read,
+                   "Couldn't read output file " << output,
                    IMP::ValueException);
   ::npctransport_proto::Assignment* pb_assignment = new_output.mutable_assignment();
   pb_assignment->mutable_box_side()->set_value(box_size);

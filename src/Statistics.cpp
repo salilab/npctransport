@@ -657,18 +657,10 @@ void Statistics::update
                    "Cannot update a Statistics object that was not activated. Call Statistics::add_optimizer_states() first",
                    IMP::UsageException);
   ::npctransport_proto::Output output;
-  bool read(false);
-  int fd=IMP_C_OPEN(output_file_name_.c_str(),
-                    IMP_C_OPEN_FLAG(O_RDONLY) | IMP_C_OPEN_BINARY);
-  if(fd!=-1) {
-      google::protobuf::io::FileInputStream fis(fd);
-      google::protobuf::io::CodedInputStream cis(&fis);
-      cis.SetTotalBytesLimit(500000000,200000000);
-      read=output.ParseFromCodedStream(&cis);
-      IMP_C_CLOSE(fd);
-    }
-  IMP_ALWAYS_CHECK(read,
-                   "Failed updating statistics to " << output_file_name_.c_str() << std::endl,
+  bool is_read= load_output_protobuf(output_file_name_, output);
+  IMP_ALWAYS_CHECK(is_read,
+                   "Failed updating statistics to " << output_file_name_.c_str()
+                   << std::endl,
                    IMP::IOException);
   RMF::HDF5::File hdf5_file= RMF::HDF5::create_file(output_file_name_ + ".hdf5");
   RMF::HDF5::Group hdf5_floater_xyz_hist_group;

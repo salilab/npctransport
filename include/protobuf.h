@@ -19,6 +19,7 @@
 // minor issue with google headers namespaces
 namespace npctransport_proto {
   class Conformation;
+  class Output;
 }
 #endif
 
@@ -103,6 +104,11 @@ void save_pb_conformation
 ( IMP::SingletonContainerAdaptor beads,
   const boost::unordered_map<core::ParticleType, algebra::Sphere3Ds> &sites,
   ::npctransport_proto::Conformation *conformation );
+
+//! load file output_fname into protobuf output object output
+//! return true if succesful
+bool load_output_protobuf(std::string output_fname,
+                          ::npctransport_proto::Output& output);
 #endif
 
 IMPNPCTRANSPORT_END_NAMESPACE
