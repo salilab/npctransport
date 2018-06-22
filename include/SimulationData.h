@@ -642,7 +642,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   /**
      resets the name of the RMF file that records the simulation.  If
-     an old one exists from a previous call, then the previous RMF
+     an old one exists from a previous call with a different name and
+     different restraints settings, then the previous RMF
      writer is invalidated by this action (closed and flushed).  If
      the Brownian Dynamics object has already been initialized, a new
      writer with the new name is added as an optimizer state to it
@@ -652,9 +653,13 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
      @param new_name the new name of the rmf file
      @param is_save_restraints_to_rmf whether to save restraints to this
                                       rmf file
+     @param is_force_reset if true, force reset even if new_name and
+                        is_save_restraints_to_rmf are equal to their
+                        old values.
   */
   void set_rmf_file(const std::string &new_name,
-                    bool is_save_restraints_to_rmf = true);
+                    bool is_save_restraints_to_rmf = true,
+                    bool is_force_restart= false);
 
   IMP_OBJECT_METHODS(SimulationData);
 

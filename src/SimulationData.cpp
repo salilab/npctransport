@@ -632,7 +632,8 @@ SimulationData::remove_particle_type
   get_bd(true)->set_scoring_function
     ( get_scoring()->get_scoring_function(true) );
   set_rmf_file(get_rmf_file_name(),
-               is_save_restraints_to_rmf_);
+               is_save_restraints_to_rmf_,
+               true);
 }
 
 void
@@ -831,9 +832,11 @@ rmf::SaveOptimizerState *SimulationData::get_rmf_sos_writer() {
 }
 
 void SimulationData::set_rmf_file(const std::string &new_name,
-                                  bool is_save_restraints_to_rmf)
+                                  bool is_save_restraints_to_rmf,
+                                  bool is_force_reset)
 {
-  if (get_rmf_file_name() == new_name &&
+  if (!is_force_reset &&
+      get_rmf_file_name() == new_name &&
       is_save_restraints_to_rmf_ == is_save_restraints_to_rmf)
     {  // nothing to do
       return ;
