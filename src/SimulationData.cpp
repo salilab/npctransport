@@ -58,6 +58,7 @@
 
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/repeated_field.h>
 #include <fcntl.h>
 #if defined(_MSC_VER)
 #include <io.h>
@@ -673,7 +674,10 @@ SimulationData::remove_fgs_with_prefix
     ::npctransport_proto::Assignment_FGAssignment const&
       fg= m_assignment->fgs(i);
     if(fg.type() == s_fg_type){ // compare only prefix since prefix identifies fg assignments
-      m_assignment->mutable_fgs()->DeleteSubrange(i,1);
+      //      m_assignment->mutable_fgs()->DeleteSubrange(i,1);
+      int i_last= m_assignment->fgs_size()-1;
+      m_assignment->mutable_fgs()->SwapElements(i, i_last);
+      m_assignment->mutable_fgs()->RemoveLast();
     }
   }
   for(int i= m_assignment->interactions_size()-1; i>=0; i--){
@@ -682,7 +686,10 @@ SimulationData::remove_fgs_with_prefix
       interaction= m_assignment->interactions(i);
     if(s_fg_types_to_remove_set.count(interaction.type0())>0 ||
        s_fg_types_to_remove_set.count(interaction.type1())>0) {
-      m_assignment->mutable_interactions()->DeleteSubrange(i,1);
+      //      m_assignment->mutable_interactions()->DeleteSubrange(i,1);
+      int i_last= m_assignment->interactions_size()-1;
+      m_assignment->mutable_interactions()->SwapElements(i, i_last);
+      m_assignment->mutable_interactions()->RemoveLast();
     }
   }
   output.clear_statistics();
