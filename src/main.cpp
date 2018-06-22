@@ -94,7 +94,8 @@ IMP::AddStringFlag restart_fgs_only_adder
 std::string remove_fgs_with_prefix = "";
 IMP::AddStringFlag remove_fgs_with_prefix_adder
 ( "remove_fgs_with_prefix",
-  "Removes all fgs whose type begins with specified prefix",
+  "Removes all fgs whose type begins with specified prefix from the simulation"
+  " and from the output file. Note this forces statistics to be reset",
   &remove_fgs_with_prefix);
 std::string conformations = "";
 IMP::AddStringFlag conformations_adder

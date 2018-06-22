@@ -631,6 +631,7 @@ SimulationData::remove_particle_type
   // Refresh bd, scoring function, and rmf file
   get_bd(true)->set_scoring_function
     ( get_scoring()->get_scoring_function(true) );
+  get_bd()->set_current_time(0.0);
   set_rmf_file(get_rmf_file_name(),
                is_save_restraints_to_rmf_,
                true);
@@ -645,6 +646,7 @@ SimulationData::remove_fgs_with_prefix
   std::set_union(fg_bead_types_.begin(), fg_bead_types_.end(),
                  fg_chain_types_.begin(), fg_chain_types_.end(),
                  std::inserter(fg_types, fg_types.begin()) );
+  std::set<std::string> s_fg_types_to_remove_set;
   IMP_FOREACH(core::ParticleType pt, fg_types){
     std::string s_cur_type= pt.get_string();
     // match  = begins with s_fg_type, followed by an empty string or a non-digit
@@ -654,8 +656,42 @@ SimulationData::remove_fgs_with_prefix
          !isdigit(s_cur_type[s_fg_type.size()]) ) ) {
       std::cout << "Removing FGs of type " << s_cur_type << std::endl;
       remove_particle_type(pt);
+      s_fg_types_to_remove_set.insert(s_cur_type);
     }
   }
+  // Remove fg types from assignment in output protobuf and reset
+  // protobuf statistics:
+  ::npctransport_proto::Output output;
+  bool is_read= load_output_protobuf(get_statistics()->get_output_file_name(),
+                                     output);
+  IMP_ALWAYS_CHECK(is_read,
+                   "Couldn't read output file" << get_statistics()->get_output_file_name(),
+                   IMP::IOException);
+  ::npctransport_proto::Assignment* m_assignment= output.mutable_assignment();
+  for(int i= m_assignment->fgs_size()-1; i>=0; i--){
+    // loop from end to start because deleting affects tail
+    ::npctransport_proto::Assignment_FGAssignment const&
+      fg= m_assignment->fgs(i);
+    if(fg.type() == s_fg_type){ // compare only prefix since prefix identifies fg assignments
+      m_assignment->mutable_fgs()->DeleteSubrange(i,1);
+    }
+  }
+  for(int i= m_assignment->interactions_size()-1; i>=0; i--){
+    // loop from end to start because deleting affects tail
+    ::npctransport_proto::Assignment_InteractionAssignment const&
+      interaction= m_assignment->interactions(i);
+    if(s_fg_types_to_remove_set.count(interaction.type0())>0 ||
+       s_fg_types_to_remove_set.count(interaction.type1())>0) {
+      m_assignment->mutable_interactions()->DeleteSubrange(i,1);
+    }
+  }
+  output.clear_statistics();
+  output.mutable_statistics(); // recreate
+  // dump to file
+  std::ofstream outf(get_statistics()->get_output_file_name().c_str(),
+                     std::ios::binary);
+  output.SerializeToOstream(&outf);
+  outf.flush();
 }
 
 
@@ -845,6 +881,9 @@ void SimulationData::set_rmf_file(const std::string &new_name,
   if (rmf_sos_writer_ && bd_) {
     bd_->remove_optimizer_state(rmf_sos_writer_);
     rmf_sos_writer_ = nullptr;
+  }
+  if(new_name==""){
+    return;
   }
   // Update vars
   rmf_file_name_ = new_name;
