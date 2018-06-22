@@ -299,7 +299,7 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
     if(is_orientational && range > 0.0 && is_found0 && is_found1){
       IMP_USAGE_CHECK(R0>0.0 && R1>0.0,
                       "R0 or R1 could not be found for type " << type0
-                      " or type " << type1 << std::endl);
+                      << " or type " << type1 << std::endl);
       k*=0.5*range; // the maximal force for this interction
       const double pi = 3.1415926535897;
       double range_sigma0_rad=a.interactions(i).range_sigma0_deg().value()*pi/180.0;
