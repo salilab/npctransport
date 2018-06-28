@@ -46,6 +46,4 @@ install(FILES "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py" DES
 
 include_directories(${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal)
 
-set(IMP_npctransport_CONFIG "IMP_NPCTRANSPORT_AVRO_NAMESPACE=internal_avro:IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE=google\\:\\:protobuf")
-
 set(IMP_npctransport_PYTHON_EXTRA_DEPENDENCIES IMP.npctransport-python_proto CACHE INTERNAL "" FORCE)

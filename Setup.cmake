@@ -1,0 +1,2 @@
+set(IMP_npctransport_CONFIG "IMP_NPCTRANSPORT_AVRO_NAMESPACE=internal_avro:IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE=google\\:\\:protobuf")
+
