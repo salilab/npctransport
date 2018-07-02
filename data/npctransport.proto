@@ -80,8 +80,8 @@ message Configuration {
     required string type0=1; // site 0 type name, e.g., "fg_nsp1"
     required string type1=2; // site 1 type name, e.g., "kap121"
     required IntRange is_on=3;
-    optional FloatRange interaction_k=4; // if decomposed to normal and tangent components, this is kN*kT
-    optional FloatRange interaction_range=5; // if decomposed to normal and tangent component, this is sqrt(rN^2+rT^2)
+    optional FloatRange interaction_k=4; // if obsoltete decomposition to normal and tangent components, this is kN*kT
+    optional FloatRange interaction_range=5; // if obsolete decomposition to normal and tangent component, this is sqrt(rN^2+rT^2)
     optional FloatRange k_tangent_skew=6; // obsolete
     optional FloatRange range_tangent_skew=7; // obsolete
     optional FloatRange range_sigma0_deg=8; // maximal angle around site0 with active attraction (0.0 for isotropic interaction between site-centers)
