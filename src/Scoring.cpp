@@ -233,8 +233,9 @@ void Scoring::add_interaction
 ( const ::npctransport_proto::Assignment_InteractionAssignment &idata)
 {
   if(idata.is_on().value()==0){
-    std::cout << "Skipping disabled interaction between " << idata.type0()
-              << " and " << idata.type1() << std::endl;
+    IMP_LOG(VERBOSE,
+            "Skipping disabled interaction between " << idata.type0()
+              << " and " << idata.type1() << std::endl);
     return;
   }
   // extract interaction params
@@ -611,9 +612,10 @@ Scoring::create_close_beads_container
   SingletonContainerAdaptor optimizable_beads) const
 {
   using namespace container;
-  std::cout << "Creating a close pair container for " << non_optimizable_beads->get_particles().size()
+  IMP_LOG(TERSE,
+          "Creating a close pair container for " << non_optimizable_beads->get_particles().size()
             << " non-optimizable beads and " << optimizable_beads->get_particles().size()
-            << " optimizable ones" << std::endl;
+            << " optimizable ones" << std::endl);
   non_optimizable_beads.set_name_if_default(
       "CreateCloseBeadsContainerNonOptimizableBeadsInput%1%");
   optimizable_beads.set_name_if_default(

@@ -197,8 +197,9 @@ namespace {
             if (done) break;
           }  // for k_simanneal
       } // for i
-    std::cout << "Energy after optimize_balls() using custom scoring function is " <<
-      bd->get_scoring_function()->evaluate(false) << std::endl;
+    IMP_LOG(PROGRESS,
+            "Energy after optimize_balls() using custom scoring function is " <<
+            bd->get_scoring_function()->evaluate(false) << std::endl);
     if(save)
       IMP_LOG(VERBOSE, "END o_b(): Saver has been called so far " <<
               save->get_number_of_updates() << std::endl);
@@ -264,8 +265,8 @@ namespace {
           (other_particles[i], false) );
     }
     // optimize
-    std::cout <<  "Optimizing " <<  cur_particles.size()
-              << " particles; adding chain type " << fg_type;
+    IMP_LOG(VERBOSE, "Optimizing " <<  cur_particles.size()
+              << " particles; adding chain type " << fg_type);
     ParticlesTemp cur_non_optimizable_beads =
       get_non_optimizable_particles( cur_particles);
     ParticlesTemp cur_optimizable_beads =
@@ -315,8 +316,8 @@ namespace {
     bool debug,
     double short_init_factor)
   {
-    std::cout <<  "Optimizing " <<  beads.size()
-              << " particles; " << std::endl;
+    IMP_LOG(VERBOSE, "Optimizing " <<  beads.size()
+              << " particles; " << std::endl);
     // Optimize everything now (including floats - kaps and inerts):
     ParticlesTemp non_optimizable_beads =
       npctransport::get_non_optimizable_particles( beads );

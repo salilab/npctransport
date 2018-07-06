@@ -29,7 +29,7 @@ using namespace IMP_NPCTRANSPORT_PROTOBUF_NAMESPACE;
 double get_close_pairs_range(double max_range, double max_range_factor) {
   // squared cause range factor is applied once for each interacting partner
   double ret_value( max_range * max_range_factor * max_range_factor );
-  std::cout << " Close pairs range: " << ret_value << std::endl;
+  IMP_LOG(VERBOSE, " Close pairs range: " << ret_value << std::endl);
   return ret_value;
 }
 
@@ -281,10 +281,10 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
       }
     }
     if(!is_found0 || !is_found1){
-      std::cout << "get_time_step() - ignoring interaction "
+      IMP_LOG(TERSE, "get_time_step() - ignoring interaction "
                 << type0 << "-" << type1
                 << " since no particles of one these types are defined"
-                << std::endl;
+                << std::endl);
       continue;
     }
     // compute skewed range if needed
@@ -315,16 +315,16 @@ double get_time_step(const ::npctransport_proto::Assignment& a,
     }
   } // for interactions(i)
 
-  std::cout << "get_time_step(): "
+  IMP_LOG(VERBOSE, "get_time_step(): "
             << " max_d_factor " << max_d_factor
             << " max-k " << max_k
             << " min-range " << min_range
             << " max-trans-relative-to-R " << max_trans_relative_to_radius
             << " time-step-factor " << time_step_factor
-            << std::endl;
+            << std::endl);
   double dT_fs= get_time_step(max_d_factor, max_k, min_radius, min_range,
                               max_trans_relative_to_radius, time_step_factor);
-  std::cout << "dT = " << dT_fs << " [fs]" << std::endl;
+  IMP_LOG(VERBOSE, "dT = " << dT_fs << " [fs]" << std::endl);
   return dT_fs;
 
 }
@@ -355,9 +355,9 @@ int get_number_of_frames(const ::npctransport_proto::Assignment& a,
 int get_dump_interval_in_frames(const ::npctransport_proto::Assignment& a,
                                 double time_step) {
   int ret = get_frames_from_ns(a.dump_interval_ns(), time_step);
-  std::cout << "dump interval = " << ret << " frames, "
+  IMP_LOG(VERBOSE, "dump interval = " << ret << " frames, "
             << a.dump_interval_ns() << " ns, time step " << time_step
-            << std::endl;
+            << std::endl);
   return ret;
 }
 
@@ -371,10 +371,10 @@ int get_statistics_interval_in_frames
     ns = a.statistics_interval_ns() ;
   }
   int ret = get_frames_from_ns(ns, time_step);
-  std::cout << "stats interval = "
+  IMP_LOG(VERBOSE, "stats interval = "
             << ret  << " frames, converted from "
             << ns << " ns, time step " << time_step
-            << std::endl;
+            << std::endl);
   return ret;
 }
 
@@ -388,10 +388,10 @@ int get_output_statistics_interval_in_frames
     ns = a.output_statistics_interval_ns() ;
   }
   int ret = get_frames_from_ns(ns, time_step);
-  std::cout << "output stats interval = "
+  IMP_LOG(VERBOSE, "output stats interval = "
             << ret  << " frames, converted from "
             << ns << " ns, time step " << time_step
-            << std::endl;
+            << std::endl);
   return ret;
 }
 
