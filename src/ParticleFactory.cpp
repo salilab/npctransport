@@ -23,6 +23,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
  */
 Particle*
 ParticleFactory::create(std::string name) {
+  set_was_used(true);
   if(name==""){
     name = type_.get_string();
   }

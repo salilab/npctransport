@@ -196,7 +196,7 @@ namespace {
     if ( n1 == 0 ) {
       return;
     }
-    std::cout << "n1,n2: " << n1 << "," << n2 << std::endl;
+    //    std::cout << "n1,n2: " << n1 << "," << n2 << std::endl;
     IMP_ALWAYS_CHECK(n1==n2,
                      "Size of list of type suffixes in FG chain assignment"
                      " should be equal to either zero or to the chain size",
