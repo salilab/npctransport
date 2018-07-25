@@ -8,7 +8,6 @@
 
 #include <IMP/npctransport/BrownianDynamicsTAMDWithSlabSupport.h>
 #include <IMP/npctransport/FGChain.h>
-#include <IMP/npctransport/ParticleFactory.h>
 #include <IMP/npctransport/protobuf.h>
 #include <IMP/npctransport/SimulationData.h>
 #include <IMP/npctransport/SitesGeometry.h>
@@ -431,11 +430,13 @@ void SimulationData::create_floaters
            color, type) );
   if(f_data.beads_tail_n()>0){ // TODO: make beads a hierarchical structure - for now it's simplest this way
     for (int i=0; i < f_data.beads_tail_n(); i++) {
-      IMP_NEW(ParticleFactory, pf,
-              (this, f_data.beads_tail_radius(),
-               f_data.d_factor().value(),
-               angular_d_factor_,
-               color, type) );
+      IMP_WARN("Beads tail functionality is not implemented just yet");
+      IMP_NOT_IMPLEMENTED;
+      // IMP_NEW(ParticleFactory, pf,
+      //         (this, f_data.beads_tail_radius(),
+      //          f_data.d_factor().value(),
+      //          angular_d_factor_,
+      //          color, type) );
     }
   }
   for (int j = 0; j < f_data.number().value(); ++j)
@@ -673,10 +674,15 @@ SimulationData::remove_fgs_with_prefix
     // loop from end to start because deleting affects tail
     ::npctransport_proto::Assignment_FGAssignment const&
       fg= m_assignment->fgs(i);
-    if(fg.type() == s_fg_type){ // compare only prefix since prefix identifies fg assignments
+    bool is_delete= (fg.type() == s_fg_type); // compare only prefix since prefix identifies fg assignments
+    if(is_delete) {
       //      m_assignment->mutable_fgs()->DeleteSubrange(i,1);
+      // Push i to last without changing order of others, since can only delete last,
+      // (note that preserving assignment order is critical for good linkage to RMF):
       int i_last= m_assignment->fgs_size()-1;
-      m_assignment->mutable_fgs()->SwapElements(i, i_last);
+      for(int ii=i; ii<i_last; ii++){
+        m_assignment->mutable_fgs()->SwapElements(ii, ii+1);
+      }
       m_assignment->mutable_fgs()->RemoveLast();
     }
   }

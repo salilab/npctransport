@@ -462,6 +462,8 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   //! remove particle of type pt from simulation, including all
   //! model particles, statistics and interactions associated with it
+  //! \note this does not update the protobuf assignment or protobuf statistics
+  //! \see remove_fgs_with_prefix
   void remove_particle_type(core::ParticleType pt);
 
   //! remove all FGs of specified type.
@@ -470,10 +472,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
       (= begins with s_fg_type, followed by an empty string or a non-digit
        character) from the simulation, including model particles, statistics and
        associated interaction, as well as related assignemnt and statistics data
-       from the output protobug file
+       from the output protobuf file
 
        @param s_fg_type The FG type prefix (chain name, to which a suffix could
                         be added for children beads)
+
+       \see remove_particle_type
   */
   void remove_fgs_with_prefix(std::string s_fg_type);
 
