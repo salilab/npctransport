@@ -59,10 +59,6 @@ SitesPairScore::SitesPairScore(double range, double k,
   IMP_LOG_PROGRESS( "Setting up SitesPairScore with sites0 "
 		    << sites0_ << " sites1 " << sites1_ << std::endl);
   is_orientational_score_ = (sigma0_deg > 0.0 && sigma1_deg > 0.0);
-  if(!is_orientational_score_){
-    IMP_LOG(WARNING, "Creating old version of SitesPairScore, for "
-	    "backwards compatibility" << std::endl);
-  }
   // Find upper bound for distance between particles whose sites interact
   // to be used for fast filtering - the range + sites radii
   double ubound_distance = (get_max_r_sum(sites0, sites1) + params_.r);
