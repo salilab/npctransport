@@ -20,58 +20,58 @@ import IMP
 import IMP.npctransport
 #import IMP.benchmark
 #import IMP.example
-from optparse import OptionParser
+try:
+    import argparse
+except ImportError:
+    import IMP._compat_argparse as argparse
 import math
 
 def get_cmdline_options(args = None):
-    usage = \
-        "Usage: %prog [options]" + \
-        "\n\nRuns FG Nups simulation with a cylinder"
-    parser = OptionParser(usage)
-    parser.add_option("-w", "--work_unit",
-                      type="int", default=1,
-                      help="The work unit")
-    parser.add_option("-c", "--configuration", metavar="CONFIG_FILE",
-                      type="string", default="configuration.pb",
-                      help="input configuration file in protobuf format" +
-                      " [default: %default]")
-    parser.add_option("-o", "--output", metavar="OUTPUT_FILE",
-                      type="string", default="assignments.pb",
-                      help="output assignment and statistics file in " +
-                      " protobuf format" +
-                      ", recording the assignment being executed"
-                      " and the associated stats" +
-                      " [default: %default]")
-    parser.add_option("-f", "--final_configuration", metavar="FINAL_FILE",
-                      type="string", default="final.pym",
-                      help="output final configuration file" +
-                      " [default: %default]")
-    parser.add_option("-r", "--rmf_file", metavar="RMF_FILE",
-                      type="string", default="output.rmf",
-                      help="RMF file for recording the simulation progress" +
-                      " [default: %default]")
-    parser.add_option("-p", "--profile",
-                      action="store_true", default=False,
-                      help="Whether to turn on profiling for the first run")
-    parser.add_option("-q", "--quick",
-                      action="store_true", default=False,
-                      help="Reduce all steps to the minimum");
-    parser.add_option("--show_steps",
-                      action="store_true", default=False,
-                      help="Show the steps for each modified variable");
-    parser.add_option("--show_number_of_work_units",
-                      action="store_true", default=False,
-                      help="Show the number of work units");
-    parser.add_option("--cylinder_anchoring",
-                      action="store_true", default=False,
-                      help="anchor FG nups to a cylinder specified in" +
-                      "the config file")
-    parser.add_option("-i", "--initialization_rmf_file",
-                      help="initialize the simulation from the last frame of " +
-                      "the specified RMF file, assuming it was created by " +
-                      "this simualtion process")
-    (options, args) = parser.parse_args()
-    return options
+    desc = "Runs FG Nups simulation with a cylinder"
+    parser = argparse.ArgumentParser(description=desc)
+    parser.add_argument("-w", "--work_unit",
+                        type=int, default=1,
+                        help="The work unit")
+    parser.add_argument("-c", "--configuration", metavar="CONFIG_FILE",
+                        type=str, default="configuration.pb",
+                        help="input configuration file in protobuf format" +
+                        " [default: %(default)s]")
+    parser.add_argument("-o", "--output", metavar="OUTPUT_FILE",
+                        type=str, default="assignments.pb",
+                        help="output assignment and statistics file in " +
+                        " protobuf format" +
+                        ", recording the assignment being executed"
+                        " and the associated stats" +
+                        " [default: %(default)s]")
+    parser.add_argument("-f", "--final_configuration", metavar="FINAL_FILE",
+                        type=str, default="final.pym",
+                        help="output final configuration file" +
+                        " [default: %(default)s]")
+    parser.add_argument("-r", "--rmf_file", metavar="RMF_FILE",
+                        type=str, default="output.rmf",
+                        help="RMF file for recording the simulation progress" +
+                        " [default: %(default)s]")
+    parser.add_argument("-p", "--profile",
+                        action="store_true", default=False,
+                        help="Whether to turn on profiling for the first run")
+    parser.add_argument("-q", "--quick",
+                        action="store_true", default=False,
+                        help="Reduce all steps to the minimum")
+    parser.add_argument("--show_steps",
+                        action="store_true", default=False,
+                        help="Show the steps for each modified variable")
+    parser.add_argument("--show_number_of_work_units",
+                        action="store_true", default=False,
+                        help="Show the number of work units")
+    parser.add_argument("--cylinder_anchoring",
+                        action="store_true", default=False,
+                        help="anchor FG nups to a cylinder specified in" +
+                        "the config file")
+    parser.add_argument("-i", "--initialization_rmf_file",
+                        help="initialize the simulation from the last frame " +
+                             "of the specified RMF file, assuming it was " +
+                             "created by this simualtion process")
+    return parser.parse_args()
 
 
 def set_fg_grid( sd ):
@@ -99,7 +99,7 @@ def set_fg_grid( sd ):
     sites = IMP.algebra.Vector2Ds()
     while ( len(sites) < len(chains) ):
         cur = IMP.algebra.get_random_vector_in(surface) # Vector2D
-        bad = False;
+        bad = False
         for i in range( len(sites) ):
             # 2*r non-overlapping
             if (IMP.algebra.get_distance(sites[i], cur) < 2*r) :
@@ -115,7 +115,7 @@ def set_fg_grid( sd ):
                 sites[i][0],
                 sites[i][1],
                 sd.get_box().get_corner(0)[2]))
-        d.set_coordinates_are_optimized(False);
+        d.set_coordinates_are_optimized(False)
         print "d = ", d
 
 
@@ -219,7 +219,7 @@ def set_specific_fgs_in_cylinder( sd, fgs_list, n_layers,
             cur_chain = IMP.atom.Hierarchy( fgs_list[chain_num] )
             d = IMP.core.XYZ( cur_chain.get_child(0) )
             d.set_coordinates( new_anchor )
-            d.set_coordinates_are_optimized(False);
+            d.set_coordinates_are_optimized(False)
             print "d = ", d
 
 def set_fgs_in_cylinder( sd, n_layers ):
@@ -295,7 +295,7 @@ def get_exclude_from_channel_restraint( sd ):
     print "here 3"
     restraint = IMP.container.SingletonsRestraint(score,
                                                   particles,
-                                                  "ExcludeZRangeRestraint");
+                                                  "ExcludeZRangeRestraint")
     print "here 4"
     return restraint
 

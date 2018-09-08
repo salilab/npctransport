@@ -138,28 +138,32 @@ def set_quick_configuration(config):
     config.maximal_number_of_frames=100000
 
 import sys
-import optparse
-make_parser = optparse.OptionParser(usage="usage: %prog [options] output.pb")
-make_parser.add_option("-s", "--single", dest="single",
-                  help="Where to put a protobuf to do a single run")
-make_parser.add_option("-q", "--quick", dest="quick",
-                  help="Where to put the protobuf for a single quick run")
+try:
+    import argparse
+except ImportError:
+    import IMP._compat_argparse as argparse
+
 
 def write(config):
-    (options, args) = make_parser.parse_args()
-    if len(args) != 1:
-        make_parser.print_help()
-        exit(1)
-    f=open(args[0], "wb")
+    make_parser = argparse.ArgumentParser()
+    make_parser.add_argument("-s", "--single", dest="single",
+                             help="Where to put a protobuf to do a single run")
+    make_parser.add_argument("-q", "--quick", dest="quick",
+                             help="Where to put the protobuf for a single "
+                                  "quick run")
+    make_parser.add_argument("output", help="output protobuf file name")
+
+    args = make_parser.parse_args()
+    f=open(args.output, "wb")
     f.write(config.SerializeToString())
 
-    if options.single:
+    if args.single:
         set_single_configuration(config)
-        f=open(options.single, "wb")
+        f=open(args.single, "wb")
         f.write(config.SerializeToString())
-    if options.quick:
+    if args.quick:
         set_quick_configuration(config)
         #config.dump_interval=1
-        f=open(options.quick, "wb")
+        f=open(args.quick, "wb")
         f.write(config.SerializeToString())
     print(nranges, "work units")
