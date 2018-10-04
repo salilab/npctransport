@@ -176,7 +176,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @param pip the pair of particle indexes in m
      @param da optional accumulator for force and torque derivatives
      @param contacts_accumulator A pointer to a tuple of output values
-            [num-contacts, sites1-bound, sites1-bound].
+            [num-contacts, sites0-bound, sites1-bound].
             num-contacts is the total number of site-site contacts between pip.
             sites0-bound and sites1-bound are vectors of contact counts
             for each site of pip[0] and pip[1], resp.
@@ -207,7 +207,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @param pip the pair of particle indexes in m
      @param da optional accumulator for force and torque derivatives
      @param contacts_accumulator A pointer to a tuple of output values
-            [num-contacts, sites1-bound, sites1-bound].
+            [num-contacts, sites0-bound, sites1-bound].
             num-contacts is the total number of site-site contacts between pip.
             sites0-bound and sites1-bound are vectors of contact counts
             for each site of pip[0] and pip[1], resp.
