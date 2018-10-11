@@ -12,7 +12,6 @@
 #include <IMP/Particle.h>
 #include <IMP/OptimizerState.h>
 //#include <IMP/optimizer_state_macros.h>
-#include <IMP/core/PeriodicOptimizerState.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
 #include <IMP/npctransport/typedefs.h>
 #include <boost/unordered_set.hpp>
@@ -27,9 +26,9 @@ class Statistics;
     range
 */
 class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
-    : public core::PeriodicOptimizerState {
+    : public OptimizerState {
  private:
-  typedef core::PeriodicOptimizerState P;
+  typedef OptimizerState P;
   typedef IMP_KERNEL_LARGE_ORDERED_SET<ParticleIndex> t_particle_index_ordered_set; // got to be ordered
   typedef IMP_KERNEL_LARGE_ORDERED_SET<ParticleIndexPair> t_particle_index_pair_ordered_set;
  private:

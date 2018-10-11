@@ -18,7 +18,6 @@
 
 #include "npctransport_config.h"
 #include <IMP/OptimizerState.h>
-#include <IMP/core/PeriodicOptimizerState.h>
 #include <IMP/SingletonContainer.h>
 #include <IMP/container/CloseBipartitePairContainer.h>
 
@@ -28,13 +27,15 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 /**
  */
 class IMPNPCTRANSPORTEXPORT GranuleActivationOptimizerState
-    : public core::PeriodicOptimizerState {
+    : public OptimizerState {
  private:
-  typedef core::PeriodicOptimizerState P;
+  typedef OptimizerState P;
 
   // maintains a list of nearby particle pairs in a bipartite graph
   IMP::PointerMember<IMP::container::CloseBipartitePairContainer>
       close_bipartite_pair_container_;
+
+  int periodicity_;
 
  public:
   /**
@@ -50,7 +51,7 @@ class IMPNPCTRANSPORTEXPORT GranuleActivationOptimizerState
    */
   GranuleActivationOptimizerState
     ( IMP::SingletonContainer* vesicles_container,
-      IMP::SingletonContainer::SingletonContainer* glucose_container,
+      IMP::SingletonContainer* glucose_container,
       double contact_range, double slack = 1.0,
       unsigned int periodicity=1);
 
@@ -73,7 +74,7 @@ class IMPNPCTRANSPORTEXPORT GranuleActivationOptimizerState
             of the optimizer state, pip[0] is assumed to be
             a vesicle particle and pip[1] is a glucose molecule.
   */
-  void rigidify_pair(pip);
+  void rigidify_pair(ParticleIndexPair pip);
 
 
   IMP_OBJECT_METHODS(GranuleActivationOptimizerState);
