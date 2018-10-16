@@ -25,11 +25,13 @@ def has_depth_with_site(root, i):
     return has_depth_with_site(c[0], i-1)
 
 
-def _add_nodes(node, tf, types, depth=0):
+def _add_nodes(node, tf, type_prefixes, depth=0):
     '''
     node - rmf node to scan
     tf - typed factory
-    types - list of type names for which to apply method
+    type_prefixes - list of full type prefixes (e.g. "Nup1" for "Nup1N")
+
+    adds only nodes whose type name begins with any of the specified type prefixes
     '''
     children = node.get_children()
     ret = []
@@ -37,11 +39,11 @@ def _add_nodes(node, tf, types, depth=0):
     if len(children)==0:
         return ret
     if has_depth_with_site(node, 3) and tf.get_is(children[0]):
-        tf_type = tf.get(children[0]).get_type_name()
-        if (tf_type in types):
+        child_type = tf.get(children[0]).get_type_name()
+        if any([child_type.startswith(tp) for tp in type_prefixes]):
             ret.append(children)
     for c in children:
-        ret += _add_nodes(c, tf,  types, depth+1)
+        ret += _add_nodes(c, tf,  type_prefixes, depth+1)
     return ret
 
 def _print_atom(node, rf, atom_id, res_id, chain_id, fg_type):
@@ -121,8 +123,10 @@ def main():
     ipf = RMF.IntermediateParticleFactory(in_fh)
     fg_types, kap_types, inert_types = _get_fg_and_floater_types( ref_output )
     type2chains={}
+    print("fg_types", fg_types)
     for i, fg_type in enumerate(fg_types):
         type2chains[fg_type] = _add_nodes(in_fh.get_root_node(), tf, [fg_type])
+        print(type2chains[fg_type])
     skip_n_frames=IMP.get_int_flag("skip_n_frames")
     first_frame=IMP.get_int_flag("first_frame")
     if(skip_n_frames>0):
@@ -137,7 +141,7 @@ def main():
             continue
         fname= "%s_f%05d.pdb" % (os.path.splitext(out_fname)[0],f_id)
         F= open(fname, 'w')
-#        print("COMMENT writing frame", f, f_id)
+        print("COMMENT writing frame", f, f_id)
         chain_id="A"
         atom_id=1
         model_id=1
@@ -145,6 +149,7 @@ def main():
         for fg_type, chains in type2chains.iteritems():
             print >>F, "MODEL %d" % model_id
             for chain in chains:
+                print("Chain ",chain)
                 if chain_id=='I': # no more than 8 chains per model
                     chain_id='A'
                     print >>F, "ENDMDL"
