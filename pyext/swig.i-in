@@ -7,6 +7,7 @@
 //#include <RMF/HDF5.h>
 IMP_CLANG_PRAGMA(diagnostic ignored "-Wc++11-long-long")
 %}
+
 IMP_SWIG_OBJECT(IMP::npctransport, SitesPairScore, SitesPairScores);
 // IMP_SWIG_OBJECT(IMP::npctransport, TemplateBaseSitesPairScore, TemplateBaseSitesPairScores);
 IMP_SWIG_OBJECT(IMP::npctransport, Scoring, Scorings);
@@ -38,9 +39,13 @@ IMP_SWIG_OBJECT(IMP::npctransport, ParticleTransportStatisticsOptimizerState, Pa
 IMP_SWIG_OBJECT(IMP::npctransport, FGChain, FGChains);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleFactory, ParticleFactories);
 // IMP_SWIG_OBJECT(IMP::npctransport::internal, TAMDChain, TAMDChains);
+IMP_SWIG_OBJECT(IMP::npctransport, GranuleActivationOptimizerState, GranuleActivationOptimizerStates);
+
+
 IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
 IMP_SWIG_VALUE(IMP::npctransport, SitesPairScoreParameters, SitesPairScoreParametersList);
 //IMP_SWIG_VALUE(IMP::npctransport, LinearInteraction, LinearInteractions);
+
 IMP_SWIG_DECORATOR(IMP::npctransport, Transporting, Transportings);
 IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithPore, SlabWithPores);
 IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithCylindricalPore, SlabWithCylindricalPores);
@@ -105,6 +110,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/initialize_positions.h"
 %include "IMP/npctransport/Avro2PBReader.h"
 %include "IMP/npctransport/util.h"
+%include "IMP/npctransport/GranuleActivationOptimizerState.h"
 
 // %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
