@@ -40,6 +40,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, FGChain, FGChains);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleFactory, ParticleFactories);
 // IMP_SWIG_OBJECT(IMP::npctransport::internal, TAMDChain, TAMDChains);
 IMP_SWIG_OBJECT(IMP::npctransport, GranuleActivationOptimizerState, GranuleActivationOptimizerStates);
+IMP_SWIG_OBJECT(IMP::npctransport, LinearRadialSingletongScore, LinearRadialSingletongScores);
 
 
 IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);
@@ -111,6 +112,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/Avro2PBReader.h"
 %include "IMP/npctransport/util.h"
 %include "IMP/npctransport/GranuleActivationOptimizerState.h"
+%include "IMP/npctransport/LinearRadialSingletonScore.h"
 
 // %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
