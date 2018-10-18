@@ -50,9 +50,10 @@ class IMPNPCTRANSPORTEXPORT GranuleActivationOptimizerState
      @param periodicity the frame interval for updating this optimizer state
    */
   GranuleActivationOptimizerState
-    ( IMP::SingletonContainer* vesicles_container,
-      IMP::SingletonContainer* glucose_container,
-      double contact_range, double slack = 1.0,
+    ( IMP::SingletonContainerAdaptor vesicles_container,
+      IMP::SingletonContainerAdaptor glucose_container,
+      double contact_range,
+      double slack = 1.0,
       unsigned int periodicity=1);
 
  protected:
@@ -76,7 +77,7 @@ class IMPNPCTRANSPORTEXPORT GranuleActivationOptimizerState
   */
   void rigidify_pair(ParticleIndexPair pip);
 
-
+ public:
   IMP_OBJECT_METHODS(GranuleActivationOptimizerState);
 };
 IMP_OBJECTS(GranuleActivationOptimizerState, GranuleActivationOptimizerStates);

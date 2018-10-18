@@ -14,12 +14,12 @@
 
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 GranuleActivationOptimizerState::GranuleActivationOptimizerState
-( IMP::SingletonContainer* vesicles_container,
-  IMP::SingletonContainer* glucose_container,
+( IMP::SingletonContainerAdaptor vesicles_container,
+  IMP::SingletonContainerAdaptor glucose_container,
   double contact_range,
   double slack,
   unsigned int periodicity)
-: P(vesicles_container ? vesicles_container->get_model() :  nullptr,
+  : P(vesicles_container ? vesicles_container->get_model() :  nullptr,
     "GranuleActivationOptimizerState%1%"),
   periodicity_(periodicity)
 {
@@ -35,16 +35,21 @@ GranuleActivationOptimizerState::GranuleActivationOptimizerState
 void GranuleActivationOptimizerState::do_update
 (unsigned int call_num)
 {
-  if(call_num % periodicity_ != 0){
-    return;
-  }
+  IMP_OBJECT_LOG;
+  close_bipartite_pair_container_->do_score_state_before_evaluate();
   IMP_CONTAINER_FOREACH                                 \
     (IMP::container::CloseBipartitePairContainer,
      close_bipartite_pair_container_,
      {
        ParticleIndexPair const& pip = _1;
+       if(IMP::core::RigidMember::get_is_setup(get_model(), pip[1])){
+         continue; // already rigidified
+       }
        int ipatch= get_interacting_patch(pip);
        if(ipatch>=0){
+         IMP_LOG(TERSE, "LOG: rigidifying pair "
+                 << pip[0] << "," << pip[1]
+                 << std::endl);
          rigidify_pair(pip);
          // TODO: need to also deactivate patch ipatch
        }
@@ -71,6 +76,7 @@ GranuleActivationOptimizerState::rigidify_pair
   IMP_USAGE_CHECK(core::XYZR::get_is_setup(m, pip[0]),
                   "particles for rigidifications must be spheres as well");
   core::XYZR xyzr0(m, pip[0]);
+  core::XYZR xyzr1(m, pip[1]);
   if(!core::RigidBody::get_is_setup(m, pip[0])){
     algebra::Transformation3D tr(xyzr0.get_sphere().get_center());
     algebra::ReferenceFrame3D rf(tr);
@@ -81,7 +87,7 @@ GranuleActivationOptimizerState::rigidify_pair
   double original_radius= xyzr0.get_radius();
   rb0.add_member(pip[1]);
   xyzr0.set_radius(original_radius);
-  xyzr0.set_coordinates_are_optimized(false);
+  xyzr1.set_coordinates_are_optimized(false);
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE
