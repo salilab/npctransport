@@ -40,7 +40,7 @@ IMP_SWIG_OBJECT(IMP::npctransport, FGChain, FGChains);
 IMP_SWIG_OBJECT(IMP::npctransport, ParticleFactory, ParticleFactories);
 // IMP_SWIG_OBJECT(IMP::npctransport::internal, TAMDChain, TAMDChains);
 IMP_SWIG_OBJECT(IMP::npctransport, GranuleActivationOptimizerState, GranuleActivationOptimizerStates);
-IMP_SWIG_OBJECT(IMP::npctransport, LinearRadialSingletongScore, LinearRadialSingletongScores);
+IMP_SWIG_OBJECT(IMP::npctransport, LinearRadialSingletonScore, LinearRadialSingletonScores);
 
 
 IMP_SWIG_VALUE(IMP::npctransport, Avro2PBReader, Avro2PBReaders);

@@ -23,8 +23,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
    as particles get farther away from the center of some
    sphere
 */
-template <class DistanceScoreT>
-LinearRadialSingletongScore<Functor>
+class IMPNPCTRANSPORTEXPORT
+LinearRadialSingletonScore
 : public IMP::SingletonScore
 {
  private:
@@ -44,7 +44,7 @@ LinearRadialSingletongScore<Functor>
             is the negative gradient of the score as the radius
             increases.
    */
-  LinearRadialSingletongScore
+  LinearRadialSingletonScore
    ( algebra::Vector3D center,
      double k)
     : center_( center),  k_( k )
@@ -77,13 +77,15 @@ LinearRadialSingletongScore<Functor>
     algebra::Vector3D dxyz= xyz.get_coordinates() - center_;
     double dxyz_magnitude=
       algebra::get_magnitude_and_normalize_in_place( dxyz );
-    double score = -k * dxyz_magnitude; // score decreases (improves) radially
+    // TODO: BR did not implement the dependence on the number of bound patches, so here is a good place
+    //       to read it and scale by it
+    double score = -k_ * dxyz_magnitude; // score decreases (improves) radially
     if (da) {
       algebra::Vector3D& dxyz_normalized= dxyz; // it is now a normalized version of itself
-      algebra::Vector3D deriv= -k * dxyz_normalized;
+      algebra::Vector3D deriv= -k_ * dxyz_normalized;
       IMP_LOG(VERBOSE, "score " << score
               << " and derivative " << deriv << std::endl);
-      d.add_to_derivatives(deriv, *da);
+      xyz.add_to_derivatives(deriv, *da);
     }
     return score;
   }
