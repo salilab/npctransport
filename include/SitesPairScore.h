@@ -438,8 +438,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
     algebra::Vector3D const& gRB1= rbi1.tr.get_translation();
     algebra::Vector3D gUnitRB0RB1= gRB1-gRB0;
     double distRB0RB1= get_magnitude_and_normalize_in_place(gUnitRB0RB1); // distance between centers
-    for (unsigned int i = 0; i < sites0_.size(); ++i) {
-      algebra::Vector3D gSite0 = rbi0.tr.get_transformed(sites0_[i].get_center());
+    for (unsigned int i0 = 0; i0 < sites0_.size(); ++i0) {
+      algebra::Vector3D gSite0 = rbi0.tr.get_transformed(sites0_[i0].get_center());
       algebra::Vector3D gUnitRB0Site0= (gSite0-gRB0)*rbi0.iradius;
       double cosSigma0 = gUnitRB0Site0*gUnitRB0RB1;
       if(cosSigma0 < params_.cosSigma1_max) { // not in range... - note the indexing is not an error - sigma0 is equivalent to params_.sigma1
@@ -453,8 +453,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
         double absSinSigma0 = get_magnitude_and_normalize_in_place(gRotSigma0);
         dKFactor0=internal::get_derivative_k_factor(absSinSigma0, params_.cosSigma1_max);
       }
-      for(unsigned int j = 0 ; j < sites1_.size(); ++j) {
-        algebra::Vector3D gSite1 = rbi1.tr.get_transformed(sites1_[j].get_center());
+      for(unsigned int i1 = 0 ; i1 < sites1_.size(); ++i1) {
+        algebra::Vector3D gSite1 = rbi1.tr.get_transformed(sites1_[i1].get_center());
         IMP_LOG_PROGRESS( "Evaluating sites at global coordinates: " << gSite0
                           << " ; " << gSite1 << std::endl );
         double cur_score;
@@ -471,8 +471,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
         sum += cur_score;
           if(contacts_accumulator && cur_score!=0.0){
             n_contacts++;
-            occupied_sites0[i]++;
-            occupied_sites1[i]++;
+            occupied_sites0[i0]++;
+            occupied_sites1[i1]++;
         }
       } // j
     } // i
