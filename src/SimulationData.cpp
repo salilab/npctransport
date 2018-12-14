@@ -179,6 +179,10 @@ void SimulationData::initialize(std::string prev_output_file,
   GET_VALUE_DEF(is_xyz_hist_stats, false)
   GET_VALUE_DEF(is_backbone_harmonic, false);
   GET_ASSIGNMENT_DEF(backbone_tau_ns, 1.0);
+  IMP_ALWAYS_CHECK(!(get_has_slab() && (!get_has_bounding_box())),
+                   "Simulations with slab require a bounding box (sphere or"
+                   " no box are not supported at this point).",
+                   IMP::ValueException);
   initial_simulation_time_ns_ = 0.0; // default
   if (pb_data.has_statistics()) {
     if (pb_data.statistics().has_bd_simulation_time_ns()) {
@@ -842,13 +846,19 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
     IMP::rmf::add_restraints(fh, s->get_z_bias_restraints() );
     IMP::rmf::add_restraints(fh, s->get_custom_restraints() );
   }
-  if (s->get_has_bounding_box()) {
+  if (s->get_has_bounding_volume()) {
     if(with_restraints && false) {
       IMP::rmf::add_restraints
-        ( fh, RestraintsTemp(1, s->get_bounding_box_restraint()) );
+        ( fh, RestraintsTemp(1, s->get_bounding_volume_restraint()) );
     }
-    IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
+    if(get_has_bounding_box()){
+      IMP_NEW(display::BoundingBoxGeometry, bbg, (get_bounding_box()));
     IMP::rmf::add_static_geometries(fh, display::Geometries(1, bbg));
+    }
+    if (get_has_bounding_sphere()){
+      IMP_NEW(display::SphereGeometry, sg, (get_bounding_sphere()));
+      IMP::rmf::add_static_geometries(fh, display::Geometries(1, sg));
+    }
   }
   if (get_has_slab()) {
     if(with_restraints && false) {
@@ -857,10 +867,10 @@ void SimulationData::link_rmf_file_handle(RMF::FileHandle fh,
     IMP::Pointer<display::Geometry> slab_geometry;
     if(get_is_slab_with_cylindrical_pore()){
       slab_geometry = new SlabWithCylindricalPoreWireGeometry
-        (get_slab_thickness(), get_pore_radius(), box_side_);
+        (get_slab_thickness(), get_pore_radius(), box_side_); // TODO: this will not work well with spherical bounding box
     } else {
       slab_geometry = new SlabWithToroidalPoreWireGeometry
-	(get_slab_thickness(), get_pore_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_); // TODO: this will not work well with spherical bounding box
     }
     IMP::rmf::add_static_geometries(fh, slab_geometry->get_components());
   }
@@ -917,10 +927,15 @@ void SimulationData::dump_geometry() {
     g->set_sites(it->first, it->second);
   }
   w->add_geometry(g);
-  if (box_is_on_) {
-    IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
+  if (get_has_bounding_box()) {
+    IMP_NEW(display::BoundingBoxGeometry, bbg, (get_bounding_box()));
     bbg->set_was_used(true);
     w->add_geometry(bbg);
+  }
+  if (get_has_bounding_sphere()) {
+    IMP_NEW(display::SphereGeometry, sg, (get_bounding_sphere()));
+    sg->set_was_used(true);
+    w->add_geometry(sg);
   }
   if (slab_is_on_) {
     //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
@@ -928,10 +943,10 @@ void SimulationData::dump_geometry() {
     IMP::Pointer<display::Geometry> slab_geometry;
     if(get_is_slab_with_cylindrical_pore()) {
       slab_geometry= new SlabWithCylindricalPoreWireGeometry
-	(get_slab_thickness(), get_pore_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_); // TODO: this will not work well with spherical bounding box
     } else {
       slab_geometry= new SlabWithToroidalPoreWireGeometry
-	(get_slab_thickness(), get_pore_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_); // TODO: this will not work well with spherical bounding box
     }
     w->add_geometry( slab_geometry );
   }
@@ -1082,7 +1097,8 @@ void SimulationData::set_sites(core::ParticleType t, int n,
 }
 
 
-void SimulationData::write_geometry(std::string out) {
+void
+SimulationData::write_geometry(std::string out) {
   IMP_OBJECT_LOG;
   Pointer<display::Writer> w = display::create_writer(out);
   {
@@ -1099,8 +1115,8 @@ void SimulationData::write_geometry(std::string out) {
             (s->get_all_chain_restraints()[i]));
     w->add_geometry(rsg);
   }
-  if (s->get_has_bounding_box()) {
-    IMP_NEW(display::RestraintGeometry, rsg, (s->get_bounding_box_restraint()));
+  if (s->get_has_bounding_volume()) {
+    IMP_NEW(display::RestraintGeometry, rsg, (s->get_bounding_volume_restraint()));
     w->add_geometry(rsg);
   }
   if (get_has_slab()) {
@@ -1112,18 +1128,23 @@ void SimulationData::write_geometry(std::string out) {
             (s->get_predicates_pair_restraint()));
     w->add_geometry(prsg);
   }
-  if (box_is_on_) {
-    IMP_NEW(display::BoundingBoxGeometry, bbg, (get_box()));
+  if (get_has_bounding_box()) {
+    IMP_NEW(display::BoundingBoxGeometry, bbg, (get_bounding_box()));
     w->add_geometry(bbg);
+  }
+  if (get_has_bounding_sphere()) {
+    IMP_NEW(display::SphereGeometry, sg, (get_bounding_sphere()));
+    sg->set_was_used(true);
+    w->add_geometry(sg);
   }
   if (slab_is_on_) {
     IMP::Pointer<display::Geometry> slab_geometry;
     if(get_is_slab_with_cylindrical_pore()) {
       slab_geometry= new SlabWithCylindricalPoreWireGeometry
-	(get_slab_thickness(), get_pore_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_); // TODO: this will not work well with spherical bounding box
     } else {
       slab_geometry= new SlabWithToroidalPoreWireGeometry
-	(get_slab_thickness(), get_pore_radius(), box_side_);
+	(get_slab_thickness(), get_pore_radius(), box_side_); // TODO: this will not work well with spherical bounding box
     }
     w->add_geometry(slab_geometry);
     //IMP_NEW(display::CylinderGeometry, cyl_geom, (get_cylinder()));
@@ -1132,27 +1153,82 @@ void SimulationData::write_geometry(std::string out) {
 }
 
 
-display::Geometry *SimulationData::get_static_geometry() {
+display::Geometry *
+SimulationData::get_static_geometry() {
   if (!static_geom_) {
-    IMP_NEW(display::BoundingBoxGeometry, bbg, (this->get_box()));
-    static_geom_ = bbg;
+    if(get_has_bounding_box()){
+      IMP_NEW(display::BoundingBoxGeometry, bbg, (get_bounding_box()));
+      static_geom_ = bbg;
+    }
+    if(get_has_bounding_sphere()){
+      IMP_NEW(display::SphereGeometry, sg, (get_bounding_sphere()));
+      static_geom_ = sg;
+    }
   }
   return static_geom_;
 }
 
-algebra::BoundingBox3D SimulationData::get_box() const {
+algebra::BoundingBox3D
+SimulationData::get_bounding_box() const {
   IMP_USAGE_CHECK(get_has_bounding_box(), "no bounding box defined");
   return algebra::get_cube_d<3>(.5 * box_side_);
 }
 
-double SimulationData::get_box_size() const{
+// returns sphere with same radius as box_size^3
+algebra::Sphere3D
+SimulationData::get_bounding_sphere() const {
+  IMP_USAGE_CHECK(get_has_bounding_sphere(), "no bounding sphere defined");
+  algebra::Vector3D origin(0,0,0);
+  return algebra::Sphere3D(origin,
+                           get_bounding_sphere_radius());
+}
+
+double
+SimulationData::get_bounding_box_size() const{
   IMP_USAGE_CHECK(get_has_bounding_box(), "no bounding box defined");
   return box_side_;
 }
 
-void SimulationData::set_box_size(double box_size) {
+void
+SimulationData::set_bounding_box_size(double box_size) {
+  IMP_USAGE_CHECK(get_has_bounding_box(), "no bounding box defined");
   box_side_= box_size;
 }
+
+double
+SimulationData::get_bounding_sphere_radius() const{
+  IMP_USAGE_CHECK(get_has_bounding_sphere(), "no bounding sphere radius defined");
+  double V_A3= get_bounding_volume();
+  double radius_A= std::pow(V_A3 * 0.75 / IMP::PI,
+                            1/3.0);
+  return radius_A;
+}
+
+void
+SimulationData::set_bounding_sphere_radius(double sphere_radius) {
+  IMP_USAGE_CHECK(get_has_bounding_sphere(), "no bounding sphere defined");
+  double V_A3= (4.0/3.0) * IMP::PI * std::pow(sphere_radius, 3.0);
+  set_bounding_volume(V_A3);
+}
+
+double
+SimulationData::get_bounding_volume() const{
+  IMP_USAGE_CHECK(get_has_bounding_box() || get_has_bounding_sphere(),
+                  "No supported bounding volume defined");
+  return std::pow(box_side_, 3);
+}
+
+//! sets the volume of the bounding box or sphere in A^3
+//! (box side or sphere radius are adjusted accordingly)
+void
+SimulationData::set_bounding_volume(double volume_A3){
+  IMP_USAGE_CHECK(get_has_bounding_box() || get_has_bounding_sphere(),
+                  "No supported bounding volume defined");
+  IMP_ALWAYS_CHECK(volume_A3>0, "only positive volumes are valid",
+                   IMP::ValueException);
+  box_side_= std::pow(volume_A3, 1/3.0);
+}
+
 
 algebra::Cylinder3D SimulationData::get_cylinder() const {
   IMP_USAGE_CHECK(get_is_slab_with_cylindrical_pore(),

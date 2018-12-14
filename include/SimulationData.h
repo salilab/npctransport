@@ -495,11 +495,32 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 #endif
 
   // get the bounding box for this simulation
-  algebra::BoundingBox3D get_box() const;
+  algebra::BoundingBox3D get_bounding_box() const;
 
-  double get_box_size() const;
+  // get the bounding box for this simulation
+  algebra::Sphere3D get_bounding_sphere() const;
 
-  void set_box_size(double box_size);
+  //! returns the length in A of one side of the box
+  //! (valid only if get_has_bounding_box() is true)
+  double get_bounding_box_size() const;
+
+  //! sets the length in A of one side of the box
+  //! (valid only if get_has_bounding_box() is true)
+  void set_bounding_box_size(double box_size);
+
+  //! get the radius of the bounding sphere
+  //! (valid only if get_has_bounding_sphere() is true)
+  double get_bounding_sphere_radius() const;
+
+  //! set radius of bounding sphere in angstrom
+  //! (valid only if get_has_bounding_sphere() is true)
+  void set_bounding_sphere_radius(double sphere_radius);
+
+  double get_bounding_volume() const;
+
+  //! sets the volume of the bounding box or sphere in A^3
+  //! (box side or sphere radius are adjusted accordingly)
+  void set_bounding_volume(double volume_A3);
 
   //* returns true if a slab is defnied */
   bool get_has_slab() const { return slab_is_on_!=0; }
@@ -527,7 +548,27 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   // get the cylinder in the slab for this simulation
   algebra::Cylinder3D get_cylinder() const;
 
-  bool get_has_bounding_box() const { return box_is_on_; }
+  //! returns true if simulation has a bounding simulation box
+  bool get_has_bounding_box() const {
+    return box_is_on_==1;
+  }
+
+  //! returns true if simulation has a bounding simulation sphere ('cell-like')
+  bool get_has_bounding_sphere() const {
+    return box_is_on_==2;
+  }
+
+  //! returns true if simulation has any bounding volume (box or sphere are supported)
+  bool get_has_bounding_volume() const {
+    bool has_bounding_volume= (box_is_on_ != 0);
+    IMP_IF_CHECK(USAGE)
+      if(has_bounding_volume){
+        IMP_USAGE_CHECK(get_has_bounding_box() || get_has_bounding_sphere(),
+                        "Invalid box_is_on value (typically defined in protobuf)");
+      }
+    return has_bounding_volume;
+
+  }
 
   /**
    Open the specified RMF file, links it to the hierarchies of this object, and

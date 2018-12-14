@@ -506,7 +506,7 @@ void inflate_floater
 }
 
 void reset_box_size(SimulationData* sd, double box_size){
-  sd->set_box_size(box_size);
+  sd->set_bounding_box_size(box_size);
   // Update output file:
   ::npctransport_proto::Output new_output;
   bool is_read= load_output_protobuf(output, new_output);
@@ -606,8 +606,11 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       std::cout << "Equilibration finished succesfully" << std::endl;
     }
     if( is_inflate_kap28 ) {
+      IMP_ALWAYS_CHECK(sd->get_has_bounding_box(),
+                       "is_inflate_kap28 works only with a bounding box",
+                       IMP::ValueException);
       sd->switch_suspend_rmf(true);
-      reset_box_size(sd, sd->get_box_size()*3.0);
+      reset_box_size(sd, sd->get_bounding_box_size()*3.0);
       sd->get_bd()->set_scoring_function // update scoring function with new box size
       ( sd->get_scoring()->get_scoring_function(true) );
       remove_Nup42(sd);

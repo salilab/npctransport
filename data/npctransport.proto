@@ -98,7 +98,7 @@ message Configuration {
   required FloatRange backbone_k=5;
   required FloatRange time_step_factor=6;
   required FloatRange box_side=7;
-  required IntRange box_is_on=8;
+  required IntRange box_is_on=8; // 0=no; 1=box; 2=sphere with volume equals box_side**3
   required FloatRange slab_thickness=9;
   required FloatRange tunnel_radius=10;
   required IntRange slab_is_on=11; // 0=no; 1=cylinder; 2=torus with major radius tunnel_radius and minor radius 0.5*slab_thickness
