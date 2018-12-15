@@ -323,6 +323,10 @@ namespace {
       npctransport::get_non_optimizable_particles( beads );
     ParticlesTemp optimizable_beads =
       npctransport::get_optimizable_particles( beads );
+    if(optimizable_beads.size()==0){
+      IMP_LOG(VERBOSE,"initialize_positions_of_specific_beads(): No optimizable particles found");
+      return;
+    }
     IMP_LOG(VERBOSE, " ; " << optimizable_beads.size()
             << " optimizable" << std::endl);
     Pointer<ScoringFunction> sf =
