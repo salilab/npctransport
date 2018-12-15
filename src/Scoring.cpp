@@ -102,7 +102,7 @@ Scoring::get_scoring_function(bool update)
     ParticlesTemp beads = get_sd()->get_beads();
     RestraintsTemp rs =
       get_chain_restraints_on( beads );
-    if (box_is_on_ == 1) {
+    if (get_has_bounding_volume()) {
       rs.push_back(get_bounding_volume_restraint(update));
     }
     if (get_sd()->get_has_slab()) {
@@ -149,7 +149,7 @@ Scoring::get_custom_scoring_function
   RestraintsTemp rs;
   rs += extra_restraints;
   rs += get_chain_restraints_on( beads );
-  if (box_is_on_) {
+  if (get_has_bounding_volume()) {
     rs.push_back( create_bounding_volume_restraint( beads ) );
   }
   if (get_sd()->get_has_slab()) {
@@ -195,7 +195,8 @@ Scoring::get_predicates_pair_restraint
 Restraint *
 Scoring::get_bounding_volume_restraint(bool update)
 {
-  IMP_USAGE_CHECK(box_is_on_, "box is not on - can't get restraint");
+  IMP_USAGE_CHECK(get_has_bounding_volume(),
+                  "box is not on - can't get restraint");
   if (update || !box_restraint_) {
     box_restraint_ =
       create_bounding_volume_restraint( get_sd()->get_beads() );

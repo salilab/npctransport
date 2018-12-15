@@ -47,7 +47,7 @@ class HarmonicSpringSingletonScore;
 class IMPNPCTRANSPORTEXPORT Scoring: public Object
 {
  private:
-  Parameter<bool> box_is_on_;
+  Parameter<int> box_is_on_;
   Parameter<double> interaction_k_;
   Parameter<double> interaction_range_;
   Parameter<double> backbone_k_;
