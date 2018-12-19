@@ -29,7 +29,7 @@ set(IMP_npctransport_LIBRARY_EXTRA_DEPENDENCIES "IMP.npctransport-proto" CACHE I
 # there is a #include 'npctransport.ph.h' in the cpp file
 add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py"
                           COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/"
-                          COMMAND protoc --python_out="${CMAKE_BINARY_DIR}/lib/IMP/npctransport/"
+                          COMMAND protoc --python_out=${CMAKE_BINARY_DIR}/lib/IMP/npctransport/
                           "-I${CMAKE_SOURCE_DIR}/modules/npctransport/data/"
                           "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
                           # add config header to resolve export symbols
