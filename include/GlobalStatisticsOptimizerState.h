@@ -2,7 +2,7 @@
  *  \file npctransport/GlobalStatisticsOptimizerState.h
  *  \brief description
  *
- *  Copyright 2007-2018 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2019 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_GLOBAL_STATISTICS_OPTIMIZER_STATE_H

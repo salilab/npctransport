@@ -3,7 +3,7 @@
  *  \brief statistics and order parameters about the simulations
  *         that is associated with a SimulationData object
  *
- *  Copyright 2007-2018 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2019 IMP Inventors. All rights reserved.
  *
 */
 

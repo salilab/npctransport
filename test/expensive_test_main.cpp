@@ -1,7 +1,7 @@
 /**
  * \file test_main.cpp
  * \brief Test the macros and loading and all that for mains
- * Copyright 2007-2018 IMP Inventors. All rights reserved.
+ * Copyright 2007-2019 IMP Inventors. All rights reserved.
  */
 
 #define IMP_NPC_MAIN
