@@ -533,8 +533,12 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
          current coordinates and their particle types
      b - vector of occupied pi1 sites counts (count number of interactions per site)
      c - vector of occupied pi2 sites counts (count number of interactions per site)
+     d - true if particles are interacting non-specifically (a non-zero contribution of non-specific terms)
   */
-  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+  boost::tuple< unsigned int,
+                std::vector<unsigned int>,
+                std::vector<unsigned int>,
+                bool >
     get_site_interactions_statistics
     ( ParticleIndex pi1, ParticleIndex pi2) const;
 
@@ -548,7 +552,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      b) vector of occupied pi1 sites counts (count number of interactions per site)
      c) vector of occupied pi2 sites counts (count number of interactions per site)
   */
-  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>, bool >
     get_site_interactions_statistics
     ( Particle const* p1, Particle const* p2) const
   {

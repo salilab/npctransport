@@ -176,10 +176,11 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @param pip the pair of particle indexes in m
      @param da optional accumulator for force and torque derivatives
      @param contacts_accumulator A pointer to a tuple of output values
-            [num-contacts, sites0-bound, sites1-bound].
+            [num-contacts, sites0-bound, sites1-bound, is_nonspec].
             num-contacts is the total number of site-site contacts between pip.
             sites0-bound and sites1-bound are vectors of contact counts
-            for each site of pip[0] and pip[1], resp.
+            for each site of pip[0] and pip[1], resp. is_nonspec is true if
+            the molecules have non-zero nonspecific interactions
             Ignored if Null
 
      @return the site-site contributions for the score for the pair
@@ -193,7 +194,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      double **torques_tables,
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
-     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>, bool >
      (*contacts_accumulator) = nullptr
      ) const;
 
@@ -207,10 +208,11 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @param pip the pair of particle indexes in m
      @param da optional accumulator for force and torque derivatives
      @param contacts_accumulator A pointer to a tuple of output values
-            [num-contacts, sites0-bound, sites1-bound].
+            [num-contacts, sites0-bound, sites1-bound, is_nonspec].
             num-contacts is the total number of site-site contacts between pip.
             sites0-bound and sites1-bound are vectors of contact counts
-            for each site of pip[0] and pip[1], resp.
+            for each site of pip[0] and pip[1], resp. is_nonspec is true if the
+            spheres have non-zero non-specific interactions
             Ignored if Null
 
      @return the site-site contributions for the score for the pair
@@ -221,7 +223,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
     (Model* m,
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
-     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>, bool >
      (*contacts_accumulator)
      ) const;
 
@@ -397,7 +399,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
   DerivativeAccumulator *da,
   boost::tuple<unsigned int,
                std::vector<unsigned int>,
-               std::vector<unsigned int> >
+               std::vector<unsigned int>,
+                bool>
   * contacts_accumulator
   ) const
 {
@@ -506,10 +509,15 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
       }// i
     } // else
   if(contacts_accumulator){
+    double non_specific_range= P::get_range_attraction();
+    double d_spheres= IMP::algebra::get_distance(spheres_table[pip[0].get_index()],
+                                                 spheres_table[pip[1].get_index()]);
+    bool is_nonspecific_interaction= d_spheres < non_specific_range;
     (*contacts_accumulator)=
       boost::make_tuple(n_contacts,
                         occupied_sites0,
-                        occupied_sites1);
+                        occupied_sites1,
+                        is_nonspecific_interaction);
   }
 
   IMP_LOG_PROGRESS( "Sum " << sum << std::endl);
@@ -523,7 +531,7 @@ SitesPairScore::evaluate_site_contributions
 (Model* m,
  const ParticleIndexPair &pip,
  DerivativeAccumulator *da,
- boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+ boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>, bool >
  (*contacts_accumulator)
  ) const
 {

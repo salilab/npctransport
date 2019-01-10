@@ -179,6 +179,7 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int call_num)
     bound_sites_I_by_pi;
   std::map<ParticleIndex, std::vector<unsigned int> >
     bound_sites_II_by_pi;
+  unsigned int n_nonspecific_interactions(0);
   IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
                         close_bipartite_pair_container_,
                         {
@@ -186,9 +187,11 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int call_num)
                           unsigned int n_site_site_contacts;
                           std::vector<unsigned int> bound_sites_I;
                           std::vector<unsigned int> bound_sites_II;
+                          bool is_nonspecific_interaction;
                           boost::tie(n_site_site_contacts,
                                      bound_sites_I,
-                                     bound_sites_II)=
+                                     bound_sites_II,
+                                     is_nonspecific_interaction)=
                             statistics_manager_->get_sd()->get_scoring()
                             ->get_site_interactions_statistics(pip[0], pip[1]);
                           if(n_site_site_contacts>0){
@@ -208,11 +211,16 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int call_num)
                           accumulate_bound_sites_by_pi(bound_sites_II_by_pi,
                                                           pip[1],
                                                           bound_sites_II);
+                          if(is_nonspecific_interaction){
+                            n_nonspecific_interactions++;
+                          }
                         });
   unsigned int n_bound_sites_I= get_number_of_bound_sites(bound_sites_I_by_pi);
   unsigned int n_bound_sites_II= get_number_of_bound_sites(bound_sites_II_by_pi);
   double fraction_bound_sites_I= (n_sites_I_>0) ? n_bound_sites_I/ (n_sites_I_+.0) : 0.0;
   double fraction_bound_sites_II= (n_sites_II_>0) ? n_bound_sites_II/ (n_sites_II_+.0) : 0.0;
+  double fraction_nonspecific_I= n_nonspecific_interactions / (n_particles_I_+0.);
+  double fraction_nonspecific_II= n_nonspecific_interactions / (n_particles_II_+0.);
 
   IMP_LOG(PROGRESS,
           new_bounds_I.size() << "/" << n_particles_I_
@@ -234,6 +242,14 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int call_num)
                               elapsed_time_ns);
       update_weighted_average(avg_fraction_bound_sites_II_, // old
                               fraction_bound_sites_II, // new
+                              stats_time_ns_,
+                              elapsed_time_ns);
+      update_weighted_average(avg_fraction_nonspecific_I_,
+                              fraction_nonspecific_I,
+                              stats_time_ns_,
+                              elapsed_time_ns);
+      update_weighted_average(avg_fraction_nonspecific_II_,
+                              fraction_nonspecific_II,
                               stats_time_ns_,
                               elapsed_time_ns);
     }

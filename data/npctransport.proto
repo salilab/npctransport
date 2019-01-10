@@ -363,6 +363,8 @@ message Statistics {
     optional float off_per_bound_pair_of_chains=20;
     optional float avg_fraction_bound_particle_sites_i=21;
     optional float avg_fraction_bound_particle_sites_ii=22;
+    optional float avg_fraction_nonspecific_interactions_i=23;
+    optional float avg_fraction_nonspecific_interactions_ii=24;
   }
   message InteractionStats {
     required string type0=1;

@@ -469,7 +469,8 @@ Scoring::get_interaction_range_for
 
 boost::tuple<unsigned int,
              std::vector<unsigned int>,
-             std::vector<unsigned int> >
+             std::vector<unsigned int>,
+             bool >
 Scoring::get_site_interactions_statistics
 ( ParticleIndex pi1, ParticleIndex pi2) const
 {
@@ -484,11 +485,12 @@ Scoring::get_site_interactions_statistics
     // when not defined or not sites pair score then only repulsive force
     // upon touching
     std::vector<unsigned int> empty;
-    return boost::make_tuple(0, empty, empty);
+    return boost::make_tuple(0, empty, empty, false);
   }
   boost::tuple<unsigned int,
                std::vector<unsigned int>,
-               std::vector<unsigned int> > ret_value;
+               std::vector<unsigned int>,
+               bool> ret_value;
   ps->evaluate_site_contributions(get_model(),
                                   ParticleIndexPair(pi1, pi2),
                                   nullptr,

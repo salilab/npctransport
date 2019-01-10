@@ -888,6 +888,12 @@ void Statistics::update
         ( bps_i->get_average_fraction_bound_particle_sites_I());
       siop->set_avg_fraction_bound_particle_sites_ii
         ( bps_i->get_average_fraction_bound_particle_sites_II());
+      siop->set_avg_fraction_bound_particle_sites_i
+        ( bps_i->get_average_fraction_bound_particle_sites_I());
+      siop->set_avg_fraction_nonspecific_interactions_i
+        ( bps_i->get_average_fraction_nonspecific_interactions_I());
+      siop->set_avg_fraction_nonspecific_interactions_ii
+        ( bps_i->get_average_fraction_nonspecific_interactions_II());
       siop->set_misc_stats_period_ns
         ( bps_i->get_misc_stats_period_ns() );
       // reset till next udpate_statistics()
@@ -1033,7 +1039,7 @@ Statistics::get_interactions_and_interacting
       Particles const& chain_particles = cur_chain->get_beads();
       for (unsigned int k = 0; k < chain_particles.size(); ++k) {
         unsigned int num;
-        boost::tie(num, boost::tuples::ignore, boost::tuples::ignore)=
+        boost::tie(num, boost::tuples::ignore, boost::tuples::ignore, boost::tuples::ignore)=
           get_sd()->get_scoring()->get_site_interactions_statistics
           (floaters[i], chain_particles[k] );
         if (num > 0) {
