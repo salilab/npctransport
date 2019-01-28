@@ -9,9 +9,9 @@
 .#*
 *#
 *.pym
-CMakeLists.txt
 CMakeModules/
-CMakeLists.txt
+*/CMakeLists.txt
+ModuleBuild.cmake
 Files.cmake
 npctransport.pb.cc
 npctransport.pb.h
