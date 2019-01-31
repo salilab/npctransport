@@ -16,7 +16,7 @@ class ConeTests(IMP.test.TestCase):
       # create sim data and write to file then check
      config= IMP.npctransport.Configuration()
      IMP.npctransport.set_default_configuration(config)
-     fg= IMP.npctransport.add_fg_type(config,
+     fg= IMP.npctransport.add_fg_type(config, type_name="fg0",
                                       number_of_beads=1,
                                       number=1,
                                       radius=10,
@@ -45,8 +45,7 @@ class ConeTests(IMP.test.TestCase):
      for n in dir():
        del n
      print("done")
+
+
 if __name__ == '__main__':
-  try:
     IMP.test.main()
-  except:
-    print("oops")
