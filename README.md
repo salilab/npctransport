@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/salilab/npctransport.svg?branch=develop)](https://travis-ci.org/salilab/npctransport)
+[![codecov](https://codecov.io/gh/salilab/npctransport/branch/develop/graph/badge.svg)](https://codecov.io/gh/salilab/npctransport)
+
 The npctransport module is a module for simulating transport through the NPC.
 
 Authors: Barak Raveh, Daniel Russel
