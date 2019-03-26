@@ -61,13 +61,14 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
     n_particles_I_(particlesI.size()),
     n_particles_II_(particlesII.size())
 {
+  IMP_LOG(VERBOSE, "Creating BipartitePairsStatisticsOptimizerState" << std::endl);
   close_bipartite_pair_container_ =
     new IMP::container::CloseBipartitePairContainer
     (particlesI, particlesII, contact_range, slack);
+  IMP_LOG(VERBOSE, "CloseBipartitePairContainer created"  << std::endl);
   range_ = contact_range;
+  IMP_LOG(VERBOSE, "DEBUG checkpoint" << std::endl);
 
-  n_possible_contacts_ =
-    get_maximal_number_of_unordered_pairs(particlesI, particlesII);
   n_sites_I_= n_particles_I_ *
     statistics_manager_->get_sd()->get_sites(interaction_type_.first).size();
   n_sites_II_= n_particles_II_ *
@@ -75,6 +76,7 @@ BipartitePairsStatisticsOptimizerState::BipartitePairsStatisticsOptimizerState
 
   // TODO: do we want to add consecutive pair filter for fg chains?
   reset(); // make sure all counters are 0
+  IMP_LOG(VERBOSE, "Created BipartitePairsStatisticsOptimizerState" << std::endl);
 }
 
 void BipartitePairsStatisticsOptimizerState::reset() {

@@ -269,18 +269,26 @@ void SimulationData::initialize(std::string prev_output_file,
     }
 
   // Add interactions:
-  IMP_LOG(TERSE, "   SimulationData before adding interactions" << std::endl);
+  IMP_LOG(PROGRESS, "SimulationData - adding interactions" << std::endl);
   for (int i = 0; i < pb_assignment.interactions_size(); ++i) {
     const ::npctransport_proto::Assignment_InteractionAssignment &
         interaction_i = pb_assignment.interactions(i);
+    IMP_LOG(TERSE, "Adding interaction " << i
+            << " type0 " <<  pb_assignment.interactions(i).type0()
+            << " type1 " <<  pb_assignment.interactions(i).type1() << std::endl);
     add_interaction(interaction_i);
   }
+  IMP_LOG(PROGRESS, "Done adding interactions" << std::endl);
+  IMP_LOG(PROGRESS, "TEST" << std::endl);
+
 
   get_bd()->set_current_time( initial_simulation_time_ns_ );
   pb_mutable_assignment->add_imp_module_version
     ( IMP::get_module_version() );
   pb_mutable_assignment->add_npc_module_version
     ( IMP::npctransport::get_module_version() );
+  IMP_LOG(PROGRESS,
+          "Writing assignment file");
   std::ofstream outf(new_output_file.c_str(), std::ios::binary);
   pb_data.SerializeToOstream(&outf);
 }
@@ -726,6 +734,7 @@ void SimulationData::add_interaction
   }
   get_scoring()->add_interaction(idata);
   get_statistics()->add_interaction_stats(type0, type1);
+  IMP_LOG(VERBOSE, "Interaction added" << std::endl)
 }
 
 Model *SimulationData::get_model() {

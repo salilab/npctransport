@@ -91,12 +91,10 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   unsigned int n_particles_II_;
   unsigned int n_bounds_I_;
   unsigned int n_bounds_II_;
+
   // Total number of sites on particles of type I and II:
   unsigned int n_sites_I_;
   unsigned int n_sites_II_;
-
-  // Theoretical number of possible (unordered) contacts between particles:
-  unsigned int n_possible_contacts_;
 
  public:
 

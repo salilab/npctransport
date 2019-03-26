@@ -162,32 +162,6 @@ inline std::pair<t_value, t_value>
   return (v0 >= v1) ? std::make_pair(v0,v1) : std::make_pair(v1,v0);
 }
 
-
-/** gets the maximal theoretical number of unordered pairs of different particles
-    between two sets of particles (note that the calculation
-    is not entirely trivial since ps0 and ps1 may be overlapping sets
-    while the pairs are unordered)
-*/
-inline unsigned int
-get_maximal_number_of_unordered_pairs(ParticlesTemp const& ps0,
-                                  ParticlesTemp const& ps1)
-{
-  std::set< std::pair<Particle*, Particle*> >
-    all_unordered_pairs; // TODO: calc not dynamic
-  for(unsigned int i = 0;  i < ps0.size(); i++)
-    {
-      for(unsigned int j = 0; j < ps1.size(); j++)
-        {
-          if(ps0[i]->get_index()==ps1[j]->get_index()){
-            continue;
-          }
-          all_unordered_pairs.insert
-            ( make_unordered_pair( ps0[i].get(), ps1[j].get() ) );
-        }
-    }
-  return all_unordered_pairs.size();
-}
-
 #ifndef SWIG
 //! convert vectors to spheres of passed radius
 template<typename V3iter>
