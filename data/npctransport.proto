@@ -342,15 +342,15 @@ message Statistics {
   message InteractionOrderParams{
     required float time_ns=1;
     // all averages since last statistics udpate
-    optional float avg_off_per_contact_per_ns=2;
-    optional float avg_off_per_bound_i_per_ns=3;
-    optional float avg_off_per_bound_ii_per_ns=4;
+    optional float avg_off_per_contact_per_ns=2; // off rate per particle-particle contact
+    optional float avg_off_per_bound_i_per_ns=3; // off rate per bound partricles of type i
+    optional float avg_off_per_bound_ii_per_ns=4; // off rate per bound partricles of type ii
     optional float off_stats_period_ns=5;
-    optional float avg_on_per_missing_contact_per_ns=6;
+    optional float avg_on_per_missing_contact_per_ns=6; // on rate per missing particle-particle contact
     optional float on_stats_period_ns=7;
-    optional float avg_on_per_unbound_i_per_ns=8;
+    optional float avg_on_per_unbound_i_per_ns=8;  // on rate per unbound particle of type i
     optional float on_i_stats_period_ns=9;
-    optional float avg_on_per_unbound_ii_per_ns=10;
+    optional float avg_on_per_unbound_ii_per_ns=10; // on rate per unbound particle of type ii
     optional float on_ii_stats_period_ns=11;
     optional float avg_contacts_per_particle_i=12;
     optional float avg_contacts_per_particle_ii=13;
@@ -359,8 +359,8 @@ message Statistics {
     optional float misc_stats_period_ns=16;
     optional float off_i_stats_period_ns=17;
     optional float off_ii_stats_period_ns=18;
-    optional float on_per_unbound_chain_i_per_unbound_chain_ii_per_ns=19;
-    optional float off_per_bound_pair_of_chains=20;
+    optional float on_per_unbound_chain_i_per_unbound_chain_ii_per_ns=19; // UNIMPLEMENTED
+    optional float off_per_bound_pair_of_chains=20; // UNIMPLEMENTED
     optional float avg_fraction_bound_particle_sites_i=21;
     optional float avg_fraction_bound_particle_sites_ii=22;
     optional float avg_fraction_nonspecific_interactions_i=23;

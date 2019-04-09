@@ -178,9 +178,9 @@ void BipartitePairsStatisticsOptimizerState::do_update(unsigned int call_num)
   t_particle_index_ordered_set new_bounds_I, new_bounds_II;
   t_particle_index_pair_ordered_set new_contacts; // more efficient if ordered set
   std::map<ParticleIndex, std::vector<unsigned int> >
-    bound_sites_I_by_pi;
+    bound_sites_I_by_pi; // for each type I pi, map a vector with one entry per site, containing the number of contacts made by that site with type II
   std::map<ParticleIndex, std::vector<unsigned int> >
-    bound_sites_II_by_pi;
+    bound_sites_II_by_pi;// for each type II pi, map a vector with one entry per site, containing the number of contacts made by that site with type I
   unsigned int n_nonspecific_interactions(0);
   IMP_CONTAINER_FOREACH(IMP::container::CloseBipartitePairContainer,
                         close_bipartite_pair_container_,

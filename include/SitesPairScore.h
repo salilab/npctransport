@@ -179,9 +179,9 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
             [num-contacts, sites0-bound, sites1-bound, is_nonspec].
             num-contacts is the total number of site-site contacts between pip.
             sites0-bound and sites1-bound are vectors of contact counts
-            for each site of pip[0] and pip[1], resp. is_nonspec is true if
-            the molecules have non-zero nonspecific interactions
-            Ignored if Null
+            for each site of pip[0] and pip[1], resp, with one entry per site.
+            is_nonspec is true if the molecules have non-zero
+            nonspecific interactions Ignored if Null
 
      @return the site-site contributions for the score for the pair
              pip in model m.
