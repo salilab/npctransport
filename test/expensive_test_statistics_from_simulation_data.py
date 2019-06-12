@@ -57,7 +57,7 @@ class Tests(IMP.test.TestCase):
         time_ns=o.statistics.bd_simulation_time_ns
         for i in o.statistics.interactions:
             print(i.type0,i.type1)
-            if(i.type0<>"kap0" and i.type1<>"kap0"):
+            if i.type0 != "kap0" and i.type1 != "kap0":
                 continue
             n=len(i.order_params)+0.0
             koff_i=0.0
