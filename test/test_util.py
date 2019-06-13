@@ -5,8 +5,8 @@ import math
 import numpy as np
 
 def write_config_file(outfile, config):
-    f=open(outfile, "wb")
-    f.write(config.SerializeToString())
+    with open(outfile, "wb") as f:
+        f.write(config.SerializeToString())
 
 def get_basic_config():
     config = Configuration()
