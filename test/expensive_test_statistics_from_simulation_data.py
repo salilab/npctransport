@@ -53,7 +53,8 @@ class Tests(IMP.test.TestCase):
     def _process_sd_stat(self, sd, is_orientational=False):
         assign_file=sd.get_statistics().get_output_file_name()
         o= IMP.npctransport.Output()
-        o.ParseFromString(open(assign_file,'r').read())
+        with open(assign_file, 'rb') as fh:
+            o.ParseFromString(fh.read())
         time_ns=o.statistics.bd_simulation_time_ns
         for i in o.statistics.interactions:
             print(i.type0,i.type1)
