@@ -2,7 +2,7 @@
  *  \file npctransport/BipartitePairsStatisticsOptimizerState.h
  *  \brief description
  *
- *  Copyright 2007-2018 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2019 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_BIPARTITE_PAIRS_STATISTICS_OPTIMIZER_STATE_H
@@ -76,6 +76,8 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   double avg_pct_bound_particles_II_;  // particles in group II (it is fraction, not pct)
   double avg_fraction_bound_sites_I_; // sites in group I
   double avg_fraction_bound_sites_II_; // sites in group I
+  double avg_fraction_nonspecific_I_; // fraction of non-specific interactions for particles of type I with particles of type II
+  double avg_fraction_nonspecific_II_; // fraction of non-specific interactions for particles of type II with particles of type I
   double avg_off_per_contact_per_ns_;
   double avg_off_per_bound_I_per_ns_;
   double avg_off_per_bound_II_per_ns_;
@@ -88,12 +90,10 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   unsigned int n_particles_II_;
   unsigned int n_bounds_I_;
   unsigned int n_bounds_II_;
+
   // Total number of sites on particles of type I and II:
   unsigned int n_sites_I_;
   unsigned int n_sites_II_;
-
-  // Theoretical number of possible (unordered) contacts between particles:
-  unsigned int n_possible_contacts_;
 
  public:
 
@@ -196,6 +196,20 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   //! that are bound in each update round
   double get_average_fraction_bound_particle_sites_II() const {
     return avg_fraction_bound_sites_II_;
+  }
+
+  //! returns the average fraction of particles from type I
+  //! that are nonspecifically interaction with particles of type II
+  //! (= non-zero contribution)
+  double get_average_fraction_nonspecific_interactions_I() const {
+    return avg_fraction_nonspecific_I_;
+  }
+
+  //! returns the average fraction of particles from type II
+  //! that are nonspecifically interaction with particles of type I
+  //! (= non-zero contribution)
+  double get_average_fraction_nonspecific_interactions_II() const {
+    return avg_fraction_nonspecific_II_;
   }
 
   /**

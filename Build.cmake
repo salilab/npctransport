@@ -5,13 +5,13 @@ add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal
                           "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h"
                           "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.cpp"
                           COMMAND protoc "--cpp_out=dllexport_decl=IMPNPCTRANSPORTEXPORT:."
-                          "-I${CMAKE_SOURCE_DIR}/modules/npctransport/data/"
-                          "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
+                          "-I${CMAKE_CURRENT_SOURCE_DIR}/data/"
+                          "${CMAKE_CURRENT_SOURCE_DIR}/data/npctransport.proto"
 			  COMMAND ${CMAKE_COMMAND} -E rename npctransport.pb.cc npctransport.pb.cpp
-			  COMMAND python "${CMAKE_SOURCE_DIR}/modules/npctransport/patch_protoc.py"
+			  COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/patch_protoc.py"
 			                 "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h"
 					 "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
-                          DEPENDS "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
+                          DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/data/npctransport.proto"
                           COMMENT "Creating protoc stuff for npctransport"
                           WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/src/npctransport")
 
@@ -29,11 +29,11 @@ set(IMP_npctransport_LIBRARY_EXTRA_DEPENDENCIES "IMP.npctransport-proto" CACHE I
 # there is a #include 'npctransport.ph.h' in the cpp file
 add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/npctransport_pb2.py"
                           COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/lib/IMP/npctransport/"
-                          COMMAND protoc --python_out="${CMAKE_BINARY_DIR}/lib/IMP/npctransport/"
-                          "-I${CMAKE_SOURCE_DIR}/modules/npctransport/data/"
-                          "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
+                          COMMAND protoc --python_out=${CMAKE_BINARY_DIR}/lib/IMP/npctransport/
+                          "-I${CMAKE_CURRENT_SOURCE_DIR}/data/"
+                          "${CMAKE_CURRENT_SOURCE_DIR}/data/npctransport.proto"
                           # add config header to resolve export symbols
-                          DEPENDS "${CMAKE_SOURCE_DIR}/modules/npctransport/data/npctransport.proto"
+                          DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/data/npctransport.proto"
                           COMMENT "Creating python protoc stuff for npctransport"
                           WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/src/npctransport")
 

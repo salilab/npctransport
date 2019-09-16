@@ -1,8 +1,7 @@
-/**
- *  \file Scoring.cpp
+/** *  \file Scoring.cpp
  *  \brief description.
  *
- *  Copyright 2007-2018 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2019 IMP Inventors. All rights reserved.
  *
  */
 
@@ -41,6 +40,7 @@
 #include <IMP/container/SingletonContainerSet.h>
 #include <IMP/container/generic.h>
 #include <IMP/core/BoundingBox3DSingletonScore.h>
+#include <IMP/core/BoundingSphere3DSingletonScore.h>
 #include <IMP/core/DistancePairScore.h>
 #include <IMP/core/SphereDistancePairScore.h>
 #include <IMP/core/HarmonicUpperBound.h>
@@ -102,8 +102,8 @@ Scoring::get_scoring_function(bool update)
     ParticlesTemp beads = get_sd()->get_beads();
     RestraintsTemp rs =
       get_chain_restraints_on( beads );
-    if (box_is_on_) {
-      rs.push_back(get_bounding_box_restraint(update));
+    if (get_has_bounding_volume()) {
+      rs.push_back(get_bounding_volume_restraint(update));
     }
     if (get_sd()->get_has_slab()) {
       rs.push_back(get_slab_restraint(update));
@@ -149,8 +149,8 @@ Scoring::get_custom_scoring_function
   RestraintsTemp rs;
   rs += extra_restraints;
   rs += get_chain_restraints_on( beads );
-  if (box_is_on_) {
-    rs.push_back( create_bounding_box_restraint( beads ) );
+  if (get_has_bounding_volume()) {
+    rs.push_back( create_bounding_volume_restraint( beads ) );
   }
   if (get_sd()->get_has_slab()) {
     rs.push_back( create_slab_restraint( beads ) );
@@ -193,12 +193,13 @@ Scoring::get_predicates_pair_restraint
 }
 
 Restraint *
-Scoring::get_bounding_box_restraint(bool update)
+Scoring::get_bounding_volume_restraint(bool update)
 {
-  IMP_USAGE_CHECK(box_is_on_, "box is not on - can't get restraint");
+  IMP_USAGE_CHECK(get_has_bounding_volume(),
+                  "box is not on - can't get restraint");
   if (update || !box_restraint_) {
     box_restraint_ =
-      create_bounding_box_restraint( get_sd()->get_beads() );
+      create_bounding_volume_restraint( get_sd()->get_beads() );
   }
   return box_restraint_;
 }
@@ -468,7 +469,8 @@ Scoring::get_interaction_range_for
 
 boost::tuple<unsigned int,
              std::vector<unsigned int>,
-             std::vector<unsigned int> >
+             std::vector<unsigned int>,
+             bool >
 Scoring::get_site_interactions_statistics
 ( ParticleIndex pi1, ParticleIndex pi2) const
 {
@@ -483,11 +485,12 @@ Scoring::get_site_interactions_statistics
     // when not defined or not sites pair score then only repulsive force
     // upon touching
     std::vector<unsigned int> empty;
-    return boost::make_tuple(0, empty, empty);
+    return boost::make_tuple(0, empty, empty, false);
   }
   boost::tuple<unsigned int,
                std::vector<unsigned int>,
-               std::vector<unsigned int> > ret_value;
+               std::vector<unsigned int>,
+               bool> ret_value;
   ps->evaluate_site_contributions(get_model(),
                                   ParticleIndexPair(pi1, pi2),
                                   nullptr,
@@ -684,23 +687,39 @@ container::PredicatePairsRestraint
 
 
 /**
-   Creates bounding volume restraints such as box restraint and slab restraints,
-   based on the box_size_, slab_height_, slab_radius_, etc. class variables
+   Create bounding volume restraints such as box restraint and slab restraints,
+   based on the box_is_on_, box_size_, slab_height_, slab_radius_, etc. class variables
+   box_is_on_ == 1 : Box
+   box_is_on_ == 2 : Sphere of volume box_size_**3
+
+   Returns nullptr if neither a box nor a sphere
 */
-Restraint* Scoring::create_bounding_box_restraint
+Restraint* Scoring::create_bounding_volume_restraint
 ( SingletonContainerAdaptor beads) const
 {
   beads.set_name_if_default("CreateBoundingBoxRestraintInput%1%");
   // Add bounding box restraint
-  // TODO: what does backbone_spring_k_ has to do
-  //       with bounding box constraint?
+  // TODO: replace backbone_spring_k_ with designated bounding volume
+  //       force coefficient
   IMP_NEW(core::HarmonicUpperBound, hub, (0, get_excluded_volume_k()));
-  IMP_NEW(core::GenericBoundingBox3DSingletonScore<core::HarmonicUpperBound>,
-          bbss, (hub.get(), get_sd()->get_box()));
-  return
-    container::create_restraint(bbss.get(),
-                                beads.get(),
-                                "bounding box");
+  IMP::Pointer<SingletonScore> ss( nullptr );
+  if (get_has_bounding_box()){
+    ss= new core::GenericBoundingBox3DSingletonScore<core::HarmonicUpperBound>
+      (hub.get(), get_sd()->get_bounding_box());
+  }
+  else if (get_has_bounding_volume()){
+    ss= new core::BoundingSphere3DSingletonScore
+      (hub.get(), get_sd()->get_bounding_sphere());
+  }
+  else {
+    IMP_ALWAYS_CHECK(!get_has_bounding_volume(),
+                     "Invalid bounding volume (check box_is_on_ value if using a protobuf file)",
+                     IMP::ValueException);
+    return nullptr;
+  }
+  return container::create_restraint(ss.get(),
+                                     beads.get(),
+                                     "bounding box");
 }
 
 Restraint * Scoring::create_slab_restraint
@@ -722,7 +741,7 @@ Restraint * Scoring::create_slab_restraint
            particles.get()) );
   return container::create_restraint(slab_score.get(),
 				     abpc.get(),
-                                     "bounding slab");
+                                     "membrane slab");
 }
 
 void Scoring::add_z_bias_restraint

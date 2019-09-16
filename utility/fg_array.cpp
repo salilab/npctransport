@@ -1,7 +1,7 @@
 /**
  * \file fg_array.cpp
  * \brief Simulate an fg and a kap interacting
- * Copyright 2007-2018 IMP Inventors. All rights reserved.
+ * Copyright 2007-2019 IMP Inventors. All rights reserved.
  */
 
 #define IMP_NPC_MAIN
@@ -19,11 +19,14 @@ int do_it(IMP::Pointer<IMP::npctransport::SimulationData> sd) {
   //  sd->add_interaction(type_of_float[1], type_of_fg[0]);
 
   // place fg anchors in grid and don't optimize them
+  IMP_ALWAYS_CHECK(sd->get_has_bounding_box(),
+                   "fg_array requires a bounding box",
+                   IMP::ValueException);
   IMP::algebra::BoundingBox2D base(
-      IMP::algebra::Vector2D(sd->get_box().get_corner(0)[0],
-                             sd->get_box().get_corner(0)[1]),
-      IMP::algebra::Vector2D(sd->get_box().get_corner(1)[0],
-                             sd->get_box().get_corner(1)[1]));
+      IMP::algebra::Vector2D(sd->get_bounding_box().get_corner(0)[0],
+                             sd->get_bounding_box().get_corner(0)[1]),
+      IMP::algebra::Vector2D(sd->get_bounding_box().get_corner(1)[0],
+                             sd->get_bounding_box().get_corner(1)[1]));
   IMP::atom::Hierarchy root = sd->get_root();
   IMP::atom::Hierarchies chain_roots = sd->get_fg_chain_roots();
   // create a set of random sites (for now)
@@ -53,7 +56,7 @@ int do_it(IMP::Pointer<IMP::npctransport::SimulationData> sd) {
     Pointer<FGChain> chain = get_fg_chain(chain_roots[i]);
     IMP::core::XYZ d(chain->get_bead(0));
     d.set_coordinates(
-        Vector3D(sites[i][0], sites[i][1], sd->get_box().get_corner(0)[2]));
+        Vector3D(sites[i][0], sites[i][1], sd->get_bounding_box().get_corner(0)[2]));
     d.set_coordinates_are_optimized(false);
   }
   IMP::npctransport::do_main_loop(sd, IMP::RestraintsTemp());

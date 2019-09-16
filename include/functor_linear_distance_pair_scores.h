@@ -2,7 +2,7 @@
  *  \file functor_linear_distance_pair_scores.h
  *  \brief A Score on the distance between a pair of particles.
  *
- *  Copyright 2007-2018 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2019 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_FUNCTOR_LINEAR_DISTANCE_PAIR_SCORES_H

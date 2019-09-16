@@ -2,7 +2,7 @@
  *  \file npctransport/Scoring.h
  *  \brief scoring associated with a SimulationData object
  *
- *  Copyright 2007-2018 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2019 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_SCORING_H
@@ -47,7 +47,7 @@ class HarmonicSpringSingletonScore;
 class IMPNPCTRANSPORTEXPORT Scoring: public Object
 {
  private:
-  Parameter<bool> box_is_on_;
+  Parameter<int> box_is_on_;
   Parameter<double> interaction_k_;
   Parameter<double> interaction_range_;
   Parameter<double> backbone_k_;
@@ -274,11 +274,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
     (bool update=false);
 
 
-  /** returns the box restraint on >get_sd()->get_beads()
+  /** returns the box/sphere restraint on >get_sd()->get_beads()
      which will be used in the next call to get_scoring_function(false)
-     (so manipulating it might affect the scoring function). Also, if update
+     (so manipulating it might affect the scoring function). If update
      is false, then it is guaranteed that these are the same restraints
-     used by the last call to get_scoring_function
+     used by the last call to get_scoring_function.
 
      @param update if true, forces recreation of the cached container,
                    o/w cached version that was used in last call to
@@ -286,8 +286,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
      @note if udpate=false, might fail to include e.g., new particles
            that were added after the last call
+
+     @see get_has_bounding_box(), get_has_bounding_sphere(),
+          get_has_bounding_volume()
   */
-  Restraint *get_bounding_box_restraint(bool update=false);
+  Restraint *get_bounding_volume_restraint(bool update=false);
 
 
   /** returns the slab restraint on >get_sd()->get_beads()
@@ -385,9 +388,10 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
       bool is_attr_interactions_on = true) const;
 
   /**
-     Creates bounding box restraint based on the box_size_
-     class variable, and apply it to all beads returned
-     by get_sd()->get_beads()
+     Creates bounding volume (box or sphere) restraint based on the
+     box_size_ class variable and get_has_bounding_sphere() and
+     get_has_bounding_box() variables (typically based on box_is_on_),
+     , and apply it to all beads returned by get_sd()->get_beads()
 
      @param beads beads on which to apply the constraint
 
@@ -396,7 +400,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
      @return a newly created box restraint
   */
-  Restraint* create_bounding_box_restraint
+  Restraint* create_bounding_volume_restraint
     ( SingletonContainerAdaptor beads ) const;
 
   /**
@@ -440,9 +444,20 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
   }
 #endif
 
-  // returns true if a bounding box restraint is defined */
-  bool get_has_bounding_box() const
-  { return box_is_on_; }
+    //! returns true if simulation has a bounding simulation box
+  bool get_has_bounding_box() const {
+    return box_is_on_==1;
+  }
+
+  //! returns true if simulation has a bounding simulation sphere ('cell-like')
+  bool get_has_bounding_sphere() const {
+    return box_is_on_==2;
+  }
+
+  //! returns true if simulation has any bounding volume (box or sphere are supported)
+  bool get_has_bounding_volume() const {
+    return get_has_bounding_box() || get_has_bounding_sphere();
+  }
 
   /** returns the default spring constant between consecutive beads
       in a chain of beads - this is used for chains whose k
@@ -518,8 +533,12 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
          current coordinates and their particle types
      b - vector of occupied pi1 sites counts (count number of interactions per site)
      c - vector of occupied pi2 sites counts (count number of interactions per site)
+     d - true if particles are interacting non-specifically (a non-zero contribution of non-specific terms)
   */
-  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+  boost::tuple< unsigned int,
+                std::vector<unsigned int>,
+                std::vector<unsigned int>,
+                bool >
     get_site_interactions_statistics
     ( ParticleIndex pi1, ParticleIndex pi2) const;
 
@@ -533,7 +552,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      b) vector of occupied pi1 sites counts (count number of interactions per site)
      c) vector of occupied pi2 sites counts (count number of interactions per site)
   */
-  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+  boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>, bool >
     get_site_interactions_statistics
     ( Particle const* p1, Particle const* p2) const
   {

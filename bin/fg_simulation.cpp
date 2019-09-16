@@ -2,7 +2,7 @@
 # * \file fg_simulation.cpp
 # * \brief Simulate an fg and a kap interacting
 #
-# * Copyright 2007-2018 IMP Inventors. All rights reserved.
+# * Copyright 2007-2019 IMP Inventors. All rights reserved.
 # */
 
 //#include <IMP/npctransport/npctransport_config.h>
@@ -49,11 +49,15 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
   using namespace IMP;
   using namespace IMP::algebra;
 
+  // place fg anchors in grid and don't optimize them
+  IMP_ALWAYS_CHECK(sd.get_has_bounding_box(),
+                   "An fg grid requires a bounding box",
+                   IMP::ValueException);
   //  get bottom surface of the simulation data bounding box
-  Vector2D lower_corner_XY(sd.get_box().get_corner(0)[0],
-                           sd.get_box().get_corner(0)[1]);
-  Vector2D upper_corner_XY(sd.get_box().get_corner(1)[0],
-                           sd.get_box().get_corner(1)[1]);
+  Vector2D lower_corner_XY(sd.get_bounding_box().get_corner(0)[0],
+                           sd.get_bounding_box().get_corner(0)[1]);
+  Vector2D upper_corner_XY(sd.get_bounding_box().get_corner(1)[0],
+                           sd.get_bounding_box().get_corner(1)[1]);
   algebra::BoundingBox2D surface(lower_corner_XY, upper_corner_XY);
   // get fg
   atom::Hierarchies chain_roots = sd.get_fg_chain_roots();
@@ -86,7 +90,7 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
       npctransport::get_fg_chain((chain_roots[i]));
     core::XYZ d(chain->get_bead(0));
     d.set_coordinates(
-        Vector3D(sites[i][0], sites[i][1], sd.get_box().get_corner(0)[2]));
+        Vector3D(sites[i][0], sites[i][1], sd.get_bounding_box().get_corner(0)[2]));
     d.set_coordinates_are_optimized(false);
     std::cout << "d = " << d << std::endl;
   }

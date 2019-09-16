@@ -2,7 +2,7 @@
  *  \file SitesPairScore.h
  *  \brief A Score on the distance between a pair of particles.
  *
- *  Copyright 2007-2018 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2019 IMP Inventors. All rights reserved.
  */
 
 // TODO: verify if energy units are kcal/mol or KT
@@ -176,11 +176,12 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @param pip the pair of particle indexes in m
      @param da optional accumulator for force and torque derivatives
      @param contacts_accumulator A pointer to a tuple of output values
-            [num-contacts, sites0-bound, sites1-bound].
+            [num-contacts, sites0-bound, sites1-bound, is_nonspec].
             num-contacts is the total number of site-site contacts between pip.
             sites0-bound and sites1-bound are vectors of contact counts
-            for each site of pip[0] and pip[1], resp.
-            Ignored if Null
+            for each site of pip[0] and pip[1], resp, with one entry per site.
+            is_nonspec is true if the molecules have non-zero
+            nonspecific interactions Ignored if Null
 
      @return the site-site contributions for the score for the pair
              pip in model m.
@@ -193,7 +194,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      double **torques_tables,
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
-     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>, bool >
      (*contacts_accumulator) = nullptr
      ) const;
 
@@ -207,10 +208,11 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @param pip the pair of particle indexes in m
      @param da optional accumulator for force and torque derivatives
      @param contacts_accumulator A pointer to a tuple of output values
-            [num-contacts, sites0-bound, sites1-bound].
+            [num-contacts, sites0-bound, sites1-bound, is_nonspec].
             num-contacts is the total number of site-site contacts between pip.
             sites0-bound and sites1-bound are vectors of contact counts
-            for each site of pip[0] and pip[1], resp.
+            for each site of pip[0] and pip[1], resp. is_nonspec is true if the
+            spheres have non-zero non-specific interactions
             Ignored if Null
 
      @return the site-site contributions for the score for the pair
@@ -221,7 +223,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
     (Model* m,
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
-     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+     boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>, bool >
      (*contacts_accumulator)
      ) const;
 
@@ -397,7 +399,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
   DerivativeAccumulator *da,
   boost::tuple<unsigned int,
                std::vector<unsigned int>,
-               std::vector<unsigned int> >
+               std::vector<unsigned int>,
+                bool>
   * contacts_accumulator
   ) const
 {
@@ -438,8 +441,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
     algebra::Vector3D const& gRB1= rbi1.tr.get_translation();
     algebra::Vector3D gUnitRB0RB1= gRB1-gRB0;
     double distRB0RB1= get_magnitude_and_normalize_in_place(gUnitRB0RB1); // distance between centers
-    for (unsigned int i = 0; i < sites0_.size(); ++i) {
-      algebra::Vector3D gSite0 = rbi0.tr.get_transformed(sites0_[i].get_center());
+    for (unsigned int i0 = 0; i0 < sites0_.size(); ++i0) {
+      algebra::Vector3D gSite0 = rbi0.tr.get_transformed(sites0_[i0].get_center());
       algebra::Vector3D gUnitRB0Site0= (gSite0-gRB0)*rbi0.iradius;
       double cosSigma0 = gUnitRB0Site0*gUnitRB0RB1;
       if(cosSigma0 < params_.cosSigma1_max) { // not in range... - note the indexing is not an error - sigma0 is equivalent to params_.sigma1
@@ -453,8 +456,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
         double absSinSigma0 = get_magnitude_and_normalize_in_place(gRotSigma0);
         dKFactor0=internal::get_derivative_k_factor(absSinSigma0, params_.cosSigma1_max);
       }
-      for(unsigned int j = 0 ; j < sites1_.size(); ++j) {
-        algebra::Vector3D gSite1 = rbi1.tr.get_transformed(sites1_[j].get_center());
+      for(unsigned int i1 = 0 ; i1 < sites1_.size(); ++i1) {
+        algebra::Vector3D gSite1 = rbi1.tr.get_transformed(sites1_[i1].get_center());
         IMP_LOG_PROGRESS( "Evaluating sites at global coordinates: " << gSite0
                           << " ; " << gSite1 << std::endl );
         double cur_score;
@@ -471,8 +474,8 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
         sum += cur_score;
           if(contacts_accumulator && cur_score!=0.0){
             n_contacts++;
-            occupied_sites0[i]++;
-            occupied_sites1[i]++;
+            occupied_sites0[i0]++;
+            occupied_sites1[i1]++;
         }
       } // j
     } // i
@@ -506,10 +509,15 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
       }// i
     } // else
   if(contacts_accumulator){
+    double non_specific_range= P::get_range_attraction();
+    double d_spheres= IMP::algebra::get_distance(spheres_table[pip[0].get_index()],
+                                                 spheres_table[pip[1].get_index()]);
+    bool is_nonspecific_interaction= d_spheres < non_specific_range;
     (*contacts_accumulator)=
       boost::make_tuple(n_contacts,
                         occupied_sites0,
-                        occupied_sites1);
+                        occupied_sites1,
+                        is_nonspecific_interaction);
   }
 
   IMP_LOG_PROGRESS( "Sum " << sum << std::endl);
@@ -523,7 +531,7 @@ SitesPairScore::evaluate_site_contributions
 (Model* m,
  const ParticleIndexPair &pip,
  DerivativeAccumulator *da,
- boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int> >
+ boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>, bool >
  (*contacts_accumulator)
  ) const
 {

@@ -2,7 +2,7 @@
  *  \file IMP/npctransport/randomize_particles.h
  *  \brief Randomizing particles in a bounding volume
  *
- *  Copyright 2007-2018 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2019 IMP Inventors. All rights reserved.
  *
  */
 
