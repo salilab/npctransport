@@ -170,14 +170,20 @@ display::Geometries SlabWithCylindricalPoreSurfaceGeometry::get_components() con
 SlabWithCylindricalPoreSurfaceGeometry::SlabWithCylindricalPoreSurfaceGeometry(double height, double radius,
                                          double width)
     : SurfaceMeshGeometry(std::pair<algebra::Vector3Ds, Ints>(), "SlabWithCylindricalPore") {
+  // TODO: should warn or something
   IMP_UNUSED(height);
   IMP_UNUSED(radius);
   IMP_UNUSED(width);
 }
+
+display::Geometries SlabWithCylindricalPoreSurfaceGeometry::get_components() const {
+  // TODO: should warn or something
+  return display::Geometries();
+}
 #endif
 
-SlabWithCylindricalPoreWireGeometry::SlabWithCylindricalPoreWireGeometry(double height, double radius, double length)
-  : Geometry("SlabWithCylindricalPore"), height_(height), radius_(radius), length_(length) {}
+ SlabWithCylindricalPoreWireGeometry::SlabWithCylindricalPoreWireGeometry(double height, double radius, double length)
+   : Geometry("SlabWithCylindricalPore"), height_(height), radius_(radius), length_(length) {}
 
 display::Geometries SlabWithCylindricalPoreWireGeometry::get_components() const {
   display::Geometries ret;

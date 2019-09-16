@@ -323,6 +323,10 @@ namespace {
       npctransport::get_non_optimizable_particles( beads );
     ParticlesTemp optimizable_beads =
       npctransport::get_optimizable_particles( beads );
+    if(optimizable_beads.size()==0){
+      IMP_LOG(VERBOSE,"initialize_positions_of_specific_beads(): No optimizable particles found");
+      return;
+    }
     IMP_LOG(VERBOSE, " ; " << optimizable_beads.size()
             << " optimizable" << std::endl);
     Pointer<ScoringFunction> sf =
@@ -360,7 +364,19 @@ void initialize_positions(SimulationData *sd,
                    "short init factor should be positive",
                    IMP::ValueException);
   if(!is_disable_randomize && !are_fgs_pre_initialized){
-    randomize_particles(sd->get_beads(), sd->get_box()); // randomize before FGs are frozen
+    if(sd->get_has_bounding_box()){
+      randomize_particles(sd->get_beads(), sd->get_bounding_box()); // randomize before FGs are frozen
+    }
+    else if (sd->get_has_bounding_sphere()){
+      randomize_particles(sd->get_beads(), sd->get_bounding_sphere()); // randomize before FGs are frozen
+    } else {
+      IMP_USAGE_CHECK(!sd->get_has_bounding_volume(),
+                      "Invalid boundig volume");
+      randomize_particles(sd->get_beads(),
+                          algebra::get_cube_d<3>
+                          ( sd->get_beads().size() * 500.0 )
+                          );
+    }
   }
   if (sd->get_rmf_sos_writer()) {
     sd->get_rmf_sos_writer()->update();
@@ -382,7 +398,19 @@ void initialize_positions(SimulationData *sd,
     }
   }
   if(!is_disable_randomize && are_fgs_pre_initialized){
-    randomize_particles(sd->get_beads(), sd->get_box()); // randomize only now that FGs are frozen
+    if(sd->get_has_bounding_box()){
+      randomize_particles(sd->get_beads(), sd->get_bounding_box()); // randomize before FGs are frozen
+    }
+    else if (sd->get_has_bounding_sphere()){
+      randomize_particles(sd->get_beads(), sd->get_bounding_sphere()); // randomize before FGs are frozen
+    } else {
+      IMP_USAGE_CHECK(!sd->get_has_bounding_volume(),
+                      "Invalid boundig volume");
+      randomize_particles(sd->get_beads(),
+                          algebra::get_cube_d<3>
+                          ( sd->get_beads().size() * 500.0 )
+                          );
+    }
   }
 
 

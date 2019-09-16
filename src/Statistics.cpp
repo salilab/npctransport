@@ -561,8 +561,8 @@ void Statistics
   it_pair.first= particle_type_zr_distribution_map_.find(pt);
   // add distribution table if needed
   if(it_pair.first==particle_type_zr_distribution_map_.end()) {
-    float z_max =  get_sd()->get_box_size() / 2.0; // get_z_distribution_top();
-    float r_max =  get_sd()->get_box_size() / std::sqrt(2.0); // get_r_distribution_max();
+    float z_max =  get_sd()->get_bounding_box_size() / 2.0; // get_z_distribution_top();
+    float r_max =  get_sd()->get_bounding_box_size() / std::sqrt(2.0); // get_r_distribution_max();
     unsigned int nz=
       (1 + !is_z_symmetric) * (std::floor(z_max/GRID_RESOLUTION_ANGSTROMS) + 5); // +5 for slack
     unsigned int nr=
@@ -617,7 +617,7 @@ void Statistics
   }
   ParticleTypeXYZDistributionMap::iterator& it=it_pair.first;
   //update distribution
-  float box_half =  std::min(get_sd()->get_box_size() / 2.0, MAX_CROP); // get_z_distribution_top();
+  float box_half =  std::min(get_sd()->get_bounding_box_size() / 2.0, MAX_CROP); // get_z_distribution_top();
   unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS*CROP_FACTOR) + 5; // +5 for slack
   int nx= 2 * half_n_max;
   int ny= 2 * half_n_max;
@@ -1065,7 +1065,7 @@ double Statistics::get_z_distribution_top() const{
     }
   if(get_sd()->get_has_bounding_box())
     {
-      return get_sd()->get_box_size() / 4.0;
+      return get_sd()->get_bounding_box_size() / 4.0;
     }
   return 1.0;
 }
@@ -1077,7 +1077,7 @@ double Statistics::get_r_distribution_max() const{
     }
   if(get_sd()->get_has_bounding_box())
     {
-      return get_sd()->get_box_size() / 4.0; // diameter = 50% box edge
+      return get_sd()->get_bounding_box_size() / 4.0; // diameter = 50% box edge
     }
   return 1.0;
 }
