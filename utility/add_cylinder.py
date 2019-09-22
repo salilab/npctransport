@@ -73,6 +73,22 @@ def _set_cylinder(cylinder_descriptor, cf, ipf):
 #    coords=[[cep0[0], cep1[0]], [cep0[1], cep1[1]], [cep0[2], cep1[2]]]
     cf.get(nh).set_frame_coordinates_list(coords_list)
 
+def _recolor_cylinder(cylinder_descriptor, cf, cdf):
+    """
+    draws a cylinder between two nodes with refframes
+    cylinder descriptor - tuple (cylinder_node, node1, node2)
+    cf - cylinder factory
+    cdf - colored factory
+    ipf - intermediate particle factory
+    """
+    nh = cylinder_descriptor[0]
+    ep0 = cylinder_descriptor[1]
+    ep1 = cylinder_descriptor[2]
+    color0 = cdf.get(ep0).get_static_rgb_color()
+    color1 = cdf.get(ep1).get_static_rgb_color()
+    color= [ 0.5*(x+y) for x,y in zip (color0, color1) ]
+    cdf.get(nh).set_static_rgb_color(RMF.Vector3(color[0],color[1],color[2]))
+
 
 def _smooth(node, tf, rff, xyz_dict, n=10, is_write=True):
     '''
@@ -157,10 +173,10 @@ def _get_fg_and_floater_types(ref_output):
     inert_types= []
     output = None
     try:
-        if(ref_output <> ""):
+        if(ref_output != ""):
             output=Output()
-            FILE=open(ref_output,"rb")
-            output.ParseFromString(FILE.read())
+            with open(ref_output,"rb") as FILE:
+                output.ParseFromString(FILE.read())
     except:
         print("Couldn't read '" + ref_output + "'")
         raise
@@ -278,6 +294,8 @@ def main():
                     is_write=True)
         for c in cylinders:
             _set_cylinder(c, cf, rff)
+            if(IMP.get_bool_flag("recolor_fgs")):
+                _recolor_cylinder(c, cf, cdf)
         DEBUG=False
         if DEBUG and f_id >= 5*skip_n_frames:
             break
