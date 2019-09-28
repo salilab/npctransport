@@ -8,7 +8,7 @@ add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal
                           "-I${CMAKE_CURRENT_SOURCE_DIR}/data/"
                           "${CMAKE_CURRENT_SOURCE_DIR}/data/npctransport.proto"
 			  COMMAND ${CMAKE_COMMAND} -E rename npctransport.pb.cc npctransport.pb.cpp
-			  COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/patch_protoc.py"
+			  COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/patch_protoc.py"
 			                 "${CMAKE_BINARY_DIR}/src/npctransport/npctransport.pb.h"
 					 "${CMAKE_BINARY_DIR}/include/IMP/npctransport/internal/npctransport.pb.h"
                           DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/data/npctransport.proto"
