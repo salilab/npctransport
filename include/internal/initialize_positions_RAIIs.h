@@ -2,7 +2,7 @@
  *  \file initialize_positions_RAIIs.h
  *  \brief temporary RAII objects for setting various parameters during initializiation
  *
- *  Copyright 2007-2019 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2020 IMP Inventors. All rights reserved.
  *
  */
 

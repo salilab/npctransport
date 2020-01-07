@@ -2,7 +2,7 @@
  *  \file npctransport/BipartitePairsStatisticsOptimizerState.h
  *  \brief description
  *
- *  Copyright 2007-2019 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2020 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_BIPARTITE_PAIRS_STATISTICS_OPTIMIZER_STATE_H

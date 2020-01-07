@@ -2,7 +2,7 @@
  *  \file AnchorToCylidnricalPorePairScore.h
  *  \brief A chore for anchoring a bead to a pore
  *
- *  Copyright 2007-2017 Sali Lab. All rights reserved.
+ *  Copyright 2007-2020 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_ANCHOR_TO_CYLINDRICAL_PORE_PAIR_SCORE_H

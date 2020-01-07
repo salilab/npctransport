@@ -2,7 +2,7 @@
  *  \file ExcludeZRangeSingletonScore.h
  *  \brief XXXXXXXXXXXXXX
  *
- *  Copyright 2007-8 Sali Lab. All rights reserved.
+ *  Copyright 2007-2020 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_EXCLUDE_Z_RANGE_SINGLETON_SCORE_H

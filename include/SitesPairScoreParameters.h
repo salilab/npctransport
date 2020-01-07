@@ -3,7 +3,7 @@
  *  \brief A summary of useful information about rigid bodies and their
  *         transformation for eg, caching purposes for SitesPairScore
  *
- *  Copyright 2007-2019 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2020 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_SITES_PAIR_SCORE_PARAMS_H

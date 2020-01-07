@@ -3,7 +3,7 @@
  *  \brief forward declaration of incomplete protobuf files
  *         for the main data structures used
  *
- *  Copyright 2007-2019 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2020 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_NPCTRANSPORT_PROTO_FWD_H

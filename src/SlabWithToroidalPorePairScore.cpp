@@ -2,7 +2,7 @@
  *  \file SlabWithToroidalPorePairScore.cpp
  *  \brief a score for a slab with a toroidal pore
  *
- *  Copyright 2006-15 Sali Lab. All rights reserved.
+ *  Copyright 2007-2020 IMP Inventors. All rights reserved.
  *
  */
 
