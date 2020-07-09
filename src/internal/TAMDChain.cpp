@@ -87,7 +87,7 @@ void TAMDChain::add_children
 
    @param p_ref reference particle to be tied by spring
    @param name particle name
-   @param T_factor temeprature factor
+   @param T_factor temperature factor
    @param F_factor friction factor
 
    @return TAMD image particle
@@ -186,7 +186,7 @@ TAMDChain* create_singleton_tamd_chain( ParticleFactory* pf)
 
    @param p_ref reference particle to be tied by spring
    @param name particle name
-   @param T_factor temeprature factor
+   @param T_factor temperature factor
    @param F_factor friction factor
 
    @return TAMD image particle */

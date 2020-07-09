@@ -154,7 +154,7 @@ class TAMDChain : public npctransport::FGChain{
      @param nlevels Number of tamd levels in the hierarchy. If 0 then return a
                     singleton particle.
      @param d       The out degree of each non-leaf node (# of children)
-     @param T_factors A list of length nlevels with temeprature at each level
+     @param T_factors A list of length nlevels with temperature at each level
                     from top to bottom
      @param G_factors A list of length nlevels with friction factor (G for gamma)
                     at each level from top to bottom
