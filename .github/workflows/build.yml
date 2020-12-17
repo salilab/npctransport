@@ -24,7 +24,7 @@ jobs:
       run: |
         git clone --depth 5 https://github.com/salilab/rmf.git ~/rmf
         tools/setup_travis.sh ~/conda ${{ matrix.python-version }}
-        rm -f ${CONDA_PREFIX}/lib/libimp_npctransport.so*
+        rm -f ${CONDA_PREFIX}/lib/libimp_npctransport.so* ${CONDA_PREFIX}/lib/_IMP_npctransport.so
     - name: Test
       run: |
         export IMP_TMP_DIR=/tmp
