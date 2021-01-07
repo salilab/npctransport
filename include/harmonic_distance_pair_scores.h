@@ -2,7 +2,7 @@
  *  \file harmonic_distance_pair_scores.h
  *  \brief Harmonic scores on the distance between a pair of particles.
  *
- *  Copyright 2007-2020 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2021 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_HARMONIC_DISTANCE_PAIR_SCORES_H

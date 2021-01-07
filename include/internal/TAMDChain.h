@@ -2,7 +2,7 @@
  * \file internal/creating_tamd_particles.h
  * \brief creating TAMD chains internal methods
  *
- *  Copyright 2007-2020 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2021 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_INTERNAL_TAMD_CHAIN_H

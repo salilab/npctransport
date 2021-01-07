@@ -2,7 +2,7 @@
  *  \file functor_linear_distance_pair_scores_typedefs.h
  *  \brief Typedefs for the functor scores on the distance between a pair of particles.
  *
- *  Copyright 2007-2020 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2021 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_FUNCTOR_LINEAR_DISTANCE_PAIR_SCORES_TYPEDEFS_H

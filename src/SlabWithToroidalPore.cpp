@@ -2,7 +2,7 @@
  *  \file SlabWithToroidalPore.cpp
  *  \brief Decoratr for slab particle with a toroidal pore
  *
- *  Copyright 2007-2020 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2021 IMP Inventors. All rights reserved.
  *
  */
 

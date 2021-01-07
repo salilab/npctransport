@@ -1,7 +1,7 @@
 /**
  * \file avro_cat.cpp
  * \brief Concatenate a bunch of protobufs to an avro archive
- * Copyright 2007-2020 IMP Inventors. All rights reserved.
+ * Copyright 2007-2021 IMP Inventors. All rights reserved.
  */
 #include <IMP/npctransport/avro.h>
 #include <IMP/npctransport/AvroDataFileData.h>
