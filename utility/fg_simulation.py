@@ -20,11 +20,9 @@ import IMP
 import IMP.npctransport
 #import IMP.benchmark
 #import IMP.example
-try:
-    import argparse
-except ImportError:
-    import IMP._compat_argparse as argparse
+import argparse
 import math
+
 
 def get_cmdline_options(args = None):
     desc = "Runs FG Nups simulation with a cylinder"

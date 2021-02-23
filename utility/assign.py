@@ -2,10 +2,8 @@
 
 import IMP.npctransport
 import sys
-try:
-    import argparse
-except ImportError:
-    import IMP._compat_argparse as argparse
+import argparse
+
 
 p = argparse.ArgumentParser()
 p.add_argument("-w", "--work_unit", dest="work_unit", type=int,

@@ -1,4 +1,7 @@
 from __future__ import print_function
+import sys
+import argparse
+
 
 nranges=1
 
@@ -136,13 +139,6 @@ def set_single_configuration(config):
 def set_quick_configuration(config):
     """Change the passed configuration to be quick"""
     config.maximal_number_of_frames=100000
-
-import sys
-try:
-    import argparse
-except ImportError:
-    import IMP._compat_argparse as argparse
-
 
 def write(config):
     make_parser = argparse.ArgumentParser()
