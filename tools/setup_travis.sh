@@ -29,7 +29,7 @@ export PATH=${conda_dir}/bin:$PATH
 conda update --yes -q conda
 conda create --yes -q -n python${python_version} -c salilab python=${python_version} pip nose imp-nightly gxx_linux-64 eigen swig cmake protobuf
 source activate python${python_version}
-pip install coverage
+pip install coverage flake8
 
 # IMP tests use sys.argv[0] to determine their location, which won't work if
 # we use nosetests, so add a workaround

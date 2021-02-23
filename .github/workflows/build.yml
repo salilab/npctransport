@@ -37,6 +37,7 @@ jobs:
         cmake .. -DIMP_DIR=${CONDA_PREFIX}/lib/cmake/IMP -DUSE_PYTHON2=${PY2} -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DAVROCPP_INCLUDE_PATH=~/rmf/src/avrocpp/api
         make
         ./setup_environment.sh ../test/nosetests --with-coverage --cover-branches -e 'probabilistic' -e 'test_protobuf_installed' -e 'add_test_sites' ../test/test_*.py ../test/medium_test_*.py test/*/*.py > /dev/null
+        flake8 ../pyext/src/
     - name: Upload coverage to codecov
       run: |
         bash <(curl -s https://codecov.io/bash)
