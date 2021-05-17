@@ -616,8 +616,8 @@ Scoring::create_close_beads_container
 {
   using namespace container;
   IMP_LOG(TERSE,
-          "Creating a close pair container for " << non_optimizable_beads->get_particles().size()
-            << " non-optimizable beads and " << optimizable_beads->get_particles().size()
+          "Creating a close pair container for " << non_optimizable_beads->get_contents().size()
+            << " non-optimizable beads and " << optimizable_beads->get_contents().size()
             << " optimizable ones" << std::endl);
   non_optimizable_beads.set_name_if_default(
       "CreateCloseBeadsContainerNonOptimizableBeadsInput%1%");
