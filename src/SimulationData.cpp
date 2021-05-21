@@ -141,7 +141,11 @@ void SimulationData::initialize(std::string prev_output_file,
   if(fd!=-1){
     google::protobuf::io::FileInputStream fis(fd);
     google::protobuf::io::CodedInputStream cis(&fis);
+#if GOOGLE_PROTOBUF_VERSION >= 3006000
+    cis.SetTotalBytesLimit(500000000);
+#else
     cis.SetTotalBytesLimit(500000000,200000000);
+#endif
     read= pb_data.ParseFromCodedStream(&cis);
     IMP_C_CLOSE(fd);
   }
