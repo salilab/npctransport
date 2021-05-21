@@ -14,7 +14,7 @@ temp_dir=$(mktemp -d)
 cd ${temp_dir}
 
 conda config --remove channels defaults  # get conda-forge, not main, packages
-conda create --yes -q -n python${python_version} -c salilab -c conda-forge python=${python_version} pip nose imp-nightly gxx_linux-64 eigen swig cmake protobuf
+conda create --yes -q -n python${python_version} -c salilab -c conda-forge python=${python_version} numpy pip nose imp-nightly gxx_linux-64 eigen swig cmake protobuf
 eval "$(conda shell.bash hook)"
 conda activate python${python_version}
 pip install coverage flake8
