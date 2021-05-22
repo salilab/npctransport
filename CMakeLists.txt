@@ -12,6 +12,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   set(SWIG_EXECUTABLE swig CACHE STRING "Swig program")
 
   find_package(IMP REQUIRED)
+  find_package(RMF REQUIRED)
   include(${IMP_USE_FILE})
 
   enable_testing()
