@@ -23,10 +23,9 @@ jobs:
     - name: Setup conda and dependencies
       run: |
         git clone --depth 5 https://github.com/salilab/rmf.git ~/rmf
-        tools/setup_travis.sh ${{ matrix.python-version }}
+        tools/setup_ci.sh ${{ matrix.python-version }}
     - name: Test
       run: |
-        export IMP_TMP_DIR=/tmp
         eval "$(conda shell.bash hook)"
         conda activate python${{ matrix.python-version }}
         rm -f ${CONDA_PREFIX}/lib/libimp_npctransport.so* ${CONDA_PREFIX}/lib/_IMP_npctransport.so
@@ -37,8 +36,6 @@ jobs:
         if test "${{ matrix.python-version }}" = "2.7" ; then PY2=on; else PY2=off; fi
         cmake .. -DIMP_DIR=${CONDA_PREFIX}/lib/cmake/IMP -DUSE_PYTHON2=${PY2} -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DAVROCPP_INCLUDE_PATH=~/rmf/src/avrocpp/api
         make
-        ./setup_environment.sh ../test/nosetests --with-coverage --cover-branches -e 'probabilistic' -e 'test_protobuf_installed' -e 'add_test_sites' ../test/test_*.py ../test/medium_test_*.py test/*/*.py > /dev/null
+        ./setup_environment.sh pytest --cov=.. --cov-branch --cov-report=xml -v -k 'not test_protobuf_installed and not add_test_sites' ../test/test_*.py ../test/medium_test_*.py test/*/*.py
         flake8 ../pyext/src/
-    - name: Upload coverage to codecov
-      run: |
-        bash <(curl -s https://codecov.io/bash)
+    - uses: codecov/codecov-action@v1
