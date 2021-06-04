@@ -14,9 +14,9 @@ class Tests(IMP.test.TestCase):
         p=create_diffusing_rb_particle(m,radius)
         t=IMP.npctransport.Transporting.setup_particle(p)
         t.set_is_last_entry_from_top(True);
-        self.assert_(t.get_is_last_entry_from_top())
+        self.assertTrue(t.get_is_last_entry_from_top())
         t.set_is_last_entry_from_top(False);
-        self.assert_(not t.get_is_last_entry_from_top())
+        self.assertFalse(t.get_is_last_entry_from_top())
         t.set_last_tracked_z(50.0);
         self.assertEqual(t.get_last_tracked_z(),50.0)
         t.set_n_entries_bottom(10)

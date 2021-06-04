@@ -74,12 +74,12 @@ class Tests(IMP.test.TestCase):
             chain = get_fg_chain(fg)
             type_name = IMP.core.Typed(fg.get_child(0)).get_type().get_string()
             if(type_name == "my_fg1"):
-                self.assert_(chain.get_number_of_beads() == 3)
+                self.assertEqual(chain.get_number_of_beads(), 3)
                 ones = ones + 1
             if(type_name == "my_fg2"):
-                self.assert_(chain.get_number_of_beads() == 6)
+                self.assertEqual(chain.get_number_of_beads(), 6)
                 twos = twos + 1
-        self.assert_(ones == 2 and twos == 3)
+        self.assertTrue(ones == 2 and twos == 3)
 
 
 if __name__ == '__main__':

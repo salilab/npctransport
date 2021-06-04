@@ -48,7 +48,7 @@ class ConeTests(IMP.test.TestCase):
             for d1 in ds:
                 if d!=d1:
                     print(d, d1)
-                    self.assert_(IMP.core.get_distance(d, d1) > -.1)
+                    self.assertGreater(IMP.core.get_distance(d, d1), -.1)
     def test_cone_construction2(self):
         """Check interaction score repulsion"""
         m= IMP.Model()
@@ -83,7 +83,7 @@ class ConeTests(IMP.test.TestCase):
             for d1 in ds:
                 if d!=d1:
                     print(d, d1)
-                    self.assert_(IMP.core.get_distance(d, d1) > -.1)
+                    self.assertGreater(IMP.core.get_distance(d, d1), -.1)
         ss= IMP.algebra.Sphere3D(IMP.algebra.Vector3D(0,0,0),
                                                       radius+rng*.9)
         ds[1].set_coordinates(IMP.algebra.get_random_vector_on(ss))
@@ -97,8 +97,8 @@ class ConeTests(IMP.test.TestCase):
             for d1 in ds:
                 if d!=d1:
                     print(d, d1)
-                    self.assert_(IMP.core.get_distance(d, d1) > -.1\
-                                   and IMP.core.get_distance(d, d1) < .1)
+                    self.assertTrue(IMP.core.get_distance(d, d1) > -.1
+                                    and IMP.core.get_distance(d, d1) < .1)
 
 if __name__ == '__main__':
     IMP.test.main()

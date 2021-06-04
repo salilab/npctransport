@@ -70,7 +70,7 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
                     print("*** BREAKING ***")
                 break
         print("Final coordinates: ", d.get_coordinates(),  " score ", s, "Pore radius", slab.get_pore_radius())
-        self.assert_(out_slab(d,slab))
+        self.assertTrue(out_slab(d,slab))
 
     def _initialize_model(self):
         print("radius", radius, "slab radius", slab_pore_radius, "slab_height", slab_height)
@@ -86,14 +86,15 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         p_slab= IMP.Particle(m, "slab")
         IMP.npctransport.SlabWithCylindricalPore.setup_particle \
             (p_slab, slab_height, slab_pore_radius)
-        self.assert_(IMP.npctransport.SlabWithCylindricalPore.get_is_setup(p_slab))
+        self.assertTrue(
+            IMP.npctransport.SlabWithCylindricalPore.get_is_setup(p_slab))
         # test cast to slab
         slab= IMP.npctransport.SlabWithPore(p_slab)
         self.slab= slab
         self.assertEqual(slab.get_pore_radius(),slab_pore_radius)
         self.assertEqual(slab.get_thickness(),slab_height);
         slabps= IMP.npctransport.SlabWithCylindricalPorePairScore(1.0)
-        self.assert_(not slab.get_pore_radius_is_optimized()) # verify correct default value
+        self.assertFalse(slab.get_pore_radius_is_optimized()) # verify correct default value
         r= IMP.core.PairRestraint(m, slabps, [p_slab.get_index(), p.get_index()], "slab")
         self.r= r
         score_init= slabps.evaluate_index(m,
@@ -120,19 +121,19 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         while out_slab(d,slab):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb_half))
         self._test_optimization('tmp.pym')
-        self.assert_(slab_pore_radius==slab.get_pore_radius())
+        self.assertEqual(slab_pore_radius, slab.get_pore_radius())
 
         print("\nTest from vertical position")
         d.set_coordinates([slab_pore_radius+2*radius,0,0.4])
-        self.assert_(not out_slab(d,slab))
+        self.assertFalse(out_slab(d,slab))
         self._test_optimization('tmp3.pym')
-        self.assert_(slab_pore_radius==slab.get_pore_radius())
+        self.assertEqual(slab_pore_radius, slab.get_pore_radius())
 
         print("\nTest from horizontal position")
         d.set_coordinates([slab_pore_radius+radius,0,0])
-        self.assert_(not out_slab(d,slab))
+        self.assertFalse(out_slab(d,slab))
         self._test_optimization('tmp2.pym')
-        self.assert_(slab_pore_radius==slab.get_pore_radius())
+        self.assertEqual(slab_pore_radius, slab.get_pore_radius())
 
         print("\n== (II) Testing optimizable pore radius ==")
 
@@ -140,7 +141,7 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         print("\nTest pore radius from vertical position")
         d.set_coordinates([slab_pore_radius+2*radius,0,0.4])
         self._test_optimization('tmp4.pym')
-        self.assert_(slab_pore_radius==slab.get_pore_radius()) # vertical position shouldn't have affected pore radius
+        self.assertEqual(slab_pore_radius, slab.get_pore_radius()) # vertical position shouldn't have affected pore radius
 
         print("\nTest pore radius from horizontal position")
         d.set_coordinates([slab_pore_radius+radius,0,0.1])

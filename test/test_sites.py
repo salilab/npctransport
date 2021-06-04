@@ -103,7 +103,7 @@ class ConeTests(IMP.test.TestCase):
         score= sf.evaluate(True)
         best_score_sites= -r_sites*k_sites
         print("Optimized score: ",score)
-        self.assert_(d < 0.1)
-        self.assert_(score<0.99*best_score_sites and score>best_score_sites)
+        self.assertLess(d, 0.1)
+        self.assertTrue(score<0.99*best_score_sites and score>best_score_sites)
 if __name__ == '__main__':
     IMP.test.main()

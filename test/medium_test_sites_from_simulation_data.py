@@ -118,10 +118,8 @@ class Tests(IMP.test.TestCase):
                                    0)
             print("Balls are close", D, " radii: ", fg_R, diffuser_R)
             print ("Asserting close balls")
-            self.assert_( self.find_close_sites(sd,
-                                                kap,
-                                                fg_anchor,
-                                                interaction_range*1.5) )
+            self.assertTrue(self.find_close_sites(sd, kap, fg_anchor,
+                                                  interaction_range*1.5))
             print ("Asserted close sites")
             print("Kap coords", kap_c, end=' ')
             print("FG coords", anchor_c, end=' ')
@@ -209,11 +207,12 @@ class Tests(IMP.test.TestCase):
                 self._assert_kap_in_place(sd, True)
                 print ("Asserted kap interacts")
                 print ("total energy", sd.get_bd().get_scoring_function().evaluate(False),)
-                print ("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False))
-                self.assert_(sd.get_scoring().get_predicates_pair_restraint().evaluate(False) < -30.0)
+                ppr = sd.get_scoring().get_predicates_pair_restraint()
+                print ("predr", ppr.evaluate(False))
+                self.assertLess(ppr.evaluate(False), -30.0)
                 n_good=n_good+1
                 print("NGOOD", n_good)
-                self.assert_(self.is_stats_interact_(assign_file))
+                self.assertTrue(self.is_stats_interact_(assign_file))
                 print("stats interact asserted")
             except AssertionError:
                 continue
@@ -224,7 +223,7 @@ class Tests(IMP.test.TestCase):
         if fast:
             print("Failed to glue particles after %d iterations x %d opt frames (total %.3f ns)" \
                 % (n_iter, opt_cycles_frames, opt_cycles_ns*n_iter))
-            self.assert_(n_good >= n_good_thresh)
+            self.assertGreaterEqual(n_good, n_good_thresh)
         else:
             print("Debug mode - couldn't glue particles in such short run")
 

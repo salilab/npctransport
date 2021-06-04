@@ -34,7 +34,7 @@ class Tests(IMP.test.TestCase):
             if .1*i > 2*radius:
                 self.assertEqual(e, 0)
             elif .1*i < 2*radius:
-                self.assert_(deriv[0] < 0)
+                self.assertLess(deriv[0], 0)
 
     def test_interaction(self):
         """Check linear interaction scores"""

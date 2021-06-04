@@ -98,7 +98,8 @@ class ConeTests(IMP.test.TestCase):
         p_slab= IMP.Particle(m, "slab")
         IMP.npctransport.SlabWithToroidalPore.setup_particle \
               (p_slab, slab_thickness, slab_radius, r_h2v_ratio)
-        self.assert_(IMP.npctransport.SlabWithToroidalPore.get_is_setup(p_slab))
+        self.assertTrue(
+            IMP.npctransport.SlabWithToroidalPore.get_is_setup(p_slab))
         # test cast to slab with pore
         slab= IMP.npctransport.SlabWithToroidalPore(p_slab)
         self.assertEqual(slab.get_pore_radius(),
@@ -141,10 +142,10 @@ class ConeTests(IMP.test.TestCase):
             w.add_geometry([g, sg])
             print(i, d.get_coordinates())
             if s==0:
-                self.assert_(out_slab(d, ALLOWED_OVERLAP=0.0))
+                self.assertTrue(out_slab(d, ALLOWED_OVERLAP=0.0))
                 break
             else:
-                self.assert_(not out_slab(d, ALLOWED_OVERLAP=0.0))
+                self.assertFalse(out_slab(d, ALLOWED_OVERLAP=0.0))
         print(d.get_coordinates())
 
 if __name__ == '__main__':

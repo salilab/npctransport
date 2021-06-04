@@ -40,8 +40,8 @@ class ZBiasTests(IMP.test.TestCase):
             if s <= 0:
                 break
         print("AFTER=", d.get_coordinates(), "Score =", s)
-        self.assert_(d.get_z() <= 0.01 and
-                     d.get_x() == 1 and
-                     d.get_y() == 1)
+        self.assertTrue(d.get_z() <= 0.01 and
+                        d.get_x() == 1 and
+                        d.get_y() == 1)
 if __name__ == '__main__':
     IMP.test.main()

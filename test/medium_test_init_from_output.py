@@ -68,14 +68,14 @@ class Tests(IMP.test.TestCase):
             print ("Bead particles: ")
             print (d1, d2)
             print ("Comparing transport statistics: ", t1, t2)
-            self.assert_(t1.get_is_last_entry_from_top()
-                         == t2.get_is_last_entry_from_top())
+            self.assertEqual(t1.get_is_last_entry_from_top(),
+                             t2.get_is_last_entry_from_top())
             self.assertAlmostEqual(t1.get_last_tracked_z(),
                                    t2.get_last_tracked_z(), delta=.00001)
-            self.assert_(t1.get_n_entries_bottom()
-                         == t2.get_n_entries_bottom())
-            self.assert_(t1.get_n_entries_top()
-                         == t2.get_n_entries_top())
+            self.assertEqual(t1.get_n_entries_bottom(),
+                             t2.get_n_entries_bottom())
+            self.assertEqual(t1.get_n_entries_top(),
+                             t2.get_n_entries_top())
 
     def assert_almost_equal_sds(self, sd1, sd2):
         """
@@ -89,8 +89,9 @@ class Tests(IMP.test.TestCase):
 #            print(p,pp)
 #            print(IMP.core.XYZR(p))
 #            print(IMP.core.XYZR(pp))
-            self.assert_((IMP.core.XYZ(p).get_coordinates()
-                          - IMP.core.XYZ(pp).get_coordinates()).get_magnitude() < .0001)
+            self.assertLess(
+                (IMP.core.XYZ(p).get_coordinates()
+                 - IMP.core.XYZ(pp).get_coordinates()).get_magnitude(), .0001)
             q0 = IMP.core.RigidBody(
                 p).get_reference_frame(
             ).get_transformation_to(
@@ -110,11 +111,11 @@ class Tests(IMP.test.TestCase):
         sites0 = sd1.get_sites(IMP.core.ParticleType("kap"))
         sites1 = sd2.get_sites(IMP.core.ParticleType("kap"))
         for s0, s1 in zip(sites0, sites1):
-            self.assert_(IMP.algebra.get_distance(s0, s1) < .0001)
+            self.assertLess(IMP.algebra.get_distance(s0, s1), .0001)
         # check timers
         bd1 = sd1.get_bd()
         bd2 = sd2.get_bd()
-        self.assert_(bd2.get_current_time() > 0)
+        self.assertGreater(bd2.get_current_time(), 0)
         print("Current times:", bd1.get_current_time(), bd2.get_current_time())
         self.assertAlmostEqual(bd1.get_current_time(), bd2.get_current_time(), delta=.01)
         # check Transporting

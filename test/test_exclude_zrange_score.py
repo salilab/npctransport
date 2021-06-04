@@ -48,6 +48,6 @@ class ExcludeZRangeTests(IMP.test.TestCase):
             if s==0:
                 break
         print(d.get_coordinates())
-        self.assert_(out_zrange(d))
+        self.assertTrue(out_zrange(d))
 if __name__ == '__main__':
     IMP.test.main()
