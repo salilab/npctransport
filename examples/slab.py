@@ -5,43 +5,44 @@ import RMF
 import IMP.rmf
 import IMP.atom
 
-height=20
-radius=20
-k=100
+height = 20
+radius = 20
+k = 100
 
-m= IMP.Model()
-p_slab= IMP.Particle(m, "slab")
-slab= IMP.npctransport.SlabWithCylindricalPore.setup_particle \
-      (p_slab, height, radius)
-p= IMP.Particle(m)
+m = IMP.Model()
+p_slab = IMP.Particle(m, "slab")
+slab = IMP.npctransport.SlabWithCylindricalPore.setup_particle(
+    p_slab, height, radius)
+p = IMP.Particle(m)
 IMP.atom.Hierarchy.setup_particle(p)
-d=IMP.core.XYZR.setup_particle(p)
+d = IMP.core.XYZR.setup_particle(p)
 d.set_radius(10)
 d.set_coordinates_are_optimized(True)
 IMP.atom.Diffusion.setup_particle(p)
 IMP.atom.Mass.setup_particle(p, 1)
-slabps= IMP.npctransport.SlabWithCylindricalPorePairScore(k)
-r= IMP.core.PairRestraint(m, slabps, [p_slab.get_index(),p.get_index()], "slab")
-bb= IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(-100, -100, -100),
-                              IMP.algebra.Vector3D(100, 100, 100))
-bbss= IMP.core.BoundingBox3DSingletonScore(IMP.core.HarmonicUpperBound(0,10),
-                                         bb)
-bbr= IMP.core.SingletonRestraint(m, bbss, p.get_index(), "bb")
+slabps = IMP.npctransport.SlabWithCylindricalPorePairScore(k)
+r = IMP.core.PairRestraint(m, slabps, [p_slab.get_index(), p.get_index()],
+                           "slab")
+bb = IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(-100, -100, -100),
+                               IMP.algebra.Vector3D(100, 100, 100))
+bbss = IMP.core.BoundingBox3DSingletonScore(IMP.core.HarmonicUpperBound(0, 10),
+                                            bb)
+bbr = IMP.core.SingletonRestraint(m, bbss, p.get_index(), "bb")
 
-nm=IMP.create_temporary_file_name("slab", ".rmf")
-rmf= RMF.create_rmf_file(nm)
+nm = IMP.create_temporary_file_name("slab", ".rmf")
+rmf = RMF.create_rmf_file(nm)
 IMP.rmf.add_hierarchies(rmf, [p])
-bbg= IMP.display.BoundingBoxGeometry(bb)
-sg= IMP.npctransport.SlabWithCylindricalPoreWireGeometry(height, radius, 100)
-sg.set_was_used(True);
-sgs= sg.get_components()
+bbg = IMP.display.BoundingBoxGeometry(bb)
+sg = IMP.npctransport.SlabWithCylindricalPoreWireGeometry(height, radius, 100)
+sg.set_was_used(True)
+sgs = sg.get_components()
 # silliness we have to do for now
 IMP.rmf.add_static_geometries(rmf, [bbg]+sgs)
 IMP.rmf.add_restraints(rmf, [bbr, r])
 
-os= IMP.rmf.SaveOptimizerState(m, rmf)
+os = IMP.rmf.SaveOptimizerState(m, rmf)
 
-bd=IMP.atom.BrownianDynamics(m)
+bd = IMP.atom.BrownianDynamics(m)
 bd.set_scoring_function([bbr, r])
 bd.set_log_level(IMP.SILENT)
 bd.add_optimizer_state(os)
