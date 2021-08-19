@@ -67,7 +67,7 @@ public:
      const ParticleIndexPairs &pips,
      DerivativeAccumulator *da,
      unsigned int lower_bound,
-     unsigned int upper_bound) const IMP_FINAL;
+     unsigned int upper_bound) const IMP_OVERRIDE IMP_FINAL;
 
   /**
      Evaluate score for particles pis[lower_bound..upper_bound] in
