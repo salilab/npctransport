@@ -108,7 +108,7 @@ class IMPNPCTRANSPORTEXPORT ChainStatisticsOptimizerState
   /**
      Resets all the statistics about that chain
   */
-  void reset();
+  void reset() IMP_OVERRIDE;
   virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
   IMP_OBJECT_METHODS(ChainStatisticsOptimizerState);
 };

@@ -91,7 +91,7 @@ class IMPNPCTRANSPORTEXPORT BrownianDynamicsTAMDWithSlabSupport
   */
   void do_advance_chunk(double dtfs, double ikt,
                         const ParticleIndexes &ps,
-                        unsigned int begin, unsigned int end);
+                        unsigned int begin, unsigned int end) IMP_OVERRIDE;
 };
 
 IMPNPCTRANSPORT_END_NAMESPACE

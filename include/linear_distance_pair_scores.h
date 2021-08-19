@@ -99,7 +99,8 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
     ( Model *m,
       const ParticleIndexPairs &p,
       DerivativeAccumulator *da,
-      double max, unsigned int lower_bound, unsigned int upper_bound) const
+      double max, unsigned int lower_bound,
+      unsigned int upper_bound) const IMP_OVERRIDE
   {
     double ret = 0;
     for (unsigned int i = lower_bound; i < upper_bound; ++i) {
@@ -111,7 +112,7 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
 
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
-                                         const ParticleIndexes &pis) const;
+                           const ParticleIndexes &pis) const IMP_OVERRIDE;
 
   //! returns the k for sphere-sphere repulsion
   double get_k() const { return k_; }
@@ -429,7 +430,8 @@ class IMPNPCTRANSPORTEXPORT LinearWellPairScore : public PairScore {
   double get_k() { return k_; }
   double evaluate_index(Model *m, const ParticleIndexPair &p,
                         DerivativeAccumulator *da) const IMP_OVERRIDE;
-  ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis) const;
+  ModelObjectsTemp do_get_inputs(Model *m,
+                  const ParticleIndexes &pis) const IMP_OVERRIDE;
   IMP_PAIR_SCORE_METHODS(LinearWellPairScore);
   IMP_OBJECT_METHODS(LinearWellPairScore);
   ;

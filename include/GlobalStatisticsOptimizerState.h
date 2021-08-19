@@ -39,7 +39,7 @@ class IMPNPCTRANSPORTEXPORT GlobalStatisticsOptimizerState
     (IMP::npctransport::Statistics* statistics_manager = nullptr,
      unsigned int periodicity=1);
 
-  void reset();
+  void reset() IMP_OVERRIDE;
 
   virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
 

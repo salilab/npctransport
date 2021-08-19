@@ -84,7 +84,7 @@ public:
       DerivativeAccumulator *da,
       double max,
       unsigned int lower_bound,
-      unsigned int upper_bound) const
+      unsigned int upper_bound) const IMP_OVERRIDE
   {
     double ret = 0;
     for (unsigned int i = lower_bound; i < upper_bound; ++i) {

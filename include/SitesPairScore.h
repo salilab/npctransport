@@ -143,7 +143,8 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   double evaluate_if_good_indexes
     ( Model *m, const ParticleIndexPairs &p,
       DerivativeAccumulator *da,
-      double max, unsigned int lower_bound, unsigned int upper_bound) const
+      double max, unsigned int lower_bound,
+      unsigned int upper_bound) const IMP_OVERRIDE
   {
     //    activate_cache();
     double ret = 0.0;
@@ -230,7 +231,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
 #endif
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
-                                         const ParticleIndexes &pis) const;
+                            const ParticleIndexes &pis) const IMP_OVERRIDE;
 
   //  Restraints do_create_current_decomposition(Model *m,
   //                                           const ParticleIndexPair &vt)
