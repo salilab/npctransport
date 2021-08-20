@@ -17,6 +17,12 @@ with open(header_fn, 'rb') as fh:
 
 with open(header_fn, 'wb') as fh:
     fh.write(b'#include <IMP/npctransport/npctransport_config.h>' + linesep)
+    # Don't warn about missing override keyword; this is not our code
+    fh.write(b'#if __GNUC__ > 5 || (__GNUC__ == 5 && __GNUC_MINOR__ >= 1)'
+             + linesep)
+    fh.write(b'IMP_GCC_PRAGMA(diagnostic ignored "-Wsuggest-override")'
+             + linesep)
+    fh.write(b'#endif' + linesep)
     fh.write(contents)
 
 if os.path.exists(link_header_fn):
