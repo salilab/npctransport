@@ -3,7 +3,7 @@
  *  \brief A decorator for a transporting particle, so as to keep track of its
 * directionality.
  *
- *  Copyright 2007-2021 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2022 IMP Inventors. All rights reserved.
  *
  */
 

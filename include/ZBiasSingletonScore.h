@@ -2,7 +2,7 @@
  *  \file ZBiasSingletonScore.h
  *  \brief score that biases particles to go down the Z axis
  *
- *  Copyright 2007-2021 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2022 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_Z_BIAS_SINGLETON_SCORE_H

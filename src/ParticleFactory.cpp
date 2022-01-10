@@ -2,7 +2,7 @@
  * \file ParticleFactory.cpp
  * \brief create singleton particles for npc simulations
  *
- *  Copyright 2007-2021 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2022 IMP Inventors. All rights reserved.
  */
 
 #include <IMP/npctransport/ParticleFactory.h>

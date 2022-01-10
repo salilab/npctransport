@@ -2,7 +2,7 @@
  *  \file SlabWithCylindricalPorePairScore.h
  *  \brief XXXXXXXXXXXXXX
  *
- *  Copyright 2007-2021 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2022 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_SLAB_PAIR_SCORE_H

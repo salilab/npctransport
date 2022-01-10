@@ -2,7 +2,7 @@
  *  \file initialize_positions.h
  *  \brief description
  *
- *  Copyright 2007-2021 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2022 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_INITIALIZE_POSITIONS_H
