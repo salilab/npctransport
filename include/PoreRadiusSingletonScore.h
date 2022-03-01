@@ -37,7 +37,7 @@ public core::GenericAttributeSingletonScore<core::Harmonic>
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const
-    IMP_OVERRIDE;
+    override;
 
   //! set the coefficient of the score harmonic to k
   void set_k(double k){

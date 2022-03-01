@@ -21,7 +21,6 @@
 #include <IMP/exception.h>
 #include <IMP/enums.h>
 #include <IMP/npctransport.h>
-#include <IMP/nullptr.h>
 #include <IMP/base_types.h>
 #include <IMP/Pointer.h>
 #include <IMP/Restraint.h>

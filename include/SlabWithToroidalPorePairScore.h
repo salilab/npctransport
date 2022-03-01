@@ -53,11 +53,11 @@ public:
   virtual double evaluate_index
     (Model *m,
      ParticleIndexPair const& pip,
-     DerivativeAccumulator *da) const IMP_OVERRIDE;
+     DerivativeAccumulator *da) const override;
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const
-      IMP_OVERRIDE;
+      override;
 
   //! evaluate score for particles pis[lower_bound..upper_bound] in
   //! model m. If da is not null, use it to accumulate derivatives
@@ -67,7 +67,7 @@ public:
      const ParticleIndexPairs &pips,
      DerivativeAccumulator *da,
      unsigned int lower_bound,
-     unsigned int upper_bound) const IMP_OVERRIDE IMP_FINAL;
+     unsigned int upper_bound) const override IMP_FINAL;
 
   /**
      Evaluate score for particles pis[lower_bound..upper_bound] in
@@ -84,7 +84,7 @@ public:
       DerivativeAccumulator *da,
       double max,
       unsigned int lower_bound,
-      unsigned int upper_bound) const IMP_OVERRIDE
+      unsigned int upper_bound) const override
   {
     double ret = 0;
     for (unsigned int i = lower_bound; i < upper_bound; ++i) {

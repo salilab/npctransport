@@ -47,11 +47,11 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   */
   virtual void do_link_particle(Model *m, ParticleIndex root,
                                 ParticleIndex cur,
-                                RMF::NodeConstHandle node) IMP_OVERRIDE;
+                                RMF::NodeConstHandle node) override;
 
   virtual void do_setup_particle(Model* m, ParticleIndex root,
                                  ParticleIndex cur,
-                                 RMF::NodeConstHandle node) IMP_OVERRIDE {
+                                 RMF::NodeConstHandle node) override {
     IMP_NOT_IMPLEMENTED;
     IMP_UNUSED(m);     IMP_UNUSED(root);
     IMP_UNUSED(cur);    IMP_UNUSED(node);
@@ -64,7 +64,7 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesLoadLink
   */
   virtual void do_load_hierarchy(RMF::NodeConstHandle root_node,
                                  Model *m,
-                                 ParticleIndex pi) IMP_OVERRIDE;
+                                 ParticleIndex pi) override;
 
  public:
   HierarchyWithSitesLoadLink(RMF::FileConstHandle fh);
@@ -104,12 +104,12 @@ class IMPNPCTRANSPORTEXPORT HierarchyWithSitesSaveLink
  protected:
   virtual void do_setup_node(Model *m, ParticleIndex root,
                            ParticleIndex cur,
-                           RMF::NodeHandle cur_node) IMP_OVERRIDE;
+                           RMF::NodeHandle cur_node) override;
 
   /** save the values of a hierarchy
   */
   virtual void do_save_hierarchy(Model *m, ParticleIndex root,
-                                 RMF::NodeHandle root_node) IMP_OVERRIDE;
+                                 RMF::NodeHandle root_node) override;
 
  public:
   HierarchyWithSitesSaveLink(RMF::FileHandle fh);

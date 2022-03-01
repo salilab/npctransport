@@ -136,7 +136,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   virtual double evaluate_indexes(
          Model *m, const ParticleIndexPairs &p, DerivativeAccumulator *da,
          unsigned int lower_bound,
-         unsigned int upper_bound) const IMP_OVERRIDE IMP_FINAL;
+         unsigned int upper_bound) const override IMP_FINAL;
 
   //! evaluated indexes for the range from lower_bound to upper_bound
   //! in p, if score>max then return max value of double
@@ -144,7 +144,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
     ( Model *m, const ParticleIndexPairs &p,
       DerivativeAccumulator *da,
       double max, unsigned int lower_bound,
-      unsigned int upper_bound) const IMP_OVERRIDE
+      unsigned int upper_bound) const override
   {
     //    activate_cache();
     double ret = 0.0;
@@ -161,7 +161,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
       updating score derivatives to da
   */
   virtual double evaluate_index(Model *m, const ParticleIndexPair &p,
-                                DerivativeAccumulator *da) const IMP_OVERRIDE;
+                                DerivativeAccumulator *da) const override;
 
 #ifndef SWIG
   /**
@@ -231,11 +231,11 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
 #endif
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
-                            const ParticleIndexes &pis) const IMP_OVERRIDE;
+                            const ParticleIndexes &pis) const override;
 
   //  Restraints do_create_current_decomposition(Model *m,
   //                                           const ParticleIndexPair &vt)
-  //  const IMP_OVERRIDE;
+  //  const override;
 
   //! return the range for site-site attraction
   double get_sites_range() const { return params_.r; }

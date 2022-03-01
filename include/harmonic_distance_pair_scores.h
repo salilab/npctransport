@@ -88,9 +88,9 @@ class IMPNPCTRANSPORTEXPORT HarmonicWellPairScore : public PairScore {
   { k_ = k; }
   double get_k() { return k_; }
   double evaluate_index(Model *m, const ParticleIndexPair &p,
-                        DerivativeAccumulator *da) const IMP_OVERRIDE;
+                        DerivativeAccumulator *da) const override;
   ModelObjectsTemp do_get_inputs(Model *m,
-                  const ParticleIndexes &pis) const IMP_OVERRIDE;
+                  const ParticleIndexes &pis) const override;
   IMP_PAIR_SCORE_METHODS(HarmonicWellPairScore);
   IMP_OBJECT_METHODS(HarmonicWellPairScore);
   ;

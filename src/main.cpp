@@ -30,8 +30,6 @@
 #include <IMP/container.h>
 #include <IMP/CreateLogContext.h>
 #include <IMP/random.h>
-#include <IMP/nullptr.h>
-#include <IMP/nullptr_macros.h>
 #include <IMP/check_macros.h>
 #include <IMP/exception.h>
 #include <IMP/ScoringFunction.h>

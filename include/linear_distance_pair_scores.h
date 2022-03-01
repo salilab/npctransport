@@ -87,20 +87,20 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
                             std::string name = "LinearSSPairScore%1%");
 
   virtual double evaluate_index(Model *m, const ParticleIndexPair &p,
-                                DerivativeAccumulator *da) const IMP_OVERRIDE;
+                                DerivativeAccumulator *da) const override;
 
   virtual double evaluate_indexes(Model *m,
                                   const ParticleIndexPairs &pips,
                                   DerivativeAccumulator *da,
                                   unsigned int lower_bound,
-                                  unsigned int upper_bound) const IMP_OVERRIDE;
+                                  unsigned int upper_bound) const override;
 
   double evaluate_if_good_indexes
     ( Model *m,
       const ParticleIndexPairs &p,
       DerivativeAccumulator *da,
       double max, unsigned int lower_bound,
-      unsigned int upper_bound) const IMP_OVERRIDE
+      unsigned int upper_bound) const override
   {
     double ret = 0;
     for (unsigned int i = lower_bound; i < upper_bound; ++i) {
@@ -112,7 +112,7 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
 
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
-                           const ParticleIndexes &pis) const IMP_OVERRIDE;
+                           const ParticleIndexes &pis) const override;
 
   //! returns the k for sphere-sphere repulsion
   double get_k() const { return k_; }
@@ -261,7 +261,7 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
 
   IMP_IMPLEMENT(double evaluate_index(Model *m, const ParticleIndexPair &p,
                                       DerivativeAccumulator *da) const
-                IMP_OVERRIDE);
+                override);
   IMP_IMPLEMENT_INLINE(double evaluate_if_good_index
                        ( Model *m,
                          const ParticleIndexPair &p,
@@ -279,7 +279,7 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
                                   const ParticleIndexPairs &pips,
                                   DerivativeAccumulator *da,
                                   unsigned int lower_bound,
-                                  unsigned int upper_bound) const IMP_OVERRIDE;
+                                  unsigned int upper_bound) const override;
 
   double evaluate_if_good_index(Model *m, const ParticleIndexPairs &p,
                                 DerivativeAccumulator *da, double max,
@@ -294,7 +294,7 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   }
 
   ModelObjectsTemp do_get_inputs(Model *m, const ParticleIndexes &pis) const
-      IMP_OVERRIDE;
+      override;
 
   //! returns the range for sphere-sphere attraction in A
   double get_range_attraction() const { return range_attr_; }
@@ -429,9 +429,9 @@ class IMPNPCTRANSPORTEXPORT LinearWellPairScore : public PairScore {
   { k_ = k; }
   double get_k() { return k_; }
   double evaluate_index(Model *m, const ParticleIndexPair &p,
-                        DerivativeAccumulator *da) const IMP_OVERRIDE;
+                        DerivativeAccumulator *da) const override;
   ModelObjectsTemp do_get_inputs(Model *m,
-                  const ParticleIndexes &pis) const IMP_OVERRIDE;
+                  const ParticleIndexes &pis) const override;
   IMP_PAIR_SCORE_METHODS(LinearWellPairScore);
   IMP_OBJECT_METHODS(LinearWellPairScore);
   ;

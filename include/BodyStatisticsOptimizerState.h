@@ -56,14 +56,14 @@ class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
 
   double get_diffusion_coefficient() const;
 
-  void reset() IMP_OVERRIDE;
+  void reset() override;
 
   /** updates the z-r distriubution table in owner's statistics
       for this particle type (distribution of z coordinates and r coordinates)
   */
   void update_particle_type_zr_distribution_map();
 
-  virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+  virtual void do_update(unsigned int call_num) override;
 
   IMP_OBJECT_METHODS(BodyStatisticsOptimizerState);
 };

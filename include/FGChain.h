@@ -19,7 +19,6 @@
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/PairScore.h>
 #include <IMP/Object.h>
-#include <IMP/nullptr.h>
 #include <IMP/container/ConsecutivePairContainer.h>
 #include <IMP/display/Color.h>
 

@@ -227,7 +227,7 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   /** restart accumulation of all averages in the next time
       that update() is called
   */
-  void reset() IMP_OVERRIDE;
+  void reset() override;
 
   double get_misc_stats_period_ns() const
   { return stats_time_ns_; };
@@ -252,7 +252,7 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
 
 
  protected:
-  virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+  virtual void do_update(unsigned int call_num) override;
 
 
  private:

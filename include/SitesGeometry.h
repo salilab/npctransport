@@ -32,7 +32,7 @@ class IMPNPCTRANSPORTEXPORT SitesGeometry : public core::XYZRGeometry {
  public:
   SitesGeometry(Particle *p, algebra::Sphere3Ds sites)
       : core::XYZRGeometry(p), sites_(sites) {}
-  virtual IMP::display::Geometries get_components() const IMP_OVERRIDE;
+  virtual IMP::display::Geometries get_components() const override;
   IMP_OBJECT_METHODS(SitesGeometry);
 };
 
@@ -48,7 +48,7 @@ class IMPNPCTRANSPORTEXPORT TypedSitesGeometry
     // std::cout << t << " gets " << s.size() << std::endl;
     sites_[t] = s;
   }
-  virtual IMP::display::Geometries get_components() const IMP_OVERRIDE;
+  virtual IMP::display::Geometries get_components() const override;
   IMP_OBJECT_METHODS(TypedSitesGeometry);
 };
 

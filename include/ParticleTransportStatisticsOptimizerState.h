@@ -103,9 +103,9 @@ class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
   }
 
   /** resets the number of transports statistics to 0 */
-  void reset() IMP_OVERRIDE;
+  void reset() override;
 
-  virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+  virtual void do_update(unsigned int call_num) override;
   IMP_OBJECT_METHODS(ParticleTransportStatisticsOptimizerState);
 };
 

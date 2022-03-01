@@ -60,7 +60,7 @@ class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
   }
 
   virtual double evaluate_index(Model *m, ParticleIndex pi,
-                                DerivativeAccumulator *da) const IMP_OVERRIDE
+                                DerivativeAccumulator *da) const override
   {
     core::XYZR d(m,pi);
     double r2 =  std::pow(d.get_x(), 2) + std::pow(d.get_y(), 2);
@@ -80,7 +80,7 @@ class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const
-      IMP_OVERRIDE
+      override
   { return IMP::get_particles(m, pis);  }
 
   IMP_SINGLETON_SCORE_METHODS(ZBiasSingletonScore);

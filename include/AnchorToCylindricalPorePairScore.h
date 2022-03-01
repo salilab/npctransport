@@ -77,11 +77,11 @@ AnchorToCylidnricalPorePairScore : public PairScore
   virtual double evaluate_index
     (Model *m,
      const ParticleIndexPair& pip,
-     DerivativeAccumulator *da) const IMP_OVERRIDE;
+     DerivativeAccumulator *da) const override;
 
   virtual ModelObjectsTemp do_get_inputs(Model *m,
                                          const ParticleIndexes &pis) const
-      IMP_OVERRIDE;
+      override;
 
   IMP_PAIR_SCORE_METHODS(AnchorToCylidnricalPorePairScore);
   IMP_OBJECT_METHODS(AnchorToCylidnricalPorePairScore);

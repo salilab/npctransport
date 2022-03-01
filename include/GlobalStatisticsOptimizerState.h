@@ -39,9 +39,9 @@ class IMPNPCTRANSPORTEXPORT GlobalStatisticsOptimizerState
     (IMP::npctransport::Statistics* statistics_manager = nullptr,
      unsigned int periodicity=1);
 
-  void reset() IMP_OVERRIDE;
+  void reset() override;
 
-  virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+  virtual void do_update(unsigned int call_num) override;
 
   double get_mean_energy() {
     return mean_energy_;

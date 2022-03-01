@@ -77,10 +77,10 @@ class IMPNPCTRANSPORTEXPORT HarmonicSpringSingletonScore
     evaluate_index
     (Model *m,
      ParticleIndex pi,
-     DerivativeAccumulator *da) const IMP_OVERRIDE;
+     DerivativeAccumulator *da) const override;
 
   virtual ModelObjectsTemp
-    do_get_inputs(Model *m, const ParticleIndexes &pis) const IMP_OVERRIDE;
+    do_get_inputs(Model *m, const ParticleIndexes &pis) const override;
 
   IMP_SINGLETON_SCORE_METHODS(HarmonicSpringSingletonScore);
 

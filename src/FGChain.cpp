@@ -22,7 +22,6 @@
 #include <IMP/atom/Mass.h>
 #include <IMP/atom/TAMDParticle.h>
 #include <IMP/Pointer.h>
-#include <IMP/nullptr.h>
 #include <IMP/core/ChildrenRefiner.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/core/Typed.h>
