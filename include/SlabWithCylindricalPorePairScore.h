@@ -73,7 +73,7 @@ SlabWithCylindricalPorePairScore : public PairScore {
      const ParticleIndexPairs &pips,
      DerivativeAccumulator *da,
      unsigned int lower_bound,
-     unsigned int upper_bound) const override IMP_FINAL;
+     unsigned int upper_bound) const override final;
 
   /**
      Evaluate score for particles pis[lower_bound..upper_bound] in

@@ -136,7 +136,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   virtual double evaluate_indexes(
          Model *m, const ParticleIndexPairs &p, DerivativeAccumulator *da,
          unsigned int lower_bound,
-         unsigned int upper_bound) const override IMP_FINAL;
+         unsigned int upper_bound) const override final;
 
   //! evaluated indexes for the range from lower_bound to upper_bound
   //! in p, if score>max then return max value of double
