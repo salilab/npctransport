@@ -266,7 +266,7 @@ Statistics::remove_particle_type
   {
     if(is_activated_){
       FGsBodyStatisticsOSs fbsos_list= fgs_bodies_stats_map_[pt];
-      IMP_FOREACH(BodyStatisticsOptimizerStates bsos, fbsos_list)
+      for(BodyStatisticsOptimizerStates bsos : fbsos_list)
         {
           optimizer->remove_optimizer_states(bsos);
         }
@@ -293,8 +293,7 @@ Statistics::remove_particle_type
   chains_stats_map_.erase(pt);
   // interactions stats:
   InteractionTypes interaction_types_delete_list;
-  IMP_FOREACH(BipartitePairsStatisticsOSMap::value_type& iter,
-              interaction_stats_map_)
+  for(BipartitePairsStatisticsOSMap::value_type& iter : interaction_stats_map_)
     {
       InteractionType itype= iter.first;
       if(is_activated_){
@@ -306,7 +305,7 @@ Statistics::remove_particle_type
       }
       interaction_types_delete_list.push_back(itype);
     }
-  IMP_FOREACH(InteractionType itype, interaction_types_delete_list)
+  for(InteractionType itype : interaction_types_delete_list)
     {
       interaction_stats_map_.erase(itype);
     }

@@ -593,7 +593,7 @@ SimulationData::remove_particle_type
     core::gather(get_root(),
                  True(),
                  std::back_inserter(all_particles));
-    IMP_FOREACH(Particle* p, all_particles){
+    for(Particle* p : all_particles){
       if(core::Typed::get_is_setup(p) &&
          core::Typed(p).get_type() == pt){
         pt_particles.push_back(p);
@@ -602,7 +602,7 @@ SimulationData::remove_particle_type
   }
   // Remove all particles of type pt from the hierarchy
   // by removing them from their parents
-  IMP_FOREACH(Particle* p, pt_particles) {
+  for(Particle* p : pt_particles) {
     atom::Hierarchy h(p);
     atom::Hierarchy parent = h.get_parent();
     if (parent) {
@@ -625,7 +625,7 @@ SimulationData::remove_particle_type
     }
   }
   // Tear down all rigid bodies in pt_particles
-  IMP_FOREACH(Particle* p, pt_particles) {
+  for(Particle* p : pt_particles) {
     IMP_USAGE_CHECK(p->get_model() == get_model(),
                     "Particle is expected to have same model as SimulationData");
     if(IMP::core::RigidBody::get_is_setup(p)){
@@ -634,7 +634,7 @@ SimulationData::remove_particle_type
     }
   }
   // Remove all particles of type pt from the model
-  IMP_FOREACH(Particle* p, pt_particles) {
+  for(Particle* p : pt_particles) {
     IMP_USAGE_CHECK(p->get_model() == get_model(),
                     "Particle is expected to have same model as SimulationData");
     p->get_model()->remove_particle(p->get_index());
@@ -665,7 +665,7 @@ SimulationData::remove_fgs_with_prefix
                  fg_chain_types_.begin(), fg_chain_types_.end(),
                  std::inserter(fg_types, fg_types.begin()) );
   std::set<std::string> s_fg_types_to_remove_set;
-  IMP_FOREACH(core::ParticleType pt, fg_types){
+  for(core::ParticleType pt : fg_types) {
     std::string s_cur_type= pt.get_string();
     // match  = begins with s_fg_type, followed by an empty string or a non-digit
     //  character
