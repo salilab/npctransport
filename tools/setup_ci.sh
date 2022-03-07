@@ -13,4 +13,11 @@ conda config --remove channels defaults  # get conda-forge, not main, packages
 conda create --yes -q -n python${python_version} -c salilab -c conda-forge python=${python_version} numpy pip imp-nightly gxx_linux-64 eigen swig cmake protobuf
 eval "$(conda shell.bash hook)"
 conda activate python${python_version}
-pip install pytest-cov coverage pytest-flake8
+
+if [ ${python_version} = "2.7" ]; then
+  # pytest-flake8 1.1.0 tries to import contextlib.redirect_stdout, which
+  # isn't present in Python 2
+  pip install pytest-cov coverage 'pytest-flake8<1.1'
+else
+  pip install pytest-cov coverage pytest-flake8
+fi
