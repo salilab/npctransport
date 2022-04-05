@@ -153,29 +153,24 @@ ParticleIndexes create_particles(Model *m, const BoundingBox3D &bb, int n) {
   IMP_NEW(core::SoftSpherePairScore, ssps, (10));
   IMP_NEW(core::ConjugateGradients, cg, (m));
   cg->set_optimizer_states(opt_states);
-  {
-    // set up restraints for cg
-    IMP_NEW(container::ListSingletonContainer, lsc, (m, pis));
-    IMP_NEW(container::ClosePairContainer, cpc,
-            (lsc, 0, core::XYZR(m, pis[0]).get_radius()));
-    cpc->add_pair_filters(excluded);
-    Pointer<Restraint> r =
-        container::create_restraint(ssps.get(), cpc.get());
-    cg->set_scoring_function(rs + RestraintsTemp(1, r.get()));
-    cg->set_optimizer_states(opt_states);
-  }
+
+  // set up restraints for cg
+  IMP_NEW(container::ListSingletonContainer, lsc, (m, pis));
+  IMP_NEW(container::ClosePairContainer, cpc,
+          (lsc, 0, core::XYZR(m, pis[0]).get_radius()));
+  cpc->add_pair_filters(excluded);
+  Pointer<Restraint> r =
+      container::create_restraint(ssps.get(), cpc.get());
+  cg->set_scoring_function(rs + RestraintsTemp(1, r.get()));
+  cg->set_optimizer_states(opt_states);
+
   IMP_NEW(core::MonteCarlo, mc, (m));
   mc->set_optimizer_states(opt_states);
-  IMP_NEW(core::IncrementalScoringFunction, isf, (m, pis, rs));
-  {
-    // set up MC
-    mc->add_mover(create_serial_mover(m, pis));
-    // we are special casing the nbl term for montecarlo, but using all for CG
-    mc->set_incremental_scoring_function(isf);
-    // use special incremental support for the non-bonded part
-    isf->add_close_pair_score(ssps, 0, ps, excluded);
-    // make pointer vector
-  }
+  mc->set_scoring_function(rs + RestraintsTemp(1, r.get()));
+  mc->set_score_moved(true);
+
+  // set up MC
+  mc->add_mover(create_serial_mover(m, pis));
 
   IMP_LOG_PROGRESS("Performing initial optimization" << std::endl);
   {
@@ -197,8 +192,6 @@ ParticleIndexes create_particles(Model *m, const BoundingBox3D &bb, int n) {
           new ScopedSetFloatAttribute(ps[j], core::XYZR::get_radius_key(),
                                       core::XYZR(m,pis[j]).get_radius() * factor));
     }
-    // changed all radii
-    isf->set_moved_particles(isf->get_movable_indexes());
     for (int j = 0; j < 5; ++j) {
       mc->set_kt(100.0 / (3 * j + 1));
       mc->optimize(pis.size() * (j + 1) * 100);
