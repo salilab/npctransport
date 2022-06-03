@@ -34,7 +34,7 @@ jobs:
         source ${CONDA_PREFIX}/etc/conda/activate.d/activate-gxx_linux-64.sh
         mkdir build && cd build
         if test "${{ matrix.python-version }}" = "2.7" ; then PY2=on; else PY2=off; fi
-        cmake .. -DIMP_DIR=${CONDA_PREFIX}/lib/cmake/IMP -DUSE_PYTHON2=${PY2} -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DAVROCPP_INCLUDE_PATH=~/rmf/src/avrocpp/api
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DIMP_DIR=${CONDA_PREFIX}/lib/cmake/IMP -DUSE_PYTHON2=${PY2} -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DAVROCPP_INCLUDE_PATH=~/rmf/src/avrocpp/api
         make
         ./setup_environment.sh pytest --cov=.. --cov-branch --cov-report=xml -v -k 'not test_protobuf_installed and not add_test_sites' ../test/test_*.py ../test/medium_test_*.py test/*/*.py
         flake8 ../pyext/src/
