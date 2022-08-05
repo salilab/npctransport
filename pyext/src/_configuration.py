@@ -105,7 +105,7 @@ def add_obstacle_type(config, type_name, R, xyzs=[],
     o.type = type_name
     o.radius.lower = R
     for xyz in xyzs:
-        assert(len(xyz) == 3)
+        assert len(xyz) == 3
         new_xyz = o.xyzs.add()
         new_xyz.x = xyz[0]
         new_xyz.y = xyz[1]
