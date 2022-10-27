@@ -72,7 +72,12 @@ class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
   //! returns the simulator that was declared in the constructor or by
   //set_owner()
   //! to moves this particle, and provide simulation time information about it.
+#ifdef SWIG
+  // Help out SWIG 4.1, which gets confused by the WeakPointer here
+  IMP::atom::Simulator* get_owner() const { return owner_; }
+#else
   WeakPointer<IMP::atom::Simulator> get_owner() const { return owner_; }
+#endif
 
   /**
       Returns the number of times the particle crossed the channel
