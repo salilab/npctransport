@@ -1,5 +1,6 @@
 #include <IMP/npctransport/npctransport_config.h>
 #include <IMP/npctransport/avro.h>
+#include <memory>
 #include <ValidSchema.hh>
 #include <Compiler.hh>
 #include <Stream.hh>
@@ -9,7 +10,7 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 
 IMP_NPCTRANSPORT_AVRO_NAMESPACE::ValidSchema get_avro_data_file_schema() {
   std::string path = get_data_path("AvroDataFileData.json");
-  boost::shared_ptr<IMP_NPCTRANSPORT_AVRO_NAMESPACE::InputStream> is =
+  std::shared_ptr<IMP_NPCTRANSPORT_AVRO_NAMESPACE::InputStream> is =
       IMP_NPCTRANSPORT_AVRO_NAMESPACE::fileInputStream(path.c_str());
   return IMP_NPCTRANSPORT_AVRO_NAMESPACE::compileJsonSchemaFromStream(*is);
 }
