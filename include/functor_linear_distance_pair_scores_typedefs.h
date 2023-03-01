@@ -43,6 +43,7 @@ class LinearInteraction : public score_functor::LinearLowerBound {
     attr_range_ = attr_range;
     k_attr_ = kattr;
   }
+  LinearInteraction() {}
   // depend on get_is_trivially_zero
   template <unsigned int D>
   double get_score(Model *m, const Array<D, ParticleIndex> &pp,
