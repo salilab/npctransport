@@ -3,8 +3,8 @@
 #env.IMPModuleTest()
 
 spelling_exceptions=['avro','rmf','cpc','predr','optimizable','zr','protobuf','npctransport']
-show_exceptions=['timer']
-value_object_exceptions=['timer','LinearInteraction']
+show_exceptions=['timer', 'SimpleTimer']
+value_object_exceptions=['timer', 'SimpleTimer', 'LinearInteraction']
 function_name_exceptions= \
        ['SimulationData.activate_statistics',
         'SimulationData.initialize_positions_from_rmf',

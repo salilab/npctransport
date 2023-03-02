@@ -114,4 +114,6 @@ try:
 except ImportError:
   print("no protobuf support in python")
 from ._configuration import *
+
+timer = SimpleTimer
 %}
