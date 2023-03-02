@@ -30,9 +30,9 @@
 #include <IMP/core/BoundingBox3DSingletonScore.h>
 #include <IMP/core/Typed.h>
 #include <IMP/core/RestraintsScoringFunction.h>
+#include <IMP/internal/SimpleTimer.h>
 #include "boost/tuple/tuple.hpp"
 
-#include <boost/timer.hpp>
 #include <string>
 
 

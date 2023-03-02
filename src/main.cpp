@@ -10,7 +10,7 @@
 
 #include <IMP/npctransport/main.h>
 #include <IMP/base_types.h>
-#include <boost/timer.hpp>
+#include <IMP/internal/SimpleTimer.h>
 #include <IMP/log.h>
 #include <IMP/exception.h>
 #include <IMP/check_macros.h>
@@ -298,7 +298,8 @@ namespace {
      @return true if succesful, false if terminated abnormally
   */
   bool run_it(SimulationData *sd, unsigned int number_of_frames,
-              boost::timer &timer, boost::timer &total_time,
+              IMP::internal::SimpleTimer &timer,
+              IMP::internal::SimpleTimer &total_time,
               bool silent_statistics = false,
               unsigned int max_frames_per_chunk = 100000) {
     // TODO: next line is a temporary hack - needed for some reason to
@@ -538,10 +539,10 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
     final_rmf_fh = RMF::create_rmf_file(final_conformations);
     sd->link_rmf_file_handle(final_rmf_fh, !no_save_restraints_to_rmf);
   }
-  boost::timer total_time;
+  IMP::internal::SimpleTimer total_time;
   for (unsigned int i = 0; i < sd->get_number_of_trials(); ++i) {
     IMP::CreateLogContext clc("iteration");
-    boost::timer timer;
+    IMP::internal::SimpleTimer timer;
     //    IMP::set_log_level(IMP::PROGRESS);
     std::cout << "Simulation trial " << i << " out of "
               << sd->get_number_of_trials() << std::endl;

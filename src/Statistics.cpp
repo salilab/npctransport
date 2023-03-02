@@ -648,7 +648,7 @@ void Statistics
 
 // @param nf_new number of new frames accounted for in this statistics update
 void Statistics::update
-( const boost::timer &timer,
+( const IMP::internal::SimpleTimer &timer,
   unsigned int nf_new)
 {
   IMP_OBJECT_LOG;

@@ -38,7 +38,7 @@
 #include "Scoring.h"
 #include "typedefs.h"
 
-#include <boost/timer.hpp>
+#include <IMP/internal/SimpleTimer.h>
 #include "boost/tuple/tuple.hpp"
 #include <boost/utility/value_init.hpp>
 #include <boost/unordered_map.hpp>
@@ -47,8 +47,10 @@
 #include <string>
 
 #ifdef SWIG
-namespace boost {
-struct timer {};
+namespace IMP {
+namespace internal {
+struct SimpleTimer {};
+}
 }
 #endif
 
@@ -226,8 +228,8 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
       @note this method is not const cause it may invoke e.g., energy evaluation
             though it does not substantially change anything in the state of the object
    */
-  void update(const boost::timer &timer,
-                         unsigned int nf_new = 1);
+  void update(const IMP::internal::SimpleTimer &timer,
+              unsigned int nf_new = 1);
 
   /** resets all the counters of any statistics counters,
       and the simulation time to zero */
@@ -339,8 +341,8 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
 
 };
 
-inline IMPNPCTRANSPORTEXPORT boost::timer create_boost_timer() {
-  return boost::timer();
+inline IMPNPCTRANSPORTEXPORT IMP::internal::SimpleTimer create_boost_timer() {
+  return IMP::internal::SimpleTimer();
 }
 
 IMPNPCTRANSPORT_END_NAMESPACE
