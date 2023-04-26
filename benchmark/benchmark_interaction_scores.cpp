@@ -18,7 +18,7 @@ using namespace IMP::container;
 
 namespace {
 const double radius = 2;
-#if IMP_BUILD < IMP_FAST
+#if IMP_BUILD == IMP_DEBUG
 int number_of_particles = 5;
 #else
 int number_of_particles = 40;
