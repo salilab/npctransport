@@ -1,0 +1,2 @@
+headers="google/protobuf/text_format.h"
+libraries="absl_spinlock_wait"
