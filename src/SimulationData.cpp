@@ -824,9 +824,9 @@ void SimulationData::initialize_positions_from_rmf(RMF::FileConstHandle f,
   ParticlesTemp linked_particles  = get_root().get_children();
   if(get_output_npctransport_version()<2.5){
     // slab particles not supported in earlier versions
-    std::remove_if(linked_particles.begin(),
-                   linked_particles.end(),
-                   is_slab_particle);
+    linked_particles.erase(
+         std::remove_if(linked_particles.begin(), linked_particles.end(),
+                        is_slab_particle), linked_particles.end());
   }
   link_hierarchies_with_sites(f, linked_particles);
   //  link_hierarchies_with_sites(f, get_root().get_children());
