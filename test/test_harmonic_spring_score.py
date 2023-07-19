@@ -125,7 +125,7 @@ class ConeTests(IMP.test.TestCase):
         print("Edist %.2f" % Edist,
               "Erest %.2f" % Erest,
               "Eq-rest-factor %.2f" % rs.get_equilibrium_rest_length_factor())
-        ExpectedDelta= 0.5 + math.sqrt(3/k/(bd.get_current_time()/tau_fs)) # delta scales with sqrt(3/k) for k in kcal/mol/A^2 beause the spring energy 0.5*k*R^2 is in the order of [kB]T, or ~0.6 kcal/mol, so 0.3*k*[kB]T should be on the order of [kB]T. The mean will converge with simulation time, but the order of [kB]T is a safe margin
+        ExpectedDelta= 0.5 + math.sqrt(3/k/(bd.get_current_time()/tau_fs)) # delta scales with sqrt(3/k) for k in kcal/mol/A^2 because the spring energy 0.5*k*R^2 is in the order of [kB]T, or ~0.6 kcal/mol, so 0.3*k*[kB]T should be on the order of [kB]T. The mean will converge with simulation time, but the order of [kB]T is a safe margin
         print("ExpectedDelta", ExpectedDelta)
         self.assertAlmostEqual(Erest,
                                rs.get_equilibrium_rest_length_factor()*radius*2.0,

@@ -53,7 +53,7 @@ class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
       sets the force constant for pulling to high z
       (negative = pull to low z)
 
-      @param k force contant
+      @param k force constant
   */
   void set_k(double k) {
     v_deriv_ =  algebra::Vector3D(0, 0, k);

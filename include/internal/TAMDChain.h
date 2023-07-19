@@ -37,7 +37,7 @@ class TAMDChain : public npctransport::FGChain{
     beads - fine chain particles
     centroids - the list of centroids in tree(p)
     images - corresponding TAMD images for each centroid in centroids
-    tamd_restraints - corresponding springs that attch each TAMD
+    tamd_restraints - corresponding springs that attach each TAMD
                        image to each centroid
     tamd_springs - springs stored in R (in same order)
   */

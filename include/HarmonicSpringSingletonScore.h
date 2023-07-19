@@ -129,7 +129,7 @@ HarmonicSpringSingletonScore
   static const double MIN_DISTANCE = .00001;
   if (IMP_LIKELY( da && delta_length > MIN_DISTANCE )) { // Profiling note on use of likely(): in BD simulations, the simulation bottleneck is when da is true, and the spring is likely out of equilibrium
     double fParticles= k1_*dDelta; // force pulling particles closer together for a positive force (or apart if negative)
-    double fSpring= k2_*dEq - 2*fParticles; // force pulling rest length down for a positive force (or up for negtive); the -2*f1 is the coutnerforce exerted on the spring by the tnwo tethered particles
+    double fSpring= k2_*dEq - 2*fParticles; // force pulling rest length down for a positive force (or up for negative); the -2*f1 is the counterforce exerted on the spring by the two tethered particles
     if(IMP_UNLIKELY(is_tiny_rest_length)) {
       double threshold=std::min(0.1*eq_rest_length, 1.0);
       double dThreshold= threshold-rest_delta_length;

@@ -129,7 +129,7 @@ inline algebra::Vector3D get_global_from_local_v3( Particle* p,
    returns |old/core| and |cur/old|, i.e., the number of
    items lost from old, and the ones gained in cur.
 
-   @note it is assumed that old and cur are ordered iteratable objects
+   @note it is assumed that old and cur are ordered iterable objects
          (e.g. std::set) whose begin() and end() methods qualify as valid inputs
          for std::set_difference
 */

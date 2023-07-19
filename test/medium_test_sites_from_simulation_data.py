@@ -126,7 +126,7 @@ class Tests(IMP.test.TestCase):
             print("D", D)
 
     def is_stats_interact_(self, output_file):
-        ''' verify that stats order parametrs know about the interaction '''
+        ''' verify that stats order parameters know about the interaction '''
         f=open(output_file, "rb")
         o=Output()
         o.ParseFromString(f.read())
@@ -142,7 +142,7 @@ class Tests(IMP.test.TestCase):
     def test_sites_from_simulation_data(self):
         '''
         Test that the site interaction glues particles together
-        in the context of simualtion data optimization
+        in the context of simulation data optimization
         '''
 
         # Prepare run:

@@ -190,7 +190,7 @@ def augment_results(pb_msg, results = {}):
     read the protobuf message pb_msg and augment
     into the results dictionary
 
-    returns true if message processed succesfully
+    returns true if message processed successfully
     """
     global KEY_CAPTIONS
     #  print a.is_valid()

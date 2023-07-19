@@ -237,7 +237,7 @@ copy_particle_reference_frame_if_applicable( Particle*  src_p,
     trg_xyz.set_coordinates(src_xyz.get_coordinates());
   }
   IMP_USAGE_CHECK(RelaxingSpring::get_is_setup(src_p)==RelaxingSpring::get_is_setup(trg_p),
-                  "Target is not RelaxingSpring but soruce is, or vice versa");
+                  "Target is not RelaxingSpring but source is, or vice versa");
   if (RelaxingSpring::get_is_setup(src_p)) {
     RelaxingSpring src_rs(src_p);
     RelaxingSpring trg_rs(trg_p);

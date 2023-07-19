@@ -106,7 +106,7 @@ void save_pb_conformation
   ::npctransport_proto::Conformation *conformation );
 
 //! load file output_fname into protobuf output object output
-//! return true if succesful
+//! return true if successful
 bool load_output_protobuf(std::string output_fname,
                           ::npctransport_proto::Output& output);
 #endif

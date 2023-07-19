@@ -239,7 +239,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
      4) a and b are not the same particles
      5) b and a do not appear on the list (= unordered list)
 
-     @note if udpate=false, might fail to include e.g., new particles
+     @note if update=false, might fail to include e.g., new particles
            or new interactions that were added after the last call
      @note TODO: right now will not return any consecutive particles - that's
                  erroneous (e.g., last particle of one chain and first particle
@@ -266,7 +266,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
                    o/w cached version that was used in last call to
                    get_scoring_function(), if applicable
 
-     @note if udpate=false, might fail to include e.g., new particles
+     @note if update=false, might fail to include e.g., new particles
            or new interactions that were added to the simulation
            after the last call
   */
@@ -284,7 +284,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
                    o/w cached version that was used in last call to
                    get_scoring_function(), if applicable
 
-     @note if udpate=false, might fail to include e.g., new particles
+     @note if update=false, might fail to include e.g., new particles
            that were added after the last call
 
      @see get_has_bounding_box(), get_has_bounding_sphere(),
@@ -303,7 +303,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
                    o/w cached version that was used in last call to
                    get_scoring_function(), if applicable
 
-     @note if udpate=false, might fail to include e.g., new particles
+     @note if update=false, might fail to include e.g., new particles
            that were added after the last call
   */
   Restraint *get_slab_restraint(bool update=false);

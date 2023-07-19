@@ -76,7 +76,7 @@ IMP::AddBoolFlag  no_save_rmf_to_output_adder
   "If true, save final rmf buffer to output file [default=false]",
   &no_save_rmf_to_output);
 
-// TODO: turn into a template inline in unamed space?
+// TODO: turn into a template inline in unnamed space?
 /**
    updates (message).field() with a weighted average of its current
    value and new_value, giving weight n_old_frames, n_new_frames to each,
@@ -207,7 +207,7 @@ void Statistics::add_interaction_stats
 OptimizerStates Statistics::add_optimizer_states(Optimizer* o)
 {
   if(o == nullptr) o = get_sd()->get_bd();
-  IMP_ALWAYS_CHECK( o, "add_optimizer_states() require either a vaild input"
+  IMP_ALWAYS_CHECK( o, "add_optimizer_states() require either a valid input"
                     " optimizer or a valid get_sd()->get_bd()",  ValueException);
   OptimizerStates ret;
   ret.push_back(global_stats_);
@@ -327,7 +327,7 @@ Statistics::update_xyz_distribution_to_hdf5
     // retrieve or create dataset in hdf5
     RMF::HDF5::DataSetD<RMF::HDF5::IntTraits, 3> ds_xyz;
     std::string s_type= p_type.get_string();
-    //    std::cout << "Outputing stats for " << s_type << std::endl;
+    //    std::cout << "Outputting stats for " << s_type << std::endl;
     RMF::HDF5::IntTraits::Type fill_value(0);
     if(hdf5_group.get_has_child(s_type)) {
       ds_xyz= hdf5_group.get_child_data_set
@@ -362,7 +362,7 @@ Statistics::update_xyz_distribution_to_hdf5
         } // iter_kk
       } // iter_jj
     } // iter_ii
-    //    std::cout << "Finished outputing stats for " << s_type << std::endl;
+    //    std::cout << "Finished outputting stats for " << s_type << std::endl;
     return true;
   } //if ptxyzdm_it
   return false;

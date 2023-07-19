@@ -90,7 +90,7 @@ inline double evaluate_one_site_3
     algebra::Vector3D gderiv0 = (k * id) * gD;
     algebra::Vector3D lderiv0 = rbi0.irot.get_rotated(gderiv0);
     //core::RigidBody(rbi0.pi).add_to_derivatives(lderiv0, gderiv0, l0.get_center(),
-    //                                           rbi0.tr.get_rotation(),*da); // TODO: swith to internal tables access?
+    //                                           rbi0.tr.get_rotation(),*da); // TODO: switch to internal tables access?
     algebra::Vector3D torque0 = algebra::get_vector_product(l0.get_center(), lderiv0);
     for (unsigned int i = 0; i < 3; ++i) {
       sphere_derivatives_table[rbi0.pi.get_index()][i]+= (*da)(gderiv0[i]);
@@ -119,7 +119,7 @@ inline double evaluate_one_site_3
   from dX=0 to dX=0.5*spsp.r with slope spsp.k, and diminishes linearly
   between dX=0.5*spsp.r and dX=spsp.r with slope -spsp.k.
 
-  @param dX distnace (note negative dX mean overlap, which will result
+  @param dX distance (note negative dX mean overlap, which will result
                       in spsp.k*dX repulsion force)
   @param spsp score parameters and precomputed parameters, including
               range spsp.r in A, and force coefficient spsp.k in units of

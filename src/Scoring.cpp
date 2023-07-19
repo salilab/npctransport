@@ -223,7 +223,7 @@ Scoring::get_slab_restraint(bool update)
    get_predr().
 
    A SitesPairScore interaction means site-specific
-   attractive forces between bidning sites on each particle,
+   attractive forces between binding sites on each particle,
    and non-specific attraction and repulsion (upon penetraion)
    between the beads themselves.
 
@@ -376,7 +376,7 @@ Scoring::create_backbone_restraint
     // Harmonic with relaxing spring
     IMP_NEW( HarmonicSpringSingletonScore,
              hsss,
-             (20.0 * backbone_k, // TODO: 20* is arbitrary - just to make the particles stick well to the ends of te spring. Need to think how to set a value that would also allow the particles to pull the spring and vice versa realistically
+             (20.0 * backbone_k, // TODO: 20* is arbitrary - just to make the particles stick well to the ends of the spring. Need to think how to set a value that would also allow the particles to pull the spring and vice versa realistically
               backbone_k) );
     ParticleIndexes pis;
     for(unsigned int i= 0; i<beads.size()-1; i++){

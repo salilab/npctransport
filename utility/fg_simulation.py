@@ -68,7 +68,7 @@ def get_cmdline_options(args = None):
     parser.add_argument("-i", "--initialization_rmf_file",
                         help="initialize the simulation from the last frame " +
                              "of the specified RMF file, assuming it was " +
-                             "created by this simualtion process")
+                             "created by this simulation process")
     return parser.parse_args()
 
 
@@ -189,7 +189,7 @@ def set_specific_fgs_in_cylinder( sd, fgs_list, n_layers,
     # compute fraction of particle from full cylinder radius
     relative_r = \
         ( cyl.get_radius() - particle_radius ) / cyl.get_radius()
-    # compute vertical poisition along central axis, and inter-layer distance
+    # compute vertical position along central axis, and inter-layer distance
     bottom_layer_height = None
     relative_mid = (relative_bottom + relative_top) / 2
     if(n_layers == 1):

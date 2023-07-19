@@ -44,11 +44,11 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
                             // requiring presence of bounds, weighted by #contacts
   double off_I_stats_time_ns_; // weighted by number of bounds I
   double off_II_stats_time_ns_; // weighted by number of bounds II
-  double on_stats_time_ns_; // time when on-rate calcualtions were gathered,
+  double on_stats_time_ns_; // time when on-rate calculations were gathered,
                             // requiring presence of unbounds
-  double on_I_stats_time_ns_; // time when on-rate calcualtions were gathered
+  double on_I_stats_time_ns_; // time when on-rate calculations were gathered
                               // for particles I, weighted by their number
-  double on_II_stats_time_ns_; // time when on-rate calcualtions were gathered
+  double on_II_stats_time_ns_; // time when on-rate calculations were gathered
                               // for particles II, weighted by their number
 
   // the types of particles involved in the interaction (type of group I and II)
@@ -86,7 +86,7 @@ class IMPNPCTRANSPORTEXPORT BipartitePairsStatisticsOptimizerState
   double avg_on_per_unbound_II_per_ns_;
   double avg_on_per_missing_contact_per_ns_;
 
-  // Total number of all (bound) particles in each group after last udpate():
+  // Total number of all (bound) particles in each group after last update():
   unsigned int n_particles_I_;
   unsigned int n_particles_II_;
   unsigned int n_bounds_I_;

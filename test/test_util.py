@@ -209,7 +209,7 @@ def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
 
 def check_import_pandas_with_series_autocorr():
     '''
-    import pandas, return true if succesful and pandas.Series
+    import pandas, return true if successful and pandas.Series
     has an autocorr() method, return false otherwise
     '''
     try:

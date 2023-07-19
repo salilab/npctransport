@@ -21,7 +21,7 @@ IMPNPCTRANSPORT_BEGIN_INTERNAL_NAMESPACE
 
 /** Reference frame information about rigid bodies and their
     transformation for eg, caching purposes for SitesPairScore.
-    In particular saving the matrix representation of a roatation
+    In particular saving the matrix representation of a rotation
     and its inverse are costly operations.
 */
 struct RigidBodyInfo{
@@ -43,7 +43,7 @@ public:
   //! @param qt - an array of arrays for each quaternion component,
   //!             e.g. qt[i][pi.get_index()] has the i'th quaternion component
   //!             of particle pi in the model of rb
-  //! @param cache_id_arg - the new cache id asociated with this rigid body
+  //! @param cache_id_arg - the new cache id associated with this rigid body
   void update
   (algebra::Sphere3D const* st, // spheres table
    double const **qt, // quaternions table

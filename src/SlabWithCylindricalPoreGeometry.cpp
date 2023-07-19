@@ -91,7 +91,7 @@ namespace {
       }
   }
 
-  // compares two segmenets lexigographically,
+  // compares two segments lexicographically,
   // after sorting s0 and s1 vertices, such that
   // their directionality does not matter
   double less_segment_lexicographically_undirectional

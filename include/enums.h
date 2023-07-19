@@ -1,6 +1,6 @@
 /**
 # * \file npctransport/enums.h
-# * \brief useful enums and contants
+# * \brief useful enums and constants
 
 #
 # * Copyright 2007-2022 IMP Inventors. All rights reserved.

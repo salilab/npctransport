@@ -29,8 +29,8 @@ SlabWithCylindricalPorePairScore : public PairScore {
  private:
   double k_;  // coefficient for violation of slab constraint in kcal/mol/A
 
-  // cache variables (therefore, all are mutable, as they are only used for performence purposes)
-  mutable double thickness_;  // thichness of slab
+  // cache variables (therefore, all are mutable, as they are only used for performance purposes)
+  mutable double thickness_;  // thickness of slab
   mutable double pore_radius_;  // radius of slab cylinder
   mutable double top_;  // top of slab on z-axis
   mutable double bottom_;  // bottom of slab on x-axis
@@ -105,7 +105,7 @@ SlabWithCylindricalPorePairScore : public PairScore {
 
  private:
   // evaluate slab for specified sphere, based on most recent cached
-  // slab parameteres (/see update_cached_slab_params()).
+  // slab parameters (/see update_cached_slab_params()).
   // Return 0 if ball does not penetrate slab.
   //
   // @param s the sphere to evaluate
@@ -299,7 +299,7 @@ SlabWithCylindricalPorePairScore::get_displacement_vector(const algebra::Vector3
   double dZ = v[2] - midZ_;  // thickness on z-axis from cyl origin
   IMP_LOG_PROGRESS( dZ << " " << dXY2 << " for " << v << std::endl);
   if (dXY2 > square(pore_radius_) ||
-      (v[2] <= top_ && v[2] >= bottom_)) {  //  inside vertical slab boundaries and pore perimeter on x,y plane OR outside pore perimeter in any vertical poisition
+      (v[2] <= top_ && v[2] >= bottom_)) {  //  inside vertical slab boundaries and pore perimeter on x,y plane OR outside pore perimeter in any vertical position
     double abs_dZ = std::abs(dZ);
     double abs_dXY = std::sqrt(dXY2);
     double dR = abs_dXY - pore_radius_;  // displacement on [x,y] direction (positive = outside pore perimeter on x,y plane)

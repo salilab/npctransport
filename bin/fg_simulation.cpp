@@ -152,7 +152,7 @@ void set_fgs_in_cylinder(IMP::npctransport::SimulationData& sd, int n_layers) {
   double particle_radius = IMP::core::XYZR(chain_beads[0]).get_radius();
   // compute fraction of particle from full cylinder radius
   double relative_r = (cyl.get_radius() - particle_radius) / cyl.get_radius();
-  // compute vertical poisition along central axis, and inter-layer distance
+  // compute vertical position along central axis, and inter-layer distance
   double h_bottom_layer;
   if (n_layers == 1)
     h_bottom_layer = 0.5;

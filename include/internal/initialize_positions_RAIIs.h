@@ -1,6 +1,6 @@
 /**
  *  \file initialize_positions_RAIIs.h
- *  \brief temporary RAII objects for setting various parameters during initializiation
+ *  \brief temporary RAII objects for setting various parameters during initialization
  *
  *  Copyright 2007-2022 IMP Inventors. All rights reserved.
  *

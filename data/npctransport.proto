@@ -62,14 +62,14 @@ message Configuration {
     optional double beads_tail_radius=15 [default=0]; // NOT IMPLEMENTED - radius of tail beads
     optional double beads_tail_k=16 [default=1.0]; // NOT IMPLEMENTED - k for tail springs;
     optional double beads_tail_bond_length=17 [default=1.0]; // NOT IMPLEMENTED - length of bond between beads
-    repeated XYZ site_coordinates=18; // coordinates of interaction sites relaive to sphere center, valid if length is zero or equals to interactions field. Overrides site_relative distance
+    repeated XYZ site_coordinates=18; // coordinates of interaction sites relative to sphere center, valid if length is zero or equals to interactions field. Overrides site_relative distance
   };
   message ObstacleConfiguration {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
     required FloatRange radius=2;
     required IntRange interactions=3;
     required int32 is_static=4 [default=1];
-    required FloatRange d_factor=5; // diffusion factor for scaling the default coefficient from Stokes radius interpreation of 'radius', relevant only if is_static=0
+    required FloatRange d_factor=5; // diffusion factor for scaling the default coefficient from Stokes radius interpretation of 'radius', relevant only if is_static=0
     required FloatRange interaction_k_factor=6;
     required FloatRange interaction_range_factor=7;
     required string type=8; // type name, e.g. "nup53"
@@ -189,7 +189,7 @@ message Assignment {
     optional double beads_tail_radius=15 [default=0]; // radius of tail beads
     optional double beads_tail_k=16 [default=1.0]; // k for tail springs;
     optional double beads_tail_bond_length=17 [default=1.0]; // length of bond between beads
-    repeated XYZ site_coordinates=18; // coordinates of interaction sites relaive to sphere center, valid if length is zero or equals to interactions field. If specified, overrides site_relative_distance
+    repeated XYZ site_coordinates=18; // coordinates of interaction sites relative to sphere center, valid if length is zero or equals to interactions field. If specified, overrides site_relative_distance
 
   };
   message ObstacleAssignment {
@@ -197,7 +197,7 @@ message Assignment {
     required FloatAssignment radius=2;
     required IntAssignment interactions=3;
     required int32 is_static=4 [default=1];
-    required FloatAssignment d_factor=5; // diffusion factor for scaling the default coefficient from Stokes radius interpreation of 'radius'
+    required FloatAssignment d_factor=5; // diffusion factor for scaling the default coefficient from Stokes radius interpretation of 'radius'
     required FloatAssignment interaction_k_factor=6;
     required FloatAssignment interaction_range_factor=7;
     required string type=8; // type name, e.g. "nup53"
@@ -322,7 +322,7 @@ message Statistics {
     optional double particle_diffusion_coefficient=1 [default=0];
     optional double particle_correlation_time=2 [default=0];
     optional string type=3; // type name, e.g. "fg_nsp1"
-    optional Ints_list zr_hist=4; // histogram of z (dimenion 1) and r(dimension 2) coordinates (or z,y,x if is_xyz_hist_stats)
+    optional Ints_list zr_hist=4; // histogram of z (dimension 1) and r(dimension 2) coordinates (or z,y,x if is_xyz_hist_stats)
     optional Ints_lists xyz_hist=5; // histogram of x,y,z (dimension 0, 1 and 2, resp.)
   }
   message FloatStats {
@@ -336,12 +336,12 @@ message Statistics {
     repeated double transport_time_points_ns=8; // records the time points of transports in simulation time (TODO: assuming single trial?)
     optional string type=9; // type name, e.g. "kap121"
     repeated FloaterOrderParams order_params=10;
-    optional  Ints_list zr_hist=11; // histogram of z (dimenion 1) and r (dimension 2) coordinates (or z,y,x if is_xyz_hist_stats)
+    optional  Ints_list zr_hist=11; // histogram of z (dimension 1) and r (dimension 2) coordinates (or z,y,x if is_xyz_hist_stats)
     optional  Ints_lists xyz_hist=12; // histogram of x,y,z (dimension 0, 1 and 2, resp.)
   }
   message InteractionOrderParams{
     required float time_ns=1;
-    // all averages since last statistics udpate
+    // all averages since last statistics update
     optional float avg_off_per_contact_per_ns=2; // off rate per particle-particle contact
     optional float avg_off_per_bound_i_per_ns=3; // off rate per bound partricles of type i
     optional float avg_off_per_bound_ii_per_ns=4; // off rate per bound partricles of type ii

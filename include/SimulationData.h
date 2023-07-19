@@ -116,7 +116,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   PointerMember <IMP::npctransport::Scoring >
     scoring_;
 
-  // The statistics manger for this simulation
+  // The statistics manager for this simulation
   PointerMember <IMP::npctransport::Statistics >
     statistics_;
 
@@ -471,7 +471,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
       Remove any FG chain if the prefix of its string representation matches s_fg_type
       (= begins with s_fg_type, followed by an empty string or a non-digit
        character) from the simulation, including model particles, statistics and
-       associated interaction, as well as related assignemnt and statistics data
+       associated interaction, as well as related assignment and statistics data
        from the output protobuf file
 
        @param s_fg_type The FG type prefix (chain name, to which a suffix could
@@ -658,7 +658,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   double get_slab_thickness() const;
 
-  //! returns te current tunnel radius
+  //! returns the current tunnel radius
   double get_tunnel_radius() const;
 
   //! alias to get_tunnel_radius

@@ -44,7 +44,7 @@ def get_column_id_dict(header, names):
 
 def read_scorefile(fname, captions, entries):
     '''
-    Read the columns 'captions' from whitespace delimeted file 'fname'.
+    Read the columns 'captions' from whitespace delimited file 'fname'.
     The first line in the file is assumed to be a header with caption names.
 
     fname - the file name

@@ -73,7 +73,7 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
 
  protected:
   //! evaluates the soft linear repulsive score, for spheres s0 and s1,
-  //! outputing derivatives to ds0 and ds1 scaled by da, if da is not null
+  //! outputting derivatives to ds0 and ds1 scaled by da, if da is not null
   inline double evaluate_index
     (algebra::Sphere3D const& s0,
      algebra::Sphere3D const& s1,
@@ -124,7 +124,7 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
 #ifndef IMP_DOXYGEN
 
 //! evaluates the soft linear repulsive score, for spheres s0 and s1,
-//! outputing derivatives to ds0 and ds1 scaled by da, if da is not null
+//! outputting derivatives to ds0 and ds1 scaled by da, if da is not null
 inline double
 LinearSoftSpherePairScore::evaluate_index
 (algebra::Sphere3D const& s0,
@@ -220,12 +220,12 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
       k_rep_,          // repulsion coeficcient
       k_attr_;         // attraction coefficient
 
-  // cache for reusable intermediate calcualtions of evaluate_infex
+  // cache for reusable intermediate calculations of evaluate_infex
   mutable EvaluationCache cache_;
 
  protected:
   //! evaluates the linear interaction score, for spheres s0 and s1,
-  //! outputing derivatives to ds0 and ds1 scaled by da, if da is not null
+  //! outputting derivatives to ds0 and ds1 scaled by da, if da is not null
   inline double evaluate_index
     (algebra::Sphere3D const& s0,
      algebra::Sphere3D const& s1,
@@ -321,7 +321,7 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
 #ifndef IMP_DOXYGEN
 
 //! evaluates the linear interaction score, for spheres s0 and s1,
-//! outputing derivatives to ds0 and ds1 scaled by da, if da is not null
+//! outputting derivatives to ds0 and ds1 scaled by da, if da is not null
 inline double
 LinearInteractionPairScore::evaluate_index
 (algebra::Sphere3D const& s0,

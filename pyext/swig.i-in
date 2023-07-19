@@ -67,7 +67,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/RelaxingSpring.h"
 %include "IMP/npctransport/HarmonicSpringSingletonScore.h"
 %include "IMP/npctransport/functor_linear_distance_pair_scores_typedefs.h"
-// The following templates are necessary for proper interpreation of class inheritence in linear_distance_pair_scores.h
+// The following templates are necessary for proper interpretation of class inheritance in linear_distance_pair_scores.h
 %template(_DistancePairScoreForLinearSoftSphere) IMP::score_functor::DistancePairScore<IMP::npctransport::LinearSoftSphereScore>;
 %template(_DistancePairScoreForLinearInteraction) IMP::score_functor::DistancePairScore<IMP::npctransport::LinearInteractionScore>;
 %include "IMP/npctransport/functor_linear_distance_pair_scores.h"
@@ -92,7 +92,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/SlabWithToroidalPorePairScore.h"
 %include "IMP/npctransport/SlabWithCylindricalPoreGeometry.h"
 %include "IMP/npctransport/SlabWithToroidalPoreGeometry.h"
-// The following template is necessary for proper interpretation of class inheritence in PoreRadiusSingletonScore
+// The following template is necessary for proper interpretation of class inheritance in PoreRadiusSingletonScore
 %template(_GenericAttributeSingletonScoreForPoreRadus) IMP::core::GenericAttributeSingletonScore<IMP::core::Harmonic>;
 %include "IMP/npctransport/PoreRadiusSingletonScore.h"
 %include "IMP/npctransport/ExcludeZRangeSingletonScore.h"

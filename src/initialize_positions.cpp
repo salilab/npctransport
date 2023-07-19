@@ -371,7 +371,7 @@ void initialize_positions(SimulationData *sd,
       randomize_particles(sd->get_beads(), sd->get_bounding_sphere()); // randomize before FGs are frozen
     } else {
       IMP_USAGE_CHECK(!sd->get_has_bounding_volume(),
-                      "Invalid boundig volume");
+                      "Invalid bounding volume");
       randomize_particles(sd->get_beads(),
                           algebra::get_cube_d<3>
                           ( sd->get_beads().size() * 500.0 )
@@ -405,7 +405,7 @@ void initialize_positions(SimulationData *sd,
       randomize_particles(sd->get_beads(), sd->get_bounding_sphere()); // randomize before FGs are frozen
     } else {
       IMP_USAGE_CHECK(!sd->get_has_bounding_volume(),
-                      "Invalid boundig volume");
+                      "Invalid bounding volume");
       randomize_particles(sd->get_beads(),
                           algebra::get_cube_d<3>
                           ( sd->get_beads().size() * 500.0 )

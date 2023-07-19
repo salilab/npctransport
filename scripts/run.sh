@@ -11,7 +11,7 @@ if(! -e $OUTFOLDER) then
     mkdir $OUTFOLDER
 endif
 if(! -d $OUTFOLDER) then
-    echo $OUTFOLDER already exists as file, choose a diffrent name
+    echo $OUTFOLDER already exists as file, choose a different name
     exit -1
 endif
 echo npc_fg_simulation --configuration $cfg --conformations Tmp/movie_$ext.rmf --short_init_factor $sif \

@@ -236,7 +236,7 @@ void SimulationData::initialize(std::string prev_output_file,
       IMP_ALWAYS_CHECK(pb_assignment.fgs(i).type() != "",
                        "FG should've been assigned a valued type,"
                        " possiblu thru protobuf.h", ValueException);
-      pb_mutable_assignment->mutable_fgs(i)->site_relative_distance(); // initiate it with default value for backward compatability
+      pb_mutable_assignment->mutable_fgs(i)->site_relative_distance(); // initiate it with default value for backward compatibility
       create_fgs(pb_assignment.fgs(i));
     }
   for (int i = 0; i < pb_assignment.floaters_size(); ++i)
@@ -249,7 +249,7 @@ void SimulationData::initialize(std::string prev_output_file,
       IMP_USAGE_CHECK( pb_assignment.floaters(i).type() != "",
                        "Floater should've been assigned a type"
                        << " thru protobuf.h");
-      pb_mutable_assignment->mutable_floaters(i)->site_relative_distance(); // initiate it with default value for backward compatability
+      pb_mutable_assignment->mutable_floaters(i)->site_relative_distance(); // initiate it with default value for backward compatibility
       create_floaters(pb_assignment.floaters(i),
                       display::get_display_color(i));
     }
@@ -1260,7 +1260,7 @@ SimulationData::get_slab_thickness() const
   return swp.get_thickness();
 }
 
-//! returns te current tunnel radius
+//! returns the current tunnel radius
 double
 SimulationData::get_tunnel_radius() const
 {

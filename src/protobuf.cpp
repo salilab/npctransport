@@ -322,7 +322,7 @@ namespace {
 
 namespace {
 
-  //! set default value of protobuf message 'prefix' to passed dafault value
+  //! set default value of protobuf message 'prefix' to passed default value
   //! the value must be positive (otherwise default value is used)
 #define SET_DEFAULT_POSITIVE_FLOAT(prefix, default_value)                              \
   {                                                                     \

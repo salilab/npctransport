@@ -253,7 +253,7 @@ namespace {
           std::cout << "work units " << num << std::endl;
       }
       prev_output_fname= output;
-    } else {  // resart.empty()
+    } else {  // restart.empty()
       prev_output_fname= restart;
       IMP_OMP_PRAGMA(critical)
         std::cout << "Restart simulation from " << restart << std::endl;
@@ -295,7 +295,7 @@ namespace {
 
      @note if first_only==true, make a really short simulation
 
-     @return true if succesful, false if terminated abnormally
+     @return true if successful, false if terminated abnormally
   */
   bool run_it(SimulationData *sd, unsigned int number_of_frames,
               IMP::internal::SimpleTimer &timer,
@@ -597,12 +597,12 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       if (!ok || first_only) return;
       // if(nframes_equilibrate > 0) {
       // if equilibrated, ignore equilibration stats
-      // TODO: removed for now since this may be incosistent with
+      // TODO: removed for now since this may be inconsistent with
       //       consecutive runs
       // sd->reset_statistics_optimizer_states();
       // }
       sd->get_bd()->set_current_time(0.0);
-      std::cout << "Equilibration finished succesfully" << std::endl;
+      std::cout << "Equilibration finished successfully" << std::endl;
     }
     if( is_inflate_kap28 ) {
       IMP_ALWAYS_CHECK(sd->get_has_bounding_box(),
@@ -641,7 +641,7 @@ void do_main_loop(SimulationData *sd, const RestraintsTemp &init_restraints) {
       if (!ok) {
         return;
       }
-      std::cout << "Run trial #" << i << " finished succesfully" << std::endl;
+      std::cout << "Run trial #" << i << " finished successfully" << std::endl;
     }
     if (conformations_rmf_sos) {
       sd->get_bd()->get_scoring_function()->evaluate(false); // score before writing rmf so restraints and such are up to date

@@ -70,13 +70,13 @@ class IMPNPCTRANSPORTEXPORT Transporting : public IMP::Decorator {
            m->get_has_attribute(get_n_entries_top_key(), pi);
   }
 
-  //! sets whether the particle last enetered the transport moiety from its top
+  //! sets whether the particle last entered the transport moiety from its top
   void set_is_last_entry_from_top(bool is_last_entry_from_top) {
     get_particle()->set_value(get_is_last_entry_from_top_key(),
                               is_last_entry_from_top ? 1 : 0);
   }
 
-  //! returns whether the particle last enetered the transport moiety from its
+  //! returns whether the particle last entered the transport moiety from its
   //top
   bool get_is_last_entry_from_top() const {
     return (get_particle()->get_value(get_is_last_entry_from_top_key()) != 0);

@@ -11,7 +11,7 @@ from IMP.npctransport import *
 import time
 
 # TODO: currently this is slow only due to initial optimization algorithm
-#       that must be imporved
+#       that must be improved
 
 
 class Tests(IMP.test.TestCase):
@@ -80,7 +80,7 @@ class Tests(IMP.test.TestCase):
     def assert_almost_equal_sds(self, sd1, sd2):
         """
         assert that sd1 and sd2 has nearly identical positions for beads
-        and sites + identical timers and Transporting porperties
+        and sites + identical timers and Transporting properties
         """
         # check beads refframes
 #        print(len(sd1.get_beads()),len(sd2.get_beads()))
