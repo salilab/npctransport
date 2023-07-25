@@ -1,5 +1,5 @@
 /**
- *  \file boost_map.h
+ *  \file internal/boost_main.h
  *  \brief Macros for using npc executable with boost program options
  *
  *  Copyright 2007-2022 IMP Inventors. All rights reserved.

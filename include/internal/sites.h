@@ -1,6 +1,6 @@
 /**
- *  \file SitesPairScore.h
- *  \brief A Score on the distance between a pair of particles.
+ *  \file internal/sites.h
+ *  \brief Various site-site utility functions and scores.
  *
  *  Copyright 2007-2022 IMP Inventors. All rights reserved.
  */

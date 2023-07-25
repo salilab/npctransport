@@ -1,5 +1,5 @@
 /**
- *  \file HarmonicSpringSingletonScoren.h
+ *  \file HarmonicSpringSingletonScore.h
  *  \brief Harmonic scores on the spring between a pair of particles.
  *         The spring resting length is dynamic
  *  Copyright 2007-2022 IMP Inventors. All rights reserved.

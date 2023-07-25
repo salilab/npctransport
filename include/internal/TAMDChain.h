@@ -1,5 +1,5 @@
 /**
- * \file internal/creating_tamd_particles.h
+ * \file internal/TAMDChain.h
  * \brief creating TAMD chains internal methods
  *
  *  Copyright 2007-2022 IMP Inventors. All rights reserved.

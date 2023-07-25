@@ -1,6 +1,6 @@
 /**
  *  \file npctransport/BodyStatisticsOptimizerState.h
- *  \brief description
+ *  \brief Track the rotational correlation time of a rigid body particle
  *
  *  Copyright 2007-2022 IMP Inventors. All rights reserved.
  */

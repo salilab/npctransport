@@ -1,5 +1,5 @@
 /**
- *  \file AnchorToCylidnricalPorePairScore.h
+ *  \file AnchorToCylindricalPorePairScore.h
  *  \brief A chore for anchoring a bead to a pore
  *
  *  Copyright 2007-2022 IMP Inventors. All rights reserved.
