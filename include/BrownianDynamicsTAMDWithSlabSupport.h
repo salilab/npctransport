@@ -1,5 +1,5 @@
 /**
- *  \file IMP/atom/BrownianDynamicsTAMDWithSlabSupport.h
+ *  \file IMP/npctransport/BrownianDynamicsTAMDWithSlabSupport.h
  *  \brief Simple molecular dynamics optimizer.
  *
  *  Copyright 2007-2022 IMP Inventors. All rights reserved.
