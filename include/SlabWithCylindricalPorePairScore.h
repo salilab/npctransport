@@ -22,12 +22,15 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
     for z = [-0.5*thickness_...0.5*thickness_]
     Returns 0 for all particles fully beyond z range
     or fully within slab radius from the origin in the [X,Y] plane
-    // TODO: verify documentation
+    For particles that penetrate the slab, the score gradient is oriented
+    to repulse the particle towards the nearest point on the slab surface, 
+    with a magnitude that is proportional to the penetration magnitude, i.e.
+    a harmonic score.
  */
 class IMPNPCTRANSPORTEXPORT
 SlabWithCylindricalPorePairScore : public PairScore {
  private:
-  double k_;  // coefficient for violation of slab constraint in kcal/mol/A
+  double k_;  // coefficient for violation of a slab restraint in kcal/mol/A^2
 
   // cache variables (therefore, all are mutable, as they are only used for performance purposes)
   mutable double thickness_;  // thickness of slab
@@ -39,14 +42,14 @@ SlabWithCylindricalPorePairScore : public PairScore {
 
  public:
   //! Constructs a slab with specified thickness and a cylindrical
-  //! pore of specified radius and repulsive force constant k
+  //! pore of specified radius and repulsive force constant k in units of kcal/mol/A^2
   SlabWithCylindricalPorePairScore(double k);
 
-  //! returns the direction vector for the displacement of point v relative to the pore walls of slab
-  algebra::Vector3D get_displacement_direction
+  //! returns the direction vector for the displacement of point v relative to the slab surface
+    algebra::Vector3D get_displacement_direction
     (SlabWithCylindricalPore const& slab, const algebra::Vector3D &v) const;
 
-  //! returns the displacement magnitude of point v relative to the pore walls of slab
+  //! returns the displacement magnitude of point v relative to the slab surface
   double get_displacement_magnitude
     (SlabWithCylindricalPore const&slab, const algebra::Vector3D &v) const;
 
@@ -279,7 +282,7 @@ SlabWithCylindricalPorePairScore::evaluate_sphere
   if (distance > sr) {
     return 0;
   }
-  double const score= k_ * (sr - distance); // must be positive score now
+  double const score= 0.5 * k_ * (sr - distance)*(sr-distance); // must be positive score now
   if(out_displacement){
     *out_displacement= dp.second;
     IMP_INTERNAL_CHECK(std::abs(out_displacement->get_magnitude() - 1) < .1,
