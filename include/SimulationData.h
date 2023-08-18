@@ -73,7 +73,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   Parameter<int> is_exclude_floaters_from_slab_initially_;
   Parameter<double> are_floaters_on_one_slab_side_;
   Parameter<int> is_xyz_hist_stats_;
-
+  Parameter<double> xyz_stats_crop_factor_;
+  Parameter<double> xyz_stats_voxel_size_a_;
+  Parameter<double> xyz_stats_max_box_size_a_;
  // time when simulation has started for this process
   Parameter<double> initial_simulation_time_ns_;
   Parameter<double> temperature_k_;
@@ -97,8 +99,23 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   bool get_are_floaters_on_one_slab_side()
   { return are_floaters_on_one_slab_side_;}
 
+  //! whether xyz histogram statistics are on (into HDF5 file)
   bool get_is_xyz_hist_stats()
   { return is_xyz_hist_stats_; }
+
+  //! return the factor by which the XYZ histogram is cropped on each axis
+  //! (symmetrically), up to the maximal size
+  bool get_xyz_stats_crop_factor()
+  { return xyz_stats_crop_factor_; }
+
+  //! return the voxel size in angstroms for the XYZ histogram
+  bool get_xyz_stats_voxel_size_A()
+  { return xyz_stats_voxel_size_a_; }
+
+  //! returns the maximal box size in angstroms for the XYZ histogram
+  //! i.e. crop at most this many angstroms from each dimension
+  bool get_xyz_stats_max_box_size_A()
+  { return xyz_stats_max_box_size_a_; }
 
   /** returns the simulation angular d factor */
   double get_angular_d_factor() const

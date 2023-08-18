@@ -180,7 +180,10 @@ void SimulationData::initialize(std::string prev_output_file,
   GET_VALUE_DEF(are_floaters_on_one_slab_side, false);
   GET_VALUE_DEF(is_exclude_floaters_from_slab_initially, false);
   GET_ASSIGNMENT_DEF(temperature_k, strip_units(IMP::internal::DEFAULT_TEMPERATURE));
-  GET_VALUE_DEF(is_xyz_hist_stats, false)
+  GET_VALUE_DEF(is_xyz_hist_stats, true)
+  GET_VALUE_DEF(xyz_stats_crop_factor, 0.5);
+  GET_VALUE_DEF(xyz_stats_voxel_size_a, 10);
+  GET_VALUE_DEF(xyz_stats_max_box_size_a, 1000);
   GET_VALUE_DEF(is_backbone_harmonic, false);
   GET_ASSIGNMENT_DEF(backbone_tau_ns, 1.0);
   IMP_ALWAYS_CHECK(!(get_has_slab() && (!get_has_bounding_box())),
