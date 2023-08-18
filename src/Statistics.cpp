@@ -601,7 +601,7 @@ void Statistics
   }
   const float GRID_RESOLUTION_ANGSTROMS=sd->get_xyz_stats_voxel_size_A(); // resolution of zr grid
   const float CROP_FACTOR=sd->get_xyz_stats_crop_factor(); // crop 0.5*Crop x 2 on each dimension (e.g. for box size of 200, only include -50 to +50 and not -100 to +100 on each dimension
-  const double MAX_CROP= sd->get_xyz_stats_max_crop(); // crop at most this many angstroms from each dimension
+  const double MAX_CROP= sd->get_xyz_stats_max_box_size_A(); // crop at most this many angstroms from each dimension
   bool is_z_symmetric=
     (sd->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
@@ -617,7 +617,7 @@ void Statistics
   }
   ParticleTypeXYZDistributionMap::iterator& it=it_pair.first;
   //update distribution
-  float box_half =  std::min(sd()->get_bounding_box_size() / 2.0, MAX_CROP); // get_z_distribution_top();
+  float box_half =  std::min(sd->get_bounding_box_size() / 2.0, MAX_CROP); // get_z_distribution_top();
   unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS*CROP_FACTOR) + 5; // +5 for slack
   int nx= 2 * half_n_max;
   int ny= 2 * half_n_max;
