@@ -10,6 +10,8 @@ function_name_exceptions= \
         'SimulationData.initialize_positions_from_rmf',
         'SimulationData.switch_suspend_rmf',
         'SimulationData.remove_fgs_with_prefix',
+	'SimulationData.get_xyz_stats_max_box_size_A',
+	'SimulationData.get_xyz_stats_voxel_size_A',
         'BipartitePairsStatisticsOptimizerState.get_average_off_per_bound_II_per_ns',
         'BipartitePairsStatisticsOptimizerState.get_average_off_per_bound_I_per_ns',
         'BipartitePairsStatisticsOptimizerState.get_average_on_per_unbound_II_per_ns',
