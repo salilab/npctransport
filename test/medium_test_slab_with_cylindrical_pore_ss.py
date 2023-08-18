@@ -8,11 +8,8 @@ import random
 
 debug=False
 radius=1
-#random.uniform(1,12)
 slab_pore_radius=5
-#random.uniform(radius+2, radius+15)
 slab_height=3
-#random.uniform(5,30)
 boxw= 2*max([3*slab_pore_radius,slab_height])
 def out_slab(p, slab):
     ''' verify particle p is out of slab.
