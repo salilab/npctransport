@@ -125,8 +125,11 @@ message Configuration {
   optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
   optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
   optional FloatRange temperature_k=33; // simulation temperature
-  optional double output_npctransport_version=34 [default=4.5]; // a version number of npctransport by which to create output files
-  optional int32 is_xyz_hist_stats=35 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
+  optional double output_npctransport_version=34 [default=5.0]; // a version number of npctransport by which to create output files
+  optional int32 is_xyz_hist_stats=35 [default=1]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
+  optional double xyz_stats_crop_factor=40 [default=0.5]; // percentage of box to crop from each axis for xyz histogram (symmetrically)
+  optional double xyz_stats_voxel_size_a=41 [default=10.0]; // size of voxel in A for xyz histogram
+  optional double xyz_stats_max_box_size_a=42 [default=1000.0]; // maximal size of box for xyz stats
   optional FloatRange tunnel_radius_k=36; // (Version 2.5+) if <=0, static radius, otherwise, k force constant for tunnel radius restraint
   optional FloatRange pore_anchored_beads_k=37; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
   optional int32 is_backbone_harmonic=38 [default=0]; // whether backbone is an harmonic or linear potential
@@ -261,7 +264,10 @@ message Assignment {
   optional int32 output_statistics_interval_frames=41 [default=100000]; // update interval of statistics file (including order params) in frames
   optional FloatAssignment temperature_k=42; // simulation temperature
   optional double output_npctransport_version=43; // a version number for npctransport by which to interpret output file that contains this assignment
-  optional int32 is_xyz_hist_stats=44 [default=0]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
+  optional int32 is_xyz_hist_stats=44 [default=1]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
+  optional double xyz_stats_crop_factor=49 [default=0.5]; // percentage of box to crop from each axis for xyz histogram (symmetrically). 
+  optional double xyz_stats_voxel_size_a=50 [default=10.0]; // size of voxel in A for xyz histogram
+  optional double xyz_stats_max_box_size_a=51 [default=1000.0]; // maximal size of box for xyz stats
   optional FloatAssignment tunnel_radius_k=45; // (Version 2.5+) if <=0, static radius, otherwise, k for tunnel radius restraint
   optional FloatAssignment pore_anchored_beads_k=46; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
   optional int32 is_backbone_harmonic=47 [default=1]; // whether backbone is an harmonic or linear potential
