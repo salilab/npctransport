@@ -86,35 +86,35 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   /** returns the maximal interaction range between particles */
   double get_range() const { return range_; }
 
-  int get_output_statistics_interval_frames()
+  int get_output_statistics_interval_frames() const
   { return output_statistics_interval_frames_; }
 
   /** returns whether should exclude floaters from slab during initialization */
-  bool get_is_exclude_floaters_from_slab_initially()
+  bool get_is_exclude_floaters_from_slab_initially() const
   { return is_exclude_floaters_from_slab_initially_; }
 
   /** returns whether should exclude floaters from one slab side,
       if excluded at all
   */
-  bool get_are_floaters_on_one_slab_side()
+  bool get_are_floaters_on_one_slab_side() const
   { return are_floaters_on_one_slab_side_;}
 
   //! whether xyz histogram statistics are on (into HDF5 file)
-  bool get_is_xyz_hist_stats()
+  bool get_is_xyz_hist_stats() const
   { return is_xyz_hist_stats_; }
 
   //! return the factor by which the XYZ histogram is cropped on each axis
   //! (symmetrically), up to the maximal size
-  double get_xyz_stats_crop_factor()
+  double get_xyz_stats_crop_factor() const
   { return xyz_stats_crop_factor_; }
 
   //! return the voxel size in angstroms for the XYZ histogram
-  double get_xyz_stats_voxel_size_A()
+  double get_xyz_stats_voxel_size_A() const
   { return xyz_stats_voxel_size_a_; }
 
   //! returns the maximal box size in angstroms for the XYZ histogram
   //! i.e. crop at most this many angstroms from each dimension
-  double get_xyz_stats_max_box_size_A()
+  double get_xyz_stats_max_box_size_A() const
   { return xyz_stats_max_box_size_a_; }
 
   /** returns the simulation angular d factor */
