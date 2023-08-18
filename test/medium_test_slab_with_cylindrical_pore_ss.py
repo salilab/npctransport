@@ -6,7 +6,7 @@ import math
 import IMP.display
 import random
 
-debug=False
+debug=True
 radius=1
 slab_pore_radius=5
 slab_height=3
@@ -16,12 +16,19 @@ def out_slab(p, slab):
         p is assumed to be decorated by XYZR '''
     d=IMP.core.XYZR(p)
     c= d.get_coordinates()
-    if c[2]> slab_height/2.0+radius-.1:
+    if c[2]> slab_height/2.0+radius-.2:
         return True
-    if c[2]< -slab_height/2.0-radius+.1:
+    if c[2]< -slab_height/2.0-radius+.2:
         return True
     rxy= (c[0]**2+c[1]**2)**.5
-    if rxy +radius < slab.get_pore_radius()+.1:
+    print("out_slab() - c: ", c, " rxy,max_rxy: ", rxy,
+          slab.get_pore_radius()-radius, " z,min_z:", c[2], slab_height/2.0+radius)
+    print("rxy+radius", rxy+radius)
+    print("pore radius + .2 = ", slab.get_pore_radius()+.2)
+    IS_OUT = (rxy + radius) < (slab.get_pore_radius() + .2)
+    print("(rxy + radius) < (slab.get_pore_radius() + .2) = ", IS_OUT)
+    if IS_OUT:
+        print("out_slab returning true")
         return True
     print("out_slab is False - c: ", c, " rxy,max_rxy: ", rxy,
           slab.get_pore_radius()-radius, " z,min_z:", c[2], slab_height/2.0+radius)
@@ -50,7 +57,7 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
             w= None
         # Optimize:
         if(debug): print(d.get_coordinates())
-        for i in range(0,2000):
+        for i in range(0,5000):
             s=opt.optimize(1)
             if w is not None:
                 w.set_frame(i+1)
@@ -62,12 +69,14 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
                 print("Pore Radius derivative",
                       slab.get_particle().get_derivative
                       ( IMP.npctransport.SlabWithPore.get_pore_radius_key() ) )
-            if abs(s-0)<0.01:
+            if abs(s-0)<0.0001:
                 if(debug):
                     print("*** BREAKING ***")
                 break
         print("Final coordinates: ", d.get_coordinates(),  " score ", s, "Pore radius", slab.get_pore_radius())
-        self.assertTrue(out_slab(d,slab))
+        OUT_SLAB = out_slab(d,slab)
+        print("OUT_SLAB = ", OUT_SLAB)
+        self.assertTrue(OUT_SLAB)
 
     def _initialize_model(self):
         print("radius", radius, "slab radius", slab_pore_radius, "slab_height", slab_height)

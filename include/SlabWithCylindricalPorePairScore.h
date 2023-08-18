@@ -24,8 +24,8 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
     or fully within slab radius from the origin in the [X,Y] plane
     For particles that penetrate the slab, the score gradient is oriented
     to repulse the particle towards the nearest point on the slab surface, 
-    with a magnitude that is proportional to the penetration magnitude, i.e.
-    a harmonic score.
+    with a constant magnitude k, that is a linear potential that is proportional to
+    the penetration magnitude.
  */
 class IMPNPCTRANSPORTEXPORT
 SlabWithCylindricalPorePairScore : public PairScore {
@@ -42,7 +42,7 @@ SlabWithCylindricalPorePairScore : public PairScore {
 
  public:
   //! Constructs a slab with specified thickness and a cylindrical
-  //! pore of specified radius and repulsive force constant k in units of kcal/mol/A^2
+  //! pore of specified radius and repulsive force constant k in units of kcal/mol/A (linear potential)
   SlabWithCylindricalPorePairScore(double k);
 
   //! returns the direction vector for the displacement of point v relative to the slab surface
@@ -166,7 +166,7 @@ SlabWithCylindricalPorePairScore::evaluate_index
   algebra::Sphere3D d_sphere( d.get_sphere() );
   if (!d.get_coordinates_are_optimized())
     return false;
-  algebra::Vector3D displacement;
+  algebra::Vector3D displacement; //  a unit displacement vector - output of evaluate sphere
   double score=evaluate_sphere(d_sphere,
                                da ? &displacement : nullptr);
   if(da && score>0.0){
@@ -282,7 +282,7 @@ SlabWithCylindricalPorePairScore::evaluate_sphere
   if (distance > sr) {
     return 0;
   }
-  double const score= 0.5 * k_ * (sr - distance)*(sr-distance); // must be positive score now
+  double const score= k_ * (sr - distance); // must be positive if distance <= sr
   if(out_displacement){
     *out_displacement= dp.second;
     IMP_INTERNAL_CHECK(std::abs(out_displacement->get_magnitude() - 1) < .1,
@@ -291,10 +291,10 @@ SlabWithCylindricalPorePairScore::evaluate_sphere
   return score;
 }
 
-// computes the distance and displacement vector of v
+// computes the distance and a unit displacement vector of v
 // from the surface of a z-axis aligned cylinder
 //
-// @return <distance, a vector pointing out>,
+// @return <distance, a unit vector pointing outwards>,
 //         negative distance should mean v is inside the cylinder
 inline std::pair<double, algebra::Vector3D>
 SlabWithCylindricalPorePairScore::get_displacement_vector(const algebra::Vector3D &v) const {
