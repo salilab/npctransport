@@ -105,16 +105,16 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   //! return the factor by which the XYZ histogram is cropped on each axis
   //! (symmetrically), up to the maximal size
-  bool get_xyz_stats_crop_factor()
+  double get_xyz_stats_crop_factor()
   { return xyz_stats_crop_factor_; }
 
   //! return the voxel size in angstroms for the XYZ histogram
-  bool get_xyz_stats_voxel_size_A()
+  double get_xyz_stats_voxel_size_A()
   { return xyz_stats_voxel_size_a_; }
 
   //! returns the maximal box size in angstroms for the XYZ histogram
   //! i.e. crop at most this many angstroms from each dimension
-  bool get_xyz_stats_max_box_size_A()
+  double get_xyz_stats_max_box_size_A()
   { return xyz_stats_max_box_size_a_; }
 
   /** returns the simulation angular d factor */
