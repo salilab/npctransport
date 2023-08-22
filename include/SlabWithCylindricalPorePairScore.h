@@ -20,17 +20,18 @@ IMPNPCTRANSPORT_BEGIN_NAMESPACE
 //! XXXX
 /** An origin centered slab with a pore in the vertical direction,
     for z = [-0.5*thickness_...0.5*thickness_]
-    Returns 0 for all particles fully beyond z range
+
+    The score evaluates to 0 for all particles fully beyond z range
     or fully within slab radius from the origin in the [X,Y] plane
-    For particles that penetrate the slab, the score gradient is oriented
-    to repulse the particle towards the nearest point on the slab surface, 
-    with a constant magnitude k, that is a linear potential that is proportional to
-    the penetration magnitude.
+    For particles that penetrate the slab, the score increases linearly
+    with the magnitude of penetration with a slope k in units of kcal/mol/A.
+    Conseuqently, the gradient is constant and it is oriented so as to repulse
+    the particle towards the nearest point on the slab surface.
  */
 class IMPNPCTRANSPORTEXPORT
 SlabWithCylindricalPorePairScore : public PairScore {
  private:
-  double k_;  // coefficient for violation of a slab restraint in kcal/mol/A^2
+  double k_;  // coefficient for violation of a slab restraint in kcal/mol/A
 
   // cache variables (therefore, all are mutable, as they are only used for performance purposes)
   mutable double thickness_;  // thickness of slab
@@ -41,8 +42,10 @@ SlabWithCylindricalPorePairScore : public PairScore {
   mutable bool is_pore_radius_optimized_;
 
  public:
-  //! Constructs a slab with specified thickness and a cylindrical
-  //! pore of specified radius and repulsive force constant k in units of kcal/mol/A (linear potential)
+  //! Constructs a slab pair score that acts on a
+  //! SlabWithCylindricalPore particle and a diffusing particle.
+  //! The slab applies a repulsive force constant k specified in units
+  //! of kcal/mol/A (linear potential)
   SlabWithCylindricalPorePairScore(double k);
 
   //! returns the direction vector for the displacement of point v relative to the slab surface
