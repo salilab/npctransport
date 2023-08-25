@@ -109,11 +109,11 @@ message Configuration {
   repeated FloatConfiguration floaters=16;
   repeated ObstacleConfiguration obstacles=27;
   repeated Interaction interactions=17;
-  required double dump_interval_ns=18; // 0 = every frame
+  required double dump_interval_ns=18; // 0 = every frame; this is the interval at which the output trajectory file is updated, if applicable
   required FloatRange nonspecific_range=19; //default range in A of non-specific interaction between pairs of beads
   required FloatRange nonspecific_k=20; //default force coefficient in kcal/mol/A of non-specific interaction between pairs of beads
   required FloatRange angular_D_factor=21;
-  required double statistics_interval_ns=22; // 0 = every frame
+  required double statistics_interval_ns=22; // 0 = every frame; this is the interval at which statistics are monitored during the run (but not necessarily output to file)
   required FloatRange excluded_volume_k=23; // default force coefficient in kcal/mol/A of repulsion between pairs of beads
   required double simulation_time_ns=24;
   // percent of time in actual running (as opposed to equlibration):
@@ -123,7 +123,9 @@ message Configuration {
   optional int32 are_floaters_on_one_slab_side=29 [default=0]; // if true (<>0), all floaters are initially concentrated on one side
   optional FloatRange time_step_wave_factor=30; // if >1.001, use a wave function for time step that allows going beyond formal maximal step in waves
   optional int32 is_exclude_floaters_from_slab_initially=31 [default = 1];
-  optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params))
+  optional double output_statistics_interval_ns=32 [default = 100]; // update interval of statistics file (including order params). 
+                                                                    // The output protobuf file is updated every output_statistics_interval_ns
+                                                                    // NOTE: it may be that the default is 1.0 for some reason and not as specified here - this is something we need to verify
   optional FloatRange temperature_k=33; // simulation temperature
   optional double output_npctransport_version=34 [default=5.0]; // a version number of npctransport by which to create output files
   optional int32 is_xyz_hist_stats=35 [default=1]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
