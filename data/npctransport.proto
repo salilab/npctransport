@@ -131,7 +131,7 @@ message Configuration {
   optional int32 is_xyz_hist_stats=35 [default=1]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
   optional double xyz_stats_crop_factor=40 [default=0.5]; // percentage of box to crop from each axis for xyz histogram (symmetrically)
   optional double xyz_stats_voxel_size_a=41 [default=10.0]; // size of voxel in A for xyz histogram
-  optional double xyz_stats_max_box_size_a=42 [default=1000.0]; // maximal size of box for xyz stats
+  optional double xyz_stats_max_box_size_a=42 [default=2000.0]; // maximal size of box for xyz stats (before applying crop factor)
   optional FloatRange tunnel_radius_k=36; // (Version 2.5+) if <=0, static radius, otherwise, k force constant for tunnel radius restraint
   optional FloatRange pore_anchored_beads_k=37; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
   optional int32 is_backbone_harmonic=38 [default=0]; // whether backbone is an harmonic or linear potential

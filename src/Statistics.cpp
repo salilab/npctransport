@@ -552,7 +552,10 @@ void Statistics
   if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
     return;
   }
-  const float GRID_RESOLUTION_ANGSTROMS= 10.0; // resolution of zr grid
+  const float GRID_RESOLUTION_A=sd->get_xyz_stats_voxel_size_A(); // resolution of zr grid in angstroms
+  const float CROP_FACTOR=sd->get_xyz_stats_crop_factor(); // crop factor x Crop x 2 on each dimension (e.g. for box size
+                                                           // 200 and factor 0.5, only include -50 to +50 and not -100 to +100 on each dimension
+  const double MAX_SIDE_A= sd->get_xyz_stats_max_box_size_A(); // crop at most this many angstroms from each dimension (before applying crop factor)
   bool is_z_symmetric=
     (get_sd()->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
@@ -560,12 +563,13 @@ void Statistics
   it_pair.first= particle_type_zr_distribution_map_.find(pt);
   // add distribution table if needed
   if(it_pair.first==particle_type_zr_distribution_map_.end()) {
-    float z_max =  get_sd()->get_bounding_box_size() / 2.0; // get_z_distribution_top();
-    float r_max =  get_sd()->get_bounding_box_size() / std::sqrt(2.0); // get_r_distribution_max();
+    float side_A = std::min(get_sd()->get_bounding_box_size(), MAX_SIDE_A);
+    float z_max =  side_A / 2.0 * CROP_FACTOR;
+    float r_max =  side_A / 2.0 * CROP_FACTOR;
     unsigned int nz=
-      (1 + !is_z_symmetric) * (std::floor(z_max/GRID_RESOLUTION_ANGSTROMS) + 5); // +5 for slack
+      (1 + !is_z_symmetric) * (std::floor(z_max/GRID_RESOLUTION_A) + 5); // +5 for slack
     unsigned int nr=
-      std::floor(r_max/GRID_RESOLUTION_ANGSTROMS)+5; // +5 for slack
+      std::floor(r_max/GRID_RESOLUTION_A)+5; // +5 for slack
     ParticleTypeZRDistributionMap::value_type vt =
       std::make_pair(pt,
                      std::vector<std::vector<int> >
@@ -584,9 +588,9 @@ void Statistics
   }
   float r= std::sqrt( x*x+y*y);
   unsigned int nz= it->second.size();
-  unsigned int zz= std::floor(z/GRID_RESOLUTION_ANGSTROMS)
+  unsigned int zz= std::floor(z/GRID_RESOLUTION_A)
     + (nz/2)*(!is_z_symmetric);
-  unsigned int rr= std::floor(r/GRID_RESOLUTION_ANGSTROMS);
+  unsigned int rr= std::floor(r/GRID_RESOLUTION_A);
   it->second[zz][rr]++;
 }
 
@@ -599,9 +603,10 @@ void Statistics
   if ( !sd->get_has_bounding_box() ){
     return;
   }
-  const float GRID_RESOLUTION_ANGSTROMS=sd->get_xyz_stats_voxel_size_A(); // resolution of zr grid
-  const float CROP_FACTOR=sd->get_xyz_stats_crop_factor(); // crop 0.5*Crop x 2 on each dimension (e.g. for box size of 200, only include -50 to +50 and not -100 to +100 on each dimension
-  const double MAX_CROP= sd->get_xyz_stats_max_box_size_A(); // crop at most this many angstroms from each dimension
+  const float GRID_RESOLUTION_A=sd->get_xyz_stats_voxel_size_A(); // resolution of xyz grid
+  const float CROP_FACTOR=sd->get_xyz_stats_crop_factor(); // crop 0.5*Crop x 2 on each dimension (e.g. for box size of 200,
+                                                           // only include -50 to +50 and not -100 to +100 on each dimension
+  const double MAX_SIDE_A= sd->get_xyz_stats_max_box_size_A(); // keep at most this many angstroms from each dimension (before applying crop_factor)
   bool is_z_symmetric=
     (sd->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
@@ -617,8 +622,8 @@ void Statistics
   }
   ParticleTypeXYZDistributionMap::iterator& it=it_pair.first;
   //update distribution
-  float box_half =  std::min(sd->get_bounding_box_size() / 2.0, MAX_CROP); // get_z_distribution_top();
-  unsigned int half_n_max= std::floor(box_half/GRID_RESOLUTION_ANGSTROMS*CROP_FACTOR) + 5; // +5 for slack
+  float box_half_A =  std::min(sd->get_bounding_box_size(), MAX_SIDE_A) / 2.0;
+  unsigned int half_n_max= std::floor(box_half_A/GRID_RESOLUTION_A*CROP_FACTOR) + 5; // +5 for slack
   int nx= 2 * half_n_max;
   int ny= 2 * half_n_max;
   int nz= (1 + !is_z_symmetric) * half_n_max;
@@ -633,11 +638,11 @@ void Statistics
     z= std::abs(z);
   }
   int xx=
-    std::floor(x/GRID_RESOLUTION_ANGSTROMS) + nx/2;
+    std::floor(x/GRID_RESOLUTION_A) + nx/2;
   int yy=
-    std::floor(y/GRID_RESOLUTION_ANGSTROMS) + ny/2;
+    std::floor(y/GRID_RESOLUTION_A) + ny/2;
   int zz=
-    std::floor(z/GRID_RESOLUTION_ANGSTROMS) + (nz/2)*(!is_z_symmetric);
+    std::floor(z/GRID_RESOLUTION_A) + (nz/2)*(!is_z_symmetric);
   if(xx<nx && yy < ny && zz<nz &&
      xx>=0 && yy>=0 && zz>=0){
     it->second[xx][yy][zz]++;
