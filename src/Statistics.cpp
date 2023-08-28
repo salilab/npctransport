@@ -549,7 +549,8 @@ void Statistics
 ( Particle* p )
 {
   IMP_OBJECT_LOG;
-  if ( !get_sd()->get_has_slab() || !get_sd()->get_has_bounding_box() ){
+  const SimulationData* sd = get_sd();
+  if ( !sd->get_has_slab() || !sd->get_has_bounding_box() ){
     return;
   }
   const float GRID_RESOLUTION_A=sd->get_xyz_stats_voxel_size_A(); // resolution of zr grid in angstroms
@@ -557,13 +558,13 @@ void Statistics
                                                            // 200 and factor 0.5, only include -50 to +50 and not -100 to +100 on each dimension
   const double MAX_SIDE_A= sd->get_xyz_stats_max_box_size_A(); // crop at most this many angstroms from each dimension (before applying crop factor)
   bool is_z_symmetric=
-    (get_sd()->get_output_npctransport_version() < 2.0);
+    (sd->get_output_npctransport_version() < 2.0);
   core::ParticleType pt( core::Typed(p).get_type() );
   std::pair<ParticleTypeZRDistributionMap::iterator, bool> it_pair;
   it_pair.first= particle_type_zr_distribution_map_.find(pt);
   // add distribution table if needed
   if(it_pair.first==particle_type_zr_distribution_map_.end()) {
-    float side_A = std::min(get_sd()->get_bounding_box_size(), MAX_SIDE_A);
+    float side_A = std::min(sd->get_bounding_box_size(), MAX_SIDE_A);
     float z_max =  side_A / 2.0 * CROP_FACTOR;
     float r_max =  side_A / 2.0 * CROP_FACTOR;
     unsigned int nz=
