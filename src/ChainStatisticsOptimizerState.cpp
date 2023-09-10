@@ -170,11 +170,7 @@ void ChainStatisticsOptimizerState::do_update(unsigned int) {
   }
   // Radius of gyration and end-to-end distance of chain/bond:
   double w= 1.0/(++n_);
-#ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
   double rgyr= atom::get_radius_of_gyration(ps_, false);
-#else
-  double rgyr=-1.0;
-#endif
   double rgyr2= rgyr*rgyr;
   mean_rgyr_=  w*rgyr  + (1-w)*mean_rgyr_;
   mean_rgyr2_= w*rgyr2 + (1-w)*mean_rgyr2_;

@@ -472,12 +472,8 @@ void Statistics::update_fg_stats
           {
             Pointer<FGChain> chain_ij= get_fg_chain(chains_i[j]);
             fill_in_zr_hist(zr_hist, chain_ij->get_beads());
-#ifdef IMP_NPCTRANSPORT_USE_IMP_CGAL
             double volume_ij =
               atom::get_volume(chain_ij->get_root()); // how does the work with TAMD?
-#else
-            double volume_ij = -1.;
-#endif
             UPDATE_AVG(nf, nf_new, *stats->mutable_fgs(i), volume, volume_ij);
             avg_volume += volume_ij / chains_i.size();
           } // for j (fg chain)
