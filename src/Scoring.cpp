@@ -352,7 +352,7 @@ void Scoring::add_interaction
     IMP_NEW(npctransport::SitesPairScore, ps2,
             (interaction_range,
              interaction_k,
-	     sigma1, sigma0,
+	     sigma0, sigma1,
              nonspecific_range,
              nonspecific_k,
              excluded_volume_k,
