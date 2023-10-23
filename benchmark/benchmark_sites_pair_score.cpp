@@ -112,9 +112,9 @@ ParticleIndexes create_particles(Model *m, const BoundingBox3D &bb, int n) {
 
   core::MonteCarloMover *create_serial_mover(IMP::Model* m, const ParticleIndexes &pis) {
   core::MonteCarloMovers movers;
-  for (unsigned int i = 0; i < pis.size(); ++i) {
-    double scale = core::XYZR(m, pis[i]).get_radius();
-    movers.push_back(new core::BallMover(m, pis[i], scale * 2));
+  for (auto pi : pis) {
+    double scale = core::XYZR(m, pi).get_radius();
+    movers.push_back(new core::BallMover(m, pi, scale * 2));
   }
   IMP_NEW(core::SerialMover, sm, (get_as<core::MonteCarloMoversTemp>(movers)));
   return sm.release();
@@ -146,8 +146,8 @@ ParticleIndexes create_particles(Model *m, const BoundingBox3D &bb, int n) {
   IMP_ALWAYS_CHECK(!pis.empty(), "No Particles passed.", ValueException);
   // double scale = core::XYZR(ps[0]).get_radius();
   Particles ps;
-  for(unsigned int i=0; i<pis.size(); i++){
-    ps.push_back(m->get_particle(pis[i]));
+  for (auto pi : pis) {
+    ps.push_back(m->get_particle(pi));
   }
 
   IMP_NEW(core::SoftSpherePairScore, ssps, (10));

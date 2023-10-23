@@ -71,9 +71,9 @@ void set_fg_grid(IMP::npctransport::SimulationData& sd) {
   while (sites.size() < chain_roots.size()) {
     Vector2D cur = get_random_vector_in(surface);
     bool bad = false;
-    for (unsigned int i = 0; i < sites.size(); ++i) {
+    for (const auto &site : sites) {
       // 2*r non-overlapping
-      if (get_distance(sites[i], cur) < 2 * r) {
+      if (get_distance(site, cur) < 2 * r) {
         bad = true;
         break;
       }
@@ -118,12 +118,12 @@ void color_fgs(IMP::npctransport::SimulationData& sd) {
     }
     // apply color (only to colored children)
     atom::Hierarchies children = core::get_all_descendants(chain_roots[i]);
-    for (unsigned int j = 0; j < children.size(); j++) {
-      if (Colored::get_is_setup(children[j])) {
-        Colored(children[j]).set_color(color);
+    for (const auto &child : children) {
+      if (Colored::get_is_setup(child)) {
+        Colored(child).set_color(color);
       } /* // removed because shouldn't setup color if not already colored - results in issues with RMF linking
           else {
-        Colored::setup_particle(children[j], color);
+        Colored::setup_particle(child, color);
         }*/ //
     }
   }
@@ -193,14 +193,11 @@ IMP::ParticlesTemp get_kaps_and_inerts(IMP::npctransport::SimulationData& sd) {
 
   IMP::ParticlesTemp ret;
   ParticleTypeSet const &fts = sd.get_floater_types();
-  for (ParticleTypeSet::const_iterator it = fts.begin();
-       it != fts.end();
-       it++)
-    {
-      std::cout << *it << std::endl;
-      ret += sd.get_root_of_type(*it).get_children();
+  for (auto ft : fts) {
+      std::cout << ft << std::endl;
+      ret += sd.get_root_of_type(ft).get_children();
       std::cout << ret;
-    }
+  }
   return ret;
 }
 

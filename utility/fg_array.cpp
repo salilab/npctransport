@@ -40,8 +40,8 @@ int do_it(IMP::Pointer<IMP::npctransport::SimulationData> sd) {
     // - a site for every cain
     IMP::algebra::Vector2D cur = (get_random_vector_in(base));
     bool bad = false;
-    for (unsigned int i = 0; i < sites.size(); ++i) {
-      if (get_distance(sites[i], cur) < 2 * r) {
+    for (const auto &site : sites) {
+      if (get_distance(site, cur) < 2 * r) {
         bad = true;
         break;
       }
