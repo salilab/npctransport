@@ -671,8 +671,8 @@ void Statistics::update
                    << std::endl,
                    IMP::IOException);
   std::string hdf5_file_name = output_file_name_ 
-      + (sd->get_is_multiple_hdf5s() ? "."+std::to_string(update_number) : "")
-      + ".hdf5");
+      + (get_sd()->get_is_multiple_hdf5s() ? "."+std::to_string(update_number) : "")
+      + ".hdf5";
   RMF::HDF5::File hdf5_file= RMF::HDF5::create_file(hdf5_file_name);
   RMF::HDF5::Group hdf5_floater_xyz_hist_group;
   static const std::string  FLOATER_XYZ_GROUP("floater_xyz_hist");
