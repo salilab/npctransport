@@ -337,7 +337,7 @@ Statistics::update_xyz_distribution_to_hdf5
     }else{
       RMF::HDF5::DataSetCreationPropertiesD
         < RMF::HDF5::IntTraits,3 > dscp;
-      RMF_HDF5_CALL(H5Pset_deflate(dscp.get_handle(), 1)); // compression
+      RMF_HDF5_CALL(H5Pset_deflate(dscp.get_handle(), 1)); // compression = 1 (best speed, least compression)
       dscp.set_custom_fill_value(&fill_value);
       ds_xyz= hdf5_group.add_child_data_set
         < RMF::HDF5::IntTraits,3 > (s_type, dscp);
@@ -659,6 +659,8 @@ void Statistics::update
   unsigned int nf_new)
 {
   IMP_OBJECT_LOG;
+  static int update_number = 0;
+  update_number++;
   IMP_ALWAYS_CHECK(get_is_activated(), // TODO: would we rather a usage/always check?
                    "Cannot update a Statistics object that was not activated. Call Statistics::add_optimizer_states() first",
                    IMP::UsageException);
@@ -668,7 +670,10 @@ void Statistics::update
                    "Failed updating statistics to " << output_file_name_.c_str()
                    << std::endl,
                    IMP::IOException);
-  RMF::HDF5::File hdf5_file= RMF::HDF5::create_file(output_file_name_ + ".hdf5");
+  std::string hdf5_file_name = output_file_name_ 
+      + (sd->get_is_multiple_hdf5s() ? "."+std::to_string(update_number) : "")
+      + ".hdf5");
+  RMF::HDF5::File hdf5_file= RMF::HDF5::create_file(hdf5_file_name);
   RMF::HDF5::Group hdf5_floater_xyz_hist_group;
   static const std::string  FLOATER_XYZ_GROUP("floater_xyz_hist");
   if(hdf5_file.get_has_child(FLOATER_XYZ_GROUP)) {

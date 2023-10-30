@@ -65,6 +65,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   Parameter<double> statistics_fraction_;
   Parameter<int> statistics_interval_frames_;
   Parameter<int> output_statistics_interval_frames_;
+  Parameter<int> is_multiple_hdf5s_;
   Parameter<double> time_step_;
   Parameter<double> time_step_wave_factor_;
   Parameter<double> maximum_number_of_minutes_;
@@ -88,6 +89,12 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   int get_output_statistics_interval_frames() const
   { return output_statistics_interval_frames_; }
+
+  // if true, hdf5s are generated every get_output_statistics_interval_frames() frames
+  bool get_is_multiple_hdf5s()
+  {
+    return is_multiple_hdf5s_;
+  }
 
   /** returns whether should exclude floaters from slab during initialization */
   bool get_is_exclude_floaters_from_slab_initially() const

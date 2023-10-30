@@ -172,6 +172,7 @@ void SimulationData::initialize(std::string prev_output_file,
   GET_VALUE(range);
   GET_VALUE(statistics_interval_frames);
   GET_VALUE_DEF(output_statistics_interval_frames,10000);
+  GET_VALUE_DEF(is_multiple_hdf5s, false);
   GET_ASSIGNMENT(statistics_fraction);
   GET_VALUE(time_step);
   GET_ASSIGNMENT_DEF(time_step_wave_factor, 0.0);
