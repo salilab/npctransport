@@ -136,10 +136,10 @@ message Configuration {
   optional FloatRange pore_anchored_beads_k=37; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
   optional int32 is_backbone_harmonic=38 [default=0]; // whether backbone is an harmonic or linear potential
   optional FloatRange backbone_tau_ns=39; // backbone relaxation time for two beads connected by a harmonic spring (relevant only is is_backbone_harmonic is true)
-  optional int32 is_multiple_hdf5s=40;  // if true, output new hdf5 every output_statistics_interval_ns, 
+  optional int32 is_multiple_hdf5s=43;  // if true, output new hdf5 every output_statistics_interval_ns, 
                                         // then add a numeric suffix to hdf5 for each dump
                                         // e.g. output_1.pb.hdf5, output_2.pb.hdf5, etc. Default is only once in the end.
-      // n=40
+  // n=43
   }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -277,10 +277,10 @@ message Assignment {
   optional FloatAssignment pore_anchored_beads_k=46; // (Version 2.5+) if <=0, static anchors, otherwise, k force constant for beads anchored to pore
   optional int32 is_backbone_harmonic=47 [default=1]; // whether backbone is an harmonic or linear potential
   optional FloatAssignment backbone_tau_ns=48; // (version 3.0+) backbone relaxation time for two beads connected by a harmonic spring (relevant only is is_backbone_harmonic is true)
-  optional int32 is_multiple_hdf5s=49;  // if true, output new hdf5 every output_statistics_interval_ns, 
+  optional int32 is_multiple_hdf5s=52;  // if true, output new hdf5 every output_statistics_interval_ns, 
                                         // then add a numeric suffix to hdf5 for each dump
                                         // e.g. output_1.pb.hdf5, output_2.pb.hdf5, etc. Default is only once in the end.
-  // n=49
+  // n=52
 }
 
 message Statistics {
