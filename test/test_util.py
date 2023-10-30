@@ -38,7 +38,8 @@ def get_basic_config():
     config.tunnel_radius.lower=75
     return config
 
-def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_obstacles=False):
+def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_obstacles=False,
+                    fg_name = "my_fg", kap_name = "kap0", inert_name="inert0", obstacle_name="my_obstacle0"):
     """
     Make a simple configuration, with or without tunnen-in-a-slab, with one or more
     FG chains that interact with one or more kaps and inert particles, and with one
@@ -49,8 +50,12 @@ def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_
     outfile - output file for configuration, if not None
     is_slab_on - suggestive
     n_particles_factor - factor by which the number of particles in the system
-                         is multiplied, to generate a more complex configuration
+                         is multiplied, to generate a more complex configurations
     is_obstacles - whether to include static particles
+    fg_name - name of fg type
+    kap_name - name of NTRs type (facilitated diffusion)
+    inert_name - name of passively diffusing molecules type
+    obstacle_name - name of static obstacles (e.g. NPC scaffold in production runs)
     """
     def add_interactions_for_fg(fg_name,
                                 k_kap_lower,
@@ -62,7 +67,7 @@ def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_
         """
         interactionFG_KAP= IMP.npctransport.add_interaction(config,
                                                             name0=fg_name,
-                                                            name1="kap0",
+                                                            name1=kap_name,
                                                             interaction_k=k_kap_lower,
                                                             interaction_range=9)
         if(k_kap_steps > 1):
@@ -71,7 +76,7 @@ def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_
                          steps = k_kap_steps)
         interactionFG_CRAP= IMP.npctransport.add_interaction(config,
                                                              name0=fg_name,
-                                                             name1="inert0",
+                                                             name1=inert_name,
                                                              interaction_k=0,
                                                              interaction_range=0)
 
@@ -85,31 +90,31 @@ def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_
     config.slab_thickness.lower=150
     config.tunnel_radius.lower=90
     fg= IMP.npctransport.add_fg_type(config,
-                                 type_name="my_fg",
+                                 type_name=fg_name,
                                  number_of_beads=int(math.floor(2 * n_particles_factor)),
                                  number=int(math.floor(1 * n_particles_factor)),
                                  radius=6,
                                  interactions=1,
                                  rest_length_factor = 1.5)
     kap= IMP.npctransport.add_float_type(config,
-                                         type_name="kap0",
+                                         type_name=kap_name,
                                          number=int(math.ceil(1 * n_particles_factor)),
                                          radius=20,
                                          interactions=6)
     nonspecifics= IMP.npctransport.add_float_type(config,
-                                                  type_name="inert0",
+                                                  type_name=inert_name,
                                                   number=int(math.ceil(1 * n_particles_factor)),
                                                   radius=20,
                                                   interactions=0)
     if is_obstacles:
         obstacle_xyzs = [[10.0,30.0,0.0], [-10.0,30.0,0.0]]
         obstacle= IMP.npctransport.add_obstacle_type(config,
-                                                     type_name="my_obstacle0",
+                                                     type_name=obstacle_name,
                                                      R=20,
                                                      xyzs = obstacle_xyzs)
     ###########
     # fg with kaps / craps
-    add_interactions_for_fg("my_fg",
+    add_interactions_for_fg(fg_name,
                             k_kap_lower=0.1)
      #############
 
@@ -119,8 +124,8 @@ def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_
 
     # internal FG-FG
     interactionFG_FG= IMP.npctransport.add_interaction(config,
-                                                       name0= "my_fg",
-                                                       name1= "my_fg",
+                                                       name0= fg_name,
+                                                       name1= fg_name,
                                                        interaction_k= 0.1,
                                                        interaction_range= 6)
     ##############

@@ -16,8 +16,8 @@ def get_95_conf(rate,time):
 class Tests(IMP.test.TestCase):
 
     def _make_sd(self, is_orientational=False):
-        cfg_file = self.get_tmp_file_name("barak_config.pb")
-        assign_file = self.get_tmp_file_name("barak_assign.pb")
+        cfg_file = self.get_tmp_file_name("my_config.pb")
+        assign_file = self.get_tmp_file_name("my_assign.pb")
         assign_file='tmp.pb'
         cfg=test_util.make_simple_cfg(is_slab_on=False, n_particles_factor=1)
         cfg.box_side.lower=35
@@ -123,7 +123,6 @@ class Tests(IMP.test.TestCase):
                 self.assertAlmostEqual(kon_ii,1.61,delta=0.33*DELTA_FACTOR)
                 self.assertAlmostEqual(fb_i,0.285,delta=0.1*DELTA_FACTOR)
                 self.assertAlmostEqual(fb_ii,0.524,delta=0.15*DELTA_FACTOR)
-        return;
 
 
     def _get_particles_of_type(self, sd, pt):
