@@ -61,6 +61,39 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %#endif
 }
 
+
+
+// Allow variable lists of strings to be handles properly for main.h startup()
+//(from https://www.swig.org/Doc2.0/Typemaps.html + ChatGPT)
+%{
+#include "IMP/npctransport/main.h"
+%}
+%typemap(in) (int argc, char *argv[]) {
+    if (PyList_Check($input)) {
+        $1 = PyList_Size($input); // argc
+        $2 = (char **) malloc(($1 + 1) * sizeof(char *));
+        for (int i = 0; i < $1; i++) {
+            PyObject *py_str = PyList_GetItem($input, i);
+            if (PyUnicode_Check(py_str)) {
+                $2[i] = strdup(PyUnicode_AsUTF8(py_str));
+            } else {
+                PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
+                return NULL;
+            }
+        }
+        $2[$1] = 0; // Null terminate the array
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
+        return NULL;
+    }
+}
+%typemap(freearg) (int argc, char *argv[]) {
+    for (int i = 0; i < $1; i++) {
+        free($2[i]);
+    }
+    free($2);
+}
+
 %include "IMP_npctransport.Parameter.i"
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
