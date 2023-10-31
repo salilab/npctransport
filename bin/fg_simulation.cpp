@@ -265,9 +265,6 @@ int main(int argc, char* argv[]) {
   try {
     IMP::Pointer<npctransport::SimulationData> sd =
         npctransport::startup(argc, argv);
-    IMP::Pointer<npctransport::HarmonicSpringSingletonScore> s=
-      new npctransport::HarmonicSpringSingletonScore(1,1); // DEBUG
-    //print_fgs(*sd, IMP::TERSE);
     if (surface_anchoring) {
       IMP_ALWAYS_CHECK(cylinder_nlayers == 0,
                        "surface anchoring and cylinder"
