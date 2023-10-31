@@ -80,6 +80,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/Statistics.h"
 %include "IMP/npctransport/SimulationData.h"
 %include "IMP/npctransport/io.h"
+%include "IMP/npctransport/main.h"
 %include "IMP/npctransport/ParticleFactory.h"
 // %include "IMP/npctransport/internal/TAMDChain.h"
 %include "IMP/npctransport/rmf_links.h"
