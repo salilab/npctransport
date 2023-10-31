@@ -108,7 +108,6 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
     t_sparse_3d_matrix;
   typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,
     t_sparse_3d_matrix >
-    //    std::vector< std::vector< std::vector<int> > > >
     ParticleTypeXYZDistributionMap;
   ParticleTypeXYZDistributionMap particle_type_xyz_distribution_map_;
   struct t_size_3d_matrix{

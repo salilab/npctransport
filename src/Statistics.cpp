@@ -943,11 +943,6 @@ void Statistics::update
     }
   }
 
-  // TODO: disable this for now
-  //  ::npctransport_proto::Conformation *conformation =
-  //   output.mutable_conformation();
-  //    save_pb_conformation(get_beads(), sites_, conformation);
-
   // save RMF for future restarts
   if(!no_save_rmf_to_output){
     RMF::BufferHandle buf;
@@ -963,7 +958,14 @@ void Statistics::update
   std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
   output.SerializeToOstream(&outf);
   outf.flush();
+
+  // reset HDF5 stats if having multiple HDF5s
+  if(get_sd()->get_is_multiple_hdf5s())
+  {
+    particle_type_zr_distribution_map_.clear();
+    particle_type_xyz_distribution_map_.clear();
   }
+}
 
 void Statistics::reset_statistics_optimizer_states()
 {
