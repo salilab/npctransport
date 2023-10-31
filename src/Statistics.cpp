@@ -659,11 +659,10 @@ void Statistics::update
   unsigned int nf_new)
 {
   IMP_OBJECT_LOG;
-  static int update_number = 0;
-  update_number++;
   IMP_ALWAYS_CHECK(get_is_activated(), // TODO: would we rather a usage/always check?
                    "Cannot update a Statistics object that was not activated. Call Statistics::add_optimizer_states() first",
                    IMP::UsageException);
+  update_calls_++;      
   ::npctransport_proto::Output output;
   bool is_read= load_output_protobuf(output_file_name_, output);
   IMP_ALWAYS_CHECK(is_read,
@@ -671,7 +670,7 @@ void Statistics::update
                    << std::endl,
                    IMP::IOException);
   std::string hdf5_file_name = output_file_name_ 
-      + (get_sd()->get_is_multiple_hdf5s() ? "."+std::to_string(update_number) : "")
+      + (get_sd()->get_is_multiple_hdf5s() ? "."+std::to_string(update_calls_) : "")
       + ".hdf5";
   RMF::HDF5::File hdf5_file= RMF::HDF5::create_file(hdf5_file_name);
   RMF::HDF5::Group hdf5_floater_xyz_hist_group;

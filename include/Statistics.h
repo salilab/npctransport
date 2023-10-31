@@ -93,6 +93,8 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
     ParticleTransportStatisticsOSsMap;
   ParticleTransportStatisticsOSsMap floaters_transport_stats_map_;
 
+  int update_calls_ = 0;
+
 #ifndef SWIG
   // distributions
   typedef IMP_KERNEL_LARGE_UNORDERED_MAP< core::ParticleType,

@@ -17,7 +17,7 @@ def get_95_conf(rate,time):
 
 class Tests(IMP.test.TestCase):
 
-    def _make_sd(self, is_orientational=False):
+    def _make_sd(self, is_orientational=False, is_multiple_hdf5s=False):
         cfg_file = self.get_tmp_file_name("my_config.pb")
         assign_file = self.get_tmp_file_name("my_assign.pb")
         print("Configuration file: " + cfg_file)
@@ -36,7 +36,8 @@ class Tests(IMP.test.TestCase):
                     i.interaction_k.lower=0.18
                 else:
                     i.interaction_k.lower=0.45
-        cfg.is_multiple_hdf5s = True
+        cfg.is_multiple_hdf5s = is_multiple_hdf5s
+        cfg.output_statistics_interval_ns = 50.0
         test_util.write_config_file(cfg_file, cfg)
         num=IMP.npctransport.assign_ranges( cfg_file, assign_file, 0,
                            False, 10 );
@@ -72,24 +73,26 @@ class Tests(IMP.test.TestCase):
         """
         test statistics of interaction between an FG and a kap
         """
-        # Non-orientational
-        sd=self._make_sd(is_orientational)
-        IMP.npctransport.initialize_positions( sd, [], False,
-                                               short_init_factor)
-        sd.get_bd().optimize(n_cycles) # still without stats
-        sd.get_bd().set_current_time(0.0);
-        sd.get_statistics().reset_statistics_optimizer_states();
-        sd.activate_statistics()
-        while n_trials>0:
-            try:
-                self._run_sd(sd, n_cycles)
-                self._process_xyz_stat(sd, is_orientational)
-                break
-            except AssertionError as e:
-                print("Failed -", n_trials, "left")
-                n_trials=n_trials-1
-                if(n_trials==0):
-                    raise e
+        for is_multiple_hdf5s in [False, True]:
+            print("Multiple HDF5s" if is_multiple_hdf5s else "Single HDF5")
+            sd=self._make_sd(is_orientational=is_orientational, 
+                             is_multiple_hdf5s=is_multiple_hdf5s)
+            IMP.npctransport.initialize_positions( sd, [], False,
+                                                short_init_factor)
+            sd.get_bd().optimize(n_cycles) # still without stats
+            sd.get_bd().set_current_time(0.0);
+            sd.get_statistics().reset_statistics_optimizer_states();
+            sd.activate_statistics()
+            while n_trials>0:
+                try:
+                    self._run_sd(sd, n_cycles)
+                    self._process_xyz_stat(sd, is_orientational)
+                    break
+                except AssertionError as e:
+                    print("Failed -", n_trials, "left")
+                    n_trials=n_trials-1
+                    if(n_trials==0):
+                        raise e
 
     def test_hdf5_statistics(self):
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
