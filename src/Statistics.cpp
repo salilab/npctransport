@@ -785,7 +785,7 @@ void Statistics::update
   }
   // Output full statistics every full_output_statistics_interval_factor calls only
   if(!force_full_output 
-      || (update_calls_ % get_sd()->get_full_output_statistics_interval_factor() != 0)){
+      && (update_calls_ % get_sd()->get_full_output_statistics_interval_factor() != 0)){
     return;
   }
   // Fetach protobuf statistics message from file
