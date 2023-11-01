@@ -51,49 +51,6 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %apply unsigned int { boost::uint32_t }
 %apply unsigned long long { boost::uint64_t }
 
-// Return value from Avro2PBReader::read_next() should be handled as an
-// array of bytes in Python 3, not a Unicode string
-%typemap(out) IMP::npctransport::Avro2PBReader::ByteBuffer {
-%#if PY_VERSION_HEX >= 0x03000000
-  $result = PyBytes_FromStringAndSize($1.data(), $1.size());
-%#else
-  $result = PyString_FromStringAndSize($1.data(), $1.size());
-%#endif
-}
-
-
-
-// Allow variable lists of strings to be handles properly for main.h startup()
-//(from https://www.swig.org/Doc2.0/Typemaps.html + ChatGPT)
-%{
-#include "IMP/npctransport/main.h"
-%}
-%typemap(in) (int argc, char *argv[]) {
-    if (PyList_Check($input)) {
-        $1 = PyList_Size($input); // argc
-        $2 = (char **) malloc(($1 + 1) * sizeof(char *));
-        for (int i = 0; i < $1; i++) {
-            PyObject *py_str = PyList_GetItem($input, i);
-            if (PyUnicode_Check(py_str)) {
-                $2[i] = strdup(PyUnicode_AsUTF8(py_str));
-            } else {
-                PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
-                return NULL;
-            }
-        }
-        $2[$1] = 0; // Null terminate the array
-    } else {
-        PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
-        return NULL;
-    }
-}
-%typemap(freearg) (int argc, char *argv[]) {
-    for (int i = 0; i < $1; i++) {
-        free($2[i]);
-    }
-    free($2);
-}
-
 %include "IMP_npctransport.Parameter.i"
 %include "IMP/npctransport/typedefs.h"
 %include "IMP/npctransport/linear_distance_pair_scores.h"
@@ -113,7 +70,6 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/Statistics.h"
 %include "IMP/npctransport/SimulationData.h"
 %include "IMP/npctransport/io.h"
-%include "IMP/npctransport/main.h"
 %include "IMP/npctransport/ParticleFactory.h"
 // %include "IMP/npctransport/internal/TAMDChain.h"
 %include "IMP/npctransport/rmf_links.h"
@@ -139,6 +95,64 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/initialize_positions.h"
 %include "IMP/npctransport/Avro2PBReader.h"
 %include "IMP/npctransport/util.h"
+
+
+// Return value from Avro2PBReader::read_next() should be handled as an
+// array of bytes in Python 3, not a Unicode string
+%typemap(out) IMP::npctransport::Avro2PBReader::ByteBuffer {
+%#if PY_VERSION_HEX >= 0x03000000
+  $result = PyBytes_FromStringAndSize($1.data(), $1.size());
+%#else
+  $result = PyString_FromStringAndSize($1.data(), $1.size());
+%#endif
+}
+
+// Allow variable lists of strings to be handles properly for main.h startup()
+//(from https://www.swig.org/Doc2.0/Typemaps.html + ChatGPT)
+%{
+#include "IMP/npctransport/main.h"
+%}
+
+%typemap(in) (int argc, char *argv[]) {
+    if (PyList_Check($input)) {
+        $1 = PyList_Size($input); // argc
+        $2 = (char **) malloc(($1 + 1) * sizeof(char *));
+        for (int i = 0; i < $1; i++) {
+            PyObject *py_str = PyList_GetItem($input, i);
+#if PY_MAJOR_VERSION >= 3
+            if (PyUnicode_Check(py_str)) {
+                $2[i] = strdup(PyUnicode_AsUTF8(py_str));
+            } else {
+                PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
+                return NULL;
+            }
+#else
+            if (PyString_Check(py_str)) {
+                $2[i] = strdup(PyString_AsString(py_str));
+            } else if (PyUnicode_Check(py_str)) {
+                PyObject* utf8 = PyUnicode_AsUTF8String(py_str);
+                $2[i] = strdup(PyString_AsString(utf8));
+                Py_DECREF(utf8);
+            } else {
+                PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
+                return NULL;
+            }
+#endif
+        }
+        $2[$1] = 0; // Null terminate the array
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
+        return NULL;
+    }
+}
+
+%typemap(freearg) (int argc, char *argv[]) {
+    for (int i = 0; i < $1; i++) {
+        free($2[i]);
+    }
+    free($2);
+}
+%include "IMP/npctransport/main.h"
 
 // %rename(_TemplateBaseSitesPairScore) TemplateBaseSitesPairScore;
 %pythoncode %{
