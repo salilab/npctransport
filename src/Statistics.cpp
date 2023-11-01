@@ -371,24 +371,12 @@ Statistics::update_xyz_distribution_to_hdf5
 void Statistics::update_fg_stats
 ( ::npctransport_proto::Statistics* stats,
   unsigned int nf_new,
-  unsigned int zr_hist[4][3],
-  RMF::HDF5::File hdf5_file)
+  unsigned int zr_hist[4][3])
 {
   IMP_OBJECT_LOG;
-  RMF::HDF5::Group hdf5_fg_xyz_hist_group;
-  static const std::string  FG_XYZ_GROUP("fg_xyz_hist");
-  if(hdf5_file.get_has_child(FG_XYZ_GROUP)){
-    IMP_ALWAYS_CHECK(hdf5_file.get_child_is_group(FG_XYZ_GROUP),
-                     FG_XYZ_GROUP << " is supposed to be an HDF5 group",
-                     ValueException);
-    hdf5_fg_xyz_hist_group= hdf5_file.get_child_group(FG_XYZ_GROUP);
-  } else {
-    hdf5_fg_xyz_hist_group= hdf5_file.add_child_group(FG_XYZ_GROUP);
-  }
   int nf = stats->number_of_frames();
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
     ->get_bd()->get_current_time() / FS_IN_NS;
-
   // Go over all fg chain types:
   ParticleTypeSet const &fgct = get_sd()->get_fg_chain_types();
   for ( ParticleTypeSet::const_iterator
@@ -518,11 +506,7 @@ void Statistics::update_fg_stats
           } // for j
       }
       // Recreate z-r histogram based on retrieved zr_hist for each type of FG bead (not chain):
-      if(get_sd()->get_is_xyz_hist_stats()){
-        stats->mutable_fg_beads(i)->clear_xyz_hist();
-        update_xyz_distribution_to_hdf5(hdf5_fg_xyz_hist_group,
-                                        fg_bead_type_i);
-      } else {
+      if(!get_sd()->get_is_xyz_hist_stats()){
         ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
           particle_type_zr_distribution_map_.find(fg_bead_type_i);
         if(ptzrdm_it != particle_type_zr_distribution_map_.end())
@@ -542,6 +526,91 @@ void Statistics::update_fg_stats
           } // if ptzed_it
       } // if is_xyz_hist
     } // for it (fg bead type)
+}
+
+std::map<IMP::core::ParticleType, double> Statistics::update_floater_stats
+(::npctransport_proto::Statistics* stats,
+ unsigned int nf_new) {
+  IMP_OBJECT_LOG;
+  int nf = stats->number_of_frames();
+  std::map<IMP::core::ParticleType, double> type_to_diffusion_coefficient_map; // to be used for floater order params
+  // Floaters general body stats
+  for (BodyStatisticsOSsMap::iterator
+         it = floaters_stats_map_.begin() ;
+       it != floaters_stats_map_.end(); it++)
+    {
+      unsigned int i= find_or_add_floater_of_type( stats, it->first );
+      BodyStatisticsOptimizerStates& bsos = it->second;
+      unsigned int n_particles_type_i = bsos.size();
+      type_to_diffusion_coefficient_map[it->first]=0.0;
+      int nf_weighted = nf * n_particles_type_i; // number of particle frames
+      for (unsigned int j= 0; j < n_particles_type_i; j++) {
+        bsos[j]->update_always();
+        double dc_j= bsos[j]->get_diffusion_coefficient();
+        UPDATE_AVG(nf_weighted, nf_new,
+                    *stats->mutable_floaters(i),
+                    diffusion_coefficient, dc_j);
+        type_to_diffusion_coefficient_map[it->first]+=
+          dc_j/n_particles_type_i;
+        double ct_j= bsos[j]->get_correlation_time();
+        UPDATE_AVG(nf_weighted, nf_new,
+                    *stats->mutable_floaters(i),
+                    correlation_time, ct_j);
+        bsos[j]->reset();
+        nf_weighted++;
+      } // for j
+      if(!get_sd()->get_is_xyz_hist_stats()){
+        // Recreate z-r histogram based on retrieved zr_hist:
+        ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
+          particle_type_zr_distribution_map_.find(it->first);
+        if(ptzrdm_it != particle_type_zr_distribution_map_.end()) {
+          ParticleTypeZRDistributionMap::mapped_type zr_hist=
+            ptzrdm_it->second;
+          stats->mutable_floaters(i)->clear_zr_hist();
+          for(unsigned int ii=0; ii < zr_hist.size(); ii++) {
+            ::npctransport_proto::Statistics_Ints* zii_r_hist=
+              stats->mutable_floaters(i)->mutable_zr_hist()->add_ints_list();
+            for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++) {
+              zii_r_hist->add_ints(zr_hist[ii][jj]);
+            } // for jj
+          } // for ii
+        } //if ptzrdm_it
+      } // if/else is_xyz_hist_stats
+    } // for it
+
+  // Floaters avg number of transports per particle
+  if ( get_sd()->get_has_slab() ){
+    for (ParticleTransportStatisticsOSsMap::iterator
+           it1 = floaters_transport_stats_map_.begin();
+         it1 != floaters_transport_stats_map_.end() ; it1++)
+      {
+        unsigned int i = find_or_add_floater_of_type( stats, it1->first );
+        ParticleTransportStatisticsOptimizerStates& pts_i = it1->second;
+        // fetch old ones from stats msg, add new ones and rewrite all:
+        std::set<double> times_i
+          ( stats->floaters(i).transport_time_points_ns().begin(),
+            stats->floaters(i).transport_time_points_ns().end() );
+        for (unsigned int j = 0; j < pts_i.size(); ++j)
+          {
+            Floats const &new_times_ij =
+              pts_i[j]->get_transport_time_points_in_ns();
+            for (unsigned int k = 0; k < new_times_ij.size(); k++)
+              {
+                times_i.insert(new_times_ij[k]);
+              } // for k
+          } // for j
+        (*stats->mutable_floaters(i)).clear_transport_time_points_ns();
+        for (std::set<double>::const_iterator it2 = times_i.begin();
+             it2 != times_i.end(); it2++)
+          {
+            (*stats->mutable_floaters(i)).add_transport_time_points_ns(*it2);
+          } // for it2
+         // update avg too:
+         double avg_n_transports_i = times_i.size() * 1.0 / pts_i.size();
+         (*stats->mutable_floaters(i)).set_avg_n_transports( avg_n_transports_i );
+       } // for it1
+   }
+   return type_to_diffusion_coefficient_map;
 }
 
 void Statistics
@@ -651,28 +720,14 @@ void Statistics
   }
 }
 
-
-
-// @param nf_new number of new frames accounted for in this statistics update
-void Statistics::update
-( const IMP::internal::SimpleTimer &timer,
-  unsigned int nf_new)
+void Statistics::update_hdf5_statistics()
 {
-  IMP_OBJECT_LOG;
-  IMP_ALWAYS_CHECK(get_is_activated(), // TODO: would we rather a usage/always check?
-                   "Cannot update a Statistics object that was not activated. Call Statistics::add_optimizer_states() first",
-                   IMP::UsageException);
-  update_calls_++;      
-  ::npctransport_proto::Output output;
-  bool is_read= load_output_protobuf(output_file_name_, output);
-  IMP_ALWAYS_CHECK(is_read,
-                   "Failed updating statistics to " << output_file_name_.c_str()
-                   << std::endl,
-                   IMP::IOException);
+  // Open HDF5
   std::string hdf5_file_name = output_file_name_ 
       + (get_sd()->get_is_multiple_hdf5s() ? "."+std::to_string(update_calls_) : "")
       + ".hdf5";
   RMF::HDF5::File hdf5_file= RMF::HDF5::create_file(hdf5_file_name);
+  // Floater distributions
   RMF::HDF5::Group hdf5_floater_xyz_hist_group;
   static const std::string  FLOATER_XYZ_GROUP("floater_xyz_hist");
   if(hdf5_file.get_has_child(FLOATER_XYZ_GROUP)) {
@@ -683,7 +738,61 @@ void Statistics::update
   } else {
     hdf5_floater_xyz_hist_group= hdf5_file.add_child_group(FLOATER_XYZ_GROUP);
   }
+  for (BodyStatisticsOSsMap::iterator it = floaters_stats_map_.begin();
+       it != floaters_stats_map_.end(); 
+       it++)
+  {
+        update_xyz_distribution_to_hdf5(hdf5_floater_xyz_hist_group,
+                                        it->first);
+  }
+  //FG Distributions
+  RMF::HDF5::Group hdf5_fg_xyz_hist_group;
+  static const std::string  FG_XYZ_GROUP("fg_xyz_hist");
+  if(hdf5_file.get_has_child(FG_XYZ_GROUP)){
+    IMP_ALWAYS_CHECK(hdf5_file.get_child_is_group(FG_XYZ_GROUP),
+                     FG_XYZ_GROUP << " is supposed to be an HDF5 group",
+                     ValueException);
+    hdf5_fg_xyz_hist_group= hdf5_file.get_child_group(FG_XYZ_GROUP);
+  } else {
+    hdf5_fg_xyz_hist_group= hdf5_file.add_child_group(FG_XYZ_GROUP);
+  }
+  for ( auto const& fg_bead_type :  get_sd()->get_fg_bead_types())
+  {
+      update_xyz_distribution_to_hdf5(hdf5_fg_xyz_hist_group,
+                                       fg_bead_type); 
+  }
+  // Restart statistics needed only if we have multiple HDF5 files:
+  if(get_sd()->get_is_multiple_hdf5s())
+  { 
+    particle_type_zr_distribution_map_.clear();
+    particle_type_xyz_distribution_map_.clear();
+  }
+}
 
+// @param nf_new number of new frames accounted for in this statistics update
+void Statistics::update
+( const IMP::internal::SimpleTimer &timer,
+  unsigned int nf_new)
+{
+  IMP_OBJECT_LOG;
+  IMP_ALWAYS_CHECK(get_is_activated(), // TODO: would we rather a usage/always check?
+                   "Cannot update a Statistics object that was not activated. Call Statistics::add_optimizer_states() first",
+                   IMP::UsageException);
+  update_calls_++;    
+  if(get_sd()->get_is_xyz_hist_stats()){
+     update_hdf5_statistics();
+  }
+  // Output full statistics every full_output_statistics_interval_factor calls only
+  if(update_calls_ % get_sd()->get_full_output_statistics_interval_factor() != 0){
+    return;
+  }
+  // Fetach protobuf statistics message from file
+  ::npctransport_proto::Output output;
+  bool is_read= load_output_protobuf(output_file_name_, output);
+  IMP_ALWAYS_CHECK(is_read,
+                   "Failed updating statistics to " << output_file_name_.c_str()
+                   << std::endl,
+                   IMP::IOException);
   ::npctransport_proto::Statistics* stats = output.mutable_statistics();
   int nf = stats->number_of_frames();
   if (is_stats_reset_) {  // stats was just reset
@@ -702,90 +811,11 @@ void Statistics::update
   double sim_time_ns = const_cast<SimulationData *>( get_sd() )
     ->get_bd()->get_current_time() / FS_IN_NS;
 
+  // Update FG and floater stats
   unsigned int zr_hist[4][3]={{0},{0},{0},{0}};
-  update_fg_stats(stats, nf_new, zr_hist, hdf5_file);
-
-  std::map<IMP::core::ParticleType, double> type_to_diffusion_coefficeint_map; // to be used for floater order params
-  // Floaters general body stats
-  for (BodyStatisticsOSsMap::iterator
-         it = floaters_stats_map_.begin() ;
-       it != floaters_stats_map_.end(); it++)
-    {
-      unsigned int i= find_or_add_floater_of_type( stats, it->first );
-      BodyStatisticsOptimizerStates& bsos = it->second;
-      unsigned int n_particles_type_i = bsos.size();
-      type_to_diffusion_coefficeint_map[it->first]=0.0;
-      int nf_weighted = nf * n_particles_type_i; // number of particle frames
-      for (unsigned int j= 0; j < n_particles_type_i; j++)
-        {
-          bsos[j]->update_always();
-          double dc_j= bsos[j]->get_diffusion_coefficient();
-          UPDATE_AVG(nf_weighted, nf_new,
-                     *stats->mutable_floaters(i),
-                     diffusion_coefficient, dc_j);
-          type_to_diffusion_coefficeint_map[it->first]+=
-            dc_j/n_particles_type_i;
-          double ct_j= bsos[j]->get_correlation_time();
-          UPDATE_AVG(nf_weighted, nf_new,
-                     *stats->mutable_floaters(i),
-                     correlation_time, ct_j);
-          bsos[j]->reset();
-          nf_weighted++;
-        } // for j
-      if(get_sd()->get_is_xyz_hist_stats()){ // TODO: floaters are disabled for xyz for now to save space - perhaps add it later
-        update_xyz_distribution_to_hdf5(hdf5_floater_xyz_hist_group,
-                                        it->first);
-      } else { // if/else is_xyz_hist_stats
-        // Recreate z-r histogram based on retrieved zr_hist:
-        ParticleTypeZRDistributionMap::const_iterator ptzrdm_it=
-          particle_type_zr_distribution_map_.find(it->first);
-        if(ptzrdm_it != particle_type_zr_distribution_map_.end()) {
-          ParticleTypeZRDistributionMap::mapped_type zr_hist=
-            ptzrdm_it->second;
-          stats->mutable_floaters(i)->clear_zr_hist();
-          for(unsigned int ii=0; ii < zr_hist.size(); ii++) {
-            ::npctransport_proto::Statistics_Ints* zii_r_hist=
-              stats->mutable_floaters(i)->mutable_zr_hist()->add_ints_list();
-            for(unsigned int jj=0; jj < zr_hist[ii].size(); jj++) {
-              zii_r_hist->add_ints(zr_hist[ii][jj]);
-            } // for jj
-          } // for ii
-        } //if ptzrdm_it
-      } // if/else is_xyz_hist_stats
-    } // for it
-
-  // Floaters avg number of transports per particle
-  if ( get_sd()->get_has_slab() ){
-    for (ParticleTransportStatisticsOSsMap::iterator
-           it1 = floaters_transport_stats_map_.begin();
-         it1 != floaters_transport_stats_map_.end() ; it1++)
-      {
-        unsigned int i = find_or_add_floater_of_type( stats, it1->first );
-        ParticleTransportStatisticsOptimizerStates& pts_i = it1->second;
-        // fetch old ones from stats msg, add new ones and rewrite all:
-        std::set<double> times_i
-          ( stats->floaters(i).transport_time_points_ns().begin(),
-            stats->floaters(i).transport_time_points_ns().end() );
-        for (unsigned int j = 0; j < pts_i.size(); ++j)
-          {
-            Floats const &new_times_ij =
-              pts_i[j]->get_transport_time_points_in_ns();
-            for (unsigned int k = 0; k < new_times_ij.size(); k++)
-              {
-                times_i.insert(new_times_ij[k]);
-              } // for k
-          } // for j
-        (*stats->mutable_floaters(i)).clear_transport_time_points_ns();
-        for (std::set<double>::const_iterator it2 = times_i.begin();
-             it2 != times_i.end(); it2++)
-          {
-            (*stats->mutable_floaters(i)).add_transport_time_points_ns(*it2);
-          } // for it2
-         // update avg too:
-         double avg_n_transports_i = times_i.size() * 1.0 / pts_i.size();
-         (*stats->mutable_floaters(i)).set_avg_n_transports( avg_n_transports_i );
-       } // for it1
-   }
+  update_fg_stats(stats, nf_new, zr_hist);
+  auto type_to_diffusion_coefficient_map =
+    update_floater_stats(stats, nf_new);
 
    // FG-floaters interactions
    ParticleTypeSet const &ft = get_sd()->get_floater_types();
@@ -827,7 +857,7 @@ void Statistics::update
             frc->set_n_z3(n_z3);
           }
         frc->set_diffusion_coefficient
-          (type_to_diffusion_coefficeint_map[*it]);
+          (type_to_diffusion_coefficient_map[*it]);
       } // for(it)
 
   // update statistics gathered on interaction rates
@@ -958,13 +988,6 @@ void Statistics::update
   std::ofstream outf(output_file_name_.c_str(), std::ios::binary);
   output.SerializeToOstream(&outf);
   outf.flush();
-
-  // reset HDF5 stats if having multiple HDF5s
-  if(get_sd()->get_is_multiple_hdf5s())
-  {
-    particle_type_zr_distribution_map_.clear();
-    particle_type_xyz_distribution_map_.clear();
-  }
 }
 
 void Statistics::reset_statistics_optimizer_states()

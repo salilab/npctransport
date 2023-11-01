@@ -228,6 +228,10 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
 
       @note this method is not const cause it may invoke e.g., energy evaluation
             though it does not substantially change anything in the state of the object
+      @note if configuration file full_output_statistics_interval_factor
+            is larger than 1, then full statistics are dumped every N calls
+            to update(), where N is the value of full_output_statistics_interval_factor,
+            and only the HDF5 file is updated at each call.
    */
   void update(const IMP::internal::SimpleTimer &timer,
               unsigned int nf_new = 1);
@@ -284,10 +288,18 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
 
   //! updates pStats with all statistics related to fgs, averaged over
   //! nf_new additional frames
+  //! @param zr_hist a grid on z / (x,y)-radial axis relevant only if not outputting xyz stats to hdf5
   void update_fg_stats( ::npctransport_proto::Statistics* pStats,
                         unsigned int nf_new,
-                        unsigned int zr_hist[4][3],
-                        RMF::HDF5::File hdf5_file);
+                        unsigned int zr_hist[4][3]);
+
+  //! updates pStats with all statistics related to floaters, averaged over
+  //! nf_new additional frames
+  //!
+  //! @return for historical reasons, returns a map of diffusion coefficients for each particle type
+  //! to be used in order params later on
+  std::map<IMP::core::ParticleType, double> update_floater_stats( ::npctransport_proto::Statistics* pStats,
+                        unsigned int nf_new);
 
 
 
@@ -334,6 +346,8 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
   */
   void fill_in_zr_hist(unsigned int zr_hist[4][3],
                        ParticlesTemp ps) const;
+
+  void update_hdf5_statistics(); // output HDF5 statistics
 
 
  public:

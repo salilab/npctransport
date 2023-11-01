@@ -65,6 +65,7 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
   Parameter<double> statistics_fraction_;
   Parameter<int> statistics_interval_frames_;
   Parameter<int> output_statistics_interval_frames_;
+  Parameter<int> full_output_statistics_interval_factor_;
   Parameter<int> is_multiple_hdf5s_;
   Parameter<double> time_step_;
   Parameter<double> time_step_wave_factor_;
@@ -89,6 +90,9 @@ class IMPNPCTRANSPORTEXPORT SimulationData : public Object {
 
   int get_output_statistics_interval_frames() const
   { return output_statistics_interval_frames_; }
+
+  int get_full_output_statistics_interval_factor() const
+  { return full_output_statistics_interval_factor_; }
 
   // if true, hdf5s are generated every get_output_statistics_interval_frames() frames
   bool get_is_multiple_hdf5s()

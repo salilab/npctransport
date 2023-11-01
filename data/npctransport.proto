@@ -139,7 +139,8 @@ message Configuration {
   optional int32 is_multiple_hdf5s=43;  // if true, output new hdf5 every output_statistics_interval_ns, 
                                         // then add a numeric suffix to hdf5 for each dump
                                         // e.g. output_1.pb.hdf5, output_2.pb.hdf5, etc. Default is only once in the end.
-  // n=43
+  optional int32 full_output_statistics_interval_factor=44 [default=1]; // if >1, output full output file every output_statistics_interval_ns*full_output_interval_factor 
+  // n=44
   }
 
 // if you add any parameters you must update automatic_parameters.cpp
@@ -269,7 +270,7 @@ message Assignment {
   optional int32 output_statistics_interval_frames=41 [default=100000]; // update interval of statistics file (including order params) in frames
   optional FloatAssignment temperature_k=42; // simulation temperature
   optional double output_npctransport_version=43; // a version number for npctransport by which to interpret output file that contains this assignment
-  optional int32 is_xyz_hist_stats=44 [default=1]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2)
+  optional int32 is_xyz_hist_stats=44 [default=1]; // whether to use an xyz histogram instead of zr histogram (= whether to project x and y to sqrt(x^2+y^2); if so output ot HDF5 file
   optional double xyz_stats_crop_factor=49 [default=0.5]; // percentage of box to crop from each axis for xyz histogram (symmetrically). 
   optional double xyz_stats_voxel_size_a=50 [default=10.0]; // size of voxel in A for xyz histogram
   optional double xyz_stats_max_box_size_a=51 [default=2000.0]; // maximal size of box for xyz stats
@@ -280,7 +281,8 @@ message Assignment {
   optional int32 is_multiple_hdf5s=52;  // if true, output new hdf5 every output_statistics_interval_ns, 
                                         // then add a numeric suffix to hdf5 for each dump
                                         // e.g. output_1.pb.hdf5, output_2.pb.hdf5, etc. Default is only once in the end.
-  // n=52
+    optional int32 full_output_statistics_interval_factor=53 [default=1]; // if >1, output full output file every output_statistics_interval_ns*full_output_interval_factor 
+  // n=53
 }
 
 message Statistics {
