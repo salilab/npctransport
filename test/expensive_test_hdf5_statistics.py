@@ -11,7 +11,8 @@ import numpy as np
 import subprocess
 
 radius=8
-N_OUTPUT_FRAMES = 3
+N_OUTPUT_FRAMES = 25
+N_FULL_OUTPUT_PER_HDF5 = 5
 BOX_SIDE=800
 
 def get_95_conf(rate,time):
@@ -40,6 +41,7 @@ class Tests(IMP.test.TestCase):
         cfg.is_multiple_hdf5s = is_multiple_hdf5s
         cfg.output_statistics_interval_ns = 1.0
         cfg.simulation_time_ns = N_OUTPUT_FRAMES * cfg.output_statistics_interval_ns
+        cfg.full_output_statistics_interval_factor = N_FULL_OUTPUT_PER_HDF5
         test_util.write_config_file(cfg_file, cfg)
 
     def _make_sd(self, is_orientational=False, is_multiple_hdf5s=False):
@@ -93,8 +95,10 @@ class Tests(IMP.test.TestCase):
         """
         for is_multiple_hdf5s in [False, True]:
             print("*** Multiple HDF5s ***" if is_multiple_hdf5s else "*** Single HDF5 ***")
-            cfg_file = self.get_tmp_file_name("config{}.pb".format(is_multiple_hdf5s))
-            out_file = self.get_tmp_file_name("output{}.pb".format(is_multiple_hdf5s))
+            cfg_file = "config{}.pb".format(is_multiple_hdf5s)
+            out_file = "output{}.pb".format(is_multiple_hdf5s)
+#            cfg_file = self.get_tmp_file_name(cfg_file)
+#            out_file = self.get_tmp_file_name(out_file)
             self._make_cfg(cfg_file,
                            is_orientational=is_orientational, 
                            is_multiple_hdf5s=is_multiple_hdf5s)
