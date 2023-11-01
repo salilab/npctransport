@@ -93,10 +93,9 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 %include "IMP/npctransport/BipartitePairsStatisticsOptimizerState.h"
 %include "IMP/npctransport/automatic_parameters.h"
 %include "IMP/npctransport/initialize_positions.h"
-%include "IMP/npctransport/Avro2PBReader.h"
 %include "IMP/npctransport/util.h"
 
-
+// include Avro2PBReader.h:
 // Return value from Avro2PBReader::read_next() should be handled as an
 // array of bytes in Python 3, not a Unicode string
 %typemap(out) IMP::npctransport::Avro2PBReader::ByteBuffer {
@@ -106,27 +105,28 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
   $result = PyString_FromStringAndSize($1.data(), $1.size());
 %#endif
 }
+%include "IMP/npctransport/Avro2PBReader.h"
 
+// include main.h:
 // Allow variable lists of strings to be handles properly for main.h startup()
 //(from https://www.swig.org/Doc2.0/Typemaps.html + ChatGPT)
 %{
 #include "IMP/npctransport/main.h"
 %}
-
 %typemap(in) (int argc, char *argv[]) {
     if (PyList_Check($input)) {
         $1 = PyList_Size($input); // argc
         $2 = (char **) malloc(($1 + 1) * sizeof(char *));
         for (int i = 0; i < $1; i++) {
             PyObject *py_str = PyList_GetItem($input, i);
-#if PY_MAJOR_VERSION >= 3
+%#if PY_VERSION_HEX >= 0x03000000
             if (PyUnicode_Check(py_str)) {
                 $2[i] = strdup(PyUnicode_AsUTF8(py_str));
             } else {
                 PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
                 return NULL;
             }
-#else
+%#else
             if (PyString_Check(py_str)) {
                 $2[i] = strdup(PyString_AsString(py_str));
             } else if (PyUnicode_Check(py_str)) {
@@ -137,7 +137,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
                 PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
                 return NULL;
             }
-#endif
+%#endif
         }
         $2[$1] = 0; // Null terminate the array
     } else {
