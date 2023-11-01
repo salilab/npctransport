@@ -225,6 +225,10 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
       @param nf_new the number of frames by which the statistics file
                     should be advanced. This is used to weight the
                     contribution of average statistics over time.
+      @param force_full_output if true, then full statistics are dumped
+                               to the output file, even if the number
+                               of calls to update does not divide by the
+                              value of full_output_statistics_interval_factor
 
       @note this method is not const cause it may invoke e.g., energy evaluation
             though it does not substantially change anything in the state of the object
@@ -234,7 +238,8 @@ class IMPNPCTRANSPORTEXPORT Statistics : public Object {
             and only the HDF5 file is updated at each call.
    */
   void update(const IMP::internal::SimpleTimer &timer,
-              unsigned int nf_new = 1);
+              unsigned int nf_new = 1,
+              bool force_full_output = false);
 
   /** resets all the counters of any statistics counters,
       and the simulation time to zero */

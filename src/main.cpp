@@ -305,7 +305,8 @@ namespace {
     // TODO: next line is a temporary hack - needed for some reason to
     // force the pair predicates to evaluate predicate pairs restraints
     sd->get_model()->update();
-    do {
+    bool is_last = number_of_frames <= 0;
+    while(!is_last) {
       unsigned int cur_nframes = std::min<unsigned int>
         ( first_only ? max_frames_per_chunk / 10 : max_frames_per_chunk,
           number_of_frames);
@@ -320,16 +321,16 @@ namespace {
         sd->get_statistics()->set_interrupted(true);
         std::cout << "Terminating..." << std::endl;
         if (!silent_statistics) {
-          sd->get_statistics()->update(timer, cur_nframes);
+          sd->get_statistics()->update(timer, cur_nframes, true);
         }
         return false;
       }
-      if (!silent_statistics) {
-        sd->get_statistics()->update(timer, cur_nframes);
-      }
-      std::cout << "Done" << std::endl;
       number_of_frames -= cur_nframes;
-    } while (number_of_frames > 0 && !first_only);
+      is_last = number_of_frames <= 0 || first_only;
+      if (!silent_statistics) {
+        sd->get_statistics()->update(timer, cur_nframes, is_last);
+      }
+    };
     return true;
   }
 

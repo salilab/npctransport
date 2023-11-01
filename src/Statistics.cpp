@@ -772,7 +772,8 @@ void Statistics::update_hdf5_statistics()
 // @param nf_new number of new frames accounted for in this statistics update
 void Statistics::update
 ( const IMP::internal::SimpleTimer &timer,
-  unsigned int nf_new)
+  unsigned int nf_new,
+  bool force_full_output)
 {
   IMP_OBJECT_LOG;
   IMP_ALWAYS_CHECK(get_is_activated(), // TODO: would we rather a usage/always check?
@@ -783,7 +784,8 @@ void Statistics::update
      update_hdf5_statistics();
   }
   // Output full statistics every full_output_statistics_interval_factor calls only
-  if(update_calls_ % get_sd()->get_full_output_statistics_interval_factor() != 0){
+  if(!force_full_output 
+      || (update_calls_ % get_sd()->get_full_output_statistics_interval_factor() != 0)){
     return;
   }
   // Fetach protobuf statistics message from file
