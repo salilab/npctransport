@@ -25,13 +25,16 @@ IMPNPCTRANSPORTEXPORT
 IMP::npctransport::SimulationData *startup(int argc, char *argv[]);
 
 //! remove nup42 and its anchors (also from obstacles)
+IMPNPCTRANSPORTEXPORT
 void remove_Nup42(SimulationData* sd);
 
 //! inflate floater of specified type to new_radius
+IMPNPCTRANSPORTEXPORT
 void inflate_floater
 (SimulationData* sd, const std::string floater_name, const float new_radius);
 
 //! change box size sd to specified box size and update output file
+IMPNPCTRANSPORTEXPORT
 void reset_box_size(SimulationData* sd, double box_size);
 
 /** Run simulation using preconstructed SimulationData object sd.
