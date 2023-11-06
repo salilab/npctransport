@@ -9,6 +9,8 @@ import glob
 import RMF
 import numpy as np
 import subprocess
+import sys
+
 
 radius=8
 N_OUTPUT_FRAMES = 15
@@ -132,7 +134,7 @@ sd = IMP.npctransport.startup(['fake_main',
     '--short_sim_factor', '{short_sim_factor}', '--short_init_factor', '{short_sim_factor}'])
 IMP.npctransport.do_main_loop(sd, [])
 """)
-            subprocess.check_call(["python", python_file])
+            subprocess.check_call([sys.executable, python_file])
             hdf5_filenames = glob.glob(out_file + "*.hdf5")
             if is_multiple_hdf5s:
                 self.assertEqual(len(hdf5_filenames), np.ceil(N_OUTPUT_FRAMES * short_sim_factor))
