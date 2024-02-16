@@ -25,6 +25,8 @@ if [ ${python_version} = "2.7" ]; then
   # pytest-flake8 1.1.0 tries to import contextlib.redirect_stdout, which
   # isn't present in Python 2
   pip install pytest-cov coverage 'pytest-flake8<1.1'
+  # Python.h includes crypt.h, which is no longer provided by default
+  sudo apt-get install -y libcrypt-dev
 else
   pip install pytest-cov coverage pytest-flake8
 fi
