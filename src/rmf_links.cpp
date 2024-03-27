@@ -19,8 +19,6 @@
 #include <IMP/exception.h>
 #include <IMP/log.h>
 
-#include <boost/foreach.hpp>
-
 IMPNPCTRANSPORT_BEGIN_NAMESPACE
 HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
     : rmf::HierarchyLoadLink(fh), bf_(fh) {
@@ -44,7 +42,7 @@ HierarchyWithSitesLoadLink::HierarchyWithSitesLoadLink(RMF::FileConstHandle fh)
 void HierarchyWithSitesLoadLink::do_load_hierarchy(
     RMF::NodeConstHandle root_node, Model *m,
     ParticleIndex root) {
-  BOOST_FOREACH(ParticleIndex pi, particles_.find(root)->second) {
+  for (ParticleIndex pi : particles_.find(root)->second) {
     // load particle transport directionality if needed
     RMF::NodeConstHandle nh = rmf::get_node_from_association(
         root_node.get_file(), m->get_particle(pi));
@@ -207,7 +205,7 @@ void HierarchyWithSitesSaveLink::do_setup_node(Model *m,
 void HierarchyWithSitesSaveLink::do_save_hierarchy(Model *m,
                                                    ParticleIndex root,
                                                    RMF::NodeHandle root_node) {
-  BOOST_FOREACH(ParticleIndex pi, particles_.find(root)->second) {
+  for (ParticleIndex pi : particles_.find(root)->second) {
     RMF::NodeHandle n = rmf::get_node_from_association(root_node.get_file(),
                                                  m->get_particle(pi));
     if (Transporting::get_is_setup(m, pi)) {
