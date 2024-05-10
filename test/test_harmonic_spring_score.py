@@ -1,4 +1,10 @@
 from __future__ import print_function
+
+try:
+    import pandas
+except ImportError:
+    pandas = None
+
 import IMP
 import IMP.test
 import IMP.npctransport
