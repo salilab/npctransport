@@ -218,7 +218,7 @@ class Tests(IMP.test.TestCase):
             if(n_good >= n_good_thresh):
                 print("total energy", sd.get_bd().get_scoring_function().evaluate(False), end=' ')
                 print("predr", sd.get_scoring().get_predicates_pair_restraint().evaluate(False), end=' ')
-                return True
+                return
         if fast:
             print("Failed to glue particles after %d iterations x %d opt frames (total %.3f ns)" \
                 % (n_iter, opt_cycles_frames, opt_cycles_ns*n_iter))
