@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 import IMP
 from IMP.npctransport import create_range, Configuration
 import sys

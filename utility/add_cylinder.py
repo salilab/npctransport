@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """Add cylinders of a given radius to the passed file."""
-from __future__ import print_function
 import IMP
 import RMF
 import IMP.rmf

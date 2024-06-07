@@ -1,4 +1,3 @@
-from __future__ import print_function
 import IMP.npctransport
 import IMP
 import RMF

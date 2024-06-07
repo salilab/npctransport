@@ -7,10 +7,7 @@ import shutil
 header_fn = sys.argv[1]
 link_header_fn = sys.argv[2]
 
-if sys.version_info[0] == 2:
-    linesep = os.linesep
-else:
-    linesep = bytes(os.linesep, 'ascii')
+linesep = bytes(os.linesep, 'ascii')
 
 with open(header_fn, 'rb') as fh:
     contents = fh.read()

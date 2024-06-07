@@ -1,4 +1,3 @@
-from __future__ import print_function
 from IMP.npctransport import *
 import sys
 import math
