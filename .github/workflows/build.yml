@@ -37,4 +37,6 @@ jobs:
         make
         ./setup_environment.sh pytest --cov=.. --cov-branch --cov-report=xml -v -k 'not test_protobuf_installed and not add_test_sites' ../test/test_*.py ../test/medium_test_*.py test/*/*.py
         flake8 ../pyext/src/
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v4
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
