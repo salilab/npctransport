@@ -1250,7 +1250,7 @@ SimulationData::set_bounding_volume(double volume_A3){
 
 algebra::Cylinder3D SimulationData::get_cylinder() const {
   IMP_USAGE_CHECK(get_is_slab_with_cylindrical_pore(),
-                  "no slab with cylidrical pore defined");
+                  "no slab with cylindrical pore defined");
   algebra::Vector3D pt(0, 0, get_slab_thickness() / 2.0);
   algebra::Segment3D seg(pt, -pt);
   return algebra::Cylinder3D(seg, get_pore_radius());

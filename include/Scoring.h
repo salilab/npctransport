@@ -186,7 +186,7 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
         @param non_optimizable_beads particles container on which to apply bounding volume
                          and pair constraints only if they also involve optimizable beads
         @param optimizable_beads particles container on which to apply bounding volume
-                         and pair contstraints, either with other optimizable beads or with
+                         and pair constraints, either with other optimizable beads or with
                          non-optimizable ones.
         @param is_attr_interactions_on if false, only repulsive interactions will be
                                        computed between pairs of particles

@@ -599,7 +599,7 @@ Scoring::remove_particle_type
   // III. TODO: Clean interaction_pair_scors - actually not essential
   // IV. TODO: remove also for z-bias partricles map
   // V. TODO: remove also restrained anchor beads (complicated!)
-  // VI. force referesh of scoring function
+  // VI. force refresh of scoring function
   get_scoring_function(true);
 }
 

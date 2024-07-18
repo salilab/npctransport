@@ -261,7 +261,7 @@ class Tests(IMP.test.TestCase):
         sos= IMP.rmf.SaveOptimizerState(m, f)
         sos.set_period(1000)
         bd.add_optimizer_state(sos)
-        print("optimizin")
+        print("optimizing")
         IMP.set_log_level(IMP.SILENT)
         bd.optimize(3000)
         print("done")

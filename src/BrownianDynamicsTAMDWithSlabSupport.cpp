@@ -27,7 +27,7 @@ BrownianDynamicsTAMDWithSlabSupport
 
   // Relax all FG springs by going over all FGs and then updating all their springs by random diffusion + gradient just as BD of XYZ particles
   // Note that this is inefficient if there are no harmonic springs (backward support), but we only care about performance of new version
-  // where they are persent
+  // where they are present
   double dtfs_ikt(dtfs*ikt);
   for(unsigned int i=0; i<ps.size(); i++){
     if(!RelaxingSpring::get_is_setup(get_model(),
