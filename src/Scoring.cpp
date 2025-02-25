@@ -539,7 +539,7 @@ Scoring::get_chain_restraints_on
             IMP_USAGE_CHECK
               (chains_set_.find(chain) != chains_set_.end(),
                "For some reason a bead particle appears in bead to chain map"
-               << " but its chain is missing from chains_set_");
+               << " but its chain is missing from chains_set_, chain " << chain);
             if( chains_found.find(chain) == chains_found.end() )
             {
               chains_found.insert(chain);
@@ -576,7 +576,7 @@ Scoring::remove_particle_type
                     "all particles are expected to be typed");
     core::ParticleType cur_type= core::Typed(get_model(), iter->first).get_type();
     if(pt == cur_type){
-      bead_to_chain_map_.erase(iter++);
+      iter = bead_to_chain_map_.erase(iter);
     } else {
       iter++;
     }
@@ -591,7 +591,7 @@ Scoring::remove_particle_type
     core::ParticleType cur_type= core::Typed(get_model(),
                                        h_root.get_particle_index()).get_type();
     if(pt == cur_type){
-      chains_set_.erase(iter++);
+      iter = chains_set_.erase(iter);
     }else{
       iter++;
     }

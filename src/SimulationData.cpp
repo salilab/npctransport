@@ -615,8 +615,7 @@ SimulationData::remove_particle_type
     }
   }
   // Remove all particles of type pt from beads_
-  for(Particles::iterator iter=beads_.begin();
-      iter!=beads_.end(); ) {
+  for(auto iter=beads_.begin(); iter!=beads_.end(); ) {
     Particle* p= *iter;
     IMP_USAGE_CHECK(p->get_model() == get_model(),
                     "Particle is expected to have same model as SimulationData");
@@ -672,6 +671,7 @@ SimulationData::remove_fgs_with_prefix
   std::set<std::string> s_fg_types_to_remove_set;
   for(core::ParticleType pt : fg_types) {
     std::string s_cur_type= pt.get_string();
+    //    std::cout << "DEBUG: examining removal of fg type " << s_cur_type << std::endl; // TODO: remove
     // match  = begins with s_fg_type, followed by an empty string or a non-digit
     //  character
     if(s_cur_type.compare(0, s_fg_type.size(), s_fg_type) == 0 &&
