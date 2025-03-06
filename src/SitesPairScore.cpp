@@ -73,7 +73,7 @@ SitesPairScore::evaluate_indexes
 (Model *m, const ParticleIndexPairs &pis,
  DerivativeAccumulator *da,
  unsigned int lower_bound,
- unsigned int upper_bound) const
+ unsigned int upper_bound, bool) const
 {
   // get internal tables:
   algebra::Sphere3D const* spheres_table=

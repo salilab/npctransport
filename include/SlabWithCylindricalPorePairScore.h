@@ -79,7 +79,8 @@ SlabWithCylindricalPorePairScore : public PairScore {
      const ParticleIndexPairs &pips,
      DerivativeAccumulator *da,
      unsigned int lower_bound,
-     unsigned int upper_bound) const override final;
+     unsigned int upper_bound,
+     bool all_indexes_checked=false) const override final;
 
   /**
      Evaluate score for particles pis[lower_bound..upper_bound] in
@@ -96,8 +97,10 @@ SlabWithCylindricalPorePairScore : public PairScore {
       DerivativeAccumulator *da,
       double max,
       unsigned int lower_bound,
-      unsigned int upper_bound) const override
+      unsigned int upper_bound,
+      bool all_indexes_checked=false) const override
   {
+    IMP_UNUSED(all_indexes_checked);
     double ret = 0;
     for (unsigned int i = lower_bound; i < upper_bound; ++i) {
       ret += evaluate_if_good_index(m, pips[i], da, max - ret);
@@ -193,7 +196,7 @@ SlabWithCylindricalPorePairScore::evaluate_indexes
  const ParticleIndexPairs &pips,
  DerivativeAccumulator *da,
  unsigned int lower_bound,
- unsigned int upper_bound) const
+ unsigned int upper_bound, bool) const
 {
   if(upper_bound<lower_bound){
     return 0.0;

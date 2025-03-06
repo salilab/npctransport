@@ -3,7 +3,7 @@
  *  \brief a score for a slab with a toroidal pore
  *
 
- *  Copyright 2007-2022 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2025 IMP Inventors. All rights reserved.
  *
  */
 
@@ -67,7 +67,8 @@ public:
      const ParticleIndexPairs &pips,
      DerivativeAccumulator *da,
      unsigned int lower_bound,
-     unsigned int upper_bound) const override final;
+     unsigned int upper_bound,
+     bool all_indexes_checked=false) const override final;
 
   /**
      Evaluate score for particles pis[lower_bound..upper_bound] in
@@ -84,8 +85,10 @@ public:
       DerivativeAccumulator *da,
       double max,
       unsigned int lower_bound,
-      unsigned int upper_bound) const override
+      unsigned int upper_bound,
+      bool all_indexes_checked=false) const override
   {
+    IMP_UNUSED(all_indexes_checked);
     double ret = 0;
     for (unsigned int i = lower_bound; i < upper_bound; ++i) {
       ret += evaluate_if_good_index(m, p[i], da, max - ret);
@@ -195,7 +198,7 @@ SlabWithToroidalPorePairScore::evaluate_indexes
      const ParticleIndexPairs &pips,
      DerivativeAccumulator *da,
      unsigned int lower_bound,
-     unsigned int upper_bound) const
+     unsigned int upper_bound, bool) const
 {
   IMP_LOG_TERSE("SlabWithToroidalPore singleton - evaluate indexes"
           << std::endl);

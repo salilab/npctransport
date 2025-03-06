@@ -90,18 +90,20 @@ class IMPNPCTRANSPORTEXPORT LinearSoftSpherePairScore : public PairScore {
                                 DerivativeAccumulator *da) const override;
 
   virtual double evaluate_indexes(Model *m,
-                                  const ParticleIndexPairs &pips,
-                                  DerivativeAccumulator *da,
-                                  unsigned int lower_bound,
-                                  unsigned int upper_bound) const override;
+                      const ParticleIndexPairs &pips,
+                      DerivativeAccumulator *da,
+                      unsigned int lower_bound,
+                      unsigned int upper_bound,
+                      bool all_indexes_checked=false) const override;
 
   double evaluate_if_good_indexes
     ( Model *m,
       const ParticleIndexPairs &p,
       DerivativeAccumulator *da,
       double max, unsigned int lower_bound,
-      unsigned int upper_bound) const override
+      unsigned int upper_bound, bool all_indexes_checked=false) const override
   {
+    IMP_UNUSED(all_indexes_checked);
     double ret = 0;
     for (unsigned int i = lower_bound; i < upper_bound; ++i) {
       ret += evaluate_if_good_index(m, p[i], da, max - ret);
@@ -175,7 +177,7 @@ LinearSoftSpherePairScore::evaluate_indexes
   const ParticleIndexPairs &pips,
   DerivativeAccumulator *da,
   unsigned int lower_bound,
-  unsigned int upper_bound ) const
+  unsigned int upper_bound, bool) const
 {
   IMP_OBJECT_LOG;
   algebra::Sphere3D const* xyzrs=
@@ -276,10 +278,11 @@ class IMPNPCTRANSPORTEXPORT LinearInteractionPairScore : public PairScore {
   //! evaluate all index pairs between pips[lower_bound] and pis[upper_bound]
   //! and update their coordinate derivatives scaled by da, if da is not null
   virtual double evaluate_indexes(Model *m,
-                                  const ParticleIndexPairs &pips,
-                                  DerivativeAccumulator *da,
-                                  unsigned int lower_bound,
-                                  unsigned int upper_bound) const override;
+                         const ParticleIndexPairs &pips,
+                         DerivativeAccumulator *da,
+                         unsigned int lower_bound,
+                         unsigned int upper_bound,
+                         bool all_indexes_checked=false) const override;
 
   double evaluate_if_good_index(Model *m, const ParticleIndexPairs &p,
                                 DerivativeAccumulator *da, double max,
@@ -379,7 +382,7 @@ LinearInteractionPairScore::evaluate_indexes
   const ParticleIndexPairs &pips,
   DerivativeAccumulator *da,
   unsigned int lower_bound,
-  unsigned int upper_bound) const
+  unsigned int upper_bound, bool) const
 {
   IMP_OBJECT_LOG;
   algebra::Sphere3D const* xyzrs=
