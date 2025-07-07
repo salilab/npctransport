@@ -55,7 +55,7 @@ class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
       @param d core::XYZR position of the particle
       @return a pair with the score and the derivative vector
   */
-  std::pair<double, algebra::Vector3D>  eval_deriv(const core::XYZR &d) const {
+  std::pair<double, algebra::Vector3D>  evaluate_deriv(const core::XYZR &d) const {
     double score;
     algebra::Vector3D v_deriv;
     double r2 =  std::pow(d.get_x(), 2) + std::pow(d.get_y(), 2);
@@ -86,7 +86,7 @@ class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
                                 DerivativeAccumulator *da) const override
   {
     core::XYZR d(m,pi);
-    auto score_deriv = eval_deriv(d);
+    auto score_deriv = evaluate_deriv(d);
     auto score = score_deriv.first;
     auto v_deriv = score_deriv.second;
     if (da) {
