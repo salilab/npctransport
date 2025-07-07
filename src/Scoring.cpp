@@ -745,17 +745,17 @@ Restraint * Scoring::create_slab_restraint
 }
 
 void Scoring::add_z_bias_restraint
-( SingletonContainerAdaptor ps, double k )
+( SingletonContainerAdaptor ps, double k, double z)
 {
   ps.set_name_if_default("AddZBiasRestraintInput%1%");
   z_bias_restraints_.push_back
-    ( create_z_bias_restraint( ps, k) );
+    ( create_z_bias_restraint(ps, k, z) );
 }
 
-void Scoring::add_z_bias_restraint(Particle* p, double k)
+void Scoring::add_z_bias_restraint(Particle* p, double k, double z)
 {
   ParticlesTemp ps(1, p);
-  add_z_bias_restraint(ps, k);
+  add_z_bias_restraint(ps, k, z);
 }
 
 IMP::Restraints
@@ -765,7 +765,7 @@ Scoring::get_z_bias_restraints()
 }
 
 IMP::Restraint*
-Scoring::create_z_bias_restraint(SingletonContainerAdaptor ps, double k)
+Scoring::create_z_bias_restraint(SingletonContainerAdaptor ps, double k, double z)
 const
 {
   ps.set_name_if_default("CreateZBiasRestraintKInput%1%");
@@ -774,7 +774,7 @@ const
   if (get_sd()->get_has_slab()) {
     R = get_sd()->get_pore_radius(); // TODO: incompatible with dynamic pore radius
   }
-  IMP_NEW(ZBiasSingletonScore, zbsc, (k, R) );
+  IMP_NEW(ZBiasSingletonScore, zbsc, (k, R, z) );
   return
     container::create_restraint(zbsc.get(),
                                 ps.get(),

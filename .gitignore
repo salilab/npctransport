@@ -18,3 +18,4 @@ npctransport.pb.h
 npctransport_pb2.py
 pyext/#swig.i-in#
 .DS_Store
+.vscode/
