@@ -54,15 +54,17 @@ message Configuration {
     required FloatRange interaction_k_factor=7;
     required FloatRange interaction_range_factor=8;
     optional string type=9; // type name, e.g. "kap121"
-    optional FloatRange k_z_bias=10; // if non-0, add a biasing constant force pulling to lower (k>0) or higher (k<0)
+    optional FloatRange k_z_bias=10; // if non-zero, add a biasing constant force pulling towards z=k_z_bias_z (k>0) or away from z=k_z_bias_z (k<0)
     optional FloatRange k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
-    optional double site_relative_distance=12 [default=1.0]; // distance of sites from center relative to particle radius
-    optional double site_radius=13 [default=0.0]; // radius around site within which maximal interaction energy is felt
-    optional int32 beads_tail_n=14 [default=0]; // NOT IMPLEMENTED - option for a tail of beads, 0 for none
-    optional double beads_tail_radius=15 [default=0]; // NOT IMPLEMENTED - radius of tail beads
-    optional double beads_tail_k=16 [default=1.0]; // NOT IMPLEMENTED - k for tail springs;
-    optional double beads_tail_bond_length=17 [default=1.0]; // NOT IMPLEMENTED - length of bond between beads
-    repeated XYZ site_coordinates=18; // coordinates of interaction sites relative to sphere center, valid if length is zero or equals to interactions field. Overrides site_relative distance
+    optional FloatRange k_z_bias_z=12; // z coordinate to bias towards/away from (default=0) (relevant only if k_z_bias is non-zero)
+    optional IntRange k_z_bias_max_t_ns=13; // minimal time point in nanoseconds to stop the z-bias. Biasing stops only after first simulation restart that takes place after the specified time. (default - never stop; relevant only if k_z_bias is non-zero)
+    optional double site_relative_distance=14 [default=1.0]; // distance of sites from center relative to particle radius
+    optional double site_radius=15 [default=0.0]; // radius around site within which maximal interaction energy is felt
+    optional int32 beads_tail_n=16 [default=0]; // NOT IMPLEMENTED - option for a tail of beads, 0 for none
+    optional double beads_tail_radius=17 [default=0]; // NOT IMPLEMENTED - radius of tail beads
+    optional double beads_tail_k=18 [default=1.0]; // NOT IMPLEMENTED - k for tail springs;
+    optional double beads_tail_bond_length=19 [default=1.0]; // NOT IMPLEMENTED - length of bond between beads
+    repeated XYZ site_coordinates=20; // coordinates of interaction sites relative to sphere center, valid if length is zero or equals to interactions field. Overrides site_relative distance
   };
   message ObstacleConfiguration {
     repeated XYZ xyzs=1; // center of mass of each such obstacle (also sets the number)
@@ -182,6 +184,7 @@ message Assignment {
     repeated string type_suffix_list=19; // list of suffixes appended to the end of the type field in corresponding chain particles. The list length is, assumed to be either 0 (=ignore) or the number of chain particles. Set to "" for particles that should not be modified. This enables customization of the interaction properties of different chain particles. Note that 'interaction_k_factor', 'interaction_range_factor', 'd_factor', 'interactions' fields are all ignored for particles whose suffix is not "".
     optional double backbone_k_factor=20 [default=1.0]; // FOR NOW - does nothing!!!!!
   };
+  // See FloaterConfiguration for documentation
   message FloaterAssignment {
     required IntAssignment number=1;
     required FloatAssignment radius=2;
@@ -190,15 +193,17 @@ message Assignment {
     required FloatAssignment interaction_k_factor=5;
     required FloatAssignment interaction_range_factor=7;
     optional string type=8; // e.g., "kap121"
-    optional FloatAssignment k_z_bias=9; // if non-0, add a biasing constant force pulling to lower (k>0) or higher (k<0)
-    optional FloatAssignment k_z_bias_fraction=11; // fraction of particles that will get the z-bias, meaningful if in (0,1]
-    optional double site_relative_distance=12 [default=1.0]; // distance of sites from center relative to particle radius
-    optional double site_radius=13 [default=0.0]; // radius around site at which maximal interaction is felt
-    optional int32 beads_tail_n=14 [default=0]; // option for a tail of beads, 0 for none
-    optional double beads_tail_radius=15 [default=0]; // radius of tail beads
-    optional double beads_tail_k=16 [default=1.0]; // k for tail springs;
-    optional double beads_tail_bond_length=17 [default=1.0]; // length of bond between beads
-    repeated XYZ site_coordinates=18; // coordinates of interaction sites relative to sphere center, valid if length is zero or equals to interactions field. If specified, overrides site_relative_distance
+    optional FloatAssignment k_z_bias=9; 
+    optional FloatAssignment k_z_bias_fraction=10;
+    optional FloatAssignment k_z_bias_z=11; 
+    optional IntAssignment k_z_bias_max_t_ns=12; 
+    optional double site_relative_distance=13 [default=1.0]; // distance of sites from center relative to particle radius
+    optional double site_radius=14 [default=0.0]; // radius around site at which maximal interaction is felt
+    optional int32 beads_tail_n=15 [default=0]; // option for a tail of beads, 0 for none
+    optional double beads_tail_radius=16 [default=0]; // radius of tail beads
+    optional double beads_tail_k=17 [default=1.0]; // k for tail springs;
+    optional double beads_tail_bond_length=18 [default=1.0]; // length of bond between beads
+    repeated XYZ site_coordinates=19; // coordinates of interaction sites relative to sphere center, valid if length is zero or equals to interactions field. If specified, overrides site_relative_distance
 
   };
   message ObstacleAssignment {

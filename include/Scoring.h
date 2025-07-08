@@ -624,11 +624,12 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
      @param ps container for the particles to be biased
      @param k force constant
+     @param z z coordinate to bias towards/away from (relevant only if k_z_bias is non-zero)
 
      \see get_z_bias_restraints()
      \see get_scoring_function()
   */
-  void add_z_bias_restraint(SingletonContainerAdaptor ps, double k);
+  void add_z_bias_restraint(SingletonContainerAdaptor ps, double k, double z);
 
   /**
      adds a biasing potential for particle p towards z, to the restraints
@@ -638,8 +639,9 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
      @param p the particle to be biased
      @param k force constant
+     @param z z coordinate to bias towards/away from (relevant only if k_z_bias is non-zero)
   */
-  void add_z_bias_restraint(Particle* p, double k);
+  void add_z_bias_restraint(Particle* p, double k, double z);
 
   /**
      return z_bias restraints for all particles that were added using
@@ -654,9 +656,11 @@ class IMPNPCTRANSPORTEXPORT Scoring: public Object
 
       @param ps the particles container
       @param k force constant for biasing ps
+      @param z z coordinate to bias towards/away from (relevant only if k_z_bias is non-zero)
   */
   IMP::Restraint* create_z_bias_restraint(SingletonContainerAdaptor ps,
-                                          double k) const;
+                                          double k,
+                                          double z) const;
 
   void add_custom_restraint(IMP::Restraint* r)
   { custom_restraints_.push_back(r); }

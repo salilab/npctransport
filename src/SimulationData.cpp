@@ -501,7 +501,9 @@ void SimulationData::create_floaters
       ( type, f_data.interaction_k_factor().value());
 
   // add z-biasing potential for fraction of particles
-  if(f_data.has_k_z_bias()) if (f_data.k_z_bias().value() != 0)
+  bool has_k_z_bias = (f_data.has_k_z_bias()) && (f_data.k_z_bias().value() != 0);
+  bool k_z_time_valid = (!f_data.has_k_z_bias_max_t_ns()) || (f_data.k_z_bias_max_t_ns().value() > initial_simulation_time_ns_);
+  if(has_k_z_bias && k_z_time_valid)
     {
       double k = f_data.k_z_bias().value();
       unsigned int n_bias = f_data.number().value();
@@ -519,7 +521,17 @@ void SimulationData::create_floaters
       IMP_LOG(VERBOSE, "Biasing " << n_bias << " floaters"
                 << " of type " << type
                 << std::endl);
-      get_scoring()->add_z_bias_restraint(ps, k);
+                
+      double z;
+      unsigned int max_t;
+      if (f_data.has_k_z_bias_z()){
+        z = f_data.k_z_bias_z().value();
+      }
+      else {
+        z = std::numeric_limits<double>::min(); // default
+      }
+      
+      get_scoring()->add_z_bias_restraint(ps, k, z);
     }
 }
 
