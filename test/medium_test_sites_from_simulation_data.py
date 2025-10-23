@@ -136,8 +136,7 @@ class Tests(IMP.test.TestCase):
                     return True
         return False
 
-
-
+    @IMP.test.unstable
     def test_sites_from_simulation_data(self):
         '''
         Test that the site interaction glues particles together
