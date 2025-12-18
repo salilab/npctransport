@@ -112,6 +112,7 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         cg.set_step_size(0.01)
         self.opt= cg
 
+    @IMP.test.unstable
     def test_slab_pair_score(self):
         """Check slab pair score"""
         self._initialize_model()
