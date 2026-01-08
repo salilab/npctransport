@@ -2,7 +2,7 @@
  *  \file ChainStatisticsOptimizerState.cpp
  *  \brief description.
  *
- *  Copyright 2007-2022 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2026 IMP Inventors. All rights reserved.
  *
  */
 
@@ -49,7 +49,7 @@ void ChainStatisticsOptimizerState::reset()
   mean_bond_distance_= -1.0;
   mean_bond_distance2_= -1.0;
   n_= 0; // resets mean statistics
-  core::PeriodicOptimizerState::reset();
+  OptimizerState::reset();
 }
 
 double ChainStatisticsOptimizerState::get_dt() const {

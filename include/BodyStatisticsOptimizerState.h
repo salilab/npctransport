@@ -2,7 +2,7 @@
  *  \file npctransport/BodyStatisticsOptimizerState.h
  *  \brief Track the rotational correlation time of a rigid body particle
  *
- *  Copyright 2007-2022 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2026 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_BODY_STATISTICS_OPTIMIZER_STATE_H
@@ -12,8 +12,6 @@
 #include <IMP/Particle.h>
 #include <IMP/algebra/Transformation3D.h>
 #include <IMP/OptimizerState.h>
-//#include <IMP/optimizer_state_macros.h>
-#include <IMP/core/PeriodicOptimizerState.h>
 #include <IMP/npctransport/typedefs.h>
 #include <deque>
 
@@ -24,9 +22,9 @@ class Statistics;
 /** Track the rotational correlation time of a rigid body particle*/
 /** The correlation with at most the last 100 updates is tracked*/
 class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
-    : public core::PeriodicOptimizerState {
+    : public OptimizerState {
  private:
-  typedef core::PeriodicOptimizerState P;
+  typedef OptimizerState P;
   Particle *p_;
   WeakPointer<IMP::npctransport::Statistics> statistics_manager_;
 

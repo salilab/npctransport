@@ -2,7 +2,7 @@
  *  \file npctransport/ParticleTransportStatisticsOptimizerState.h
  *  \brief description
  *
- *  Copyright 2007-2022 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2026 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_PARTICLE_TRANSPORT_STATISTICS_OPTIMIZER_STATE_H
@@ -11,8 +11,6 @@
 #include "npctransport_config.h"
 #include <IMP/Particle.h>
 #include <IMP/OptimizerState.h>
-//#include <IMP/optimizer_state_macros.h>
-#include <IMP/core/PeriodicOptimizerState.h>
 #include <IMP/npctransport/typedefs.h>
 #include <IMP/atom/Simulator.h>
 #include <deque>
@@ -26,9 +24,9 @@ class Statistics;
      aligned channel,
  */
 class IMPNPCTRANSPORTEXPORT ParticleTransportStatisticsOptimizerState
-    : public core::PeriodicOptimizerState {
+    : public OptimizerState {
  private:
-  typedef core::PeriodicOptimizerState P;
+  typedef OptimizerState P;
   Particle* p_;             // the particle
   Float bottom_z_, top_z_;  // channel boundaries on z-axis
   WeakPointer<IMP::npctransport::Statistics> statistics_manager_;
