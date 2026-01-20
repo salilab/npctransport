@@ -2,7 +2,7 @@
  *  \file io.cpp
  *  \brief description.
  *
- *  Copyright 2007-2022 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2026 IMP Inventors. All rights reserved.
  *
  */
 
@@ -140,7 +140,7 @@ namespace {
   // @param name the name to be given to the range (range.name),
   //             only if it is a direct child of current message.
   // @param in_message the config message
-  // @param out_message the message to which constand and 'degenerate' range
+  // @param out_message the message to which constant and 'degenerate' range
   //                    messages are written (in the same hierarchy as in message)
   //                    In addition, range.m (message field) of each range
   //                    that is returned is associated with the descendent of

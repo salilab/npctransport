@@ -50,7 +50,7 @@ class IMPNPCTRANSPORTEXPORT ZBiasSingletonScore
   double get_k() const { return k_; }
 
   /**
-      evaluates the derivative accoridng to the particle position
+      evaluates the derivative according to the particle position
 
       @param d core::XYZR position of the particle
       @return a pair with the score and the derivative vector
