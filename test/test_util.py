@@ -85,7 +85,7 @@ def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_
     config.simulation_time_ns=0.01
     config.box_is_on.lower=1
     config.box_side.lower=200
-    config.slab_is_on.lower= is_slab_on
+    config.slab_is_on.lower = 1 if is_slab_on else 0
     config.slab_thickness.lower=150
     config.tunnel_radius.lower=90
     fg= IMP.npctransport.add_fg_type(config,

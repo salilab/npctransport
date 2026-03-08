@@ -49,7 +49,7 @@ def my_make_simple_cfg(outfile,
                                     interactions=0)
     cfg.box_is_on.lower=1
     cfg.box_side.lower=BOX_SIDE_A
-    cfg.slab_is_on.lower= False
+    cfg.slab_is_on.lower = 0
     cfg.nonspecific_range.lower= 5.0
     cfg.nonspecific_k.lower= 0.01
     cfg.time_step_factor.lower=8
