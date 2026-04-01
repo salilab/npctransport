@@ -28,7 +28,7 @@ def my_make_simple_cfg(outfile,
                        fg_name = "fg", 
                        kap_name = "kap", 
                        inert_name="inert",
-                       is_multiple_hdf5s=False):
+                       is_multiple_hdf5s=0):
     cfg= test_util.get_basic_config()
     IMP.npctransport.add_fg_type(cfg,
                                  type_name=fg_name,
@@ -53,7 +53,7 @@ def my_make_simple_cfg(outfile,
     cfg.nonspecific_range.lower= 5.0
     cfg.nonspecific_k.lower= 0.01
     cfg.time_step_factor.lower=8
-    cfg.is_xyz_hist_stats=True
+    cfg.is_xyz_hist_stats = 1
     cfg.xyz_stats_crop_factor=XYZ_STATS_CROP_FACTOR
     cfg.xyz_stats_max_box_size_a=XYZ_STATS_MAX_BOX_SIZE_A
     cfg.xyz_stats_voxel_size_a=VOXEL_SIZE_A
@@ -113,7 +113,7 @@ class Tests(IMP.test.TestCase):
         """
         test statistics of interaction between an FG and a kap using main.h functions
         """
-        for is_multiple_hdf5s in [False, True]:
+        for is_multiple_hdf5s in [0, 1]:
             print("*** Multiple HDF5s ***" if is_multiple_hdf5s else "*** Single HDF5 ***")
             cfg_file = "config{}.pb".format(is_multiple_hdf5s)
             out_file = "output{}.pb".format(is_multiple_hdf5s)
