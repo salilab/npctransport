@@ -1,9 +1,7 @@
 import IMP
 import IMP.test
-import RMF
 import IMP.rmf
 import IMP.container
-import math
 import IMP
 import test_util
 from IMP.npctransport import *
@@ -29,7 +27,7 @@ class Tests(IMP.test.TestCase):
         IMP.set_log_level(IMP.VERBOSE)
         sd = IMP.npctransport.SimulationData(output, False)
         sd.set_log_level(IMP.VERBOSE)
-        sd.set_rmf_file( self.get_tmp_file_name("out0.rmf"), False )
+        sd.set_rmf_file(self.get_tmp_file_name("out0.rmf"), False)
         print("BEFORE INIT", time.ctime())
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             short_init_factor = 0.00001
@@ -58,15 +56,15 @@ class Tests(IMP.test.TestCase):
         """ assert that sd1 and sd2 have identical Transporting statistics """
         for d1, d2 in zip(sd1.get_beads(),
                           sd2.get_beads()):
-            if(not IMP.npctransport.Transporting.get_is_setup(d1)):
+            if not IMP.npctransport.Transporting.get_is_setup(d1):
                 continue
-            if(not IMP.npctransport.Transporting.get_is_setup(d2)):
+            if not IMP.npctransport.Transporting.get_is_setup(d2):
                 continue
             t1 = IMP.npctransport.Transporting(d1)
             t2 = IMP.npctransport.Transporting(d2)
-            print ("Bead particles: ")
-            print (d1, d2)
-            print ("Comparing transport statistics: ", t1, t2)
+            print("Bead particles: ")
+            print(d1, d2)
+            print("Comparing transport statistics: ", t1, t2)
             self.assertEqual(t1.get_is_last_entry_from_top(),
                              t2.get_is_last_entry_from_top())
             self.assertAlmostEqual(t1.get_last_tracked_z(),
@@ -85,24 +83,11 @@ class Tests(IMP.test.TestCase):
 #        print(len(sd1.get_beads()),len(sd2.get_beads()))
         for p, pp in zip(sd1.get_beads(),
                          sd2.get_beads()):
-#            print(p,pp)
-#            print(IMP.core.XYZR(p))
-#            print(IMP.core.XYZR(pp))
             self.assertLess(
                 (IMP.core.XYZ(p).get_coordinates()
                  - IMP.core.XYZ(pp).get_coordinates()).get_magnitude(), .0001)
-            q0 = IMP.core.RigidBody(
-                p).get_reference_frame(
-            ).get_transformation_to(
-            ).get_rotation(
-            ).get_quaternion(
-            )
-            q1 = IMP.core.RigidBody(
-                pp).get_reference_frame(
-            ).get_transformation_to(
-            ).get_rotation(
-            ).get_quaternion(
-            )
+            q0 = IMP.core.RigidBody(p).get_reference_frame().get_transformation_to().get_rotation().get_quaternion()
+            q1 = IMP.core.RigidBody(pp).get_reference_frame().get_transformation_to().get_rotation().get_quaternion()
             print(q0, q1)
             for qa, qb in zip(q0, q1):
                 self.assertAlmostEqual(qa, qb, delta=.01)
@@ -140,7 +125,7 @@ class Tests(IMP.test.TestCase):
         print("reloading from output file ", rt_output)
         sdp = IMP.npctransport.SimulationData(rt_output, False)
         sdp.activate_statistics()
-        sd.set_rmf_file( self.get_tmp_file_name("out1.rmf"), False )
+        sd.set_rmf_file(self.get_tmp_file_name("out1.rmf"), False)
         print("After reload", time.ctime())
         self.assert_almost_equal_sds(sd, sdp)
 #        print "updating stats at end"
@@ -151,22 +136,21 @@ class Tests(IMP.test.TestCase):
         return
         print("TEST_INIT_FROM_OLD_OUTPUT1")
         test_util.test_protobuf_installed(self)
-        expected_sites = [ (3.67394e-15, 0, -30),
-                           (17.2447, -0.377296, -24.5455),
-                           (-1.55764, -23.0892, -19.0909),
-                           (-19.7675, 17.9804, -13.6364),
-                           (28.589, -3.96571, -8.18182),
-                           (-28.2097, -9.8375, -2.72727),
-                           (20.6227, 21.6163, 2.72727),
-                           (-4.64461, -28.4866, 8.18182),
-                           (-17.9874, 19.7612, 13.6364),
-                           (17.8043, 14.7833, 19.0909),
-                           (13.5084, 10.7259, 24.5455),
-                           (0, 0, 30) ]
-        expected_time =  12500039289
-        expected_particles=[ [-253.636, -108.652, 40.4134, 1, 0, 0, 0], #trans + quaternion
-                             [-236.08, -127.91, 27.47, 0.23, 0.33, -0.84, -0.36] ]
-
+        expected_sites = [(3.67394e-15, 0, -30),
+                          (17.2447, -0.377296, -24.5455),
+                          (-1.55764, -23.0892, -19.0909),
+                          (-19.7675, 17.9804, -13.6364),
+                          (28.589, -3.96571, -8.18182),
+                          (-28.2097, -9.8375, -2.72727),
+                          (20.6227, 21.6163, 2.72727),
+                          (-4.64461, -28.4866, 8.18182),
+                          (-17.9874, 19.7612, 13.6364),
+                          (17.8043, 14.7833, 19.0909),
+                          (13.5084, 10.7259, 24.5455),
+                          (0, 0, 30)]
+        expected_time = 12500039289
+        expected_particles=[[-253.636, -108.652, 40.4134, 1, 0, 0, 0], # trans + quaternion
+                            [-236.08, -127.91, 27.47, 0.23, 0.33, -0.84, -0.36]]
         # random generator initialization
         # RMF.set_log_level("trace")
         IMP.set_log_level(IMP.SILENT)
@@ -182,14 +166,10 @@ class Tests(IMP.test.TestCase):
         sd.activate_statistics()
         sd.set_rmf_file(out_rmf, False)
         for i,p in enumerate(sd.get_beads()):
-            if( i >= len(expected_particles) ):
+            if i >= len(expected_particles):
                 break
             pc= [x for x in IMP.core.XYZ(p).get_coordinates()]
-            pq = [x  for x in IMP.core.RigidBody(p
-               ).get_reference_frame(
-               ).get_transformation_to(
-               ).get_rotation(
-               ).get_quaternion() ]
+            pq = [x for x in IMP.core.RigidBody(p).get_reference_frame().get_transformation_to().get_rotation().get_quaternion()]
             for x,y in zip(pc+pq, expected_particles[i]):
                 self.assertAlmostEqual(x,y, delta=0.1)
 #            if(not IMP.npctransport.Transporting.get_is_setup(p)):
@@ -203,8 +183,8 @@ class Tests(IMP.test.TestCase):
         sites = sd.get_sites(IMP.core.ParticleType("kap"))
         for i,s in enumerate(sites):
             self.assertAlmostEqual(
-                ( s.get_center() - expected_sites[i]).get_magnitude(),
-                0, delta=.01 )
+                (s.get_center() - expected_sites[i]).get_magnitude(),
+                0, delta=.01)
         # check timers
         t = sd.get_bd().get_current_time()
         self.assertAlmostEqual(t, expected_time, delta=1)
@@ -230,8 +210,6 @@ class Tests(IMP.test.TestCase):
         sd.activate_statistics()
         sd.set_rmf_file(out_rmf, False)
 #        sd.get_bd().optimize(1)
-
-
 
 
 if __name__ == '__main__':

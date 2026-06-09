@@ -5,7 +5,6 @@ import IMP.core
 import IMP.npctransport
 import math
 import IMP.display
-import random
 
 radius=1
 #random.uniform(1,12)
@@ -19,6 +18,7 @@ rv2=rv**2
 rh2=rh**2
 #random.uniform(5,30)
 boxw= 2*max([1.1*slab_radius,slab_thickness])
+
 
 ##
 def get_surface_distance_from_axis_aligned_ellipsoid(sphere, origin, rv, rh):
@@ -40,6 +40,7 @@ def get_surface_distance_from_axis_aligned_ellipsoid(sphere, origin, rv, rh):
     cur_r = math.sqrt(rv**2*cosTheta2 + rh**2*sinTheta2)
     dv=math.sqrt(dv2)
     return dv-cur_r-sphere.get_radius()
+
 
 ##
 def out_slab(p, ALLOWED_OVERLAP=0.0):
@@ -68,17 +69,18 @@ def out_slab(p, ALLOWED_OVERLAP=0.0):
     if rxy0 + d.get_radius() > R:
         print("Sphere overlaps slab outside the torus major radius")
         return False
-    if(rxy0>EPS):
-        xy0_major= xy0 * ( R / rxy0 ) # same direction as xy0 but on major radius
+    if rxy0>EPS:
+        xy0_major= xy0 * (R / rxy0) # same direction as xy0 but on major radius
     else:
         xy0_major=IMP.algebra.Vector3D(0, R, 0.0)
     print("xy0_major", xy0_major)
-    distance = get_surface_distance_from_axis_aligned_ellipsoid \
-               (d.get_sphere(), xy0_major, rv, rh)
+    distance = get_surface_distance_from_axis_aligned_ellipsoid(
+        d.get_sphere(), xy0_major, rv, rh)
     print("Sphere surface distance to torus", distance)
     is_overlap = (distance + ALLOWED_OVERLAP < 0)
     print("Is overlapping slab somewhere within torus major radius? ", is_overlap)
     return not is_overlap
+
 
 ##
 class ConeTests(IMP.test.TestCase):
@@ -95,24 +97,20 @@ class ConeTests(IMP.test.TestCase):
         bb= IMP.algebra.BoundingBox3D(0.5*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       0.5*IMP.algebra.Vector3D(boxw,boxw,boxw))
         p_slab= IMP.Particle(m, "slab")
-        IMP.npctransport.SlabWithToroidalPore.setup_particle \
-              (p_slab, slab_thickness, slab_radius, r_h2v_ratio)
+        IMP.npctransport.SlabWithToroidalPore.setup_particle(
+            p_slab, slab_thickness, slab_radius, r_h2v_ratio)
         self.assertTrue(
             IMP.npctransport.SlabWithToroidalPore.get_is_setup(p_slab))
         # test cast to slab with pore
         slab= IMP.npctransport.SlabWithToroidalPore(p_slab)
         self.assertEqual(slab.get_pore_radius(),
                          slab_radius)
-        self.assertEqual(slab.get_thickness(),
-                         slab_thickness);
+        self.assertEqual(slab.get_thickness(), slab_thickness)
         self.assertEqual(slab.get_minor_radius_h2v_aspect_ratio(),
                          r_h2v_ratio)
-        self.assertEqual(slab.get_vertical_minor_radius(),
-                         rv);
-        self.assertEqual(slab.get_horizontal_minor_radius(),
-                         rh);
-        slabps= IMP.npctransport.SlabWithToroidalPorePairScore \
-                (1.0)
+        self.assertEqual(slab.get_vertical_minor_radius(), rv)
+        self.assertEqual(slab.get_horizontal_minor_radius(), rh)
+        slabps= IMP.npctransport.SlabWithToroidalPorePairScore(1.0)
         slabps.set_log_level(IMP.SILENT)
         r= IMP.core.PairRestraint(m,
                                   slabps,
@@ -121,7 +119,7 @@ class ConeTests(IMP.test.TestCase):
         while out_slab(p, ALLOWED_OVERLAP=0.5):
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
         print("Penetrating slab: ", d.get_coordinates())
-        pym_fname="tmp.pym" #self.get_tmp_file_name("slabps.pym")
+        pym_fname="tmp.pym" # self.get_tmp_file_name("slabps.pym")
         w= IMP.display.PymolWriter(pym_fname)
         w.set_frame(0)
         g=IMP.core.XYZRGeometry(d)

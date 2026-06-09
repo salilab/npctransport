@@ -4,14 +4,15 @@ import IMP.npctransport
 import IMP.container
 import math
 import test_util
-import sys
 
 radius=8
+
 
 def get_95_conf(rate,time):
     if time==0.0:
         return -1.0
     return 1.96*math.sqrt(rate/time)
+
 
 class Tests(IMP.test.TestCase):
 
@@ -31,13 +32,13 @@ class Tests(IMP.test.TestCase):
         cfg.time_step_factor.lower=8
         cfg.statistics_interval_ns=0.01
         test_util.write_config_file(cfg_file, cfg)
-        num=IMP.npctransport.assign_ranges( cfg_file, assign_file, 0,
-                           False, 10 );
+        num=IMP.npctransport.assign_ranges(cfg_file, assign_file, 0,
+                           False, 10)
         sd= IMP.npctransport.SimulationData(assign_file, False)
         return sd
 
     def _run_sd(self, sd, n_cycles):
-        self.assertTrue(sd != None)
+        self.assertTrue(sd is not None)
         IMP.set_log_level(IMP.SILENT)
         sd.get_bd().set_log_level(IMP.SILENT)
         time_step_fs=sd.get_bd().get_maximum_time_step()
@@ -47,8 +48,6 @@ class Tests(IMP.test.TestCase):
         sd.get_statistics().update(IMP.npctransport.create_boost_timer(),
                                    n_cycles)
 
-
-
     def _get_particles_of_type(self, sd, pt):
         """
         get bead particles of type pt in simulation data sd
@@ -57,10 +56,9 @@ class Tests(IMP.test.TestCase):
         ret=[]
         for cur_p in ps:
             cur_pt=IMP.core.Typed(cur_p).get_type()
-            if(cur_pt==pt):
+            if cur_pt==pt:
                 ret.append(cur_p)
         return ret
-
 
     def test_remove_particle_type(self):
         pt1=IMP.core.ParticleType("my_fg")

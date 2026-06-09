@@ -1,11 +1,12 @@
 from IMP.npctransport import *
-import sys
 import math
 import numpy as np
+
 
 def write_config_file(outfile, config):
     with open(outfile, "wb") as f:
         f.write(config.SerializeToString())
+
 
 def get_basic_config():
     config = Configuration()
@@ -26,7 +27,7 @@ def get_basic_config():
     config.number_of_trials=1
     config.dump_interval_ns=0.1
     config.simulation_time_ns=500
-    config.angular_D_factor.lower=0.3 #increased dynamic viscosity relative to water?
+    config.angular_D_factor.lower=0.3 # increased dynamic viscosity relative to water?
     config.statistics_interval_ns=0.01
     ###
     #simulation bounding volumes:
@@ -36,6 +37,7 @@ def get_basic_config():
     config.slab_thickness.lower=150
     config.tunnel_radius.lower=75
     return config
+
 
 def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_obstacles=False,
                     fg_name = "my_fg", kap_name = "kap0", inert_name="inert0", obstacle_name="my_obstacle0"):
@@ -69,7 +71,7 @@ def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_
                                                             name1=kap_name,
                                                             interaction_k=k_kap_lower,
                                                             interaction_range=9)
-        if(k_kap_steps > 1):
+        if k_kap_steps > 1:
             create_range(interactionFG_KAP.interaction_k,
                          k_kap_lower, k_kap_upper,
                          steps = k_kap_steps)
@@ -115,7 +117,7 @@ def make_simple_cfg(outfile=None, is_slab_on = True, n_particles_factor = 1, is_
     # fg with kaps / craps
     add_interactions_for_fg(fg_name,
                             k_kap_lower=0.1)
-     #############
+    #############
 
     # non-specific attraction
     config.nonspecific_range.lower= 5.0
@@ -150,6 +152,7 @@ def create_diffusing_rb_particle(m, radius):
     IMP.atom.RigidBodyDiffusion.setup_particle(p)
     return p
 
+
 def create_rb(m, radius):
     '''
     create a rigid-body particle of specified radius
@@ -162,13 +165,14 @@ def create_rb(m, radius):
     rb.set_coordinates_are_optimized(True)
     return rb
 
+
 def test_protobuf_installed(test_class):
     '''
     Test that protobuf is installed on python. test_class is a unittest class. For typical tests, use 'self'
     '''
     protobuf_installed=False
     try:
-        import google.protobuf
+        import google.protobuf  # noqa: F401
         protobuf_installed=True
     except ImportError:
         msg='ERROR: npctransport python module requires the python protobuf package.' \
@@ -178,7 +182,7 @@ def test_protobuf_installed(test_class):
 #    test_class.assertTrue(protobuf_installed)
 
 
-def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
+def optimize_in_chunks(sd, sim_time_ns, ns_per_chunk):
     """
         Optimizes sd->bd() in nchunks iterations, writing statistics at
         the end of each iteration
@@ -196,9 +200,9 @@ def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
     timer = IMP.npctransport.create_boost_timer()
     nframes_left = nframes
     R=[]
-    while(nframes_left > 0):
+    while nframes_left > 0:
         nframes_per_chunk = min(nframes_per_chunk, nframes_left)
-        sd.get_bd().optimize( nframes_per_chunk )
+        sd.get_bd().optimize(nframes_per_chunk)
         ps=sd.get_beads()
         cur_R=[]
         for p in ps:
@@ -206,10 +210,11 @@ def optimize_in_chunks( sd, sim_time_ns, ns_per_chunk ):
                 rs= IMP.npctransport.RelaxingSpring(p)
                 cur_R.append(rs.get_rest_length())
         R.append(cur_R)
-        if(sd.get_statistics().get_is_activated()):
-            sd.get_statistics().update( timer, nframes - nframes_per_chunk ) # TODO: timer?
+        if sd.get_statistics().get_is_activated():
+            sd.get_statistics().update(timer, nframes - nframes_per_chunk) # TODO: timer?
         nframes_left = nframes_left - nframes_per_chunk
     return np.array(R)
+
 
 def check_import_pandas_with_series_autocorr():
     '''

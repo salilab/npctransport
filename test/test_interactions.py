@@ -2,7 +2,6 @@ import IMP
 import IMP.test
 import IMP.npctransport
 import IMP
-import math
 from test_util import *
 
 
@@ -51,7 +50,7 @@ class InteractionsTests(IMP.test.TestCase):
                     expected_score):
         #        self._test_score([0,0,0],[0,0,19],
         for bead in self.sd.get_beads():
-            assert(IMP.core.XYZ.get_is_setup(bead))
+            assert IMP.core.XYZ.get_is_setup(bead)
             xyz= IMP.core.XYZ(bead)
             if IMP.core.Typed.get_is_setup(bead):
                 t= IMP.core.Typed(bead)
@@ -138,9 +137,6 @@ class InteractionsTests(IMP.test.TestCase):
             self._test_score(coords1,
                              coords2,
                              expected_score)
-
-
-
 
 
 if __name__ == '__main__':

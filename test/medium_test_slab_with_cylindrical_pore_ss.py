@@ -1,15 +1,15 @@
 import IMP
 import IMP.test
 import IMP.npctransport
-import math
 import IMP.display
-import random
 
 debug=False
 radius=1
 slab_pore_radius=5
 slab_height=3
 boxw= 2*max([3*slab_pore_radius,slab_height])
+
+
 def out_slab(p, slab):
     ''' verify particle p is out of slab.
         p is assumed to be decorated by XYZR '''
@@ -39,7 +39,6 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         '''
         pymol_fname - file name for output (stored in tmp if debug==True)
         '''
-        global debug
         d= self.d # diffusing particle
         slab= self.slab
         opt= self.opt # optimizer
@@ -55,24 +54,25 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         else:
             w= None
         # Optimize:
-        if(debug): print(d.get_coordinates())
+        if debug:
+            print(d.get_coordinates())
         for i in range(0,2000):
             s=opt.optimize(1)
             if w is not None:
                 w.set_frame(i+1)
                 w.add_geometry([g, sg])
-            if(debug):
+            if debug:
                 print("Score=%.4f at i=%d" % (s,i), " d=", d.get_coordinates(),
                       " pore radius=",slab.get_pore_radius())
                 print("Derivative XYZ", IMP.core.XYZ(d).get_derivatives())
                 print("Pore Radius derivative",
                       slab.get_particle().get_derivative
-                      ( IMP.npctransport.SlabWithPore.get_pore_radius_key() ) )
+                      (IMP.npctransport.SlabWithPore.get_pore_radius_key()))
             if abs(s-0)<0.01:
-                if(debug):
+                if debug:
                     print("*** BREAKING ***")
                 break
-        print("Final coordinates: ", d.get_coordinates(),  " score ", s, "Pore radius", slab.get_pore_radius())
+        print("Final coordinates: ", d.get_coordinates(), " score ", s, "Pore radius", slab.get_pore_radius())
         OUT_SLAB = out_slab(d,slab)
         print("OUT_SLAB = ", OUT_SLAB)
         self.assertTrue(OUT_SLAB)
@@ -89,15 +89,15 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         bb= IMP.algebra.BoundingBox3D(0.5*IMP.algebra.Vector3D(-boxw, -boxw, -boxw),
                                       0.5*IMP.algebra.Vector3D(boxw,boxw,boxw))
         p_slab= IMP.Particle(m, "slab")
-        IMP.npctransport.SlabWithCylindricalPore.setup_particle \
-            (p_slab, slab_height, slab_pore_radius)
+        IMP.npctransport.SlabWithCylindricalPore.setup_particle(
+            p_slab, slab_height, slab_pore_radius)
         self.assertTrue(
             IMP.npctransport.SlabWithCylindricalPore.get_is_setup(p_slab))
         # test cast to slab
         slab= IMP.npctransport.SlabWithPore(p_slab)
         self.slab= slab
         self.assertEqual(slab.get_pore_radius(),slab_pore_radius)
-        self.assertEqual(slab.get_thickness(),slab_height);
+        self.assertEqual(slab.get_thickness(),slab_height)
         slabps= IMP.npctransport.SlabWithCylindricalPorePairScore(1.0)
         self.assertFalse(slab.get_pore_radius_is_optimized()) # verify correct default value
         r= IMP.core.PairRestraint(m, slabps, [p_slab.get_index(), p.get_index()], "slab")
@@ -157,9 +157,9 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
     def test_pore_radius_score_with_slab_pair_score(self):
         '''Test combination of pore radius and slab scores'''
         self._initialize_model()
-        m= self.m
-        d=  self.d
-        slab= self.slab
+        m = self.m
+        d = self.d
+        slab = self.slab
 
         # append pore radius score to existing restraint
         prss=IMP.npctransport.PoreRadiusSingletonScore(slab_pore_radius, 1.0)
@@ -176,13 +176,13 @@ class CylindricalPoreSSTest(IMP.test.TestCase):
         self.assertAlmostEqual(slab.get_pore_radius(), 5.37, delta=0.025)
         # optimize with larger k
         print("Testing with pore radius k= 10.0")
-        prss.set_k (10.0)
+        prss.set_k(10.0)
         d.set_coordinates([slab_pore_radius+radius,0,0.1])
         self._test_optimization('tmp5.pym')
         self.assertAlmostEqual(slab.get_pore_radius(), 5.04, delta=0.025)
         # optimize with tiny k
         print("Testing with pore radius k= 0.001")
-        prss.set_k (0.001)
+        prss.set_k(0.001)
         d.set_coordinates([slab_pore_radius+radius,0,0.1])
         self._test_optimization('tmp5.pym')
         self.assertAlmostEqual(slab.get_pore_radius(), 6.02, delta=0.025)

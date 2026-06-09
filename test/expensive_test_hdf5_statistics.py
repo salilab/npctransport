@@ -2,7 +2,6 @@ import IMP
 import IMP.test
 import IMP.npctransport
 import IMP.container
-import math
 import test_util
 import glob
 import RMF
@@ -24,9 +23,10 @@ N_KAPs=1
 N_INERTs=1
 N_STATS_PER_HDF5=30.0
 
-def my_make_simple_cfg(outfile, 
-                       fg_name = "fg", 
-                       kap_name = "kap", 
+
+def my_make_simple_cfg(outfile,
+                       fg_name = "fg",
+                       kap_name = "kap",
                        inert_name="inert",
                        is_multiple_hdf5s=0):
     cfg= test_util.get_basic_config()
@@ -68,6 +68,7 @@ def my_make_simple_cfg(outfile,
         test_util.write_config_file(outfile, cfg)
     return cfg
 
+
 class Tests(IMP.test.TestCase):
 
     def _validate_hdf5_file(self, hdf5_filename, is_multiple_hdf5s):
@@ -82,14 +83,14 @@ class Tests(IMP.test.TestCase):
             dataset= G_fgs.get_child_int_data_set_3d(fg_type)
             n_voxels_expected = XYZ_STATS_CROP_FACTOR * min(XYZ_STATS_MAX_BOX_SIZE_A, BOX_SIDE_A) / VOXEL_SIZE_A \
                                     + 5*2 # adding 5 voxels on each side used for slack
-            self.assertEqual(dataset.get_size(), 
+            self.assertEqual(dataset.get_size(),
                              [n_voxels_expected, n_voxels_expected, n_voxels_expected])
             XYZ_as_vector=np.array(dataset.get_block([0,0,0],dataset.get_size()))
             self.assertEqual(XYZ_as_vector.shape, (n_voxels_expected**3,))
             print("Sum of XYZ: {}".format(np.sum(XYZ_as_vector)))
             sum_observed = np.sum(XYZ_as_vector)
-            sum_expected = ( N_FG_BEADS * N_FGs * N_STATS_PER_HDF5  
-                              * (1 if is_multiple_hdf5s else N_OUTPUT_FRAMES))
+            sum_expected = (N_FG_BEADS * N_FGs * N_STATS_PER_HDF5
+                            * (1 if is_multiple_hdf5s else N_OUTPUT_FRAMES))
             self.assertAlmostEqual(sum_observed, sum_expected, delta=0.1*sum_observed)
         G_floaters= F.get_child_group("floater_xyz_hist")
         n_floaters= G_floaters.get_number_of_children()
@@ -102,12 +103,11 @@ class Tests(IMP.test.TestCase):
             self.assertEqual(XYZ_as_vector.shape, (n_voxels_expected**3,))
             print("Sum of XYZ: {}".format(np.sum(XYZ_as_vector)))
             sum_observed = np.sum(XYZ_as_vector)
-            sum_expected = ( (N_KAPs if floater_type=="kap" else N_INERTs) * N_STATS_PER_HDF5  
+            sum_expected = ((N_KAPs if floater_type=="kap" else N_INERTs) * N_STATS_PER_HDF5
                               * (1 if is_multiple_hdf5s else N_OUTPUT_FRAMES))
             self.assertAlmostEqual(sum_observed, sum_expected, delta=0.1*sum_observed)
-            
-                         
-    def _test_xyz_stats_using_main(self, 
+
+    def _test_xyz_stats_using_main(self,
                                    short_sim_factor,
                                    is_orientational=False):
         """
@@ -128,8 +128,8 @@ class Tests(IMP.test.TestCase):
 import IMP.npctransport
 cfg_file = "{cfg_file}"
 out_file = "{out_file}"
-sd = IMP.npctransport.startup(['fake_main', 
-    '--configuration', cfg_file, '--output', out_file, 
+sd = IMP.npctransport.startup(['fake_main',
+    '--configuration', cfg_file, '--output', out_file,
     '--short_sim_factor', '{short_sim_factor}', '--short_init_factor', '{short_sim_factor}'])
 IMP.npctransport.do_main_loop(sd, [])
 """)
@@ -141,9 +141,8 @@ IMP.npctransport.do_main_loop(sd, [])
                 self.assertEqual(len(hdf5_filenames), 1)
             print("HDF5 files: {}".format(hdf5_filenames))
             for hdf5_filename in hdf5_filenames:
-                self._validate_hdf5_file(hdf5_filename, 
+                self._validate_hdf5_file(hdf5_filename,
                                          is_multiple_hdf5s=is_multiple_hdf5s)
-                    
 
     def test_hdf5_statistics(self):
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
@@ -156,9 +155,6 @@ IMP.npctransport.do_main_loop(sd, [])
         self._test_xyz_stats_using_main(
             short_sim_factor,
             is_orientational=True)
-
-
-
 
 
 if __name__ == '__main__':

@@ -1,9 +1,7 @@
 import IMP
 import IMP.test
 import IMP.npctransport
-import math
 import IMP.display
-import random
 
 radius=1
 bottom = -5
@@ -11,9 +9,12 @@ top = 5
 k = 10.0
 boxw= top * 4
 
+
 def out_zrange(d):
     c= d.get_coordinates()
     return (c[2] > top or c[2] < bottom)
+
+
 class ExcludeZRangeTests(IMP.test.TestCase):
     def test_cone_(self):
         """Check exclude z-range singleton score"""

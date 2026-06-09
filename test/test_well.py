@@ -4,9 +4,9 @@ import IMP.npctransport
 import IMP.container
 import IMP.rmf
 import RMF
-import math
 
 radius=5
+
 
 class ConeTests(IMP.test.TestCase):
     def _create_diffuser(self, m):
@@ -18,13 +18,16 @@ class ConeTests(IMP.test.TestCase):
         m= IMP.atom.Mass.setup_particle(p, 1)
         diff= IMP.atom.Diffusion.setup_particle(p)
         return d
+
     def _randomize(self, ds, bb):
         for d in ds:
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
+
     def _show(self, ds, w):
         for d in ds:
-            g= IMP.core.XYZRGeometry(d);
+            g= IMP.core.XYZRGeometry(d)
             w.add_geometry(g)
+
     def test_cone_construction(self):
         """Check linear well"""
         m= IMP.Model()

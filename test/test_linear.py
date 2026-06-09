@@ -2,25 +2,27 @@ import IMP
 import IMP.test
 import IMP.npctransport
 import IMP.container
-import math
 from test_util import *
 
 radius=5
+
 
 class ConeTests(IMP.test.TestCase):
     def _randomize(self, ds, bb):
         for d in ds:
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
+
     def _show(self, ds, w):
         for d in ds:
-            g= IMP.core.XYZRGeometry(d);
+            g= IMP.core.XYZRGeometry(d)
             w.add_geometry(g)
+
     def test_cone_construction(self):
         """Check linear soft sphere"""
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)
         ps= [create_diffusing_rb_particle(m, radius) for i in range(0,2)]
-        ds= [IMP.core.XYZR(p) for p in ps];
+        ds= [IMP.core.XYZR(p) for p in ps]
         apps= IMP.container.AllPairContainer(IMP.container.ListSingletonContainer(m, IMP.get_indexes(ds)))
         lssps= IMP.npctransport.LinearSoftSpherePairScore(10)
         lssps.set_log_level(IMP.VERBOSE)
@@ -48,13 +50,14 @@ class ConeTests(IMP.test.TestCase):
                 if d!=d1:
                     print(d, d1)
                     self.assertGreater(IMP.core.get_distance(d, d1), -.1)
+
     def test_cone_construction2(self):
         """Check interaction score repulsion"""
         m= IMP.Model()
         rng=3
         m.set_log_level(IMP.SILENT)
         ps= [create_diffusing_rb_particle(m,radius) for i in range(0,2)]
-        ds= [IMP.core.XYZR(p) for p in ps];
+        ds= [IMP.core.XYZR(p) for p in ps]
         ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[0].set_coordinates_are_optimized(False)
         bb= IMP.algebra.get_cube_3d(3)

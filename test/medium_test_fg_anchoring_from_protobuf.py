@@ -1,7 +1,5 @@
 import IMP.npctransport
 import IMP.test
-import sys
-import math
 import test_util
 #import read_nups
 
@@ -56,10 +54,10 @@ class Tests(IMP.test.TestCase):
         verify that fg anchors are still in same place as in the originally
         specified coordinates coords
         '''
-        fgs = sd.get_fg_chain_roots(  ) # atom.Hierarchies
+        fgs = sd.get_fg_chain_roots() # atom.Hierarchies
         # verify that anchors are in placed
         for fg,c in zip(fgs,coords):
-            fg_c = IMP.core.XYZ( fg.get_child(0) ).get_coordinates()
+            fg_c = IMP.core.XYZ(fg.get_child(0)).get_coordinates()
             d2 = sum([(a-b)**2 for a,b in zip(fg_c,c)])
             print(fg_c, c, d2)
             self.assertEqual(d2, 0)
@@ -73,11 +71,11 @@ class Tests(IMP.test.TestCase):
         test_util.test_protobuf_installed(self)
         cfg_file = self.get_tmp_file_name("barak_config.pb")
         assign_file = self.get_tmp_file_name("barak_assign.pb")
-        coords = self._create_cfg_file_with_fg_anchors( cfg_file )
+        coords = self._create_cfg_file_with_fg_anchors(cfg_file)
         print("assigning parameter ranges from config")
-        num=IMP.npctransport.assign_ranges( cfg_file, assign_file, 0, False, 10 );
+        num=IMP.npctransport.assign_ranges(cfg_file, assign_file, 0, False, 10)
         sd= IMP.npctransport.SimulationData(assign_file, False, "")
-#                                            self.get_tmp_file_name("out.rmf"));
+#                                            self.get_tmp_file_name("out.rmf"))
         self._assert_anchors_in_place(sd, coords)
         # verify that anchors remain intact during optimization
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
@@ -89,7 +87,6 @@ class Tests(IMP.test.TestCase):
         self._assert_anchors_in_place(sd, coords)
         sd.get_bd().optimize(1000)
         self._assert_anchors_in_place(sd, coords)
-
 
 
 if __name__ == '__main__':

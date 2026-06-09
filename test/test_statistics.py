@@ -2,10 +2,10 @@ import IMP
 import IMP.test
 import IMP.npctransport
 import IMP.container
-import math
 from test_util import *
 
 radius=10.0
+
 
 class Tests(IMP.test.TestCase):
 
@@ -28,7 +28,7 @@ class Tests(IMP.test.TestCase):
         bd.set_scoring_function([IMP.RestraintSet(m, "empty set")])
         bd.set_maximum_time_step(dt)
         print(p)
-        print (dir(p))
+        print(dir(p))
         os= IMP.npctransport.BodyStatisticsOptimizerState(p)
         os.set_period(10)
         bd.add_optimizer_state(os)
@@ -40,6 +40,7 @@ class Tests(IMP.test.TestCase):
         print("Estimated vs. actual D_translation: %.2e %.2e" % (Dout, Din))
         self.assertAlmostEqual(Dout, Din,
                                delta=delta_factor*Din)
+
     def test_rot(self):
         """Check rigid body correlation time"""
         IS_DISABLED=True
@@ -55,8 +56,8 @@ class Tests(IMP.test.TestCase):
         dd= IMP.atom.RigidBodyDiffusion(p)
         nD=dd.get_rotational_diffusion_coefficient()
         dd.set_rotational_diffusion_coefficient(10*nD)
-        print(dd.get_rotational_diffusion_coefficient() \
-            , dd.get_diffusion_coefficient())
+        print(dd.get_rotational_diffusion_coefficient(),
+              dd.get_diffusion_coefficient())
         dt=100000
         bd= IMP.atom.BrownianDynamics(m)
         bd.set_scoring_function([IMP.RestraintSet(m, "empty set")])
@@ -73,6 +74,7 @@ class Tests(IMP.test.TestCase):
         Dout=1.0/(2.0*cor_out)
         print("Estimated vs. actual D_rotation: %.2e %.2e" % (Dout, Din), "Correlation: ", cor_out)
         self.assertAlmostEqual(Dout, Din, delta=.5*Dout)
+
     def _create_magnet_restraint(self, m, p, magnet_coordinates):
         """
         create a dummy particle at magnet_coordinate,
@@ -88,12 +90,13 @@ class Tests(IMP.test.TestCase):
         harmonic = IMP.core.Harmonic(0,1)
         magnet_restraint= IMP.core.DistanceRestraint(harmonic, p, p_magnet)
         return (magnet_restraint, p_magnet_rb)
+
     def test_transport_stats(self):
         """Check particle transport stats"""
         print("TEST_TRANSPORT_STATS")
         print("\nTesting particle transport statistics:")
         if IMP.build!= "fast":
-          self.skipTest("Only run in fast mode")
+            self.skipTest("Only run in fast mode")
         m= IMP.Model()
         p= create_diffusing_rb_particle(m, radius)
         p_rb= IMP.core.RigidBody(p)
@@ -111,19 +114,20 @@ class Tests(IMP.test.TestCase):
         os= IMP.npctransport.ParticleTransportStatisticsOptimizerState(p,10,20)
         print("ho")
         num_steps=10000
-        os.set_period( num_steps / 1000 )
-        bd.add_optimizer_state( os )
+        os.set_period(num_steps / 1000)
+        bd.add_optimizer_state(os)
         IMP.set_log_level(IMP.SILENT)
 
         print("Before optimization z = %.2f" % p_rb.get_coordinates()[2])
-        bd.optimize( num_steps )
+        bd.optimize(num_steps)
         print("After 1st optimization z = %.2f" % p_rb.get_coordinates()[2])
-        p_magnet_rb.set_coordinates( [0,0,0] );
-        bd.optimize( num_steps )
+        p_magnet_rb.set_coordinates([0,0,0])
+        bd.optimize(num_steps)
         print("After 2nd optimization z = %.2f" % p_rb.get_coordinates()[2])
         n = os.get_total_n_transports()
         print("# of transports: %d" % n)
         self.assertEqual(n,2)
+
     def test_rot_nrb(self):
         """Check hidden rigid body correlation time"""
         print("TEST_ROT_NRB")
@@ -164,7 +168,7 @@ class Tests(IMP.test.TestCase):
         Dout2= os2.get_correlation_time()
         Din= dd.get_rotational_diffusion_coefficient()
         v=1.0/(2.0*Dout)
-        print("Corr1, Corr2, rot_dif_coeff, v",  Dout, Dout2, Din, v)
+        print("Corr1, Corr2, rot_dif_coeff, v", Dout, Dout2, Din, v)
         self.assertAlmostEqual(Dout, Dout2, delta=.1*Dout)
         dfs= os.get_local_diffusion_coefficients()
         print(dfs)

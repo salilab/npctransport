@@ -2,7 +2,6 @@ import IMP.npctransport
 import IMP.core
 import IMP.algebra
 import IMP.test
-import sys
 import math
 import test_util
 
@@ -12,11 +11,10 @@ TAU_NS= 1.0
 NS_PER_CHUNK= 0.5*TAU_NS
 BACKBONE_K= 0.5
 
+
 class Tests(IMP.test.TestCase):
 
     def _do_particles_report(self, m, pis):
-        global RADIUS
-        global REST_LENGTH_FACTOR
         for pi in pis:
             print("Particle index",pi)
             if IMP.core.XYZR.get_is_setup(m, pi):
@@ -41,8 +39,6 @@ class Tests(IMP.test.TestCase):
                                        actual_rest_length,
                                        delta= allowed_delta)
 
-
-
     def _create_cfg_file_with_fg_anchors(self, cfg_file, n_beads=2):
         '''
         Create a configuration file 'cfg_file' with anchors for fgs
@@ -51,9 +47,6 @@ class Tests(IMP.test.TestCase):
         the anchor coordinates 3D tuples by same order as they were added
         to the config file fgs[0] object
         '''
-        global RADIUS
-        global REST_LENGTH_FACTOR
-        global TAU_NS
         config = IMP.npctransport.Configuration()
         IMP.npctransport.set_default_configuration(config)
         config.angular_D_factor.lower=1
@@ -84,8 +77,6 @@ class Tests(IMP.test.TestCase):
 
     def _analyze_run(self, output_file, R):
         ''' R is the rest length distance data from the RMF file '''
-        global TAU_NS
-        global NS_PER_CHUNK
         f=open(output_file, "rb")
         output= IMP.npctransport.Output()
         output.ParseFromString(f.read())
@@ -116,10 +107,10 @@ class Tests(IMP.test.TestCase):
             mean_ACR=0.0
             for j in range(R.shape[1]):
                 mean_ACR= mean_ACR+pd.Series(R[:,j]).autocorr(i) / R.shape[1]
-            print("%8.3f  " % T[i], \
-                      "%10.3f  " % pd.Series(B).autocorr(i), \
-                      "%10.3f  " % pd.Series(E).autocorr(i), \
-                      "%10.3f  " % mean_ACR)
+            print("%8.3f  " % T[i],
+                  "%10.3f  " % pd.Series(B).autocorr(i),
+                  "%10.3f  " % pd.Series(E).autocorr(i),
+                  "%10.3f  " % mean_ACR)
         if len(E)>i_tau:
             self.assertAlmostEqual(
                 pd.Series(R[:,0]).autocorr(i_tau),
@@ -136,27 +127,23 @@ class Tests(IMP.test.TestCase):
                 math.exp(-5),
                 delta=0.07)
 
-
-
     def _test_harmonic_spring_score_from_protobuf(self, n_beads=2):
         '''
         Test that FG nups can be anchored properly through protobuf file
         '''
-        global NS_PER_CHUNK
-
         IMP.set_log_level(IMP.SILENT)
         test_util.test_protobuf_installed(self)
         cfg_file = self.get_tmp_file_name("barak_config.pb")
 #        assign_file = self.get_tmp_file_name("barak_assign.pb")
         assign_file="output2.pb"
-        self._create_cfg_file_with_fg_anchors( cfg_file, n_beads )
+        self._create_cfg_file_with_fg_anchors(cfg_file, n_beads)
         print("assigning parameter ranges from config")
-        num=IMP.npctransport.assign_ranges( cfg_file, assign_file, 0, False, 10 );
+        num=IMP.npctransport.assign_ranges(cfg_file, assign_file, 0, False, 10)
         sd= IMP.npctransport.SimulationData(assign_file,
                                             False,
                                             "")
 #                                            "out2.rmf")
-#                                            self.get_tmp_file_name("out.rmf"));
+#                                            self.get_tmp_file_name("out.rmf"))
         # verify that anchors remain intact during optimization
         if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
             short_init_factor=0.0001

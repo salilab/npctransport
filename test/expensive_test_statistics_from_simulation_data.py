@@ -7,10 +7,12 @@ import test_util
 
 radius=8
 
+
 def get_95_conf(rate,time):
     if time==0.0:
         return -1.0
     return 1.96*math.sqrt(rate/time)
+
 
 class Tests(IMP.test.TestCase):
 
@@ -25,20 +27,19 @@ class Tests(IMP.test.TestCase):
         for i in cfg.interactions:
             if i.type0=="kap0" or i.type1=="kap0":
                 i.interaction_range.lower=10
-                if(is_orientational):
+                if is_orientational:
                     i.range_sigma0_deg.lower=45
                     i.range_sigma1_deg.lower=45
                     i.interaction_k.lower=0.18
                 else:
                     i.interaction_k.lower=0.45
         test_util.write_config_file(cfg_file, cfg)
-        num=IMP.npctransport.assign_ranges( cfg_file, assign_file, 0,
-                           False, 10 );
+        num=IMP.npctransport.assign_ranges(cfg_file, assign_file, 0, False, 10)
         sd= IMP.npctransport.SimulationData(assign_file, False)
         return sd
 
     def _run_sd(self, sd, n_cycles):
-        self.assertTrue(sd != None)
+        self.assertTrue(sd is not None)
         IMP.set_log_level(IMP.SILENT)
         sd.get_bd().set_log_level(IMP.SILENT)
         time_step_fs=sd.get_bd().get_maximum_time_step()
@@ -47,7 +48,6 @@ class Tests(IMP.test.TestCase):
         print(sd.get_bd().get_scoring_function().evaluate(False))
         sd.get_statistics().update(IMP.npctransport.create_boost_timer(),
                                    n_cycles)
-
 
     def _process_sd_stat(self, sd, is_orientational=False):
         assign_file=sd.get_statistics().get_output_file_name()
@@ -100,10 +100,10 @@ class Tests(IMP.test.TestCase):
             print("On_i", kon_i, "+-", conf95_kon_i)
             print("Off_ii", koff_ii, "+-", conf95_koff_ii)
             print("On_ii", kon_ii, "+-", conf95_kon_ii)
-            print("Kd_i",  koff_i /(kon_i+0.00000001) )
+            print("Kd_i", koff_i /(kon_i+0.00000001))
             print("Kd_ii", koff_ii/(kon_ii+0.00000001))
-            print("%% bound: I %.1f%% II %.1f%%" % ( 100*fb_i, 100*fb_ii))
- #            # Verify results
+            print("%% bound: I %.1f%% II %.1f%%" % (100*fb_i, 100*fb_ii))
+#           # Verify results
             if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
                 return
             if is_orientational:
@@ -123,7 +123,6 @@ class Tests(IMP.test.TestCase):
                 self.assertAlmostEqual(fb_i,0.285,delta=0.1*DELTA_FACTOR)
                 self.assertAlmostEqual(fb_ii,0.524,delta=0.15*DELTA_FACTOR)
 
-
     def _get_particles_of_type(self, sd, pt):
         """
         get bead particles of type pt in simulation data sd
@@ -132,7 +131,7 @@ class Tests(IMP.test.TestCase):
         ret=[]
         for cur_p in ps:
             cur_pt=IMP.core.Typed(cur_p).get_type()
-            if(cur_pt==pt):
+            if cur_pt==pt:
                 ret.append(cur_p)
         return ret
 
@@ -143,11 +142,11 @@ class Tests(IMP.test.TestCase):
         """
         # Non-orientational
         sd=self._make_sd(is_orientational)
-        IMP.npctransport.initialize_positions( sd, [], False,
-                                               short_init_factor)
+        IMP.npctransport.initialize_positions(sd, [], False,
+                                              short_init_factor)
         sd.get_bd().optimize(n_cycles) # still without stats
-        sd.get_bd().set_current_time(0.0);
-        sd.get_statistics().reset_statistics_optimizer_states();
+        sd.get_bd().set_current_time(0.0)
+        sd.get_statistics().reset_statistics_optimizer_states()
         sd.activate_statistics()
         while n_trials>0:
             try:
@@ -157,7 +156,7 @@ class Tests(IMP.test.TestCase):
             except AssertionError as e:
                 print("Failed -", n_trials, "left")
                 n_trials=n_trials-1
-                if(n_trials==0):
+                if n_trials==0:
                     raise e
 
     def test_all_interaction_stats(self):
@@ -182,14 +181,12 @@ class Tests(IMP.test.TestCase):
     def test_statistics_activation(self):
         sd= self._make_sd(False)
         timer = IMP.npctransport.create_boost_timer()
-        self.assertFalse( sd.get_statistics().get_is_activated() )
+        self.assertFalse(sd.get_statistics().get_is_activated())
         with self.assertRaises(IMP.UsageException):
-            sd.get_statistics().update( timer )
+            sd.get_statistics().update(timer)
         sd.activate_statistics()
-        self.assertTrue( sd.get_statistics().get_is_activated() )
-        sd.get_statistics().update( timer ) # should not throw an exception now
-
-
+        self.assertTrue(sd.get_statistics().get_is_activated())
+        sd.get_statistics().update(timer) # should not throw an exception now
 
 
 if __name__ == '__main__':

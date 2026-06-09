@@ -1,10 +1,10 @@
 import IMP
 import IMP.test
 import IMP.npctransport
-import math
 from test_util import *
 
 radius=5
+
 
 class ConeTests(IMP.test.TestCase):
     def _randomize(self, rbs, sites, bb):
@@ -30,7 +30,6 @@ class ConeTests(IMP.test.TestCase):
                 ok=True
                 for orb, s in zip(rbs[0:i], sites[0:i]):
                     if failures>500:
-#                        print ("RETRYING RANDOMIZE")
                         return self._randomize(rbs, sites, bb) # retry
                     d= IMP.core.get_distance(IMP.core.XYZR(rbs[i]),
                                              IMP.core.XYZR(orb))
@@ -53,8 +52,6 @@ class ConeTests(IMP.test.TestCase):
 
     def test_sites_pair_score(self):
         """Check sites pair score"""
-        global radius
-
         print("Check sites pair score")
         m= IMP.Model()
         m.set_log_level(IMP.SILENT)

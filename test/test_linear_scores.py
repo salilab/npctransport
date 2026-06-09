@@ -3,9 +3,9 @@ import IMP.test
 import IMP.npctransport
 import IMP.container
 import IMP.score_functor
-import math
 
 radius=3
+
 
 class Tests(IMP.test.TestCase):
     def _create_xyzr(self, m):
@@ -14,6 +14,7 @@ class Tests(IMP.test.TestCase):
         d.set_radius(radius)
         d.set_coordinates_are_optimized(True)
         return d
+
     def test_repulsion(self):
         """Check linear soft sphere scores"""
         m= IMP.Model()
@@ -21,10 +22,10 @@ class Tests(IMP.test.TestCase):
         ds= [self._create_xyzr(m) for i in range(0,2)]
         dsi=[x.get_particle_index() for x in ds]
         ps= IMP.npctransport.LinearSoftSpherePairScore(1)
-        ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0));
+        ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ps.set_log_level(IMP.SILENT)
-        sf= IMP.core.PairRestraint(m, ps, dsi).create_scoring_function();
+        sf= IMP.core.PairRestraint(m, ps, dsi).create_scoring_function()
         for i in range(1,100):
             ds[1].set_coordinate(0, .1*i)
             e= sf.evaluate(True)
@@ -43,7 +44,7 @@ class Tests(IMP.test.TestCase):
         dsi=[x.get_particle_index() for x in ds]
         ps= IMP.npctransport.LinearInteractionPairScore(1, 2, .5)
         fps= IMP.npctransport.FunctorLinearInteractionPairScore(1, 2, .5)
-        ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0));
+        ds[0].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ds[1].set_coordinates(IMP.algebra.Vector3D(0,0,0))
         ps.set_log_level(IMP.SILENT)
         for i in range(0,100):

@@ -10,8 +10,6 @@ import IMP.container
 import IMP.rmf
 import RMF
 import math
-import numpy
-import time
 import random
 import test_util
 
@@ -45,6 +43,7 @@ class ConeTests(IMP.test.TestCase):
                 f= RMF.create_rmf_file(self.get_tmp_file_name("tmp%d.rmf" % i)) # just to force a flush
                 if i+1==ntrials:
                     raise
+
     def _create_diffuser(self, m):
         p= IMP.Particle(m)
         d= IMP.core.XYZR.setup_particle(p)
@@ -54,13 +53,16 @@ class ConeTests(IMP.test.TestCase):
         m= IMP.atom.Mass.setup_particle(p, 1)
         diff= IMP.atom.Diffusion.setup_particle(p)
         return d
+
     def _randomize(self, ds, bb):
         for d in ds:
             d.set_coordinates(IMP.algebra.get_random_vector_in(bb))
+
     def _show(self, ds, w):
         for d in ds:
-            g= IMP.core.XYZRGeometry(d);
+            g= IMP.core.XYZRGeometry(d)
             w.add_geometry(g)
+
     def _test_harmonic_spring_score(self):
         """Check linear well"""
         m= IMP.Model()
@@ -75,14 +77,9 @@ class ConeTests(IMP.test.TestCase):
         tau_ns= 1
         tau_fs= tau_ns*(1E+6)
         D_A2_per_fs= IMP.atom.get_kt(T)/tau_fs/k
-        print ("D [A^2/fs]", D_A2_per_fs, "D particle", IMP.atom.Diffusion(m,pis[0]).get_diffusion_coefficient())
-        rs= IMP.npctransport.RelaxingSpring.setup_particle \
-            (m,
-             pis[0],
-             pis[0],
-             pis[1],
-             rest_length_factor,
-             D_A2_per_fs)
+        print("D [A^2/fs]", D_A2_per_fs, "D particle", IMP.atom.Diffusion(m,pis[0]).get_diffusion_coefficient())
+        rs= IMP.npctransport.RelaxingSpring.setup_particle(
+            m, pis[0], pis[0], pis[1], rest_length_factor, D_A2_per_fs)
         ss= IMP.npctransport.HarmonicSpringSingletonScore(20*k, k)
         r= IMP.core.SingletonRestraint(m, ss, pis[0])
         bd= IMP.npctransport.BrownianDynamicsTAMDWithSlabSupport(m)
@@ -114,7 +111,6 @@ class ConeTests(IMP.test.TestCase):
         R=[rs.get_rest_length()]
         do_particles_report(m, pis)
         for i in range(outer):
-#            print("%.1f [ns]\t" % (bd.get_current_time()*1E-6),end='')
             bd.optimize(inner)
             dist= IMP.core.get_distance(ds[0], ds[1])
             rest_length= rs.get_rest_length()
@@ -154,7 +150,6 @@ class ConeTests(IMP.test.TestCase):
                                delta=0.04)
 #        for i in range(len(R)):
 #            print (T[i],Rp.autocorr(i))
-
 
 
 if __name__ == '__main__':

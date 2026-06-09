@@ -2,9 +2,9 @@ import IMP
 import IMP.test
 import IMP.npctransport
 import IMP
-import math
 from test_util import *
 radius=5
+
 
 class ProtobufTests(IMP.test.TestCase):
     def _make_config(self, name):
@@ -31,8 +31,8 @@ class ProtobufTests(IMP.test.TestCase):
         IMP.npctransport.create_range(kap.number,0, 10,3)
         IMP.npctransport.create_range(kap.interactions, 1, 10, 3)
 
-        obstacle = IMP.npctransport.add_obstacle_type \
-            (config, type_name="obstacle", R=10)
+        obstacle = IMP.npctransport.add_obstacle_type(
+            config, type_name="obstacle", R=10)
         IMP.npctransport.create_range(obstacle.radius, 1, 10, 3)
 
         interaction= IMP.npctransport.add_interaction(config, "fg0", "fg0")
@@ -41,6 +41,7 @@ class ProtobufTests(IMP.test.TestCase):
         interaction= IMP.npctransport.add_interaction(config, "fg0", "kap0")
         f=open(name, "wb")
         f.write(config.SerializeToString())
+
     def test_1(self):
         """Check creating a configuration and assigning values"""
         test_protobuf_installed(self)
