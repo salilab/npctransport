@@ -74,7 +74,7 @@ inline double evaluate_one_site_3
   algebra::Vector3D& g0, algebra::Vector3D& g1,
   DerivativeAccumulator *da,
   algebra::Sphere3D *sphere_derivatives_table,
-  double **torques_tables)
+  algebra::Vector3D *torques_table)
 {
   static const double MIN_D = .001;
   algebra::Vector3D gD = g0 - g1;
@@ -94,7 +94,7 @@ inline double evaluate_one_site_3
     algebra::Vector3D torque0 = algebra::get_vector_product(l0.get_center(), lderiv0);
     for (unsigned int i = 0; i < 3; ++i) {
       sphere_derivatives_table[rbi0.pi.get_index()][i]+= (*da)(gderiv0[i]);
-      torques_tables[i][rbi0.pi.get_index()]+= (*da)(torque0[i]);
+      torques_table[rbi0.pi.get_index()][i] += (*da)(torque0[i]);
     }
     // RB1:
     algebra::Vector3D gderiv1 = -gderiv0;
@@ -104,7 +104,7 @@ inline double evaluate_one_site_3
     algebra::Vector3D torque1 = algebra::get_vector_product(l1.get_center(), lderiv1);
     for (unsigned int i = 0; i < 3; ++i) {
       sphere_derivatives_table[rbi1.pi.get_index()][i]+= (*da)(gderiv1[i]);
-      torques_tables[i][rbi1.pi.get_index()]+= (*da)(torque1[i]);
+      torques_table[rbi1.pi.get_index()][i] += (*da)(torque1[i]);
     }
   } // if (da)
   return score;
@@ -191,7 +191,7 @@ bell-shaped spline
     @param da - accumulator for reweighting derivatives,
                 or null to disable force and torque computations
     @param sphere_derivatives_table
-    @param torques_tables
+    @param torques_table
     */
 inline
 double evaluate_pair_of_sites
@@ -204,7 +204,7 @@ double evaluate_pair_of_sites
   double kFactor1, double dKFactor1,
   DerivativeAccumulator *da,
   algebra::Sphere3D *sphere_derivatives_table,
-  double **torques_tables)
+  algebra::Vector3D *torques_table)
 {
   using IMP::algebra::Vector3D;
   using IMP::algebra::Sphere3D;
@@ -254,8 +254,8 @@ double evaluate_pair_of_sites
       Vector3D gTorque_on_RB1=fS1*gRotSigma1;
       Vector3D lTorque_on_RB1=rbi1.irot.get_rotated(gTorque_on_RB1);
       //rbi1.rb.add_to_torque(lTorque_on_RB1, *da);
-      for(unsigned int i=0; i<3; i++){
-        torques_tables[i][rbi1.pi.get_index()]+= (*da)(lTorque_on_RB1[i]);
+      for (unsigned i = 0; i < 3; ++i) {
+        torques_table[rbi1.pi.get_index()][i] += (*da)(lTorque_on_RB1[i]);
       }
       IMP_LOG_VERBOSE("global torque on first rb " << lTorque_on_RB1);
     }
@@ -267,8 +267,8 @@ double evaluate_pair_of_sites
       Vector3D gTorque_on_RB2=fS2*gRotSigma2;
       Vector3D lTorque_on_RB2=rbi2.irot.get_rotated(gTorque_on_RB2);
       //      rbi2.rb.add_to_torque(lTorque_on_RB2, *da);
-      for(unsigned int i=0; i<3; i++){
-        torques_tables[i][rbi2.pi.get_index()]+= (*da)(lTorque_on_RB2[i]);
+      for (unsigned i = 0; i < 3; ++i) {
+        torques_table[rbi2.pi.get_index()][i] += (*da)(lTorque_on_RB2[i]);
       }
       IMP_LOG_VERBOSE("global torque on second rb " << lTorque_on_RB2);
     }

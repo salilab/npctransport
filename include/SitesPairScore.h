@@ -176,7 +176,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      @param sphere_table An array storing of sphere coordinates by particle index
      @param quaternions_tables An array of quaternions by particle index
      @param sphere_table An array storing of sphere coordinate derivatives by particle index
-     @param torque_tables An array of torques by particle index
+     @param torques_table An array of torques by particle index
      @param pip the pair of particle indexes in m
      @param da optional accumulator for force and torque derivatives
      @param contacts_accumulator A pointer to a tuple of output values
@@ -195,7 +195,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
     (algebra::Sphere3D const* spheres_table,
      double const**quaternions_tables,
      algebra::Sphere3D *sphere_derivatives_table,
-     double **torques_tables,
+     algebra::Vector3D *torques_table,
      const ParticleIndexPair &pip,
      DerivativeAccumulator *da,
      boost::tuple< unsigned int, std::vector<unsigned int>, std::vector<unsigned int>, bool >
@@ -262,7 +262,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
       algebra::Sphere3D const* spheres_table,
       double const **quaternions_tables,
       algebra::Sphere3D *sphere_derivatives_table,
-      double **torques_tables,
+      algebra::Vector3D *torques_table,
       const ParticleIndexPair &p,
       DerivativeAccumulator *da) const;
 
@@ -328,17 +328,14 @@ SitesPairScore::evaluate_index
   }
   algebra::Sphere3D* sphere_derivatives_table=
     m->access_sphere_derivatives_data();
-  double* torques_tables[3];
-  for(unsigned int i = 0; i < 3; i++){
-    torques_tables[i]=
-      core::RigidBody::access_torque_i_data(m, i);
-  }
+  algebra::Vector3D* torques_table=
+    core::RigidBody::access_torque_data(m);
   // evaluate:
   return evaluate_index_with_internal_tables(m,
                                              spheres_table,
                                              quaternions_tables,
                                              sphere_derivatives_table,
-                                             torques_tables,
+                                             torques_table,
                                              p,
                                              da);
 }
@@ -358,7 +355,7 @@ SitesPairScore::evaluate_index_with_internal_tables
   algebra::Sphere3D const* spheres_table,
  double const** quaternions_tables,
  algebra::Sphere3D *sphere_derivatives_table,
- double **torques_tables,
+ algebra::Vector3D *torques_table,
  const ParticleIndexPair &pip,
  DerivativeAccumulator *da) const {
   IMP_OBJECT_LOG;
@@ -384,7 +381,7 @@ SitesPairScore::evaluate_index_with_internal_tables
     (spheres_table,
      quaternions_tables,
      sphere_derivatives_table,
-     torques_tables,
+     torques_table,
      pip, da);
   // III. evaluate site-specific contributions :
   return site_score + non_specific_score;
@@ -398,7 +395,7 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
 ( algebra::Sphere3D const* spheres_table,
   double const**quaternions_tables,
   algebra::Sphere3D *sphere_derivatives_table,
-  double **torques_tables,
+  algebra::Vector3D *torques_table,
   const ParticleIndexPair &pip,
   DerivativeAccumulator *da,
   boost::tuple<unsigned int,
@@ -474,7 +471,7 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
                                            kFactor0, dKFactor0,
                                            da,
                                            sphere_derivatives_table,
-                                           torques_tables);
+                                           torques_table);
         sum += cur_score;
           if(contacts_accumulator && cur_score!=0.0){
             n_contacts++;
@@ -501,7 +498,7 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
                                           g0, g1,
                                           da,
                                           sphere_derivatives_table,
-                                          torques_tables);
+                                          torques_table);
 
           sum += cur_score;
           if(contacts_accumulator && cur_score!=0.0){
@@ -549,17 +546,14 @@ SitesPairScore::evaluate_site_contributions
   }
   algebra::Sphere3D* sphere_derivatives_table=
     m->access_sphere_derivatives_data();
-  double* torques_tables[3];
-  for(unsigned int i = 0; i < 3; i++){
-    torques_tables[i]=
-      core::RigidBody::access_torque_i_data(m, i);
-  }
+  algebra::Vector3D* torques_table=
+    core::RigidBody::access_torque_data(m);
   // evaluate:
   return evaluate_site_contributions_with_internal_tables
     (spheres_table,
      quaternions_tables,
      sphere_derivatives_table,
-     torques_tables,
+     torques_table,
      pip,
      da,
      contacts_accumulator);

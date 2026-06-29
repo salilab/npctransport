@@ -2,7 +2,7 @@
  *  \file DistancePairScore.cpp
  *  \brief A Score on the distance between a pair of particles.
  *
- *  Copyright 2007-2022 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2026 IMP Inventors. All rights reserved.
  */
 
 #include <IMP/npctransport/SitesPairScore.h>
@@ -85,11 +85,7 @@ SitesPairScore::evaluate_indexes
     quaternions_tables[i]=
       core::RigidBody::access_quaternion_i_data(m, i);
   }
-  double* torques_tables[3];
-  for(unsigned int i = 0; i < 3; i++){
-    torques_tables[i]=
-      core::RigidBody::access_torque_i_data(m, i);
-  }
+  algebra::Vector3D* torques_table = core::RigidBody::access_torque_data(m);
   // evaluate all idexes with rigid body info cache active:
   //   activate_cache();
   double ret = 0.0;
@@ -98,7 +94,7 @@ SitesPairScore::evaluate_indexes
                                                spheres_table,
                                                quaternions_tables,
                                                sphere_derivatives_table,
-                                               torques_tables,
+                                               torques_table,
                                                pis[i],
                                                da);
   }
