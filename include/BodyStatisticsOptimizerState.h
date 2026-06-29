@@ -56,7 +56,7 @@ class IMPNPCTRANSPORTEXPORT BodyStatisticsOptimizerState
 
   void reset() override;
 
-  /** updates the z-r distriubution table in owner's statistics
+  /** updates the z-r distribution table in owner's statistics
       for this particle type (distribution of z coordinates and r coordinates)
   */
   void update_particle_type_zr_distribution_map();
