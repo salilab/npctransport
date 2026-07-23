@@ -3,7 +3,7 @@
  *  \brief A summary of useful information about rigid bodies and their
  *         transformation for eg, caching purposes for SitesPairScore
  *
- *  Copyright 2007-2022 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2026 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPNPCTRANSPORT_INTERNAL_RIGID_BODY_INFO_H
@@ -40,13 +40,13 @@ public:
   //! @param st - the table of spheres data in model for each particle index,
   //!             e.g. st[pi.get_index()] has the sphere of particle pi in the
   //!             model of rb.
-  //! @param qt - an array of arrays for each quaternion component,
-  //!             e.g. qt[i][pi.get_index()] has the i'th quaternion component
+  //! @param qt - an array of the rigid body rotation quaternions,
+  //!             e.g. qt[pi.get_index()] has the quaternion
   //!             of particle pi in the model of rb
   //! @param cache_id_arg - the new cache id associated with this rigid body
   void update
   (algebra::Sphere3D const* st, // spheres table
-   double const **qt, // quaternions table
+   algebra::Vector4D const* qt, // quaternions table
    unsigned int cache_id_arg);
 
 public:
@@ -56,26 +56,26 @@ RigidBodyInfo() : cache_id(INVALID_CACHE_ID) {}
   //! initiats the info for rigid body of particle index pi in model m,
   //! assigned with passed cached id. Can be overridden by set_particle
 RigidBodyInfo(algebra::Sphere3D const* spheres_table,
-              double const**quaterntions_tables,
+              algebra::Vector4D const* quaternions_table,
               ParticleIndex pi,
               unsigned int cache_id_arg)
 : pi(pi)
   {
-    update(spheres_table, quaterntions_tables, cache_id_arg);
+    update(spheres_table, quaternions_table, cache_id_arg);
   }
 
   //! set/reset the info for rigid body of particle index pi in model m,
   //! assigned with passed cached id
   void set_particle
   (algebra::Sphere3D const* spheres_table,
-   double const**quaternions_tables,
+   algebra::Vector4D const* quaternions_table,
    ParticleIndex pi,
    unsigned int cache_id_arg)
   {
     //    IMP_USAGE_CHECK(core::RigidBody::get_is_setup(m, pi),
     //                BOOST_CURRENT_FUNCTION << " pi must be a rigid body");
     this->pi=pi;
-    update(spheres_table, quaternions_tables, cache_id_arg);
+    update(spheres_table, quaternions_table, cache_id_arg);
   }
 
 
@@ -85,15 +85,15 @@ RigidBodyInfo(algebra::Sphere3D const* spheres_table,
 inline
 void RigidBodyInfo::update
 (algebra::Sphere3D const* st, // spheres table
-   double const **qt, // quaternions table
+ algebra::Vector4D const* qt, // quaternions table
    unsigned int cache_id_arg)
   {
     this->cache_id = cache_id_arg;
     algebra::Sphere3D s=st[pi.get_index()];
-    algebra::Rotation3D rot(qt[0][pi.get_index()],
-                            qt[1][pi.get_index()],
-                            qt[2][pi.get_index()],
-                            qt[3][pi.get_index()]);
+    algebra::Rotation3D rot(qt[pi.get_index()][0],
+                            qt[pi.get_index()][1],
+                            qt[pi.get_index()][2],
+                            qt[pi.get_index()][3]);
     this->tr=algebra::Transformation3D(rot, s.get_center());
     this->irot = rot.get_inverse();
     this->radius=s.get_radius();

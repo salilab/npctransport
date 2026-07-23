@@ -2,7 +2,7 @@
  *  \file SitesPairScore.h
  *  \brief A Score on the distance between a pair of particles.
  *
- *  Copyright 2007-2022 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2026 IMP Inventors. All rights reserved.
  */
 
 // TODO: verify if energy units are kcal/mol or KT
@@ -174,7 +174,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
      then the number of individual contacts and occupied sites is asscumulated there.
 
      @param sphere_table An array storing of sphere coordinates by particle index
-     @param quaternions_tables An array of quaternions by particle index
+     @param quaternions_table An array of quaternions by particle index
      @param sphere_table An array storing of sphere coordinate derivatives by particle index
      @param torques_table An array of torques by particle index
      @param pip the pair of particle indexes in m
@@ -193,7 +193,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   double
     evaluate_site_contributions_with_internal_tables
     (algebra::Sphere3D const* spheres_table,
-     double const**quaternions_tables,
+     algebra::Vector4D const* quaternions_table,
      algebra::Sphere3D *sphere_derivatives_table,
      algebra::Vector3D *torques_table,
      const ParticleIndexPair &pip,
@@ -260,7 +260,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   inline double evaluate_index_with_internal_tables
     ( Model* m,
       algebra::Sphere3D const* spheres_table,
-      double const **quaternions_tables,
+      algebra::Vector4D const* quaternions_table,
       algebra::Sphere3D *sphere_derivatives_table,
       algebra::Vector3D *torques_table,
       const ParticleIndexPair &p,
@@ -272,7 +272,7 @@ class IMPNPCTRANSPORTEXPORT SitesPairScore
   inline internal::RigidBodyInfo
     get_rigid_body_info
     (algebra::Sphere3D const* spheres_table,
-     double const** quaternions_tables,
+     algebra::Vector4D const* quaternions_table,
      ParticleIndex pi) const;
 
  public:
@@ -321,11 +321,8 @@ SitesPairScore::evaluate_index
   // get internal tables:
   algebra::Sphere3D const* spheres_table=
     m->access_spheres_data();
-  double const* quaternions_tables[4];
-  for(unsigned int i = 0; i < 4; i++){
-    quaternions_tables[i]=
-      core::RigidBody::access_quaternion_i_data(m, i);
-  }
+  algebra::Vector4D const* quaternions_table =
+    core::RigidBody::access_quaternion_data(m);
   algebra::Sphere3D* sphere_derivatives_table=
     m->access_sphere_derivatives_data();
   algebra::Vector3D* torques_table=
@@ -333,7 +330,7 @@ SitesPairScore::evaluate_index
   // evaluate:
   return evaluate_index_with_internal_tables(m,
                                              spheres_table,
-                                             quaternions_tables,
+                                             quaternions_table,
                                              sphere_derivatives_table,
                                              torques_table,
                                              p,
@@ -351,9 +348,9 @@ SitesPairScore::evaluate_index
 */
 inline double
 SitesPairScore::evaluate_index_with_internal_tables
-( Model* m,
-  algebra::Sphere3D const* spheres_table,
- double const** quaternions_tables,
+(Model* m,
+ algebra::Sphere3D const* spheres_table,
+ algebra::Vector4D const* quaternions_table,
  algebra::Sphere3D *sphere_derivatives_table,
  algebra::Vector3D *torques_table,
  const ParticleIndexPair &pip,
@@ -379,7 +376,7 @@ SitesPairScore::evaluate_index_with_internal_tables
 
   double site_score=evaluate_site_contributions_with_internal_tables
     (spheres_table,
-     quaternions_tables,
+     quaternions_table,
      sphere_derivatives_table,
      torques_table,
      pip, da);
@@ -393,7 +390,7 @@ SitesPairScore::evaluate_index_with_internal_tables
 inline double
 SitesPairScore::evaluate_site_contributions_with_internal_tables
 ( algebra::Sphere3D const* spheres_table,
-  double const**quaternions_tables,
+  algebra::Vector4D const* quaternions_table,
   algebra::Sphere3D *sphere_derivatives_table,
   algebra::Vector3D *torques_table,
   const ParticleIndexPair &pip,
@@ -423,10 +420,10 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
   ParticleIndex pi1 = pip[1];
   // get rbi0/1 info, update if needed
   internal::RigidBodyInfo rbi0 = get_rigid_body_info(spheres_table,
-                                                     quaternions_tables,
+                                                     quaternions_table,
                                                      pi0);
   internal::RigidBodyInfo rbi1 = get_rigid_body_info(spheres_table,
-                                                     quaternions_tables,
+                                                     quaternions_table,
                                                      pi1);
   IMP_LOG_PROGRESS( "RBI0.pi " << rbi0.pi
                     << " RB0.cache_id " << rbi0.cache_id
@@ -539,11 +536,8 @@ SitesPairScore::evaluate_site_contributions
   // Get internal tables
   algebra::Sphere3D const* spheres_table=
     m->access_spheres_data();
-  double const* quaternions_tables[4];
-  for(unsigned int i = 0; i < 4; i++){
-    quaternions_tables[i]=
-      core::RigidBody::access_quaternion_i_data(m, i);
-  }
+  algebra::Vector4D const* quaternions_table =
+    core::RigidBody::access_quaternion_data(m);
   algebra::Sphere3D* sphere_derivatives_table=
     m->access_sphere_derivatives_data();
   algebra::Vector3D* torques_table=
@@ -551,7 +545,7 @@ SitesPairScore::evaluate_site_contributions
   // evaluate:
   return evaluate_site_contributions_with_internal_tables
     (spheres_table,
-     quaternions_tables,
+     quaternions_table,
      sphere_derivatives_table,
      torques_table,
      pip,
@@ -565,7 +559,7 @@ SitesPairScore::evaluate_site_contributions
 inline internal::RigidBodyInfo
 SitesPairScore::get_rigid_body_info
 (algebra::Sphere3D const* spheres_table,
- double const **quaternions_tables,
+ algebra::Vector4D const* quaternions_table,
  ParticleIndex pi) const
 {
   // TODO: add usage check that it has valid quaternions
@@ -590,7 +584,7 @@ SitesPairScore::get_rigid_body_info
   /* else // if is_cache_active_ */
   /*   { */
   return internal::RigidBodyInfo(spheres_table,
-                                 quaternions_tables,
+                                 quaternions_table,
                                  pi,
                                  INVALID_CACHE_ID);
     /* } */

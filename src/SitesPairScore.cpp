@@ -80,11 +80,8 @@ SitesPairScore::evaluate_indexes
       m->access_spheres_data();
   algebra::Sphere3D* sphere_derivatives_table=
     m->access_sphere_derivatives_data();
-  double const* quaternions_tables[4];
-  for(unsigned int i = 0; i < 4; i++){
-    quaternions_tables[i]=
-      core::RigidBody::access_quaternion_i_data(m, i);
-  }
+  algebra::Vector4D const* quaternions_table =
+    core::RigidBody::access_quaternion_data(m);
   algebra::Vector3D* torques_table = core::RigidBody::access_torque_data(m);
   // evaluate all idexes with rigid body info cache active:
   //   activate_cache();
@@ -92,7 +89,7 @@ SitesPairScore::evaluate_indexes
   for (unsigned int i = lower_bound; i < upper_bound; ++i) {
     ret += evaluate_index_with_internal_tables(m,
                                                spheres_table,
-                                               quaternions_tables,
+                                               quaternions_table,
                                                sphere_derivatives_table,
                                                torques_table,
                                                pis[i],
