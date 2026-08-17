@@ -99,11 +99,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
 // Return value from Avro2PBReader::read_next() should be handled as an
 // array of bytes in Python 3, not a Unicode string
 %typemap(out) IMP::npctransport::Avro2PBReader::ByteBuffer {
-%#if PY_VERSION_HEX >= 0x03000000
   $result = PyBytes_FromStringAndSize($1.data(), $1.size());
-%#else
-  $result = PyString_FromStringAndSize($1.data(), $1.size());
-%#endif
 }
 %include "IMP/npctransport/Avro2PBReader.h"
 
@@ -119,25 +115,12 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
         $2 = (char **) malloc(($1 + 1) * sizeof(char *));
         for (int i = 0; i < $1; i++) {
             PyObject *py_str = PyList_GetItem($input, i);
-%#if PY_VERSION_HEX >= 0x03000000
             if (PyUnicode_Check(py_str)) {
                 $2[i] = strdup(PyUnicode_AsUTF8AndSize(py_str, NULL));
             } else {
                 PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
                 return NULL;
             }
-%#else
-            if (PyString_Check(py_str)) {
-                $2[i] = strdup(PyString_AsString(py_str));
-            } else if (PyUnicode_Check(py_str)) {
-                PyObject* utf8 = PyUnicode_AsUTF8String(py_str);
-                $2[i] = strdup(PyString_AsString(utf8));
-                Py_DECREF(utf8);
-            } else {
-                PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
-                return NULL;
-            }
-%#endif
         }
         $2[$1] = 0; // Null terminate the array
     } else {
