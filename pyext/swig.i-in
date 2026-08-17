@@ -121,7 +121,7 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
             PyObject *py_str = PyList_GetItem($input, i);
 %#if PY_VERSION_HEX >= 0x03000000
             if (PyUnicode_Check(py_str)) {
-                $2[i] = strdup(PyUnicode_AsUTF8(py_str));
+                $2[i] = strdup(PyUnicode_AsUTF8AndSize(py_str, NULL));
             } else {
                 PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
                 return NULL;
