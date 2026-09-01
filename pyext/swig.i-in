@@ -116,7 +116,13 @@ IMP_SWIG_DECORATOR(IMP::npctransport, SlabWithToroidalPore, SlabWithToroidalPore
         for (int i = 0; i < $1; i++) {
             PyObject *py_str = PyList_GetItem($input, i);
             if (PyUnicode_Check(py_str)) {
+%#if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030A0000
                 $2[i] = strdup(PyUnicode_AsUTF8AndSize(py_str, NULL));
+%#else
+                PyObject *bytes = PyUnicode_AsUTF8String(py_str);
+                $2[i] = strdup(PyBytes_AsString(bytes));
+                Py_XDECREF(bytes);
+%#endif
             } else {
                 PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
                 return NULL;
