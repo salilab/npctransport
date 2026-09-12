@@ -38,8 +38,8 @@ class ProtobufTests(IMP.test.TestCase):
                 interaction= IMP.npctransport.add_interaction(
                     config, a.type, b.type,
                     interaction_range=interaction_range, interaction_k=1)
-        f=open(name, "wb")
-        f.write(config.SerializeToString())
+        with open(name, "wb") as f:
+            f.write(config.SerializeToString())
 
     def _get_assignment(self, assignment_filename):
         seed = 1.0
@@ -50,8 +50,8 @@ class ProtobufTests(IMP.test.TestCase):
                                        assignment_filename, 0, True, seed)
         output= IMP.npctransport.Output()
         a= output.assignment
-        f=open(assignment_filename, "rb")
-        output.ParseFromString(f.read())
+        with open(assignment_filename, "rb") as f:
+            output.ParseFromString(f.read())
         return output.assignment
 
     def test_close_range_params(self):

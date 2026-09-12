@@ -42,10 +42,8 @@ class Tests(IMP.test.TestCase):
         #                                               radius=diffuser_R, #-1,
         #                                               interactions=0)
         # dump to file
-        f=open(cfg_file, "wb")
-        f.write(config.SerializeToString())
-#        print config
-        f.close()
+        with open(cfg_file, "wb") as f:
+            f.write(config.SerializeToString())
 
     def test_get_fg_chain_roots(self):
         '''

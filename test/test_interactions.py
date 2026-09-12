@@ -41,8 +41,8 @@ class InteractionsTests(IMP.test.TestCase):
             i_interaction.nonspecific_range.lower= nonspecific_range
         if excluded_volume_k is not None:
             i_interaction.excluded_volume_k.lower= excluded_volume_k
-        f=open(name, "wb")
-        f.write(config.SerializeToString())
+        with open(name, "wb") as f:
+            f.write(config.SerializeToString())
 
     def _test_score(self,
                     coords1,

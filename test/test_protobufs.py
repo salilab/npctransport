@@ -39,8 +39,8 @@ class ProtobufTests(IMP.test.TestCase):
         IMP.npctransport.create_range(interaction.is_on,0,1,2)
 
         interaction= IMP.npctransport.add_interaction(config, "fg0", "kap0")
-        f=open(name, "wb")
-        f.write(config.SerializeToString())
+        with open(name, "wb") as f:
+            f.write(config.SerializeToString())
 
     def test_1(self):
         """Check creating a configuration and assigning values"""
@@ -52,8 +52,8 @@ class ProtobufTests(IMP.test.TestCase):
         assignment_name= self.get_tmp_file_name("assignment.pb")
         IMP.npctransport.assign_ranges(config_name, assignment_name, 0, True, seed)
         output= IMP.npctransport.Output()
-        f=open(assignment_name, "rb")
-        output.ParseFromString(f.read())
+        with open(assignment_name, "rb") as f:
+            output.ParseFromString(f.read())
         assign= output.assignment
         self.assertAlmostEqual(assign.interaction_k.value, .2, delta=.0000001)
         self.assertEqual(assign.interactions[0].is_on.value, 0)
@@ -61,10 +61,12 @@ class ProtobufTests(IMP.test.TestCase):
         self.assertEqual(num, 5*5*3*3*3*3*3*3*2) # all options
         assignment_name= self.get_tmp_file_name("final.pb")
         IMP.npctransport.assign_ranges(config_name, assignment_name, num-1, True, seed)
-        f=open(assignment_name, "rb")
-        output.ParseFromString(f.read())
+        with open(assignment_name, "rb") as f:
+            output.ParseFromString(f.read())
         assign= output.assignment
         self.assertAlmostEqual(assign.interaction_k.value, 20, delta=1e-5)
         self.assertEqual(assign.interactions[0].is_on.value, 1)
+
+
 if __name__ == '__main__':
     IMP.test.main()

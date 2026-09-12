@@ -66,9 +66,8 @@ class Tests(IMP.test.TestCase):
         #                                               radius=diffuser_R, #-1,
         #                                               interactions=0)
         # dump to file
-        f=open(cfg_file, "wb")
-        f.write(config.SerializeToString())
-        f.close()
+        with open(cfg_file, "wb") as f:
+            f.write(config.SerializeToString())
 
     def find_close_sites(self, sd, p1, p2, distance_thresh=5.0):
         """
@@ -122,9 +121,9 @@ class Tests(IMP.test.TestCase):
 
     def is_stats_interact_(self, output_file):
         ''' verify that stats order parameters know about the interaction '''
-        f=open(output_file, "rb")
         o=Output()
-        o.ParseFromString(f.read())
+        with open(output_file, "rb") as f:
+            o.ParseFromString(f.read())
         assert o.statistics is not None
         for f in o.statistics.floaters:
             if f.type == kap_type:

@@ -43,10 +43,9 @@ class Tests(IMP.test.TestCase):
 #                                                      radius=kaps_R, #-1,
 #                                                      interactions=0)
         # dump to file
-        f=open(cfg_file, "wb")
-        f.write(config.SerializeToString())
+        with open(cfg_file, "wb") as f:
+            f.write(config.SerializeToString())
         print(config)
-        f.close()
         return coords
 
     def _assert_anchors_in_place(self, sd, coords):

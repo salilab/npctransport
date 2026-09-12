@@ -70,16 +70,14 @@ class Tests(IMP.test.TestCase):
                                           interactions=1,
                                           rest_length_factor = REST_LENGTH_FACTOR)
         # dump to file
-        f=open(cfg_file, "wb")
-        f.write(config.SerializeToString())
-        #        print(config)
-        f.close()
+        with open(cfg_file, "wb") as f:
+            f.write(config.SerializeToString())
 
     def _analyze_run(self, output_file, R):
         ''' R is the rest length distance data from the RMF file '''
-        f=open(output_file, "rb")
         output= IMP.npctransport.Output()
-        output.ParseFromString(f.read())
+        with open(output_file, "rb") as f:
+            output.ParseFromString(f.read())
         stats= output.statistics
         B=[]
         E=[]
