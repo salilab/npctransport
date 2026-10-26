@@ -501,7 +501,7 @@ SitesPairScore::evaluate_site_contributions_with_internal_tables
           if(contacts_accumulator && cur_score!=0.0){
             n_contacts++;
             occupied_sites0[i]++;
-            occupied_sites1[i]++;
+            occupied_sites1[j]++;
           }
         }// j
       }// i
