@@ -5,11 +5,15 @@
 
 The npctransport module is a module for simulating transport through the NPC.
 
-Authors: Barak Raveh, Daniel Russel
+_Authors_: Barak Raveh, Daniel Russel
 
-License:
+_License_: [LGPL](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
 
-Publications:
+_Publications_:
 Timney*, Raveh* et al., JCB 2016
 
 Building from source in a nutshell (see https://integrativemodeling.org/latest/doc/manual/installation.html for general IMP installation instruction):
@@ -20,7 +24,7 @@ Building from source in a nutshell (see https://integrativemodeling.org/latest/d
 - Build IMP according to online instructions
 - The npctransport installation can be tested using ctest, eg - "ctest -R npctransport"
 
-Versions:
+_Versions_:
 4.5
 - optimization of ball size used to define close pair range results in faster runs for larger particles
 
