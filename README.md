@@ -1,6 +1,6 @@
 \brief Simulation of transport through the Nuclear Pore Complex
 
-[![Build Status](https://github.com/salilab/npctransport/workflows/build/badge.svg?branch=develop)](https://github.com/salilab/npctransport/actions?query=workflow%3Abuild)
+[![Build Status](https://github.com/salilab/npctransport/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/salilab/npctransport/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/salilab/npctransport/branch/develop/graph/badge.svg)](https://codecov.io/gh/salilab/npctransport)
 
 The npctransport module is a module for simulating transport through the NPC.
