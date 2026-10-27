@@ -35,6 +35,7 @@ function_name_exceptions= \
         'remove_Nup42',
         'startup',
         'BrownianDynamicsTAMDWithSlabSupport.set_use_stochastic_runge_kutta',
+        'BrownianDynamicsTAMDWithSlabSupport.get_use_stochastic_runge_kutta',
         'BrownianDynamicsTAMDWithSlabSupport.simulate',
         'BrownianDynamicsTAMDWithSlabSupport.simulate_wave',
         'copy_FGs_coordinates',
