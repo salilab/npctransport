@@ -29,7 +29,7 @@ class Tests(IMP.test.TestCase):
         config = Configuration()
         IMP.npctransport.set_default_configuration(config)
         config.box_is_on.lower=1
-        config.box_side.lower=150
+        config.box_side.lower=100
         config.excluded_volume_k.lower=7.5
         if DEBUG:
             config.dump_interval_ns=1.0
