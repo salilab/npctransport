@@ -11,27 +11,23 @@ boxw= 2*max([3*slab_pore_radius,slab_height])
 
 
 def out_slab(p, slab):
-    ''' verify particle p is out of slab.
+    ''' verify particle p is out of slab (up to a tolerance of 0.1 A).
         p is assumed to be decorated by XYZR '''
     d=IMP.core.XYZR(p)
     c= d.get_coordinates()
-    if c[2]> slab_height/2.0+radius-.1:
-        return True
-    if c[2]< -slab_height/2.0-radius+.1:
-        return True
     rxy= (c[0]**2+c[1]**2)**.5
-    print("out_slab() - c: ", c, " rxy,max_rxy: ", rxy,
-          slab.get_pore_radius()-radius, " z,min_z:", c[2], slab_height/2.0+radius)
-    print("rxy+radius", rxy+radius)
-    print("pore radius + .1 = ", slab.get_pore_radius()+.1)
-    IS_OUT = (rxy + radius) < (slab.get_pore_radius() + .1)
-    print("(rxy + radius) < (slab.get_pore_radius() + .1) = ", IS_OUT)
-    if IS_OUT:
-        print("out_slab returning true")
-        return True
-    print("out_slab is False - c: ", c, " rxy,max_rxy: ", rxy,
-          slab.get_pore_radius()-radius, " z,min_z:", c[2], slab_height/2.0+radius)
-    return False
+    # Distance from the sphere center to the slab body, i.e. the solid
+    # region rxy >= pore_radius, |z| <= slab_height/2. This correctly
+    # handles spheres that sit near the rim of the pore, where the closest
+    # point on the slab is on the edge between the pore wall and a face.
+    dr= max(slab.get_pore_radius() - rxy, 0.)
+    dz= max(abs(c[2]) - slab_height/2.0, 0.)
+    distance= (dr**2 + dz**2)**.5
+    IS_OUT = distance > radius - .1
+    print("out_slab() - c: ", c, " rxy: ", rxy, " pore radius: ",
+          slab.get_pore_radius(), " distance from slab: ", distance,
+          " out: ", IS_OUT)
+    return IS_OUT
 
 
 class CylindricalPoreSSTest(IMP.test.TestCase):
