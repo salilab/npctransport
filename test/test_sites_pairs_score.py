@@ -125,6 +125,12 @@ class Tests(IMP.test.TestCase):
                   "A is: %.2f vs. expected: %.2f" % (init_score, estimated_score)
                   )
             self.assertAlmostEqual((init_score+0.0001)/(estimated_score+0.0001), 1.0, delta = 0.0001)
+        # Start the simulation inside the range of the site interaction
+        # (rather than at its edge, where the force is zero) so that the
+        # particles don't diffuse away from each other before they are glued
+        ds[1].set_coordinates(IMP.algebra.Vector3D(
+            2*radius+0.5*site_range,0,0))
+        init_score = bd.get_scoring_function().evaluate(False)
         print("Score before optimization is %.2f" % init_score)
         for i in range(10):
             bd.optimize(math.ceil(nsteps / 10))
