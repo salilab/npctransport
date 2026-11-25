@@ -113,6 +113,7 @@ class Tests(IMP.test.TestCase):
                   "%10.3f  " % pd.Series(B).autocorr(i),
                   "%10.3f  " % pd.Series(E).autocorr(i),
                   "%10.3f  " % mean_ACR)
+
         # Average autocorrelation over all bonds, to reduce statistical noise
         def get_mean_autocorr(lag):
             return sum(pd.Series(R[:,j]).autocorr(lag)
