@@ -9,6 +9,10 @@ RADIUS= 7
 REST_LENGTH_FACTOR= 1.75
 TAU_NS= 1.0
 NS_PER_CHUNK= 0.5*TAU_NS
+# Statistical error in the estimated autocorrelation scales as
+# 1/sqrt(SIM_TIME_NS/TAU_NS), so this must be long enough that the
+# autocorrelation checks in _analyze_run() pass reliably
+SIM_TIME_NS= 1000*TAU_NS
 BACKBONE_K= 0.5
 
 
@@ -109,21 +113,16 @@ class Tests(IMP.test.TestCase):
                   "%10.3f  " % pd.Series(B).autocorr(i),
                   "%10.3f  " % pd.Series(E).autocorr(i),
                   "%10.3f  " % mean_ACR)
-        if len(E)>i_tau:
-            self.assertAlmostEqual(
-                pd.Series(R[:,0]).autocorr(i_tau),
-                math.exp(-1),
-                delta=0.07)
-        if len(E)>2*i_tau:
-            self.assertAlmostEqual(
-                pd.Series(R[:,0]).autocorr(2*i_tau),
-                math.exp(-2),
-                delta=0.07)
-        if len(E)>5*i_tau:
-            self.assertAlmostEqual(
-                pd.Series(R[:,0]).autocorr(5*i_tau),
-                math.exp(-5),
-                delta=0.07)
+        # Average autocorrelation over all bonds, to reduce statistical noise
+        def get_mean_autocorr(lag):
+            return sum(pd.Series(R[:,j]).autocorr(lag)
+                       for j in range(R.shape[1])) / R.shape[1]
+        for n_tau in (1, 2, 5):
+            if len(E)>n_tau*i_tau:
+                self.assertAlmostEqual(
+                    get_mean_autocorr(n_tau*i_tau),
+                    math.exp(-n_tau),
+                    delta=0.07)
 
     def _test_harmonic_spring_score_from_protobuf(self, n_beads=2):
         '''
@@ -167,7 +166,7 @@ class Tests(IMP.test.TestCase):
         self._do_particles_report(sd.get_model(), sd.get_beads())
         print()
 
-        sim_time_ns=500*TAU_NS
+        sim_time_ns=SIM_TIME_NS
         sd.get_bd().set_current_time(0.0)
         sd.activate_statistics()
         print("Running for %.1f ns" % sim_time_ns)
